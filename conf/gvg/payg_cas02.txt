@@ -1,7 +1,7 @@
 //===================================================================
 //pay_gld02         by kalen
 //===================================================================
-pay_gld.gat,292,112,6	script	ギルドフラッグ	722,{
+pay_gld.gat,292,112,6	script	ギルドフラッグ#f2-1	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -35,8 +35,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
-pay_gld.gat,292,120,6	script	ギルドフラッグ	722,{
+pay_gld.gat,292,120,6	script	ギルドフラッグ#f2-2	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -70,8 +73,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
-pay_gld.gat,291,135,6	script	ギルドフラッグ	722,{
+pay_gld.gat,291,135,6	script	ギルドフラッグ#f2-3	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -105,8 +111,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
-pay_gld.gat,271,163,0	script	ギルドフラッグ	722,{
+pay_gld.gat,271,163,0	script	ギルドフラッグ#f2-4	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -140,8 +149,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
-payg_cas02.gat,254,40,6	script	ギルドフラッグ	722,{
+payg_cas02.gat,254,40,6	script	ギルドフラッグ#f2-5	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -175,8 +187,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
-payg_cas02.gat,254,48,6	script	ギルドフラッグ	722,{
+payg_cas02.gat,254,48,6	script	ギルドフラッグ#f2-6	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -210,8 +225,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
-payg_cas02.gat,202,49,0	script	ギルドフラッグ	722,{
+payg_cas02.gat,202,49,0	script	ギルドフラッグ#f2-7	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -245,8 +263,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
-payg_cas02.gat,209,49,0	script	ギルドフラッグ	722,{
+payg_cas02.gat,209,49,0	script	ギルドフラッグ#f2-8	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -280,8 +301,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
-payg_cas02.gat,59,282,4	script	ギルドフラッグ	722,{
+payg_cas02.gat,59,282,4	script	ギルドフラッグ#f2-9	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -315,8 +339,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
-payg_cas02.gat,70,282,4	script	ギルドフラッグ	722,{
+payg_cas02.gat,70,282,4	script	ギルドフラッグ#f2-10	722,{
 	set @GIDf2,getcastledata("payg_cas02.gat",1);
 	if (@GIDf2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -350,6 +377,9 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleF02:
+	FlagEmblem getcastledata("payg_cas02.gat",1);
+	end;
 }
 //------------------------------カプラ--------------------------------
 payg_cas02.gat,22,275,5	script	カプラ職員::kapra_payg02	117,{

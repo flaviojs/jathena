@@ -19,8 +19,10 @@ prtg_cas01.gat,112,181,0	script	アブライ	55,{
 // ------- アジト未占領 ----------------------------------
 LStart:
 	mes "[執事アブライ]";
-	mes "私は、主人を待っています…、";
-	mes "勇敢なプレイヤー！あなたを待ってますよ！！";
+	mes "私は運命に導かれるまま、";
+	mes "私の主人になる方を待っております。";
+	mes "勇気ある方は、一度ご自分の運命を";
+	mes "お試しになってはいかがでしょう。";
 	close;
 // -------- マスターじゃない ------------------------------
 LStart2:
@@ -400,10 +402,14 @@ LStartg:
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 LStartg2:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes "ギルドアジトに戻ります";
+		mes "[ 声 ]";
+		mes "勇者よ…";
+		mes "君の地に帰るか？";
 		next;
-		warp "prtg_cas01.gat",97,174;end;
+		menu "砦に帰る",-,"やめる",Lclose;
+			warp "prtg_cas01.gat",97,174;end;
+Lclose:
+		close;
 OnRecvCastleP01:
 // [FlagEmblem GuildID]: Show EMBLEM of the GuildID to the FlagNPC(ClassID=722).
 	FlagEmblem getcastledata("prtg_cas01.gat",1);

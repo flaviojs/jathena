@@ -1,7 +1,7 @@
 //===================================================================
 //prtg_cas05         by kalen
 //===================================================================
-prt_gld.gat,199,243,2	script	ギルドフラッグ	722,{
+prt_gld.gat,199,243,2	script	ギルドフラッグ#p5-1	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -35,8 +35,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prt_gld.gat,199,236,2	script	ギルドフラッグ	722,{
+prt_gld.gat,199,236,2	script	ギルドフラッグ#p5-2	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -70,8 +73,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prt_gld.gat,197,243,2	script	ギルドフラッグ	722,{
+prt_gld.gat,197,243,2	script	ギルドフラッグ#p5-3	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -105,8 +111,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prt_gld.gat,197,236,2	script	ギルドフラッグ	722,{
+prt_gld.gat,197,236,2	script	ギルドフラッグ#p5-4	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -140,8 +149,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prtg_cas05.gat,19,247,4	script	ギルドフラッグ	722,{
+prtg_cas05.gat,19,247,4	script	ギルドフラッグ#p5-5	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -175,8 +187,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prtg_cas05.gat,19,243,4	script	ギルドフラッグ	722,{
+prtg_cas05.gat,19,243,4	script	ギルドフラッグ#p5-6	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -210,8 +225,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prtg_cas05.gat,26,247,4	script	ギルドフラッグ	722,{
+prtg_cas05.gat,26,247,4	script	ギルドフラッグ#p5-7	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -245,8 +263,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prtg_cas05.gat,26,243,4	script	ギルドフラッグ	722,{
+prtg_cas05.gat,26,243,4	script	ギルドフラッグ#p5-8	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -280,8 +301,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prtg_cas05.gat,249,289,4	script	ギルドフラッグ	722,{
+prtg_cas05.gat,249,289,4	script	ギルドフラッグ#p5-9	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -315,8 +339,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prtg_cas05.gat,256,289,4	script	ギルドフラッグ	722,{
+prtg_cas05.gat,256,289,4	script	ギルドフラッグ#p5-10	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -350,8 +377,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prtg_cas05.gat,253,271,4	script	ギルドフラッグ	722,{
+prtg_cas05.gat,253,271,4	script	ギルドフラッグ#p5-11	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -385,8 +415,11 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
-prtg_cas05.gat,273,257,4	script	ギルドフラッグ	722,{
+prtg_cas05.gat,273,257,4	script	ギルドフラッグ#p5-12	722,{
 	getcastledata "prtg_cas05.gat",1,@GIDp5;
 	if (@GIDp5 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
@@ -420,6 +453,9 @@ LStartg:
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+OnRecvCastleP05:
+	FlagEmblem getcastledata("prtg_cas05.gat",1);
+	end;
 }
 //------------------------------カプラ--------------------------------
 prtg_cas05.gat,52,41,4	script	カプラ職員::kapra_prtg05	117,{

@@ -16,6 +16,7 @@ OnAgitBreak:
 	SetCastleData "aldeg_cas01.gat",1,@GIDa1;
 	Announce "砦 [" + GetCastleName("aldeg_cas01.gat") + "]を [" + GetGuildName(@GIDa1) + "]ギルドが占領しました",0;
 	MapAnnounce "aldeg_cas01.gat","エンペリウムが破壊されました",17;
+	GetCastleData "aldeg_cas01.gat",0,"::OnRecvCastleA01";
 	End;
 OnAgitEliminate:
 	MapRespawnGuildID "aldeg_cas01.gat",GetCastleData("aldeg_cas01.gat",1),6;
@@ -46,6 +47,7 @@ OnAgitBreak:
 	SetCastleData "aldeg_cas02.gat",1,@GIDa2;
 	Announce "砦 [" + GetCastleName("aldeg_cas02.gat") + "]を [" + GetGuildName(@GIDa2) + "]ギルドが占領しました",0;
 	MapAnnounce "aldeg_cas02.gat","エンペリウムが破壊されました",17;
+	GetCastleData "aldeg_cas02.gat",0,"::OnRecvCastleA02";
 	End;
 OnAgitEliminate:
 	MapRespawnGuildID "aldeg_cas02.gat",GetCastleData("aldeg_cas02.gat",1),6;
@@ -76,6 +78,7 @@ OnAgitBreak:
 	SetCastleData "aldeg_cas03.gat",1,@GIDa3;
 	Announce "砦 [" + GetCastleName("aldeg_cas03.gat") + "]を [" + GetGuildName(@GIDa3) + "]ギルドが占領しました",0;
 	MapAnnounce "aldeg_cas03.gat","エンペリウムが破壊されました",17;
+	GetCastleData "aldeg_cas03.gat",0,"::OnRecvCastleA03";
 	End;
 OnAgitEliminate:
 	MapRespawnGuildID "aldeg_cas03.gat",GetCastleData("aldeg_cas03.gat",1),6;
@@ -106,6 +109,7 @@ OnAgitBreak:
 	SetCastleData "aldeg_cas04.gat",1,@GIDa4;
 	Announce "砦 [" + GetCastleName("aldeg_cas04.gat") + "]を [" + GetGuildName(@GIDa4) + "]ギルドが占領しました",0;
 	MapAnnounce "aldeg_cas04.gat","エンペリウムが破壊されました",17;
+	GetCastleData "aldeg_cas04.gat",0,"::OnRecvCastleA04";
 	End;
 OnAgitEliminate:
 	MapRespawnGuildID "aldeg_cas04.gat",GetCastleData("aldeg_cas04.gat",1),6;
@@ -136,6 +140,7 @@ OnAgitBreak:
 	SetCastleData "aldeg_cas05.gat",1,@GIDa5;
 	Announce "砦 [" + GetCastleName("aldeg_cas05.gat") + "]を [" + GetGuildName(@GIDa5) + "]ギルドが占領しました",0;
 	MapAnnounce "aldeg_cas05.gat","エンペリウムが破壊されました",17;
+	GetCastleData "aldeg_cas05.gat",0,"::OnRecvCastleA05";
 	End;
 OnAgitEliminate:
 	MapRespawnGuildID "aldeg_cas05.gat",GetCastleData("aldeg_cas05.gat",1),6;
