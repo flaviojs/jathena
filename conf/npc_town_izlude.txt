@@ -1,0 +1,41 @@
+//イズルードNPC
+izlude.gat,201,181,2	script	船員	100,{
+	mes "[船員]";
+	mes "超高速の快速船です！";
+	mes "ただし安全は別の問題！";
+	mes "さあ～いらっしゃいませ！";
+	next;
+	menu "バイラン島 -> 150 z",Lbai,"アルベルタ港  -> 500 z",Laru,"やめる",Lyame;
+Lbai:
+	if(Zeny<150) goto Lbai_fusoku;
+	set Zeny,Zeny-150;
+	warp "izlu2dun",107,50;
+	end;
+Laru:
+	if(Zeny<500) goto Laru_fusoku;
+	set Zeny,Zeny-500;
+	warp "alberta",188,169;
+	end;
+Lyame:
+	close;
+Lbai_fusoku:
+	mes "[船員]";
+	mes "150z…150Zenyです！";
+	close;
+Laru_fusoku:
+	mes "[船員]";
+	mes "500z…500Zenyです！";
+	close;
+}
+
+izlu2dun.gat,108,27,0	script	船員	100,{
+	mes "[船員]";
+	mes "帰りますか？";
+	next;
+	menu "帰る",Liz,"やめる",Lno;
+Liz:
+	warp "izlude",176,182;
+	end;
+Lno:
+	close;
+}

@@ -1,0 +1,129 @@
+#!/usr/bin/perl
+
+##########################################################################
+# Athena用のアカウント作成ツール
+#
+# 　起動中のAthenaのlogin.exeに接続してアカウントを作成するツール.
+#
+#-------------------------------------------------------------------------
+# 設定方法
+# 　ログイン鯖のIP、ポート、管理者パスワードを正しく設定します.
+# 　設定したら addaccount [id] [sex] [pass] でアカウントを作れます.
+#
+#   同じアカウントIDが存在しないのにアカウントの作成に失敗する場合、
+# 　管理者パスワードが間違ってないか確認してください.
+#
+# 　アカウントIDに使えるのは英数字、＠、ハイフン、アンダースコアのみです.
+# 　パスワードに使えるのは制御文字と＠以外の文字です.
+#
+##########################################################################
+
+$loginserverip="127.0.0.1";		#ログイン鯖のIP
+$loginserverport=6900;			#ログイン鯖のポート
+$loginserveradminpassword="admin";	#ログイン鯖の管理者パスワード
+
+$connecttimeout=10;	# 接続タイムアウト(秒)
+
+
+#-------------------------------設定ここまで-----------------------------
+
+
+
+
+
+
+
+use IO::Socket;
+
+if($ARGV[0] eq "" || $ARGV[1] eq ""){
+	printf << "EOM";exit(5);
+[USAGE]
+	$0 [account-id] [sex(M/F)] [password] : add account
+EOM
+}
+
+# データの設定
+$makeaccountbase=$ARGV[0];
+$makesex=uc(substr($ARGV[1],0,1));
+$makepasswd=$ARGV[2];
+
+# アカウントIDの確認（英数字、＠、ハイフン、アンダーバーのみ）
+if($makeaccountbase=~/[^A-Za-z0-9\@-_]/){
+	print "Illeagal charactor found in account id ".$`."[${&}]${'}\n";
+	exit(6);
+}
+if(length($makeaccountbase)<4){
+	print "Account id too short !\n";
+	exit(6);
+}
+
+# 性別の確認
+if( $makesex!~/^[MF]$/ ){
+	print "Illeagal gender [$makesex]\n";
+	exit(7);
+}
+
+# パスワードの入力
+while($makepasswd eq ""){
+	print "Password ? ";
+	$makepasswd=<STDIN>;
+	chomp $makepasswd;
+}
+
+# パスワードの確認（制御文字と＠の禁止）
+if($makepasswd=~/[\x00-\x1f\@]/){
+	print "Illeagal charactor found in password ".$`."[$&]$'\n";
+	exit(8);
+}
+if(length($makepasswd)<4){
+	print "Password too short !\n";
+	exit(6);
+}
+
+# 送信用アカウント情報の生成
+$makeaccount= $makeaccountbase."_".$makesex;
+if($loginserveradminpassword ne ""){
+	$makepasswd.="@".$loginserveradminpassword;
+}
+
+# サーバーに接続する
+my($so,$er)=();
+eval{
+	$so=IO::Socket::INET->new(
+		PeerAddr=> $loginserverip,
+		PeerPort=> $loginserverport,
+		Proto	=> "tcp",
+		Timeout	=> $connecttimeout) or $er=1;
+};
+if($er || $@){
+	print "Cant connect to login server [${loginserverip}:$loginserverport] !\n";
+	exit(2);
+}
+
+# アカウント作成要求
+print $so pack("v V a24 a24 C",0x0064,9,$makeaccount,$makepasswd,3);
+$so->flush();
+
+# 返答待ち
+my($buf)=("");
+if(read($so,$buf,2)<2){
+	print "Socket read error.\n";
+	exit(3);
+}
+
+# パケット解析
+$retcode=unpack("v",$buf);
+
+# 切断
+$so->shutdown(2);
+$so->close();
+
+
+if($retcode==0x0069){
+	print "Account [$makeaccountbase] is successfully created.\n";
+	exit(0);
+}else{
+	print "Account [$makeaccountbase] creation failed. (acount exists?)\n";
+	exit(1);
+}
+die "Not reachable!";

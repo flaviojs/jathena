@@ -1,0 +1,1947 @@
+// monster
+
+pay_fild08.gat,0,0,0	monster	WILOW	1010,5
+pay_fild08.gat,0,0,0	monster	ELDER WILOW	1033,10
+pay_fild08.gat,0,0,0	monster	POPORING	1031,15
+pay_fild08.gat,0,0,0	monster	SMOKIE	1056,10
+pay_fild08.gat,0,0,0	monster	POISON SPORE	1077,5
+pay_fild08.gat,0,0,0	monster	BIGFOOT	1060,5
+pay_fild07.gat,0,0,0	monster	POPORING	1031,10
+pay_fild07.gat,0,0,0	monster	POISON SPORE	1077,5
+pay_fild07.gat,0,0,0	monster	BIGFOOT	1060,10
+pay_fild07.gat,0,0,0	monster	CARAMEL	1103,5
+pay_fild07.gat,0,0,0	monster	EGGYRA	1116,10
+pay_fild07.gat,0,0,0	monster	DOKEBI	1110,8
+pay_fild09.gat,0,0,0	monster	POPORING	1031,10
+pay_fild09.gat,0,0,0	monster	POISON SPORE	1077,5
+pay_fild09.gat,0,0,0	monster	BIGFOOT	1060,15
+pay_fild09.gat,0,0,0	monster	ELDER WILOW	1033,5
+pay_fild09.gat,0,0,0	monster	EGGYRA	1116,5
+pay_fild09.gat,0,0,0	monster	SOHEE	1170,8
+pay_fild09.gat,0,0,0	monster	WANDER MAN	1208,1
+pay_fild10.gat,0,0,0	monster	POISON SPORE	1077,5
+pay_fild10.gat,0,0,0	monster	BIGFOOT	1060,10
+pay_fild10.gat,0,0,0	monster	EGGYRA	1116,5
+pay_fild10.gat,0,0,0	monster	HORONG	1129,10
+pay_fild10.gat,0,0,0	monster	MUNAK	1026,5
+pay_fild10.gat,0,0,0	monster	EDDGA	1115,1
+anthell01.gat,0,0,0	monster	FARMILIAR	1005,5
+anthell01.gat,0,0,0	monster	ANDRE	1095,10
+anthell01.gat,0,0,0	monster	PIERE	1160,10
+anthell01.gat,0,0,0	monster	DENIRO	1105,10
+anthell01.gat,0,0,0	monster	VITATA	1176,5
+anthell01.gat,0,0,0	monster	GIEARTH	1121,8
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	ANT EGG	1097,1
+anthell01.gat,0,0,0	monster	PHREEONI	1159,1
+anthell02.gat,0,0,0	monster	ANT EGG	1097,15
+anthell02.gat,0,0,0	monster	FARMILIAR	1005,5
+anthell02.gat,0,0,0	monster	ANDRE	1095,10
+anthell02.gat,0,0,0	monster	PIERE	1160,10
+anthell02.gat,0,0,0	monster	DENIRO	1105,10
+anthell02.gat,0,0,0	monster	VITATA	1176,5
+anthell02.gat,0,0,0	monster	GIEARTH	1121,10
+anthell02.gat,0,0,0	monster	MARTIN	1145,10
+anthell02.gat,0,0,0	monster	MAYA	1147,1
+gef_dun00.gat,0,0,0	monster	FARMILIAR	1005,10
+gef_dun00.gat,0,0,0	monster	POPORING	1031,10
+gef_dun00.gat,0,0,0	monster	DUSTINESS	1114,15
+gef_dun00.gat,0,0,0	monster	POISON SPORE	1077,10
+gef_dun00.gat,0,0,0	monster	RED PLANT	1078,1
+gef_dun00.gat,0,0,0	monster	YELLOW PLANT	1081,1
+gef_dun00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_dun00.gat,0,0,0	monster	RED PLANT	1078,1
+gef_dun00.gat,0,0,0	monster	SHINING PLANT	1083,1
+gef_dun01.gat,0,0,0	monster	FARMILIAR	1005,10
+gef_dun01.gat,0,0,0	monster	DUSTINESS	1114,10
+gef_dun01.gat,0,0,0	monster	POISON SPORE	1077,5
+gef_dun01.gat,0,0,0	monster	ARGOS	1100,5
+gef_dun01.gat,0,0,0	monster	WHISPER	1179,10
+gef_dun01.gat,0,0,0	monster	JAKK	1130,15
+gef_dun01.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_dun02.gat,0,0,0	monster	ARGOS	1100,10
+gef_dun02.gat,0,0,0	monster	WHISPER	1179,10
+gef_dun02.gat,0,0,0	monster	JAKK	1130,12
+gef_dun02.gat,0,0,0	monster	MYST	1151,10
+gef_dun02.gat,0,0,0	monster	MARIONETTE	1143,14
+gef_dun02.gat,0,0,0	monster	BATHORY	1102,4
+gef_dun02.gat,0,0,0	monster	NIGHTMARE	1061,8
+gef_dun02.gat,0,0,0	monster	DOPPELGANGER	1046,1
+gef_dun03.gat,0,0,0	monster	MYST	1151,5
+gef_dun03.gat,0,0,0	monster	DEVIRUCHI	1109,10
+gef_dun03.gat,0,0,0	monster	RAYDRIC	1163,10
+gef_dun03.gat,0,0,0	monster	KHALITZBURG	1132,10
+gef_dun03.gat,0,0,0	monster	JOKER	1131,5
+glast_01.gat,0,0,0	monster	POISON SPORE	1077,10
+glast_01.gat,0,0,0	monster	JAKK	1130,5
+glast_01.gat,0,0,0	monster	BATHORY	1102,5
+glast_01.gat,0,0,0	monster	KNIGHT OF ABYSS	1219,1
+glast_01.gat,0,0,0	monster	MYST	1151,15
+gef_fild08.gat,0,0,0	monster	POPORING	1031,15
+gef_fild08.gat,0,0,0	monster	STAINER	1174,10
+gef_fild08.gat,0,0,0	monster	CREAMY	1018,5
+gef_fild08.gat,0,0,0	monster	KOBOLD 4	1136,5
+gef_fild08.gat,0,0,0	monster	KOBOLD 5	1137,5
+gef_fild08.gat,0,0,0	monster	KOBOLD 2	1134,5
+gef_fild08.gat,0,0,0	monster	KOBOLD 3	1135,5
+gef_fild08.gat,0,0,0	monster	KOBOLD 1	1133,5
+gef_fild06.gat,0,0,0	monster	POPORING	1031,15
+gef_fild06.gat,0,0,0	monster	STAINER	1174,5
+gef_fild06.gat,0,0,0	monster	CREAMY	1018,5
+gef_fild06.gat,0,0,0	monster	PETIT	1155,5
+gef_fild06.gat,0,0,0	monster	PETIT_	1156,5
+moc_fild07.gat,0,0,0	monster	PECOPECO EGG	1047,10
+moc_fild07.gat,0,0,0	monster	DROPS	1113,5
+moc_fild07.gat,0,0,0	monster	CHONCHON	1011,10
+moc_fild07.gat,0,0,0	monster	PICKY	1049,5
+moc_fild07.gat,0,0,0	monster	PICKY	1050,5
+moc_fild06.gat,0,0,0	monster	DROPS	1113,10
+moc_fild06.gat,0,0,0	monster	CHONCHON	1011,10
+moc_fild06.gat,0,0,0	monster	PECOPECO EGG	1047,10
+moc_fild06.gat,0,0,0	monster	PICKY	1049,10
+moc_fild06.gat,0,0,0	monster	PICKY	1050,10
+moc_fild06.gat,0,0,0	monster	CONDOR	1009,10
+moc_fild06.gat,0,0,0	monster	DESERT WOLF B	1107,10
+moc_fild06.gat,0,0,0	monster	MUKA	1055,10
+moc_fild06.gat,0,0,0	monster	DRAGON FLY	1091,1
+moc_fild05.gat,0,0,0	monster	DROPS	1113,5
+moc_fild05.gat,0,0,0	monster	PECOPECO EGG	1047,10
+moc_fild05.gat,0,0,0	monster	PICKY	1049,15
+moc_fild05.gat,0,0,0	monster	PICKY	1050,15
+moc_fild05.gat,0,0,0	monster	CHONCHON	1011,5
+moc_fild05.gat,0,0,0	monster	CONDOR	1009,10
+moc_fild05.gat,0,0,0	monster	WOLF	1013,10
+moc_fild05.gat,0,0,0	monster	STEEL CHONCHON	1042,5
+moc_fild04.gat,0,0,0	monster	DROPS	1113,10
+moc_fild04.gat,0,0,0	monster	CHONCHON	1011,5
+moc_fild04.gat,0,0,0	monster	PECOPECO EGG	1047,10
+moc_fild04.gat,0,0,0	monster	PICKY	1049,15
+moc_fild04.gat,0,0,0	monster	PICKY	1050,15
+moc_fild04.gat,0,0,0	monster	CONDOR	1009,10
+moc_fild04.gat,0,0,0	monster	WOLF	1013,5
+moc_fild04.gat,0,0,0	monster	PECOPECO	1019,15
+moc_fild01.gat,0,0,0	monster	DROPS	1113,10
+moc_fild01.gat,0,0,0	monster	PECOPECO EGG	1047,5
+moc_fild01.gat,0,0,0	monster	PICKY	1049,10
+moc_fild01.gat,0,0,0	monster	PICKY	1050,10
+moc_fild01.gat,0,0,0	monster	CONDOR	1009,5
+moc_fild01.gat,0,0,0	monster	PECOPECO	1019,10
+moc_fild12.gat,0,0,0	monster	ANT EGG	1097,10
+moc_fild12.gat,0,0,0	monster	DROPS	1113,5
+moc_fild12.gat,0,0,0	monster	CHONCHON	1011,5
+moc_fild12.gat,0,0,0	monster	PICKY	1049,10
+moc_fild12.gat,0,0,0	monster	PICKY	1050,10
+moc_fild18.gat,0,0,0	monster	DROPS	1113,5
+moc_fild18.gat,0,0,0	monster	CHONCHON	1011,15
+moc_fild18.gat,0,0,0	monster	ANACONDAQ	1030,10
+moc_fild18.gat,0,0,0	monster	HODE	1127,10
+moc_fild18.gat,0,0,0	monster	STEEL CHONCHON	1042,10
+moc_fild17.gat,0,0,0	monster	ANDRE	1095,10
+moc_fild17.gat,0,0,0	monster	PIERE	1160,10
+moc_fild17.gat,0,0,0	monster	DROPS	1113,10
+moc_fild17.gat,0,0,0	monster	HODE	1127,10
+moc_fild17.gat,0,0,0	monster	METALLER	1058,5
+moc_fild17.gat,0,0,0	monster	SAND MAN	1165,15
+moc_fild17.gat,0,0,0	monster	FRILLDORA	1119,5
+moc_fild11.gat,0,0,0	monster	PICKY	1049,10
+moc_fild11.gat,0,0,0	monster	PICKY	1050,10
+moc_fild11.gat,0,0,0	monster	DROPS	1113,15
+moc_fild11.gat,0,0,0	monster	CHONCHON	1011,15
+moc_fild11.gat,0,0,0	monster	ANT EGG	1097,5
+moc_fild11.gat,0,0,0	monster	ANDRE	1095,5
+moc_fild11.gat,0,0,0	monster	PIERE	1160,5
+moc_fild11.gat,0,0,0	monster	DENIRO	1105,5
+moc_fild10.gat,0,0,0	monster	PECOPECO EGG	1047,10
+moc_fild10.gat,0,0,0	monster	PICKY	1049,10
+moc_fild10.gat,0,0,0	monster	PICKY	1050,10
+moc_fild10.gat,0,0,0	monster	CONDOR	1009,10
+moc_fild10.gat,0,0,0	monster	PECOPECO	1019,10
+moc_fild09.gat,0,0,0	monster	PECOPECO EGG	1047,10
+moc_fild09.gat,0,0,0	monster	PICKY	1049,5
+moc_fild09.gat,0,0,0	monster	PICKY	1050,5
+moc_fild09.gat,0,0,0	monster	CONDOR	1009,15
+moc_fild09.gat,0,0,0	monster	DESERT WOLF B	1107,10
+moc_fild09.gat,0,0,0	monster	MUKA	1055,10
+moc_fild15.gat,0,0,0	monster	ANT EGG	1097,5
+moc_fild15.gat,0,0,0	monster	ANDRE	1095,10
+moc_fild15.gat,0,0,0	monster	PIERE	1160,10
+moc_fild15.gat,0,0,0	monster	DENIRO	1105,10
+moc_fild15.gat,0,0,0	monster	SCORPION	1001,10
+moc_fild16.gat,0,0,0	monster	HODE	1127,5
+moc_fild16.gat,0,0,0	monster	MUKA	1055,10
+moc_fild16.gat,0,0,0	monster	METALLER	1058,15
+moc_fild16.gat,0,0,0	monster	SAND MAN	1165,5
+moc_fild08.gat,0,0,0	monster	METALLER	1058,10
+moc_fild08.gat,0,0,0	monster	GOLEM	1040,5
+moc_fild08.gat,0,0,0	monster	SCORPION	1001,5
+moc_fild08.gat,0,0,0	monster	DESERT WOLF B	1107,15
+moc_fild14.gat,0,0,0	monster	DESERT WOLF B	1107,10
+moc_fild14.gat,0,0,0	monster	SCORPION	1001,10
+moc_fild14.gat,0,0,0	monster	METALLER	1058,5
+moc_fild14.gat,0,0,0	monster	DESERT WOLF	1106,48
+moc_fild14.gat,0,0,0	monster	HODE	1127,15
+mjolnir_01.gat,0,0,0	monster	CHONCHON	1011,10
+mjolnir_01.gat,0,0,0	monster	STEEL CHONCHON	1042,10
+mjolnir_01.gat,0,0,0	monster	HORNET	1004,5
+mjolnir_01.gat,0,0,0	monster	MANDRAGORA	1020,10
+mjolnir_01.gat,0,0,0	monster	CREAMY	1018,5
+mjolnir_02.gat,0,0,0	monster	FABRE	1007,10
+mjolnir_02.gat,0,0,0	monster	PUPA	1008,5
+mjolnir_02.gat,0,0,0	monster	CREAMY	1018,10
+mjolnir_02.gat,0,0,0	monster	DUSTINESS	1114,10
+mjolnir_03.gat,0,0,0	monster	POPORING	1031,10
+mjolnir_03.gat,0,0,0	monster	DUSTINESS	1114,15
+mjolnir_03.gat,0,0,0	monster	CARAMEL	1103,5
+mjolnir_03.gat,0,0,0	monster	SMOKIE	1056,15
+mjolnir_03.gat,0,0,0	monster	BIGFOOT	1060,15
+mjolnir_04.gat,0,0,0	monster	POPORING	1031,10
+mjolnir_04.gat,0,0,0	monster	BIGFOOT	1060,10
+mjolnir_04.gat,0,0,0	monster	CARAMEL	1103,10
+mjolnir_04.gat,0,0,0	monster	ARGOS	1100,10
+mjolnir_04.gat,0,0,0	monster	FLORA	1118,10
+molmir_04.gat,0,0,0	monster	RAFFLESIA	1162,10
+mjolnir_05.gat,0,0,0	monster	HORNET	1004,5
+mjolnir_05.gat,0,0,0	monster	MANTIS	1139,10
+mjolnir_05.gat,0,0,0	monster	ARGOS	1100,5
+mjolnir_05.gat,0,0,0	monster	FLORA	1118,5
+mjolnir_05.gat,0,0,0	monster	ARGIOPE	1099,15
+mjolnir_05.gat,0,0,0	monster	MISTRESS	1059,1
+mjolnir_06.gat,0,0,0	monster	CHONCHON	1011,10
+mjolnir_06.gat,0,0,0	monster	STEEL CHONCHON	1042,5
+mjolnir_06.gat,0,0,0	monster	THIEF BUG 	1053,10
+mjolnir_06.gat,0,0,0	monster	AMBERNITE	1094,5
+mjolnir_06.gat,0,0,0	monster	HORN	1128,10
+mjolnir_06.gat,0,0,0	monster	COCO	1104,10
+mjolnir_07.gat,0,0,0	monster	LUNATIC	1063,5
+mjolnir_07.gat,0,0,0	monster	AMBERNITE	1094,15
+mjolnir_07.gat,0,0,0	monster	POPORING	1031,15
+mjolnir_07.gat,0,0,0	monster	COCO	1104,10
+mjolnir_07.gat,0,0,0	monster	HORN	1128,5
+mjolnir_08.gat,0,0,0	monster	POPORING	1031,15
+mjolnir_08.gat,0,0,0	monster	LUNATIC	1063,10
+mjolnir_08.gat,0,0,0	monster	STAINER	1174,10
+mjolnir_08.gat,0,0,0	monster	HORN	1128,5
+mjolnir_08.gat,0,0,0	monster	YOYO	1057,10
+mjolnir_09.gat,0,0,0	monster	CHONCHON	1011,15
+mjolnir_09.gat,0,0,0	monster	STEEL CHONCHON	1042,10
+mjolnir_09.gat,0,0,0	monster	ROCKER	1052,10
+mjolnir_09.gat,0,0,0	monster	WORM TAIL	1024,5
+mjolnir_09.gat,0,0,0	monster	THIEF BUG 	1053,10
+mjolnir_09.gat,0,0,0	monster	WOLF	1013,10
+mjolnir_09.gat,0,0,0	monster	STAINER	1174,5
+mjolnir_09.gat,0,0,0	monster	HORN	1128,10
+mjolnir_10.gat,0,0,0	monster	PORING	1002,10
+mjolnir_10.gat,0,0,0	monster	ANGELING	1096,1
+mjolnir_10.gat,0,0,0	monster	MASTERING	1090,1
+mjolnir_10.gat,0,0,0	monster	ARGOS	1100,10
+mjolnir_10.gat,0,0,0	monster	ARGIOPE	1099,10
+mjolnir_11.gat,0,0,0	monster	HORN	1128,15
+mjolnir_11.gat,0,0,0	monster	STAINER	1174,10
+mjolnir_11.gat,0,0,0	monster	ROCKER	1052,15
+mjolnir_11.gat,0,0,0	monster	ANT EGG	1097,5
+mjolnir_11.gat,0,0,0	monster	ANDRE	1095,5
+mjolnir_11.gat,0,0,0	monster	PIERE	1160,10
+mjolnir_11.gat,0,0,0	monster	DENIRO	1105,10
+mjolnir_12.gat,0,0,0	monster	STEEL CHONCHON	1042,15
+mjolnir_12.gat,0,0,0	monster	ROCKER	1052,15
+mjolnir_12.gat,0,0,0	monster	METALLER	1058,5
+mjolnir_12.gat,0,0,0	monster	AMBERNITE	1094,10
+mjolnir_12.gat,0,0,0	monster	POPORING	1031,15
+mjolnir_12.gat,0,0,0	monster	MANTIS	1139,10
+mjolnir_12.gat,0,0,0	monster	PETIT	1155,3
+mjolnir_12.gat,0,0,0	monster	RAFFLESIA	1162,10
+in_sphinx1.gat,0,0,0	monster	DRAINLIAR	1111,5
+in_sphinx1.gat,0,0,0	monster	ANACONDAQ	1030,10
+in_sphinx1.gat,0,0,0	monster	ZEROM	1178,5
+in_sphinx1.gat,0,0,0	monster	MATYR	1146,15
+in_sphinx1.gat,0,0,0	monster	REQUIEM	1164,5
+in_sphinx2.gat,0,0,0	monster	DRAINLIAR	1111,10
+in_sphinx2.gat,0,0,0	monster	REQUIEM	1164,15
+in_sphinx2.gat,0,0,0	monster	ZEROM	1178,5
+in_sphinx2.gat,0,0,0	monster	MATYR	1146,10
+in_sphinx2.gat,0,0,0	monster	PASANA	1154,10
+in_sphinx2.gat,0,0,0	monster	WHISPER	1179,15
+in_sphinx3.gat,0,0,0	monster	DRAINLIAR	1111,5
+in_sphinx3.gat,0,0,0	monster	MATYR	1146,5
+in_sphinx3.gat,0,0,0	monster	REQUIEM	1164,10
+in_sphinx3.gat,0,0,0	monster	WHISPER	1179,10
+in_sphinx3.gat,0,0,0	monster	PASANA	1154,10
+in_sphinx3.gat,0,0,0	monster	MARDUK	1140,5
+in_sphinx3.gat,0,0,0	monster	MIMIC	1191,2
+in_sphinx4.gat,0,0,0	monster	WHISPER	1179,5
+in_sphinx4.gat,0,0,0	monster	REQUIEM	1164,10
+in_sphinx4.gat,0,0,0	monster	MATYR	1146,10
+in_sphinx4.gat,0,0,0	monster	SIDE_WINDER	1037,10
+in_sphinx4.gat,0,0,0	monster	MARDUK	1140,10
+in_sphinx4.gat,0,0,0	monster	MIMIC	1191,4
+in_sphinx4.gat,0,0,0	monster	EVIL DRUID	1117,1
+in_sphinx4.gat,0,0,0	monster	MEDUSA	1148,5
+in_sphinx4.gat,0,0,0	monster	ANUBIS	1098,5
+in_sphinx5.gat,0,0,0	monster	WHISPER	1179,10
+in_sphinx5.gat,0,0,0	monster	MATYR	1146,10
+in_sphinx5.gat,0,0,0	monster	SIDE_WINDER	1037,10
+in_sphinx5.gat,0,0,0	monster	REQUIEM	1164,10
+in_sphinx5.gat,0,0,0	monster	MARDUK	1140,10
+in_sphinx5.gat,0,0,0	monster	MIMIC	1191,7
+in_sphinx5.gat,0,0,0	monster	WRAITH	1192,1
+in_sphinx5.gat,0,0,0	monster	MEDUSA	1148,10
+in_sphinx5.gat,0,0,0	monster	ANUBIS	1098,10
+in_sphinx5.gat,0,0,0	monster	PHARAOH	1157,1
+orcsdun01.gat,0,0,0	monster	CHONCHON	1011,5
+orcsdun01.gat,0,0,0	monster	STEEL CHONCHON	1042,15
+orcsdun01.gat,0,0,0	monster	FARMILIAR	1005,15
+orcsdun01.gat,0,0,0	monster	DRAINLIAR	1111,5
+orcsdun01.gat,0,0,0	monster	MARTIN	1145,5
+orcsdun01.gat,0,0,0	monster	ORC ZOMBIE	1153,10
+orcsdun01.gat,0,0,0	monster	ORC SKELETON	1152,10
+orcsdun02.gat,0,0,0	monster	CHONCHON	1011,10
+orcsdun02.gat,0,0,0	monster	CHONCHON	1011,10
+orcsdun02.gat,0,0,0	monster	FARMILIAR	1005,15
+orcsdun02.gat,0,0,0	monster	ORC SKELETON	1152,10
+orcsdun02.gat,0,0,0	monster	ZENORC	1177,10
+orcsdun02.gat,0,0,0	monster	ORC ARCHER	1189,3
+orcsdun02.gat,0,0,0	monster	ORC LORD	1190,1
+gef_fild02.gat,0,0,0	monster	POPORING	1031,15
+gef_fild02.gat,0,0,0	monster	COCO	1104,15
+gef_fild02.gat,0,0,0	monster	HORN	1128,10
+gef_fild02.gat,0,0,0	monster	GOBLIN 5	1126,5
+gef_fild02.gat,0,0,0	monster	GOBLIN 4	1125,18
+gef_fild02.gat,0,0,0	monster	GOBLIN 2	1123,15
+gef_fild02.gat,0,0,0	monster	GOBLIN 3	1124,12
+gef_fild03.gat,0,0,0	monster	POPORING	1031,15
+gef_fild03.gat,0,0,0	monster	COCO	1104,10
+gef_fild03.gat,0,0,0	monster	SMOKIE	1056,10
+gef_fild10.gat,0,0,0	monster	ORK WARRIOR	1023,5
+gef_fild10.gat,0,0,0	monster	POPORING	1031,5
+gef_fild10.gat,0,0,0	monster	HORN	1128,5
+gef_fild10.gat,0,0,0	monster	YOYO	1057,5
+gef_fild10.gat,0,0,0	monster	ORK_HERO	1087,1
+gef_fild11.gat,0,0,0	monster	POPORING	1031,10
+gef_fild11.gat,0,0,0	monster	COCO	1104,10
+gef_fild11.gat,0,0,0	monster	SMOKIE	1056,15
+gef_fild11.gat,0,0,0	monster	GOBLIN 5	1126,5
+gef_fild11.gat,0,0,0	monster	GOBLIN 4	1125,16
+gef_fild11.gat,0,0,0	monster	GOBLIN 2	1123,12
+gef_fild11.gat,0,0,0	monster	GOBLIN 3	1124,10
+gef_fild11.gat,0,0,0	monster	GOBLIN 1	1122,8
+iz_dun00.gat,0,0,0	monster	PLANKTON	1161,5
+iz_dun00.gat,0,0,0	monster	KUKRE	1070,10
+iz_dun00.gat,0,0,0	monster	HYDRA	1068,10
+iz_dun00.gat,0,0,0	monster	VADON	1066,10
+iz_dun00.gat,0,0,0	monster	MARINA	1141,10
+iz_dun01.gat,0,0,0	monster	PLANKTON	1161,10
+iz_dun01.gat,0,0,0	monster	MARINA	1141,10
+iz_dun01.gat,0,0,0	monster	KUKRE	1070,10
+iz_dun01.gat,0,0,0	monster	HYDRA	1068,10
+iz_dun01.gat,0,0,0	monster	VADON	1066,5
+iz_dun01.gat,0,0,0	monster	THARA FROG	1034,10
+iz_dun01.gat,0,0,0	monster	CORNUTUS	1067,15
+iz_dun02.gat,0,0,0	monster	HYDRA	1068,5
+iz_dun02.gat,0,0,0	monster	THARA FROG	1034,5
+iz_dun02.gat,0,0,0	monster	CORNUTUS	1067,5
+iz_dun02.gat,0,0,0	monster	MARSE	1144,5
+iz_dun02.gat,0,0,0	monster	OBEAUNE	1044,5
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,10
+iz_dun03.gat,0,0,0	monster	PHEN	1158,10
+iz_dun03.gat,0,0,0	monster	MARINE SPHERE	1142,5
+iz_dun03.gat,0,0,0	monster	SWORD_FISH	1069,5
+iz_dun03.gat,0,0,0	monster	MARSE	1144,15
+iz_dun03.gat,0,0,0	monster	OBEAUNE	1044,10
+iz_dun03.gat,0,0,0	monster	MARC	1045,10
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun03.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	MARINE SPHERE	1142,5
+iz_dun04.gat,0,0,0	monster	SWORD_FISH	1069,10
+iz_dun04.gat,0,0,0	monster	MARSE	1144,15
+iz_dun04.gat,0,0,0	monster	OBEAUNE	1044,5
+iz_dun04.gat,0,0,0	monster	MARC	1045,10
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	HYDRA	1068,1
+iz_dun04.gat,0,0,0	monster	PENOMENA	1216,10
+iz_dun04.gat,0,0,0	monster	DEVIACE	1108,1
+prt_sewb1.gat,0,0,0	monster	THIEF BUG EGG	1048,5
+prt_sewb1.gat,0,0,0	monster	THIEF BUG	1051,100
+prt_sewb1.gat,0,0,0	monster	FARMILIAR	1005,5
+prt_sewb1.gat,0,0,0	monster	SPORE	1014,5
+prt_sewb1.gat,0,0,0	monster	TAROU	1175,10
+prt_sewb2.gat,0,0,0	monster	THIEF BUG EGG	1048,5
+prt_sewb2.gat,0,0,0	monster	THIEF BUG	1051,5
+prt_sewb2.gat,0,0,0	monster	FARMILIAR	1005,10
+prt_sewb2.gat,0,0,0	monster	SPORE	1014,15
+prt_sewb2.gat,0,0,0	monster	PLANKTON	1161,5
+prt_sewb3.gat,0,0,0	monster	HYDRA	1068,5
+prt_sewb2.gat,0,0,0	monster	THIEF BUG 	1053,10
+prt_sewb2.gat,0,0,0	monster	TAROU	1175,10
+prt_sewb3.gat,0,0,0	monster	THIEF BUG EGG	1048,10
+prt_sewb3.gat,0,0,0	monster	THIEF BUG	1051,5
+prt_sewb3.gat,0,0,0	monster	THIEF BUG 	1053,5
+prt_sewb3.gat,0,0,0	monster	TAROU	1175,10
+prt_sewb3.gat,0,0,0	monster	POPORING	1031,15
+prt_sewb3.gat,0,0,0	monster	FARMILIAR	1005,5
+prt_sewb4.gat,0,0,0	monster	THIEF BUG EGG	1048,5
+prt_sewb4.gat,0,0,0	monster	THIEF BUG	1051,5
+prt_sewb4.gat,0,0,0	monster	THIEF BUG 	1053,5
+prt_sewb4.gat,0,0,0	monster	THIEF BUG _	1054,5
+prt_sewb4.gat,0,0,0	monster	GOLDEN BUG	1086,1
+mjo_dun01.gat,0,0,0	monster	FARMILIAR	1005,10
+mjo_dun01.gat,0,0,0	monster	TAROU	1175,5
+mjo_dun01.gat,0,0,0	monster	SMOKIE	1056,5
+mjo_dun01.gat,0,0,0	monster	ANDRE	1095,15
+mjo_dun01.gat,0,0,0	monster	PIERE	1160,15
+mjo_dun01.gat,0,0,0	monster	DENIRO	1105,15
+mjo_dun01.gat,0,0,0	monster	GIEARTH	1121,10
+mjo_dun01.gat,0,0,0	monster	MARTIN	1145,15
+mjo_dun01.gat,0,0,0	monster	DRAINLIAR	1111,5
+mjo_dun01.gat,0,0,0	monster	SKEL WORKER	1169,5
+mjo_dun02.gat,0,0,0	monster	MARTIN	1145,5
+mjo_dun02.gat,0,0,0	monster	DRAINLIAR	1111,5
+mjo_dun02.gat,0,0,0	monster	SKEL WORKER	1169,10
+mjo_dun03.gat,0,0,0	monster	MARTIN	1145,15
+mjo_dun03.gat,0,0,0	monster	SKEL WORKER	1169,5
+mjo_dun03.gat,0,0,0	monster	MYST	1151,10
+mjo_dun03.gat,0,0,0	monster	EVIL DRUID	1117,5
+pay_fild01.gat,0,0,0	monster	PORING	1002,15
+pay_fild01.gat,0,0,0	monster	FABRE	1007,10
+pay_fild01.gat,0,0,0	monster	PUPA	1008,10
+pay_fild01.gat,0,0,0	monster	LUNATIC	1063,10
+pay_fild01.gat,0,0,0	monster	WILOW	1010,10
+pay_fild02.gat,0,0,0	monster	PORING	1002,5
+pay_fild02.gat,0,0,0	monster	FABRE	1007,5
+pay_fild02.gat,0,0,0	monster	PUPA	1008,15
+pay_fild02.gat,0,0,0	monster	LUNATIC	1063,10
+pay_fild02.gat,0,0,0	monster	WILOW	1010,10
+pay_fild02.gat,0,0,0	monster	THIEF BUG	1051,15
+pay_fild02.gat,0,0,0	monster	WOLF	1013,5
+pay_fild02.gat,0,0,0	monster	SNAKE	1025,10
+pay_fild02.gat,0,0,0	monster	VAGABOND WOLF	1092,1
+pay_fild03.gat,0,0,0	monster	PORING	1002,5
+pay_fild03.gat,0,0,0	monster	FABRE	1007,10
+pay_fild03.gat,0,0,0	monster	PUPA	1008,5
+pay_fild03.gat,0,0,0	monster	LUNATIC	1063,15
+pay_fild03.gat,0,0,0	monster	WILOW	1010,10
+pay_fild03.gat,0,0,0	monster	WORM TAIL	1024,5
+pay_fild05.gat,0,0,0	monster	SPORE	1014,5
+pay_fild05.gat,0,0,0	monster	POPORING	1031,10
+pay_fild05.gat,0,0,0	monster	POISON SPORE	1077,15
+pay_fild05.gat,0,0,0	monster	SNAKE	1025,10
+pay_fild06.gat,0,0,0	monster	PORING	1002,10
+pay_fild06.gat,0,0,0	monster	FABRE	1007,5
+pay_fild06.gat,0,0,0	monster	PUPA	1008,10
+pay_fild06.gat,0,0,0	monster	LUNATIC	1063,15
+pay_fild06.gat,0,0,0	monster	WILOW	1010,10
+pay_fild06.gat,0,0,0	monster	RODA FROG	1012,10
+pay_fild06.gat,0,0,0	monster	SPORE	1014,5
+moc_fild03.gat,0,0,0	monster	PORING	1002,5
+moc_fild03.gat,0,0,0	monster	LUNATIC	1063,15
+moc_fild03.gat,0,0,0	monster	WILOW	1010,15
+moc_fild03.gat,0,0,0	monster	RODA FROG	1012,5
+moc_fild03.gat,0,0,0	monster	SNAKE	1025,10
+moc_fild02.gat,0,0,0	monster	PICKY	1049,10
+moc_fild02.gat,0,0,0	monster	PICKY	1050,10
+moc_fild02.gat,0,0,0	monster	PECOPECO EGG	1047,15
+moc_fild02.gat,0,0,0	monster	CONDOR	1009,10
+moc_fild02.gat,0,0,0	monster	SAVAGE BABE	1167,5
+pay_fild11.gat,0,0,0	monster	FABRE	1007,5
+pay_fild11.gat,0,0,0	monster	PUPA	1008,10
+pay_fild11.gat,0,0,0	monster	WORM TAIL	1024,5
+pay_fild11.gat,0,0,0	monster	STEM WORM	1215,1
+pay_fild11.gat,0,0,0	monster	STAINER	1174,10
+pay_fild11.gat,0,0,0	monster	BRILIGHT	1211,1
+pay_fild11.gat,0,0,0	monster	DUSTINESS	1114,10
+pay_fild11.gat,0,0,0	monster	HORN	1128,15
+moc_fild13.gat,0,0,0	monster	PICKY	1049,10
+moc_fild13.gat,0,0,0	monster	PICKY	1050,10
+moc_fild13.gat,0,0,0	monster	PECOPECO EGG	1047,10
+moc_fild13.gat,0,0,0	monster	CONDOR	1009,5
+moc_fild13.gat,0,0,0	monster	PECOPECO	1019,5
+moc_fild13.gat,0,0,0	monster	SNAKE	1025,5
+pay_dun00.gat,0,0,0	monster	FARMILIAR	1005,15
+pay_dun00.gat,0,0,0	monster	SPORE	1014,5
+pay_dun00.gat,0,0,0	monster	SKELETON	1076,10
+pay_dun00.gat,0,0,0	monster	ZOMBIE	1015,5
+pay_dun00.gat,0,0,0	monster	SNAKE	1025,5
+pay_dun01.gat,0,0,0	monster	FARMILIAR	1005,10
+pay_dun01.gat,0,0,0	monster	SMOKIE	1056,10
+pay_dun01.gat,0,0,0	monster	MARTIN	1145,15
+pay_dun01.gat,0,0,0	monster	SKELETON	1076,5
+pay_dun01.gat,0,0,0	monster	EGGYRA	1116,15
+pay_dun01.gat,0,0,0	monster	KAHO	1072,10
+pay_dun01.gat,0,0,0	monster	MAGNOLIA	1138,10
+pay_dun01.gat,0,0,0	monster	SOLDIER SKELETON	1028,2
+pay_dun01.gat,0,0,0	monster	MUNAK	1026,1
+pay_dun01.gat,0,0,0	monster	BON GUN	1188,1
+pay_dun02.gat,0,0,0	monster	MAGNOLIA	1138,15
+pay_dun02.gat,0,0,0	monster	SOLDIER SKELETON	1028,5
+pay_dun02.gat,0,0,0	monster	MUNAK	1026,5
+pay_dun02.gat,0,0,0	monster	BON GUN	1188,10
+pay_dun02.gat,0,0,0	monster	ARCHER SKELETON	1016,2
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun02.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun02.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun02.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun02.gat,0,0,0	monster	RED PLANT	1078,1
+pay_dun02.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_dun03.gat,0,0,0	monster	SOLDIER SKELETON	1028,10
+pay_dun03.gat,0,0,0	monster	ARCHER SKELETON	1016,5
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,10
+pay_dun03.gat,0,0,0	monster	MAGNOLIA	1138,5
+pay_dun03.gat,0,0,0	monster	MUNAK	1026,5
+pay_dun03.gat,0,0,0	monster	BON GUN	1188,5
+pay_dun03.gat,0,0,0	monster	WHISPER 	1185,1
+pay_dun03.gat,0,0,0	monster	WHISPER 	1185,1
+pay_dun03.gat,0,0,0	monster	WHISPER 	1185,1
+pay_dun03.gat,0,0,0	monster	WHISPER 	1185,1
+pay_dun03.gat,0,0,0	monster	WHISPER BOSS	1186,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	HYDRA	1068,1
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun03.gat,0,0,0	monster	RED PLANT	1078,1
+pay_dun03.gat,0,0,0	monster	BLUE PLANT	1079,1
+pay_dun03.gat,0,0,0	monster	GREEN PLANT	1080,1
+pay_dun03.gat,0,0,0	monster	YELLOW PLANT	1081,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun03.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	SOLDIER SKELETON	1028,10
+pay_dun04.gat,0,0,0	monster	ARCHER SKELETON	1016,5
+pay_dun04.gat,0,0,0	monster	SOHEE	1170,10
+pay_dun04.gat,0,0,0	monster	HORONG	1129,10
+pay_dun04.gat,0,0,0	monster	MOONLIGHT	1150,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun04.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun04.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun04.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun04.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun04.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun04.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun04.gat,0,0,0	monster	SOHEE	1170,2
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+pay_dun04.gat,0,0,0	monster	MANDRAGORA	1020,1
+prt_fild00.gat,0,0,0	monster	PORING	1002,10
+prt_fild00.gat,0,0,0	monster	FABRE	1007,10
+prt_fild00.gat,0,0,0	monster	PUPA	1008,10
+prt_fild00.gat,0,0,0	monster	LUNATIC	1063,5
+prt_fild00.gat,0,0,0	monster	RODA FROG	1012,15
+prt_fild00.gat,0,0,0	monster	HORNET	1004,5
+prt_fild00.gat,0,0,0	monster	CREAMY	1018,5
+prt_fild01.gat,0,0,0	monster	PORING	1002,10
+prt_fild01.gat,0,0,0	monster	FABRE	1007,10
+prt_fild01.gat,0,0,0	monster	PUPA	1008,5
+prt_fild01.gat,0,0,0	monster	LUNATIC	1063,5
+prt_fild01.gat,0,0,0	monster	THIEF BUG EGG	1048,10
+prt_fild01.gat,0,0,0	monster	RODA FROG	1012,5
+prt_fild02.gat,0,0,0	monster	THIEF BUG	1051,10
+prt_fild02.gat,0,0,0	monster	PORING	1002,10
+prt_fild02.gat,0,0,0	monster	FABRE	1007,5
+prt_fild02.gat,0,0,0	monster	PUPA	1008,15
+prt_fild02.gat,0,0,0	monster	LUNATIC	1063,10
+prt_fild02.gat,0,0,0	monster	THIEF BUG	1051,5
+prt_fild02.gat,0,0,0	monster	THIEF BUG 	1053,15
+prt_fild02.gat,0,0,0	monster	MANDRAGORA	1020,15
+prt_fild02.gat,0,0,0	monster	ECLIPSE	1093,1
+prt_fild03.gat,0,0,0	monster	FABRE	1007,5
+prt_fild03.gat,0,0,0	monster	PUPA	1008,15
+prt_fild03.gat,0,0,0	monster	LUNATIC	1063,10
+prt_fild03.gat,0,0,0	monster	THIEF BUG EGG	1048,10
+prt_fild03.gat,0,0,0	monster	POPORING	1031,10
+prt_fild03.gat,0,0,0	monster	CREAMY	1018,10
+prt_fild03.gat,0,0,0	monster	YOYO	1057,5
+prt_fild03.gat,0,0,0	monster	CHOCO	1214,3
+prt_fild04.gat,0,0,0	monster	PORING	1002,10
+prt_fild04.gat,0,0,0	monster	LUNATIC	1063,10
+prt_fild04.gat,0,0,0	monster	RODA FROG	1012,10
+prt_fild04.gat,0,0,0	monster	HORNET	1004,15
+prt_fild04.gat,0,0,0	monster	ROCKER	1052,10
+prt_fild05.gat,0,0,0	monster	PORING	1002,10
+prt_fild05.gat,0,0,0	monster	FABRE	1007,5
+prt_fild05.gat,0,0,0	monster	PUPA	1008,5
+prt_fild05.gat,0,0,0	monster	LUNATIC	1063,10
+prt_fild05.gat,0,0,0	monster	RODA FROG	1012,15
+prt_fild06.gat,0,0,0	monster	PORING	1002,5
+prt_fild06.gat,0,0,0	monster	FABRE	1007,5
+prt_fild06.gat,0,0,0	monster	PUPA	1008,10
+prt_fild06.gat,0,0,0	monster	LUNATIC	1063,5
+prt_fild06.gat,0,0,0	monster	THIEF BUG EGG	1048,10
+prt_fild06.gat,0,0,0	monster	RODA FROG	1012,5
+prt_fild06.gat,0,0,0	monster	THIEF BUG	1051,5
+prt_fild07.gat,0,0,0	monster	PORING	1002,10
+prt_fild07.gat,0,0,0	monster	FABRE	1007,10
+prt_fild07.gat,0,0,0	monster	LUNATIC	1063,5
+prt_fild07.gat,0,0,0	monster	RODA FROG	1012,10
+prt_fild07.gat,0,0,0	monster	ROCKER	1052,10
+prt_fild07.gat,0,0,0	monster	CREAMY	1018,10
+prt_fild07.gat,0,0,0	monster	VOCAL	1088,1
+prt_fild08.gat,0,0,0	monster	PORING	1002,10
+prt_fild08.gat,0,0,0	monster	FABRE	1007,5
+prt_fild08.gat,0,0,0	monster	PUPA	1008,10
+prt_fild08.gat,0,0,0	monster	LUNATIC	1063,15
+prt_fild08.gat,0,0,0	monster	CHONCHON	1011,5
+prt_fild08.gat,0,0,0	monster	RODA FROG	1012,15
+prt_fild09.gat,0,0,0	monster	DROPS	1113,5
+prt_fild09.gat,0,0,0	monster	PECOPECO EGG	1047,5
+prt_fild09.gat,0,0,0	monster	PICKY	1049,5
+prt_fild09.gat,0,0,0	monster	PICKY	1050,5
+prt_fild09.gat,0,0,0	monster	CHONCHON	1011,10
+prt_fild09.gat,0,0,0	monster	STEEL CHONCHON	1042,5
+prt_fild09.gat,0,0,0	monster	CONDOR	1009,10
+prt_fild09.gat,0,0,0	monster	DESERT WOLF B	1107,5
+prt_fild09.gat,0,0,0	monster	MUKA	1055,5
+prt_fild10.gat,0,0,0	monster	LUNATIC	1063,10
+prt_fild10.gat,0,0,0	monster	SAVAGE BABE	1167,10
+prt_fild10.gat,0,0,0	monster	POPORING	1031,15
+prt_fild10.gat,0,0,0	monster	CREAMY	1018,10
+prt_fild10.gat,0,0,0	monster	ELDER WILOW	1033,5
+prt_fild10.gat,0,0,0	monster	WILOW	1010,5
+prt_fild11.gat,0,0,0	monster	LUNATIC	1063,10
+prt_fild11.gat,0,0,0	monster	SAVAGE BABE	1167,5
+prt_fild11.gat,0,0,0	monster	ELDER WILOW	1033,10
+prt_fild11.gat,0,0,0	monster	POPORING	1031,10
+prt_fild11.gat,0,0,0	monster	COCO	1104,5
+prt_fild11.gat,0,0,0	monster	COCO	1104,15
+prt_fild11.gat,0,0,0	monster	YOYO	1057,5
+prt_fild11.gat,0,0,0	monster	SAVAGE	1166,10
+gef_fild05.gat,0,0,0	monster	PORING	1002,10
+gef_fild05.gat,0,0,0	monster	FABRE	1007,10
+gef_fild05.gat,0,0,0	monster	PUPA	1008,15
+gef_fild05.gat,0,0,0	monster	WILOW	1010,10
+gef_fild05.gat,0,0,0	monster	CHONCHON	1011,5
+gef_fild05.gat,0,0,0	monster	RODA FROG	1012,10
+gef_fild05.gat,0,0,0	monster	SAVAGE BABE	1167,10
+gef_fild05.gat,0,0,0	monster	ROCKER	1052,5
+gef_fild05.gat,0,0,0	monster	DESERT WOLF B	1107,5
+gef_fild04.gat,0,0,0	monster	PORING	1002,10
+gef_fild04.gat,0,0,0	monster	FABRE	1007,10
+gef_fild04.gat,0,0,0	monster	PUPA	1008,5
+gef_fild04.gat,0,0,0	monster	WILOW	1010,10
+gef_fild04.gat,0,0,0	monster	CHONCHON	1011,10
+gef_fild04.gat,0,0,0	monster	RODA FROG	1012,10
+gef_fild04.gat,0,0,0	monster	AMBERNITE	1094,10
+gef_fild07.gat,0,0,0	monster	PORING	1002,5
+gef_fild07.gat,0,0,0	monster	FABRE	1007,5
+gef_fild07.gat,0,0,0	monster	PUPA	1008,15
+gef_fild07.gat,0,0,0	monster	WILOW	1010,10
+gef_fild07.gat,0,0,0	monster	CHONCHON	1011,10
+gef_fild07.gat,0,0,0	monster	RODA FROG	1012,10
+gef_fild07.gat,0,0,0	monster	STAINER	1174,5
+gef_fild09.gat,0,0,0	monster	PORING	1002,15
+gef_fild09.gat,0,0,0	monster	HORNET	1004,10
+gef_fild09.gat,0,0,0	monster	AMBERNITE	1094,5
+gef_fild01.gat,0,0,0	monster	PORING	1002,5
+gef_fild01.gat,0,0,0	monster	HORNET	1004,10
+gef_fild01.gat,0,0,0	monster	RODA FROG	1012,10
+gef_fild01.gat,0,0,0	monster	THARA FROG	1034,10
+gef_fild01.gat,0,0,0	monster	TOAD	1089,1
+gef_fild00.gat,0,0,0	monster	PORING	1002,5
+gef_fild00.gat,0,0,0	monster	FABRE	1007,5
+gef_fild00.gat,0,0,0	monster	PUPA	1008,15
+gef_fild00.gat,0,0,0	monster	WILOW	1010,5
+gef_fild00.gat,0,0,0	monster	CHONCHON	1011,10
+gef_fild00.gat,0,0,0	monster	RODA FROG	1012,15
+gef_fild00.gat,0,0,0	monster	MARTIN	1145,5
+moc_pryd01.gat,0,0,0	monster	FARMILIAR	1005,5
+moc_pryd01.gat,0,0,0	monster	SPORE	1014,10
+moc_pryd01.gat,0,0,0	monster	SKELETON	1076,10
+moc_pryd01.gat,0,0,0	monster	POPORING	1031,5
+moc_pryd01.gat,0,0,0	monster	MIMIC	1191,1
+moc_pryd02.gat,0,0,0	monster	POPORING	1031,5
+moc_pryd02.gat,0,0,0	monster	DRAINLIAR	1111,10
+moc_pryd02.gat,0,0,0	monster	SOLDIER SKELETON	1028,10
+moc_pryd02.gat,0,0,0	monster	ARCHER SKELETON	1016,10
+moc_pryd03.gat,0,0,0	monster	DRAINLIAR	1111,15
+moc_pryd03.gat,0,0,0	monster	SOLDIER SKELETON	1028,5
+moc_pryd03.gat,0,0,0	monster	ARCHER SKELETON	1016,15
+moc_pryd03.gat,0,0,0	monster	MUMMY	1041,10
+moc_pryd03.gat,0,0,0	monster	MIMIC	1191,2
+moc_pryd04.gat,0,0,0	monster	MUMMY	1041,10
+moc_pryd04.gat,0,0,0	monster	GHOUL	1036,5
+moc_pryd04.gat,0,0,0	monster	ISIS	1029,10
+moc_pryd04.gat,0,0,0	monster	MIMIC	1191,3
+moc_pryd04.gat,0,0,0	monster	OSIRIS	1038,1
+moc_pryd05.gat,0,0,0	monster	SCORPION	1001,10
+moc_pryd05.gat,0,0,0	monster	ANACONDAQ	1030,5
+moc_pryd05.gat,0,0,0	monster	MUMMY	1041,10
+moc_pryd05.gat,0,0,0	monster	VERIT	1032,10
+moc_pryd05.gat,0,0,0	monster	GHOUL	1036,5
+moc_pryd06.gat,0,0,0	monster	MUMMY	1041,5
+moc_pryd06.gat,0,0,0	monster	VERIT	1032,10
+moc_pryd06.gat,0,0,0	monster	GHOUL	1036,10
+moc_pryd06.gat,0,0,0	monster	ISIS	1029,10
+moc_pryd06.gat,0,0,0	monster	RAYDRIC	1163,15
+moc_pryd06.gat,0,0,0	monster	KHALITZBURG	1132,2
+pay_fild04.gat,0,0,0	monster	PORING	1002,10
+pay_fild04.gat,0,0,0	monster	DROPS	1113,10
+pay_fild04.gat,0,0,0	monster	POPORING	1031,10
+pay_fild04.gat,0,0,0	monster	ANGELING	1096,1
+pay_fild04.gat,0,0,0	monster	GHOSTRING	1120,1
+treasure01.gat,0,0,0	monster	PLANKTON	1161,10
+treasure01.gat,0,0,0	monster	KUKRE	1070,10
+treasure01.gat,0,0,0	monster	POPORING	1031,5
+treasure01.gat,0,0,0	monster	KUKRE	1070,5
+treasure01.gat,0,0,0	monster	POISON SPORE	1077,3
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	POISON SPORE	1077,3
+treasure01.gat,0,0,0	monster	HYDRA	1068,4
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,3
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure01.gat,0,0,0	monster	THARA FROG	1034,2
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	POISON SPORE	1077,3
+treasure01.gat,0,0,0	monster	POISON SPORE	1077,3
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	DRAKE	1112,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	PIRATE SKEL	1071,5
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure01.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	KUKRE	1070,10
+treasure02.gat,0,0,0	monster	POPORING	1031,5
+treasure02.gat,0,0,0	monster	THARA FROG	1034,10
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	WHISPER	1179,2
+treasure02.gat,0,0,0	monster	WHISPER	1179,1
+treasure02.gat,0,0,0	monster	WHISPER	1179,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	HYDRA	1068,1
+treasure02.gat,0,0,0	monster	WHISPER	1179,10
+treasure02.gat,0,0,0	monster	GHOSTRING	1120,1
+treasure02.gat,0,0,0	monster	PIRATE SKEL	1071,3
+treasure02.gat,0,0,0	monster	MEGALODON	1064,6
+treasure02.gat,0,0,0	monster	POISON SPORE	1077,1
+treasure02.gat,0,0,0	monster	POISON SPORE	1077,1
+treasure02.gat,0,0,0	monster	POISON SPORE	1077,1
+treasure02.gat,0,0,0	monster	PIRATE SKEL	1071,6
+treasure02.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure02.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure02.gat,0,0,0	monster	PIRATE SKEL	1071,1
+treasure02.gat,0,0,0	monster	WHISPER	1179,1
+treasure02.gat,0,0,0	monster	WHISPER	1179,1
+treasure02.gat,0,0,0	monster	WHISPER	1179,1
+treasure02.gat,0,0,0	monster	WHISPER	1179,1
+treasure02.gat,0,0,0	monster	MARIONETTE	1143,1
+prt_maze01.gat,0,0,0	monster	PORING	1002,5
+prt_maze01.gat,0,0,0	monster	LUNATIC	1063,5
+prt_maze01.gat,0,0,0	monster	FABRE	1007,5
+prt_maze01.gat,0,0,0	monster	CREAMY	1018,1
+prt_maze01.gat,0,0,0	monster	PUPA	1008,5
+prt_maze01.gat,0,0,0	monster	POPORING	1031,5
+prt_maze01.gat,0,0,0	monster	ROCKER	1052,5
+prt_maze01.gat,0,0,0	monster	BIGFOOT	1060,5
+prt_maze01.gat,0,0,0	monster	SMOKIE	1056,5
+prt_maze01.gat,0,0,0	monster	SNAKE	1025,5
+prt_maze01.gat,0,0,0	monster	WOLF	1013,5
+prt_maze01.gat,0,0,0	monster	ARGIOPE	1099,3
+prt_maze01.gat,0,0,0	monster	ARGOS	1100,3
+prt_maze01.gat,0,0,0	monster	CHONCHON	1011,5
+prt_maze01.gat,0,0,0	monster	HORN	1128,5
+prt_maze01.gat,0,0,0	monster	HUNTER FLY	1035,3
+prt_maze01.gat,0,0,0	monster	MANTIS	1139,3
+prt_maze01.gat,0,0,0	monster	STAINER	1174,5
+prt_maze01.gat,0,0,0	monster	SIDE_WINDER	1037,3
+prt_maze01.gat,0,0,0	monster	YOYO	1057,4
+prt_maze01.gat,0,0,0	monster	CHOCO	1214,2
+prt_maze01.gat,0,0,0	monster	STEEL CHONCHON	1042,5
+prt_maze01.gat,0,0,0	monster	COCO	1104,5
+prt_maze01.gat,0,0,0	monster	CARAMEL	1103,5
+prt_maze01.gat,0,0,0	monster	DUSTINESS	1114,5
+prt_maze01.gat,0,0,0	monster	MARTIN	1145,5
+prt_maze01.gat,0,0,0	monster	SAVAGE	1166,3
+prt_maze01.gat,0,0,0	monster	SAVAGE	1166,5
+prt_maze03.gat,0,0,0	monster	PORING	1002,5
+prt_maze03.gat,0,0,0	monster	MASTERING	1090,1
+prt_maze03.gat,0,0,0	monster	LUNATIC	1063,5
+prt_maze03.gat,0,0,0	monster	ECLIPSE	1093,1
+prt_maze03.gat,0,0,0	monster	FABRE	1007,5
+prt_maze03.gat,0,0,0	monster	CREAMY	1018,1
+prt_maze03.gat,0,0,0	monster	PUPA	1008,5
+prt_maze03.gat,0,0,0	monster	POPORING	1031,5
+prt_maze03.gat,0,0,0	monster	ROCKER	1052,5
+prt_maze03.gat,0,0,0	monster	VOCAL	1088,1
+prt_maze03.gat,0,0,0	monster	BIGFOOT	1060,5
+prt_maze03.gat,0,0,0	monster	SMOKIE	1056,5
+prt_maze03.gat,0,0,0	monster	SNAKE	1025,5
+prt_maze03.gat,0,0,0	monster	WOLF	1013,5
+prt_maze03.gat,0,0,0	monster	VAGABOND WOLF	1092,1
+prt_maze03.gat,0,0,0	monster	ARGIOPE	1099,3
+prt_maze03.gat,0,0,0	monster	ARGOS	1100,3
+prt_maze03.gat,0,0,0	monster	BAPHOMET	1039,1
+prt_maze03.gat,0,0,0	monster	HORN	1128,5
+prt_maze03.gat,0,0,0	monster	HUNTER FLY	1035,3
+prt_maze03.gat,0,0,0	monster	MANTIS	1139,3
+prt_maze03.gat,0,0,0	monster	STAINER	1174,5
+prt_maze03.gat,0,0,0	monster	SIDE_WINDER	1037,3
+prt_maze03.gat,0,0,0	monster	YOYO	1057,4
+prt_maze03.gat,0,0,0	monster	CHOCO	1214,2
+prt_maze03.gat,0,0,0	monster	STEEL CHONCHON	1042,5
+prt_maze03.gat,0,0,0	monster	COCO	1104,5
+prt_maze03.gat,0,0,0	monster	CARAMEL	1103,5
+prt_maze03.gat,0,0,0	monster	DUSTINESS	1114,5
+prt_maze03.gat,0,0,0	monster	MARTIN	1145,5
+prt_maze03.gat,0,0,0	monster	SAVAGE	1166,3
+prt_maze03.gat,0,0,0	monster	SAVAGE BABE	1167,5
+gef_fild02.gat,0,0,0	monster	GREEN PLANT	1080,8
+gef_fild02.gat,0,0,0	monster	RED MUSHROOM	1085,5
+gef_fild02.gat,0,0,0	monster	BLUE PLANT	1079,2
+gef_fild02.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild02.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild02.gat,0,0,0	monster	SHINING PLANT	1083,1
+gef_fild01.gat,0,0,0	monster	GREEN PLANT	1080,5
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+gef_fild09.gat,0,0,0	monster	BLUE PLANT	1079,3
+gef_fild10.gat,0,0,0	monster	BLUE PLANT	1079,3
+gef_fild10.gat,0,0,0	monster	BLUE PLANT	1079,3
+gef_fild10.gat,0,0,0	monster	GREEN PLANT	1080,3
+gef_fild11.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+gef_fild11.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+gef_fild11.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+gef_fild11.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+gef_fild11.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+gef_fild11.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+gef_fild11.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild03.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild05.gat,0,0,0	monster	RED PLANT	1078,1
+gef_fild08.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild08.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild08.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild08.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild08.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild08.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild08.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild08.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild06.gat,0,0,0	monster	SHINING PLANT	1083,4
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,3
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,3
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild04.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild07.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild07.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild07.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild07.gat,0,0,0	monster	GREEN PLANT	1080,3
+gef_fild07.gat,0,0,0	monster	GREEN PLANT	1080,3
+gef_fild07.gat,0,0,0	monster	SHINING PLANT	1083,1
+gef_fild07.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild07.gat,0,0,0	monster	GREEN PLANT	1080,3
+gef_fild00.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild00.gat,0,0,0	monster	BLUE PLANT	1079,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,3
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,3
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+gef_fild00.gat,0,0,0	monster	GREEN PLANT	1080,1
+moc_fild07.gat,0,0,0	monster	YELLOW PLANT	1081,5
+moc_fild06.gat,0,0,0	monster	YELLOW PLANT	1081,10
+moc_fild05.gat,0,0,0	monster	YELLOW PLANT	1081,5
+moc_fild04.gat,0,0,0	monster	YELLOW PLANT	1081,10
+moc_fild01.gat,0,0,0	monster	YELLOW PLANT	1081,10
+moc_fild02.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild02.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild02.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild02.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild02.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild02.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild02.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild02.gat,0,0,0	monster	GREEN PLANT	1080,1
+moc_fild02.gat,0,0,0	monster	GREEN PLANT	1080,1
+moc_fild02.gat,0,0,0	monster	GREEN PLANT	1080,1
+moc_fild02.gat,0,0,0	monster	GREEN PLANT	1080,1
+moc_fild02.gat,0,0,0	monster	GREEN PLANT	1080,1
+moc_fild02.gat,0,0,0	monster	GREEN PLANT	1080,1
+moc_fild02.gat,0,0,0	monster	GREEN PLANT	1080,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	RED MUSHROOM	1085,1
+moc_fild13.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild13.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild13.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild13.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild13.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild13.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild13.gat,0,0,0	monster	YELLOW PLANT	1081,3
+moc_fild13.gat,0,0,0	monster	YELLOW PLANT	1081,3
+moc_fild13.gat,0,0,0	monster	YELLOW PLANT	1081,3
+moc_fild03.gat,0,0,0	monster	GREEN PLANT	1080,2
+moc_fild03.gat,0,0,0	monster	GREEN PLANT	1080,2
+moc_fild03.gat,0,0,0	monster	GREEN PLANT	1080,2
+moc_fild03.gat,0,0,0	monster	GREEN PLANT	1080,2
+moc_fild03.gat,0,0,0	monster	GREEN PLANT	1080,2
+moc_fild03.gat,0,0,0	monster	GREEN PLANT	1080,2
+moc_fild03.gat,0,0,0	monster	GREEN PLANT	1080,2
+moc_fild09.gat,0,0,0	monster	YELLOW PLANT	1081,2
+moc_fild09.gat,0,0,0	monster	YELLOW PLANT	1081,2
+moc_fild09.gat,0,0,0	monster	YELLOW PLANT	1081,2
+moc_fild09.gat,0,0,0	monster	YELLOW PLANT	1081,2
+moc_fild09.gat,0,0,0	monster	YELLOW PLANT	1081,2
+moc_fild10.gat,0,0,0	monster	YELLOW PLANT	1081,10
+moc_fild10.gat,0,0,0	monster	GREEN PLANT	1080,5
+moc_fild11.gat,0,0,0	monster	SHINING PLANT	1083,1
+moc_fild12.gat,0,0,0	monster	YELLOW PLANT	1081,10
+moc_fild18.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild18.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild18.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild18.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild18.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild18.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild18.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild18.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild17.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild17.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild17.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild17.gat,0,0,0	monster	BLUE PLANT	1079,1
+moc_fild17.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild17.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild17.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild15.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild14.gat,0,0,0	monster	SHINING PLANT	1083,1
+moc_fild14.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild14.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild14.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild14.gat,0,0,0	monster	YELLOW PLANT	1081,1
+moc_fild14.gat,0,0,0	monster	YELLOW PLANT	1081,1
+mjolnir_01.gat,0,0,0	monster	SHINING PLANT	1083,1
+mjolnir_01.gat,0,0,0	monster	SHINING PLANT	1083,1
+mjolnir_01.gat,0,0,0	monster	GREEN PLANT	1080,5
+mjolnir_01.gat,0,0,0	monster	GREEN PLANT	1080,5
+mjolnir_01.gat,0,0,0	monster	BLUE PLANT	1079,5
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	BLUE PLANT	1079,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	BLUE PLANT	1079,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_11.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_06.gat,0,0,0	monster	BLUE PLANT	1079,1
+mjolnir_06.gat,0,0,0	monster	BLUE PLANT	1079,1
+mjolnir_06.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_06.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_06.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_06.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_06.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_06.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_06.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_06.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	BLUE PLANT	1079,1
+mjolnir_02.gat,0,0,0	monster	RED PLANT	1078,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	RED PLANT	1078,1
+mjolnir_02.gat,0,0,0	monster	BLUE PLANT	1079,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	RED PLANT	1078,1
+mjolnir_02.gat,0,0,0	monster	BLUE PLANT	1079,1
+mjolnir_02.gat,0,0,0	monster	RED PLANT	1078,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	RED PLANT	1078,1
+mjolnir_02.gat,0,0,0	monster	BLUE PLANT	1079,1
+mjolnir_02.gat,0,0,0	monster	RED PLANT	1078,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_02.gat,0,0,0	monster	BLUE PLANT	1079,2
+mjolnir_07.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_07.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_07.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_07.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_07.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_07.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_07.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_07.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_07.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_07.gat,0,0,0	monster	BLUE PLANT	1079,2
+mjolnir_03.gat,0,0,0	monster	SHINING PLANT	1083,1
+mjolnir_03.gat,0,0,0	monster	SHINING PLANT	1083,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_03.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	SHINING PLANT	1083,3
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_04.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_05.gat,0,0,0	monster	BLUE PLANT	1079,3
+mjolnir_05.gat,0,0,0	monster	SHINING PLANT	1083,1
+mjolnir_05.gat,0,0,0	monster	BLUE PLANT	1079,3
+mjolnir_05.gat,0,0,0	monster	BLUE PLANT	1079,3
+mjolnir_05.gat,0,0,0	monster	RED PLANT	1078,10
+mjolnir_08.gat,0,0,0	monster	BLUE PLANT	1079,2
+mjolnir_08.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_08.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_08.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_08.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_08.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_08.gat,0,0,0	monster	GREEN PLANT	1080,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_09.gat,0,0,0	monster	RED MUSHROOM	1085,1
+mjolnir_10.gat,0,0,0	monster	SHINING PLANT	1083,1
+mjolnir_10.gat,0,0,0	monster	GREEN PLANT	1080,10
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+pay_fild01.gat,0,0,0	monster	GREEN PLANT	1080,5
+pay_fild08.gat,0,0,0	monster	GREEN PLANT	1080,10
+pay_fild08.gat,0,0,0	monster	SHINING PLANT	1083,1
+pay_fild09.gat,0,0,0	monster	GREEN PLANT	1080,10
+pay_fild09.gat,0,0,0	monster	SHINING PLANT	1083,1
+pay_fild10.gat,0,0,0	monster	GREEN PLANT	1080,5
+pay_fild10.gat,0,0,0	monster	GREEN PLANT	1080,5
+pay_fild10.gat,0,0,0	monster	GREEN PLANT	1080,5
+pay_fild10.gat,0,0,0	monster	BLUE PLANT	1079,1
+pay_fild10.gat,0,0,0	monster	BLUE PLANT	1079,1
+pay_fild10.gat,0,0,0	monster	BLUE PLANT	1079,1
+pay_fild07.gat,0,0,0	monster	GREEN PLANT	1080,8
+pay_fild02.gat,0,0,0	monster	GREEN PLANT	1080,4
+pay_fild02.gat,0,0,0	monster	RED MUSHROOM	1085,4
+pay_fild03.gat,0,0,0	monster	RED MUSHROOM	1085,6
+pay_fild03.gat,0,0,0	monster	GREEN PLANT	1080,4
+pay_fild06.gat,0,0,0	monster	RED MUSHROOM	1085,8
+pay_fild06.gat,0,0,0	monster	GREEN PLANT	1080,10
+pay_fild06.gat,0,0,0	monster	SHINING PLANT	1083,1
+pay_fild05.gat,0,0,0	monster	GREEN PLANT	1080,4
+pay_fild05.gat,0,0,0	monster	GREEN PLANT	1080,4
+pay_fild11.gat,0,0,0	monster	RED MUSHROOM	1085,3
+pay_fild11.gat,0,0,0	monster	RED MUSHROOM	1085,3
+pay_fild04.gat,0,0,0	monster	SHINING PLANT	1083,1
+pay_fild04.gat,0,0,0	monster	GREEN PLANT	1080,5
+prt_fild04.gat,0,0,0	monster	GREEN PLANT	1080,5
+prt_fild05.gat,0,0,0	monster	GREEN PLANT	1080,6
+prt_fild05.gat,0,0,0	monster	BLUE PLANT	1079,1
+prt_fild06.gat,0,0,0	monster	GREEN PLANT	1080,15
+prt_fild01.gat,0,0,0	monster	GREEN PLANT	1080,3
+prt_fild01.gat,0,0,0	monster	BLUE PLANT	1079,1
+prt_fild02.gat,0,0,0	monster	SHINING PLANT	1083,1
+prt_fild02.gat,0,0,0	monster	SHINING PLANT	1083,2
+prt_fild03.gat,0,0,0	monster	GREEN PLANT	1080,5
+prt_fild03.gat,0,0,0	monster	BLUE PLANT	1079,2
+prt_fild03.gat,0,0,0	monster	GREEN PLANT	1080,5
+prt_fild03.gat,0,0,0	monster	GREEN PLANT	1080,5
+prt_fild03.gat,0,0,0	monster	GREEN PLANT	1080,5
+prt_fild00.gat,0,0,0	monster	SHINING PLANT	1083,1
+prt_fild00.gat,0,0,0	monster	GREEN PLANT	1080,5
+prt_fild09.gat,0,0,0	monster	YELLOW PLANT	1081,3
+prt_fild07.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+prt_fild10.gat,0,0,0	monster	RED MUSHROOM	1085,15
+prt_fild10.gat,0,0,0	monster	SHINING PLANT	1083,1
+prt_fild11.gat,0,0,0	monster	RED MUSHROOM	1085,10
+gef_dun00.gat,0,0,0	monster	RED PLANT	1078,10
+gef_dun00.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+gef_dun00.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+gef_dun01.gat,0,0,0	monster	BLACK MUSHROOM	1084,5
+gef_dun01.gat,0,0,0	monster	WHITE PLANT	1082,10
+gef_dun02.gat,0,0,0	monster	WHITE PLANT	1082,15
+gef_dun03.gat,0,0,0	monster	SHINING PLANT	1083,3
+gef_dun03.gat,0,0,0	monster	WHITE PLANT	1082,10
+glast_01.gat,0,0,0	monster	SHINING PLANT	1083,1
+glast_01.gat,0,0,0	monster	GREEN PLANT	1080,8
+glast_01.gat,0,0,0	monster	BLUE PLANT	1079,2
+orcsdun01.gat,0,0,0	monster	BLACK MUSHROOM	1084,5
+orcsdun01.gat,0,0,0	monster	BLACK MUSHROOM	1084,5
+orcsdun01.gat,0,0,0	monster	WHITE PLANT	1082,5
+orcsdun02.gat,0,0,0	monster	BLACK MUSHROOM	1084,5
+orcsdun02.gat,0,0,0	monster	WHITE PLANT	1082,5
+iz_dun00.gat,0,0,0	monster	BLACK MUSHROOM	1084,5
+iz_dun01.gat,0,0,0	monster	BLACK MUSHROOM	1084,10
+iz_dun02.gat,0,0,0	monster	BLACK MUSHROOM	1084,15
+pay_dun00.gat,0,0,0	monster	RED PLANT	1078,15
+pay_dun00.gat,0,0,0	monster	BLACK MUSHROOM	1084,3
+pay_dun01.gat,0,0,0	monster	BLACK MUSHROOM	1084,7
+pay_dun01.gat,0,0,0	monster	RED PLANT	1078,10
+pay_dun02.gat,0,0,0	monster	BLACK MUSHROOM	1084,7
+pay_dun02.gat,0,0,0	monster	WHITE PLANT	1082,5
+pay_dun02.gat,0,0,0	monster	RED PLANT	1078,10
+pay_dun03.gat,0,0,0	monster	RED PLANT	1078,15
+pay_dun03.gat,0,0,0	monster	WHITE PLANT	1082,5
+pay_dun04.gat,0,0,0	monster	SHINING PLANT	1083,3
+pay_dun04.gat,0,0,0	monster	RED PLANT	1078,10
+pay_dun04.gat,0,0,0	monster	WHITE PLANT	1082,5
+prt_maze01.gat,0,0,0	monster	SHINING PLANT	1083,5
+prt_maze01.gat,0,0,0	monster	RED PLANT	1078,5
+prt_maze01.gat,0,0,0	monster	BLUE PLANT	1079,5
+prt_maze01.gat,0,0,0	monster	BLACK MUSHROOM	1084,5
+prt_maze01.gat,0,0,0	monster	RED MUSHROOM	1085,5
+prt_maze03.gat,0,0,0	monster	SHINING PLANT	1083,5
+prt_maze03.gat,0,0,0	monster	RED PLANT	1078,5
+prt_maze03.gat,0,0,0	monster	BLUE PLANT	1079,5
+prt_maze03.gat,0,0,0	monster	BLACK MUSHROOM	1084,5
+prt_maze03.gat,0,0,0	monster	RED MUSHROOM	1085,5
+alde_dun01.gat,0,0,0	monster	STEM WORM	1215,5
+alde_dun01.gat,0,0,0	monster	DRAINLIAR	1111,10
+alde_dun01.gat,0,0,0	monster	IRON FIST	1212,10
+alde_dun02.gat,0,0,0	monster	IRON FIST	1212,10
+alde_dun02.gat,0,0,0	monster	DRAINLIAR	1111,5
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,5
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,10
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	ORC ARCHER	1189,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun02.gat,0,0,0	monster	HIGH ORC	1213,1
+alde_dun03.gat,0,0,0	monster	CRAMP	1209,10
+alde_dun03.gat,0,0,0	monster	BRILIGHT	1211,10
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,15
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,5
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,7
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,4
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,5
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,10
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,8
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,10
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,13
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,5
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,4
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,7
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,5
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,5
+alde_dun03.gat,0,0,0	monster	PENOMENA	1216,5
+alde_dun03.gat,0,0,0	monster	ALARM	1193,1
+alde_dun03.gat,0,0,0	monster	ALARM	1193,1
+alde_dun04.gat,0,0,0	monster	ANOLIAN	1206,5
+alde_dun04.gat,0,0,0	monster	AMBERNITE	1094,15
+c_tower1.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower1.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower1.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower1.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower1.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower1.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower1.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower1.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower1.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower1.gat,0,0,0	monster	PUNK	1199,5
+c_tower1.gat,0,0,0	monster	BATHORY	1102,10
+c_tower1.gat,0,0,0	monster	BAPHOMET_	1101,10
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,5
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,15
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,15
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,12
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,10
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,10
+c_tower2.gat,0,0,0	monster	PUNK	1199,10
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower2.gat,0,0,0	monster	ARCHER SKELETON	1016,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	ALARM	1193,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower2.gat,0,0,0	monster	DEVIRUCHI	1109,1
+c_tower3.gat,0,0,0	monster	ALARM	1193,10
+c_tower3.gat,0,0,0	monster	ARCHER SKELETON	1016,5
+c_tower4.gat,0,0,0	monster	ALARM	1193,5
+c_tower4.gat,0,0,0	monster	ARCHER SKELETON	1016,10
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	RIDEWORD	1195,1
+c_tower4.gat,0,0,0	monster	HORONG	1129,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	MIMIC	1191,1
+c_tower4.gat,0,0,0	monster	KNIGHT OF ABYSS	1219,1
+c_tower4.gat,0,0,0	monster	EXECUTIONER	1205,1
+gl_church.gat,0,0,0	monster	NIGHTMARE	1061,5
+gl_church.gat,0,0,0	monster	WHISPER	1179,5
+gl_church.gat,0,0,0	monster	JOKER	1131,5
+gl_church.gat,0,0,0	monster	EVIL DRUID	1117,15
+gl_church.gat,0,0,0	monster	GHOUL	1036,10
+gl_church.gat,0,0,0	monster	BRILIGHT	1211,15
+gl_chyard.gat,0,0,0	monster	GHOUL	1036,10
+gl_chyard.gat,0,0,0	monster	ZOMBIE	1015,10
+gl_chyard.gat,0,0,0	monster	ZOMBIE PRISONER	1197,10
+gl_chyard.gat,0,0,0	monster	SKEL PRISONER	1196,10
+gl_chyard.gat,0,0,0	monster	WRAITH	1192,5
+gl_prison.gat,0,0,0	monster	SKEL PRISONER	1196,5
+gl_prison.gat,0,0,0	monster	WHISPER	1179,10
+gl_prison.gat,0,0,0	monster	GHOUL	1036,10
+gl_prison.gat,0,0,0	monster	HUNTER FLY	1035,10
+gl_prison1.gat,0,0,0	monster	ZOMBIE PRISONER	1197,10
+gl_prison1.gat,0,0,0	monster	WHISPER	1179,5
+gl_prison1.gat,0,0,0	monster	CRAMP	1209,10
+gl_step.gat,0,0,0	monster	WRAITH	1192,5
+gl_step.gat,0,0,0	monster	MIMIC	1191,10
+gl_step.gat,0,0,0	monster	NIGHTMARE	1061,5
+gl_step.gat,0,0,0	monster	WHISPER	1179,10
+gl_knt01.gat,0,0,0	monster	RAYDRIC	1163,5
+gl_knt01.gat,0,0,0	monster	WHISPER BOSS	1186,1
+gl_knt01.gat,0,0,0	monster	RIDEWORD	1195,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	MANDRAGORA	1020,1
+gl_knt01.gat,0,0,0	monster	BRILIGHT	1211,10
+gl_knt01.gat,0,0,0	monster	FLORA	1118,1
+gl_knt01.gat,0,0,0	monster	RIDEWORD	1195,10
+gl_knt01.gat,0,0,0	monster	RIDEWORD	1195,10
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	BLACK MUSHROOM	1084,1
+gl_knt01.gat,0,0,0	monster	EVIL DRUID	1117,1
+gl_knt01.gat,0,0,0	monster	EVIL DRUID	1117,1
+gl_knt01.gat,0,0,0	monster	EVIL DRUID	1117,1
+gl_knt01.gat,0,0,0	monster	EVIL DRUID	1117,1
+gl_knt01.gat,0,0,0	monster	EVIL DRUID	1117,1
+gl_knt02.gat,0,0,0	monster	RAYDRIC	1163,5
+gl_knt02.gat,0,0,0	monster	WHISPER	1179,5
+gl_knt02.gat,0,0,0	monster	JOKER	1131,10
+gl_knt02.gat,0,0,0	monster	KNIGHT OF ABYSS	1219,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_knt02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_cas01.gat,0,0,0	monster	JOKER	1131,5
+gl_cas01.gat,0,0,0	monster	BAPHOMET_	1101,5
+gl_cas01.gat,0,0,0	monster	RIDEWORD	1195,5
+gl_cas01.gat,0,0,0	monster	TIRFING	1204,1
+gl_in01.gat,0,0,0	monster	MARIONETTE	1143,10
+gl_in01.gat,0,0,0	monster	RIDEWORD	1195,5
+gl_in01.gat,0,0,0	monster	WANDER MAN	1208,1
+gl_cas02.gat,0,0,0	monster	WANDER MAN	1208,5
+gl_cas02.gat,0,0,0	monster	RAYDRIC	1163,10
+gl_cas02.gat,0,0,0	monster	NIGHTMARE	1061,10
+gl_cas02.gat,0,0,0	monster	WHISPER	1179,10
+gl_cas02.gat,0,0,0	monster	ARCHER SKELETON	1016,10
+gl_cas02.gat,0,0,0	monster	MYSTELTAINN	1203,1
+gl_cas02.gat,0,0,0	monster	WHISPER 	1185,1
+gl_cas02.gat,0,0,0	monster	WHISPER 	1185,1
+gl_cas02.gat,0,0,0	monster	BAPHOMET	1039,1
+gl_cas02.gat,0,0,0	monster	RIDEWORD	1195,4
+gl_cas02.gat,0,0,0	monster	DEVIRUCHI	1109,4
+gl_cas02.gat,0,0,0	monster	KNIGHT OF ABYSS	1219,1
+gl_cas02.gat,0,0,0	monster	KNIGHT OF ABYSS	1219,1
+gl_cas02.gat,0,0,0	monster	RIDEWORD	1195,15
+gl_cas02.gat,0,0,0	monster	MARIONETTE	1143,8
+gl_cas02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_cas02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_cas02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_cas02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_cas02.gat,0,0,0	monster	KHALITZBURG	1132,1
+gl_cas02.gat,0,0,0	monster	KNIGHT OF ABYSS	1219,1
+gl_cas02.gat,0,0,0	monster	KNIGHT OF ABYSS	1219,1
+gl_cas02.gat,0,0,0	monster	MIMIC	1191,1
+gl_cas02.gat,0,0,0	monster	MIMIC	1191,1
+gl_cas02.gat,0,0,0	monster	MYSTELTAINN	1203,1
+gl_sew01.gat,0,0,0	monster	ANOLIAN	1206,5
+gl_sew01.gat,0,0,0	monster	CRAMP	1209,5
+gl_sew01.gat,0,0,0	monster	DRAINLIAR	1111,10
+gl_sew02.gat,0,0,0	monster	ANOLIAN	1206,5
+gl_sew02.gat,0,0,0	monster	CRAMP	1209,5
+gl_sew02.gat,0,0,0	monster	DRAINLIAR	1111,10
+gl_sew03.gat,0,0,0	monster	STING	1207,5
+gl_sew03.gat,0,0,0	monster	CRAMP	1209,5
+gl_sew03.gat,0,0,0	monster	DRAINLIAR	1111,10
+gl_sew04.gat,0,0,0	monster	STING	1207,5
+gl_sew04.gat,0,0,0	monster	CRAMP	1209,5
+gl_sew04.gat,0,0,0	monster	DRAINLIAR	1111,10
+gl_dun01.gat,0,0,0	monster	STING	1207,5
+gl_dun01.gat,0,0,0	monster	ARCLOUSE	1194,140
+gl_dun02.gat,0,0,0	monster	ARCLOUSE	1194,160
+pvp_n_8-1.gat,0,0,0	monster	BIGFOOT	1060,2
+pvp_n_8-1.gat,0,0,0	monster	SIDE_WINDER	1037,2
+pvp_n_8-2.gat,0,0,0	monster	CRAMP	1209,4
+pvp_n_8-3.gat,0,0,0	monster	WHISPER BOSS	1186,2
+pvp_n_8-3.gat,0,0,0	monster	WHISPER	1179,3
+pvp_n_8-4.gat,0,0,0	monster	ZOMBIE	1015,4
+pvp_n_8-4.gat,0,0,0	monster	GHOUL	1036,3
+pvp_n_8-5.gat,0,0,0	monster	RAYDRIC	1163,2
+pvp_n_8-5.gat,0,0,0	monster	KHALITZBURG	1132,1
+xmas.gat,0,0,0	monster	SASQUATCH	1243,1
+xmas_fild01.gat,0,0,0	monster	MARIN	1242,5
+xmas_fild01.gat,0,0,0	monster	PORING 	1062,5
+xmas_fild01.gat,0,0,0	monster	SASQUATCH	1243,15
+xmas_fild01.gat,0,0,0	monster	GARM	1252,1
+xmas_dun01.gat,0,0,0	monster	MARIN	1242,10
+xmas_dun01.gat,0,0,0	monster	GOBLINE_XMAS	1245,15
+xmas_dun01.gat,0,0,0	monster	COOKIE_XMAS	1246,15
+xmas_dun01.gat,0,0,0	monster	CRUISER	1248,10
+xmas_dun01.gat,0,0,0	monster	CHEPET	1250,1
+xmas_dun02.gat,0,0,0	monster	COOKIE_XMAS	1246,10
+xmas_dun02.gat,0,0,0	monster	CRUISER	1248,15
+xmas_dun02.gat,0,0,0	monster	MYSTCASE	1249,15
+xmas_dun02.gat,0,0,0	monster	GOBLINE_XMAS	1245,10
+xmas_dun02.gat,0,0,0	monster	KNIGHT OF WINDSTORM	1251,1
+gef_fild02.gat,0,0,0	monster	GOBLINE_XMAS	1245,5
+gef_fild11.gat,0,0,0	monster	GOBLINE_XMAS	1245,5
+gef_fild00.gat,0,0,0	monster	PORING 	1062,10
+gef_fild01.gat,0,0,0	monster	PORING 	1062,10
+gef_fild02.gat,0,0,0	monster	PORING 	1062,10
+gef_fild03.gat,0,0,0	monster	PORING 	1062,10
+gef_fild04.gat,0,0,0	monster	PORING 	1062,10
+gef_fild05.gat,0,0,0	monster	PORING 	1062,10
+gef_fild07.gat,0,0,0	monster	PORING 	1062,10
+gef_fild08.gat,0,0,0	monster	PORING 	1062,10
+gef_fild09.gat,0,0,0	monster	PORING 	1062,10
+gef_fild10.gat,0,0,0	monster	PORING 	1062,10
+gef_fild11.gat,0,0,0	monster	PORING 	1062,10
+glast_01.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_01.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_02.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_03.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_04.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_05.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_06.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_07.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_08.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_09.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_10.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_11.gat,0,0,0	monster	PORING 	1062,10
+mjolnir_12.gat,0,0,0	monster	PORING 	1062,10
+moc_fild01.gat,0,0,0	monster	PORING 	1062,10
+moc_fild02.gat,0,0,0	monster	PORING 	1062,10
+moc_fild03.gat,0,0,0	monster	PORING 	1062,10
+moc_fild04.gat,0,0,0	monster	PORING 	1062,10
+moc_fild05.gat,0,0,0	monster	PORING 	1062,10
+moc_fild06.gat,0,0,0	monster	PORING 	1062,10
+moc_fild07.gat,0,0,0	monster	PORING 	1062,10
+moc_fild08.gat,0,0,0	monster	PORING 	1062,10
+moc_fild09.gat,0,0,0	monster	PORING 	1062,10
+moc_fild10.gat,0,0,0	monster	PORING 	1062,10
+moc_fild11.gat,0,0,0	monster	PORING 	1062,10
+moc_fild12.gat,0,0,0	monster	PORING 	1062,10
+moc_fild13.gat,0,0,0	monster	PORING 	1062,10
+moc_fild14.gat,0,0,0	monster	PORING 	1062,10
+moc_fild15.gat,0,0,0	monster	PORING 	1062,10
+moc_fild16.gat,0,0,0	monster	PORING 	1062,10
+moc_fild17.gat,0,0,0	monster	PORING 	1062,10
+moc_fild18.gat,0,0,0	monster	PORING 	1062,10
+pay_fild01.gat,0,0,0	monster	PORING 	1062,10
+pay_fild02.gat,0,0,0	monster	PORING 	1062,10
+pay_fild03.gat,0,0,0	monster	PORING 	1062,10
+pay_fild04.gat,0,0,0	monster	PORING 	1062,10
+pay_fild05.gat,0,0,0	monster	PORING 	1062,10
+pay_fild06.gat,0,0,0	monster	PORING 	1062,10
+pay_fild07.gat,0,0,0	monster	PORING 	1062,10
+pay_fild08.gat,0,0,0	monster	PORING 	1062,10
+pay_fild09.gat,0,0,0	monster	PORING 	1062,10
+pay_fild10.gat,0,0,0	monster	PORING 	1062,10
+pay_fild11.gat,0,0,0	monster	PORING 	1062,10
+prt_fild00.gat,0,0,0	monster	PORING 	1062,10
+prt_fild01.gat,0,0,0	monster	PORING 	1062,10
+prt_fild02.gat,0,0,0	monster	PORING 	1062,10
+prt_fild03.gat,0,0,0	monster	PORING 	1062,10
+prt_fild04.gat,0,0,0	monster	PORING 	1062,10
+prt_fild05.gat,0,0,0	monster	PORING 	1062,10
+prt_fild06.gat,0,0,0	monster	PORING 	1062,10
+prt_fild07.gat,0,0,0	monster	PORING 	1062,10
+prt_fild08.gat,0,0,0	monster	PORING 	1062,10
+prt_fild09.gat,0,0,0	monster	PORING 	1062,10
+prt_fild10.gat,0,0,0	monster	PORING 	1062,10
+prt_fild11.gat,0,0,0	monster	PORING 	1062,10
+gef_fild00.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild01.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild02.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild03.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild04.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild05.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild07.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild08.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild09.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild10.gat,0,0,0	monster	ANTONIO	1247,1
+gef_fild11.gat,0,0,0	monster	ANTONIO	1247,1
+glast_01.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_01.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_02.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_03.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_04.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_05.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_06.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_07.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_08.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_09.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_10.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_11.gat,0,0,0	monster	ANTONIO	1247,1
+mjolnir_12.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild01.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild02.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild03.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild04.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild05.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild06.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild07.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild08.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild09.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild10.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild11.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild12.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild13.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild14.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild15.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild16.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild17.gat,0,0,0	monster	ANTONIO	1247,1
+moc_fild18.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild01.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild02.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild03.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild04.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild05.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild06.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild07.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild08.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild09.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild10.gat,0,0,0	monster	ANTONIO	1247,1
+pay_fild11.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild00.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild01.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild02.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild03.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild04.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild05.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild06.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild07.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild08.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild09.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild10.gat,0,0,0	monster	ANTONIO	1247,1
+prt_fild11.gat,0,0,0	monster	ANTONIO	1247,1

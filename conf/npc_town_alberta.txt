@@ -1,0 +1,79 @@
+//アルベルタ&沈没船NPC
+alberta.gat,53,39,0	script	商人	100,{
+	mes "[商人]";
+	mes "魔法都市ゲフェンには";
+	mes "魔法に耐性のある不思議な";
+	mes "防具を売ってると聞いたことがある。";
+	mes "それを大量に流通させる事が";
+	mes "出来たら俺は大金持ちに";
+	mes "なれるだろうなぁ。";
+	close;
+}
+
+alberta.gat,97,51,0	script	商人	84,{
+	mes "[商人]";
+	mes "この世界の噂の中には";
+	mes "いろんなものがあってな、";
+	mes "こんなことを聞いたことがあるかい？";
+	mes "モンスターたちの力を";
+	mes "魔法で封印している、カードって";
+	mes "もんがあるという…。";
+	next;
+	mes "[商人]";
+	mes "それを使うと強力な力を手に";
+	mes "入れる事が出来るらしい。";
+	mes "まぁ、噂に過ぎないだろうがな。";
+	close;
+}
+
+alberta_in.gat,20,183,0	script	青年	49,{
+	mes "[青年]";
+	mes "伝説の中で登場する「グングニル」";
+	mes "と言う武器は一度ターゲットに";
+	mes "決めた獲物は絶対に逃す事など";
+	mes "ないって！そんな物が本当に";
+	mes "あったらおもしろそうだなー。";
+	close;
+}
+
+alberta.gat,189,151,6	script	船員	100,{
+	mes "[船員]";
+	mes "はい、いらっしゃいませ！";
+	mes "どこに行かれますか？";
+	next;
+	menu "沈没した海賊船 -> 250 z",Lkai,"イズルード -> 500 z",Liz,"コモドファロス燈台 -> 600 z",Ltou,"やめる",Lyame;
+Lkai:
+	if(Zeny<250) goto Lfusoku;
+	set Zeny,Zeny-250;
+	warp "alb2trea",43,53;
+	end;
+Liz:
+	if(Zeny<500) goto Lfusoku;
+	set Zeny,Zeny-500;
+	warp "izlude",176,182;
+	end;
+Ltou:
+	if(Zeny<600) goto Lfusoku;
+	set Zeny,Zeny-600;
+	warp "cmd_fild07",82,121;
+	end;
+Lyame:
+	mes "[船員]";
+	mes "では、またー";
+	close;
+Lfusoku:
+	mes "[船員]";
+	mes "お客さん、お金足りないっす。";
+	close;
+}
+
+alb2trea.gat,39,50,6	script	船員	100,{
+	mes "[船員]";
+	mes "あ、お客様ーお帰りですか？";
+	menu "アルベルタへ帰る",Lbye,"やめる",Lyame;
+Lbye:
+	warp "alberta",192,169;
+	end;
+Lyame:
+	close;
+}

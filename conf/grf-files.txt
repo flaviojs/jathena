@@ -1,0 +1,3 @@
+data: C:\Gravity\RO\data.grf
+sdata: C:\Gravity\RO\sdata.grf
+adata: C:\Gravity\RO\adata.grf
