@@ -302,26 +302,101 @@ AthenaNPCScript
 
 ３．命令文及び関数及び定数ラベル
 	＊基本構文
-		if構文
+		C 言語の構文に準拠してます。分からなければ、C 言語の解説を読んでください。
 
-			if (<cond>) ....; [ [ else if(<cond>) ...; ]* else ...; ]
+		if - else if - else 構文
+			if( <cond> ) <cmd_1> [ [else if(<cond_n>) <cmd_n> ]* else <cmd_z>]
 
-			cond		条件(数値)
+			<conf>が真の時には、<cmd1> を実行して、if構文を抜けます。
+			次に "else if(<cond_n>)" があれば、それを先頭から順番に評価して、
+			それが真であれば<cmd_n>を実行して、if構文を抜けます。
+			最後に、"else" があれば、それを実行してif構文を抜けます。
 
-			cond が真の時、.... を実行します(C 言語と同じ仕様です)。
-			複数の構文を実行させたい場合は、それぞれを { , } でくくってまとめられます。
+			また、<cmd_n> は { , } を用いてブロックにすることができます。
 
-			if(<cond>) { ....; ....; } else { ....; ....; }
+			例；
+			// @input が0 の場合、ラベルHOGEに飛びます。
+			if(@input == 0) goto HOGE;
+
+			// @input が0 の場合、ラベルHOGEに飛び、それ以外の場合FUGAに飛びます。
+			if(@input == 0) goto HOGE; else goto FUGA; 
+
+			if(@input == 0)
+				mes "zero";
+			else if(@input == 1)
+				mes "one";
+			else if(@input == 2) {
+				mes "two";
+			} else {
+				mes "??unknown";
+				mes "0,1,2 のいずれかの値を入力してください。";
+			}
+
+			中かっこが無い複数のif の後にelseが続くと、else は else が無い
+			最後のif文と結びつきます。例えば、
+
+			if(@temp <= 1) if(@temp <= 0) mes "<= 0"; else mes "1"; else mes ">= 2";
+
+			という構文は、
+
+			if(@temp <= 1) { if(@temp <= 0) mes "<= 0"; else mes "1"; } else mes ">= 2";
+
+			と同じように処理されます。
+
+		for構文
+			for(<cmd_1>; <cond>; <cmd_2>) <cmd_3>
+
+			<cmd_1>を実行した後、<cond> が真である間、<cmd_3> を実行してから、
+			<cmd_2>を実行します。
+
+			for(set @i,0;@i < 5;set @i,@i+1) mes @i;
+
+			for(set @i,0;@i < 5;set @i,@i+1) {
+				mes @i;
+				next;
+			}
+
+		while構文
+			while( <cond> ) <cmd>
+
+			<cond>が真の間<cmd> を実行します。
+
+			set @temp,5;
+			while(@temp > 0) {
+				mes @temp;
+				set @temp,@temp-1;
+			}
 
 		switch構文
+			switch(<val_1>) { [case <val_n>: ....] [ default: ...] }
 
-			C 言語と同じ仕様(fall through)です。
+			<val> と同じ値を持つ"case <val_n>"の所に移動します。一致する値が無い時は、
+			default 構文がある場合はそこに飛び、無い場合はswitch 構文を抜けます。
 
-			switch(<cond>) {
-			default aaa(); break;
-			case 0: hoge(); // FALLTHRU
-			case 1: fuga(); break;
+			また、fall throughになっているので、switch 構文からは自動的に抜けません。
+			switch 構文を抜けるには、break; 命令を用います。
+
+			switch(@temp) {
+			default: mes("unknown FALLTHRU"); // "break" が無いので実行が継続される
+			case 0: mes("零"); break;
+			case 1: mes("壱"); break;
+			case 2: mes("弐 FALLTHRU"); // "break" が無いので実行が継続される
+			case 3: mes("参"); break;
+			case 4: mes("四"); break;
+			case 5: mes("伍"); break;
 			}
+
+		do - while 構文
+			do <cmd> while(<val>);
+
+			"<cmd> while(<val>) <cmd>;" ど同じ構文で、最初に<cmd> を実行します。
+			その後、<val> が真の間<cmd> を実行します。
+
+		break 命令
+			一番内側にある for , while , switch , do - while 構文を抜けます。
+
+		continue 命令
+			一番内側にある for , while , do - while 構文の次の繰り返し位置に移動します。
 
 	＊命令文
 		mes命令
@@ -1455,8 +1530,8 @@ AthenaNPCScript
 
 			stringN	文字列
 
-			メニューを表示し、ユーザーが選択した番号(1から始まります)を返す(menu 命令の関数版)。
-			また、選ばれたラベルの番号は変数@menuにも代入されます。
+			メニューを表示し、1から始まるユーザーが選択した番号を返します(menu 命令の関数版)。
+			また、選ばれたラベルの番号は変数@menuに代入されます。
 			(l15にも代入されますが、こちらは今後動作が保障されないのでl15は使用しないで下さい）
 
 	＊定数ラベル
