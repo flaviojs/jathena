@@ -38,6 +38,11 @@
 #define FD_SETSIZE 4096
 #endif	// __INTERIX
 
+#ifdef CYGWIN
+#undef FD_SETSIZE
+#define FD_SETSIZE 4096
+#endif
+
 // Struct declaration
 
 struct socket_data{

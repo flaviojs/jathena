@@ -21,8 +21,8 @@
 fd_set readfds;
 int fd_max;
 
-int rfifo_size = 32768;
-int wfifo_size = 32768;
+int rfifo_size = 65536;
+int wfifo_size = 65536;
 
 struct socket_data *session[FD_SETSIZE];
 

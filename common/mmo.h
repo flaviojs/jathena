@@ -6,8 +6,6 @@
 #ifdef CYGWIN
 // txtやlogなどの書き出すファイルの改行コード
 #define RETCODE	"\r\n"	// (CR/LF：Windows系)
-#undef FD_SETSIZE
-#define FD_SETSIZE 4096
 #else
 #define RETCODE "\n"	// (LF：Unix系）
 #endif
