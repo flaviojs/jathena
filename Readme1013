@@ -1,4 +1,17 @@
 --------------------
+//1043 by dusk
+・docフォルダ・confフォルダ内のhelp.txtに1042(TEILUさん)の説明追加
+	@itemidentifyの説明は７２行目の@itemresetの下に。
+
+・Valkyrie Realms 5 (右上)の旗の修正
+	Valkyrie Realms 5 (右上)の旗を見ると未取得状態コメントばっかり出ていたのを
+	ちゃんと確認できるように。
+	※ Valkyrie Realmsの各砦に戻る旗とは違います。
+	prtg_cas05.txt内のギルドダンジョンに入るレバー以外の
+	getcastledata "prtg_cas05.gat",1,@GIDp5;を
+	set @GIDp5,getcastledata("prtg_cas05.gat",1);に修正。
+
+--------------------
 //1042 by TEILU
 
 ・@healコマンドに何も渡さないと完全回復するように変更。
