@@ -22,6 +22,7 @@
 #include "atcommand.h"
 
 static char msg_table[200][1024];	/* Server message */
+static int gvg_flag=0;
 
 struct Atcommand_Config atcommand_config;
 
@@ -1220,7 +1221,30 @@ z [0`4]•ž‚ÌF
 			}
 			return 1;
 		}
-
+		if(strcmpi(command, "@gvgstart") == 0 && gm_level >= atcommand_config.gvgstart){
+			if(sscanf(message, "%s", command)) {
+				if(gvg_flag==1){
+					clif_displaymessage(fd,msg_table[73]);
+					return 1;
+				}
+				gvg_flag=1;
+				guild_gvg_init();
+				clif_displaymessage(fd,msg_table[72]);
+			}
+			return 1;
+		}
+		if(strcmpi(command, "@gvgend") == 0 && gm_level >= atcommand_config.gvgend){
+			if(sscanf(message, "%s", command)) {
+				if(gvg_flag==0){
+					clif_displaymessage(fd,msg_table[75]);
+					return 1;
+				}
+				gvg_flag=0;
+				guild_gvg_final();
+				clif_displaymessage(fd,msg_table[74]);
+			}
+			return 1;
+		}
 	}
 
 	return 0;
@@ -1343,6 +1367,8 @@ int atcommand_config_read(const char *cfgName)
 				{ "spiritball",&atcommand_config.spiritball },
 				{ "party",&atcommand_config.party },
 				{ "guild",&atcommand_config.guild },
+				{ "gvgstart",&atcommand_config.gvgstart },
+				{ "gvgend",&atcommand_config.gvgend },
 			};
 		
 			if(line[0] == '/' && line[1] == '/')

@@ -8,11 +8,13 @@
 #include "battle.h"
 #include "pc.h"
 #include "map.h"
+#include "mob.h"
 #include "intif.h"
 #include "clif.h"
 #include "socket.h"
 
 static struct dbt *guild_db;
+static struct dbt *castle_db;
 static struct dbt *guild_expcache_db;
 
 // ギルドのEXPキャッシュのフラッシュに関連する定数
@@ -35,21 +37,82 @@ int guild_checkskill(struct guild *g,int id){ return g->skill[id-10000].lv; }
 
 
 int guild_payexp_timer(int tid,unsigned int tick,int id,int data);
+int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data);
+
+
+static int guild_read_castledb(void)
+{
+	FILE *fp;
+	char line[1024];
+	int j,ln=0;
+	char *str[32],*p;
+	struct guild_castle *gc;
+	printf("debug: 1\n");
+	
+	if( (fp=fopen("db/castle_db.txt","r"))==NULL){
+		printf("can't read db/castle_db.txt\n");
+		return -1;
+	}
+
+	while(fgets(line,1020,fp)){
+		if(line[0]=='/' && line[1]=='/')
+			continue;
+		memset(str,0,sizeof(str));
+		gc=malloc(sizeof(struct guild_castle));
+		if(gc==NULL){
+			printf("guild: out of memory!\n");
+			exit(0);
+		}
+		for(j=0,p=line;j<5 && p;j++){
+			str[j]=p;
+			p=strchr(p,',');
+			if(p) *p++=0;
+		}
+
+		gc->castle_id=atoi(str[0]);
+
+		memcpy(gc->m_name,str[1],24);
+		memcpy(gc->c_name,str[2],24);
+
+		gc->emp_x=atoi(str[3]);
+		gc->emp_y=atoi(str[4]);
+
+		numdb_insert(castle_db,gc->castle_id,gc);
+
+		//占領ギルド問い合わせはGVG開始時に。
+//		intif_guild_castle_info(gc->castle_id);
+
+		ln++;
+	}
+	fclose(fp);
+	printf("read db/castle_db.txt done (count=%d)\n",ln);
+	return 0;
+}
 
 // 初期化
 void do_init_guild(void)
 {
 	guild_db=numdb_init();
+	castle_db=numdb_init();
 	guild_expcache_db=numdb_init();
 
+	guild_read_castledb();
+
+	add_timer_func_list(guild_gvg_eliminate_timer,"guild_gvg_eliminate_timer");
 	add_timer_func_list(guild_payexp_timer,"guild_payexp_timer");
 	add_timer_interval(gettick()+GUILD_PAYEXP_INVERVAL,guild_payexp_timer,0,0,GUILD_PAYEXP_INVERVAL);
 }
+
 
 // 検索
 struct guild *guild_search(int guild_id)
 {
 	return numdb_search(guild_db,guild_id);
+}
+
+struct guild_castle *guild_castle_search(int gcid)
+{
+	return numdb_search(castle_db,gcid);
 }
 
 // ログイン中のギルドメンバーの１人のsdを返す
@@ -1031,3 +1094,142 @@ int guild_break(struct map_session_data *sd,char *name)
 	return 0;
 }
 
+//-----------------------------
+//GvG
+//-----------------------------
+
+int guild_gvg_empelium_pos(int map,int type)
+{
+	int i,m;
+	struct guild_castle *gc;
+	for(i=0;i<MAX_GUILDCASTLE;i++){
+		gc=guild_castle_search(i);
+		if(gc==NULL){
+			continue;
+		}
+		if(!(m=map_mapname2mapid(gc->m_name))){
+			continue;
+		}
+		if(m==map && type==1){
+			return gc->emp_x;
+		}
+		if(m==map && type==2){
+			return gc->emp_y;
+		}
+	}
+	return -1;
+}
+
+int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data)
+{
+	int x,y;
+	x=guild_gvg_empelium_pos(id,1);
+	y=guild_gvg_empelium_pos(id,2);
+	guild_gvg_eliminate(id);
+	mob_once_spawn(NULL,map[id].name,x,y,"エンペリウム",1288,1,"");//もう一度エンペ出す
+	return 0;
+}
+
+int guild_gvg_eliminate_sub(struct block_list *bl,va_list ap)
+{
+	struct map_session_data *sd=(struct map_session_data*)bl;
+	pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,3);
+	return 0;
+}
+
+int guild_gvg_eliminate(int m)
+{
+	map_foreachinarea(guild_gvg_eliminate_sub,m,0,0,map[m].xs-1,map[m].ys-1,BL_PC);
+	return 0;
+}
+
+int guild_gvg_init(void)
+{
+	int i,m;
+	struct guild_castle *gc;
+	for(i=0;i<MAX_GUILDCASTLE;i++){
+		gc=guild_castle_search(i);
+		if(gc==NULL){
+			printf("debug:err\n");
+			continue;
+		}
+		if(!(m=map_mapname2mapid(gc->m_name))){
+			printf("debug:err2\n");
+			continue;
+		}
+		intif_guild_castle_info(gc->castle_id);
+		guild_gvg_eliminate(m);
+		mob_once_spawn(NULL,gc->m_name,gc->emp_x,gc->emp_y,"エンペリウム",1288,1,"");
+		map[m].flag.gvg=1;
+	}
+	return 0;
+}
+int guild_gvg_final_sub(struct block_list *bl,va_list ap)
+{
+	struct mob_data *md=(struct mob_data*)bl;
+	mob_delete(md);
+	return 0;
+}
+int guild_gvg_final(void)
+{
+	int i,m;
+	struct guild_castle *gc;
+	for(i=0;i<MAX_GUILDCASTLE;i++){
+		gc=guild_castle_search(i);
+		if(gc==NULL){
+			continue;
+		}
+		if(!(m=map_mapname2mapid(gc->m_name))){
+			continue;
+		}
+		guild_gvg_eliminate(m);
+		map_foreachinarea(guild_gvg_final_sub,m,0,0,map[m].xs-1,map[m].ys-1,BL_MOB);
+		map[m].flag.gvg=0;
+	}
+	return 0;
+}
+
+int guild_gvg_break_empelium(struct mob_data *md)
+{
+	int i;
+	struct guild_castle *gc=NULL;
+	struct guild *g=NULL;
+	struct map_session_data *sd=NULL;
+	struct block_list *bl=NULL;
+
+	char mes1[] = "エンペリウムが破壊されました";
+	char mes2[1024];
+	char mes2_1[] = "砦 [";
+	char mes2_2[] = "]を [";
+	char mes2_3[] = "] ギルドが占領しました";
+
+	for(i=0;i<MAX_GUILDCASTLE;i++){
+		if( (gc=guild_castle_search(i)) != NULL ){
+			if(strcmp(map[md->bl.m].name,gc->m_name)==0){//Mapnameで砦を判断
+				if((bl=map_id2bl(md->attacked_id)) == NULL){
+					printf("gvg : error! null last empelium attacker!\n");
+					return 0;
+				}
+				sd=(struct map_session_data*)bl;
+				g=guild_search(sd->status.guild_id);
+				if(g == NULL){
+					printf("gvg : error! last empelium attacker doesn't belong any guild!\n");
+					return 0;
+				}
+				strcat(mes2,mes2_1);
+				strcat(mes2,gc->c_name);
+				strcat(mes2,mes2_2);
+				strcat(mes2,g->name);
+				strcat(mes2,mes2_3);
+				clif_GMmessage(bl,mes2,strlen(mes2)+1,0x00);//全MAPに陥落告知
+				clif_GMmessage(bl,mes1,strlen(mes1)+1,0x11);//エンペリウム破壊告知は該当MAPのみ
+				g->castle_id = gc->castle_id;
+				gc->guild_id = sd->status.guild_id;
+				intif_guild_castle_change(gc->castle_id,gc->guild_id);//占領ギルド変更通知
+				add_timer(gettick()+battle_config.gvg_eliminate_time,guild_gvg_eliminate_timer,sd->bl.m,0);
+				return 0;
+			}
+		}
+	}
+	return 0;
+}

@@ -3605,6 +3605,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.gvg_misc_damage_rate = 100;
 	battle_config.gvg_invincible_time = 10000;
 	battle_config.gvg_continuous_attack = 0;
+	battle_config.gvg_eliminate_time = 5000;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -3716,6 +3717,7 @@ int battle_config_read(const char *cfgName)
 			{ "gvg_misc_attack_damage_rate" ,&battle_config.gvg_misc_damage_rate },
 			{ "gvg_invincible_time" ,&battle_config.gvg_invincible_time },
 			{ "gvg_continuous_attack" ,&battle_config.gvg_continuous_attack },
+			{ "gvg_eliminate_time" ,&battle_config.gvg_eliminate_time },
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

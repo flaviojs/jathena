@@ -1,4 +1,55 @@
 --------------------
+//0777 by ぴざまん
+
+・ギルド攻城戦仮実装
+　・基本的な部分だけしか実装してない上、いくつかの点で本鯖と相違があります。
+　・攻城戦開始と終了は@コマンドで行います
+	@gvgstart : 攻城戦開始
+	@gvgend : 攻城戦終了
+　・battle_athena.confに項目追加。
+	(char/)
+	int_guild.c
+		inter_guild_init()、inter_guild_readdb()、inter_guild_save() 修正。
+		inter_castle_save_sub()、mapif_guild_castle_info() 追加。
+		mapif_guild_change_castle()、mapif_parse_GuildCastleInfo() 追加。
+		mapif_parse_GuildChangeCastle() 追加。
+	inter.c
+		inter_config_read() 修正。
+		inter_send_packet_length[]、inter_recv_packet_length[] 修正。
+	int_guild.h 修正。
+	(map/)
+	atcommand.c
+		atcommand()、atcommand_config_read() 修正。
+	battle.c
+		battle_config_read() 修正。
+	guild.c
+		guild_castle_search()、guild_read_castledb()追加。
+		do_init_guild() 修正。
+		guild_gvg_init()、guild_gvg_final()、guild_gvg_final_sub() 追加。
+		guild_gvg_eliminate()、guild_gvg_eliminate_sub() 追加。
+		guild_gvg_eliminate_timer()、guild_gvg_empelium_pos() 追加。
+		guild_gvg_break_empelium() 追加。
+	intif.c
+		intif_parse()、packet_len_table[] 修正。
+		intif_parse_GuildCastleInfo()、intif_parse_GuildCastleChange() 追加。
+		intif_guild_castle_info()、intif_guild_castle_change() 追加。
+	mob.c
+		mob_damage() 修正。
+	atcommand.h 修正。
+	battle.h 修正。
+	guild.h 修正。
+	intif.h 修正。
+	mob.h 修正。
+	(common/)
+	mmo.h 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	inter_athena.conf 修正。
+	msg_athena.conf 修正。
+	atcommand_athena.conf 修正。
+	(db/)
+	castle_db.txt 追加。
+--------------------
 //0776 by 死神
 
 ・NPCスキル孵化実装。(mob_skill_db.txtのval1を使います。)

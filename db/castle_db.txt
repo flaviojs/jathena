@@ -1,0 +1,22 @@
+//ギルド城テーブル by sakage,shuto
+//<castle_id>,<map_name>,<castle_name>,<emp_x>,<emp_y>
+0,prtg_cas01.gat,Valkyrie Realms 1,197,197
+1,prtg_cas02.gat,Valkyrie Realms 2,158,174
+2,prtg_cas03.gat,Valkyrie Realms 3,17,221
+3,prtg_cas04.gat,Valkyrie Realms 4,292,14
+4,prtg_cas05.gat,Valkyrie Realms 5,266,266
+5,payg_cas01.gat,Chung-Rim Guild 1,139,139
+6,payg_cas02.gat,Chung-Rim Guild 2,39,25
+7,payg_cas03.gat,Chung-Rim Guild 3,269,265
+8,payg_cas04.gat,Chung-Rim Guild 4,271,29
+9,payg_cas05.gat,Chung-Rim Guild 5,30,30
+10,aldeg_cas01.gat,Luina Guild 1,216,24
+11,aldeg_cas02.gat,Luina Guild 2,214,24
+12,aldeg_cas03.gat,Luina Guild 3,206,32
+13,aldeg_cas04.gat,Luina Guild 4,36,218
+14,aldeg_cas05.gat,Luina Guild 5,28,102
+15,gefg_cas01.gat,Britoniah Guild 1,198,182
+16,gefg_cas02.gat,Britoniah Guild 2,176,178
+17,gefg_cas03.gat,Britoniah Guild 3,245,167
+18,gefg_cas04.gat,Britoniah Guild 4,174,178
+19,gefg_cas05.gat,Britoniah Guild 5,194,184

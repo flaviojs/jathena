@@ -33,7 +33,7 @@ static const int packet_len_table[]={
 	-1, 7, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	35,-1,11,15, 34,29, 7,-1,  0, 0, 0, 0,  0, 0,  0, 0,
 	10,-1,15, 0, 79,19, 7,-1,  0,-1,-1,-1, 14,67,186,-1,
-	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	 8, 8, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
@@ -436,8 +436,25 @@ int intif_guild_emblem(int guild_id,int len,const char *data)
 	WFIFOSET(inter_fd,len+12);
 	return 0;
 }
+//現在のギルド城占領ギルドを調べる
+int intif_guild_castle_info(int castle_id)
+{
+	WFIFOW(inter_fd,0)=0x3040;
+	
+	WFIFOW(inter_fd,2)=castle_id;
+	WFIFOSET(inter_fd,4);
+	return 0;
+}
 
-
+//ギルド城占領ギルド変更要求
+int intif_guild_castle_change(int castle_id,int guild_id)
+{
+	WFIFOW(inter_fd,0)=0x3041;
+	WFIFOW(inter_fd,2)=castle_id;
+	WFIFOL(inter_fd,4)=guild_id;
+	WFIFOSET(inter_fd,8);
+	return 0;
+}
 //-----------------------------------------------------------------
 // inter serverから受信
 
@@ -757,7 +774,29 @@ int intif_parse_DeletePetOk(int fd)
 
 	return 0;
 }
+int intif_parse_GuildCastleInfo(int fd)
+{
+	int c_id=RFIFOW(fd,2);
+	int g_id=RFIFOL(fd,4);
+	struct guild_castle *gc=guild_castle_search(c_id);
+	if(gc==NULL){
+		return 0;
+	}
+	gc->guild_id = g_id;
+	return 0;
+}
 
+int intif_parse_GuildCastleChange(int fd)
+{
+	int c_id=RFIFOW(fd,2);
+	int g_id=RFIFOL(fd,4);
+	struct guild_castle *gc=guild_castle_search(c_id);
+	if(gc==NULL){
+		return 0;
+	}
+	gc->guild_id = g_id;
+	return 0;
+}
 //-----------------------------------------------------------------
 // inter serverからの通信
 // エラーがあれば0(false)を返すこと
@@ -813,6 +852,8 @@ int intif_parse(int fd)
 	case 0x383d:	intif_parse_GuildAlliance(fd); break;
 	case 0x383e:	intif_parse_GuildNotice(fd); break;
 	case 0x383f:	intif_parse_GuildEmblem(fd); break;
+	case 0x3840:	intif_parse_GuildCastleInfo(fd); break;
+	case 0x3841:	intif_parse_GuildCastleChange(fd); break;
 	case 0x3880:	intif_parse_CreatePet(fd); break;
 	case 0x3881:	intif_parse_RecvPetData(fd); break;
 	case 0x3882:	intif_parse_SavePetOk(fd); break;

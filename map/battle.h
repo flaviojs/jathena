@@ -213,6 +213,7 @@ extern struct Battle_Config {
 	int gvg_misc_damage_rate;
 	int gvg_invincible_time;
 	int gvg_continuous_attack;
+	int gvg_eliminate_time;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

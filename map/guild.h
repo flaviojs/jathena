@@ -3,6 +3,7 @@
 
 
 struct map_session_data;
+struct mob_data;
 struct guild;
 struct guild_member;
 struct guild_position;
@@ -16,6 +17,7 @@ int guild_checkskill(struct guild *g,int id);
 
 void do_init_guild(void);
 struct guild *guild_search(int guild_id);
+struct guild_castle *guild_castle_search(int gcid);
 
 struct map_session_data *guild_getavailablesd(struct guild *g);
 int guild_getindex(struct guild *g,int account_id,int char_id);
@@ -61,5 +63,11 @@ int guild_recv_message(int guild_id,int account_id,char *mes,int len);
 int guild_skillupack(int guild_id,int skill_num,int account_id);
 int guild_break(struct map_session_data *sd,char *name);
 int guild_broken(int guild_id,int flag);
+
+int guild_gvg_eliminate(int m);
+int guild_gvg_init(void);
+int guild_gvg_final(void);
+int guild_gvg_break_empelium(struct mob_data *md);
+
 
 #endif

@@ -25,6 +25,7 @@
 #define MAX_GUILDEXPLUSION 32
 #define MAX_GUILDALLIANCE 16
 #define MAX_GUILDSKILL	8
+#define MAX_GUILDCASTLE 20
 
 #define GRF_PATH_FILENAME "conf/grf-files.txt"
 
@@ -165,6 +166,8 @@ struct guild {
 struct guild_castle {
 	int castle_id;
 	int guild_id;
+	int emp_x,emp_y;	//エンペリウムの座標
+	char m_name[24],c_name[24];
 };
 
 enum {

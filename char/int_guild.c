@@ -10,8 +10,12 @@
 #include <stdlib.h>
 
 char guild_txt[1024]="guild.txt";
+char castle_txt[1024]="castle.txt";
+
 
 static struct dbt *guild_db;
+static struct dbt *castle_db;
+
 static int guild_newid=10000;
 
 static int guild_exp[100];
@@ -236,7 +240,7 @@ int inter_guildcastle_tostr(char *str,struct guild_castle *gc)
 //	int i,c;
 	int len;
 	
-	len=sprintf(str,"%d,%d\t",
+	len=sprintf(str,"%d,%d",
 		gc->castle_id,gc->guild_id);
 	return 0;
 }
@@ -259,7 +263,7 @@ int inter_guild_readdb()
 {
 	int i;
 	FILE *fp;
-	char line[256];
+	char line[1024];
 
 	fp=fopen("db/exp_guild.txt","r");
 	if(fp==NULL){
@@ -273,6 +277,7 @@ int inter_guild_readdb()
 		guild_exp[i]=atoi(line);
 		i++;
 	}
+	fclose(fp);
 
 	return 0;
 }
@@ -283,12 +288,14 @@ int inter_guild_init()
 {
 	char line[16384];
 	struct guild *g;
+	struct guild_castle *gc;
 	FILE *fp;
 	int c=0;
 	
 	inter_guild_readdb();
 	
 	guild_db=numdb_init();
+	castle_db=numdb_init();
 	
 	if( (fp=fopen(guild_txt,"r"))==NULL )
 		return 1;
@@ -311,6 +318,22 @@ int inter_guild_init()
 	}
 	fclose(fp);
 //	printf("int_guild: %s read done (%d guilds)\n",guild_txt,c);
+	if( (fp=fopen(castle_txt,"r"))==NULL )
+		return 1;
+	while(fgets(line,sizeof(line),fp)){
+		gc=malloc(sizeof(struct guild_castle));
+		if(gc==NULL){
+			printf("int_guild: out of memory!\n");
+			exit(0);
+		}
+		if(inter_guildcastle_fromstr(line,gc)==0){
+			numdb_insert(castle_db,gc->castle_id,gc);
+		}else{
+			printf("int_guild: broken data [%s] line %d\n",castle_txt,c);
+		}
+	}
+	fclose(fp);
+
 	return 0;
 }
 
@@ -324,6 +347,18 @@ int inter_guild_save_sub(void *key,void *data,va_list ap)
 	fprintf(fp,"%s" RETCODE,line);
 	return 0;
 }
+
+// ギルド城データのセーブ用
+int inter_castle_save_sub(void *key,void *data,va_list ap)
+{
+	char line[16384];
+	FILE *fp;
+	inter_guildcastle_tostr(line,(struct guild_castle *)data);
+	fp=va_arg(ap,FILE *);
+	fprintf(fp,"%s" RETCODE,line);
+	return 0;
+}
+
 // ギルドデータのセーブ
 int inter_guild_save()
 {
@@ -335,6 +370,14 @@ int inter_guild_save()
 	numdb_foreach(guild_db,inter_guild_save_sub,fp);
 	fclose(fp);
 //	printf("int_guild: %s saved.\n",guild_txt);
+
+	if( (fp=fopen(castle_txt,"w"))==NULL ){
+		printf("int_guild: cant write [%s] !!! data is lost !!!\n",castle_txt);
+		return 1;
+	}
+	numdb_foreach(castle_db,inter_castle_save_sub,fp);
+	fclose(fp);
+
 	return 0;
 }
 
@@ -666,6 +709,25 @@ int mapif_guild_emblem(struct guild *g)
 	return 0;
 }
 
+int mapif_guild_castle_info(int castle_id,int guild_id)
+{
+	unsigned char buf[16];
+	WBUFW(buf, 0)=0x3840;
+	WBUFW(buf, 2)=castle_id;
+	WBUFL(buf, 4)=guild_id;
+	mapif_sendall(buf,8);
+	return 0;
+}
+
+int mapif_guild_change_castle(int castle_id,int guild_id)
+{
+	unsigned char buf[16];
+	WBUFW(buf, 0)=0x3841;
+	WBUFW(buf, 2)=castle_id;
+	WBUFL(buf, 4)=guild_id;
+	mapif_sendall(buf,8);
+	return 0;
+}
 //-------------------------------------------------------------------
 // map serverからの通信
 
@@ -1016,6 +1078,24 @@ int mapif_parse_GuildEmblem(int fd,int len,int guild_id,int dummy,const char *da
 	g->emblem_id++;
 	return mapif_guild_emblem(g);
 }
+int mapif_parse_GuildCastleInfo(int fd,int castle_id)
+{
+	struct guild_castle *gc=numdb_search(castle_db,castle_id);
+	if(gc==NULL){
+		return mapif_guild_castle_info(castle_id,0);
+	}
+	return mapif_guild_castle_info(gc->castle_id,gc->guild_id);
+}
+int mapif_parse_GuildChangeCastle(int fd,int castle_id,int guild_id)
+{
+	struct guild_castle *gc=numdb_search(castle_db,castle_id);
+	if(gc==NULL){
+		return mapif_guild_change_castle(castle_id,guild_id);
+	}
+	gc->guild_id = guild_id;
+	inter_guild_save();
+	return mapif_guild_change_castle(gc->castle_id,gc->guild_id);
+}
 // ギルドチェック要求
 int mapif_parse_GuildCheck(int fd,int guild_id,int account_id,int char_id)
 {
@@ -1045,6 +1125,9 @@ int inter_guild_parse_frommap(int fd)
 	case 0x303D: mapif_parse_GuildAlliance(fd,RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10),RFIFOL(fd,14),RFIFOB(fd,18)); break;
 	case 0x303E: mapif_parse_GuildNotice(fd,RFIFOL(fd,2),RFIFOP(fd,6),RFIFOP(fd,66)); break;
 	case 0x303F: mapif_parse_GuildEmblem(fd,RFIFOW(fd,2)-12,RFIFOL(fd,4),RFIFOL(fd,8),RFIFOP(fd,12)); break;
+	case 0x3040: mapif_parse_GuildCastleInfo(fd,RFIFOW(fd,2)); break;
+	case 0x3041: mapif_parse_GuildChangeCastle(fd,RFIFOW(fd,2),RFIFOL(fd,4)); break;
+
 	default:
 		return 0;
 	}
