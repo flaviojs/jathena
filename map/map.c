@@ -1168,7 +1168,7 @@ static int map_readmap(int m,char *fn)
 	if(gat==NULL)
 		return -1;
 
-	printf("\rmap reading [%d/%d]",m,map_num);
+	printf("\rmap reading [%d/%d] %-20s  ",m,map_num,fn);
 	fflush(stdout);
 
 	map[m].m=m;
@@ -1258,7 +1258,7 @@ int map_readallmap(void)
 		map_readmap(i,fn);
 	}
 	free(waterlist);
-	printf("\rmap read done. (%d map)    \n",map_num);
+	printf("\rmap read done. (%d map) %24s\n",map_num,"");
 	return 0;
 }
 

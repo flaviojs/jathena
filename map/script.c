@@ -54,7 +54,7 @@ int str_hash[16];
 
 static struct dbt *mapreg_db=NULL;
 static struct dbt *mapregstr_db=NULL;
-static int mapreg_dirty=0;
+static int mapreg_dirty=-1;
 char mapreg_txt[256]="save/mapreg.txt";
 #define MAPREG_AUTOSAVE_INTERVAL	(10*1000)
 
@@ -83,6 +83,7 @@ int buildin_jobchange(struct script_state *st);
 int buildin_input(struct script_state *st);
 int buildin_setlook(struct script_state *st);
 int buildin_set(struct script_state *st);
+int buildin_getelementofarray(struct script_state *st);
 int buildin_if(struct script_state *st);
 int buildin_getitem(struct script_state *st);
 int buildin_getitem2(struct script_state *st);
@@ -175,8 +176,8 @@ int buildin_failedremovecards(struct script_state *st);
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
 
-int mapreg_setreg(const char *name,int val);
-int mapreg_setregstr(const char *name,const char *str);
+int mapreg_setreg(int num,int val);
+int mapreg_setregstr(int num,const char *str);
 
 struct {
 	int (*func)();
@@ -194,6 +195,7 @@ struct {
 	{buildin_areawarp,"areawarp","siiiisii"},
 	{buildin_setlook,"setlook","ii"},
 	{buildin_set,"set","ii"},
+	{buildin_getelementofarray,"getelementofarray","ii"},
 	{buildin_if,"if","igi"},
 	{buildin_getitem,"getitem","ii"},
 	{buildin_getitem2,"getitem2","iiiiiiiii"},
@@ -289,7 +291,8 @@ struct {
 	{NULL,NULL,NULL}
 };
 enum {
-	C_NOP,C_POS,C_INT,C_PARAM,C_FUNC,C_STR,C_CONSTSTR,C_ARG,C_NAME,C_EOL,
+	C_NOP,C_POS,C_INT,C_PARAM,C_FUNC,C_STR,C_CONSTSTR,C_ARG,
+	C_NAME,C_EOL,
 
 	C_LOR,C_LAND,C_LE,C_LT,C_GE,C_GT,C_EQ,C_NE,   //operator
 	C_XOR,C_OR,C_AND,C_ADD,C_SUB,C_MUL,C_DIV,C_MOD,C_NEG,C_LNOT,C_NOT
@@ -627,17 +630,31 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 		add_scriptb(0);
 		p++;	//'"'
 	} else {
-		int c;
+		int c,l;
+		char *p2;
 		// label , register , function etc
 		if(skip_word(p)==p){
 			disp_error_message("unexpected charactor",p);
 			exit(1);
 		}
-		c=*skip_word(p);
-		*skip_word(p)=0;
-		add_scriptl(add_str(p));
-		*skip_word(p)=c;
-		p=skip_word(p);
+		p2=skip_word(p);
+		c=*p2;	*p2=0;	l=add_str(p);	*p2=c;	p=p2;	// 名前をadd_strする
+		
+		if(c=='['){
+			// array(name[i] => getelementofarray(name,i) )
+			add_scriptl(search_str("getelementofarray"));
+			add_scriptc(C_ARG);
+			add_scriptl(l);
+			p=parse_subexpr(p+1,-1);
+			p=skip_space(p);
+			if((*p++)!=']'){
+				disp_error_message("unmatch ']'",p);
+				exit(1);
+			}
+			add_scriptc(C_FUNC);
+		}else
+			add_scriptl(l);
+
 	}
 
 #ifdef DEBUG_FUNCIN
@@ -949,12 +966,13 @@ enum {STOP=1,END,RERUNLINE,GOTO};
  * 変数の読み取り
  *------------------------------------------
  */
+
 // 変数のデータ拾いのみ
 int get_val(struct script_state*st,struct script_data* data)
 {
 	struct map_session_data *sd;
 	if(data->type==C_NAME){
-		char *name=str_buf+str_data[data->u.num].str;
+		char *name=str_buf+str_data[data->u.num&0x00ffffff].str;
 		char prefix=*name;
 		char postfix=name[strlen(name)-1];
 		sd=map_id2sd(st->rid);
@@ -976,10 +994,10 @@ int get_val(struct script_state*st,struct script_data* data)
 		}else{
 		
 			data->type=C_INT;
-			if(str_data[data->u.num].type==C_INT){
-				data->u.num = str_data[data->u.num].val;
-			}else if(str_data[data->u.num].type==C_PARAM){
-				data->u.num = pc_readparam(sd,str_data[data->u.num].val);
+			if(str_data[data->u.num&0x00ffffff].type==C_INT){
+				data->u.num = str_data[data->u.num&0x00ffffff].val;
+			}else if(str_data[data->u.num&0x00ffffff].type==C_PARAM){
+				data->u.num = pc_readparam(sd,str_data[data->u.num&0x00ffffff].val);
 			}else if(prefix=='@' || prefix=='l'){
 				data->u.num = pc_readreg(sd,data->u.num);
 			}else if(prefix=='$'){
@@ -1373,7 +1391,7 @@ int buildin_input(struct script_state *st)
 {
 	struct map_session_data *sd;
 	int num=(st->end>st->start+2)?st->stack->stack_data[st->start+2].u.num:0;
-	char *name=(st->end>st->start+2)?str_buf+str_data[num].str:"";
+	char *name=(st->end>st->start+2)?str_buf+str_data[num&0x00ffffff].str:"";
 	char prefix=*name;
 	char postfix=name[strlen(name)-1];
 
@@ -1386,7 +1404,7 @@ int buildin_input(struct script_state *st)
 				if(prefix=='@' || prefix=='l')
 					pc_setregstr(sd,num,sd->npc_str);
 				else if(prefix=='$')
-					mapreg_setregstr(name,sd->npc_str);
+					mapreg_setregstr(num,sd->npc_str);
 				else{
 					printf("buildin_input: illeagal scope string variable.\n");
 				}
@@ -1399,9 +1417,9 @@ int buildin_input(struct script_state *st)
 				if(prefix=='@' || prefix=='l')
 					pc_setreg(sd,num,sd->npc_amount);
 				else if(prefix=='$')
-					mapreg_setreg(name,sd->npc_amount);
+					mapreg_setreg(num,sd->npc_amount);
 				else if(prefix=='#'){
-					if( str_buf[str_data[num].str+1]=='#')
+					if( name[1]=='#')
 						pc_setaccountreg2(sd,name,sd->npc_amount);
 					else
 						pc_setaccountreg(sd,name,sd->npc_amount);
@@ -1455,9 +1473,14 @@ int buildin_set(struct script_state *st)
 {
 	struct map_session_data *sd;
 	int num=st->stack->stack_data[st->start+2].u.num;
-	char *name=str_buf+str_data[num].str;
+	char *name=str_buf+str_data[num&0x00ffffff].str;
 	char prefix=*name;
 	char postfix=name[strlen(name)-1];
+
+	if( st->stack->stack_data[st->start+2].type!=C_NAME ){
+		printf("script: buildin_set: not name\n");
+		return 0;
+	}
 
 	sd=map_id2sd(st->rid);
 	if( postfix=='$' ){
@@ -1466,21 +1489,21 @@ int buildin_set(struct script_state *st)
 		if( prefix=='@' || prefix=='l'){
 			pc_setregstr(sd,num,str);
 		}else if(prefix=='$') {
-			mapreg_setregstr(name,str);
+			mapreg_setregstr(num,str);
 		}else{
 			printf("script: buildin_set: illeagal scope string variable !");
 		}
 	}else{
 		// 数値
 		int val = conv_num(st,& (st->stack->stack_data[st->start+3]));
-		if(str_data[num].type==C_PARAM){
-			pc_setparam(sd,str_data[num].val,val);
+		if(str_data[num&0x00ffffff].type==C_PARAM){
+			pc_setparam(sd,str_data[num&0x00ffffff].val,val);
 		}else if(prefix=='@' || prefix=='l') {
 			pc_setreg(sd,num,val);
 		}else if(prefix=='$') {
-			mapreg_setreg(name,val);
+			mapreg_setreg(num,val);
 		}else if(prefix=='#') {
-			if( str_buf[str_data[num].str+1]=='#' )
+			if( name[1]=='#' )
 				pc_setaccountreg2(sd,name,val);	
 			else
 				pc_setaccountreg(sd,name,val);	
@@ -1489,6 +1512,27 @@ int buildin_set(struct script_state *st)
 		}
 	}
 
+	return 0;
+}
+/*==========================================
+ * 指定要素を表す値(キー)を所得する
+ *------------------------------------------
+ */
+int buildin_getelementofarray(struct script_state *st)
+{
+	if( st->stack->stack_data[st->start+2].type==C_NAME ){
+		int i=conv_num(st,& (st->stack->stack_data[st->start+3]));
+		if(i>127 || i<0){
+			printf("script: getelementofarray (operator[]): param2 illeagal number %d\n",i);
+			push_val(st->stack,C_INT,0);
+		}else{
+			push_val(st->stack,C_NAME,
+				(i<<24) | st->stack->stack_data[st->start+2].u.num );
+		}
+	}else{
+		printf("script: getelementofarray (operator[]): param1 not name !\n");
+		push_val(st->stack,C_INT,0);
+	}
 	return 0;
 }
 
@@ -3857,14 +3901,12 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
  * マップ変数の変更
  *------------------------------------------
  */
-int mapreg_setreg(const char *name,int val)
+int mapreg_setreg(int num,int val)
 {
-	int i=add_str(name);
-	
 	if(val!=0)
-		numdb_insert(mapreg_db,i,val);
+		numdb_insert(mapreg_db,num,val);
 	else
-		numdb_erase(mapreg_db,i);
+		numdb_erase(mapreg_db,num);
 	
 	mapreg_dirty=1;
 	return 0;
@@ -3873,16 +3915,15 @@ int mapreg_setreg(const char *name,int val)
  * 文字列型マップ変数の変更
  *------------------------------------------
  */
-int mapreg_setregstr(const char *name,const char *str)
+int mapreg_setregstr(int num,const char *str)
 {
 	char *p;
-	int i=add_str(name);
 	
-	if( (p=numdb_search(mapregstr_db,i))!=NULL )
+	if( (p=numdb_search(mapregstr_db,num))!=NULL )
 		free(p);
 		
 	if( str==NULL || *str==0 ){
-		numdb_erase(mapregstr_db,i);
+		numdb_erase(mapregstr_db,num);
 		mapreg_dirty=1;
 		return 0;
 	}
@@ -3891,7 +3932,7 @@ int mapreg_setregstr(const char *name,const char *str)
 		return 0;
 	}
 	strcpy(p,str);
-	numdb_insert(mapregstr_db,i,p);
+	numdb_insert(mapregstr_db,num,p);
 	mapreg_dirty=1;
 	return 0;
 }
@@ -3910,8 +3951,9 @@ static int script_load_mapreg()
 
 	while(fgets(line,sizeof(line),fp)){
 		char buf1[256],buf2[1024],*p;
-		int n,i,s;
-		if( sscanf(line,"%[^\t]\t%n",buf1,&n)!=1 )
+		int n,v,s,i;
+		if( sscanf(line,"%[^,],%d\t%n",buf1,&i,&n)!=2 &&
+			(i=0,sscanf(line,"%[^\t]\t%n",buf1,&n)!=1) )
 			continue;
 		if( buf1[strlen(buf1)-1]=='$' ){
 			if( sscanf(line+n,"%[^\n\r]",buf2)!=1 ){
@@ -3924,17 +3966,18 @@ static int script_load_mapreg()
 			}
 			strcpy(p,buf2);
 			s=add_str(buf1);
-			numdb_insert(mapregstr_db,s,p);
+			numdb_insert(mapregstr_db,(i<<24)|s,p);
 		}else{
-			if( sscanf(line+n,"%d",&i)!=1 ){
+			if( sscanf(line+n,"%d",&v)!=1 ){
 				printf("%s: %s broken data !\n",mapreg_txt,buf1);
 				continue;
 			}
 			s=add_str(buf1);
-			numdb_insert(mapreg_db,s,i);
+			numdb_insert(mapreg_db,(i<<24)|s,v);
 		}
 	}
 	fclose(fp);
+	mapreg_dirty=0;
 	return 0;
 }
 /*==========================================
@@ -3944,18 +3987,26 @@ static int script_load_mapreg()
 static int script_save_mapreg_intsub(void *key,void *data,va_list ap)
 {
 	FILE *fp=va_arg(ap,FILE*);
-	char *name=str_buf+str_data[(int)key].str;
+	int num=((int)key)&0x00ffffff, i=((int)key)>>24;
+	char *name=str_buf+str_data[num].str;
 	if( name[1]!='@' ){
-		fprintf(fp,"%s\t%d\n", name, (int)data);
+		if(i==0)
+			fprintf(fp,"%s\t%d\n", name, (int)data);
+		else
+			fprintf(fp,"%s,%d\t%d\n", name, i, (int)data);
 	}
 	return 0;
 }
 static int script_save_mapreg_strsub(void *key,void *data,va_list ap)
 {
 	FILE *fp=va_arg(ap,FILE*);
-	char *name=str_buf+str_data[(int)key].str;
+	int num=((int)key)&0x00ffffff, i=((int)key)>>24;
+	char *name=str_buf+str_data[num].str;
 	if( name[1]!='@' ){
-		fprintf(fp,"%s\t%s\n", name, (char *)data);
+		if(i==0)
+			fprintf(fp,"%s\t%s\n", name, (char *)data);
+		else
+			fprintf(fp,"%s,%d\t%s\n", name, i, (char *)data);
 	}
 	return 0;
 }
@@ -4036,7 +4087,8 @@ int script_config_read(char *cfgName)
  */
 int do_final_script()
 {
-	script_save_mapreg();
+	if(mapreg_dirty>=0)
+		script_save_mapreg();
 	return 0;
 }
 /*==========================================

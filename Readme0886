@@ -1,4 +1,29 @@
 --------------------
+//0902 by 胡蝶蘭
+
+・スクリプトが配列変数に対応。
+	・array[number]のように使います。数値型、文字列型両方使えます。
+	・使えるプレフィックスは @, $, $@ です。
+	  （一時的キャラクター変数、一時的/永続的マップサーバー変数）
+	・number==0は配列じゃない変数と値を共有します。
+	  （@hoge[0]と@hogeは同じ変数を表す）
+	・まだ仮実装段階なのでバグ報告よろしくお願いします。
+・マップサーバー変数の読込中にCtrl+Cをするとデータ破損の可能性がある問題を修正.
+・マップファイル読み込み画面がさびしいのでせめてファイル名を表示するように。
+
+	(conf/sample/)
+	npc_test_array.txt
+		配列変数テストスクリプト
+	(map/)
+	script.c
+		buildin_set(),buildin_input(),get_val(),
+		parse_simpleexpr()修正
+		buildin_getelementofarray()追加
+		do_final_script()修正など
+	map.c
+		map_readmap(),map_readallmap()修正
+
+--------------------
 //0901 by ぴざまん
 
 ・露店バグの修正
@@ -34,6 +59,7 @@
 	(db/)
 	abra_db.txt 追加。
 	skill_db.txt 修正。
+
 --------------------
 //0899 by 胡蝶蘭
 

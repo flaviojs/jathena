@@ -1,0 +1,13 @@
+// 配列のテスト
+prontera.gat,164,190,1	script	配列テスト	112,{
+	set @hoge[0],1;
+	set @hoge[1],5;
+	mes "hoge[2]を入力してください";
+	next;
+	input @hoge[2];
+	mes "hoge   => " + @hoge;
+	mes "hoge[0]=> " + @hoge[0];
+	mes "hoge[1]=> " + @hoge[1];
+	mes "hoge[2]=> " + @hoge[2];
+	close;
+}
