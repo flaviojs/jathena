@@ -1,4 +1,13 @@
 --------------------
+//0840 by Kalen
+
+・鬼イベント追加
+	conf/npc/npc_event_oni.txt
+
+・map_athena.conf修正(バレンタインコメントアウト。鬼追加)
+	conf/map_athena.conf
+
+--------------------
 //0839 by shuto
 
 ・コンロンNPC追加(カン ソンソンが抜けてた)
