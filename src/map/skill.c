@@ -735,11 +735,14 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 	else if(pd)
 		map_foreachinmovearea(clif_petoutsight,target->m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,dx,dy,BL_PC,pd);
 
-	if(moveblock) map_delblock(target);
-	target->x=nx;
-	target->y=ny;
-	if(su) clif_skill_setunit(su);
-	if(moveblock) map_addblock(target);
+	if(su){
+		skill_unit_move_unit_group(su->group,dx,dy);
+	}else{
+		if(moveblock) map_delblock(target);
+		target->x=nx;
+		target->y=ny;
+		if(moveblock) map_addblock(target);
+	}
 
 	if(sd) {	/* 画面内に入ってきたので表示 */
 		map_foreachinmovearea(clif_pcinsight,target->m,nx-AREA_SIZE,ny-AREA_SIZE,nx+AREA_SIZE,ny+AREA_SIZE,-dx,-dy,0,sd);
@@ -3162,7 +3165,12 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			}
 		}
 		break;
+	case BD_ENCORE:					/* アンコール */
+		if(sd)
+			skill_use_id(sd,src->id,sd->skillid_dance,sd->skilllv_dance);
+		break;
 	default:
+		printf("Unknown skill used:%d\n",skillid);
 		map_freeblock_unlock();
 		return 1;
 	}
@@ -4228,20 +4236,11 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		break;
 
 	case 0x8f:	/* ブラストマイン */
-	case 0x97:	/* フリージングトラップ */
-	case 0x98:	/* クレイモアートラップ */
-		map_foreachinarea(skill_trap_splash,src->bl.m
-					,src->bl.x-src->range,src->bl.y-src->range
-					,src->bl.x+src->range,src->bl.y+src->range
-					,0,&src->bl,tick);
-		sg->unit_id = 0x8c;
-		clif_changelook(&src->bl,LOOK_BASE,sg->unit_id);
-		sg->limit=DIFF_TICK(tick,sg->tick)+1500;
-		break;
-
+	case 0x94:	/* ショックウェーブトラップ */
 	case 0x95:	/* サンドマン */
 	case 0x96:	/* フラッシャー */
-	case 0x94:	/* ショックウェーブトラップ */
+	case 0x97:	/* フリージングトラップ */
+	case 0x98:	/* クレイモアートラップ */
 		map_foreachinarea(skill_trap_splash,src->bl.m
 					,src->bl.x-src->range,src->bl.y-src->range
 					,src->bl.x+src->range,src->bl.y+src->range
@@ -4452,14 +4451,13 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 	case 0x85:	/* ニューマ */
 	case 0x8e:	/* クァグマイア */
 		{
-			struct skill_unit *unit2;
 			struct status_change *sc_data=battle_get_sc_data(bl);
 			int type=
 				(sg->unit_id==0x85)?SC_PNEUMA:
 				((sg->unit_id==0x7e)?SC_SAFETYWALL:
 				 SC_QUAGMIRE);
 			if((type != SC_QUAGMIRE || bl->type != BL_MOB) &&
-				sc_data[type].timer!=-1 && (unit2=(struct skill_unit *)sc_data[type].val2)==src){
+				sc_data[type].timer!=-1 && ((struct skill_unit *)sc_data[type].val2)==src){
 				skill_status_change_end(bl,type,-1);
 			}
 		} break;
@@ -4476,10 +4474,9 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 	case 0x9b:	/* デリュージ */
 	case 0x9c:	/* バイオレントゲイル */
 		{
-			struct skill_unit *unit2;
 			struct status_change *sc_data=battle_get_sc_data(bl);
 			int type=SkillStatusChangeTable[sg->skill_id];
-			if(sc_data[type].timer!=-1 && (unit2=(struct skill_unit *)sc_data[type].val2)==src){
+			if(sc_data[type].timer!=-1 && ((struct skill_unit *)sc_data[type].val2)==src){
 				skill_status_change_end(bl,type,-1);
 			}
 		}
@@ -4504,10 +4501,9 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 	case 0xae:	/* 幸運のキス */
 	case 0xaf:	/* サービスフォーユー */
 		{
-			struct skill_unit *unit2;
 			struct status_change *sc_data=battle_get_sc_data(bl);
 			int type=SkillStatusChangeTable[sg->skill_id];
-			if(sc_data[type].timer!=-1 && (unit2=(struct skill_unit *)sc_data[type].val4)==src){
+			if(sc_data[type].timer!=-1 && ((struct skill_unit *)sc_data[type].val4)==src){
 				skill_status_change_end(bl,type,-1);
 			}
 		}
@@ -4838,6 +4834,8 @@ int skill_check_condition(struct map_session_data *sd,int type)
 	lv = sd->skilllv;
 	hp=skill_get_hp(skill, lv);	/* 消費HP */
 	sp=skill_get_sp(skill, lv);	/* 消費SP */
+	if((sd->skillid_old == BD_ENCORE) && skill==sd->skillid_dance)
+		sp=sp/2;	//アドリブ→アンコール時はSP消費が半分
 	hp_rate = (lv <= 0)? 0:skill_db[skill].hp_rate[lv-1];
 	sp_rate = (lv <= 0)? 0:skill_db[skill].sp_rate[lv-1];
 	zeny = skill_get_zeny(skill,lv);
@@ -4920,6 +4918,12 @@ int skill_check_condition(struct map_session_data *sd,int type)
 	case MO_EXTREMITYFIST:					// 阿修羅覇鳳拳
 		if((sd->sc_data[SC_COMBO].timer != -1 && (sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH || sd->sc_data[SC_COMBO].val1 == CH_CHAINCRUSH)) || sd->sc_data[SC_BLADESTOP].timer!=-1)
 			spiritball--;
+		break;
+	case BD_ADAPTATION:				/* アドリブ */
+		if(sd->sc_data[SC_DANCING].timer==-1){ //ダンス中のみ？
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
+		}
 		break;
 	}
 
@@ -5184,15 +5188,27 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 
 	if(skill_get_inf2(skill_num)&0x200 && sd->bl.id == target_id)
 		return 0;
+	//直前のスキルが何か覚える必要のあるスキル
+	switch(skill_num){
+	case SA_CASTCANCEL:
+		if(sd->skillid != skill_num){ //キャストキャンセル自体は覚えない
+			sd->skillid_old = sd->skillid;
+			sd->skilllv_old = sd->skilllv;
+			break;
+		}
+	case BD_ENCORE:					/* アンコール */
+		if(!sd->skillid_dance){ //前回使用した踊りがないとだめ
+			clif_skill_fail(sd,skill_num,0,0);
+			return 0;
+		}else{
+			sd->skillid_old = skill_num;
+		}
+		break;
+	}
 
 	sd->skillid = skill_num;
 	sd->skilllv = skill_lv;
 	if(!skill_check_condition(sd,0)) return 0;
-
-	if(skill_num == SA_CASTCANCEL) {
-		sd->skillid_old = sd->skillid;
-		sd->skilllv_old = sd->skilllv;
-	}
 
 	/* 射程と障害物チェック */
 	range = skill_get_range(skill_num,skill_lv);
@@ -7210,9 +7226,15 @@ struct skill_unit_group *skill_initunitgroup(struct block_list *src,
 	group->tick=gettick();
 	group->valstr=NULL;
 
-	if( skill_is_danceskill(skillid) )
+	if( skill_is_danceskill(skillid) ){
+		struct map_session_data *sd = NULL;
+		if(src->type==BL_PC){
+			sd=(struct map_session_data *)src;
+			sd->skillid_dance=skillid;
+			sd->skilllv_dance=skilllv;
+		}
 		skill_status_change_start(src,SC_DANCING,skillid,(int)group,0,0,1000*181,0);
-
+	}
 	return group;
 }
 
@@ -7548,6 +7570,34 @@ int skill_unit_move( struct block_list *bl,unsigned int tick,int range)
 		bl->m,bl->x-range,bl->y-range,bl->x+range,bl->y+range,BL_SKILL,
 		bl,tick );
 
+	return 0;
+}
+
+/*==========================================
+ * スキルユニット自体の移動時処理
+ * 引数はグループと移動量
+ *------------------------------------------
+ */
+int skill_unit_move_unit_group( struct skill_unit_group *group, int dx,int dy)
+{
+	if(group->unit_count<=0)
+		return 0;
+	if(group->unit!=NULL){
+		int i;
+		for(i=0;i<group->unit_count;i++){
+			struct skill_unit *unit=NULL;
+			struct block_list *bl=NULL;
+			unit=&group->unit[i];
+			bl=(struct block_list *)unit;
+			if(unit->alive && !(dx==0 && dy==0)){
+				map_delblock(bl);
+				bl->x += dx;
+				bl->y += dy;
+				clif_skill_setunit(unit);
+				map_addblock(bl);
+			}
+		}
+	}
 	return 0;
 }
 

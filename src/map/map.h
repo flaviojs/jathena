@@ -183,6 +183,7 @@ struct map_session_data {
 	short skillid,skilllv;
 	short skillitem,skillitemlv;
 	short skillid_old,skilllv_old;
+	short skillid_dance,skilllv_dance;
 	struct skill_unit_group skillunit[MAX_SKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];

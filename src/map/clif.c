@@ -5772,7 +5772,8 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 		sd->sc_data[SC_AUTOCOUNTER].timer !=-1 || //オートカウンター
 		sd->sc_data[SC_TRICKDEAD].timer !=-1 || //死んだふり
 		sd->sc_data[SC_BLADESTOP].timer !=-1 || //白刃取り
-		sd->sc_data[SC_SPIDERWEB].timer !=-1 //スパイダーウェッブ
+		sd->sc_data[SC_SPIDERWEB].timer !=-1 || //スパイダーウェッブ
+		(sd->sc_data[SC_DANCING].timer !=-1 && (sd->sc_data[SC_DANCING].val1 >= BD_LULLABY && sd->sc_data[SC_DANCING].val1 <= BD_RAGNAROK)) //合奏スキル演奏中は動けない
 		) //
 		return;
 	if( (sd->status.option&2) && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0)

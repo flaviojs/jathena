@@ -1,4 +1,30 @@
 --------------------
+//0993 by (凸)
+・一人で合奏だけど合奏スキル中は動けないように
+・アンコール実装。直前に使ったダンススキルを半分のSPで使えます
+・ダンス中に移動するとエフェクトも移動するようにした
+・未実装のスキルが使われるとUnknown skillと表示されることがあるかもしれません
+・Sageのキャストキャンセルで実は前のスキルを覚えていなかった問題の修正
+
+	(map/)
+	clif.c
+		clif_parse_WalkToXY() 変更
+	map.h アンコール用変数の追加
+	pc.c
+		pc_walk()
+	skill.c
+		skill_blown
+		skill_castend_nodamage_id
+		skill_unitsetting() 変更
+		skill_unit_onplace() 罠で同じ処理をしているcaseをまとめた
+		skill_unit_onout() 使われてないunit2を削除
+		skill_check_condition() 変更
+		skill_use_id
+		skill_initunitgroup() 使ったダンススキルを変数に入れるようにした
+		skill_unit_move_unit_group() 追加
+	skill.h 変更
+
+--------------------
 //0992 by nokia
 
 map_quitを修正してメモリを釈放する時何度もを釈放するためメモリの間違いが起こる問題を招く
