@@ -3959,7 +3959,7 @@ int clif_vendinglist(struct map_session_data *sd,int id,struct vending *vending)
 		WBUFL(buf,8+n*22)=vending[i].value;
 		WBUFW(buf,12+n*22)=vending[i].amount;
 		WBUFW(buf,14+n*22)=(index=vending[i].index)+2;
-		if(sd->status.cart[index].nameid <= 0 || sd->status.cart[index].amount <= 0)
+		if(vsd->status.cart[index].nameid <= 0 || vsd->status.cart[index].amount <= 0)
 			continue;
 		data = itemdb_search(vsd->status.cart[index].nameid);
 		WBUFB(buf,16+n*22)=data->type;
@@ -3996,7 +3996,7 @@ int clif_vendinglist(struct map_session_data *sd,int id,struct vending *vending)
 		}
 		n++;
 	}
-	if(n){
+	if(n > 0){
 		WBUFW(buf,2)=8+n*22;
 		WFIFOSET(fd,WFIFOW(fd,2));
 	}
@@ -4074,12 +4074,12 @@ int clif_openvending(struct map_session_data *sd,int id,struct vending *vending)
 		}
 		n++;
 	}
-	if(n){
+	if(n > 0){
 		WBUFW(buf,2)=8+n*22;
 		WFIFOSET(fd,WFIFOW(fd,2));
 	}
 
-	return 0;
+	return n;
 }
 
 /*==========================================

@@ -1,4 +1,16 @@
 --------------------
+//0847 by 死神
+
+・露店バグ修正。
+	(map/)
+	clif.c
+		clif_vendinglist()、clif_openvending() 修正。
+	vending.c
+		vending_openvending() 修正。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+
+--------------------
 //0846 by 死神
 
 ・バグ修正と細かい修正。

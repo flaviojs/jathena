@@ -104,8 +104,10 @@ void vending_openvending(struct map_session_data *sd,int len,char *message,int f
 		}
 		sd->vend_num=i;
 		strcpy(sd->message,message);
-		clif_openvending(sd,sd->vender_id,sd->vending);
-		clif_showvendingboard(&sd->bl,message,0);
+		if(clif_openvending(sd,sd->vender_id,sd->vending) > 0)
+			clif_showvendingboard(&sd->bl,message,0);
+		else
+			sd->vender_id=0;
 	}
 }
 

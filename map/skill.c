@@ -2065,12 +2065,24 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	/*（付加と解除が必要） */
 	case BS_MAXIMIZE:		/* マキシマイズパワー */
 	case NV_TRICKDEAD:		/* 死んだふり */
-	case TF_HIDING:			/* ハイディング */
 	case CR_DEFENDER:		/* ディフェンダー */
 	case CR_AUTOGUARD:		/* オートガード */
 		{
 			int sc=SkillStatusChangeTable[skillid];
 			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			if( (battle_get_sc_data(bl))[sc].timer==-1 )
+				/* 付加する */
+				skill_status_change_start(bl,sc,skilllv,0,0,0,skill_get_time(skillid,skilllv),0);
+			else
+				/* 解除する */
+				skill_status_change_end(bl, sc, -1);
+		}
+		break;
+
+	case TF_HIDING:			/* ハイディング */
+		{
+			int sc=SkillStatusChangeTable[skillid];
+			clif_skill_nodamage(src,bl,skillid,-1,1);
 			if( (battle_get_sc_data(bl))[sc].timer==-1 )
 				/* 付加する */
 				skill_status_change_start(bl,sc,skilllv,0,0,0,skill_get_time(skillid,skilllv),0);
