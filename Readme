@@ -1,4 +1,10 @@
 --------------
+//0551 by Kalen
+・DB修正
+	db/create_arrow_db.txt 完成
+	SourceID順にソートしました。
+
+--------------
 //0550 by huge
 
 ・矢作成スキル実装
