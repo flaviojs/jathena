@@ -2947,7 +2947,8 @@ struct Damage battle_calc_magic_attack(
 			MATK_FIX( 100+skill_lv*10, 100);
 			break;
 		case WZ_FIREPILLAR:	// ファイヤーピラー
-			mdef1=mdef2=0;	// MDEF無視
+			if(mdef1 < 10000)
+				mdef1=mdef2=0;	// MDEF無視
 			MATK_FIX( 1,5 );
 			matk1+=50;
 			matk2+=50;
