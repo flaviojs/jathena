@@ -1,4 +1,34 @@
 --------------------
+//0883 by Kalen
+・Warp色々修正
+	・アサシンギルド周り修正(昔のままのリンクだったので現在の状態に修正。)
+	・YunoのWarp全面見直し(YumilLoop修正、SageCastleRandomWarp追加、女医さんの家追加)
+	・モンクギルド周り追加
+・NPC色々修正
+	・帽子作成NPCを別ファイルへ。一部追加(ep2.5追加分)
+	　参考Data(R.O.M776): ttp://green.sakura.ne.jp/~youc/ro/data/itemmaking.html#04
+	・アサシンギルド修正
+	・二次職転職関係NPC一部追加(これでコモド小劇場へ行けます)
+	・マスターアルケミストの台詞修正
+	・アルデバランの案内要員を移動&台詞修正&イメージ追加
+	・BBSにあがっていたコモドスクリプト追加(event_hat等へ分散)
+	・コンロンクエスト関係NPC一部追加(女医[yuno]、ネル[prontera])
+	(conf/warp/)
+		npc_warp.txt
+		npc_warp30.txt
+		npc_warp_job.txt
+	(conf/npc/)
+		npc_event_hat.txt(新規)
+		npc_job_2nd.txt
+		npc_job_alchemist.txt
+		npc_town_aldebaran.txt
+		npc_town_comodo.txt
+		npc_town_gonryun.txt
+		npc_town_guide.txt
+		npc_town_yuno.txt
+		npc_town_lutie.txt
+
+--------------------
 //0882 by 胡蝶蘭
 
 ・スクリプトに0881相当のアカウント共有変数機能のプレフィックス変更

@@ -25,6 +25,7 @@ if ((Class==5) && (JobLevel >= 40)) goto Lmarchant;
 	mes "民間人がこんな所に";
 	mes "何の用事で来たのかね。";
 	next;
+	mes "[ビンセント=カーシャル]";
 	mes "ここは見世物小屋じゃないよ。";
 	mes "うろうろしてないで、";
 	mes "どっかに行きなさい。";
@@ -97,6 +98,205 @@ alde_alche.gat,175,107,4	script	気むずかしい錬金術師	749,{
 	mes "キキキ　ケケケケ……";
 	mes "プロンテラの奴等には秘密じゃぞ……";
 	close;
+//
+//Lquestion1:
+//	set @alrand,rand(2);
+//	if (@alrand == 1) goto Lquestion1_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "12 + 23 + 34 + 45 =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 114) set @alcheQP+10;
+//		goto Lquestion2;
+//Lquestion1_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "13 + 25 + 37 + 48 =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion2;
+////==========================================================
+//Lquestion2:
+//	if (@alrand == 1) goto Lquestion2_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "1000 - 36 - 227 - 348 =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 389) set @alcheQP+10;
+//		goto Lquestion3;
+//Lquestion2_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "1000 - 58 - 214 - 416 =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion3;
+////==========================================================
+//Lquestion3:
+//	if (@alrand == 1) goto Lquestion3_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "14 x 17 x 3 =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 714) set @alcheQP+10;
+//		goto Lquestion4;
+//Lquestion3_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "12 x 24 x 3 =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion4;
+////==========================================================
+//Lquestion4:
+//	if (@alrand == 1) goto Lquestion4_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "9765 / 3 / 5 / 7 =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 93) set @alcheQP+10;
+//		goto Lquestion5;
+//Lquestion4_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "10530 / 3 / 5 / 2 =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion5;
+////==========================================================
+//Lquestion5:
+//	if (@alrand == 1) goto Lquestion5_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "(47 x 28) - (1376 / 4) =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 972) set @alcheQP+10;
+//		goto Lquestion6;
+//Lquestion5_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "(35 x 19) - (1792 / 7) =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion6;
+////==========================================================
+//Lquestion6:
+//	if (@alrand == 1) goto Lquestion6_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "(2646 / 7) + (13 x 28) =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 742) set @alcheQP+10;
+//		goto Lquestion7;
+//Lquestion6_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "(2368 / 8) + (24 x 17) =";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion7;
+////==========================================================
+//Lquestion7:
+//	if (@alrand == 1) goto Lquestion7_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "ディスカウント24％で";
+//	mes "赤ポーション 12個";
+//	mes "ハエの羽 5個";
+//	mes "蝶の羽 1個";
+//	mes "買った時の総額は？";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion8;
+//Lquestion7_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "ディスカウント24％で";
+//	mes "緑ポーション 15個";
+//	mes "拡大鏡 6個";
+//	mes "設置用トラップ 4個";
+//	mes "買った時の総額は？";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion8;
+////==========================================================
+//Lquestion8:
+//	if (@alrand == 1) goto Lquestion8_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "環頭太刀 2個";
+//	mes "キャップ 3個";
+//	mes "ブーツ 3個";
+//	mes "重さの合計は？";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 480) set @alcheQP+10;
+//		goto Lquestion9;
+//Lquestion8_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "シミター 3個";
+//	mes "ヘルム 2個";
+//	mes "ロングコート 1個";
+//	mes "重さの合計は？";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 450) set @alcheQP+10;
+//		goto Lquestion9;
+////==========================================================
+//Lquestion9:
+//	if (@alrand == 1) goto Lquestion9_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "ミラーシールド、レザージャケット";
+//	mes "スマイル、シルクローブ、ヴェール";
+//	mes "マフラー、眼帯";
+//	mes "防御値の合計は？";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 12) set @alcheQP+10;
+//		goto Lquestion10;
+//Lquestion9_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "ビレタ、メントル、オペラ仮面";
+//	mes "リボン、マフラー、ブーツ、耳当て";
+//	mes "防御値の合計は？";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion10;
+//Lquestion9_3:/*発動なし*/
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "バックラー、ロングコート、マスク";
+//	mes "大きなリボン、リボンのヘアバンド";
+//	mes "笠、グラス";
+//	mes "防御値の合計は？";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == ###) set @alcheQP+10;
+//		goto Lquestion10;
+////==========================================================
+//Lquestion10:
+//	if (@alrand == 1) goto Lquestion10_2;
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "ヘルム 5個を";
+//	mes "ディスカウント24％で買った場合と";
+//	mes "ディスカウント20％で買った場合の";
+//	mes "差はいくらか？";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 8800) set @alcheQP+10;
+//		goto LcheckQP;
+//Lquestion10_2:
+//	mes "[グレゴリー=ラスプーチン]";
+//	mes "アーマーを 4個";
+//	mes "ディスカウント24％で買った場合と";
+//	mes "ディスカウント20％で買った場合の";
+//	mes "差はいくらか？";
+//	next;
+//		input @alcheQ;
+//		if (@alcheQ == 7680) set @alcheQP+10;
+//		goto LcheckQP;
+//
+//LcheckQP:
+//
 }
 //==============================================================================
 alde_alche.gat,24,188,2	script	ギルド商人	740,{
