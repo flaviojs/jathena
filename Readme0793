@@ -1,4 +1,48 @@
 --------------------
+//0815 by 死神
+
+・0814のバグ修正と細かい修正。
+・mapflag monster_noteleport、noreturn追加とnoteleportの仕様変更。
+noteleportはプレイヤーのハエとテレポート、ワープスキルの制限をするが蝶は制限しないように変更、monster_noteleportはモンスターのテレポートを制限する物でnoreturnは蝶の使用を制限する物です。ただmapflag.txtは修正していません。(noreturnを設定する必要があります。)
+・battle_athena.confのplayer_auto_counter_typeとmonster_auto_counter_typeが説明通りに機能しなかった問題修正。
+・battle_athena.confにplayer_cloak_check_wall とmonster_cloak_check_wall 追加。
+・ボスモンスターの認識をMVP経験とmodeの0x20で行なっていた物をmodeだけにするように変更。(本鯖のイベントモンスターでMVP経験をくれるが状態異常に掛かるやつがあったらしく修正。HPが1億もあって毒じゃないと倒せなかったらしいので...) つまりMVP経験があってもボス扱いではないモンスターを作ることも可能です。
+・状態異常に掛かった状態で接続切断ができないように修正。(ただタイマーチェックではなくopt1とopt2をチェックするだけなので見た目が変わる状態異常だけに適用されます。)
+・今さらですが昔のyareCVS(2003年9月バージョン)で適用されていたラグを減らす為の処理を入れてみました。どんな効果があるかは自分でもわかりません。(ただ入れてみただけ...)
+・シーズモードとPVPで禁止装備が外されても効果が消えないバグ修正。
+・その他細かい修正。
+・未テストの物もかなりあります。
+	(common/)
+	socket.c
+		connect_client()、make_listen_port()、make_connection() 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(map/)
+	battle.h 修正。
+	battle.c
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_calc_magic_attack()、battle_config_read() 修正。
+	skill.c
+		skill_unit_onplace()、skill_status_change_timer() 修正。
+		skill_castend_nodamage_id()、skill_use_id() 修正。
+		skill_check_unit_range_sub()、skill_timerskill() 修正。
+		skill_additional_effect()、skill_attack()、skill_status_change_start() 修正。
+		skill_check_cloaking() 修正。
+	clif.c
+		clif_item_identify_list()、clif_parse_QuitGame()、clif_GM_kick() 修正。
+	pc.c
+		pc_attack_timer()、pc_isUseitem()、pc_checkitem 修正。
+	mob.c
+		mob_warp()、mob_walk()、mob_attack()、mob_target() 修正。
+		mob_ai_sub_hard_activesearch()、mob_ai_sub_hard_mastersearch() 修正。
+		mob_ai_sub_lazy()、mob_damage() 修正。
+	npc.c
+		npc_parse_mapflag() 修正。
+	map.h 修正。
+
+--------------------
 //0814 by 死神
 
 ・バグ修正と細かい修正。
@@ -8,8 +52,8 @@
 ・スティールの確率を少し下げ。
 ・モンスターのハイディング、クローキング、マキシマイズパワーがすぐに解除される問題修正。(モンスターにはSPがないせいです。取り敢えずクローキングはハイディングの時間を適用してマキシマイズパワーはウエポンパーフェクションの時間を適用します。) 未テスト
 ・サンクチュアリを人数から回数に変更。
-・PVPで自分のトラップに攻撃されるように修正。
-・vitペナルティの適用で減算防御も減るように変更。(未テスト)
+・PVPで自分のトラップに攻撃対象になるように変更。
+・vitペナルティの適用で乗算防御も減るように変更。(未テスト)
 ・その他細かいバグ修正。
 	(conf/)
 	battle_athena.conf

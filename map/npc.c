@@ -961,7 +961,6 @@ int npc_parse_mob(char *w1,char *w2,char *w3,char *w4)
 			num=1;
 	}
 
-
 	base=malloc(sizeof(struct mob_data)*num);
 	if(base==NULL){
 		printf("out of memory : npc_parse_mob\n");
@@ -1051,6 +1050,12 @@ static int npc_parse_mapflag(char *w1,char *w2,char *w3,char *w4)
 	}
 	else if(strcmpi(w3,"noteleport")==0) {
 		map[m].flag.noteleport=1;
+	}
+	else if(strcmpi(w3,"noreturn")==0) {
+		map[m].flag.noreturn=1;
+	}
+	else if(strcmpi(w3,"monster_noteleport")==0) {
+		map[m].flag.monster_noteleport=1;
 	}
 	else if(strcmpi(w3,"nobranch")==0) {
 		map[m].flag.nobranch=1;

@@ -419,7 +419,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	case HT_ANKLESNARE:		/* アンクルスネア */
 		{
 			int sec=skill_get_time2(skillid,skilllv);
-			if(battle_get_mode(bl)&0x20 || battle_get_mexp(bl) > 0)
+			if(battle_get_mode(bl)&0x20)
 				sec = sec/5;
 			battle_stopwalking(bl,1);
 			skill_status_change_start(bl,SC_ANKLE,skilllv,0,sec,0);
@@ -749,7 +749,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	/* 実際にダメージ処理を行う */
 	if(skillid != KN_BOWLINGBASH || flag != 0)
 		battle_damage(src,bl,damage);
-	if(skillid == RG_INTIMIDATE && damage > 0 && battle_get_mexp(bl) <= 0 && !(battle_get_mode(bl)&0x20) && !map[src->m].flag.gvg ) {
+	if(skillid == RG_INTIMIDATE && damage > 0 && !(battle_get_mode(bl)&0x20) && !map[src->m].flag.gvg ) {
 		int s_lv = battle_get_lv(src),t_lv = battle_get_lv(bl);
 		int rate = 50 + skilllv * 5;
 		rate = rate + (s_lv - t_lv);
@@ -845,8 +845,7 @@ static int skill_check_unit_range_sub( struct block_list *bl,va_list ap )
 			return 0;
 	}
 	else if(skillid == AL_WARP) {
-		if(unit->group->unit_id != 0x80 && unit->group->unit_id != 0x81 &&
-			(unit->group->unit_id < 0x8f || unit->group->unit_id > 0x99) && unit->group->unit_id != 0x92)
+		if((unit->group->unit_id < 0x8f || unit->group->unit_id > 0x99) && unit->group->unit_id != 0x92)
 			return 0;
 	}
 	else if((skillid >= HT_SKIDTRAP && skillid <= HT_CLAYMORETRAP) || skillid == HT_TALKIEBOX) {
@@ -957,37 +956,33 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 				clif_skill_nodamage(src,src,skl->skill_id,skl->skill_lv,1);
 				break;
 			case RG_INTIMIDATE:
-				if(!map[src->m].flag.noteleport) {
-					if(src->type == BL_PC) {
-						pc_randomwarp(sd,3);
-						if(target->prev != NULL) {
-							if(target->type == BL_PC && !pc_isdead((struct map_session_data *)target))
-								pc_setpos((struct map_session_data *)target,map[sd->bl.m].name,sd->bl.x,sd->bl.y,3);
-							else if(target->type == BL_MOB)
-								mob_warp((struct mob_data *)target,sd->bl.x,sd->bl.y,3);
-						}
+				if(src->type == BL_PC && !map[src->m].flag.noteleport) {
+					pc_randomwarp(sd,3);
+					if(target->prev != NULL) {
+						if(target->type == BL_PC && !pc_isdead((struct map_session_data *)target))
+							pc_setpos((struct map_session_data *)target,map[sd->bl.m].name,sd->bl.x,sd->bl.y,3);
+						else if(target->type == BL_MOB)
+							mob_warp((struct mob_data *)target,sd->bl.x,sd->bl.y,3);
 					}
-					else if(src->type == BL_MOB) {
-						mob_warp(md,-1,-1,3);
-						if(target->prev != NULL) {
-							if(target->type == BL_PC && !pc_isdead((struct map_session_data *)target))
-								pc_setpos((struct map_session_data *)target,map[md->bl.m].name,md->bl.x,md->bl.y,3);
-							else if(target->type == BL_MOB)
-								mob_warp((struct mob_data *)target,md->bl.x,md->bl.y,3);
-						}
+				}
+				else if(src->type == BL_MOB && !map[src->m].flag.monster_noteleport) {
+					mob_warp(md,-1,-1,3);
+					if(target->prev != NULL) {
+						if(target->type == BL_PC && !pc_isdead((struct map_session_data *)target))
+							pc_setpos((struct map_session_data *)target,map[md->bl.m].name,md->bl.x,md->bl.y,3);
+						else if(target->type == BL_MOB)
+							mob_warp((struct mob_data *)target,md->bl.x,md->bl.y,3);
 					}
 				}
 				break;
 
 			case BA_FROSTJOKE:			/* 寒いジョーク */
 			case DC_SCREAM:				/* スクリーム */
-				range=15;		//視界全体
+				range=AREA_SIZE-5;		//視界全体
 				map_foreachinarea(skill_frostjoke_scream,sd->bl.m,
 					sd->bl.x-range,sd->bl.y-range,
 					sd->bl.x+range,sd->bl.y+range,BL_NUL,src,skl->skill_id,skl->skill_lv,tick);
 				break;
-
-
 
 			default:
 				skill_attack(skl->type,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag);
@@ -1919,9 +1914,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			else
 				/* 解除する */
 				skill_status_change_end(bl, sc, -1);
-
-			if(skillid==AS_CLOAKING)
-				skill_check_cloaking(bl);
 		}
 		break;
 
@@ -1936,8 +1928,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				/* 解除する */
 				skill_status_change_end(bl, sc, -1);
 
-			if(skillid==AS_CLOAKING)
-				skill_check_cloaking(bl);
+			skill_check_cloaking(bl);
 		}
 		break;
 
@@ -1981,7 +1972,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				if(range < 0)
 					range = battle_get_range(src) - (range + 1);
 				clif_skill_nodamage(src,bl,skillid,skilllv,1);
-				mob_target((struct mob_data *)bl,src,range);
 			}
 			else
 				clif_skill_nodamage(src,bl,skillid,skilllv,0);
@@ -3061,7 +3051,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 				battle_heal(NULL,bl,heal,0);
 			}
 			else
-				skill_attack(BF_MAGIC,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
+				skill_attack(BF_MAGIC,ss,&src->bl,bl,AL_HEAL,sg->skill_lv,tick,0);
 		}
 		break;
 
@@ -3390,7 +3380,7 @@ int skill_unit_onlimit(struct skill_unit *src,unsigned int tick)
 		map_setcell(src->bl.m,src->bl.x,src->bl.y,src->val2);
 		clif_changemapcell(src->bl.m,src->bl.x,src->bl.y,src->val2,1);
 		break;
-			
+
 	}
 	return 0;
 }
@@ -3456,10 +3446,10 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_BLASTMINE:
 			case HT_CLAYMORETRAP:
 			case HT_TALKIEBOX:
+			case AL_WARP:
 				range = 0;
 				break;
 			case AL_PNEUMA:
-			case AL_WARP:
 				range = 1;
 				break;
 		}
@@ -3867,10 +3857,10 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	sd->state.skillcastcancel = skill_db[skill_num].castcancel;
 
 	switch(skill_num){	/* 何か特殊な処理が必要 */
-	case AL_HEAL:	/* ヒール */
-		if(battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)))
-			forcecast=1;	/* ヒールアタックなら詠唱エフェクト有り */
-		break;
+//	case AL_HEAL:	/* ヒール */
+//		if(battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)))
+//			forcecast=1;	/* ヒールアタックなら詠唱エフェクト有り */
+//		break;
 	case ALL_RESURRECTION:	/* リザレクション */
 		if(bl->type != BL_PC && battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl))){	/* 敵がアンデッドなら */
 			forcecast=1;	/* ターンアンデットと同じ詠唱時間 */
@@ -4753,6 +4743,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 			short *opt1 = battle_get_opt1(bl);
 			sc_data[type].val2 = 0;
 			sc_data[type].val4 = 0;
+			battle_stopwalking(bl,1);
 			if(opt1) {
 				*opt1 = 1;
 				clif_changeoption(bl);
@@ -4762,7 +4753,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 		}
 		else if( (--sc_data[type].val3) > 0) {
 			int hp = battle_get_max_hp(bl);
-			if((sc_data[type].val4++)%5 == 0 && battle_get_hp(bl) > hp>>2) {
+			if((++sc_data[type].val4)%5 == 0 && battle_get_hp(bl) > hp>>2) {
 				hp = hp/100;
 				if(hp < 1) hp = 1;
 				if(bl->type == BL_PC)
@@ -4862,7 +4853,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		return 0;
 	if(bl->type==BL_MOB){
 		md=(struct mob_data *)bl;
-		if((mob_db[md->class].mode & 0x20 || mob_db[md->class].mexp > 0) && (type==SC_STONE || type==SC_FREEZE ||
+		if(mob_db[md->class].mode & 0x20 && (type==SC_STONE || type==SC_FREEZE ||
 			type==SC_STAN || type==SC_SLEEP || type==SC_SILENCE || type==SC_QUAGMIRE || type == SC_DECREASEAGI) && !(flag&1) ){
 			/* ボスには効かない(ただしカードによる効果は適用される) */
 			return 0;
@@ -5353,6 +5344,10 @@ int skill_check_cloaking(struct block_list *bl)
 	static int dx[]={-1, 0, 1,-1, 1,-1, 0, 1};
 	static int dy[]={-1,-1,-1, 0, 0, 1, 1, 1};
 	int end=1,i;
+	if(bl->type == BL_PC && !battle_config.pc_cloak_check_wall)
+		return 0;
+	if(bl->type == BL_MOB && !battle_config.monster_cloak_check_wall)
+		return 0;
 	for(i=0;i<sizeof(dx)/sizeof(dx[0]);i++){
 		int c=map_getcell(bl->m,bl->x+dx[i],bl->y+dy[i]);
 		if(c==1 || c==5) end=0;

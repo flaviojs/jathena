@@ -104,6 +104,7 @@ static int connect_client(int listen_fd)
 	struct sockaddr_in client_address;
 	int len;
 	int result;
+	int yes = 1; // reuse fix
 
 	//printf("connect_client : %d\n",listen_fd);
 
@@ -111,12 +112,15 @@ static int connect_client(int listen_fd)
 
 	fd=accept(listen_fd,(struct sockaddr*)&client_address,&len);
 	if(fd_max<=fd) fd_max=fd+1;
-	result = fcntl(fd, F_SETFL, O_NONBLOCK);
-	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
+	result = fcntl(fd,F_SETFL,O_NONBLOCK);
+//	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
+	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(char *)&yes,sizeof yes); // reuse fix
 #ifdef SO_REUSEPORT
-	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,NULL,0);
+//	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,NULL,0);
+	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,(char *)&yes,sizeof yes); //reuse fix
 #endif
-	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,NULL,0);
+//	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,NULL,0);
+	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,(char *)&yes,sizeof yes); // reuse fix
 
 	if(fd==-1){
 		perror("accept");
@@ -156,15 +160,19 @@ int make_listen_port(int port)
 	struct sockaddr_in server_address;
 	int fd;
 	int result;
+	int yes = 1; // reuse fix
 
 	fd = socket( AF_INET, SOCK_STREAM, 0 );
 	if(fd_max<=fd) fd_max=fd+1;
-	result = fcntl(fd, F_SETFL, O_NONBLOCK);
-	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
+	result = fcntl(fd,F_SETFL,O_NONBLOCK);
+//	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
+	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(char *)&yes,sizeof yes); // reuse fix
 #ifdef SO_REUSEPORT
-	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,NULL,0);
+//	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,NULL,0);
+	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,(char *)&yes,sizeof yes); //reuse fix
 #endif
-	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,NULL,0);
+//	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,NULL,0);
+	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,(char *)&yes,sizeof yes); // reuse fix
 
 	server_address.sin_family      = AF_INET;
 	server_address.sin_addr.s_addr = htonl( INADDR_ANY );
@@ -198,14 +206,18 @@ int make_connection(long ip,int port)
 	struct sockaddr_in server_address;
 	int fd;
 	int result;
+	int yes = 1; // reuse fix
 
 	fd = socket( AF_INET, SOCK_STREAM, 0 );
 	if(fd_max<=fd) fd_max=fd+1;
-	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
+//	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
+	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(char *)&yes,sizeof yes); // reuse fix
 #ifdef SO_REUSEPORT
-	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,NULL,0);
+//	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,NULL,0);
+	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,(char *)&yes,sizeof yes); //reuse fix
 #endif
-	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,NULL,0);
+//	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,NULL,0);
+	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,(char *)&yes,sizeof yes); // reuse fix
 
 	server_address.sin_family = AF_INET;
 	server_address.sin_addr.s_addr = ip;

@@ -788,6 +788,14 @@ monster_skill_reiteration
 	これをyesにするとSWやニューマ、トラップを重ねて置くことができます。
 	デフォルトはnoです。
 
+player_cloak_check_wall
+	プレイヤーがクローキングした時壁をチェックするかどうかです。
+	これをnoにすると壁がなくてもクローキングできます。デフォルトはyesです。
+
+monster_cloak_check_wall
+	モンスターがクローキングした時壁をチェックするかどうかです。
+	これをnoにすると壁がなくてもクローキングできます。デフォルトはyesです。
+
 gvg_short_attack_damage_rate
 	シーズモードで近距離物理攻撃のダメージ倍率です。デフォルトは100です。
 
@@ -905,6 +913,8 @@ vit_penaly_count: 3
 vit_penaly_num: 0
 player_skill_reiteration: no
 monster_skill_reiteration: no
+player_cloak_check_wall: yes
+monster_cloak_check_wall: yes
 gvg_short_attack_damage_rate: 100
 gvg_long_attack_damage_rate: 100
 gvg_magic_attack_damage_rate: 100

@@ -369,6 +369,8 @@ struct map_data {
 	struct {
 		unsigned nomemo : 1;
 		unsigned noteleport : 1;
+		unsigned noreturn : 1;
+		unsigned monster_noteleport : 1;
 		unsigned nosave : 1;
 		unsigned nobranch : 1;
 		unsigned nopenalty : 1;

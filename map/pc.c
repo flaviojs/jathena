@@ -2372,9 +2372,9 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 		return 0;
 	if((nameid == 605) && map[sd->bl.m].flag.gvg)
 		return 0;
-	if((nameid == 602) && map[sd->bl.m].flag.gvg)
-		return 1;
-	if((nameid == 601 || nameid == 602) && map[sd->bl.m].flag.noteleport)
+	if(nameid == 601 && (map[sd->bl.m].flag.noteleport || map[sd->bl.m].flag.gvg))
+		return 0;
+	if(nameid == 602 && map[sd->bl.m].flag.noreturn)
 		return 0;
 	if(nameid == 604 && (map[sd->bl.m].flag.nobranch || map[sd->bl.m].flag.gvg))
 		return 0;
@@ -3199,7 +3199,7 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 	if(sd->skilltimer != -1 && pc_checkskill(sd,SA_FREECAST) <= 0)
 		return 0;
 
-	if(!battle_config.sdelay_attack_enable) {
+	if(!battle_config.sdelay_attack_enable && sd->skilltimer == -1) {
 		if(DIFF_TICK(tick , sd->canact_tick) < 0) {
 			clif_skill_fail(sd,1,4,0);
 			return 0;
@@ -4667,7 +4667,7 @@ int pc_unequipitem(struct map_session_data *sd,int n,int type)
  */
 int pc_checkitem(struct map_session_data *sd)
 {
-	int i,j,k,id;
+	int i,j,k,id,calc_flag = 0;
 	struct item_data *it=NULL;
 
 	// 所持品空き詰め
@@ -4717,17 +4717,23 @@ int pc_checkitem(struct map_session_data *sd)
 
 		if(sd->status.inventory[i].nameid==0)
 			continue;
-		if(sd->status.inventory[i].equip & ~pc_equippoint(sd,i))
+		if(sd->status.inventory[i].equip & ~pc_equippoint(sd,i)) {
 			sd->status.inventory[i].equip=0;
+			calc_flag = 1;
+		}
 		//装備制限チェック
 		if(sd->status.inventory[i].equip && map[sd->bl.m].flag.pvp && (it->flag.no_equip==1 || it->flag.no_equip==3)){//PvP制限
 			sd->status.inventory[i].equip=0;
+			calc_flag = 1;
 		}else if(sd->status.inventory[i].equip && map[sd->bl.m].flag.gvg && (it->flag.no_equip==2 || it->flag.no_equip==3)){//GvG制限
 			sd->status.inventory[i].equip=0;
+			calc_flag = 1;
 		}
 	}
 
 	pc_setequipindex(sd);
+	if(calc_flag)
+		pc_calcstatus(sd,2);
 
 	return 0;
 }

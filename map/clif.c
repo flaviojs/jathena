@@ -3439,16 +3439,18 @@ int clif_item_identify_list(struct map_session_data *sd)
 {
 	int i,c;
 	int fd=sd->fd;
-	
+
 	WFIFOW(fd,0)=0x177;
 	for(i=c=0;i<MAX_INVENTORY;i++){
-		if(sd->status.inventory[i].identify!=1){
+		if(sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].identify!=1){
 			WFIFOW(fd,c*2+4)=i+2;
 			c++;
 		}
 	}
-	WFIFOW(fd,2)=c*2+4;
-	WFIFOSET(fd,WFIFOW(fd,2));
+	if(c > 0) {
+		WFIFOW(fd,2)=c*2+4;
+		WFIFOSET(fd,WFIFOW(fd,2));
+	}
 	return 0;
 }
 
@@ -4818,6 +4820,7 @@ int clif_GM_kick(struct map_session_data *sd,struct map_session_data *tsd,int ty
 {
 	if(type)
 		clif_GM_kickack(sd,tsd->status.account_id);
+	tsd->opt1 = tsd->opt2 = 0;
 	clif_parse_QuitGame(tsd->fd,tsd);
 
 	return 0;
@@ -5033,6 +5036,8 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
  */
 void clif_parse_QuitGame(int fd,struct map_session_data *sd)
 {
+	if(sd->opt1 || sd->opt2)
+		return;
 	WFIFOW(fd,0)=0x18b;
 	WFIFOW(fd,2)=0;
 	WFIFOSET(fd,packet_len_table[0x18b]);
