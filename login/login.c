@@ -261,6 +261,11 @@ int mmo_auth_init(void)
 			auth_num++;
 			if(account_id>=account_id_count)
 			account_id_count=account_id+1;
+		}else{
+			i=0;
+			if( sscanf(line,"%d\t%%newid%%\n%n",&account_id,&i)==1 &&
+				i>0 && account_id>account_id_count)
+				account_id_count=account_id;
 		}
 	}
 	fclose(fp);
@@ -272,7 +277,7 @@ int mmo_auth_init(void)
 void mmo_auth_sync(void)
 {
 	FILE *fp;
-	int i,j;
+	int i,j,maxid=0;
 	fp=fopen(account_filename,"w");
 	if(fp==NULL)
 		return;
@@ -291,7 +296,12 @@ void mmo_auth_sync(void)
 				auth_dat[i].account_reg2[j].value);
 		}
 		fprintf(fp,RETCODE);
+		
+		if(maxid<auth_dat[i].account_id)
+			maxid=auth_dat[i].account_id;
 	}
+	fprintf(fp,"%d\t%%newid%%\n",account_id_count);
+
 	fclose(fp);
 }
 

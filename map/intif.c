@@ -833,6 +833,18 @@ int intif_parse_GuildMessage(int fd)
 	guild_recv_message(RFIFOL(fd,4),RFIFOL(fd,8),RFIFOP(fd,12),RFIFOW(fd,2)-12);
 	return 0;
 }
+// ギルド城データ要求返信
+int intif_parse_GuildCastleDataLoad(int fd)
+{
+	return guild_castledataloadack(RFIFOW(fd,2),RFIFOB(fd,4),RFIFOL(fd,5));
+}
+// ギルド城データ変更通知
+int intif_parse_GuildCastleDataSave(int fd)
+{
+	return guild_castledatasaveack(RFIFOW(fd,2),RFIFOB(fd,4),RFIFOL(fd,5));
+}
+
+
 
 // pet
 int intif_parse_CreatePet(int fd)
@@ -875,74 +887,6 @@ int intif_parse_DeletePetOk(int fd)
 	}
 
 	return 0;
-}
-int intif_parse_GuildCastleDataLoad(int fd)
-{
-	int c_id=RFIFOW(fd,2);
-	int index=RFIFOB(fd,4);
-	int value=RFIFOL(fd,5);
-	struct guild_castle *gc=guild_castle_search(c_id);
-
-		if(gc==NULL){
-		return 0;
-	}
-	switch(index){
-	case 1: gc->guild_id = value; break;
-	case 2: gc->economy = value; break;
-	case 3: gc->defense = value; break;
-	case 4: gc->triggerE = value; break;
-	case 5: gc->triggerD = value; break;
-	case 6: gc->nextTime = value; break;
-	case 7: gc->payTime = value; break;
-	case 8: gc->createTime = value; break;
-	case 9: gc->visibleC = value; break;
-	case 10: gc->visibleG0 = value; break;
-	case 11: gc->visibleG1 = value; break;
-	case 12: gc->visibleG2 = value; break;
-	case 13: gc->visibleG3 = value; break;
-	case 14: gc->visibleG4 = value; break;
-	case 15: gc->visibleG5 = value; break;
-	case 16: gc->visibleG6 = value; break;
-	case 17: gc->visibleG7 = value; break;
-	default:
-		printf("intif_parse_GuildCastleDataLoad ERROR!! (Not found index=%d)\n", index);
-		return 0;
-	}
-	return 1;
-}
-
-int intif_parse_GuildCastleDataSave(int fd)
-{
-	int c_id=RFIFOW(fd,2);
-	int index=RFIFOB(fd,4);
-	int value=RFIFOL(fd,5);
-	struct guild_castle *gc=guild_castle_search(c_id);
-	if(gc==NULL){
-		return 0;
-	}
-	switch(index){
-	case 1: gc->guild_id = value; break;
-	case 2: gc->economy = value; break;
-	case 3: gc->defense = value; break;
-	case 4: gc->triggerE = value; break;
-	case 5: gc->triggerD = value; break;
-	case 6: gc->nextTime = value; break;
-	case 7: gc->payTime = value; break;
-	case 8: gc->createTime = value; break;
-	case 9: gc->visibleC = value; break;
-	case 10: gc->visibleG0 = value; break;
-	case 11: gc->visibleG1 = value; break;
-	case 12: gc->visibleG2 = value; break;
-	case 13: gc->visibleG3 = value; break;
-	case 14: gc->visibleG4 = value; break;
-	case 15: gc->visibleG5 = value; break;
-	case 16: gc->visibleG6 = value; break;
-	case 17: gc->visibleG7 = value; break;
-	default:
-		printf("intif_parse_GuildCastleDataSave ERROR!! (Not found index=%d)\n", index);
-		return 0;
-	}
-	return 1;
 }
 //-----------------------------------------------------------------
 // inter serverからの通信

@@ -1,6 +1,9 @@
 prtg_cas01.gat,197,197,0	script	Agit_D01	-1,{
-OnAgitInit:
-	GetCastleData "prtg_cas01.gat",0;
+OnInterIfInit:
+	GetCastleData "prtg_cas01.gat",0,"::OnRecvCastleP01";
+	End;
+OnRecvCastleP01:
+	RequestGuildInfo GetCastleData("prtg_cas01.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "prtg_cas01.gat",GetCastleData("prtg_cas01.gat",1),2;

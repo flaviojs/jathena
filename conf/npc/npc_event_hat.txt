@@ -46,7 +46,7 @@ L4:/*まだら卵殻*/
 		mes "- ご利用ありがとうございました。 -";
 		close;
 L5:/*ほお紅*/
-	if (countitem(7047) < 100) goto LError
+	if (countitem(7047) < 100) goto LError;
 		delitem 7047,100;
 		getitem 5040,1;
 		mes "[アウディ]";

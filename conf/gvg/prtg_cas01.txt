@@ -492,7 +492,7 @@ LStartg:
 		close;
 }
 //------------------------------カプラ--------------------------------
-prtg_cas01.gat,96,173,0	script	カプラ職員#prt1	117,{
+prtg_cas01.gat,96,173,0	script	カプラ職員::kapra_prtg01	117,{
 	cutin "kafra_01",2;
 	set @GIDp1,getcastledata("prtg_cas01.gat",1);
 	if (getcharid(2) == @GIDp1) goto LStartg;
@@ -595,8 +595,11 @@ L_EXIT:
 	cutin "kafra_01",255;
 	close;
 OnInit:
-	if (getcastledata("prtg_cas01.gat",9) == 1) end;
-	disablenpc "カプラ職員#prt1";
+	disablenpc "kapra_prtg01";
+	end;
+OnRecvCastleP01:
+	if (getcastledata("prtg_cas01.gat",9) != 1) end;
+	enablenpc "kapra_prtg01";
 	end;
 }
 //-------------------------------執事(TEST SCRIPT有)------------------

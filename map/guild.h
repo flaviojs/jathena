@@ -31,6 +31,7 @@ int guild_created(int account_id,int guild_id);
 int guild_request_info(int guild_id);
 int guild_recv_noinfo(int guild_id);
 int guild_recv_info(struct guild *sg);
+int guild_npc_request_info(int guild_id,const char *ev);
 int guild_invite(struct map_session_data *sd,int account_id);
 int guild_reply_invite(struct map_session_data *sd,int guild_id,int flag);
 int guild_member_added(int guild_id,int account_id,int char_id,int flag);
@@ -65,6 +66,12 @@ int guild_recv_message(int guild_id,int account_id,char *mes,int len);
 int guild_skillupack(int guild_id,int skill_num,int account_id);
 int guild_break(struct map_session_data *sd,char *name);
 int guild_broken(int guild_id,int flag);
+
+int guild_addcastleinfoevent(int castle_id,int index,const char *name);
+int guild_castledataload(int castle_id,int index);
+int guild_castledataloadack(int castle_id,int index,int value);
+int guild_castledatasave(int castle_id,int index,int value);
+int guild_castledatasaveack(int castle_id,int index,int value);
 
 int guild_agit_start(void);
 int guild_agit_end(void);

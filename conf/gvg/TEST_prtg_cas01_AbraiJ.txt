@@ -242,7 +242,7 @@ L5:
 		close;
 	L_k_1:
 		set Zeny,Zeny-10000;
-		enablenpc "カプラ職員#prt1";
+		enablenpc "kapra_prtg01";
 		setcastledata "prtg_cas01.gat",9,1;
 		mes "[執事アブライ]";
 		mes "カプラとの契約が完了しました";
@@ -278,7 +278,7 @@ Lkafra_dimi:
 				mes "[カプラ職員]";
 				mes "ああ、解雇なさるんですね、、、TT";
 				next;
-				disablenpc "カプラ職員#prt1";
+				disablenpc "kapra_prtg01";
 				setcastledata "prtg_cas01.gat",9,0;
 				cutin "kafra_01",255;
 				mes "[執事アブライ]";
@@ -353,6 +353,7 @@ L7:
 		setcastledata "prtg_cas01.gat",15,0;
 		setcastledata "prtg_cas01.gat",16,0;
 		setcastledata "prtg_cas01.gat",17,0;
+		disablenpc "kapra_prtg01";
 		Announce "砦 [" + GetCastleName("prtg_cas01.gat") + "]を [" + GetGuildName(@GIDp1) + "]ギルドが破棄しました。",0;
 		MapRespawnGuildID "prtg_cas01.gat",GetCastleData("prtg_cas01.gat",1),7;
 		end;
@@ -408,11 +409,11 @@ LStartg2:
 //ギルド宝箱(暫定)
 prtg_cas01.gat,10,209,0 script t_box_p1s -1,{
 OnClock0000:
-killmonster "prtg_cas01.gat","t_box_p1";
-if (getcastledata("prtg_cas01.gat",1) == 0) end;
-set $boxnum,2+getcastledata("prtg_cas01.gat",2)/100000;
-areamonster "prtg_cas01.gat",6,204,15,213,"宝箱",1324,$boxnum,"t_box_p1";
-areamonster "prtg_cas01.gat",6,204,15,213,"宝箱",1325,$boxnum,"t_box_p1";
-end;
+	killmonster "prtg_cas01.gat","t_box_p1";
+	if (getcastledata("prtg_cas01.gat",1) == 0) end;
+	set $boxnum,2+getcastledata("prtg_cas01.gat",2)/100000;
+	areamonster "prtg_cas01.gat",6,204,15,213,"宝箱",1324,$boxnum,"t_box_p1";
+	areamonster "prtg_cas01.gat",6,204,15,213,"宝箱",1325,$boxnum,"t_box_p1";
+	end;
 }
 

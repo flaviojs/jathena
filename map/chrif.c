@@ -212,6 +212,11 @@ int chrif_connectack(int fd)
 
 	chrif_sendmap(fd);
 
+	printf("chrif: OnCharIfInit event done. (%d events)\n",
+		npc_event_doall("OnCharIfInit") );
+	printf("chrif: OnInterIfInit event done. (%d events)\n",
+		npc_event_doall("OnInterIfInit") );
+	
 	// <Agit> Run Event [AgitInit]
 	printf("NPC_Event:[OnAgitInit] do (%d) events (Agit Initialize).\n", npc_event_doall("OnAgitInit"));
 

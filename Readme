@@ -1,4 +1,550 @@
 --------------------
+//0904 by 胡蝶蘭
+
+・スクリプト処理修正
+	・char/interサーバーに接続した時にOnCharIfInit/OnInterIfInitイベントが
+	  呼ばれるようになりました。
+	  OnAgitInitはOnInterIfInitに変更すべきです。
+	・getcastledata命令で第２パラメータが0のとき、第３パラメータに
+	  イベント名を設定できます。このイベントはギルド城のデータを
+	  Interサーバーから所得完了したときに実行されます。
+	・起こすNPCイベント名を"::"で始めると、同名ラベルを持つ全NPCのイベント
+	  を実行できます。
+	  たとえば、getcastledata "prtg_cas01.gat",0,"::OnRecvCastleP01";
+	  とすると全てのNPCの OnRecvCastleP01ラベルが実行されます。
+	・requestguildinfo命令追加。特定ギルドの情報をInterサーバーに
+	  要求できます。第１パラメータはギルドID、第２パラメータはイベント名で
+	  このイベントはギルド情報をInterサーバーから所得完了したときに
+	  実行されます。
+ 
+	(map/)
+	guild.c/guild.h/npc.c/npc.h/script.c/intif.c/chrif.c
+		色々修正
+
+・ギルド城関連NPC修正
+  （バルキリーレルム１のみ修正。他の城のスクリプトは各自で弄ってください。
+    というか、むしろ弄ったらあっぷしましょう）
+  	・初期化処理をOnAgitInitでなくOnInterIfInitに変更。
+	・城データ所得完了処理としてOnRecvCastleP01を追加。
+	・鯖再起動時、ギルド専属カプラが正しく表示されるように。
+	・ギルド専属カプラの名前を"カプラ職員::kapra_prtg01"に変更。
+	  （"::"以降はエクスポートされる名前で、"::"以前が表示名）
+	  "カプラ職員#prt"より名前を長くして競合しにくくするためです。
+	  この関係で、disablenpcなどのパラメータを"kapra_prtg01"に修正。
+	(conf/gvg/)
+	prtg_cas01.txt
+		ギルド専属カプラ修正
+	ev_agit_prtg.txt
+		初期化処理修正（バルキリーレルム１のみ）
+	TEST_prtg_cas01_AbraiJ.txt
+		ギルド専属カプラ雇用/城破棄修正
+
+・NPCの修正
+	(conf/npc/)
+	npc_job_swordman.txt
+	npc_event_hat.txt
+		修正
+
+・アカウントを削除してもアカウントIDを再利用しないように修正
+・ギルド/パーティについても一応同等の処理追加（コメント化されています。
+  ギルドやパーティはIDを再利用してもおそらく問題ないため）
+
+	(login/)
+	login.c
+		読み込み/保存処理修正
+	(char/)
+	int_guild.c/int_party.c
+		読み込み/保存処理修正
+
+--------------------
+//0903 by 胡蝶蘭
+
+・l14/l15およびプレフィックスlを"推奨されない(deprecated)"機能としました。
+	・まだ使用できますが、今後の動作が保障されないので、速やかに代替機能を
+	  使用するように移行してください。
+	・プレフィックス'l'は代替機能のプレフィックス'@'を使用してください。
+	・l15は代替機能の@menuを使用してください。
+	・l14は代替機能はありません。input命令の引数を省略しないで下さい。
+	・これらの推奨されない機能を使用すると警告メッセージがでます。
+
+	(map/)
+	script.c
+		parse_simpleexpr()修正
+	(conf/warp/)
+	npc_warp.txt/npc_warp25.txt/npc_warp30.txt
+		変数名l0を@warp0に修正
+	(conf/npc/)
+	npc_event_hat.txt
+		変数名l15を@menuに修正
+	(doc/)
+	script_ref.txt
+		配列変数の説明追加
+		変数のプレフィックス'l'、input命令のl14、menu命令のl15の
+		説明を修正
+	
+--------------------
+//0902 by 胡蝶蘭
+
+・スクリプトが配列変数に対応。
+	・array[number]のように使います。数値型、文字列型両方使えます。
+	・使えるプレフィックスは @, $, $@ です。
+	  （一時的キャラクター変数、一時的/永続的マップサーバー変数）
+	・number==0は配列じゃない変数と値を共有します。
+	  （@hoge[0]と@hogeは同じ変数を表す）
+	・まだ仮実装段階なのでバグ報告よろしくお願いします。
+・マップサーバー変数の読込中にCtrl+Cをするとデータ破損の可能性がある問題を修正.
+・マップファイル読み込み画面がさびしいのでせめてファイル名を表示するように。
+
+	(conf/sample/)
+	npc_test_array.txt
+		配列変数テストスクリプト
+	(map/)
+	script.c
+		buildin_set(),buildin_input(),get_val(),
+		parse_simpleexpr()修正
+		buildin_getelementofarray()追加
+		do_final_script()修正など
+	map.c
+		map_readmap(),map_readallmap()修正
+
+--------------------
+//0901 by ぴざまん
+
+・露店バグの修正
+
+	(map/)
+	pc.c
+		pc_cartitem_amount() 追加。
+	vending.c
+		vending_openvending() 修正。
+	clif.c
+		clif_parse_NpcClicked() 修正。
+	pc.h 修正。
+
+--------------------
+//0900 by ぴざまん
+
+・アブラカダブラのランダムスキル発動率をabra_db.txtで設定できるように。
+・スフィアーマインとバイオプラントの微修正。
+・Noreturnマップで蝶が消費だけされるバグ修正。
+・一部のアブラ固有スキルが正しく動作しなかったバグ修正。
+	(map/)
+	mob.c
+		mob_damage()、mobskill_use() 修正。
+		mob_skillid2skillidx() 追加。
+	skill.c
+		skill_readdb()、skill_abra_dataset() 修正。
+		skill_castend_nodamage_id()、skill_castend_pos2() 修正。
+	script.c
+		buildin_warp() 修正。
+
+	skill.h 修正。
+	map.h 修正。
+	(db/)
+	abra_db.txt 追加。
+	skill_db.txt 修正。
+
+--------------------
+//0899 by 胡蝶蘭
+
+・取り巻きMOBの処理修正
+	・取り巻き召喚でコアを吐くバグ修正
+	・主が別マップに飛ぶと、テレポートで追いかけるように修正
+	・取り巻き処理をより軽く変更
+
+	(map/)
+	mob.c
+		mob_ai_sub_hard_mastersearch()をmob_ai_sub_hard_slavemob()
+		に名前を変えて処理修正。
+		mob_summonslave()修正
+
+--------------------
+//0898 by 胡蝶蘭
+
+・eathenaからCardRemoverNPCの取り込み
+	NPCデータも日本語訳してますが、かなり適当です。
+
+	(map/)
+	script.c
+		buildin_getequipcardcnt(),buildin_successremovecards()
+		buildin_failedremovecards()追加
+	(conf/sample/)
+	npc_card_remover.txt
+		カード取り外しNPCの日本語訳
+		プロンテラの精錬所の中の左下の部屋にいます
+
+・ポータルで別マップに飛ばしたMOBがそのマップに沸き直すバグ修正
+	(map/)
+	map.h
+		struct mob_dataにmメンバ追加
+	mob.c
+		mob_spawn(),mob_once_spawn()修正
+	npc.c
+		npc_parse_mob()修正
+	
+
+--------------------
+//0897 by ぴざまん
+
+・細かい調整
+・ストリップ系とケミカルプロテクション系スキルの全実装
+　本鯖での細かい仕様が分ったので実装しました。
+　確率は暫定です。
+
+	(map/)
+	pc.c
+		pc_isequip() 修正
+	skill.c
+		skill_status_change_start()、skill_castend_nodamage_id() 修正。
+		skill_abra_dataset() 修正。
+	battle.c
+		battle_get_def()、battle_get_atk2() 修正。
+		battle_get_vit()、battle_get_int() 修正。
+	(db/)
+	const.txt 修正。
+	skill_db.txt 修正。
+	cast_db.txt 修正。
+
+--------------------
+//0896 by 胡蝶蘭
+
+・永続的マップ変数機能追加
+・マップ変数を文字列型変数としても使用できるようにした
+	・今までのプレフィックス $ は永続的になります。
+	  一時的マップ変数を使用する場合はプレフィックス $@ を指定してください.
+
+	・永続的/一時的ともに文字列型に対応しています。
+	  文字列型のポストフィックスは$です。
+
+	<例> $@hoge 数値型一時マップ変数、$hoge$ 文字列型永続マップ変数
+	・永続マップ変数はデフォルトでは save/mapreg.txt に保存されます。
+	  これはmap_athena.confのmapreg_txtで設定できます。
+
+・str_dataが再割り当てされるとマップ変数が正常に使用できないバグ修正
+	・strdbからnumdbにして、変数名はstr_bufに入れるように。
+
+・map_athena.confのdelnpc,npc:clearが正しく働かないバグ修正
+
+	(map/)
+	npc.c
+		npc_delsrcfile(),npc_clearsrcfile()修正
+	script.c / script.h
+		マップ変数系かなり修正
+	map.c
+		map_read_config()修正など
+	(conf/)
+	map_athena.conf
+		mapreg_txt追加
+	(doc/)
+	conf_ref.txt
+		mapreg_txt,help_txt,motd_txt追加
+	script_ref.txt
+		文字列型変数の説明修正
+
+--------------------
+//0895 by Selena
+
+・mapflagにnozenypenaltyを追加。
+　GVGや街中のテロなどで死亡した際に、Zenyペナルティー発生を外す用。
+
+	(map/)
+	pc.c
+		pc_setrestartvalue() 修正
+	script.c
+		buildin_setmapflag()、buildin_removemapflag() 修正
+	npc.c
+		npc_parse_mapflag() 修正
+	map.h
+		map_data() 修正
+	(db/)
+	const.txt 修正。
+
+--------------------
+//0894 by ぴざまん
+
+・コーマ以外のアブラカダブラ固有スキル全実装。
+　オートスペルにはレベルアップ以外多分全部乗せれます。(オートスペルレベルアップは未テスト)
+・アブラカダブラ仮実装
+　発動スキルがレベル依存じゃありません。
+　全ての発動率が理論上均一です。
+　アイテムスキルを使って実装しているので一部の使用条件を無視します（ジェム罠気球等）
+・アイテムスキルがキャスト・ディレイ無しだったのを修正。
+
+	(map/)
+	skill.c
+		skill_castend_nodamage_id()、skill_use_id()、skill_use_pos() 修正。
+		skill_abra_dataset() 追加。
+	(db/)
+	skill_db.txt 修正。
+
+--------------------
+//0893 by 胡蝶蘭
+
+・他マップからポータルの上にワープしてきたPCがワープしない問題を修正
+・チャット中のPCをワープポータルで飛ばすかどうか設定可能に
+・MOBをワープポータルで飛ばすかどうか設定可能に
+	MOBのワープポータルを許可すると、テロが簡単にできるので注意。
+
+・アカウント変数変更と同時にファイルに書き出すように修正
+・マップデータのロード部分のログ表示はあまり重要じゃないと思うので変更。
+
+	(char/)
+	inter.c
+		mapif_parse_AccReg()でinter_accreg_save()を呼ぶように修正
+	(map/)
+	mob.c/mob.h
+		mob_warp()の引数変更と修正
+	battle.c/battle.h
+		mob_warp()呼び出しの引数修正
+		battle_config関連
+	map.c
+		map_readallmap(),map_readmap()修正
+	pc.c
+		pc_setpos()修正
+	skill.c
+		mob_warp()呼び出しの引数修正
+		skill_unit_onplace()修正
+	(conf/)
+	battle_athena.conf
+		chat_warpportal,mob_warpportalの追加
+	(doc/)
+	conf_ref.txt
+		chat_warpportal,mob_warpportalの追加
+
+--------------------
+//0892 by 胡蝶蘭
+
+・各種confファイルで別ファイルをインポートできるようにした
+	・自分のサーバー用の設定を別ファイルに記述できるようになります。
+	・全て「import: ファイル名」形式で記述します。
+	・各種confファイル（login,char,map,inter,atcommand,battle）の最後に
+	  conf/import/*_conf を読むように指定したので、そこに自分用の設定を
+	  書いておけば、変更部分のみオーバーライドします。
+	  msg,scriptのconfについては、この限りではありませんが、import命令の
+	  処理は追加されているので、自分でimport命令を書けば動きます。
+	・新しいスナップショットが出た場合などに、このconf/importフォルダを
+	  昔のAthenaからコピーするだけで自分用の設定を適用できるようになります.
+
+・map_athena.confのmapとnpcで追加したファイルを削除できるようにした
+	・上に関連する変更です。
+	・delmap,delnpc命令を使用すれば、map,npc命令で追加したファイルを
+	  読み込まないように指定できます。ここでファイル名ではなく、
+	  all と指定するとそれまでに指定されたファイルを全て読み込まなくします.
+	・map,npc命令で、ファイル名にclearを指定すると、
+	  delmap,delnpcのallと同等の動作をするようになりました。
+
+・login_athena.confのallowとdenyをクリアできるようにｓた
+	・allowおよびdeny命令でclearを指定すると以前のホスト情報を全削除します.
+
+	(conf/)
+	各種confファイルの最後にimport命令追加
+	(conf/import)
+	*.txt
+		インポートされるファイル。これらに自分用の設定を書くとよい。
+	(login/)
+	login.c
+		login_read_config()修正
+	(char/)
+	char.c/inter.c
+		char_read_config(),inter_read_config()修正
+	(map/)
+	map.c
+		map_read_config(),map_addmap()修正、map_delmap()追加
+	npc.c
+		npc_addsrcfile()修正,npc_delsrcfile(),npc_clearsrcfile()追加
+	battle.c/atcommand.c/script.c
+		battle_read_config(),atcommand_read_config(),
+		msg_read_config(),script_read_config()修正
+	(doc/)
+	conf_ref.txt
+		修正
+
+--------------------
+//0891 by (凸)
+
+・「スキル使用の後は、しばらくお待ちください」を表示するかどうか設定できるようにした。
+    ・本鯖相違スレッド　其のⅡ>>5さんのコードをパクリました。
+	(doc/)
+	conf_ref.txt 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(map/)
+	battle.h 修正。
+	battle.c
+		battle_config_read() 修正。
+	clif.c
+		clif_skill_fail() 修正。
+
+--------------------
+//0890 by 死神
+
+・ギルド倉庫を一度に一人だけが使用するように変更。(未テスト)
+・battle_athena.confからplayer_undead_nofreeze 削除。
+・@コマンド@gstorage 追加。
+・スクリプトguildstorageをguildopenstorageに変更。
+・その他細かいバグ修正。
+	(doc/)
+	conf_ref.txt 修正。
+	script_ref.txt 修正。
+	(conf/)
+	atcommand_athena.conf 修正。
+	battle_athena.conf 修正。
+	help.txt 修正。
+	(conf/sample/)
+	gstorage_test.txt 追加。
+	(char/)
+	makefile 修正。
+	int_storage.h 修正。
+	int_storage.c
+		inter_storage_delete()、inter_guild_storage_delete() 追加。
+	int_guild.c
+		guild_check_empty()、mapif_parse_BreakGuild() 修正。
+	(map/)
+	makefile 修正。
+	battle.h 修正。
+	battle.c
+		battle_config_read() 修正。
+	guild.c
+		guild_broken() 修正。
+	storage.h 修正。
+	storage.c
+		storage_guild_storageopen() 修正。
+		storage_delete()、guild_storage_delete() 追加。
+	script.c
+		buildin_guildstorage() を buildin_guildopenstorage()に変更。
+	intif.c
+		intif_parse_LoadGuildStorage() 修正。
+	mob.c
+		mob_summonslave()、mob_damage()、mob_delete() 修正。
+		mob_catch_delete()、mob_readdb() 修正。
+	skill.c
+		skill_castend_nodamage_id()、skill_status_change_start() 修正。
+	clif.c
+		clif_parse_ActionRequest() 修正。
+	atcommand.h 修正。
+	atcommand.c
+		atcommand() 修正。
+
+--------------------
+//0889 by 胡蝶蘭
+
+・文字列型一時的キャラクター変数機能追加。
+	・プレフィックス@,ポストフィックス$を使用します。（@hoge$など）
+	・inputで文字列変数を指定すると文字列入力になります。
+	・関係演算子（比較演算子）で文字列どうしを指定すると文字列の比較が
+	  できます。数値と文字列を混ぜて比較することはできません。
+	・とりあえずサンプル付けてます。
+
+	(map/)
+	map.h
+		struct map_session_dataにnpc_str,regstr,regstr_numメンバ追加
+	script.c
+		buildin_set(),get_val(),buildin_input(),op_2num()など修正
+		op_2str(),op_2()追加
+	clif.c / clif.h
+		01d5パケット長修正
+		clif_parse_NpcStringInput(),clif_scriptinputstr()追加
+	pc.c / pc.h
+		pc_readregstr(),pc_setregstr()追加
+	(doc/)
+	script_ref.txt
+		演算子の説明追加、変数の説明修正、input,menu修正
+	(conf/sample/)
+	npc_test_str.txt
+		文字列変数を使用したスクリプトの例。
+		文字列の代入、結合、比較、入力などのテストを行うもの。
+
+--------------------
+//0888 by 死神
+
+・設計から間違っていたギルド倉庫修正。(ただ複数人の使用によるバグがある可能性はまだあります。)
+・細かいバグ修正。
+	(doc/)
+	inter_server_packet.txt 修正。
+	conf_ref.txt 修正。
+	(conf/)
+	inter_athena.conf 修正。
+	help.txt 修正。
+	(common/)
+	mmo.h 修正。
+	(char/)
+	makefile 修正。
+	int_storage.h 修正。
+	int_storage.c
+		account2storage()、inter_storage_init()、storage_fromstr() 修正。
+		inter_storage_save()、mapif_load_storage() 修正。
+		mapif_parse_SaveStorage() 修正。
+		guild_storage_fromstr()、guild_storage_tostr() 追加。
+		inter_storage_save_sub()、inter_guild_storage_save_sub() 追加。
+		inter_guild_storage_save()、mapif_parse_LoadGuildStorage() 追加。
+		mapif_parse_SaveGuildStorage()、mapif_load_guild_storage() 追加。
+		mapif_save_guild_storage_ack()、guild2storage() 追加。
+	int_party.c
+		inter_party_init() 修正。
+	int_guild.h 修正。
+	int_guild.c
+		inter_guild_init() 修正。
+		inter_guild_search() 追加。
+	int_pet.c
+		inter_pet_init() 修正。
+	inter.c
+		inter_init()、inter_save()、inter_config_read() 修正。
+	(map/)
+	makefile 修正。
+	map.h 修正。
+	map.c
+		map_quit()、do_init() 修正。
+	pc.c
+		pc_setpos() 修正。
+	storage.h 修正。
+	storage.c
+		do_init_storage()、do_final_storage()、account2storage() 修正。
+		storage_storageopen()、storage_storageadd()、storage_storageget() 修正。
+		storage_storageaddfromcart()、storage_storagegettocart() 修正。
+		storage_storageclose()、storage_storage_quit() 修正。
+		storage_storage_save() 修正。
+		guild2storage()、storage_guild_storageopen() 追加。
+		guild_storage_additem() 、guild_storage_delitem() 追加。
+		storage_guild_storageadd()、storage_guild_storageget() 追加。
+		storage_guild_storageaddfromcart()、storage_guild_storagegettocart() 追加。
+		storage_guild_storageclose()、storage_guild_storage_quit() 追加。
+	intif.h 修正。
+	intif.c
+		intif_send_storage()、intif_parse_LoadStorage()、intif_parse() 修正。
+		intif_request_guild_storage()、intif_send_guild_storage() 追加。
+		intif_parse_SaveGuildStorage()、intif_parse_LoadGuildStorage() 追加。
+	clif.h 修正。
+	clif.c
+		clif_additem()、clif_parse_MoveToKafra() 修正。
+		clif_parse_MoveFromKafra()、clif_parse_MoveToKafraFromCart() 修正。
+		clif_parse_MoveFromKafraToCart()、clif_parse_CloseKafra() 修正。
+		clif_parse_LoadEndAck() 修正。
+		clif_guildstorageitemlist()、clif_guildstorageequiplist() 追加。
+		clif_updateguildstorageamount()、clif_guildstorageitemadded() 追加。
+	guild.c
+		guild_broken() 修正。
+	script.c
+		buildin_openstorage()、buildin_guildstorage() 修正。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+	mob.c
+		mob_summonslave()、mob_damage() 修正。
+	atcommand.c
+		atkillmonster_sub()、atcommand() 修正。
+
+--------------------
+//0887 by 獅子o^.^o
+
+・(db/)
+	skill_tree.txt 修正
+
+--------------------
+//0886 by ぴざまん
+
+・サーバーsnapshot
+・ファイル調整
+
+--------------------
 //0885 by huge
 
 ・ギルド共有倉庫の実装。guildstorageで開けます。

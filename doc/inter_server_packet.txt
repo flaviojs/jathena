@@ -184,6 +184,14 @@ S 303F <len>.w <guild_id>.l <dummy>.l <emblem_data>.?B
 	ギルドエンブレム変更要求 dummyは0固定
 R 383F <len>.w <guild_id>.l <dummy>.l <emblem_data>.?B
 	ギルドエンブレム変更通知
+S 3040 <castle_id>.w <index>.B
+	ギルド城データ要求
+R 3840 <castle_id>.w <index>.B <value>.l
+	ギルド城データ要求返信
+S 3041 <castle_id>.w <index>.B <value>.l
+	ギルド城データ変更要求
+R 3841 <castle_id>.w <index>.B <value>.l
+	ギルド城データ変更通知
 （以下、ギルド系追加予定）
 
 S 3080 <account_id>.l <char_id>.I <pet_type>.w <pet_lv>.w <pet_egg_id>.w 

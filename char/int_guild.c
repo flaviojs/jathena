@@ -325,6 +325,12 @@ int inter_guild_init()
 	if( (fp=fopen(guild_txt,"r"))==NULL )
 		return 1;
 	while(fgets(line,sizeof(line),fp)){
+		int i,j=0;
+		if( sscanf(line,"%d\t%%newid%%\n%n",&i,&j)==1 && j>0 && guild_newid<=i){
+			guild_newid=i;
+			continue;
+		}
+	
 		g=malloc(sizeof(struct guild));
 		if(g==NULL){
 			printf("int_guild: out of memory!\n");
@@ -447,6 +453,7 @@ int inter_guild_save()
 		return 1;
 	}
 	numdb_foreach(guild_db,inter_guild_save_sub,fp);
+//	fprintf(fp,"%d\t%%newid%%\n",guild_newid);
 	fclose(fp);
 //	printf("int_guild: %s saved.\n",guild_txt);
 

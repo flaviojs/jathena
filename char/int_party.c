@@ -91,6 +91,12 @@ int inter_party_init()
 	if( (fp=fopen(party_txt,"r"))==NULL )
 		return 1;
 	while(fgets(line,sizeof(line),fp)){
+		int i,j=0;
+		if( sscanf(line,"%d\t%%newid%%\n%n",&i,&j)==1 && j>0 && party_newid<=i){
+			party_newid=i;
+			continue;
+		}
+	
 		p=malloc(sizeof(struct party));
 		if(p==NULL){
 			printf("int_party: out of memory!\n");
@@ -104,7 +110,7 @@ int inter_party_init()
 			party_check_empty(p);
 		}
 		else{
-			printf("int_party: broken data [%s] line %d\n",party_txt,c);
+			printf("int_party: broken data [%s] line %d\n",party_txt,c+1);
 			free(p);
 		}
 		c++;
@@ -133,6 +139,7 @@ int inter_party_save()
 		return 1;
 	}
 	numdb_foreach(party_db,inter_party_save_sub,fp);
+//	fprintf(fp,"%d\t%%newid%%\n",party_newid);
 	fclose(fp);
 //	printf("int_party: %s saved.\n",party_txt);
 	return 0;

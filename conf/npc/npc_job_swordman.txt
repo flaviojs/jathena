@@ -276,7 +276,7 @@ sword_1-1.gat,7,245,0	script	　	45,1,1,{
 		warp "sword_1-1.gat",10,245;
 		end;
 Lwarp:
-		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",8;
+		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",0;
 		warp "izlude_in.gat",65,165;
 		end;
 }
@@ -289,7 +289,7 @@ sword_1-1.gat,8,207,0	script	　	45,1,1,{
 		warp "sword_1-1.gat",11,207;
 		end;
 Lwarp:
-		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",8;
+		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",0;
 		warp "izlude_in.gat",65,165;
 		end;
 }
@@ -303,7 +303,7 @@ sword_1-1.gat,8,169,0	script	　	45,1,1,{
 		warp "sword_1-1.gat",11,169;
 		end;
 Lwarp:
-		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",8;
+		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",0;
 		warp "izlude_in.gat",65,165;
 		end;
 }
@@ -311,19 +311,19 @@ Lwarp:
 //==============================================================================
 sword_1-1.gat,192,244,0	script	　	45,1,1,{
 	warp "sword_1-1.gat",215,244;
-	mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + ".第１ポイント通過",8;
+	mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + ".第１ポイント通過",0;
 	end;
 }
 //==============================================================================
 sword_1-1.gat,193,207,0	script	　	45,1,1,{
 	warp "sword_1-1.gat",215,205;
-	mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + ".第２ポイント通過",8;
+	mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + ".第２ポイント通過",0;
 	end;
 }
 //==============================================================================
 sword_1-1.gat,193,168,0	script	　	45,1,1,{
 	warp "sword_1-1.gat",215,167;
-	mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + ".第３ポイント通過",8;
+	mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + ".第３ポイント通過",0;
 	end;
 }
 //==============================================================================
@@ -338,7 +338,7 @@ sword_1-1.gat,230,242,2	script	試験場サポーター	105,{
 		mes "燃える若いパワーで立ち向かうのだ！";
 		close;
 Lwarp:
-		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",8;
+		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",0;
 		warp "izlude_in.gat",65,165;
 		end;
 }
@@ -353,7 +353,7 @@ sword_1-1.gat,230,204,2	script	試験場サポーター	105,{
 		mes "燃える若いパワーで立ち向かうのだ！";
 		close;
 Lwarp:
-		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",8;
+		mapannounce "sword_1-1.gat","試験場サポーター: 受験生 " + strcharinfo(0) + " が試験を放棄しました.",0;
 		warp "izlude_in.gat",65,165;
 		end;
 }
@@ -376,7 +376,7 @@ sword_1-1.gat,230,207,2	script	医療担当サポーター	105,{
 }
 //==============================================================================
 sword_1-1.gat,223,167,4	script	mei	92,{
-	mapannounce "sword_1-1.gat","mei: 受験生 " + strcharinfo(0) + "、試験に合格しました.",8;
+	mapannounce "sword_1-1.gat","mei: 受験生 " + strcharinfo(0) + "、試験に合格しました.",0;
 	set change_sword,5;
 	mes "[メイ]";
 	mes "試験の合格、おめでとうございます！";

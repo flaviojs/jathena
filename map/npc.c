@@ -183,10 +183,12 @@ int npc_event_do_sub(void *key,void *data,va_list ap)
 int npc_event_do(const char *name)
 {
 	int c=0;
-	char buf[64]="";
+	
+	if(*name==':' && name[1]==':'){
+		return npc_event_doall(name+2);
+	}
 
-	strcpy(buf,name);
-	strdb_foreach(ev_db,npc_event_do_sub,&c,buf);
+	strdb_foreach(ev_db,npc_event_do_sub,&c,name);
 	return c;
 }
 

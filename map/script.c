@@ -169,6 +169,7 @@ int buildin_agitend(struct script_state *st);
 int buildin_getcastlename(struct script_state *st);
 int buildin_getcastledata(struct script_state *st);
 int buildin_setcastledata(struct script_state *st);
+int buildin_requestguildinfo(struct script_state *st);
 int buildin_getequipcardcnt(struct script_state *st);
 int buildin_successremovecards(struct script_state *st);
 int buildin_failedremovecards(struct script_state *st);
@@ -285,6 +286,7 @@ struct {
 	{buildin_getcastlename,"getcastlename","s"},
 	{buildin_getcastledata,"getcastledata","si"},
 	{buildin_setcastledata,"setcastledata","sii"},
+	{buildin_requestguildinfo,"requestguildinfo","i*"},
 	{buildin_getequipcardcnt,"getequipcardcnt","i"},
 	{buildin_successremovecards,"successremovecards","i"},
 	{buildin_failedremovecards,"failedremovecards","ii"},
@@ -3258,14 +3260,26 @@ int buildin_getcastledata(struct script_state *st)
 {
 	char *mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	int index=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	char *event=NULL;	
 	struct guild_castle *gc;
 	int i,j;
+	
+	if( st->end>st->start+4 && index==0){
+		for(i=0,j=-1;i<MAX_GUILDCASTLE;i++)
+			if( (gc=guild_castle_search(i)) != NULL &&
+				strcmp(mapname,gc->map_name)==0 )
+				j=i;
+		if(j>=0){
+			event=conv_str(st,& (st->stack->stack_data[st->start+4]));
+			guild_addcastleinfoevent(j,17,event);
+		}
+	}
 
 	for(i=0;i<MAX_GUILDCASTLE;i++){
 		if( (gc=guild_castle_search(i)) != NULL ){
 			if(strcmp(mapname,gc->map_name)==0){
 				switch(index){
-				case 0: for(j=1;j<18;j++) intif_guild_castle_dataload(gc->castle_id,j); break;  // Initialize[AgitInit]
+				case 0: for(j=1;j<18;j++) guild_castledataload(gc->castle_id,j); break;  // Initialize[AgitInit]
 				case 1: push_val(st->stack,C_INT,gc->guild_id); break;
 				case 2: push_val(st->stack,C_INT,gc->economy); break;
 				case 3: push_val(st->stack,C_INT,gc->defense); break;
@@ -3326,13 +3340,30 @@ int buildin_setcastledata(struct script_state *st)
 				case 17: gc->visibleG7 = value; break;
 				default: return 0;
 				}
-				intif_guild_castle_datasave(gc->castle_id,index,value);
+				guild_castledatasave(gc->castle_id,index,value);
 				return 0;
 			}
 		}
 	}
 	return 0;
 }
+
+/* =====================================================================
+ * ギルド情報を要求する
+ * ---------------------------------------------------------------------
+ */
+int buildin_requestguildinfo(struct script_state *st)
+{
+	int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	char *event=NULL;
+	
+	if( st->end>st->start+3 )
+		event=conv_str(st,& (st->stack->stack_data[st->start+3]));
+	
+	guild_npc_request_info(guild_id,event);	
+	return 0;
+}
+
 /* =====================================================================
  * カードの数を得る
  * ---------------------------------------------------------------------

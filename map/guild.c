@@ -18,6 +18,13 @@
 static struct dbt *guild_db;
 static struct dbt *castle_db;
 static struct dbt *guild_expcache_db;
+static struct dbt *guild_infoevent_db;
+static struct dbt *guild_castleinfoevent_db;
+
+struct eventlist {
+	char name[50];
+	struct eventlist *next;
+};
 
 // ギルドのEXPキャッシュのフラッシュに関連する定数
 #define GUILD_PAYEXP_INVERVAL 10000	// 間隔(キャッシュの最大生存時間、ミリ秒)
@@ -81,8 +88,7 @@ static int guild_read_castledb(void)
 
 		numdb_insert(castle_db,gc->castle_id,gc);
 
-		//占領ギルド問い合わせはGVG開始時に。
-//		intif_guild_castle_info(gc->castle_id);
+		//intif_guild_castle_info(gc->castle_id);
 
 		ln++;
 	}
@@ -97,6 +103,8 @@ void do_init_guild(void)
 	guild_db=numdb_init();
 	castle_db=numdb_init();
 	guild_expcache_db=numdb_init();
+	guild_infoevent_db=numdb_init();
+	guild_castleinfoevent_db=numdb_init();
 
 	guild_read_castledb();
 
@@ -276,6 +284,29 @@ int guild_request_info(int guild_id)
 //		printf("guild_request_info\n");
 	return intif_guild_request_info(guild_id);
 }
+// イベント付き情報要求
+int guild_npc_request_info(int guild_id,const char *event)
+{
+	struct eventlist *ev;
+	
+	if( guild_search(guild_id) ){
+		if(event && *event)
+			npc_event_do(event);
+		return 0;
+	}
+
+	if(event==NULL || *event==0)
+		return guild_request_info(guild_id);
+
+	if((ev=(struct eventlist *)malloc(sizeof(struct eventlist)) )==NULL){
+		printf("guild_npc_request_info: out of memory !");
+		exit(0);
+	}
+	memcpy(ev->name,event,sizeof(ev->name));
+	ev->next=(struct eventlist *)numdb_search(guild_infoevent_db,guild_id);
+	numdb_insert(guild_infoevent_db,guild_id,ev);
+	return guild_request_info(guild_id);
+}
 
 // 所属キャラの確認
 int guild_check_member(const struct guild *g)
@@ -321,6 +352,7 @@ int guild_recv_info(struct guild *sg)
 {
 	struct guild *g,before;
 	int i,bm,m;
+	struct eventlist *ev,*ev2;
 	
 	if((g=numdb_search(guild_db,sg->guild_id))==NULL){
 		g=malloc(sizeof(struct guild));
@@ -373,6 +405,14 @@ int guild_recv_info(struct guild *sg)
 			clif_guild_notice(sd,g);
 			sd->guild_emblem_id=g->emblem_id;
 			sd->guild_sended=1;
+		}
+	}
+
+	// イベントの発生
+	if( (ev=numdb_search(guild_infoevent_db,sg->guild_id))!=NULL ){
+		numdb_erase(guild_infoevent_db,sg->guild_id);
+		for(;ev;ev2=ev->next,free(ev),ev=ev2){
+			npc_event_do(ev->name);
 		}
 	}
 
@@ -1111,9 +1151,109 @@ int guild_break(struct map_session_data *sd,char *name)
 	return 0;
 }
 
-//-----------------------------
-// <Agit>
-//-----------------------------
+// ギルド城データ要求
+int guild_castledataload(int castle_id,int index)
+{
+	return intif_guild_castle_dataload(castle_id,index);
+}
+// ギルド城情報所得時イベント追加
+int guild_addcastleinfoevent(int castle_id,int index,const char *name)
+{
+	struct eventlist *ev;
+	int code=castle_id|(index<<16);
+	
+	if( name==NULL || *name==0 )
+		return 0;
+		
+	if( (ev=malloc(sizeof(struct eventlist)))==NULL ){
+		printf("guild_addcastleinfoevent: out of memory !!");
+		exit(0);
+	}
+	memcpy(ev->name,name,sizeof(ev->name));
+	ev->next=numdb_search(guild_castleinfoevent_db,code);
+	numdb_insert(guild_castleinfoevent_db,code,ev);
+	return 0;
+}
+
+// ギルド城データ要求返信
+int guild_castledataloadack(int castle_id,int index,int value)
+{
+	struct guild_castle *gc=guild_castle_search(castle_id);
+	int code=castle_id|(index<<16);
+	struct eventlist *ev,*ev2;
+	
+	if(gc==NULL){
+		return 0;
+	}
+	switch(index){
+	case 1: gc->guild_id = value; break;
+	case 2: gc->economy = value; break;
+	case 3: gc->defense = value; break;
+	case 4: gc->triggerE = value; break;
+	case 5: gc->triggerD = value; break;
+	case 6: gc->nextTime = value; break;
+	case 7: gc->payTime = value; break;
+	case 8: gc->createTime = value; break;
+	case 9: gc->visibleC = value; break;
+	case 10: gc->visibleG0 = value; break;
+	case 11: gc->visibleG1 = value; break;
+	case 12: gc->visibleG2 = value; break;
+	case 13: gc->visibleG3 = value; break;
+	case 14: gc->visibleG4 = value; break;
+	case 15: gc->visibleG5 = value; break;
+	case 16: gc->visibleG6 = value; break;
+	case 17: gc->visibleG7 = value; break;
+	default:
+		printf("guild_castledataloadack ERROR!! (Not found index=%d)\n", index);
+		return 0;
+	}
+	if( (ev=numdb_search(guild_castleinfoevent_db,code))!=NULL ){
+		numdb_erase(guild_castleinfoevent_db,code);
+		for(;ev;ev2=ev->next,free(ev),ev=ev2){
+			npc_event_do(ev->name);
+		}
+	}
+	return 1;
+}
+// ギルド城データ変更要求
+int guild_castledatasave(int castle_id,int index,int value)
+{
+	return intif_guild_castle_datasave(castle_id,index,value);
+}
+
+// ギルド城データ変更通知
+int guild_castledatasaveack(int castle_id,int index,int value)
+{
+	struct guild_castle *gc=guild_castle_search(castle_id);
+	if(gc==NULL){
+		return 0;
+	}
+	switch(index){
+	case 1: gc->guild_id = value; break;
+	case 2: gc->economy = value; break;
+	case 3: gc->defense = value; break;
+	case 4: gc->triggerE = value; break;
+	case 5: gc->triggerD = value; break;
+	case 6: gc->nextTime = value; break;
+	case 7: gc->payTime = value; break;
+	case 8: gc->createTime = value; break;
+	case 9: gc->visibleC = value; break;
+	case 10: gc->visibleG0 = value; break;
+	case 11: gc->visibleG1 = value; break;
+	case 12: gc->visibleG2 = value; break;
+	case 13: gc->visibleG3 = value; break;
+	case 14: gc->visibleG4 = value; break;
+	case 15: gc->visibleG5 = value; break;
+	case 16: gc->visibleG6 = value; break;
+	case 17: gc->visibleG7 = value; break;
+	default:
+		printf("guild_castledatasaveack ERROR!! (Not found index=%d)\n", index);
+		return 0;
+	}
+	return 1;
+}
+
+
 
 int guild_agit_start(void)
 {	// Run All NPC_Event[OnAgitStart]
