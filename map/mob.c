@@ -75,6 +75,7 @@ int mob_spawn_dataset(struct mob_data *md,const char *mobname,int class)
 	md->timer = -1;
 	md->target_id=0;
 	md->attacked_id=0;
+	md->speed=mob_db[class].speed;
 
 	return 0;
 }

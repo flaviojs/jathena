@@ -516,11 +516,13 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 	if(damage==0)
 		return 0;
 
-	if(bl->prev==NULL || target->prev==NULL)
-		return 0;
+	if(bl) {
+		if(bl->prev==NULL || target->prev==NULL)
+			return 0;
 
-	if(bl->type==BL_PC)
-		sd=(struct map_session_data *)bl;
+		if(bl->type==BL_PC)
+			sd=(struct map_session_data *)bl;
+	}
 		
 	if(damage<0)
 		return battle_heal(bl,target,-damage,0);

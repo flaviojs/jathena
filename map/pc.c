@@ -2695,7 +2695,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	// pvp
 	if( map[sd->bl.m].flag.pvp){
 		sd->pvp_point-=5;
-		if( src->type==BL_PC )
+		if(src && src->type==BL_PC )
 			((struct map_session_data *)src)->pvp_point++;
 	}
 

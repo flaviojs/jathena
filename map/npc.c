@@ -865,11 +865,9 @@ int npc_parse_mob(char *w1,char *w2,char *w3,char *w4)
 		md->spawndelay1=delay1;
 		md->spawndelay2=delay2;
 
-		md->state.state=0;
-		md->state.skillstate=0;
+		memset(&md->state,0,sizeof(md->state));
 		md->timer = -1;
 		md->target_id=0;
-		md->state.targettype=0;
 		md->attacked_id=0;
 		md->speed=mob_db[class].speed;
 

@@ -1805,6 +1805,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 			pc_movepos(sd,x,y);
 		break;
 	}
+
 	return 0;
 }
 
@@ -1951,7 +1952,6 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		limit=500;
 		interval=500;
 		range=2;
-		count=2*(skilllv);
 		break;
 
 	case WZ_VERMILION:			/* ロードオブヴァーミリオン */
@@ -3973,7 +3973,7 @@ struct skill_unit_group *skill_initunitgroup(struct block_list *src,
 	int i;
 	struct skill_unit_group *group=NULL, *list=NULL;
 	int maxsug=0;
-	
+
 	if(src->type==BL_PC){
 		list=((struct map_session_data *)src)->skillunit;
 		maxsug=MAX_SKILLUNITGROUP;
@@ -4049,7 +4049,7 @@ int skill_delunitgroup(struct skill_unit_group *group)
 
 /*	printf("delunitgroup %d\n",group->group_id); */
 
-	group->alive_count=-1;
+	group->alive_count=0;
 	if(group->unit!=NULL){
 		for(i=0;i<group->unit_count;i++)
 			if(group->unit[i].alive)

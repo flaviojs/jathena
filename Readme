@@ -1,4 +1,22 @@
 --------------
+//0540 by 死神
+
+・バグ修正と問題ありそうな所修正。(これでWZ_FIREPILLARとブリッツに
+よる鯖ダウンはなくなるはず...)
+	map.c
+		map_foreachinarea()、map_foreachinmovearea() 修正。
+	skill.c
+		skill_unitsetting()、skill_delunitgroup() 修正。
+	pc.c
+		pc_damage() 修正。
+	battle.c
+		battle_damage() 修正。
+	npc.c
+		npc_parse_mob() 修正。
+	mob.c
+		mob_spawn_dataset() 修正。
+
+--------------
 //0539 by 死神
 
 ・clif_pvpset()をマップからAREAかマップかを設定できるように変更。(pvpの時の処理は0535以前の物に戻そました。自分だけに転送してもいいような気もしますが...)
