@@ -1,3 +1,26 @@
+--------------------
+//0837 by 死神
+
+・スキル関係の細かい修正。
+・フロストノヴァをユニット設置式に変更。
+・ロードオブヴァーミリオンの範囲を11*11に修正と40ヒットするように変更。(ラグナゲートの情報。
+13*13説もありますが...)
+・ユピテルサンダーのノックバックを2~7に変更。
+・ストームガストの攻撃回数をレベル依存から10回に固定。
+・サンクチュアリのノックバックを3から2に変更。(aegis鯖でノックバックがあることは確認しましたがどれぐらいなのかが不明だったので少し減らしてみました。)
+・モンスターの詠唱時間が早くなっていた問題修正。(dex補正が入ってしまったせいです。)
+・その他オートスペル当たりの細かい修正。
+	(db/)
+	skill_db.txt 修正。
+	(map/)
+	skill.c
+		skill_castfix()、skill_delayfix()、skill_timerskill() 修正。
+		skill_castend_pos2()、skill_unitsetting()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_get_unit_id()、skill_attack() 修正。
+	battle.c
+		battle_calc_magic_attack()、battle_weapon_attack() 修正。
+
+--------------------
 //0836 by 釈尊
 
 ・モンスターの取り巻き召還の間隔を中ボス以外完全修正。

@@ -2983,7 +2983,7 @@ struct Damage battle_calc_magic_attack(
 		case PR_SANCTUARY:	// サンクチュアリ
 			damage = (skill_lv>6)?388:skill_lv*50;
 			normalmagic_flag=0;
-			blewcount=3|0x10000;
+			blewcount=2|0x10000;
 			break;
 		case ALL_RESURRECTION:
 		case PR_TURNUNDEAD:	// 攻撃リザレクションとターンアンデッド
@@ -3042,10 +3042,9 @@ struct Damage battle_calc_magic_attack(
 			matk2+=50;
 			break;
 		case WZ_METEOR:
-//			MATK_FIX( skill_lv*30+80, 100 );
 			break;
 		case WZ_JUPITEL:	// ユピテルサンダー
-			blewcount=(skill_lv>6)?6:skill_lv;
+			blewcount=(skill_lv>6)? 7:skill_lv+1;
 			break;
 		case WZ_VERMILION:	// ロードオブバーミリオン
 			MATK_FIX( skill_lv*20+80, 100 );
@@ -3373,43 +3372,43 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		if(!(target->prev == NULL || (target->type == BL_PC && pc_isdead((struct map_session_data *)target) ) ) ) {
 			if(wd.damage > 0 || wd.damage2 > 0)
 				skill_additional_effect(src,target,0,0,BF_WEAPON,tick);
-			if(sc_data && sc_data[SC_AUTOSPELL].timer != -1 && rand()%100 < sc_data[SC_AUTOSPELL].val4) {
-				int skilllv=sc_data[SC_AUTOSPELL].val3,i;
-				i = rand()%100;
-				if(i >= 50) skilllv -= 2;
-				else if(i >= 15) skilllv--;
-				if(skilllv < 1) skilllv = 1;
-				if(sd) {
-					int sp = skill_get_sp(sc_data[SC_AUTOSPELL].val2,skilllv)*2/3;
-					if(sd->status.sp >= sp) {
-						pc_heal(sd,0,-sp);
-						if((i=skill_get_inf(sc_data[SC_AUTOSPELL].val2) == 2) || i == 32)
-							skill_castend_pos2(src,target->x,target->y,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
-						else
-							skill_castend_damage_id(src,target,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
-					}
-				}
-				else {
+		}
+		if(sc_data && sc_data[SC_AUTOSPELL].timer != -1 && rand()%100 < sc_data[SC_AUTOSPELL].val4) {
+			int skilllv=sc_data[SC_AUTOSPELL].val3,i,f=0;
+			i = rand()%100;
+			if(i >= 50) skilllv -= 2;
+			else if(i >= 15) skilllv--;
+			if(skilllv < 1) skilllv = 1;
+			if(sd) {
+				int sp = skill_get_sp(sc_data[SC_AUTOSPELL].val2,skilllv)*2/3;
+				if(sd->status.sp >= sp) {
 					if((i=skill_get_inf(sc_data[SC_AUTOSPELL].val2) == 2) || i == 32)
-						skill_castend_pos2(src,target->x,target->y,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+						f = skill_castend_pos2(src,target->x,target->y,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
 					else
-						skill_castend_damage_id(src,target,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+						f = skill_castend_damage_id(src,target,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+					if(!f) pc_heal(sd,0,-sp);
 				}
 			}
-			if(sd && sd->autospell_id > 0 && sd->autospell_lv > 0 && rand()%100 < sd->autospell_rate) {
-				int skilllv=sd->autospell_lv,i,sp;
-				i = rand()%100;
-				if(i >= 50) skilllv -= 2;
-				else if(i >= 15) skilllv--;
-				if(skilllv < 1) skilllv = 1;
-				sp = skill_get_sp(sd->autospell_id,skilllv)*2/3;
-				if(sd->status.sp >= sp) {
-					pc_heal(sd,0,-sp);
-					if((i=skill_get_inf(sd->autospell_id) == 2) || i == 32)
-						skill_castend_pos2(src,target->x,target->y,sd->autospell_id,skilllv,tick,flag);
-					else
-						skill_castend_damage_id(src,target,sd->autospell_id,skilllv,tick,flag);
-				}
+			else {
+				if((i=skill_get_inf(sc_data[SC_AUTOSPELL].val2) == 2) || i == 32)
+					skill_castend_pos2(src,target->x,target->y,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+				else
+					skill_castend_damage_id(src,target,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+			}
+		}
+		if(sd && sd->autospell_id > 0 && sd->autospell_lv > 0 && rand()%100 < sd->autospell_rate) {
+			int skilllv=sd->autospell_lv,i,f=0,sp;
+			i = rand()%100;
+			if(i >= 50) skilllv -= 2;
+			else if(i >= 15) skilllv--;
+			if(skilllv < 1) skilllv = 1;
+			sp = skill_get_sp(sd->autospell_id,skilllv)*2/3;
+			if(sd->status.sp >= sp) {
+				if((i=skill_get_inf(sd->autospell_id) == 2) || i == 32)
+					f = skill_castend_pos2(src,target->x,target->y,sd->autospell_id,skilllv,tick,flag);
+				else
+					f = skill_castend_damage_id(src,target,sd->autospell_id,skilllv,tick,flag);
+				if(!f) pc_heal(sd,0,-sp);
 			}
 		}
 		if(t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1 && t_sc_data[SC_AUTOCOUNTER].val4 > 0) {
