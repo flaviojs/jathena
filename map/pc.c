@@ -117,12 +117,47 @@ int pc_setghosttimer(struct map_session_data *sd,int val)
 	return 0;
 }
 
-
 int pc_delghosttimer(struct map_session_data *sd)
 {
 	if(sd->ghost_timer != -1) {
 		delete_timer(sd->ghost_timer,pc_ghost_timer);
 		sd->ghost_timer = -1;
+	}
+	return 0;
+}
+
+static int pc_gvg_ghost_timer(int tid,unsigned int tick,int id,int data)
+{
+	struct map_session_data *sd;
+
+	sd=(struct map_session_data *)map_id2sd(id);
+	if(sd==NULL || sd->bl.type!=BL_PC)
+		return 1;
+
+	if(sd->gvg_ghost_timer != tid){
+		if(battle_config.error_log)
+			printf("gvg_ghost_timer %d != %d\n",sd->gvg_ghost_timer,tid);
+		return 0;
+	}
+	sd->gvg_ghost_timer=-1;
+
+	return 0;
+}
+
+
+int pc_setgvg_ghosttimer(struct map_session_data *sd,int val)
+{
+	if(sd->gvg_ghost_timer != -1)
+		delete_timer(sd->gvg_ghost_timer,pc_gvg_ghost_timer);
+	sd->gvg_ghost_timer = add_timer(gettick()+val,pc_gvg_ghost_timer,sd->bl.id,0);
+	return 0;
+}
+
+int pc_delgvg_ghosttimer(struct map_session_data *sd)
+{
+	if(sd->gvg_ghost_timer != -1) {
+		delete_timer(sd->gvg_ghost_timer,pc_gvg_ghost_timer);
+		sd->gvg_ghost_timer = -1;
 	}
 	return 0;
 }
@@ -526,6 +561,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->skillitem=-1;
 	sd->skillitemlv=-1;
 	sd->ghost_timer=-1;
+	sd->gvg_ghost_timer=-1;
 	sd->sg_count=0;
 
 	sd->deal_locked =0;
@@ -3165,7 +3201,7 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 		}
 	}
 
-	if(map[sd->bl.m].flag.gvg) sd->state.attack_continue = 0;
+//	if(map[sd->bl.m].flag.gvg) sd->state.attack_continue = 0;
 	if(sd->state.attack_continue) {
 		sd->attacktimer=add_timer(sd->attackabletime,pc_attack_timer,sd->bl.id,0);
 	}
@@ -3192,7 +3228,7 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
 	if(sd->attacktimer != -1)
 		pc_stopattack(sd);
 	sd->attacktarget=target_id;
-	if(map[sd->bl.m].flag.gvg) type = 0;
+//	if(map[sd->bl.m].flag.gvg) type = 0;
 	sd->state.attack_continue=type;
 
 	d=DIFF_TICK(sd->attackabletime,gettick());
@@ -5322,6 +5358,7 @@ int do_init_pc(void)
 	add_timer_func_list(pc_attack_timer,"pc_attack_timer");
 	add_timer_func_list(pc_natural_heal,"pc_natural_heal");
 	add_timer_func_list(pc_ghost_timer,"pc_ghost_timer");
+	add_timer_func_list(pc_gvg_ghost_timer,"pc_gvg_ghost_timer");
 	add_timer_func_list(pc_eventtimer,"pc_eventtimer");
 	add_timer_func_list(pc_calc_pvprank_timer,"pc_calc_pvprank_timer");
 	add_timer_func_list(pc_autosave,"pc_autosave");

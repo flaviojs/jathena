@@ -3253,6 +3253,11 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		return 0;
 	if(target->type == BL_PC && pc_isdead((struct map_session_data *)target))
 		return 0;
+	if(map[src->m].flag.gvg){
+		if(target->type == BL_PC
+			&& ((struct map_session_data *)target)->gvg_ghost_timer != -1)
+				return 0;
+	}
 
 	opt1=battle_get_opt1(src);
 	if(opt1 && *opt1 > 0) {
@@ -3614,6 +3619,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.gvg_long_damage_rate = 100;
 	battle_config.gvg_magic_damage_rate = 100;
 	battle_config.gvg_misc_damage_rate = 100;
+	battle_config.gvg_ghost_time = 10000;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -3720,9 +3726,10 @@ int battle_config_read(const char *cfgName)
 			{ "player_skill_reiteration", &battle_config.pc_skill_reiteration },
 			{ "monster_skill_reiteration", &battle_config.monster_skill_reiteration },
 			{ "gvg_short_attack_damage_rate" ,&battle_config.gvg_short_damage_rate },
-			{ "gvg_long_attack_damage_rate" ,&battle_config.gvg_short_damage_rate },
-			{ "gvg_magic_attack_damage_rate" ,&battle_config.gvg_short_damage_rate },
-			{ "gvg_misc_attack_damage_rate" ,&battle_config.gvg_short_damage_rate },
+			{ "gvg_long_attack_damage_rate" ,&battle_config.gvg_long_damage_rate },
+			{ "gvg_magic_attack_damage_rate" ,&battle_config.gvg_magic_damage_rate },
+			{ "gvg_misc_attack_damage_rate" ,&battle_config.gvg_misc_damage_rate },
+			{ "gvg_ghost_time" ,&battle_config.gvg_ghost_time },
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

@@ -776,6 +776,7 @@ int map_quit(struct map_session_data *sd)
 	pc_stop_walking(sd,0);
 	pc_stopattack(sd);
 	pc_delghosttimer(sd);
+	pc_delgvg_ghosttimer(sd);
 	pc_delspiritball(sd,sd->spiritball,1);
 	skill_gangsterparadise(sd,0);
 

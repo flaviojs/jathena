@@ -1,4 +1,32 @@
 --------------------
+//0772 by ぴざまん
+
+・シーズモード下で以下の点を修正
+　・連続して攻撃できなくなっていたバグ修正
+　・ダメージ軽減率が正しく設定できなかったバグ修正
+　・無敵時間実装。battle_athena.confのgvg_ghost_timeで設定できます
+
+・ハイディングで魔法攻撃等を回避できなかったバグ修正
+
+	(map/)
+	skill.c
+		skill_attack()、skill_unit_onplace()、skill_check_condition() 修正。
+	clif.c
+		clif_parse_ActionRequest()、clif_parse_UseItem() 修正。
+		clif_parse_UseSkillToId()、clif_parse_UseSkillToPos() 修正。
+		clif_parse_UseSkillMap()、clif_parse_WalkToXY() 修正。
+	pc.c
+		do_init_pc()、pc_authok() 修正。
+		pc_attack()、pc_attack_timer() 修正。
+		pc_setgvg_ghosttimer()、pc_delgvg_ghosttimer() 追加。
+		pc_gvg_ghost_timer() 追加。
+	map.c
+		map_quit() 修正
+	battle.c
+		battle_config_read()、battle_weapon_attack() 修正。
+	battle.h 修正。
+	pc.h 修正。
+--------------------
 //0771 by huge
 
 ・スペルブレイカー実装
