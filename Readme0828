@@ -1,4 +1,11 @@
 --------------------
+//0859 by 獅子o^.^o
+Alchemist warp 修正(Aegis参考)
+(/conf)
+    (/warp)
+		npc_warp_job.txt 修正
+		
+--------------------
 //0858 by 死神
 
 ・細かい修正。

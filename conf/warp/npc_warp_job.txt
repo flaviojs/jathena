@@ -24,7 +24,7 @@ sword_1-1.gat,161,27,0	warp	swd103	1,1,sword_1-1.gat,11,207
 sword_1-1.gat,223,205,0	warp	swd104	1,1,sword_1-1.gat,11,168
 sword_1-1.gat,223,243,0	warp	swd105	1,1,sword_1-1.gat,11,206
 sword_1-1.gat,239,117,0	warp	swd106	1,1,sword_1-1.gat,11,169
-// 1st’Ê˜H
+// 1st????
 //==================================================================
 sword_1-1.gat,16,250,0	script	1st_fall	-1,{
 	set @r,rand(5);
@@ -86,7 +86,7 @@ sword_1-1.gat,181,250,0	script	1_blank_13_c	139,1,0,{doevent "1st_fall";end;}
 sword_1-1.gat,180,238,0	script	1_blank_14_a	139,0,1,{doevent "1st_fall";end;}
 sword_1-1.gat,183,238,0	script	1_blank_14_b	139,0,1,{doevent "1st_fall";end;}
 sword_1-1.gat,181,239,0	script	1_blank_14_c	139,1,0,{doevent "1st_fall";end;}
-// 2nd’Ê˜H
+// 2nd????
 //==================================================================
 sword_1-1.gat,56,211,0	script	2nd_fall	-1,{
 	set @r,rand(5);
@@ -143,7 +143,7 @@ sword_1-1.gat,132,201,0	script	2_blank_9_0	139,2,0,{doevent "2nd_fall";end;}
 sword_1-1.gat,155,201,0	script	2_blank_9_a	139,21,0,{doevent "2nd_fall";end;}
 sword_1-1.gat,181,201,0	script	2_blank_9_b	139,2,0,{doevent "2nd_fall";end;}
 
-// 3rd’Ê˜H
+// 3rd????
 //==================================================================
 
 sword_1-1.gat,17,174,0	script	3rd_fall	-1,{
@@ -310,8 +310,8 @@ job_hunte.gat,89,68,0	warp	jhun03	3,3,job_hunte.gat,0,0
 //Alchemist
 //==============================================================================
 //Town - Alchemist , Alchemist - Town
-aldebaran.gat,224,233,0	warp	alche01	1,1,alde_alche.gat,88,113
-alde_alche.gat,88,117,0	warp	alche02	1,1,aldebaran.gat,222,221
+aldebaran.gat,54,66,0	warp	alche01	1,1,alde_alche.gat,41,174
+alde_alche.gat,41,171,0	warp	alche02	1,1,aldebaran.gat,56,68
 //Alchemist Hall 1st Floor Top Rooms
 alde_alche.gat,129,104,0	warp	alche03	1,1,alde_alche.gat,163,163
 alde_alche.gat,159,163,0	warp	alche04	1,1,alde_alche.gat,126,104
@@ -323,14 +323,16 @@ alde_alche.gat,92,18,0	warp	alche08	1,1,alde_alche.gat,50,103
 alde_alche.gat,47,77,0	warp	alche09	1,1,alde_alche.gat,155,18
 alde_alche.gat,159,18,0	warp	alche10	1,1,alde_alche.gat,50,77
 //Alchemist Hall 2nd Floor - 1st Floor Link
-alde_alche.gat,89,63,0	warp	alche11	1,1,alde_alche.gat,14,180
-alde_alche.gat,14,184,0	warp	alche12	1,1,alde_alche.gat,89,66
+alde_alche.gat,14,184,0	warp	alche11	1,1,alde_alche.gat,88,113
+alde_alche.gat,88,117,0	warp	alche12	1,1,alde_alche.gat,14,180
 //Alchemist Hall 2nd Floor Rooms
-alde_alche.gat,19,171,0	warp	alche13	1,1,alde_alche.gat,18,24
-alde_alche.gat,18,28,0	warp	alche14	1,1,alde_alche.gat,19,175
+alde_alche.gat,19,171,0	warp	alche13	1,1,aldebaran.gat,68,56
+aldebaran.gat,66,54,0	warp	alche14	1,1,alde_alche.gat,19,175
+alde_alche.gat,18,28,0	warp	alche15	1,1,alde_alche.gat,89,66
+alde_alche.gat,89,63,0	warp	alche16	1,1,alde_alche.gat,18,24
 //Alchemist Hall 3rd Floor
-alde_alche.gat,41,187,0	warp	alche15	1,1,alde_alche.gat,114,178
-alde_alche.gat,114,182,0	warp	alche16	1,1,alde_alche.gat,41,183
+alde_alche.gat,41,187,0	warp	alche17	1,1,alde_alche.gat,114,178
+alde_alche.gat,114,182,0	warp	alche18	1,1,alde_alche.gat,41,183
 
 //==============================================================================
 //Rogue
