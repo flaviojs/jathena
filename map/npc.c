@@ -1098,8 +1098,11 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 
 	}else{
 		// duplicate
-		memcpy(nd->u.scr.label_list,label_dup,
-			sizeof(struct npc_label_list)*label_dupnum);
+
+//		nd->u.scr.label_list=malloc(sizeof(struct npc_label_list)*label_dupnum);
+//		memcpy(nd->u.scr.label_list,label_dup,sizeof(struct npc_label_list)*label_dupnum);
+
+		nd->u.scr.label_list=label_dup;	// ラベルデータ共有
 		nd->u.scr.label_list_num=label_dupnum;
 	}
 
@@ -1157,7 +1160,6 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 			nd->u.scr.timer_event=te;
 			nd->u.scr.timeramount=k+1;
 		}
-		return 0;
 	}
 	nd->u.scr.nexttimer=-1;
 	nd->u.scr.timerid=-1;

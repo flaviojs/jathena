@@ -1,4 +1,20 @@
 --------------------
+//0945 by 胡蝶蘭
+
+・NPCタイマーラベルデータが正しくインポートされない問題を修正
+・NPCタイマー初期値やタイマーIDが正しく初期化されない問題を修正
+・NPCのduplicateを行うとアクセス違反が起こる場合がある問題を修正
+
+	(map/)
+	npc.c
+		npc_parse_script修正
+
+・パッチアップスレ４の87のpc.cとりこみ
+	(map/)
+	pc.c
+		カード重量制限を元に戻したもの
+
+--------------------
 //0944 by huge
 ・ギルドの上納経験値の上限を、confで制限できるように。
 ・露店の販売価格を10Mまでに制限。
@@ -61,6 +77,7 @@
 
 	(conf/gvg/)
 		prtg_cas01_guardian.txt
+
 --------------------
 //0942 by 胡蝶蘭
 
@@ -165,7 +182,7 @@ Retouch about problem of not recovery,use POTIONPITCHER skill.
 //0935 by 胡蝶蘭
 
 ・内容の同じスクリプトNPCを何度も記述しなくても言いように修正
-	・NPC定義の"script"と各部分を"duplicate(NPC名)"とすると、
+	・NPC定義の"script"と書く部分を"duplicate(NPC名)"とすると、
 	  該当のNPCとスクリプトを共有するように。NPC名は表示名ではなく
 	  エクスポートされる名前を指定します。
 	  <例>
@@ -182,7 +199,7 @@ prontera.gat,165,195,1	duplicate(カプラ職員)	カプラ職員2	112
 //	(略)
 }
 prontera.gat,165,195,1	duplicate(test1)	テスト2	112
-geffen.gat,99,99,1	duplicate(test1)	テスト3 112
+geffen.gat,99,99,1	duplicate(test1)	テスト3	112
 
 	・上のマップに存在しないNPCはイベントにもすることができる。
 	  （どのマップサーバーからでも必ず呼び出せるイベントになる）
