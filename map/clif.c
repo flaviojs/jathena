@@ -1914,7 +1914,7 @@ int clif_changeoption(struct block_list* bl)
 	for(i=0;i<sizeof(omask)/sizeof(omask[0]);i++){
 		if( option&omask[i] ){
 			if( sc_data[scnum[i]].timer==-1)
-				skill_status_change_start(bl,scnum[i],0,0,0,0);
+				skill_status_change_start(bl,scnum[i],0,0,0,0,0,0);
 		}else{
 			skill_status_change_end(bl,scnum[i],-1);
 		}
@@ -3115,6 +3115,14 @@ int clif_skill_memo(struct map_session_data *sd,int flag)
 	WFIFOSET(fd,packet_len_table[0x11e]);
 	return 0;
 }
+int clif_skill_teleportmessage(struct map_session_data *sd,int flag)
+{
+	int fd=sd->fd;
+	WFIFOW(fd,0)=0x189;
+	WFIFOW(fd,2)=flag;
+	WFIFOSET(fd,packet_len_table[0x189]);
+	return 0;
+}
 
 /*==========================================
  * モンスター情報
@@ -4201,28 +4209,35 @@ int clif_autospell(struct map_session_data *sd,int skilllv)
 {
 	int fd=sd->fd;
 	WFIFOW(fd, 0)=0x1cd;
-	
-	if(skilllv>0 && pc_checkskill(sd,MG_NAPALMBEAT))
-			WFIFOL(fd,2)= MG_NAPALMBEAT;
-	else		WFIFOL(fd,2)= 0x00000000;
-	if(skilllv>1 && pc_checkskill(sd,MG_COLDBOLT))
-			WFIFOL(fd,6)= MG_COLDBOLT;
-	else		WFIFOL(fd,6)= 0x00000000;
-	if(skilllv>1 && pc_checkskill(sd,MG_FIREBOLT))
-			WFIFOL(fd,10)= MG_FIREBOLT;
-	else		WFIFOL(fd,10)= 0x00000000;
-	if(skilllv>1 && pc_checkskill(sd,MG_LIGHTNINGBOLT))
-			WFIFOL(fd,14)= MG_LIGHTNINGBOLT;
-	else		WFIFOL(fd,14)= 0x00000000;
-	if(skilllv>4 && pc_checkskill(sd,MG_SOULSTRIKE))
-			WFIFOL(fd,18)= MG_SOULSTRIKE;
-	else		WFIFOL(fd,18)= 0x00000000;
-	if(skilllv>7 && pc_checkskill(sd,MG_FIREBALL))
-			WFIFOL(fd,22)= MG_FIREBALL;
-	else		WFIFOL(fd,22)= 0x00000000;
-	if(skilllv>9 && pc_checkskill(sd,MG_FROSTDIVER))
-			WFIFOL(fd,26)= MG_FROSTDIVER;
-	else		WFIFOL(fd,26)= 0x00000000;
+
+	if(skilllv>0 && pc_checkskill(sd,MG_NAPALMBEAT)>0)
+		WFIFOL(fd,2)= MG_NAPALMBEAT;
+	else
+		WFIFOL(fd,2)= 0x00000000;
+	if(skilllv>1 && pc_checkskill(sd,MG_COLDBOLT)>0)
+		WFIFOL(fd,6)= MG_COLDBOLT;
+	else
+		WFIFOL(fd,6)= 0x00000000;
+	if(skilllv>1 && pc_checkskill(sd,MG_FIREBOLT)>0)
+		WFIFOL(fd,10)= MG_FIREBOLT;
+	else
+		WFIFOL(fd,10)= 0x00000000;
+	if(skilllv>1 && pc_checkskill(sd,MG_LIGHTNINGBOLT)>0)
+		WFIFOL(fd,14)= MG_LIGHTNINGBOLT;
+	else
+		WFIFOL(fd,14)= 0x00000000;
+	if(skilllv>4 && pc_checkskill(sd,MG_SOULSTRIKE)>0)
+		WFIFOL(fd,18)= MG_SOULSTRIKE;
+	else
+		WFIFOL(fd,18)= 0x00000000;
+	if(skilllv>7 && pc_checkskill(sd,MG_FIREBALL)>0)
+		WFIFOL(fd,22)= MG_FIREBALL;
+	else
+		WFIFOL(fd,22)= 0x00000000;
+	if(skilllv>9 && pc_checkskill(sd,MG_FROSTDIVER)>0)
+		WFIFOL(fd,26)= MG_FROSTDIVER;
+	else
+		WFIFOL(fd,26)= 0x00000000;
 
 	WFIFOSET(fd,packet_len_table[0x1cd]);
 	return 0;
@@ -5009,13 +5024,13 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	if(sd->status.hp<sd->status.max_hp>>2 && pc_checkskill(sd,SM_AUTOBERSERK)>0 &&
 		(sd->sc_data[SC_PROVOKE].timer==-1 || sd->sc_data[SC_PROVOKE].val2==0 ))
 		// オートバーサーク発動
-		skill_status_change_start(&sd->bl,SC_PROVOKE,10,1,0,0);
+		skill_status_change_start(&sd->bl,SC_PROVOKE,10,1,0,0,0,0);
 	// option
 	clif_changeoption(&sd->bl);
 	if(sd->sc_data[SC_TRICKDEAD].timer != -1)
 		skill_status_change_end(&sd->bl,SC_TRICKDEAD,-1);
 	if(sd->special_state.infinite_endure && sd->sc_data[SC_ENDURE].timer == -1)
-		skill_status_change_start(&sd->bl,SC_ENDURE,10,1,0,0);
+		skill_status_change_start(&sd->bl,SC_ENDURE,10,1,0,0,0,0);
 
 	map_foreachinarea(clif_getareachar,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,0,sd);
 }

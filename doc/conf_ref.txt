@@ -800,13 +800,21 @@ monster_skill_nofootset
 	効果範囲にプレイヤーやモンスターがいるとスキルを置くことができません。
 	デフォルトはnoです。
 
-player_cloak_check_wall
-	プレイヤーがクローキングした時壁をチェックするかどうかです。
-	これをnoにすると壁がなくてもクローキングできます。デフォルトはyesです。
+player_cloak_check_type
+	 プレイヤークローキングの仕様を設定します。
+	0は壁チェック有り、スキル使用と攻撃で解除される。
+	1は壁チェック無し、スキル使用と攻撃で解除される。
+	2はは壁チェック有り、スキル使用と攻撃で解除されない。
+	2はは壁チェック無し、スキル使用と攻撃で解除されない。
+	デフォルトは0です。
 
-monster_cloak_check_wall
-	モンスターがクローキングした時壁をチェックするかどうかです。
-	これをnoにすると壁がなくてもクローキングできます。デフォルトはyesです。
+monster_cloak_check_type
+	 モンスタークローキングの仕様を設定します。
+	0は壁チェック有り、スキル使用と攻撃で解除される。
+	1は壁チェック無し、スキル使用と攻撃で解除される。
+	2はは壁チェック有り、スキル使用と攻撃で解除されない。
+	2はは壁チェック無し、スキル使用と攻撃で解除されない。
+	デフォルトは0です。
 
 gvg_short_attack_damage_rate
 	シーズモードで近距離物理攻撃のダメージ倍率です。デフォルトは100です。
@@ -927,8 +935,8 @@ player_skill_reiteration: no
 monster_skill_reiteration: no
 player_skill_nofootset: no
 monster_skill_nofootset: no
-player_cloak_check_wall: yes
-monster_cloak_check_wall: yes
+player_cloak_check_type: 0
+monster_cloak_check_type: 0
 gvg_short_attack_damage_rate: 100
 gvg_long_attack_damage_rate: 100
 gvg_magic_attack_damage_rate: 100

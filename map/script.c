@@ -2512,7 +2512,7 @@ int buildin_sc_start(struct script_state *st)
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	tick=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	val1=conv_num(st,& (st->stack->stack_data[st->start+4]));
-	skill_status_change_start(map_id2bl(st->rid),type,val1,0,tick,0);
+	skill_status_change_start(map_id2bl(st->rid),type,val1,0,0,0,tick,0);
 	return 0;
 }
 

@@ -211,9 +211,9 @@ int mob_get_viewclass(int class)
  */
 int mob_can_move(struct mob_data *md)
 {
-	if(md->canmove_tick > gettick() || (md->opt1 > 0 && md->opt1 != 6))
+	if(md->canmove_tick > gettick() || (md->opt1 > 0 && md->opt1 != 6) || md->option&2)
 		return 0;
-	if( md->sc_data[SC_ANKLE].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1 )	// アンクル中で動けない
+	if( md->sc_data[SC_ANKLE].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1)	// アンクル中で動けない
 		return 0;
 
 	return 1;
@@ -331,7 +331,7 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 	if( md->skilltimer!=-1 )	// スキル使用中
 		return 0;
 
-	if(md->opt1>0 || md->option&6)
+	if(md->opt1>0 || md->option&2)
 		return 0;
 
 	if(md->sc_data[SC_AUTOCOUNTER].timer != -1)
@@ -371,6 +371,8 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 		return 0;
 
 	battle_weapon_attack(&md->bl,&sd->bl,tick,0);
+	if(!(battle_config.monster_cloak_check_type&2) && md->sc_data[SC_CLOAKING].timer != -1)
+		skill_status_change_end(&md->bl,SC_CLOAKING,-1);
 
 	md->attackabletime = tick + battle_get_adelay(&md->bl);
 
@@ -653,7 +655,6 @@ int mob_spawn(int id)
 	md->next_walktime = tick+rand()%50+5000;
 	md->attackabletime = tick;
 	md->canmove_tick = tick;
-	md->sg_count=0;
 
 	md->skilltimer=-1;
 	for(i=0,c=tick-1000*3600*10;i<MAX_MOBSKILL;i++)
@@ -669,8 +670,10 @@ int mob_spawn(int id)
 	for(i=0;i<MAX_SKILLTIMERSKILL/2;i++)
 		md->skilltimerskill[i].timer = -1;
 
-	for(i=0;i<MAX_STATUSCHANGE;i++)
+	for(i=0;i<MAX_STATUSCHANGE;i++) {
 		md->sc_data[i].timer=-1;
+		md->sc_data[i].val1 = md->sc_data[i].val2 = md->sc_data[i].val3 = md->sc_data[i].val4 =0;
+	}
 	md->sc_count=0;
 	md->opt1=md->opt2=md->option=0;
 
@@ -1600,6 +1603,8 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 
 	if(md->sc_data[SC_ENDURE].timer == -1)
 		mob_stop_walking(md,3);
+	if(damage > max_hp>>2)
+		skill_stop_dancing(&md->bl);
 
 	if(md->hp > max_hp)
 		md->hp = max_hp;
@@ -1657,10 +1662,10 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 
 	md->hp-=damage;
 
-	if(md->option&6 ){
+	if(md->option&2 )
 		skill_status_change_end(&md->bl, SC_HIDING, -1);
+	if(md->option&4 )
 		skill_status_change_end(&md->bl, SC_CLOAKING, -1);
-	}
 
 	if(md->hp>0){
 		return 0;
@@ -1938,7 +1943,6 @@ int mob_class_change(struct mob_data *md,int class)
 	md->next_walktime = tick+rand()%50+5000;
 	md->attackabletime = tick;
 	md->canmove_tick = tick;
-	md->sg_count=0;
 
 	for(i=0,c=tick-1000*3600*10;i<MAX_MOBSKILL;i++)
 		md->skilldelay[i] = c;
@@ -2345,8 +2349,13 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 		return 0;
 
 	// 沈黙や異常
-	if( md->opt1>0 || md->option&6 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
+	if( md->opt1>0 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
 		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
+		return 0;
+
+	if(md->option&4 && skill_id==TF_HIDING)
+		return 0;
+	if(md->option&2 && skill_id!=TF_HIDING && skill_id!=AS_GRIMTOOTH && skill_id!=RG_BACKSTAP && skill_id!=RG_RAID)
 		return 0;
 
 	if(map[md->bl.m].flag.gvg && (skill_id == SM_ENDURE || skill_id == AL_TELEPORT || skill_id == AL_WARP ||
@@ -2360,11 +2369,9 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	if(!battle_check_range(&md->bl,target,range))
 		return 0;
 
-//	casttime=skill_castfix(&md->bl, skill_get_cast( skill_id,skill_lv) );
 //	delay=skill_delayfix(&md->bl, skill_get_delay( skill_id,skill_lv) );
-//	sd->skillcastcancel=1;
 
-	casttime=ms->casttime;
+	casttime=skill_castfix(&md->bl,ms->casttime);
 	md->state.skillcastcancel=ms->cancel;
 	md->skilldelay[skill_idx]=gettick();
 
@@ -2395,6 +2402,9 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	md->skilllv		= skill_lv;
 	md->skillidx	= skill_idx;
 
+	if(!(battle_config.monster_cloak_check_type&2) && md->sc_data[SC_CLOAKING].timer != -1 && md->skillid != AS_CLOAKING)
+		skill_status_change_end(&md->bl,SC_CLOAKING,-1);
+
 	if( casttime>0 ){
 		md->skilltimer =
 			add_timer( gettick()+casttime, mobskill_castend_id, md->bl.id, 0 );
@@ -2402,8 +2412,6 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 		md->skilltimer = -1;
 		mobskill_castend_id(md->skilltimer,gettick(),md->bl.id, 0);
 	}
-
-//	sd->canmove_tick=gettick()+casttime+delay;
 
 	return 1;
 }
@@ -2422,9 +2430,12 @@ int mobskill_use_pos( struct mob_data *md,
 	if( md->bl.prev==NULL )
 		return 0;
 
-	if( md->opt1>0 || md->option&6 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
+	if( md->opt1>0 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
 		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
 		return 0;	// 異常や沈黙など
+
+	if(md->option&2)
+		return 0;
 
 	if(map[md->bl.m].flag.gvg && (skill_id == SM_ENDURE || skill_id == AL_TELEPORT || skill_id == AL_WARP ||
 		skill_id == WZ_ICEWALL || skill_id == TF_BACKSLIDING))
@@ -2441,9 +2452,8 @@ int mobskill_use_pos( struct mob_data *md,
 	if(!battle_check_range(&md->bl,&bl,range))
 		return 0;
 
-//	casttime=skill_castfix(&sd->bl, skill_get_cast( skill_id,skill_lv) );
 //	delay=skill_delayfix(&sd->bl, skill_get_delay( skill_id,skill_lv) );
-	casttime=ms->casttime;
+	casttime=skill_castfix(&md->bl,ms->casttime);
 	md->skilldelay[skill_idx]=gettick();
 	md->state.skillcastcancel=ms->cancel;
 
@@ -2465,6 +2475,8 @@ int mobskill_use_pos( struct mob_data *md,
 	md->skillid		= skill_id;
 	md->skilllv		= skill_lv;
 	md->skillidx	= skill_idx;
+	if(!(battle_config.monster_cloak_check_type&2) && md->sc_data[SC_CLOAKING].timer != -1)
+		skill_status_change_end(&md->bl,SC_CLOAKING,-1);
 	if( casttime>0 ){
 		md->skilltimer =
 			add_timer( gettick()+casttime, mobskill_castend_pos, md->bl.id, 0 );
@@ -2472,8 +2484,6 @@ int mobskill_use_pos( struct mob_data *md,
 		md->skilltimer = -1;
 		mobskill_castend_pos(md->skilltimer,gettick(),md->bl.id, 0);
 	}
-
-//	sd->canmove_tick=gettick()+casttime+delay;
 
 	return 1;
 }

@@ -1,5 +1,60 @@
 --------------------
+//0831 by 死神
+
+・少し修正。
+・オートスペル修正。装備による物とスキルによる物を別々に適用、発動確率修正。
+・装備によるオートスペルは指定したレベルより2つ下まで判定をします。つまりレベル5を設定するとレベル3から5まで発動します。
+・battle_athana.confのplayer_cloak_check_wall、monster_cloak_check_wallをplayer_cloak_check_type、monster_cloak_check_typeに変更。
+・アイテムルート権限時間を本鯖に合わせて修正。
+・その他スキル関係の細かい修正。
+	(doc/)
+	conf_ref.txt 修正。
+	db_ref.txt 修正。
+	item_bonus.txt 修正。
+	(conf/)
+	battle_athana.conf 修正。
+	(db/)
+	item_db.txt 修正。
+	(map/)
+	map.h
+	map.c
+		block_free_max、BL_LIST_MAX 修正。
+	skill.h 修正。
+	skill.c
+		skill_additional_effect()、skill_attack()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_unit_onplace() 修正。
+		skill_status_change_end()、skill_status_change_start() 修正。
+		skill_initunitgroup()、skill_unitsetting()、skill_castfix() 修正。
+		skill_delayfix()、skill_autospell()、skill_use_id()、skill_use_pos() 修正。
+		skill_check_cloaking()、skill_unit_timer_sub()、skill_check_condition() 修正。
+	battle.h 修正。
+	battle.c
+		battle_damage()、battle_get_agi()、battle_get_speed() 修正。
+		battle_get_adelay()、battle_get_amotion()、battle_get_flee() 修正。
+		battle_weapon_attack()、battle_calc_magic_attack() 修正。
+		battle_config_read() 修正。
+	mob.c
+		mob_attack()、mob_damage()、mobskill_use_id() 修正。
+		mobskill_use_pos()、mob_spawn()、mob_class_change() 修正。
+		mob_can_move() 修正。
+	pc.c
+		pc_attack_timer()、pc_checkweighticon()、pc_calcstatus() 修正。
+		pc_damage()、pc_equipitem()、pc_unequipitem() 修正。
+		pc_bonus2()、pc_bonus3()、pc_memo()、pc_authok() 修正。
+		pc_isUseitem() 修正。
+	clif.h 修正。
+	clif.c
+		clif_changeoption()、clif_parse_LoadEndAck()、clif_autospell() 修正。
+		clif_skill_memo() 修正。
+		clif_skill_teleportmessage() 追加。
+	script.c
+		buildin_sc_start() 修正。
+	atcommnad.c
+		atcommand() 修正。
+
+--------------------
 //0830 by huge
+
 ・オートスペルで、自分の習得してるレベルよりも高いレベルで
   魔法が発動していたであろう問題を修正。
 ・オートスペルでも、ちゃんとSPが減るように修正(ど忘れ)
@@ -11,6 +66,7 @@
 
 --------------------
 //0829 by Kalen
+
 ・mob_db修正
 	自鯖用のと間違ってUPしてしまったようです。
 	本来のものに直しました。

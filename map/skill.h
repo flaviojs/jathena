@@ -93,6 +93,8 @@ int skill_clear_unitgroup(struct block_list *src);
 int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,
 	int damage,unsigned int tick);
 
+int skill_castfix( struct block_list *bl, int time );
+int skill_delayfix( struct block_list *bl, int time );
 int skill_check_unit_range(int m,int x,int y,int range,int skillid);
 int skill_check_unit_range2(int m,int x,int y,int range);
 int skill_unit_out_all( struct block_list *bl,unsigned int tick,int range);
@@ -119,7 +121,7 @@ void skill_devotion_end(struct map_session_data *md,struct map_session_data *sd,
 int skill_check_cloaking(struct block_list *bl);
 
 // ステータス異常
-int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,int tick,int flag);
+int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,int val3,int val4,int tick,int flag);
 int skill_status_change_timer(int tid, unsigned int tick, int id, int data);
 int skill_encchant_eremental_end(struct block_list *bl, int type);
 int skill_status_change_end( struct block_list* bl , int type,int tid );

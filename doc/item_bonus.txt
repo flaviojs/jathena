@@ -130,7 +130,7 @@ bonus2 bAddMDefClass,n,x;		クラスnのモンスターにx%の魔法ダメージ軽減、プレイヤー
 bonus3 bAddMonsterDropItem,n,x,y;	物理攻撃でモンスターを倒した時モンスターの種族がxならアイテムnを落とす確率y%(モンスターが落とすアイテムとは無関係の物、高い物だけ適用)
 					yは万分率で複数の種族を入れたい時はnを同じ物にしてyを0にするとxだけ反映することができる
 						0,無形　1,不死　2,動物　3,植物　4,昆虫　5,魚貝　6,悪魔　7,人間　8,天使　9,竜族　10,ボスモンスター　11,ボスモンスター以外(普通のモンスター)
-
+bonus3 bAutoSpell,n,x,y: オートスペルでスキルnをxレベルでy%確率で使用。
 
 bAddDamageClass、bAddMagicDamageClass、bAddMonsterDropItemは10個まで設定可能です。10個を越える物は無視されます。
 

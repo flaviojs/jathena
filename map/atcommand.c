@@ -1229,27 +1229,23 @@ z [0`4]•‚ÌF
 			return 1;
 		}
 		if(strcmpi(command, "@agitstart") == 0 && gm_level >= atcommand_config.agitstart){
-			if(sscanf(message, "%s", command)) {
-				if(agit_flag==1){
-					clif_displaymessage(fd,msg_table[73]);
-					return 1;
-				}
-				agit_flag=1;
-				guild_agit_start();
-				clif_displaymessage(fd,msg_table[72]);
+			if(agit_flag==1){
+				clif_displaymessage(fd,msg_table[73]);
+				return 1;
 			}
+			agit_flag=1;
+			guild_agit_start();
+			clif_displaymessage(fd,msg_table[72]);
 			return 1;
 		}
 		if(strcmpi(command, "@agitend") == 0 && gm_level >= atcommand_config.agitend){
-			if(sscanf(message, "%s", command)) {
-				if(agit_flag==0){
-					clif_displaymessage(fd,msg_table[75]);
-					return 1;
-				}
-				agit_flag=0;
-				guild_agit_end();
-				clif_displaymessage(fd,msg_table[74]);
+			if(agit_flag==0){
+				clif_displaymessage(fd,msg_table[75]);
+				return 1;
 			}
+			agit_flag=0;
+			guild_agit_end();
+			clif_displaymessage(fd,msg_table[74]);
 			return 1;
 		}
 	}
