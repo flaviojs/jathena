@@ -962,41 +962,52 @@ int map_setipport(char *name,unsigned long ip,int port)
 
 // 初期化周り
 /*==========================================
- * "conf/npc_water.txt"の第4列で水場高さ設定（ちゃんとした水場判定が実装されるまでのつなぎとして・・・）
+ * 水場ファイルの第4列で水場高さ設定（ちゃんとした水場判定が実装されるまでのつなぎとして・・・）
  *------------------------------------------
  */
-static int map_readwater(char *watermap)
+static struct {
+	char mapname[24];
+	int waterheight;
+} waterlist[512];
+
+static int map_waterheight(char *mapname)
+{
+	int n;
+	for(n=0;waterlist[n].mapname[0] && n<512;n++)
+		if(strcmp(waterlist[n].mapname,mapname)==0)
+			return waterlist[n].waterheight;
+	return 3;
+}
+
+static int map_readwater(char *watertxt)
 {
 	char line[1024];
 	FILE *fp;
+	static int n=0;
 
-	fp=fopen("conf/npc_water.txt","r");
+	fp=fopen(watertxt,"r");
 	if(fp==NULL){
-		printf("file not found: %s\n","conf/npc_water.txt");
-		return 3;
+		printf("file not found: %s\n",watertxt);
+		return 1;
 	}
-	while(fgets(line,1020,fp)){
-		char w1[1024],w2[1024],w3[1024],mapname[1024];
+	while(fgets(line,1020,fp) && n<512){
+		char w1[1024],w2[1024],w3[1024];
 		int wh=3,count;
 		if(line[0] == '/' && line[1] == '/')
 			continue;
 		if((count=sscanf(line,"%s%s%s%d",w1,w2,w3,&wh)) < 3){
 			continue;
 		}
-		sscanf(w1,"%[^,]",mapname);
-		if(strcmpi(watermap,mapname)==0){
-			if(strcmpi(w2,"mapflag")==0 && strcmpi(w3,"water")==0 && count >= 4){
-				fclose(fp);
-				return wh;
-			}else{
-				fclose(fp);
-				return 3;
-			}
+		if(strcmpi(w2,"mapflag")==0 && strcmpi(w3,"water")==0 && count >= 4){
+			strcpy(waterlist[n].mapname,w1);
+			waterlist[n].waterheight = wh;
+			n++;
 		}
 	}
 	fclose(fp);
-	return 3;
+	return 0;
 }
+
 /*==========================================
  * マップ1枚読み込み
  *------------------------------------------
@@ -1025,7 +1036,7 @@ static int map_readmap(int m,char *fn)
 	map[m].npc_num=0;
 	map[m].users=0;
 	memset(&map[m].flag,0,sizeof(map[m].flag));
-	wh=map_readwater(map[m].name);
+	wh=map_waterheight(map[m].name);
 	for(y=0;y<ys;y++){
 		p=(struct gat_1cell*)(gat+y*xs*20+14);
 		for(x=0;x<xs;x++){
@@ -1151,6 +1162,7 @@ int map_config_read(char *cfgName)
 			map_addmap(w2);
 		} else if(strcmpi(w1,"npc")==0){
 			npc_addsrcfile(w2);
+			map_readwater(w2);
 		} else if(strcmpi(w1,"data_grf")==0){
 			grfio_setdatafile(w2);
 		} else if(strcmpi(w1,"sdata_grf")==0){

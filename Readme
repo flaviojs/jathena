@@ -1,4 +1,15 @@
 --------------
+//0575 by 引退人
+・水場ファイルが"conf/npc_water.txt"固定だったのを修正
+（conf/map_athena.confのnpc:に書かれているファイルをみて水場高さ設定するように）
+	map.c
+		struct waterlist[512];	新規追加。マップファイル名と水場高さを記憶。
+		map_waterheight()	新規追加。水場の高さを返す。
+		map_readwater()		水場ファイルをみてwaterlistを設定するように修正。
+		map_readmap()		map_waterheight()を呼ぶように修正。
+		map_config_read()	"npc"でmap_readwater(w2);追加。
+
+--------------
 //0574 by いど
 
 ・サーバーSnapshot
