@@ -47,7 +47,7 @@
 #define MAX_ATTRIBUTE 4
 #define ATTRIBUTE_NORMAL 0
 #define MIN_STAR 0
-#define MAX_STAR 0
+#define MAX_STAR 3
 
 #define MIN_PORTAL_MEMO 0
 #define MAX_PORTAL_MEMO 2

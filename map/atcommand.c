@@ -351,7 +351,7 @@ get_atcommandinfo_byname(const char* name)
 {
 	int i = 0;
 	for (i = 0; atcommand_info[i].type != AtCommand_Unknown; i++)
-		if (strcmpi(atcommand_info[i].command, name) == 0)
+		if (strcmpi(atcommand_info[i].command + 1, name) == 0)
 			return &atcommand_info[i];
 	return NULL;
 }
