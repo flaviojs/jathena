@@ -1266,16 +1266,22 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->status.max_sp = battle_config.max_sp;
 
 	sd->nhealhp = 1 + (sd->paramc[2]/5) + (sd->status.max_hp/200);
-	if((skill=pc_checkskill(sd,SM_RECOVERY)) > 0)
+	if((skill=pc_checkskill(sd,SM_RECOVERY)) > 0) {
 		sd->nshealhp = skill*5 + (sd->status.max_hp*skill/500);
+		if(sd->nshealhp > 0x7fff) sd->nshealhp = 0x7fff;
+	}
 	sd->nhealsp = 1 + (sd->paramc[3]/6) + (sd->status.max_sp/100);
 	if(sd->paramc[3] >= 120)
 		sd->nhealsp += ((sd->paramc[3]-120)>>1) + 4;
-	if((skill=pc_checkskill(sd,MG_SRECOVERY)) > 0)
+	if((skill=pc_checkskill(sd,MG_SRECOVERY)) > 0) {
 		sd->nshealsp = skill*3 + (sd->status.max_sp*skill/500);
+		if(sd->nshealsp > 0x7fff) sd->nshealsp = 0x7fff;
+	}
 	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0) {
 		sd->nsshealhp = skill*4 + (sd->status.max_hp*skill/500);
 		sd->nsshealsp = skill*2 + (sd->status.max_sp*skill/500);
+		if(sd->nsshealhp > 0x7fff) sd->nsshealhp = 0x7fff;
+		if(sd->nsshealsp > 0x7fff) sd->nsshealsp = 0x7fff;
 	}
 	if(sd->hprecov_rate != 100) {
 		sd->nhealhp = sd->nhealhp*sd->hprecov_rate/100;
@@ -1339,8 +1345,12 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(sd->sc_data[SC_TWOHANDQUICKEN].timer != -1 && sd->sc_data[SC_QUAGMIRE].timer == -1 && sd->sc_data[SC_DONTFORGETME].timer == -1)	// 2HQ
 			aspd_rate -= 30;
 		if(sd->sc_data[SC_ADRENALINE].timer != -1 && sd->sc_data[SC_TWOHANDQUICKEN].timer == -1 &&
-			sd->sc_data[SC_QUAGMIRE].timer == -1 && sd->sc_data[SC_DONTFORGETME].timer == -1)	// アドレナリンラッシュ
-			aspd_rate -= 30;
+			sd->sc_data[SC_QUAGMIRE].timer == -1 && sd->sc_data[SC_DONTFORGETME].timer == -1) {	// アドレナリンラッシュ
+			if(sd->sc_data[SC_ADRENALINE].val3 || !battle_config.party_skill_penaly)
+				aspd_rate -= 30;
+			else
+				aspd_rate -= 25;
+		}
 		if(sd->sc_data[SC_SPEARSQUICKEN].timer != -1 && sd->sc_data[SC_ADRENALINE].timer == -1 &&
 			sd->sc_data[SC_TWOHANDQUICKEN].timer == -1 && sd->sc_data[SC_QUAGMIRE].timer == -1 && sd->sc_data[SC_DONTFORGETME].timer == -1)	// スピアクィッケン
 			aspd_rate -= sd->sc_data[SC_SPEARSQUICKEN].val2;
@@ -4995,7 +5005,7 @@ static int pc_natural_heal_hp(struct map_session_data *sd)
 
 	if(sd->nshealhp > 0) {
 		if(sd->inchealhptick >= battle_config.natural_heal_skill_interval && sd->status.hp < sd->status.max_hp) {
-			bonus = sd->nshealhp;;
+			bonus = sd->nshealhp;
 			while(sd->inchealhptick >= battle_config.natural_heal_skill_interval) {
 				sd->inchealhptick -= battle_config.natural_heal_skill_interval;
 				if(sd->status.hp + bonus <= sd->status.max_hp)

@@ -1,10 +1,44 @@
 --------------------
 //0868 by 死神
 
+・battle_athena.confにplayer_land_skill_limit、monster_land_skill_limit、party_skill_penaly 追加。
+・char_athena.confにparty_share_level 追加。
+・その他細かい修正。
+	(conf/)
+	char_athena.conf 修正。
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(char/)
+	char.h 修正。
+	char.c
+		char_config_read() 修正。
+	int_party.c
+		party_check_exp_share() 修正。
+	(map/)
+	map.h 修正。
+	skill.c
+		skill_attack()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_status_change_start() 修正。
+		skill_castend_pos() 修正。
+	pc.c
+		pc_calcstatus() 修正。
+	mob.c
+		mobskill_castend_pos() 修正。
+	battle.h
+	battle.c
+		battle_get_adelay()、battle_get_amotion()、battle_calc_damage() 修正。
+		battle_config_read() 修正。
+	pet.c
+		pet_data_init() 修正。
+
+--------------------
+//0868 by 死神
+
 ・マジックロッド実装とスペルブレイカー修正。
 ・マジックロッドの場合本鯖で使ってもなんの表示もなく発動の前には使ったかどうかの確認ができないのでスキル詠唱パケット(0x13e)を利用して使用する時スキル名が出るようにしています。(本鯖と違うぞとかで文句がこないように)
-・スペルブレイカー詠唱キャンセルに関係なくskill_db.txtに設定されてるskill_typeがmagicのスキルのみ破るとこができます。(ラグナゲートの説明を適用)
-・skill_db.txtの書式が変わったので注意してください。ノックバック距離の設定もできますが念の為にいっておきますがA鯖でのテストでFWのノックバック距離は2でサンクも2であることを確認しています。韓国の2003年11月19日パッチ前の鯖ではありますが2-2は適用されている所なので本鯖をの違いはないと思います。
+・スペルブレイカー詠唱キャンセルに関係なくskill_db.txtに設定されてるskill_typeがmagicのスキルのみ破ることができます。(ラグナゲートの説明を適用)
+・skill_db.txtの書式が変わったので注意してください。ノックバック距離の設定もできますが念の為にいっておきますがA鯖でのテストでFWのノックバック距離は2でサンクも2であることを確認しています。韓国の2003年11月19日パッチ前の鯖ではありますが2-2は適用されている所なので本鯖の違いはないと思います。
 ・その他スキル関係の細かい修正。
 ・0867で書き忘れ。モンスターのヒールでアンデッドモンスターが攻撃されて自滅するのでヒールやリザの場合mob_skill_db.txtのval1(値1)に1を入れるとアンデッドモンスターも攻撃を受けず回復するようになります。本鯖ではモンスターのヒールはアンデッドに関係なく回復するようです。ただ個人的にはゾンビがヒールして自滅する方が正しいと思うのでmob_skill_db.txtで設定できるようにしております。
 	(doc/)

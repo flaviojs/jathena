@@ -604,7 +604,6 @@ int pet_data_init(struct map_session_data *sd)
 		exit(1);
 	}
 
-	pd->n = 0;
 	pd->bl.m = sd->bl.m;
 	pd->bl.prev = pd->bl.next = NULL;
 	pd->bl.x = pd->to_x = sd->bl.x;

@@ -21,5 +21,6 @@ int mapif_sendallwos(int fd,unsigned char *buf,unsigned int len);
 int mapif_send(int fd,unsigned char *buf,unsigned int len);
 
 extern int autosave_interval;
+extern int party_share_level;
 
 #endif

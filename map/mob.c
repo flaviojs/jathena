@@ -2403,15 +2403,17 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 		}
 	}
 
-	maxcount = skill_get_maxcount(md->skillid);
-	if(maxcount > 0) {
-		int i,c;
-		for(i=c=0;i<MAX_MOBSKILLUNITGROUP;i++) {
-			if(md->skillunit[i].alive_count > 0 && md->skillunit[i].skill_id == md->skillid)
-				c++;
+	if(battle_config.monster_land_skill_limit) {
+		maxcount = skill_get_maxcount(md->skillid);
+		if(maxcount > 0) {
+			int i,c;
+			for(i=c=0;i<MAX_MOBSKILLUNITGROUP;i++) {
+				if(md->skillunit[i].alive_count > 0 && md->skillunit[i].skill_id == md->skillid)
+					c++;
+			}
+			if(c >= maxcount)
+				return 0;
 		}
-		if(c >= maxcount)
-			return 0;
 	}
 
 	range = skill_get_range(md->skillid,md->skilllv);

@@ -229,6 +229,9 @@ extern struct Battle_Config {
 	int pc_attack_direction_change;
 	int monster_attack_direction_change;
 	int pc_undead_nofreeze;
+	int pc_land_skill_limit;
+	int monster_land_skill_limit;
+	int party_skill_penaly;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

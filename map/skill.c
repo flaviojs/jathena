@@ -708,7 +708,8 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		if(bl->type == BL_PC) {
 			int sp = skill_get_sp(skillid,skilllv);
 			sp = sp * sc_data[SC_MAGICROD].val2 / 100;
-			if(sp < 1) sp = 1;
+			if(sp > 0x7fff) sp = 0x7fff;
+			else if(sp < 1) sp = 1;
 			((struct map_session_data *)bl)->status.sp += sp;
 			clif_heal(((struct map_session_data *)bl)->fd,SP_SP,sp);
 		}
@@ -1422,7 +1423,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case AS_GRIMTOOTH:		/* グリムトゥース */
 	case MC_CARTREVOLUTION:	/* カートレヴォリューション */
 	case NPC_SPLASHATTACK:	/* スプラッシュアタック */
-		if(flag&3){
+		if(flag&1){
 			/* 個別にダメージを与える */
 			if(bl->id!=skill_area_temp[1]){
 				int dist=0;
@@ -2046,7 +2047,13 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case AL_ANGELUS:		/* エンジェラス */
 	case PR_MAGNIFICAT:		/* マグニフィカート */
 	case PR_GLORIA:			/* グロリア */
-		if( sd==NULL || sd->status.party_id==0 || (flag&1) ){
+		if(sd == NULL) {
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
+				break;
+			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0);
+		}
+		else if(sd->status.party_id==0 || (flag&1) ){
 			/* 個別の処理 */
 			clif_skill_nodamage(bl,bl,skillid,skilllv,1);
 			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
@@ -2064,10 +2071,14 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case BS_ADRENALINE:		/* アドレナリンラッシュ */
 	case BS_WEAPONPERFECT:	/* ウェポンパーフェクション */
 	case BS_OVERTHRUST:		/* オーバートラスト */
-		if( sd==NULL || sd->status.party_id==0 || (flag&1) ){
+		if(sd == NULL) {
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,(src == bl)? 1:0,0,0,skill_get_time(skillid,skilllv),0);
+		}
+		else if(sd->status.party_id==0 || (flag&1) ){
 			/* 個別の処理 */
 			clif_skill_nodamage(bl,bl,skillid,skilllv,1);
-			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0);
+			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,(src == bl)? 1:0,0,0,skill_get_time(skillid,skilllv),0);
 		}
 		else{
 			/* パーティ全体への処理 */
@@ -2460,6 +2471,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				if(dstsd) {
 					sp = skill_get_sp(skillid,skilllv);
 					sp = sp * sc_data[SC_MAGICROD].val2 / 100;
+					if(sp > 0x7fff) sp = 0x7fff;
 					if(sp < 1) sp = 1;
 					dstsd->status.sp += sp;
 					clif_heal(dstsd->fd,SP_SP,sp);
@@ -3923,18 +3935,20 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 		}
 	}
 
-	maxcount = skill_get_maxcount(sd->skillid);
-	if(maxcount > 0) {
-		int i,c;
-		for(i=c=0;i<MAX_SKILLUNITGROUP;i++) {
-			if(sd->skillunit[i].alive_count > 0 && sd->skillunit[i].skill_id == sd->skillid)
-				c++;
-		}
-		if(c >= maxcount) {
-			clif_skill_fail(sd,sd->skillid,0,0);
-			sd->canact_tick = tick;
-			sd->canmove_tick = tick;
-			return 0;
+	if(battle_config.pc_land_skill_limit) {
+		maxcount = skill_get_maxcount(sd->skillid);
+		if(maxcount > 0) {
+			int i,c;
+			for(i=c=0;i<MAX_SKILLUNITGROUP;i++) {
+				if(sd->skillunit[i].alive_count > 0 && sd->skillunit[i].skill_id == sd->skillid)
+					c++;
+			}
+			if(c >= maxcount) {
+				clif_skill_fail(sd,sd->skillid,0,0);
+				sd->canact_tick = tick;
+				sd->canmove_tick = tick;
+				return 0;
+			}
 		}
 	}
 
@@ -5360,6 +5374,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 
 	if(bl->type==BL_PC){
 		sd=(struct map_session_data *)bl;
+
+		if(type == SC_ADRENALINE && !(skill_get_weapontype(BS_ADRENALINE)&(1<<sd->status.weapon)))
+			return 0;
 		if(type==SC_FREEZE && undead_flag && battle_config.pc_undead_nofreeze && !(flag&1))
 			return 0;
 
@@ -5380,6 +5397,10 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			printf("skill_status_change_start: neither MOB nor PC !\n");
 		return 0;
 	}
+
+	if((type == SC_ADRENALINE || type == SC_WEAPONPERFECTION || type == SC_OVERTHRUST) &&
+		sc_data[type].timer != -1 && sc_data[type].val3 && !val3)
+		return 0;
 
 	if(mode & 0x20 && (type==SC_STONE || type==SC_FREEZE ||
 		type==SC_STAN || type==SC_SLEEP || type==SC_SILENCE || type==SC_QUAGMIRE || type == SC_DECREASEAGI || type == SC_SIGNUMCRUCIS ||
@@ -5453,7 +5474,10 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			calc_flag = 1;
 			break;
 		case SC_WEAPONPERFECTION:	/* ウェポンパーフェクション */
+			if(battle_config.party_skill_penaly && !val3) tick /= 5;
+			break;
 		case SC_OVERTHRUST:			/* オーバースラスト */
+			if(battle_config.party_skill_penaly && !val3) tick /= 10;
 			break;
 		case SC_MAXIMIZEPOWER:		/* マキシマイズパワー(SPが1減る時間,val2にも) */
 			if(bl->type == BL_PC)

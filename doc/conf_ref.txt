@@ -176,6 +176,11 @@ start_point
 	「mapファイル名,X座標,Y座標」のように記述します。
 	省略可能で、デフォルトは new_1-1.gat,53,111 です。
 
+party_share_level
+	公平分配パーティの制限レベルを設定します。
+	省略可能で、デフォルトは10です。
+
+
 < 例 >
 userid: s1
 passwd: p1
@@ -190,6 +195,7 @@ autosave_time: 300
 char_maintenance: 0
 char_new: 0
 start_point: new_,150,120
+party_share_level: 10
 
 
 ==========================================================================
@@ -850,7 +856,27 @@ monster_attack_direction_change
 player_undead_nofreeze: no
 	プレイヤーが装備等によってアンデッドとして認識されている時
 	氷化するかどうかです。これをyesにすればアンデッドと認識されると
-	氷化しなくないらす。デフォルトはnoです。
+	氷化しなくなります。デフォルトはnoです。
+
+player_land_skill_limit
+	skill_db.txtで設定されている地面スキルの数制限をプレイヤーに
+	適用するかどうかです。これをyesにすれば設定されている数以上は
+	地面に設置することができなくなりますが数制限をどう変えても
+	MAX_SKILLUNITGROUPを越える数の設置はできません。
+	デフォルトはyesです。
+
+monster_land_skill_limit
+	skill_db.txtで設定されている地面スキルの数制限をモンスターに
+	適用するかどうかです。これをyesにすれば設定されている数以上は
+	地面に設置することができなくなりますが数制限をどう変えても
+	MAX_MOBSKILLUNITGROUPを越える数の設置はできません。
+	デフォルトはyesです。
+
+party_skill_penaly
+	一部のパーティスキルを使用者とパーティでスキル効果が違うように
+	するかどうかです。これの影響を受けるスキルは今の所
+	アドレナリンラッシュ、ウエポンパーフェクション、オーバートラストのみです。
+	デフォルトはyesです。
 
 
 < 例 >
@@ -967,6 +993,9 @@ mob_changetarget_byskill: no
 player_attack_direction_change:yes
 monster_attack_direction_change:yes
 player_undead_nofreeze: no
+player_land_skill_limit: yes
+monster_land_skill_limit: yes
+party_skill_penaly: yes
 
 
 =====================================================================ghos6. atcommand_athena.conf

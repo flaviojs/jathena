@@ -159,7 +159,7 @@ struct party* search_partyname(char *str)
 int party_check_exp_share(struct party *p)
 {
 	int i;
-	int maxlv=0,minlv=9999;
+	int maxlv=0,minlv=0x7fffffff;
 	for(i=0;i<MAX_PARTY;i++){
 		int lv=p->member[i].lv;
 		if( p->member[i].online ){
@@ -167,7 +167,7 @@ int party_check_exp_share(struct party *p)
 			if( maxlv < lv ) maxlv=lv;
 		}
 	}
-	return (maxlv==0 || maxlv-minlv<=10);
+	return (maxlv==0 || maxlv-minlv<=party_share_level);
 }
 // パーティが空かどうかチェック
 int party_check_empty(struct party *p)

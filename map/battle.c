@@ -628,8 +628,12 @@ int battle_get_adelay(struct block_list *bl)
 			if(sc_data[SC_TWOHANDQUICKEN].timer != -1 && sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1)	// 2HQ
 				aspd_rate -= 30;
 			if(sc_data[SC_ADRENALINE].timer != -1 && sc_data[SC_TWOHANDQUICKEN].timer == -1 &&
-				sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1)	// アドレナリンラッシュ
-				aspd_rate -= 30;
+				sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1) {	// アドレナリンラッシュ
+				if(sc_data[SC_ADRENALINE].val3 || !battle_config.party_skill_penaly)
+					aspd_rate -= 30;
+				else
+					aspd_rate -= 25;
+			}
 			if(sc_data[SC_SPEARSQUICKEN].timer != -1 && sc_data[SC_ADRENALINE].timer == -1 &&
 				sc_data[SC_TWOHANDQUICKEN].timer == -1 && sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1)	// スピアクィッケン
 				aspd_rate -= sc_data[SC_SPEARSQUICKEN].val2;
@@ -667,8 +671,12 @@ int battle_get_amotion(struct block_list *bl)
 			if(sc_data[SC_TWOHANDQUICKEN].timer != -1 && sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1)	// 2HQ
 				aspd_rate -= 30;
 			if(sc_data[SC_ADRENALINE].timer != -1 && sc_data[SC_TWOHANDQUICKEN].timer == -1 &&
-				sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1)	// アドレナリンラッシュ
-				aspd_rate -= 30;
+				sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1) {	// アドレナリンラッシュ
+				if(sc_data[SC_ADRENALINE].val3 || !battle_config.party_skill_penaly)
+					aspd_rate -= 30;
+				else
+					aspd_rate -= 25;
+			}
 			if(sc_data[SC_SPEARSQUICKEN].timer != -1 && sc_data[SC_ADRENALINE].timer == -1 &&
 				sc_data[SC_TWOHANDQUICKEN].timer == -1 && sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1)	// スピアクィッケン
 				aspd_rate -= sc_data[SC_SPEARSQUICKEN].val2;
@@ -1096,9 +1104,9 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 			skill_status_change_end( bl,SC_AETERNA,-1 );
 		}
 
-		if(sc_data[SC_ENERGYCOAT].timer!=-1 && damage>0){	// エナジーコート
+		if(sc_data[SC_ENERGYCOAT].timer!=-1 && damage>0  && flag&BF_WEAPON){	// エナジーコート
 			if(sd){
-				if(sd->status.sp>0 && flag&BF_WEAPON){
+				if(sd->status.sp>0){
 					int per = sd->status.sp * 5 / (sd->status.max_sp + 1);
 					sd->status.sp -= damage * (per * 5 + 10) / 1000;
 					if( sd->status.sp <0 ) sd->status.sp=0;
@@ -3867,6 +3875,9 @@ int battle_config_read(const char *cfgName)
 	battle_config.pc_attack_direction_change = 1;
 	battle_config.monster_attack_direction_change = 1;
 	battle_config.pc_undead_nofreeze = 0;
+	battle_config.pc_land_skill_limit = 1;
+	battle_config.monster_land_skill_limit = 1;
+	battle_config.party_skill_penaly = 1;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -3993,6 +4004,9 @@ int battle_config_read(const char *cfgName)
 			{ "player_attack_direction_change" ,&battle_config.pc_attack_direction_change },
 			{ "monster_attack_direction_change" ,&battle_config.monster_attack_direction_change },
 			{ "player_undead_nofreeze" ,&battle_config.pc_undead_nofreeze },
+			{ "player_land_skill_limit" ,&battle_config.pc_land_skill_limit },
+			{ "monster_land_skill_limit" ,&battle_config.monster_land_skill_limit },
+			{ "party_skill_penaly" ,&battle_config.party_skill_penaly },
 		};
 		
 		if(line[0] == '/' && line[1] == '/')
