@@ -1,4 +1,33 @@
 --------------------
+//0889 by 胡蝶蘭
+
+・文字列型一時的キャラクター変数機能追加。
+	・プレフィックス@,ポストフィックス$を使用します。（@hoge$など）
+	・inputで文字列変数を指定すると文字列入力になります。
+	・関係演算子（比較演算子）で文字列どうしを指定すると文字列の比較が
+	  できます。数値と文字列を混ぜて比較することはできません。
+	・とりあえずサンプル付けてます。
+
+	(map/)
+	map.h
+		struct map_session_dataにnpc_str,regstr,regstr_numメンバ追加
+	script.c
+		buildin_set(),get_val(),buildin_input(),op_2num()など修正
+		op_2str(),op_2()追加
+	clif.c / clif.h
+		01d5パケット長修正
+		clif_parse_NpcStringInput(),clif_scriptinputstr()追加
+	pc.c / pc.h
+		pc_readregstr(),pc_setregstr()追加
+	(doc/)
+	script_ref.txt
+		演算子の説明追加、変数の説明修正、input,menu修正
+	(conf/sample/)
+	npc_test_str.txt
+		文字列変数を使用したスクリプトの例。
+		文字列の代入、結合、比較、入力などのテストを行うもの。
+
+--------------------
 //0888 by 死神
 
 ・設計から間違っていたギルド倉庫修正。(ただ複数人の使用によるバグがある可能性はまだあります。)

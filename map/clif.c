@@ -84,9 +84,9 @@ static const int packet_len_table[0x200]={
 #endif
     3,  3, 35,  5, 11, 26, -1,  4,   4,  6, 10, 12,  6, -1,  4,  4,
    11,  7, -1, 67, 12, 18,114,  6,   3,  6, 26, 26, 26, 26,  2,  3,
-//#0x01C0
+//#0x01C0,   Set 0x1d5=-1
     2, 14, 10, -1, 22, 22,  4,  2,  13, 97,  0,  9,  9, 30,  6, 28,
-    8, 14, 10, 35,  6,  8,  4, 11,  54, 53, 60,  2, -1, 47, 33,  6,
+    8, 14, 10, 35,  6, -1,  4, 11,  54, 53, 60,  2, -1, 47, 33,  6,
     0,  8,  0,  0,  0,  0,  0,  0,  28,  0,  0,  0,  0,  0, -1, -1,
    -1,  0,  0,  0,  7,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
 };
@@ -1327,6 +1327,20 @@ int clif_scriptinput(struct map_session_data *sd,int npcid)
 	WFIFOW(fd,0)=0x142;
 	WFIFOL(fd,2)=npcid;
 	WFIFOSET(fd,packet_len_table[0x142]);
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int clif_scriptinputstr(struct map_session_data *sd,int npcid)
+{
+	int fd=sd->fd;
+
+	WFIFOW(fd,0)=0x1d4;
+	WFIFOL(fd,2)=npcid;
+	WFIFOSET(fd,packet_len_table[0x1d4]);
 	return 0;
 }
 
@@ -6503,6 +6517,21 @@ void clif_parse_NpcAmountInput(int fd,struct map_session_data *sd)
  *
  *------------------------------------------
  */
+void clif_parse_NpcStringInput(int fd,struct map_session_data *sd)
+{
+	if(RFIFOW(fd,2)-7 >= sizeof(sd->npc_str)){
+		printf("clif: input string too long !\n");
+		memcpy(sd->npc_str,RFIFOP(fd,8),sizeof(sd->npc_str));
+		sd->npc_str[sizeof(sd->npc_str)-1]=0;
+	}else
+		strcpy(sd->npc_str,RFIFOP(fd,8));
+	npc_scriptcont(sd,RFIFOL(fd,4));
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
 void clif_parse_NpcCloseClicked(int fd,struct map_session_data *sd)
 {
 	// nop
@@ -7282,7 +7311,9 @@ static int clif_parse(int fd)
 		clif_parse_AutoSpell,
 		NULL,
 		// 1d0
-		NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+		NULL,NULL,NULL,NULL,NULL,
+		clif_parse_NpcStringInput,
+		NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 		clif_parse_GMReqNoChatCount,
 		// 1e0
 		NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,

@@ -52,7 +52,7 @@ static struct {
 int str_num=LABEL_START,str_data_size;
 int str_hash[16];
 
-static struct dbt *mapval_db;
+static struct dbt *mapvar_db;
 
 static struct dbt *scriptlabel_db=NULL;
 struct dbt* script_get_label_db(){ return scriptlabel_db; }
@@ -514,14 +514,20 @@ static unsigned char *skip_space(unsigned char *p)
  */
 static unsigned char *skip_word(unsigned char *p)
 {
+	// prefix
 	if(*p=='@') p++;	// like weiss
 	if(*p=='$') p++;	// MAPŽI“à‹¤—L•Ï”—p
 	if(*p=='#') p++;	// account•Ï”—p
+	
 	while(isalnum(*p)||*p=='_'|| *p>=0x81)
 		if(*p>=0x81 && p[1]){
 			p+=2;
 		} else
 			p++;
+
+	// postfix
+	if(*p=='$') p++;	// •¶Žš—ñ•Ï”
+	
 	return p;
 }
 
@@ -934,24 +940,40 @@ int get_val(struct script_state*st,struct script_data* data)
 {
 	struct map_session_data *sd;
 	if(data->type==C_NAME){
-		char prefix=str_buf[str_data[data->u.num].str];
+		char *name=str_buf+str_data[data->u.num].str;
+		char prefix=*name;
+		char postfix=name[strlen(name)-1];
 		sd=map_id2sd(st->rid);
-		data->type=C_INT;
-		if(str_data[data->u.num].type==C_INT){
-			data->u.num = str_data[data->u.num].val;
-		}else if(str_data[data->u.num].type==C_PARAM){
-			data->u.num = pc_readparam(sd,str_data[data->u.num].val);
-		}else if(prefix=='@' || prefix=='l'){
-			data->u.num = pc_readreg(sd,data->u.num);
-		}else if(prefix=='$'){
-			data->u.num = (int)strdb_search(mapval_db,str_buf+str_data[data->u.num].str);
-		}else if(prefix=='#'){
-			if( str_buf[str_data[data->u.num].str+1]=='#')
-				data->u.num = pc_readaccountreg2(sd,str_buf+str_data[data->u.num].str);
-			else
-				data->u.num = pc_readaccountreg(sd,str_buf+str_data[data->u.num].str);
+		
+		if(postfix=='$'){
+		
+			data->type=C_CONSTSTR;
+			if( prefix=='@' || prefix=='l' ){
+				data->u.str = pc_readregstr(sd,data->u.num);
+			}else{
+				printf("script: get_val: illeagal scope string variable.\n");
+				data->u.str = "!!ERROR!!";
+			}
+			
 		}else{
-			data->u.num = pc_readglobalreg(sd,str_buf+str_data[data->u.num].str);
+		
+			data->type=C_INT;
+			if(str_data[data->u.num].type==C_INT){
+				data->u.num = str_data[data->u.num].val;
+			}else if(str_data[data->u.num].type==C_PARAM){
+				data->u.num = pc_readparam(sd,str_data[data->u.num].val);
+			}else if(prefix=='@' || prefix=='l'){
+				data->u.num = pc_readreg(sd,data->u.num);
+			}else if(prefix=='$'){
+				data->u.num = (int)strdb_search(mapvar_db,name);
+			}else if(prefix=='#'){
+				if( name[1]=='#')
+					data->u.num = pc_readaccountreg2(sd,name);
+				else
+					data->u.num = pc_readaccountreg(sd,name);
+			}else{
+				data->u.num = pc_readglobalreg(sd,name);
+			}
 		}
 	}
 	return 0;
@@ -1332,35 +1354,53 @@ int buildin_jobchange(struct script_state *st)
 int buildin_input(struct script_state *st)
 {
 	struct map_session_data *sd;
+	int num=(st->end>st->start+2)?st->stack->stack_data[st->start+2].u.num:0;
+	char *name=(st->end>st->start+2)?str_buf+str_data[num].str:"";
+	char prefix=*name;
+	char postfix=name[strlen(name)-1];
 
 	sd=map_id2sd(st->rid);
 	if(sd->state.menu_or_input){
 		sd->state.menu_or_input=0;
-		if(st->end>st->start+2){ // ˆø”1ŒÂ
-			int num=st->stack->stack_data[st->start+2].u.num;
-			char prefix=str_buf[str_data[num].str];
-			if(prefix=='@' || prefix=='l')
-				pc_setreg(sd,num,sd->npc_amount);
-			else if(prefix=='$')
-				strdb_insert(mapval_db,str_buf+str_data[num].str,sd->npc_amount);
-			else if(prefix=='#'){
-				if( str_buf[str_data[num].str+1]=='#')
-					pc_setaccountreg2(sd,str_buf+str_data[num].str,sd->npc_amount);
-				else
-					pc_setaccountreg(sd,str_buf+str_data[num].str,sd->npc_amount);
-			}else
-				pc_setglobalreg(sd,str_buf+str_data[num].str,sd->npc_amount);
-		} else {
-			// ragemuŒÝŠ·‚Ì‚½‚ß
-			pc_setreg(sd,add_str("l14"),sd->npc_amount);
+		if( postfix=='$' ){
+			// •¶Žš—ñ
+			if(st->end>st->start+2){ // ˆø”1ŒÂ
+				if(prefix=='@' || prefix=='l')
+					pc_setregstr(sd,num,sd->npc_str);	
+				else{
+					printf("buildin_input: illeagal scope string variable.\n");
+				}
+			}else{
+				printf("buildin_input: string discarded !!\n");
+			}
+		}else{
+			// ”’l
+			if(st->end>st->start+2){ // ˆø”1ŒÂ
+				if(prefix=='@' || prefix=='l')
+					pc_setreg(sd,num,sd->npc_amount);
+				else if(prefix=='$')
+					strdb_insert(mapvar_db,name,sd->npc_amount);
+				else if(prefix=='#'){
+					if( str_buf[str_data[num].str+1]=='#')
+						pc_setaccountreg2(sd,name,sd->npc_amount);
+					else
+						pc_setaccountreg(sd,name,sd->npc_amount);
+				}else
+					pc_setglobalreg(sd,name,sd->npc_amount);
+			} else {
+				// ragemuŒÝŠ·‚Ì‚½‚ß
+				pc_setreg(sd,add_str("l14"),sd->npc_amount);
+			}
 		}
 	} else {
 		st->state=RERUNLINE;
-		clif_scriptinput(map_id2sd(st->rid),st->oid);
+		if(postfix=='$')clif_scriptinputstr(map_id2sd(st->rid),st->oid);
+		else			clif_scriptinput(map_id2sd(st->rid),st->oid);
 		sd->state.menu_or_input=1;
 	}
 	return 0;
 }
+
 
 /*==========================================
  *
@@ -1393,26 +1433,38 @@ int buildin_if(struct script_state *st)
  */
 int buildin_set(struct script_state *st)
 {
-	int val;
 	struct map_session_data *sd;
 	int num=st->stack->stack_data[st->start+2].u.num;
-	char prefix=str_buf[str_data[num].str];
+	char *name=str_buf+str_data[num].str;
+	char prefix=*name;
+	char postfix=name[strlen(name)-1];
 
-	val=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	sd=map_id2sd(st->rid);
-	if(str_data[num].type==C_PARAM){
-		pc_setparam(sd,str_data[num].val,val);
-	}else if(prefix=='@' || prefix=='l') {
-		pc_setreg(sd,num,val);
-	}else if(prefix=='$') {
-		strdb_insert(mapval_db,str_buf+str_data[num].str,val);
-	}else if(prefix=='#') {
-		if( str_buf[str_data[num].str+1]=='#' )
-			pc_setaccountreg2(sd,str_buf+str_data[num].str,val);	
-		else
-			pc_setaccountreg(sd,str_buf+str_data[num].str,val);	
+	if( postfix=='$' ){
+		// •¶Žš—ñ
+		char *str = conv_str(st,& (st->stack->stack_data[st->start+3]));
+		if( prefix=='@' || prefix=='l'){
+			pc_setregstr(sd,num,str);
+		}else{
+			printf("script: buildin_set: illeagal scope string variable !");
+		}
 	}else{
-		pc_setglobalreg(sd,str_buf+str_data[num].str,val);
+		// ”’l
+		int val = conv_num(st,& (st->stack->stack_data[st->start+3]));
+		if(str_data[num].type==C_PARAM){
+			pc_setparam(sd,str_data[num].val,val);
+		}else if(prefix=='@' || prefix=='l') {
+			pc_setreg(sd,num,val);
+		}else if(prefix=='$') {
+			strdb_insert(mapvar_db,name,val);
+		}else if(prefix=='#') {
+			if( str_buf[str_data[num].str+1]=='#' )
+				pc_setaccountreg2(sd,name,val);	
+			else
+				pc_setaccountreg(sd,name,val);	
+		}else{
+			pc_setglobalreg(sd,name,val);
+		}
 	}
 
 	return 0;
@@ -3305,14 +3357,50 @@ void op_add(struct script_state* st)
 }
 
 /*==========================================
- * “ñ€‰‰ŽZŽq
+ * “ñ€‰‰ŽZŽq(•¶Žš—ñ)
  *------------------------------------------
  */
-void op_2num(struct script_state *st,int op)
+void op_2str(struct script_state *st,int op,int sp1,int sp2)
 {
-	int i1,i2;
-	i2=pop_val(st);
-	i1=pop_val(st);
+	char *s1=st->stack->stack_data[sp1].u.str,
+		 *s2=st->stack->stack_data[sp2].u.str;
+	int a=0;
+	
+	switch(op){
+	case C_EQ:
+		a= (strcmp(s1,s2)==0);
+		break;
+	case C_NE:
+		a= (strcmp(s1,s2)!=0);
+		break;
+	case C_GT:
+		a= (strcmp(s1,s2)> 0);
+		break;
+	case C_GE:
+		a= (strcmp(s1,s2)>=0);
+		break;
+	case C_LT:
+		a= (strcmp(s1,s2)< 0);
+		break;
+	case C_LE:
+		a= (strcmp(s1,s2)<=0);
+		break;
+	default:
+		printf("Illeagal string operater\n");
+		break;
+	}
+	
+	push_val(st->stack,C_INT,a);
+
+	if(st->stack->stack_data[sp1].type==C_STR)	free(s1);
+	if(st->stack->stack_data[sp2].type==C_STR)	free(s2);
+}
+/*==========================================
+ * “ñ€‰‰ŽZŽq(”’l)
+ *------------------------------------------
+ */
+void op_2num(struct script_state *st,int op,int i1,int i2)
+{
 	switch(op){
 	case C_SUB:
 		i1-=i2;
@@ -3361,6 +3449,35 @@ void op_2num(struct script_state *st,int op)
 		break;
 	}
 	push_val(st->stack,C_INT,i1);
+}
+/*==========================================
+ * “ñ€‰‰ŽZŽq
+ *------------------------------------------
+ */
+void op_2(struct script_state *st,int op)
+{
+	int i1,i2;
+	char *s1=NULL,*s2=NULL;
+
+	i2=pop_val(st);
+	if( isstr(st->stack->stack_data[st->stack->sp]) )
+		s2=st->stack->stack_data[st->stack->sp].u.str;
+	
+	i1=pop_val(st);
+	if( isstr(st->stack->stack_data[st->stack->sp]) )
+		s1=st->stack->stack_data[st->stack->sp].u.str;
+
+	if( s1!=NULL && s2!=NULL ){
+		// ss => op_2str
+		op_2str(st,op,st->stack->sp,st->stack->sp+1);
+	}else if( s1==NULL && s2==NULL ){
+		// ii => op_2num
+		op_2num(st,op,i1,i2);
+	}else{
+		// si,is => error
+		printf("script: op_2: int&str, str&str not allow.");
+		push_val(st->stack,C_INT,0);
+	}
 }
 
 /*==========================================
@@ -3524,7 +3641,7 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 		case C_XOR:
 		case C_LAND:
 		case C_LOR:
-			op_2num(&st,c);
+			op_2(&st,c);
 			break;
 
 		case C_NEG:
@@ -3620,7 +3737,7 @@ int script_config_read(char *cfgName)
  */
 int do_init_script()
 {
-	mapval_db=strdb_init(32);
+	mapvar_db=strdb_init(32);
 	scriptlabel_db=strdb_init(50);
 	return 0;
 }

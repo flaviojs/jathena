@@ -4426,8 +4426,6 @@ int pc_readreg(struct map_session_data *sd,int reg)
 
 	return 0;
 }
-
-
 /*==========================================
  * script用変数の値を設定
  *------------------------------------------
@@ -4453,6 +4451,50 @@ int pc_setreg(struct map_session_data *sd,int reg,int val)
 	return 0;
 }
 
+
+/*==========================================
+ * script用文字列変数の値を読む
+ *------------------------------------------
+ */
+char *pc_readregstr(struct map_session_data *sd,int reg)
+{
+	int i;
+
+	for(i=0;i<sd->regstr_num;i++)
+		if(sd->regstr[i].index==reg)
+			return sd->regstr[i].data;
+
+	return NULL;
+}
+/*==========================================
+ * script用文字列変数の値を設定
+ *------------------------------------------
+ */
+int pc_setregstr(struct map_session_data *sd,int reg,char *str)
+{
+	int i;
+
+	if(strlen(str)+1 >= sizeof(sd->regstr[0].data)){
+		printf("pc_setregstr: string too long !\n");
+		return 0;
+	}
+
+	for(i=0;i<sd->regstr_num;i++)
+		if(sd->regstr[i].index==reg){
+			strcpy(sd->regstr[i].data,str);
+			return 0;
+		}
+	sd->regstr_num++;
+	sd->regstr=realloc(sd->regstr,sizeof(sd->regstr[0])*sd->regstr_num);
+	if(sd->regstr==NULL){
+		printf("out of memory : pc_setreg\n");
+		exit(1);
+	}
+	sd->regstr[i].index=reg;
+	strcpy(sd->regstr[i].data,str);
+
+	return 0;
+}
 
 /*==========================================
  * script用グローバル変数の値を読む

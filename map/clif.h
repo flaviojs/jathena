@@ -46,6 +46,7 @@ int clif_scriptnext(struct map_session_data*,int);	//self
 int clif_scriptclose(struct map_session_data*,int);	//self
 int clif_scriptmenu(struct map_session_data*,int,char*);	//self
 int clif_scriptinput(struct map_session_data*,int);	//self
+int clif_scriptinputstr(struct map_session_data *sd,int npcid);	// self
 int clif_cutin(struct map_session_data*,char*,int);	//self
 int clif_viewpoint(struct map_session_data*,int,int,int,int,int,int);	//self
 int clif_additem(struct map_session_data*,int,int,int);	//self

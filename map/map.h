@@ -49,6 +49,10 @@ struct script_reg {
 	int index;
 	int data;
 };
+struct script_regstr {
+	int index;
+	char data[256];
+};
 struct status_change {
 	int timer;
 	int val1,val2,val3,val4;
@@ -157,6 +161,7 @@ struct map_session_data {
 	int npc_pos;
 	int npc_menu;
 	int npc_amount;
+	char npc_str[256];
 	unsigned int chatID;
 
 	int attacktimer;
@@ -227,6 +232,8 @@ struct map_session_data {
 
 	int reg_num;
 	struct script_reg *reg;
+	int regstr_num;
+	struct script_regstr *regstr;
 
 	struct status_change sc_data[MAX_STATUSCHANGE];
 	short sc_count;
