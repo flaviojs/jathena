@@ -245,6 +245,131 @@ int npc_event_do_oninit(void)
 
 	return 0;
 }
+/*==========================================
+ * タイマーイベント用ラベルの取り込み
+ * npc_parse_script->strdb_foreachから呼ばれる
+ *------------------------------------------
+ */
+int npc_timerevent_import(void *key,void *data,va_list ap)
+{
+	char *lname=(char *)key;
+	int pos=(int)data;
+	struct npc_data *nd=va_arg(ap,struct npc_data *);
+	int t=0,i=0;
+	
+	if(sscanf(lname,"OnTimer%d%n",&t,&i)==1 && lname[i]==':') {
+		// タイマーイベント
+		struct npc_timerevent_list *te=nd->u.scr.timer_event;
+		int j,i=nd->u.scr.timeramount;
+		if(te==NULL) te=malloc(sizeof(struct npc_timerevent_list));
+		else te=realloc( te, sizeof(struct npc_timerevent_list) * (i+1) );
+		if(te==NULL){
+			printf("npc_timerevent_import: out of memory !\n");
+			exit(1);
+		}
+		for(j=0;j<i;j++){
+			if(te[j].timer>t){
+				memmove(te+j+1,te+j,sizeof(struct npc_timerevent_list)*(i-j));
+				break;
+			}
+		}
+		te[j].timer=t;
+		te[j].pos=pos;
+		nd->u.scr.timer_event=te;
+		nd->u.scr.timeramount=i+1;
+	}
+	return 0;
+}
+/*==========================================
+ * タイマーイベント実行
+ *------------------------------------------
+ */
+int npc_timerevent(int tid,unsigned int tick,int id,int data)
+{
+	int next,t;
+	struct npc_data* nd=(struct npc_data *)map_id2bl(id);
+	struct npc_timerevent_list *te;
+	if( nd==NULL || nd->u.scr.nexttimer<0 ){
+		printf("npc_timerevent: ??\n");
+		return 0;
+	}
+	nd->u.scr.timertick=tick;
+	te=nd->u.scr.timer_event+ nd->u.scr.nexttimer;
+	nd->u.scr.timerid = -1;
+	
+	t = nd->u.scr.timer+=data;
+	nd->u.scr.nexttimer++;
+	if( nd->u.scr.timeramount>nd->u.scr.nexttimer ){
+		next= nd->u.scr.timer_event[ nd->u.scr.nexttimer ].timer - t;
+		nd->u.scr.timerid = add_timer(tick+next,npc_timerevent,id,next);
+	}
+
+	run_script(nd->u.scr.script,te->pos,0,nd->bl.id);
+	return 0;
+}
+/*==========================================
+ * タイマーイベント開始
+ *------------------------------------------
+ */
+int npc_timerevent_start(struct npc_data *nd)
+{
+	int j,n=nd->u.scr.timeramount, next;
+	if( nd->u.scr.nexttimer>=0 || n==0 )
+		return 0;
+	
+	for(j=0;j<n;j++){
+		if( nd->u.scr.timer_event[j].timer > nd->u.scr.timer )
+			break;
+	}
+	nd->u.scr.nexttimer=j;
+	nd->u.scr.timertick=gettick();
+
+	if(j>=n)
+		return 0;
+	
+	next = nd->u.scr.timer_event[j].timer - nd->u.scr.timer;
+	nd->u.scr.timerid = add_timer(gettick()+next,npc_timerevent,nd->bl.id,next);
+	return 0;
+}
+/*==========================================
+ * タイマーイベント終了
+ *------------------------------------------
+ */
+int npc_timerevent_stop(struct npc_data *nd)
+{
+	if( nd->u.scr.nexttimer>=0 ){
+		nd->u.scr.nexttimer = -1;
+		nd->u.scr.timer += (int)(gettick() - nd->u.scr.timertick);
+		if(nd->u.scr.timerid!=-1)
+			delete_timer(nd->u.scr.timerid,npc_timerevent);
+		nd->u.scr.timerid = -1;
+	}
+	return 0;
+}
+/*==========================================
+ * タイマー値の所得
+ *------------------------------------------
+ */
+int npc_gettimerevent_tick(struct npc_data *nd)
+{
+	int tick=nd->u.scr.timer;
+	if( nd->u.scr.nexttimer>=0 )
+		tick += (int)(gettick() - nd->u.scr.timertick);
+	return tick;
+}
+/*==========================================
+ * タイマー値の設定
+ *------------------------------------------
+ */
+int npc_settimerevent_tick(struct npc_data *nd,int newtimer)
+{
+	int flag= nd->u.scr.nexttimer;
+	npc_timerevent_stop(nd);
+	nd->u.scr.timer=newtimer;
+	if(flag>=0)
+		npc_timerevent_start(nd);
+	return 0;
+}
 
 /*==========================================
  * イベント型のNPC処理
@@ -974,6 +1099,11 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	// イベント用ラベルデータのエクスポート
 	label_db=script_get_label_db();
 	strdb_foreach(label_db,npc_event_export,nd);
+	
+	// ラベルデータからタイマーイベント取り込み
+	strdb_foreach(label_db,npc_timerevent_import,nd);
+	nd->u.scr.nexttimer=-1;
+	nd->u.scr.timerid=-1;
 
 	return 0;
 }
@@ -1210,7 +1340,7 @@ int do_init_npc(void)
 
 	add_timer_func_list(npc_event_timer,"npc_event_timer");
 	add_timer_func_list(npc_event_do_clock,"npc_event_do_clock");
-	
+	add_timer_func_list(npc_timerevent,"npc_timerevent");
 
 	//exit(1);
 

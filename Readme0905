@@ -1,4 +1,40 @@
 --------------------
+//0909 by 胡蝶蘭
+
+・NPCタイマー関係の命令追加＆修正他
+	・delwaitingroom（NPCチャット終了）引数を見てなかったので修正
+	・initnpctimer（NPCタイマー初期化）追加
+	・stopnpctimer（NPCタイマー停止）追加
+	・startnpctimer（NPCタイマー開始）追加
+	・getnpctimer（NPCタイマー情報所得）追加
+	・setnpctimer（NPCタイマー値設定）追加
+
+	既存のaddtimerなどはプレイヤー単位のため、NPC単位のタイマーを作りました。
+	こちらは、addtimerなどとは違い、OnTimerXXXという風にラベルを指定します。
+	詳しくはサンプルとscrit_ref.txtを参照。
+	
+	(map/)
+	map.h
+		struct npc_data 修正、struct npc_timerevent_list追加
+	npc.c / npc.h
+		npc_timerevent(),npc_timerevent_start(),npc_timerevent_stop(),
+		npc_gettimerevent_tick(),npc_settimerevent_tick()追加
+		npc_parse_script()修正
+	script.c
+		buildin_*npctimer()追加など
+	(conf/sample/)
+	npc_test_npctimer.txt
+		NPCタイマー使用サンプル
+	(doc/)
+	script_ref.txt
+		NPCタイマー関係の命令/関数追加、定数ラベルの説明修正
+
+・Sageのアーススパイクの所得条件修正
+	(db/)
+	skill_tree.txt
+		アーススパイクの行（サイズミックウェポンをLv1に）
+
+--------------------
 //0914 by p
 ・範囲スキル使用時に解放済みメモリを参照していた問題に対応
 ・メモリを初期化せずに使用していた領域を、初期化してから使用するように変更

@@ -268,6 +268,10 @@ struct map_session_data {
 	int eventtimer[MAX_EVENTTIMER];
 };
 
+struct npc_timerevent_list {
+	int timer,pos;
+};
+
 struct npc_item_list {
 	int nameid,value;
 };
@@ -285,6 +289,9 @@ struct npc_data {
 			char *script;
 			short xs,ys;
 			int guild_id;
+			int timer,timerid,timeramount,nexttimer;
+			unsigned int timertick;
+			struct npc_timerevent_list *timer_event;
 		} scr;
 		struct npc_item_list shop_item[1];
 		struct {

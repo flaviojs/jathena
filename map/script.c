@@ -145,6 +145,11 @@ int buildin_doevent(struct script_state *st);
 int buildin_addtimer(struct script_state *st);
 int buildin_deltimer(struct script_state *st);
 int buildin_addtimercount(struct script_state *st);
+int buildin_initnpctimer(struct script_state *st);
+int buildin_stopnpctimer(struct script_state *st);
+int buildin_startnpctimer(struct script_state *st);
+int buildin_setnpctimer(struct script_state *st);
+int buildin_getnpctimer(struct script_state *st);
 int buildin_announce(struct script_state *st);
 int buildin_mapannounce(struct script_state *st);
 int buildin_areaannounce(struct script_state *st);
@@ -267,6 +272,11 @@ struct {
 	{buildin_addtimer,"addtimer","is"},
 	{buildin_deltimer,"deltimer","s"},
 	{buildin_addtimercount,"addtimercount","si"},
+	{buildin_initnpctimer,"initnpctimer","*"},
+	{buildin_stopnpctimer,"stopnpctimer","*"},
+	{buildin_startnpctimer,"startnpctimer","*"},
+	{buildin_setnpctimer,"setnpctimer","*"},
+	{buildin_getnpctimer,"getnpctimer","i*"},
 	{buildin_announce,"announce","si"},
 	{buildin_mapannounce,"mapannounce","ssi"},
 	{buildin_areaannounce,"areaannounce","siiiisi"},
@@ -2716,6 +2726,92 @@ int buildin_addtimercount(struct script_state *st)
 }
 
 /*==========================================
+ * NPCタイマー初期化
+ *------------------------------------------
+ */
+int buildin_initnpctimer(struct script_state *st)
+{
+	struct npc_data *nd;
+	if( st->end > st->start+2 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+2])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
+	
+	npc_settimerevent_tick(nd,0);
+	npc_timerevent_start(nd);
+	return 0;
+}
+/*==========================================
+ * NPCタイマー開始
+ *------------------------------------------
+ */
+int buildin_startnpctimer(struct script_state *st)
+{
+	struct npc_data *nd;
+	if( st->end > st->start+2 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+2])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
+	
+	npc_timerevent_start(nd);
+	return 0;
+}
+/*==========================================
+ * NPCタイマー停止
+ *------------------------------------------
+ */
+int buildin_stopnpctimer(struct script_state *st)
+{
+	struct npc_data *nd;
+	if( st->end > st->start+2 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+2])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
+	
+	npc_timerevent_stop(nd);
+	return 0;
+}
+/*==========================================
+ * NPCタイマー情報所得
+ *------------------------------------------
+ */
+int buildin_getnpctimer(struct script_state *st)
+{
+	struct npc_data *nd;
+	int type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	int val=0;
+	if( st->end > st->start+3 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+3])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
+	
+	switch(type){
+	case 0: val=npc_gettimerevent_tick(nd); break;
+	case 1: val= (nd->u.scr.nexttimer>=0); break;
+	case 2: val= nd->u.scr.timeramount; break;
+	}
+	push_val(st->stack,C_INT,val);
+	return 0;
+}
+/*==========================================
+ * NPCタイマー値設定
+ *------------------------------------------
+ */
+int buildin_setnpctimer(struct script_state *st)
+{
+	int tick;
+	struct npc_data *nd;
+	tick=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if( st->end > st->start+3 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+3])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
+	
+	npc_settimerevent_tick(nd,tick);
+	return 0;
+}
+
+/*==========================================
  * 天の声アナウンス
  *------------------------------------------
  */
@@ -3055,7 +3151,11 @@ int buildin_waitingroom(struct script_state *st)
  */
 int buildin_delwaitingroom(struct script_state *st)
 {
-	struct npc_data *nd=(struct npc_data *)map_id2bl(st->oid);
+	struct npc_data *nd;
+	if( st->end > st->start+2 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+2])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
 	chat_deletenpcchat(nd);
 	return 0;
 }

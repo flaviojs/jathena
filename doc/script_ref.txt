@@ -549,15 +549,56 @@ AthenaNPCScript
 			ms		数値
 			event		文字列
 			
-			<ms>ミリ秒経過した後、<event>を開始するタイマーを作成します。
+			現在のプレイヤーに、<ms>ミリ秒経過した後<event>を開始するタイマーを作成します。
+			このタイマーによって実行されるイベントは、このプレイヤーの情報にアクセスできます。
+			プレイヤーがログアウトするとタイマーは無効になるため注意してください。
+			アリーナマップなどで使用する場合はこれではなくNPCタイマーを使用してください。
 			
 		deltimer命令
 			deltimer <event>;
 			
 			event		文字列
 			
-			<event>を開始するタイマーを消去します。
+			現在のプレイヤーの<event>を開始するタイマーを消去します。
 			
+		addtimercount命令
+			addtimercount <event>,<ms>;
+			
+			event		文字列
+			ms		数値
+			
+			現在のプレイヤーの<event>を開始するタイマーの開始までの時間を<ms>ミリ秒追加します。
+		
+		initnpctimer命令
+			initnpctimer [<name>];
+			
+			<name>で指定されたNPCが持つNPCタイマーの値を０にし、カウントを開始します。
+			nameを省略すると、命令を実行したNPCが対象になります。
+			
+			このNPCタイマーはミリ秒単位でOnTimerXXXXというラベルイベントを実行します。
+			<例> OnTimer1000: <= 1秒後, OnTimer30000: <= 30秒後
+
+		stopnpctimer命令
+			stopnpctimer [<name>];
+			
+			<name>で指定されたNPCが持つNPCタイマーのカウントを停止します。
+			nameを省略すると、命令を実行したNPCが対象になります。
+		
+		startnpctimer命令
+			stopnpctimer [<name>];
+			
+			<name>で指定されたNPCが持つNPCタイマーのカウントを再開します。
+			nameを省略すると、命令を実行したNPCが対象になります。
+			こちらはinitnpctimerと違い、カウントを0にリセットしません。
+			stopnpctimerとセットで使用します。
+		
+		setnpctimer命令
+			setnpctimer <tick>[,<name>]
+			
+			<name>で指定されたNPCが持つNPCタイマーのカウントを変更します。
+			nameを省略すると、命令を実行したNPCが対象になります。
+			getnpctimerを利用すれば、カウントを増減できます。
+		
 		disablenpc命令
 			disablenpc <npcname>;
 			
@@ -572,14 +613,6 @@ AthenaNPCScript
 			
 			<npcname>を有効にします。
 		
-		addtimercount命令
-			addtimercount <event>,<ms>;
-			
-			event		文字列
-			ms		数値
-			
-			<event>を開始するタイマーの開始までの時間を<ms>ミリ秒追加します。
-			
 		mapannounce命令
 			mapannounce <gatname>,<string>,<flag>;
 			
@@ -927,6 +960,17 @@ AthenaNPCScript
 			num=16	チャットルームのイベント名（文字列）
 			num=32	チャットルームが満員かどうか（数値）
 			num=33	チャットルームでイベントが起こる人数かどうか（数値）
+
+		getnpctimer命令
+			getnpctimer <num>[,<name>]
+			
+			<name>で指定されたNPCが持つNPCタイマーの情報を得ます。
+			nameを省略すると、命令を実行したNPCが対象になります。
+			<num>で得たい情報を指定します。
+		
+			num=0	現在のNPCタイマーのカウント値
+			num=1	現在NPCタイマーが動作しているかどうか
+			num=2	指定NPCのタイマーイベントラベルの総数
 			
 	＊定数ラベル
 		-ラベル
@@ -940,6 +984,22 @@ AthenaNPCScript
 		
 		OnCharIfInitラベル
 			MAPサーバーがCharサーバーに接続したときに実行します。
+		
+		OnMinuteXXラベル
+			毎時XX分に実行します。数値は十進数２桁です。
+
+		OnClockXXXXラベル
+			毎日XX時XX分に実行します。数値は十進数４桁です。
+		
+		OnHourXXラベル
+			毎日XX時00分に実行します。数値は十進数２桁です。
+			
+		OnDayXXラベル
+			毎月XX日00時00分に実行します。数値は十進数２桁です。
+		
+		OnTimerXラベル
+			NPCタイマーのカウントがXになったときに実行されます。
+			このXはミリ秒単位です。桁数は関係ありません。
 		
 	＊注意事項
 		文字列と説明されている引数は""で囲ってください。
