@@ -1,5 +1,5 @@
 /===============================================================================
-// 闘技場EVENT(発生データ不足)未起動 
+// 闘技場EVENT
 //===============================================================================
 gonryun.gat,180,117,0	script	ソン ムド	85,{
 	if (Class == 0) goto Lnovice;
@@ -18,6 +18,7 @@ L1:
 	mes "いいことを教えてやる。";
 	mes "さあ、準備しろ。";
 	next;
+//プリハンター730アコ690BS770(ATKで決まる？ﾜｶﾝﾈ)
 	if (checkweight(7049,730)) goto Lweightok;
 		mes "^0000ffソン ムドは、あなたより";
 		mes "かなり大きそうな石を指し、";
@@ -36,6 +37,7 @@ Lweightok:
 	mes "持ち上げてみろと言った。";
 	mes "あなたは、軽々と石を持ち上げた。^000000";
 	next;
+	emotion 21;
 	mes "[ソン ムド]";
 	mes "ははっ、やっぱり俺の目に";
 	mes "狂いはなかった。今度来た時に、";
@@ -66,11 +68,9 @@ LStart2:
 		mes "そうこなくっちゃ。";
 		mes "あははははっ。";
 		mes "それじゃあ、楽しんでこい！";
-	mes "(未実装)";
-	close;
-//		next;
-//		warp "gon_test.gat",53,6;
-//		end;
+		next;
+		warp "gon_test.gat",53,6;
+		end;
 	Lno:
 		mes "[ソン ムド]";
 		mes "やめるのか。まあ、";
@@ -89,10 +89,12 @@ OnInit:
 	waitingroom "入ってください!!",1,"控室管理者::Onwarp";
 	end;
 Onwarp:
-	set @username,strcharinfo(0);
+	set @addmon,0;
+	set @kengaku,0;
 	warp "gon_test.gat",44,86;
-	addtimer 120000,"gontimer::On120000";
-	disablenpc "闘技場受付";
+	KillMonster "gon_test.gat";
+	addtimer 120000,"gontimer120000";
+	disablenpc "控室管理者";
 	end;
 }
 //===============================================================================
@@ -131,6 +133,7 @@ L3:
 	mes "ありがとうございます。";
 	mes "楽しい時間をお過ごしください。";
 	next;
+	set @kengaku,1;
 	warp "gon_test.gat",25,99;
 	end;
 L4:
@@ -148,46 +151,172 @@ L5:
 }
 //===============================================================================
 gon_test.gat,42,89,4	script	召喚者	774,{
-	if (@username != strcharinfo(0)) goto LError;
+	if (@kengaku == 1) goto LError;
+	if (@addmon == 1) goto Lalready;
 	mes "[ソン ヨンウ]";
 	mes "いらっしゃいませ。";
 	mes "どのモンスターを召喚しますか？";
 	next;
 	menu "グループ１",L1,"グループ２",L2,"グループ３",L3,"グループ４",L4,"グループ５",L5,"グループ６",L6,"グループ７",L7,"グループ８",L8,"グループ９",L9,"グループ１０",L10,"グループ１１",L11;
-L1:
-	menu "めまい",L1_1,"食中毒",L1_2,"貧血",L1_3,"虫さされ",L1_4,"切り傷",L1_5,"狂犬病",L1_6;
-	L1_1:
-
-	L1_2:
-
-	L1_3:
-
-	L1_4:
-		monster "gontest.gat",58,87,"虫",1100,1,"mobend";
-	L1_5:
-
-	L1_6:
-
-L2:
-
-L3:
-
-L4:
-
-L5:
-
-L6:
-
-L7:
-
-L8:
-
-L9:
-
-L10:
-
-L11:
-
+	L1:
+		menu "めまい",L1_1,"食中毒",L1_2,"貧血",L1_3,"虫さされ",L1_4,"切り傷",L1_5,"狂犬病",L1_6;
+		L1_1:
+			monster "gon_test.gat",58,87,"めまい",1419,1,"mobend";set @addmon,1;close;
+		L1_2:
+			monster "gon_test.gat",58,87,"食中毒",1428,1,"mobend";set @addmon,1;close;
+		L1_3:
+			monster "gon_test.gat",58,87,"貧血",1434,1,"mobend";set @addmon,1;close;
+		L1_4:
+			monster "gon_test.gat",58,87,"虫",1430,1,"mobend";set @addmon,1;close;
+		L1_5:
+			monster "gon_test.gat",58,87,"切り傷",1457,1,"mobend";set @addmon,1;close;
+		L1_6:
+			monster "gon_test.gat",58,87,"狂犬病",1432,1,"mobend";set @addmon,1;close;
+	L2:
+		menu "サマエル",L2_1,"トロル",L2_2,"カンゲイシ",L2_3,"ブラックドック",L2_4,"メロウ",L2_5,"キョウシ",L2_6;
+		L2_1:
+			monster "gon_test.gat",58,87,"サマエル",1462,1,"mobend";set @addmon,1;close;
+		L2_2:
+			monster "gon_test.gat",58,87,"トロル",1442,1,"mobend";set @addmon,1;close;
+		L2_3:
+			monster "gon_test.gat",58,87,"カンゲイシ",1469,1,"mobend";set @addmon,1;close;
+		L2_4:
+			monster "gon_test.gat",58,87,"ブラックドック",1460,1,"mobend";set @addmon,1;close;
+		L2_5:
+			monster "gon_test.gat",58,87,"メロウ",1425,1,"mobend";set @addmon,1;close;
+		L2_6:
+			monster "gon_test.gat",58,87,"キョウシ",1472,1,"mobend";set @addmon,1;close;
+	L3:
+		menu "足元",L3_1,"蝕む",L3_2,"空っぽ",L3_3,"冷たい",L3_4,"熱い",L3_5,"腐る",L3_6;
+		L3_1:
+			monster "gon_test.gat",58,87,"足元",1454,1,"mobend";set @addmon,1;close;
+		L3_2:
+			monster "gon_test.gat",58,87,"蝕む",1443,1,"mobend";set @addmon,1;close;
+		L3_3:
+			monster "gon_test.gat",58,87,"空っぽ",1455,1,"mobend";set @addmon,1;close;
+		L3_4:
+			monster "gon_test.gat",58,87,"冷たい",1426,1,"mobend";set @addmon,1;close;
+		L3_5:
+			monster "gon_test.gat",58,87,"熱い",1436,1,"mobend";set @addmon,1;close;
+		L3_6:
+			monster "gon_test.gat",58,87,"腐る",1423,1,"mobend";set @addmon,1;close;
+	L4:
+		menu "祭司",L4_1,"タマネギ",L4_2,"大百足",L4_3,"操り人形",L4_4,"マッチ売りの少女",L4_5,"蠅",L4_6;
+		L4_1:
+			monster "gon_test.gat",58,87,"祭司",1458,1,"mobend";set @addmon,1;close;
+		L4_2:
+			monster "gon_test.gat",58,87,"タマネギ",1440,1,"mobend";set @addmon,1;close;
+		L4_3:
+			monster "gon_test.gat",58,87,"大百足",1429,1,"mobend";set @addmon,1;close;
+		L4_4:
+			monster "gon_test.gat",58,87,"操り人形",1459,1,"mobend";set @addmon,1;close;
+		L4_5:
+			monster "gon_test.gat",58,87,"マッチ売りの少女",1444,1,"mobend";set @addmon,1;close;
+		L4_6:
+			monster "gon_test.gat",58,87,"蠅",1422,1,"mobend";set @addmon,1;close;
+	L5:
+		menu "女禍",L5_1,"息壌",L5_2,"修蛇",L5_3,"毒龍",L5_4,"青竜",L5_5,"疫鬼",L5_6;
+		L5_1:
+			monster "gon_test.gat",58,87,"女禍",1421,1,"mobend";set @addmon,1;close;
+		L5_2:
+			monster "gon_test.gat",58,87,"息壌",1481,1,"mobend";set @addmon,1;close;
+		L5_3:
+			monster "gon_test.gat",58,87,"修蛇",1424,1,"mobend";set @addmon,1;close;
+		L5_4:
+			monster "gon_test.gat",58,87,"毒龍",1465,1,"mobend";set @addmon,1;close;
+		L5_5:
+			monster "gon_test.gat",58,87,"青竜",1466,1,"mobend";set @addmon,1;close;
+		L5_6:
+			monster "gon_test.gat",58,87,"疫鬼",1433,1,"mobend";set @addmon,1;close;
+	L6:
+		menu "獏",L6_1,"おいてけ掘",L6_2,"雷神",L6_3,"怨霊",L6_4,"付喪神",L6_5,"飯綱",L6_6;
+		L6_1:
+			monster "gon_test.gat",58,87,"獏",1427,1,"mobend";set @addmon,1;close;
+		L6_2:
+			monster "gon_test.gat",58,87,"おいてけ堀",1473,1,"mobend";set @addmon,1;close;
+		L6_3:
+			monster "gon_test.gat",58,87,"雷神",1431,1,"mobend";set @addmon,1;close;
+		L6_4:
+			monster "gon_test.gat",58,87,"怨霊",1446,1,"mobend";set @addmon,1;close;
+		L6_5:
+			monster "gon_test.gat",58,87,"付喪神",1474,1,"mobend";set @addmon,1;close;
+		L6_6:
+			monster "gon_test.gat",58,87,"飯綱",1471,1,"mobend";set @addmon,1;close;
+	L7:
+		menu "杖",L7_1,"斧",L7_2,"大槌",L7_3,"鎧",L7_4,"弓",L7_5,"鉄球",L7_6;
+		L7_1:
+			monster "gon_test.gat",58,87,"杖",1450,1,"mobend";set @addmon,1;close;
+		L7_2:
+			monster "gon_test.gat",58,87,"斧",1439,1,"mobend";set @addmon,1;close;
+		L7_3:
+			monster "gon_test.gat",58,87,"大槌",1461,1,"mobend";set @addmon,1;close;
+		L7_4:
+			monster "gon_test.gat",58,87,"鎧",1467,1,"mobend";set @addmon,1;close;
+		L7_5:
+			monster "gon_test.gat",58,87,"弓",1453,1,"mobend";set @addmon,1;close;
+		L7_6:
+			monster "gon_test.gat",58,87,"鉄球",1479,1,"mobend";set @addmon,1;close;
+	L8:
+		menu "唇",L8_1,"歯",L8_2,"髪",L8_3,"手",L8_4,"筋肉",L8_5,"骨",L8_6;
+		L8_1:
+			monster "gon_test.gat",58,87,"唇",1451,1,"mobend";set @addmon,1;close;
+		L8_2:
+			monster "gon_test.gat",58,87,"歯",1475,1,"mobend";set @addmon,1;close;
+		L8_3:
+			monster "gon_test.gat",58,87,"髪",1437,1,"mobend";set @addmon,1;close;
+		L8_4:
+			monster "gon_test.gat",58,87,"手",1441,1,"mobend";set @addmon,1;close;
+		L8_5:
+			monster "gon_test.gat",58,87,"筋肉",1476,1,"mobend";set @addmon,1;close;
+		L8_6:
+			monster "gon_test.gat",58,87,"骨",1435,1,"mobend";set @addmon,1;close;
+	L9:
+		menu "球",L9_1,"鏡",L9_2,"本",L9_3,"手袋",L9_4,"鞄",L9_5,"服",L9_6;
+		L9_1:
+			monster "gon_test.gat",58,87,"球",1477,1,"mobend";set @addmon,1;close;
+		L9_2:
+			monster "gon_test.gat",58,87,"鏡",1448,1,"mobend";set @addmon,1;close;
+		L9_3:
+			monster "gon_test.gat",58,87,"本",1478,1,"mobend";set @addmon,1;close;
+		L9_4:
+			monster "gon_test.gat",58,87,"手袋",1489,1,"mobend";set @addmon,1;close;
+		L9_5:
+			monster "gon_test.gat",58,87,"鞄",1488,1,"mobend";set @addmon,1;close;
+		L9_6:
+			monster "gon_test.gat",58,87,"服",1438,1,"mobend";set @addmon,1;close;
+	L10:
+		menu "女王",L10_1,"熱血男",L10_2,"死刑執行人",L10_3,"突然変異竜",L10_4,"合成獣",L10_5,"悪魔",L10_6;
+		L10_1:
+			monster "gon_test.gat",58,87,"女王",1482,1,"mobend";set @addmon,1;close;
+		L10_2:
+			monster "gon_test.gat",58,87,"熱血男",1464,1,"mobend";set @addmon,1;close;
+		L10_3:
+			monster "gon_test.gat",58,87,"死刑執行人",1487,1,"mobend";set @addmon,1;close;
+		L10_4:
+			monster "gon_test.gat",58,87,"突然変異竜",1449,1,"mobend";set @addmon,1;close;
+		L10_5:
+			monster "gon_test.gat",58,87,"合成獣",1456,1,"mobend";set @addmon,1;close;
+		L10_6:
+			monster "gon_test.gat",58,87,"悪魔",1486,1,"mobend";set @addmon,1;close;
+	L11:
+		menu "狩人",L11_1,"暗殺者",L11_2,"侍",L11_3,"武道家",L11_4,"剣士",L11_5;
+		L11_1:
+			monster "gon_test.gat",58,87,"狩人",1447,1,"mobend";set @addmon,1;close;
+		L11_2:
+			monster "gon_test.gat",58,87,"暗殺者",1483,1,"mobend";set @addmon,1;close;
+		L11_3:
+			monster "gon_test.gat",58,87,"侍",1490,1,"mobend";set @addmon,1;close;
+		L11_4:
+			monster "gon_test.gat",58,87,"武道家",1484,1,"mobend";set @addmon,1;close;
+		L11_5:
+			monster "gon_test.gat",58,87,"剣士",1485,1,"mobend";set @addmon,1;close;
+Lalready:
+	mes "[ソン ヨンウ]";
+	mes "既にモンスターを召喚しました。";
+	mes "1回にモンスターを1匹だけ";
+	mes "他のモンスターを召喚するならば、";
+	mes "再入場してください。";
+	close;
 LError:
 	mes "[ソン ヨンウ]";
 	mes "正式に申し込みをしてから";
@@ -195,16 +324,19 @@ LError:
 	close;
 }
 //===============================================================================
-gon_test,0,0,0	script	gontimer	-1,{
-On120000:
+gon_test.gat,51,90,0	script	gontimer120000	-1,{
 	mapannounce "gon_test.gat",": 残り１分です。",0;
-	addtimer 60000,"gontimer::On180000";
+	deltimer "gontimer120000";
+	addtimer 60000,"gontimer180000";
 	end;
-On180000:
+}
+gon_test.gat,50,90,0	script	gontimer180000	-1,{
+Onend:
 	mapannounce "gon_test.gat",": 制限時間になりました。",0;
 	areawarp "gon_test.gat",42,82,73,91,"gon_test.gat",44,4;
-	deltimer "gontimer";
+	deltimer "gontimer180000";
 	enablenpc "控室管理者";
+	killmonster "gon_test.gat";
 	end;
 }
 //===============================================================================
@@ -215,7 +347,8 @@ gon_test.gat,58,87,0	script	mobend	-1,{
 OnReturn:
 	warp "gon_test.gat",44,4;
 	deltimer "mobend";
-	deltimer "gontimer";
+	deltimer "gontimer180000";
+	deltimer "gontimer120000";
 	enablenpc "控室管理者";
 	end;
 }
@@ -230,6 +363,8 @@ gon_test.gat,70,103,4	script	出口案内員	773,{
 		mes "よければ、また来てくださいね。";
 		next;
 		warp "gon_test.gat",44,4;
+		set @kengaku,0;
+		end;
 	Lno:
 		mes "[チェ エンエン]";
 		mes "ありがとうございました。";
