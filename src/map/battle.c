@@ -41,6 +41,8 @@ static int distance(int x0,int y0,int x1,int y1)
  */
 int battle_counttargeted(struct block_list *bl,struct block_list *src,int target_lv)
 {
+	if(!bl)
+		return 0;
 	if(bl->type == BL_PC)
 		return pc_counttargeted((struct map_session_data *)bl,src,target_lv);
 	else if(bl->type == BL_MOB)
@@ -54,6 +56,8 @@ int battle_counttargeted(struct block_list *bl,struct block_list *src,int target
  */
 int battle_get_class(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB)
 		return ((struct mob_data *)bl)->class;
 	else if(bl->type==BL_PC)
@@ -70,6 +74,8 @@ int battle_get_class(struct block_list *bl)
  */
 int battle_get_dir(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB)
 		return ((struct mob_data *)bl)->dir;
 	else if(bl->type==BL_PC)
@@ -86,6 +92,8 @@ int battle_get_dir(struct block_list *bl)
  */
 int battle_get_lv(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB)
 		return mob_db[((struct mob_data *)bl)->class].lv;
 	else if(bl->type==BL_PC)
@@ -102,6 +110,8 @@ int battle_get_lv(struct block_list *bl)
  */
 int battle_get_range(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB)
 		return mob_db[((struct mob_data *)bl)->class].range;
 	else if(bl->type==BL_PC)
@@ -118,6 +128,8 @@ int battle_get_range(struct block_list *bl)
  */
 int battle_get_hp(struct block_list *bl)
 {
+	if(!bl)
+		return 1;
 	if(bl->type==BL_MOB)
 		return ((struct mob_data *)bl)->hp;
 	else if(bl->type==BL_PC)
@@ -132,6 +144,8 @@ int battle_get_hp(struct block_list *bl)
  */
 int battle_get_max_hp(struct block_list *bl)
 {
+	if(!bl)
+		return 1;
 	if(bl->type==BL_PC)
 		return ((struct map_session_data *)bl)->status.max_hp;
 	else {
@@ -177,8 +191,11 @@ int battle_get_max_hp(struct block_list *bl)
 int battle_get_str(struct block_list *bl)
 {
 	int str=0;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_MOB)
 		str = mob_db[((struct mob_data *)bl)->class].str;
 	else if(bl->type==BL_PC)
@@ -209,8 +226,11 @@ int battle_get_str(struct block_list *bl)
 int battle_get_agi(struct block_list *bl)
 {
 	int agi=0;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_MOB)
 		agi=mob_db[((struct mob_data *)bl)->class].agi;
 	else if(bl->type==BL_PC)
@@ -245,7 +265,11 @@ int battle_get_agi(struct block_list *bl)
 int battle_get_vit(struct block_list *bl)
 {
 	int vit=0;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
+
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_MOB)
 		vit=mob_db[((struct mob_data *)bl)->class].vit;
 	else if(bl->type==BL_PC)
@@ -270,8 +294,11 @@ int battle_get_vit(struct block_list *bl)
 int battle_get_int(struct block_list *bl)
 {
 	int int_=0;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_MOB)
 		int_=mob_db[((struct mob_data *)bl)->class].int_;
 	else if(bl->type==BL_PC)
@@ -301,8 +328,11 @@ int battle_get_int(struct block_list *bl)
 int battle_get_dex(struct block_list *bl)
 {
 	int dex=0;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_MOB)
 		dex=mob_db[((struct mob_data *)bl)->class].dex;
 	else if(bl->type==BL_PC)
@@ -336,8 +366,11 @@ int battle_get_dex(struct block_list *bl)
 int battle_get_luk(struct block_list *bl)
 {
 	int luk=0;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_MOB)
 		luk=mob_db[((struct mob_data *)bl)->class].luk;
 	else if(bl->type==BL_PC)
@@ -365,8 +398,11 @@ int battle_get_luk(struct block_list *bl)
 int battle_get_flee(struct block_list *bl)
 {
 	int flee=1;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 1;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_PC)
 		flee=((struct map_session_data *)bl)->flee;
 	else
@@ -394,8 +430,11 @@ int battle_get_flee(struct block_list *bl)
 int battle_get_hit(struct block_list *bl)
 {
 	int hit=1;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 1;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_PC)
 		hit=((struct map_session_data *)bl)->hit;
 	else
@@ -423,8 +462,11 @@ int battle_get_hit(struct block_list *bl)
 int battle_get_flee2(struct block_list *bl)
 {
 	int flee2=1;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 1;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_PC) {
 		flee2 = battle_get_luk(bl) + 10;
 		flee2 += ((struct map_session_data *)bl)->flee2 - (((struct map_session_data *)bl)->paramc[5] + 10);
@@ -448,8 +490,11 @@ int battle_get_flee2(struct block_list *bl)
 int battle_get_critical(struct block_list *bl)
 {
 	int critical=1;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 1;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_PC) {
 		critical = battle_get_luk(bl)*3 + 10;
 		critical += ((struct map_session_data *)bl)->critical - ((((struct map_session_data *)bl)->paramc[5]*3) + 10);
@@ -476,8 +521,12 @@ int battle_get_critical(struct block_list *bl)
  */
 int battle_get_baseatk(struct block_list *bl)
 {
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 	int batk=1;
+
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type == BL_PC) //PC‚È‚ç
 		batk = ((struct map_session_data *)bl)->base_atk; //Ý’è‚³‚ê‚Ä‚¢‚ébase_atk
 	else { //‚»‚êˆÈŠO‚È‚ç
@@ -504,8 +553,12 @@ int battle_get_baseatk(struct block_list *bl)
  */
 int battle_get_atk(struct block_list *bl)
 {
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 	int atk=0;
+
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_PC)
 		atk = ((struct map_session_data*)bl)->watk;
 	else if(bl->type==BL_MOB)
@@ -531,6 +584,8 @@ int battle_get_atk(struct block_list *bl)
  */
 int battle_get_atk_(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_PC){
 		int atk=((struct map_session_data*)bl)->watk_;
 
@@ -548,6 +603,8 @@ int battle_get_atk_(struct block_list *bl)
  */
 int battle_get_atk2(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_PC)
 		return ((struct map_session_data*)bl)->watk2;
 	else {
@@ -585,6 +642,8 @@ int battle_get_atk2(struct block_list *bl)
  */
 int battle_get_atk_2(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_PC)
 		return ((struct map_session_data*)bl)->watk_2;
 	else
@@ -597,6 +656,8 @@ int battle_get_atk_2(struct block_list *bl)
  */
 int battle_get_matk1(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB){
 		int matk,int_=battle_get_int(bl);
 		matk = int_+(int_/5)*(int_/5);
@@ -619,6 +680,8 @@ int battle_get_matk1(struct block_list *bl)
  */
 int battle_get_matk2(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB){
 		int matk,int_=battle_get_int(bl);
 		matk = int_+(int_/7)*(int_/7);
@@ -641,9 +704,12 @@ int battle_get_matk2(struct block_list *bl)
  */
 int battle_get_def(struct block_list *bl)
 {
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 	int def=0,skilltimer=-1,skillid=0;
 
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_PC) {
 		def = ((struct map_session_data *)bl)->def;
 		skilltimer = ((struct map_session_data *)bl)->skilltimer;
@@ -704,9 +770,12 @@ int battle_get_def(struct block_list *bl)
  */
 int battle_get_mdef(struct block_list *bl)
 {
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 	int mdef=0;
 
+	if(!bl)
+		return 0;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_PC)
 		mdef = ((struct map_session_data *)bl)->mdef;
 	else if(bl->type==BL_MOB)
@@ -734,9 +803,12 @@ int battle_get_mdef(struct block_list *bl)
  */
 int battle_get_def2(struct block_list *bl)
 {
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 	int def2=1;
 
+	if(!bl)
+		return 1;
+	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_PC)
 		def2 = ((struct map_session_data *)bl)->def2;
 	else if(bl->type==BL_MOB)
@@ -765,6 +837,8 @@ int battle_get_def2(struct block_list *bl)
  */
 int battle_get_mdef2(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB)
 		return mob_db[((struct mob_data *)bl)->class].int_ + (mob_db[((struct mob_data *)bl)->class].vit>>1);
 	else if(bl->type==BL_PC)
@@ -782,6 +856,8 @@ int battle_get_mdef2(struct block_list *bl)
  */
 int battle_get_speed(struct block_list *bl)
 {
+	if(!bl)
+		return 1000;
 	if(bl->type == BL_PC)
 		return ((struct map_session_data *)bl)->speed;
 	else {
@@ -835,6 +911,8 @@ int battle_get_speed(struct block_list *bl)
  */
 int battle_get_adelay(struct block_list *bl)
 {
+	if(!bl)
+		return 4000;
 	if(bl->type == BL_PC)
 		return (((struct map_session_data *)bl)->aspd<<1);
 	else {
@@ -890,6 +968,8 @@ int battle_get_adelay(struct block_list *bl)
 }
 int battle_get_amotion(struct block_list *bl)
 {
+	if(!bl)
+		return 2000;
 	if(bl->type==BL_PC)
 		return ((struct map_session_data *)bl)->amotion;
 	else {
@@ -936,7 +1016,11 @@ int battle_get_amotion(struct block_list *bl)
 int battle_get_dmotion(struct block_list *bl)
 {
 	int ret;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
+
+	if(!bl)
+		return 0;
+	sc_data = battle_get_sc_data(bl);
 	if(bl->type==BL_MOB) {
 		ret=mob_db[((struct mob_data *)bl)->class].dmotion;
 		if(battle_config.monster_damage_delay_rate != 100)
@@ -961,8 +1045,11 @@ int battle_get_dmotion(struct block_list *bl)
 int battle_get_element(struct block_list *bl)
 {
 	int ret = 20;
-	struct status_change *sc_data=battle_get_sc_data(bl);
+	struct status_change *sc_data;
 
+	if(!bl)
+		return 20;
+	sc_data = battle_get_sc_data(bl);
 	if(bl->type==BL_MOB)	// 10‚ÌˆÊLv*2A‚P‚ÌˆÊ‘®«
 		ret=((struct mob_data *)bl)->def_ele;
 	else if(bl->type==BL_PC)
@@ -986,6 +1073,8 @@ int battle_get_attack_element(struct block_list *bl)
 	int ret = 0;
 	struct status_change *sc_data=battle_get_sc_data(bl);
 
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB)
 		ret=0;
 	else if(bl->type==BL_PC)
@@ -1012,6 +1101,8 @@ int battle_get_attack_element(struct block_list *bl)
 }
 int battle_get_attack_element2(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_PC) {
 		int ret = ((struct map_session_data *)bl)->atk_ele_;
 		struct status_change *sc_data = ((struct map_session_data *)bl)->sc_data;
@@ -1036,6 +1127,8 @@ int battle_get_attack_element2(struct block_list *bl)
 }
 int battle_get_party_id(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if( bl->type == BL_PC )
 		return ((struct map_session_data *)bl)->status.party_id;
 	else if( bl->type==BL_MOB ){
@@ -1051,6 +1144,8 @@ int battle_get_party_id(struct block_list *bl)
 }
 int battle_get_guild_id(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if( bl->type == BL_PC )
 		return ((struct map_session_data *)bl)->status.guild_id;
 	else if( bl->type==BL_MOB )
@@ -1062,6 +1157,8 @@ int battle_get_guild_id(struct block_list *bl)
 }
 int battle_get_race(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB)
 		return mob_db[((struct mob_data *)bl)->class].race;
 	else if(bl->type==BL_PC)
@@ -1073,6 +1170,8 @@ int battle_get_race(struct block_list *bl)
 }
 int battle_get_size(struct block_list *bl)
 {
+	if(!bl)
+		return 1;
 	if(bl->type==BL_MOB)
 		return mob_db[((struct mob_data *)bl)->class].size;
 	else if(bl->type==BL_PC)
@@ -1084,6 +1183,8 @@ int battle_get_size(struct block_list *bl)
 }
 int battle_get_mode(struct block_list *bl)
 {
+	if(!bl)
+		return 0x01;
 	if(bl->type==BL_MOB)
 		return mob_db[((struct mob_data *)bl)->class].mode;
 	else if(bl->type==BL_PET)
@@ -1094,6 +1195,8 @@ int battle_get_mode(struct block_list *bl)
 
 int battle_get_mexp(struct block_list *bl)
 {
+	if(!bl)
+		return 0;
 	if(bl->type==BL_MOB)
 		return mob_db[((struct mob_data *)bl)->class].mexp;
 	else if(bl->type==BL_PET)
@@ -1105,6 +1208,8 @@ int battle_get_mexp(struct block_list *bl)
 // StatusChangeŒn‚ÌŠ“¾
 struct status_change *battle_get_sc_data(struct block_list *bl)
 {
+	if(!bl)
+		return NULL;
 	if(bl->type==BL_MOB)
 		return ((struct mob_data*)bl)->sc_data;
 	else if(bl->type==BL_PC)
@@ -1113,6 +1218,8 @@ struct status_change *battle_get_sc_data(struct block_list *bl)
 }
 short *battle_get_sc_count(struct block_list *bl)
 {
+	if(!bl)
+		return NULL;
 	if(bl->type==BL_MOB)
 		return &((struct mob_data*)bl)->sc_count;
 	else if(bl->type==BL_PC)
@@ -1121,6 +1228,8 @@ short *battle_get_sc_count(struct block_list *bl)
 }
 short *battle_get_opt1(struct block_list *bl)
 {
+	if(!bl)
+		return NULL;
 	if(bl->type==BL_MOB)
 		return &((struct mob_data*)bl)->opt1;
 	else if(bl->type==BL_PC)
@@ -1129,6 +1238,8 @@ short *battle_get_opt1(struct block_list *bl)
 }
 short *battle_get_opt2(struct block_list *bl)
 {
+	if(!bl)
+		return NULL;
 	if(bl->type==BL_MOB)
 		return &((struct mob_data*)bl)->opt2;
 	else if(bl->type==BL_PC)
@@ -1137,6 +1248,8 @@ short *battle_get_opt2(struct block_list *bl)
 }
 short *battle_get_option(struct block_list *bl)
 {
+	if(!bl)
+		return NULL;
 	if(bl->type==BL_MOB)
 		return &((struct mob_data*)bl)->option;
 	else if(bl->type==BL_PC)

@@ -2886,7 +2886,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		guild_reply_reqalliance(sd,sd->guild_alliance_account,0);
 
 	skill_castcancel(&sd->bl,0);	// ‰r¥’†’f
-	skill_stop_dancing(&sd->bl);// ƒ_ƒ“ƒX/‰‰‘t’†’f
+	skill_stop_dancing(&sd->bl,1);// ƒ_ƒ“ƒX/‰‰‘t’†’f
 	pc_stop_walking(sd,0);		// •às’†’f
 	pc_stopattack(sd);			// UŒ‚’†’f
 
@@ -4105,7 +4105,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		pc_stop_walking(sd,3);
 	// ‰‰‘t/ƒ_ƒ“ƒX‚Ì’†’f
 	if(damage > sd->status.max_hp>>2)
-		skill_stop_dancing(&sd->bl);
+		skill_stop_dancing(&sd->bl,0);
 
 	sd->status.hp-=damage;
 	if(sd->status.pet_id > 0 && sd->pd && sd->petDB && battle_config.pet_damage_support)
@@ -5272,7 +5272,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,sd->def_ele))
 		skill_status_change_end(&sd->bl,SC_SIGNUMCRUCIS,-1);
 	if(sd->sc_data[SC_DANCING].timer!=-1 && (sd->status.weapon != 13 && sd->status.weapon !=14))
-		skill_stop_dancing(&sd->bl);
+		skill_stop_dancing(&sd->bl,0);
 
 	return 0;
 }
@@ -5750,9 +5750,14 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 {
 	int skill;
 	if( (battle_config.natural_heal_weight_rate > 100 || sd->weight*100/sd->max_weight < battle_config.natural_heal_weight_rate) &&
-		!pc_isdead(sd) && !pc_ishiding(sd) && sd->sc_data[SC_POISON].timer == -1 && sd->sc_data[SC_EXTREMITYFIST].timer == -1) {
+		!pc_isdead(sd) && 
+		!pc_ishiding(sd) && 
+		sd->sc_data[SC_POISON].timer == -1 &&
+		sd->sc_data[SC_DANCING].timer == -1
+	  ){
 		pc_natural_heal_hp(sd);
-		pc_natural_heal_sp(sd);
+		if(sd->sc_data[SC_EXTREMITYFIST].timer == -1) //ˆ¢C—…ó‘Ô‚Å‚ÍSP‚ª‰ñ•œ‚µ‚È‚¢
+			pc_natural_heal_sp(sd);
 	}
 	else {
 		sd->hp_sub = sd->inchealhptick = 0;

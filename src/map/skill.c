@@ -282,7 +282,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 int skill_frostjoke_scream(struct block_list *bl,va_list ap);
 int skill_status_change_timer_sub(struct block_list *bl, va_list ap );
 int skill_attack_area(struct block_list *bl,va_list ap);
-int skill_is_danceskill(int id);
 int skill_abra_dataset(int skilllv);
 int skill_clear_element_field(struct block_list *bl);
 int skill_landprotector(struct block_list *bl, va_list ap );
@@ -2569,7 +2568,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			struct status_change *sc_data = battle_get_sc_data(src);
 			if(sc_data && sc_data[SC_DANCING].timer!=-1){
 				clif_skill_nodamage(src,bl,skillid,skilllv,1);
-				skill_stop_dancing(src);
+				skill_stop_dancing(src,0);
 			}
 		}
 		break;
@@ -4849,7 +4848,15 @@ static int skill_check_condition_char_sub(struct block_list *bl,va_list ap)
 	case BD_INTOABYSS:				/* 深淵の中に */
 	case BD_SIEGFRIED:				/* 不死身のジークフリード */
 	case BD_RAGNAROK:				/* 神々の黄昏 */
-		if(sd != ssd && ((ss_class.job==19 && s_class.job==20) || (ss_class.job==20 && s_class.job==19)) && pc_checkskill(sd,ssd->skillid) > 0 && (*c)==0)
+		if(sd != ssd &&
+		 ((ss_class.job==19 && s_class.job==20) ||
+		 (ss_class.job==20 && s_class.job==19)) &&
+		 pc_checkskill(sd,ssd->skillid) > 0 &&
+		 (*c)==0 &&
+		 sd->status.party_id == ssd->status.party_id &&
+		 !pc_issit(sd) &&
+		 sd->sc_data[SC_DANCING].timer==-1
+		 )
 			(*c)=pc_checkskill(sd,ssd->skillid);
 		break;
 	}
@@ -4886,7 +4893,15 @@ static int skill_check_condition_use_sub(struct block_list *bl,va_list ap)
 	case BD_INTOABYSS:				/* 深淵の中に */
 	case BD_SIEGFRIED:				/* 不死身のジークフリード */
 	case BD_RAGNAROK:				/* 神々の黄昏 */
-		if(sd != ssd && ((ss_class.job==19 && s_class.job==20) || (ss_class.job==20 && s_class.job==19)) && pc_checkskill(sd,skillid) > 0 && (*c)==0){
+		if(sd != ssd && //本人以外で
+		  ((ss_class.job==19 && s_class.job==20) || //自分がバードならダンサーで
+		   (ss_class.job==20 && s_class.job==19)) && //自分がダンサーならバードで
+		   pc_checkskill(sd,skillid) > 0 && //スキルを持っていて
+		   (*c)==0 && //最初の一人で
+		   sd->status.party_id == ssd->status.party_id && //パーティーが同じで
+		   !pc_issit(sd) && //座ってない
+		   sd->sc_data[SC_DANCING].timer==-1 //ダンス中じゃない
+		  ){
 			ssd->sc_data[SC_DANCING].val4=bl->id;
 			clif_skill_nodamage(bl,bl,skillid,skilllv,1);
 			skill_status_change_start(bl,SC_DANCING,skillid,ssd->sc_data[SC_DANCING].val2,gettick(),src->id,1000*181,0);
@@ -5309,11 +5324,14 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		return 0;
 
 	/* 演奏/ダンス中 */
-	if( sd->sc_data[SC_DANCING].timer!=-1 && skill_num!=BD_ADAPTATION &&
-		skill_num!=BA_MUSICALSTRIKE && skill_num!=DC_THROWARROW ){
+	if( sd->sc_data[SC_DANCING].timer!=-1 ){
 //		if(battle_config.pc_skill_log)
 //			printf("dancing! %d\n",skill_num);
-		return 0;
+		if(sd->sc_data[SC_DANCING].val4 && skill_num!=BD_ADAPTATION) //合奏中はアドリブ以外不可
+			return 0;
+		if(skill_num!=BD_ADAPTATION && skill_num!=BA_MUSICALSTRIKE && skill_num!=DC_THROWARROW){
+			return 0;
+		}
 	}
 
 	if(skill_get_inf2(skill_num)&0x200 && sd->bl.id == target_id)
@@ -6215,7 +6233,6 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			case SC_SPEEDPOTION1:
 			case SC_SPEEDPOTION2:
 			case SC_APPLEIDUN:			/* イドゥンの林檎 */
-			case SC_DANCING:			/* ダンス/演奏中 */
 			case SC_RIDING:
 			case SC_BLADESTOP_WAIT:
 			case SC_AURABLADE:			/* オーラブレード */
@@ -6249,6 +6266,19 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 					if(sc_data[type].val2==2)
 						clif_bladestop((struct block_list *)sc_data[type].val3,(struct block_list *)sc_data[type].val4,0);
 				}
+				break;
+			case SC_DANCING:
+				{
+					struct map_session_data *dsd;
+					struct status_change *d_sc_data;
+					if(sc_data[type].val4 && (dsd=map_id2sd(sc_data[type].val4))){
+						d_sc_data = dsd->sc_data;
+						//合奏で相手がいる場合相手のval4を0にする
+						if(d_sc_data && d_sc_data[type].timer!=-1)
+							d_sc_data[type].val4=0;
+					}
+				}
+				calc_flag = 1;
 				break;
 
 		/* option1 */
@@ -7102,7 +7132,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_STAN:
 		case SC_SLEEP:
 			battle_stopattack(bl);	/* 攻撃停止 */
-			skill_stop_dancing(bl);	/* 演奏/ダンスの中断 */
+			skill_stop_dancing(bl,0);	/* 演奏/ダンスの中断 */
 			{	/* 同時に掛からないステータス異常を解除 */
 				int i;
 				for(i = SC_STONE; i <= SC_SLEEP; i++){
@@ -7236,21 +7266,82 @@ int skill_check_cloaking(struct block_list *bl)
  *----------------------------------------------------------------------------
  */
 
-/* 演奏/ダンススキルかどうか判定 */
+/*==========================================
+ * 演奏/ダンススキルかどうか判定
+ * 引数 スキルID
+ * 戻り ダンスじゃない=0 合奏=2 それ以外のダンス=1
+ *------------------------------------------
+ */
 int skill_is_danceskill(int id)
 {
-	return ( (id>=BD_LULLABY && id<=BD_RAGNAROK) ||
-		(id>=BA_DISSONANCE && id<=BA_APPLEIDUN && id!=BA_FROSTJOKE ) ||
-		(id>=DC_UGLYDANCE && id<=DC_SERVICEFORYOU && id!=DC_SCREAM) );
+	int i;
+	switch(id){
+	case BD_LULLABY:				/* 子守歌 */
+	case BD_RICHMANKIM:				/* ニヨルドの宴 */
+	case BD_ETERNALCHAOS:			/* 永遠の混沌 */
+	case BD_DRUMBATTLEFIELD:		/* 戦太鼓の響き */
+	case BD_RINGNIBELUNGEN:			/* ニーベルングの指輪 */
+	case BD_ROKISWEIL:				/* ロキの叫び */
+	case BD_INTOABYSS:				/* 深淵の中に */
+	case BD_SIEGFRIED:				/* 不死身のジークフリード */
+	case BD_RAGNAROK:				/* 神々の黄昏 */
+		i=2;
+		break;
+	case BA_DISSONANCE:				/* 不協和音 */
+	case BA_FROSTJOKE:				/* 寒いジョーク */
+	case BA_WHISTLE:				/* 口笛 */
+	case BA_ASSASSINCROSS:			/* 夕陽のアサシンクロス */
+	case BA_POEMBRAGI:				/* ブラギの詩 */
+	case BA_APPLEIDUN:				/* イドゥンの林檎 */
+	case DC_UGLYDANCE:				/* 自分勝手なダンス */
+	case DC_SCREAM:					/* スクリーム */
+	case DC_HUMMING:				/* ハミング */
+	case DC_DONTFORGETME:			/* 私を忘れないで… */
+	case DC_FORTUNEKISS:			/* 幸運のキス */
+	case DC_SERVICEFORYOU:			/* サービスフォーユー */
+		i=1;
+		break;
+	default:
+		i=0;
+	}
+	return i;
 }
 
-/* 演奏/ダンスをやめる */
-void skill_stop_dancing(struct block_list *src)
+/*==========================================
+ * 演奏/ダンスをやめる
+ * flag 1で合奏中なら相方にユニットを任せる
+ * 
+ *------------------------------------------
+ */
+void skill_stop_dancing(struct block_list *src, int flag)
 {
 	struct status_change* sc_data=battle_get_sc_data(src);
+	struct skill_unit_group* group;
 	if(sc_data && sc_data[SC_DANCING].timer==-1)
 		return;
-	skill_delunitgroup((struct skill_unit_group *)sc_data[SC_DANCING].val2);
+	group=(struct skill_unit_group *)sc_data[SC_DANCING].val2; //ダンスのスキルユニットIDはval2に入ってる
+	if(group && src->type==BL_PC && sc_data[SC_DANCING].val4){ //合奏中断
+		struct map_session_data* dsd=map_id2sd(sc_data[SC_DANCING].val4); //相方のsd取得
+		if(flag){ //ログアウトなど片方が落ちても演奏が継続される
+			if(dsd && src->id == group->src_id){ //グループを持ってるPCが落ちる
+				group->src_id=sc_data[SC_DANCING].val4; //相方にグループを任せる
+				dsd->sc_data[SC_DANCING].val4=0; //相方の相方を0にして合奏終了→通常のダンス状態
+			}else if(dsd && dsd->bl.id == group->src_id){ //相方がグループを持っているPCが落ちる(自分はグループを持っていない)
+				dsd->sc_data[SC_DANCING].val4=0; //相方の相方を0にして合奏終了→通常のダンス状態
+			}
+			skill_status_change_end(src,SC_DANCING,-1);//自分のステータスを終了させる
+			//そしてグループは消さない＆消さないのでステータス計算もいらない？
+			return;
+		}else{
+			if(dsd && src->id == group->src_id){ //グループを持ってるPCが止める
+				skill_status_change_end((struct block_list *)dsd,SC_DANCING,-1);//相手のステータスを終了させる
+			}
+			if(dsd && dsd->bl.id == group->src_id){ //相方がグループを持っているPCが止める(自分はグループを持っていない)
+				skill_status_change_end(src,SC_DANCING,-1);//自分のステータスを終了させる
+			}
+		}
+	}
+	skill_delunitgroup(group);
 	if(src->type==BL_PC)
 		pc_calcstatus((struct map_session_data *)src,0);
 }
@@ -7426,17 +7517,9 @@ int skill_delunitgroup(struct skill_unit_group *group)
 	if(group->unit_count<=0)
 		return 0;
 
-	if( skill_is_danceskill(group->skill_id) ){
-		if(src){
-			struct status_change *sc_data = battle_get_sc_data(src);
-			if(sc_data && sc_data[SC_DANCING].val4) { //合奏相手が存在する
-				struct block_list *bl=map_id2bl(sc_data[SC_DANCING].val4);
-				struct status_change *dsc_data = battle_get_sc_data(bl);
-				if(dsc_data && sc_data[SC_DANCING].timer!=-1)
-					skill_status_change_end(bl,SC_DANCING,-1);
-			}
+	if( skill_is_danceskill(group->skill_id) ){ //ダンススキルはダンス状態を解除する
+		if(src)
 			skill_status_change_end(src,SC_DANCING,-1);
-		}
 	}
 
 	group->alive_count=0;
@@ -7476,7 +7559,7 @@ int skill_clear_unitgroup(struct block_list *src)
 	if(group){
 		int i;
 		for(i=0;i<maxsug;i++)
-			if(group[i].group_id>0)
+			if(group[i].group_id>0 && group[i].src_id == src->id)
 				skill_delunitgroup(&group[i]);
 	}
 	return 0;

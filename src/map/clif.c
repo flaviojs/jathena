@@ -5773,7 +5773,7 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 		sd->sc_data[SC_TRICKDEAD].timer !=-1 || //死んだふり
 		sd->sc_data[SC_BLADESTOP].timer !=-1 || //白刃取り
 		sd->sc_data[SC_SPIDERWEB].timer !=-1 || //スパイダーウェッブ
-		(sd->sc_data[SC_DANCING].timer !=-1 && (sd->sc_data[SC_DANCING].val1 >= BD_LULLABY && sd->sc_data[SC_DANCING].val1 <= BD_RAGNAROK)) //合奏スキル演奏中は動けない
+		(sd->sc_data[SC_DANCING].timer !=-1 && sd->sc_data[SC_DANCING].val4) //合奏スキル演奏中は動けない
 		) //
 		return;
 	if( (sd->status.option&2) && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0)
@@ -5973,6 +5973,8 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 	case 0x00:	// once attack
 	case 0x07:	// continuous attack
 		if(sd->vender_id != 0) return;
+		if(sd->sc_data && sd->sc_data[SC_DANCING].timer!=-1) //ダンス中は殴れない
+			return;
 		if(!battle_config.sdelay_attack_enable && pc_checkskill(sd,SA_FREECAST) <= 0 ) {
 			if(DIFF_TICK(tick , sd->canact_tick) < 0) {
 				clif_skill_fail(sd,1,4,0);
@@ -5985,6 +5987,8 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 		break;
 	case 0x02:	// sitdown
 		if(battle_config.basic_skill_check == 0 || pc_checkskill(sd,NV_BASIC) >= 3) {
+			if(sd->sc_data && sd->sc_data[SC_DANCING].timer!=-1) //合奏中は座らせない
+				return;
 			pc_stop_walking(sd,1);
 			skill_gangsterparadise(sd,1);/* ギャングスターパラダイス設定 */
 			pc_setsit(sd);

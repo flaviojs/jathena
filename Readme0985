@@ -1,4 +1,44 @@
 --------------------
+//0998 by (凸)
+・battle.cで引数の存在を確認せずに値を見に行ってる関数をいくつか修正
+・ダンス中は座れないようにした(本鯖相違スレッド part2 >>114 DoTさん)
+・ダンス中はHP、SPが回復しないように変更(同上)
+・ダンス中は通常攻撃できないようにした(本鯖相違スレッド part2 >>116 ・・・さん)
+・合奏中片方が落ちた場合、残ったほうで演奏を継続するようにした(同上)
+・合奏中はアドリブ以外できないように変更(同上)
+・合奏発動条件にダンス中じゃない＆座っていないを追加(本鯖相違スレッド part2 >>118 ろろさん)
+・阿修羅使用後にHPも回復しなかったのを修正
+
+	(map/)
+	battle.c
+		battle_counttargeted() 修正
+		battle_get系 たぶん全部修正
+	clif.c
+		clif_parse_WalkToXY() 合奏の判断方法の変更
+		clif_parse_ActionRequest() ダンス中は殴らない座らないように変更
+	map.c
+		map_quit() ダンス中断追加
+	mob.c
+		mob_damage() skill_stop_dancingの引数増加による変更
+	pc.c
+		pc_setpos() 同上
+		pc_damage() 同上
+		pc_equipitem() 同上
+		pc_natural_heal_sub() ダンス中は自然回復しないように＆阿修羅時はSPのみ回復しないように
+	skill.c
+		skill_castend_nodamage_id() skill_stop_dancingの引数増加による変更
+		skill_status_change_start() 同上
+		skill_check_condition_char_sub() 相手がダンス中や座っていても合奏できないように変更
+		skill_check_condition_use_sub() 同上
+		skill_use_id() 合奏の判断方法の変更＆合奏中はアドリブ以外禁止に
+		skill_status_change_end() 合奏のダンス状態解除は相手のval4を0にするようにした
+		skill_is_danceskill() 戻り値変更
+		skill_stop_dancing() 引数増加、合奏で片方だけ落ちたときの処理追加
+		skill_delunitgroup() 合奏時のステータス変更処理を↑に移した
+		skill_clear_unitgroup() 自分のbl->idとユニットグループのgroup->src_idが違うときは削除しないように変更
+	skill.h 変更
+
+--------------------
 //0997 by (凸)
 ・二人で合奏、三人で聖体を実装
 	合奏 バード・ダンサーが隣接したセルにいて同じスキルを持っている時に発動

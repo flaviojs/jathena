@@ -112,7 +112,7 @@ int skill_unit_move( struct block_list *bl,unsigned int tick,int range);
 int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int dy);
 
 struct skill_unit_group *skill_check_dancing( struct block_list *src );
-void skill_stop_dancing(struct block_list *src);
+void skill_stop_dancing(struct block_list *src, int flag);
 
 // 詠唱キャンセル
 int skill_castcancel(struct block_list *bl,int type);
@@ -130,6 +130,7 @@ void skill_devotion_end(struct map_session_data *md,struct map_session_data *sd,
 
 // その他
 int skill_check_cloaking(struct block_list *bl);
+int skill_is_danceskill(int id);
 
 // ステータス異常
 int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,int val3,int val4,int tick,int flag);

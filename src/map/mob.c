@@ -1771,7 +1771,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	if(md->sc_data[SC_ENDURE].timer == -1)
 		mob_stop_walking(md,3);
 	if(damage > max_hp>>2)
-		skill_stop_dancing(&md->bl);
+		skill_stop_dancing(&md->bl,0);
 
 	if(md->hp > max_hp)
 		md->hp = max_hp;
