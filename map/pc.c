@@ -2927,7 +2927,7 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 		/* ディボーション検査 */
 		for(i=0;i<5;i++)
 			if(sd->dev.val1[i]){
-				skill_devotion3(&sd->bl,i);
+				skill_devotion3(&sd->bl,sd->dev.val1[i]);
 				break;
 			}
 		/* 被ディボーション検査 */

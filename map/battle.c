@@ -960,7 +960,7 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 
 		if(tsd->sc_data[SC_DEVOTION].val1){	// ディボーションをかけられている
 			struct map_session_data *md = map_id2sd(tsd->sc_data[SC_DEVOTION].val1);
-			if(skill_devotion3(target,tsd->sc_data[SC_DEVOTION].val1)){
+			if(md && skill_devotion3(&md->bl,target->id)){
 				skill_devotion(md,target->id);
 			}
 			else if(md)
@@ -980,6 +980,11 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 				!tsd->special_state.no_castcancel2)
 				skill_castcancel(target,0);
 		}
+		if( (*battle_get_option(target))&6 ){
+			skill_status_change_end( target, SC_HIDING, -1);
+			skill_status_change_end( target, SC_CLOAKING, -1);
+		}
+
 		return pc_damage(bl,tsd,damage);
 
 	}else if(target->type==BL_SKILL)

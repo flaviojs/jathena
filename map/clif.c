@@ -4193,14 +4193,16 @@ int clif_pet_food(struct map_session_data *sd,int foodid,int fail)
  */
 int clif_devotion(struct map_session_data *sd,int target)
 {
-	unsigned char buf[28];
+	unsigned char buf[56];
 	int n;
-	/* パケットがイマイチ分からない */
 	WBUFW(buf,0)=0x1cf;
-	WBUFL(buf,4)=sd->bl.id;
+	WBUFL(buf,2)=sd->bl.id;
+//	WBUFL(buf,6)=target;
 	for(n=0;n<5;n++)
-		WBUFL(buf,8+4*n) =sd->dev.val2[n];
-//	WBUFL(buf,8)=target;
+		WBUFL(buf,6+4*n)=sd->dev.val2[n];
+//		WBUFL(buf,10+4*n)=0;
+	WBUFB(buf,26)=8;
+	WBUFB(buf,27)=0;
 
 	clif_send(buf,packet_len_table[0x1cf],&sd->bl,AREA);
 	return 0;

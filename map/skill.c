@@ -1749,8 +1749,8 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		if(sd && dstsd){
 			int lv = sd->status.base_level-dstsd->status.base_level;
 			lv = (lv<0)?-lv:lv;
-			if((sd->bl.type!=BL_PC)		// 相手はPCじゃないとだめ
-			 ||(sd->bl.id == bl->id)	// 相手が自分はだめ
+			if((dstsd->bl.type!=BL_PC)	// 相手はPCじゃないとだめ
+			 ||(dstsd->bl.id == bl->id)	// 相手が自分はだめ
 			 ||(lv > 10)			// レベル差±10まで
 			 ||(sd->status.party_id != dstsd->status.party_id)	// 同じパーティーじゃないとだめ
 			 ||(dstsd->status.class==14||dstsd->status.class==21)){	// クルセだめ
@@ -1760,6 +1760,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			for(i=0;i<skilllv;i++){
 				if(!sd->dev.val1[i]){		// 空きがあったら入れる
 					sd->dev.val1[i] = bl->id;
+					sd->dev.val2[i] = bl->id;
 					break;
 				}else if(i==skilllv-1){		// 空きがなかった
 					clif_skill_fail(sd,skillid,0,0);
@@ -1770,6 +1771,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			clif_devotion(sd,bl->id);
 			skill_status_change_start( bl, SkillStatusChangeTable[skillid], src->id ,1, 1000*(15+15*skilllv),0 );
 		}
+		else	clif_skill_fail(sd,skillid,0,0);
 		break;
 	case MO_CALLSPIRITS:	// 気功
 		if(sd) {
@@ -4257,24 +4259,22 @@ void skill_devotion2(struct block_list *bl,int crusader)
 	// 被ディボーションが歩いた時の距離チェック
 	struct map_session_data *sd = map_id2sd(crusader);
 	if(sd) skill_devotion3(&sd->bl,bl->id);
-
 }
-int skill_devotion3(struct block_list *bl,int crusader)
+int skill_devotion3(struct block_list *bl,int target)
 {
 	// クルセが歩いた時の距離チェック
-	struct map_session_data *sd = map_id2sd(crusader);
-	int x,y,r;
-
-	if(!sd) return 1;
-
-	x = bl->x - sd->bl.x;
-	y = bl->y - sd->bl.y;
-	x = (x<0)?-x:x;
-	y = (y<0)?-y:y;
-	r = (x>y)?x:y;
+	struct map_session_data *md = (struct map_session_data *)bl;
+	struct map_session_data *sd = map_id2sd(target);
+	int n,r=0;
+	if(!md || !sd) return 1;
+	else
+		r = distance(bl->x,bl->y,sd->bl.x,sd->bl.y);
 
 	if(pc_checkskill(sd,CR_DEVOTION)+6 < r){	// 許容範囲を超えてた
-		clif_devotion(sd,bl->id);		// 離れた時は、糸を切るだけ
+		for(n=0;n<5;n++)
+			if(md->dev.val1[n]==target)
+				md->dev.val2[n]=0;	// 離れた時は、糸を切るだけ
+		clif_devotion(md,sd->bl.id);
 		return 1;
 	}
 	return 0;
@@ -4288,7 +4288,8 @@ void skill_devotion_end(struct map_session_data *md,struct map_session_data *sd,
 	//	skill_status_change_end(sd->bl,SC_DEVOTION,-1);
 		sd->sc_data[SC_DEVOTION].val1=0;
 		sd->sc_data[SC_DEVOTION].val2=0;
-		clif_status_change(&sd->bl,SC_DEVOTION,0);// 3c:0x60
+		clif_status_change(&sd->bl,SC_DEVOTION,0);
+		clif_devotion(md,sd->bl.id);
 	}
 }
 
@@ -5614,7 +5615,6 @@ int skill_delunitgroup(struct skill_unit_group *group)
 	group->unit_count=0;
 	return 0;
 }
-
 
 /*==========================================
  * スキルユニットグループ全削除
