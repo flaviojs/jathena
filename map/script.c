@@ -94,6 +94,8 @@ int buildin_getequippercentrefinery(struct script_state *st);
 int buildin_successrefitem(struct script_state *st);
 int buildin_failedrefitem(struct script_state *st);
 int buildin_cutin(struct script_state *st);
+int buildin_statusup(struct script_state *st);
+int buildin_statusup2(struct script_state *st);
 int buildin_bonus(struct script_state *st);
 int buildin_bonus2(struct script_state *st);
 int buildin_bonus3(struct script_state *st);
@@ -184,6 +186,8 @@ struct {
 	{buildin_getequippercentrefinery,"getequippercentrefinery","i"},
 	{buildin_successrefitem,"successrefitem","i"},
 	{buildin_failedrefitem,"failedrefitem","i"},
+	{buildin_statusup,"statusup","i"},
+	{buildin_statusup2,"statusup2","ii"},
 	{buildin_bonus,"bonus","ii"},
 	{buildin_bonus2,"bonus2","iii"},
 	{buildin_bonus3,"bonus3","iiii"},
@@ -1761,6 +1765,37 @@ int buildin_failedrefitem(struct script_state *st)
 	return 0;
 }
 
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int buildin_statusup(struct script_state *st)
+{
+	int type;
+	struct map_session_data *sd;
+
+	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	sd=map_id2sd(st->rid);
+	pc_statusup(sd,type);
+
+	return 0;
+}
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int buildin_statusup2(struct script_state *st)
+{
+	int type,val;
+	struct map_session_data *sd;
+
+	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	val=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	sd=map_id2sd(st->rid);
+	pc_statusup2(sd,type,val);
+
+	return 0;
+}
 /*==========================================
  * 装備品による能力値ボーナス
  *------------------------------------------

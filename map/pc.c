@@ -334,8 +334,10 @@ int pc_equippoint(struct map_session_data *sd,int n)
 	int ep = 0;
 	if(sd && sd->inventory_data[n]) {
 		ep = sd->inventory_data[n]->equip;
-		if(ep == 2 && pc_checkskill(sd,AS_LEFT) > 0)
-			return 34;
+		if(sd->inventory_data[n]->look == 1 || sd->inventory_data[n]->look == 2 || sd->inventory_data[n]->look == 6) {
+			if(ep == 2 && (pc_checkskill(sd,AS_LEFT) > 0 || sd->status.class == 12) )
+				return 34;
+		}
 	}
 	return ep;
 }
@@ -813,7 +815,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(sd->magic_addrace,0,sizeof(sd->magic_addrace));
 	memset(sd->magic_subrace,0,sizeof(sd->magic_subrace));
 	sd->perfect_hit = 0;
-	sd->critical_rate = 100;
+	sd->critical_rate = sd->hit_rate = sd->flee_rate = sd->flee2_rate = 100;
+	sd->def_rate = sd->def2_rate = sd->mdef_rate = sd->mdef2_rate = 100;
 	sd->def_ratio_atk_ele = sd->def_ratio_atk_ele_ = 0;
 	sd->def_ratio_atk_race = sd->def_ratio_atk_race_ = 0;
 	sd->get_zeny_num = 0;
@@ -1013,7 +1016,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->speed = sd->speed*3/2;
 	}
 
-
 	sd->paramc[0]=sd->status.str+sd->paramb[0]+sd->parame[0];
 	sd->paramc[1]=sd->status.agi+sd->paramb[1]+sd->parame[1];
 	sd->paramc[2]=sd->status.vit+sd->paramb[2]+sd->parame[2];
@@ -1047,6 +1049,28 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	if(sd->critical_rate != 100)
 		sd->critical = (sd->critical*sd->critical_rate)/100;
+	if(sd->critical < 1) sd->critical = 1;
+	if(sd->hit_rate != 100)
+		sd->hit = (sd->hit*sd->hit_rate)/100;
+	if(sd->hit < 1) sd->hit = 1;
+	if(sd->flee_rate != 100)
+		sd->flee = (sd->flee*sd->flee_rate)/100;
+	if(sd->flee < 1) sd->flee = 1;
+	if(sd->flee2_rate != 100)
+		sd->flee2 = (sd->flee2*sd->flee2_rate)/100;
+	if(sd->flee2 < 1) sd->flee2 = 1;
+	if(sd->def_rate != 100)
+		sd->def = (sd->def*sd->def_rate)/100;
+	if(sd->def < 0) sd->def = 0;
+	if(sd->def2_rate != 100)
+		sd->def2 = (sd->def2*sd->def2_rate)/100;
+	if(sd->def2 < 1) sd->def2 = 1;
+	if(sd->mdef_rate != 100)
+		sd->mdef = (sd->mdef*sd->mdef_rate)/100;
+	if(sd->mdef < 0) sd->mdef = 0;
+	if(sd->mdef2_rate != 100)
+		sd->mdef2 = (sd->mdef2*sd->mdef2_rate)/100;
+	if(sd->mdef2 < 1) sd->mdef2 = 1;
 
 	// “ñ“—¬ ASPD C³
 	if (sd->status.weapon <= 16)
@@ -1179,7 +1203,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		
 		if( sd->sc_data[SC_DANCING].timer!=-1 )		// ‰‰‘t/ƒ_ƒ“ƒXg—p’†
 			sd->speed*=4;
-
 
 		// HIT/FLEE•Ï‰»Œn
 		if(sd->sc_data[SC_WHISTLE].timer!=-1){  // Œû“J
@@ -1403,6 +1426,10 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		if(sd->state.lr_flag != 2)
 			sd->mdef+=val;
 		break;
+	case SP_MDEF2:
+		if(sd->state.lr_flag != 2)
+			sd->mdef+=val;
+		break;
 	case SP_HIT:
 		if(sd->state.lr_flag != 2)
 			sd->hit+=val;
@@ -1467,7 +1494,7 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		else if(sd->state.lr_flag == 2)
 			sd->arrow_range += val;
 		break;
-	case SP_SPEED:
+	case SP_ADD_SPEED:
 		if(sd->state.lr_flag != 2)
 			sd->speed -= val;
 		break;
@@ -1590,6 +1617,34 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 			sd->def_ratio_atk_race |= 1<<val;
 		else if(sd->state.lr_flag == 1)
 			sd->def_ratio_atk_race_ |= 1<<val;
+		break;
+	case SP_HIT_RATE:
+		if(sd->state.lr_flag != 2)
+			sd->hit_rate += val;
+		break;
+	case SP_FLEE_RATE:
+		if(sd->state.lr_flag != 2)
+			sd->flee_rate += val;
+		break;
+	case SP_FLEE2_RATE:
+		if(sd->state.lr_flag != 2)
+			sd->flee2_rate += val;
+		break;
+	case SP_DEF_RATE:
+		if(sd->state.lr_flag != 2)
+			sd->def_rate += val;
+		break;
+	case SP_DEF2_RATE:
+		if(sd->state.lr_flag != 2)
+			sd->def2_rate += val;
+		break;
+	case SP_MDEF_RATE:
+		if(sd->state.lr_flag != 2)
+			sd->mdef_rate += val;
+		break;
+	case SP_MDEF2_RATE:
+		if(sd->state.lr_flag != 2)
+			sd->mdef2_rate += val;
 		break;
 	case SP_RESTART_FULL_RECORVER:
 		if(sd->state.lr_flag != 2)
@@ -3001,10 +3056,7 @@ int pc_checkbaselevelup(struct map_session_data *sd)
 		sd->status.base_level ++;
 		clif_updatestatus(sd,SP_BASELEVEL);
 		clif_updatestatus(sd,SP_NEXTBASEEXP);
-		if(sd->status.base_level>=99)
-			sd->status.status_point += 22;
-		else
-			sd->status.status_point += (sd->status.base_level+14) / 5 ;
+		sd->status.status_point += (sd->status.base_level+14) / 5 ;
 		clif_updatestatus(sd,SP_STATUSPOINT);
 		pc_calcstatus(sd,0);
 		pc_heal(sd,sd->status.max_hp,sd->status.max_sp);
@@ -3148,27 +3200,51 @@ int pc_statusup(struct map_session_data *sd,int type)
 		clif_statusupack(sd,type,0,0);
 		return 1;
 	}
-	sd->status.status_point-=need;
 	switch(type){
 	case SP_STR:
+		if(sd->status.str >= battle_config.max_parameter) {
+			clif_statusupack(sd,type,0,0);
+			return 1;
+		}
 		val= ++sd->status.str;
 		break;
 	case SP_AGI:
+		if(sd->status.agi >= battle_config.max_parameter) {
+			clif_statusupack(sd,type,0,0);
+			return 1;
+		}
 		val= ++sd->status.agi;
 		break;
 	case SP_VIT:
+		if(sd->status.vit >= battle_config.max_parameter) {
+			clif_statusupack(sd,type,0,0);
+			return 1;
+		}
 		val= ++sd->status.vit;
 		break;
 	case SP_INT:
+		if(sd->status.int_ >= battle_config.max_parameter) {
+			clif_statusupack(sd,type,0,0);
+			return 1;
+		}
 		val= ++sd->status.int_;
 		break;
 	case SP_DEX:
+		if(sd->status.dex >= battle_config.max_parameter) {
+			clif_statusupack(sd,type,0,0);
+			return 1;
+		}
 		val= ++sd->status.dex;
 		break;
 	case SP_LUK:
+		if(sd->status.luk >= battle_config.max_parameter) {
+			clif_statusupack(sd,type,0,0);
+			return 1;
+		}
 		val= ++sd->status.luk;
 		break;
 	}
+	sd->status.status_point-=need;
 	if(need!=pc_need_status_point(sd,type)){
 		clif_updatestatus(sd,type-SP_STR+SP_USTR);
 	}
@@ -3180,6 +3256,79 @@ int pc_statusup(struct map_session_data *sd,int type)
 	return 0;
 }
 
+/*==========================================
+ * ”\—Í’l¬’·
+ *------------------------------------------
+ */
+int pc_statusup2(struct map_session_data *sd,int type,int val)
+{
+	if(type<SP_STR || type>SP_LUK){
+		clif_statusupack(sd,type,0,0);
+		return 1;
+	}
+	switch(type){
+	case SP_STR:
+		if(sd->status.str + val >= battle_config.max_parameter)
+			val = battle_config.max_parameter;
+		else if(sd->status.str + val < 1)
+			val = 1;
+		else
+			val += sd->status.str;
+		sd->status.str = val;
+		break;
+	case SP_AGI:
+		if(sd->status.agi + val >= battle_config.max_parameter)
+			val = battle_config.max_parameter;
+		else if(sd->status.agi + val < 1)
+			val = 1;
+		else
+			val += sd->status.agi;
+		sd->status.agi = val;
+		break;
+	case SP_VIT:
+		if(sd->status.vit + val >= battle_config.max_parameter)
+			val = battle_config.max_parameter;
+		else if(sd->status.vit + val < 1)
+			val = 1;
+		else
+			val += sd->status.vit;
+		sd->status.vit = val;
+		break;
+	case SP_INT:
+		if(sd->status.int_ + val >= battle_config.max_parameter)
+			val = battle_config.max_parameter;
+		else if(sd->status.int_ + val < 1)
+			val = 1;
+		else
+			val += sd->status.int_;
+		sd->status.int_ = val;
+		break;
+	case SP_DEX:
+		if(sd->status.dex + val >= battle_config.max_parameter)
+			val = battle_config.max_parameter;
+		else if(sd->status.dex + val < 1)
+			val = 1;
+		else
+			val += sd->status.dex;
+		sd->status.dex = val;
+		break;
+	case SP_LUK:
+		if(sd->status.luk + val >= battle_config.max_parameter)
+			val = battle_config.max_parameter;
+		else if(sd->status.luk + val < 1)
+			val = 1;
+		else
+			val = sd->status.luk + val;
+		sd->status.luk = val;
+		break;
+	}
+	clif_updatestatus(sd,type-SP_STR+SP_USTR);
+	clif_updatestatus(sd,type);
+	pc_calcstatus(sd,0);
+	clif_statusupack(sd,type,1,val);
+
+	return 0;
+}
 
 /*==========================================
  * ƒXƒLƒ‹ƒ|ƒCƒ“ƒgŠ„‚èU‚è
@@ -3610,6 +3759,7 @@ int pc_jobchange(struct map_session_data *sd,int job)
 	}
 	pc_calcstatus(sd,0);
 	pc_equiplookall(sd);
+	clif_equiplist(sd);
 
 	return 0;
 }
@@ -3986,8 +4136,8 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	// “ñ“—¬ˆ—
 	if ((pos==0x22) // ˆê‰A‘•”õ—v‹‰ÓŠ‚ª“ñ“—¬•Ší‚©ƒ`ƒFƒbƒN‚·‚é
 	 &&	(id->equip==2)	// ’P è•Ší
-	 &&	(pc_checkskill(sd, AS_LEFT) > 0) // ¶èC˜B—L
-	){
+	 &&	(pc_checkskill(sd, AS_LEFT) > 0 || sd->status.class == 12) ) // ¶èC˜B—L
+	{
 		int tpos=0;
 		if(sd->equip_index[8] >= 0)
 			tpos |= sd->status.inventory[sd->equip_index[8]].equip;

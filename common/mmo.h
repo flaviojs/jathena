@@ -26,6 +26,8 @@
 #define MAX_GUILDALLIANCE 16
 #define MAX_GUILDSKILL	8
 
+#define GRF_PATH_FILENAME "conf/grf-files.txt"
+
 struct item {
 	int id;
 	short nameid;
@@ -69,7 +71,7 @@ struct mmo_charstatus {
 
 	short class;
 	short status_point,skill_point;
-	short hp,max_hp,sp,max_sp;
+	int hp,max_hp,sp,max_sp;
 	short option,karma,manner;
 	short hair,hair_color,clothes_color;
 	int party_id,guild_id,pet_id;
@@ -79,7 +81,7 @@ struct mmo_charstatus {
 
 	char name[24];
 	unsigned char base_level,job_level;
-	unsigned char str,agi,vit,int_,dex,luk,char_num,sex;
+	short str,agi,vit,int_,dex,luk,char_num,sex;
 
 	struct point last_point,save_point,memo_point[10];
 	struct item inventory[MAX_INVENTORY],cart[MAX_CART];

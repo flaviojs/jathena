@@ -26,7 +26,7 @@ bonus bCritical,n;		クリティカル+n
 bonus bCriticalRate,n;		クリティカル+n%
 bonus bFlee,n;			回避力+n
 bonus bFlee2,n;			完全回避+n
-bonus bSpeed,n;			移動速度+n
+bonus bAddSpeed,n;			移動速度+n
 bonus bAspd,n;			攻撃速度+n
 bonus bSpeedRate,n;		移動速度n%(高い物だけ適用)
 bonus bAspdRate,n;		攻撃速度n%(高い物だけ適用)
@@ -65,6 +65,13 @@ bonus bAtkEle,n;		武器にnの属性付与
 					0,無　1,水　2,土　3,火　4,風　5,毒　6,聖　7,闇　8,念　9,不死
 bonus bDefEle,n;		防具にnの属性付与
 					0,無　1,水　2,土　3,火　4,風　5,毒　6,聖　7,闇　8,念　9,不死
+bonus bHitRate,n;		命中率+n%
+bonus bFleeRate,n;		回避率+n%
+bonus bFlee2Rate,n;		完全回避率+n%
+bonus bDefRate,n;		防御率+n%(装備)
+bonus bDef2Rate,n;		防御率+n%(vitによる物)
+bonus bMdefRate,n;		魔法防御率+n%(装備)
+bonus bMdef2Rate,n;		魔法防御率+n%(intによる物)
 
 bonus bInfiniteEndure,n;	無限インデュア(nは無意味)
 bonus bRestartFullRecover,n;	復活した時HPとSPを全て回復(nは無意味)
@@ -76,25 +83,25 @@ bonus bNoMagicDamage,n;		魔法でダメージを受けない(ヒールも含む、nは無意味)
 bonus bNoGemStone,n;		スキルを使う時ジェムストーンを消耗しない(nは無意味)
 
 
-bonus2 bAddEff,Eff_Blind,n;	n%の確率で暗黒付与
-bonus2 bAddEff,Eff_Sleep,n;	n%の確率で睡眠付与
-bonus2 bAddEff,Eff_Poison,n;	n%の確率で毒付与
-bonus2 bAddEff,Eff_Freeze,n;	n%の確率で凍結付与
-bonus2 bAddEff,Eff_Silence,n;	n%の確率で沈黙付与
-bonus2 bAddEff,Eff_Stan,n;	n%の確率でスタン付与
-bonus2 bAddEff,Eff_Curse,n;	n%の確率で呪い付与
-bonus2 bAddEff,Eff_Confusion,n;	n%の確率で混乱付与
-bonus2 bAddEff,Eff_Stone,n;	n%の確率で石化付与
+bonus2 bAddEff,Eff_Blind,n;	n%の確率で暗黒付与(nは万分率)
+bonus2 bAddEff,Eff_Sleep,n;	n%の確率で睡眠付与(nは万分率)
+bonus2 bAddEff,Eff_Poison,n;	n%の確率で毒付与(nは万分率)
+bonus2 bAddEff,Eff_Freeze,n;	n%の確率で凍結付与(nは万分率)
+bonus2 bAddEff,Eff_Silence,n;	n%の確率で沈黙付与(nは万分率)
+bonus2 bAddEff,Eff_Stan,n;	n%の確率でスタン付与(nは万分率)
+bonus2 bAddEff,Eff_Curse,n;	n%の確率で呪い付与(nは万分率)
+bonus2 bAddEff,Eff_Confusion,n;	n%の確率で混乱付与(nは万分率)
+bonus2 bAddEff,Eff_Stone,n;	n%の確率で石化付与(nは万分率)
 
-bonus2 bResEff,Eff_Blind,n;	暗黒耐性+n%
-bonus2 bResEff,Eff_Sleep,n;	睡眠耐性+n%
-bonus2 bResEff,Eff_Poison,n;	毒耐性+n%
-bonus2 bResEff,Eff_Freeze,n;	凍結耐性+n%
-bonus2 bResEff,Eff_Silence,n;	沈黙耐性+n%
-bonus2 bResEff,Eff_Stan,n;	スタン耐性+n%
-bonus2 bResEff,Eff_Curse,n;	呪い耐性+n%
-bonus2 bResEff,Eff_Confusion,n;	混乱耐性+n%
-bonus2 bResEff,Eff_Stone,n;	石化耐性+n%
+bonus2 bResEff,Eff_Blind,n;	暗黒耐性+n%(nは万分率)
+bonus2 bResEff,Eff_Sleep,n;	睡眠耐性+n%(nは万分率)
+bonus2 bResEff,Eff_Poison,n;	毒耐性+n%(nは万分率)
+bonus2 bResEff,Eff_Freeze,n;	凍結耐性+n%(nは万分率)
+bonus2 bResEff,Eff_Silence,n;	沈黙耐性+n%(nは万分率)
+bonus2 bResEff,Eff_Stan,n;	スタン耐性+n%(nは万分率)
+bonus2 bResEff,Eff_Curse,n;	呪い耐性+n%(nは万分率)
+bonus2 bResEff,Eff_Confusion,n;	混乱耐性+n%(nは万分率)
+bonus2 bResEff,Eff_Stone,n;	石化耐性+n%(nは万分率)
 
 bonus2 bAddSize,n,x;			nサイズにx%のダメージ追加(物理攻撃のみ)
 						0,小型　1,中型　2,大型

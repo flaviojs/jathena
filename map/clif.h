@@ -26,17 +26,17 @@ int clif_clearchar_id(int,int,int);
 int clif_spawnpc(struct map_session_data*);	//area
 int clif_spawnnpc(struct npc_data*);	// area
 int clif_spawnmob(struct mob_data*);	// area
-int clif_spawnpet(struct npc_data*);	// area
+int clif_spawnpet(struct pet_data*);	// area
 int clif_walkok(struct map_session_data*);	// self
 int clif_movechar(struct map_session_data*);	// area
 int clif_movemob(struct mob_data*);	//area
-int clif_movepet(struct npc_data *nd);	//area
+int clif_movepet(struct pet_data *nd);	//area
 int clif_changemap(struct map_session_data*,char*,int,int);	//self
 int clif_changemapserver(struct map_session_data*,char*,int,int,int,int);	//self
 int clif_fixpos(struct block_list *);	// area
 int clif_fixmobpos(struct mob_data *md);
 int clif_fixpcpos(struct map_session_data *sd);
-int clif_fixpetpos(struct npc_data *nd);
+int clif_fixpetpos(struct pet_data *nd);
 int clif_npcbuysell(struct map_session_data*,int);	//self
 int clif_buylist(struct map_session_data*,struct npc_data*);	//self
 int clif_selllist(struct map_session_data*);	//self
@@ -74,7 +74,6 @@ int clif_leavechat(struct chat_data*,struct map_session_data*);	// chat
 int clif_changechatstatus(struct chat_data*);	// chat
 
 void clif_emotion(struct block_list *bl,int type);
-
 
 // trade
 int clif_traderequest(struct map_session_data *sd,char *name);
@@ -143,6 +142,9 @@ int clif_solved_charname(struct map_session_data *sd,int char_id);
 
 int clif_use_card(struct map_session_data *sd,int idx);
 int clif_insert_card(struct map_session_data *sd,int idx_equip,int idx_card,int flag);
+
+int clif_itemlist(struct map_session_data *sd);
+int clif_equiplist(struct map_session_data *sd);
 
 int clif_cart_additem(struct map_session_data*,int,int,int);
 int clif_cart_delitem(struct map_session_data*,int,int);
@@ -222,9 +224,9 @@ int clif_pet_rulet(struct map_session_data *sd,int data);
 int clif_sendegg(struct map_session_data *sd);
 int clif_send_petdata(struct map_session_data *sd,int type,int param);
 int clif_send_petstatus(struct map_session_data *sd);
-int clif_pet_emotion(struct npc_data *nd,int param);
-int clif_pet_performance(struct npc_data *nd,int param);
-int clif_pet_equip(struct npc_data *nd,int nameid);
+int clif_pet_emotion(struct pet_data *nd,int param);
+int clif_pet_performance(struct pet_data *nd,int param);
+int clif_pet_equip(struct pet_data *nd,int nameid);
 int clif_pet_food(struct map_session_data *sd,int foodid,int fail);
 
 int clif_GM_kickack(struct map_session_data *sd,int id);

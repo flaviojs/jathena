@@ -436,13 +436,13 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		int i;
 		for(i=SC_STONE;i<=SC_BLIND;i++){
 			if(!sd->state.arrow_atk) {
-				if(rand()%100 < sd->addeff[i-SC_STONE] ){
+				if(rand()%10000 < sd->addeff[i-SC_STONE] ){
 					printf("PC %d skill_addeff: cardによる異常発動 %d %d\n",sd->bl.id,i,sd->addeff[i-SC_STONE]);
 					skill_status_change_start(bl,i,1,5);
 				}
 			}
 			else {
-				if(rand()%100 < sd->addeff[i-SC_STONE]+sd->arrow_addeff[i-SC_STONE] ){
+				if(rand()%10000 < sd->addeff[i-SC_STONE]+sd->arrow_addeff[i-SC_STONE] ){
 					printf("PC %d skill_addeff: cardによる異常発動 %d %d\n",sd->bl.id,i,sd->addeff[i-SC_STONE]);
 					skill_status_change_start(bl,i,1,5);
 				}
@@ -3884,7 +3884,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 		sd=(struct map_session_data *)bl;
 
 		if(SC_STONE<=type && type<=SC_BLIND){	/* カードによる耐性 */
-			if(sd->reseff[type-SC_STONE] && rand()%100<sd->reseff[type-SC_STONE]){
+			if(sd->reseff[type-SC_STONE] > 0 && rand()%10000<sd->reseff[type-SC_STONE]){
 				printf("PC %d skill_sc_start: cardによる異常耐性発動\n",sd->bl.id);
 				return 0;
 			}
@@ -4154,7 +4154,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			if( (tick=val2)<=0 )
 				tick = 500*600;		/* とりあえず５分 */
 			break;
-			
+
 		/* option */
 		case SC_HIDDING:		/* ハイディング */
 			tick = 1000;			/* １秒ずつ時間チェック */
@@ -4277,7 +4277,7 @@ int skill_status_change_clear(struct block_list *bl)
 		if(sc_data[i].timer != -1){	/* 異常があるならタイマーを削除する */
 			delete_timer(sc_data[i].timer, skill_status_change_timer);
 			sc_data[i].timer = -1;
-			
+
 			if(bl->type==BL_PC && i<SC_SENDMAX)
 				clif_status_change(bl,i,0);	/* アイコン消去 */
 		}

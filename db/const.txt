@@ -20,6 +20,7 @@ Job_Alchem	18
 Job_Bard	19
 Job_Dancer	20
 Job_Crusader2	21
+Job_SuperNovice	23
 
 mf_nomemo	0
 mf_noteleport	1
@@ -43,7 +44,6 @@ Weight		24	1
 MaxWeight	25	1
 JobLevel	55	1
 
-bSpeed		0
 bMaxHP		6
 bMaxSP		8
 bStr		13
@@ -58,6 +58,7 @@ bMatk1		43
 bMatk2		44
 bDef		45
 bMdef		47
+bMdef2		48
 bHit		49
 bFlee		50
 bFlee2		51
@@ -96,8 +97,8 @@ bSpeedAddRate	1029
 bAspdAddRate	1030
 bMagicAtkDef	1031
 bMiscAtkDef	1032
-bIgnoreMDefEle	1033
-bIgnoreMDefRace	1034
+bIgnoreMdefEle	1033
+bIgnoreMdefRace	1034
 bMagicAddEle	1035
 bMagicAddRace	1036
 bMagicSubRace	1037
@@ -109,10 +110,18 @@ bAddGetZenyNum	1042
 bAddDamageClass	1043
 bAddMagicDamageClass	1044
 bAddDefClass	1045
-bAddMDefClass	1046
+bAddMdefClass	1046
 bAddMonsterDropItem	1047
 bDefRatioAtkEle	1048
 bDefRatioAtkRace	1049
+bAddSpeed	1050
+bHitRate	1051
+bFleeRate	1052
+bFlee2Rate	1053
+bDefRate	1054
+bDef2Rate	1055
+bMdefRate	1056
+bMdef2Rate	1057
 bRestartFullRecover	2000
 bNoCastCancel	2001
 bNoSizeFix	2002

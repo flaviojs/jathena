@@ -1,4 +1,50 @@
 --------------
+//0695 by 死神
+
+・少し修正。
+・プレイヤーの基本パラメータを2byteに拡張。
+・item_db.txtをラグナゲートの説明に合わせて修正。
+・bAddEffとbResEffの確率を百分率から万分率に変更。
+・スクリプトstatusupとstatusup2追加。
+statusup bStr; のように使って機能はステータスポイントを減らして
+基本パラメータを1上げる。
+statusup2 bInt,n; のように使って機能はステータスポイントを減らさずに
+基本パラメータをn上げる。
+・その他細かい修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(db/)
+	item_db.txt 修正。
+	const.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	conf_ref.txt 修正。
+	(common/)
+	mmo.h 修正。
+	(char/)
+	char.c
+		mmo_char_send006b()、parse_char() 修正。
+	(map/)
+	map.h 修正。
+	clif.h 修正。
+	clif.c
+		clif_initialstatus()、clif_updatestatus() 修正。
+	pc.h 修正。
+	pc.c
+		pc_bonus()、pc_calcstatus()、pc_equippoint()、pc_equipitem() 修正。
+		pc_jobchange()、pc_checkbaselevelup()、pc_statusup() 修正。
+		pc_statusup2() 追加。
+	battle.h 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack()、battle_config_read() 修正。
+	skill.c
+		skill_additional_effect()、skill_status_change_start() 修正。
+	script.c
+		buildin_statusup()、buildin_statusup2() 追加。
+	atcommnad.c 修正。
+
+--------------
 //0694 by 死神
 
 ・バグ修正と細かい修正。

@@ -60,7 +60,7 @@ struct {
 } auth_fifo[AUTH_FIFO_SIZE];
 int auth_fifo_pos=0;
 
-int char_id_count=100000;
+int char_id_count=150000;
 struct mmo_charstatus *char_dat;
 int char_num,char_max;
 int max_connect_user=0;
@@ -491,10 +491,10 @@ int mmo_char_send006b(int fd,struct char_session_data *sd)
     WFIFOL(fd,offset+(i*106)+36) = char_dat[j].manner;
 
     WFIFOW(fd,offset+(i*106)+40) = char_dat[j].status_point;
-    WFIFOW(fd,offset+(i*106)+42) = char_dat[j].hp;
-    WFIFOW(fd,offset+(i*106)+44) = char_dat[j].max_hp;
-    WFIFOW(fd,offset+(i*106)+46) = char_dat[j].sp;
-    WFIFOW(fd,offset+(i*106)+48) = char_dat[j].max_sp;
+    WFIFOW(fd,offset+(i*106)+42) = (char_dat[j].hp > 0x7fff)? 0x7fff:char_dat[j].hp;
+    WFIFOW(fd,offset+(i*106)+44) = (char_dat[j].max_hp > 0x7fff)? 0x7fff:char_dat[j].max_hp;
+    WFIFOW(fd,offset+(i*106)+46) = (char_dat[j].sp > 0x7fff)? 0x7fff:char_dat[j].sp;
+    WFIFOW(fd,offset+(i*106)+48) = (char_dat[j].max_sp > 0x7fff)? 0x7fff:char_dat[j].max_sp;
     WFIFOW(fd,offset+(i*106)+50) = DEFAULT_WALK_SPEED; // char_dat[j].speed;
     WFIFOW(fd,offset+(i*106)+52) = char_dat[j].class;
     WFIFOW(fd,offset+(i*106)+54) = char_dat[j].hair;
@@ -510,12 +510,12 @@ int mmo_char_send006b(int fd,struct char_session_data *sd)
 
     memcpy( WFIFOP(fd,offset+(i*106)+74), char_dat[j].name, 24 );
 
-    WFIFOB(fd,offset+(i*106)+98) = char_dat[j].str;
-    WFIFOB(fd,offset+(i*106)+99) = char_dat[j].agi;
-    WFIFOB(fd,offset+(i*106)+100) = char_dat[j].vit;
-    WFIFOB(fd,offset+(i*106)+101) = char_dat[j].int_;
-    WFIFOB(fd,offset+(i*106)+102) = char_dat[j].dex;
-    WFIFOB(fd,offset+(i*106)+103) = char_dat[j].luk;
+    WFIFOB(fd,offset+(i*106)+98) = (char_dat[j].str > 255)? 255:char_dat[j].str;
+    WFIFOB(fd,offset+(i*106)+99) = (char_dat[j].agi > 255)? 255:char_dat[j].agi;
+    WFIFOB(fd,offset+(i*106)+100) = (char_dat[j].vit > 255)? 255:char_dat[j].vit;
+    WFIFOB(fd,offset+(i*106)+101) = (char_dat[j].int_ > 255)? 255:char_dat[j].int_;
+    WFIFOB(fd,offset+(i*106)+102) = (char_dat[j].dex > 255)? 255:char_dat[j].dex;
+    WFIFOB(fd,offset+(i*106)+103) = (char_dat[j].luk > 255)? 255:char_dat[j].luk;
     WFIFOB(fd,offset+(i*106)+104) = char_dat[j].char_num;
   }
 
@@ -1007,10 +1007,10 @@ int parse_char(int fd)
 			WFIFOL(fd,2+32) = char_dat[i].manner;
 
 			WFIFOW(fd,2+40) = 0x30;
-			WFIFOW(fd,2+42) = char_dat[i].hp;
-			WFIFOW(fd,2+44) = char_dat[i].max_hp;
-			WFIFOW(fd,2+46) = char_dat[i].sp;
-			WFIFOW(fd,2+48) = char_dat[i].max_sp;
+			WFIFOW(fd,2+42) = (char_dat[i].hp > 0x7fff)? 0x7fff:char_dat[i].hp;
+			WFIFOW(fd,2+44) = (char_dat[i].max_hp > 0x7fff)? 0x7fff:char_dat[i].max_hp;
+			WFIFOW(fd,2+46) = (char_dat[i].sp > 0x7fff)? 0x7fff:char_dat[i].sp;
+			WFIFOW(fd,2+48) = (char_dat[i].max_sp > 0x7fff)? 0x7fff:char_dat[i].max_sp;
 			WFIFOW(fd,2+50) = DEFAULT_WALK_SPEED; // char_dat[i].speed;
 			WFIFOW(fd,2+52) = char_dat[i].class;
 			WFIFOW(fd,2+54) = char_dat[i].hair;
@@ -1025,12 +1025,12 @@ int parse_char(int fd)
 
 			memcpy( WFIFOP(fd,2+74), char_dat[i].name, 24 );
 
-			WFIFOB(fd,2+98) = char_dat[i].str;
-			WFIFOB(fd,2+99) = char_dat[i].agi;
-			WFIFOB(fd,2+100) = char_dat[i].vit;
-			WFIFOB(fd,2+101) = char_dat[i].int_;
-			WFIFOB(fd,2+102) = char_dat[i].dex;
-			WFIFOB(fd,2+103) = char_dat[i].luk;
+			WFIFOB(fd,2+98) = (char_dat[i].str > 255)? 255:char_dat[i].str;
+			WFIFOB(fd,2+99) = (char_dat[i].agi > 255)? 255:char_dat[i].agi;
+			WFIFOB(fd,2+100) = (char_dat[i].vit > 255)? 255:char_dat[i].vit;
+			WFIFOB(fd,2+101) = (char_dat[i].int_ > 255)? 255:char_dat[i].int_;
+			WFIFOB(fd,2+102) = (char_dat[i].dex > 255)? 255:char_dat[i].dex;
+			WFIFOB(fd,2+103) = (char_dat[i].luk > 255)? 255:char_dat[i].luk;
 			WFIFOB(fd,2+104) = char_dat[i].char_num;
 
 			WFIFOSET(fd,108);
@@ -1219,6 +1219,77 @@ int check_connect_login_server(int tid,unsigned int tick,int id,int data)
   return 0;
 }
 
+int char_config_read(const char *cfgName)
+{
+	struct hostent *h=NULL;
+	char line[1024],w1[1024],w2[1024];
+	int i;
+	FILE *fp=fopen(cfgName,"r");
+	if(fp==NULL){
+		printf("file not found: %s\n",cfgName);
+		exit(1);
+	}
+
+	while(fgets(line,1020,fp)){
+		if(line[0] == '/' && line[1] == '/')
+			continue;
+
+		i=sscanf(line,"%[^:]: %[^\r\n]",w1,w2);
+		if(i!=2)
+			continue;
+		if(strcmpi(w1,"userid")==0){
+			memcpy(userid,w2,24);
+		} else if(strcmpi(w1,"passwd")==0){
+			memcpy(passwd,w2,24);
+		} else if(strcmpi(w1,"server_name")==0){
+			memcpy(server_name,w2,16);
+		} else if(strcmpi(w1,"login_ip")==0){
+			h = gethostbyname (w2);
+			if(h != NULL) { 
+				printf("Login server IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+				sprintf(login_ip_str,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+			}
+			else
+				memcpy(login_ip_str,w2,16);
+		} else if(strcmpi(w1,"login_port")==0){
+			login_port=atoi(w2);
+		} else if(strcmpi(w1,"char_ip")==0){
+			h = gethostbyname (w2);
+			if(h != NULL) { 
+				printf("Character server IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+				sprintf(char_ip_str,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+			}
+			else
+				memcpy(char_ip_str,w2,16);
+		} else if(strcmpi(w1,"char_port")==0){
+			char_port=atoi(w2);
+		} else if(strcmpi(w1,"char_maintenance")==0){
+			char_maintenance=atoi(w2);
+		} else if(strcmpi(w1,"char_new")==0){
+			char_new=atoi(w2);
+		} else if(strcmpi(w1,"char_txt")==0){
+			strcpy(char_txt,w2);
+		} else if(strcmpi(w1,"max_connect_user")==0){
+			max_connect_user=atoi(w2);
+		} else if(strcmpi(w1,"autosave_time")==0){
+			autosave_interval=atoi(w2)*1000;
+			if(autosave_interval <= 0)
+				autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
+		} else if(strcmpi(w1,"start_point")==0){
+			char map[32];
+			int x,y;
+			if( sscanf(w2,"%[^,],%d,%d",map,&x,&y)<3 )
+				continue;
+			memcpy(start_point.map,map,16);
+			start_point.x=x;
+			start_point.y=y;
+		}
+	}
+	fclose(fp);
+
+	return 0;
+}
+
 void do_final(void)
 {
 	mmo_char_sync();
@@ -1228,73 +1299,8 @@ void do_final(void)
 int do_init(int argc,char **argv)
 {
 	int i;
-	struct hostent *h=NULL;
-	if(argc < 2) argv[1] = CHAR_CONF_NAME;
-	if(argv[1]){
-		char line[1024],w1[1024],w2[1024];
-		FILE *fp=fopen(argv[1],"r");
-		if(fp==NULL){
-			printf("file not found: %s\n",argv[1]);
-			exit(1);
-		}
 
-		while(fgets(line,1020,fp)){
-			if(line[0] == '/' && line[1] == '/')
-				continue;
-
-			i=sscanf(line,"%[^:]:%s",w1,w2);
-			if(i!=2)
-				continue;
-			if(strcmpi(w1,"userid")==0){
-				memcpy(userid,w2,24);
-			} else if(strcmpi(w1,"passwd")==0){
-				memcpy(passwd,w2,24);
-			} else if(strcmpi(w1,"server_name")==0){
-				memcpy(server_name,w2,16);
-			} else if(strcmpi(w1,"login_ip")==0){
-				h = gethostbyname (w2);
-				if(h != NULL) { 
-					printf("Login server IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
-					sprintf(login_ip_str,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
-				}
-				else
-					memcpy(login_ip_str,w2,16);
-			} else if(strcmpi(w1,"login_port")==0){
-				login_port=atoi(w2);
-			} else if(strcmpi(w1,"char_ip")==0){
-				h = gethostbyname (w2);
-				if(h != NULL) { 
-					printf("Character server IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
-					sprintf(char_ip_str,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
-				}
-				else
-					memcpy(char_ip_str,w2,16);
-			} else if(strcmpi(w1,"char_port")==0){
-				char_port=atoi(w2);
-			} else if(strcmpi(w1,"char_maintenance")==0){
-				char_maintenance=atoi(w2);
-			} else if(strcmpi(w1,"char_new")==0){
-				char_new=atoi(w2);
-			} else if(strcmpi(w1,"char_txt")==0){
-				strcpy(char_txt,w2);
-			} else if(strcmpi(w1,"max_connect_user")==0){
-				max_connect_user=atoi(w2);
-			} else if(strcmpi(w1,"autosave_time")==0){
-				autosave_interval=atoi(w2)*1000;
-				if(autosave_interval <= 0)
-					autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
-			} else if(strcmpi(w1,"start_point")==0){
-				char map[32];
-				int x,y;
-				if( sscanf(w2,"%[^,],%d,%d",map,&x,&y)<3 )
-					continue;
-				memcpy(start_point.map,map,16);
-				start_point.x=x;
-				start_point.y=y;
-			}
-		}
-		fclose(fp);
-	}
+	char_config_read((argc<2)? CHAR_CONF_NAME:argv[1]);
 
 	login_ip=inet_addr(login_ip_str);
 	char_ip=inet_addr(char_ip_str);
