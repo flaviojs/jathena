@@ -24,6 +24,9 @@
 
 #define OPTION_HIDE 0x40
 #define STATE_BLIND 0x10
+#define STATE_RAIN 0x3d
+#define STATE_SNOW 0x3e
+#define STATE_CHERRY 0x3f
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -115,6 +118,9 @@ ATCOMMAND_FUNC(shuffle);
 ATCOMMAND_FUNC(maintenance);
 ATCOMMAND_FUNC(misceffect);
 ATCOMMAND_FUNC(summon);
+ATCOMMAND_FUNC(rain);
+ATCOMMAND_FUNC(snow);
+ATCOMMAND_FUNC(cherry);
 
 /*==========================================
  *AtCommandInfo atcommand_info[]ç\ë¢ëÃÇÃíËã`
@@ -214,6 +220,11 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_MapMove,				"@mapmove",			0, NULL },
 	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
 	{ AtCommand_LocalBroadcast,			"@local_broadcast",	0, NULL },
+	//---
+	{ AtCommand_rain,			"@rain",	0, atcommand_rain },
+	{ AtCommand_snow,			"@snow",	0, atcommand_snow },
+	{ AtCommand_cherry,			"@cherry",	0, atcommand_cherry },
+	//--- by code
 	{ AtCommand_Unknown,				NULL,				0, NULL }
 };
 
@@ -2262,6 +2273,75 @@ atcommand_night(
 	
 	return 0;
 }
+
+/*==========================================
+ * âJÇç~ÇÁÇπÇÈ
+ *------------------------------------------
+ */
+int
+atcommand_rain(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd = NULL;
+	int i = 0;
+	for(i = 0; i < fd_max; i++) {
+		if (session[i] && (pl_sd = session[i]->session_data) &&
+			pl_sd->state.auth) {
+			pl_sd->opt2 |= STATE_RAIN;
+					clif_changeoption(&pl_sd->bl);
+			clif_displaymessage(pl_sd->fd, msg_table[84]);
+			}
+		}
+	
+	return 0;
+}
+/*==========================================
+ * ê·Çç~ÇÁÇπÇÈ
+ *------------------------------------------
+ */
+int
+atcommand_snow(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd = NULL;
+	int i = 0;
+	for(i = 0; i < fd_max; i++) {
+		if (session[i] && (pl_sd = session[i]->session_data) &&
+			pl_sd->state.auth) {
+			pl_sd->opt2 |= STATE_SNOW;
+					clif_changeoption(&pl_sd->bl);
+			clif_displaymessage(pl_sd->fd, msg_table[85]);
+			}
+		}
+	
+	return 0;
+}
+
+/*==========================================
+ * ÉTÉNÉâêÅê·Çç~ÇÁÇπÇÈ
+ *------------------------------------------
+ */
+int
+atcommand_cherry(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd = NULL;
+	int i = 0;
+	for(i = 0; i < fd_max; i++) {
+		if (session[i] && (pl_sd = session[i]->session_data) &&
+			pl_sd->state.auth) {
+			pl_sd->opt2 |= STATE_CHERRY;
+					clif_changeoption(&pl_sd->bl);
+			clif_displaymessage(pl_sd->fd, msg_table[86]);
+			}
+		}
+	
+	return 0;
+}
+
 
 /*==========================================
  * 

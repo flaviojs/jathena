@@ -1,4 +1,41 @@
 --------------------
+//1048 by code
+・雨、雪、サクラ吹雪の3つの天候操作コマンドを追加しました。
+※衝動的に追加してしまったのでバグがあるかも知れません(汗
+
+	GMコマンド追加
+	@rain       雨
+	@snow       雪
+	@cherry     サクラ吹雪
+
+	(conf/)
+		atcommand_athena.conf
+			rain: 1 追加
+			snow: 1 追加
+			cherry: 1 追加
+
+		msg_athena.conf
+			84: 雨が降り出しました。 追加
+			85: 雪が降り出しました。 追加
+			86: サクラ吹雪を降らせます。 追加
+	(/src/common/)
+		version.h
+			Ver 1047->1048 変更
+	(/src/map)
+		atcommand.c
+			ATCOMMAND_FUNC(rain);  追加
+			ATCOMMAND_FUNC(snow);  追加
+			ATCOMMAND_FUNC(cherry);  追加
+			{ AtCommand_rain,"@rain",0, atcommand_rain }, 追加
+			{ AtCommand_snow,"@snow",0, atcommand_snow }, 追加
+			{ AtCommand_cherry,"@cherry",0, atcommand_cherry }, 追加
+
+		atcommand.h
+			AtCommand_Rain, 追加
+			AtCommand_Snow, 追加
+			AtCommand_Cherry, 追加
+
+--------------------
 //1047 by SVN
 ・製造アイテムの製作者の名前を引くmap←→charのパケットが間違っていたのを修正
 ・二重ログインをした時にchar-serverが落ちる可能性があったのを修正
