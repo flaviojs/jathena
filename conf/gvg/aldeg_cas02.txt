@@ -2,8 +2,8 @@
 //aldeg_cas02         by kalen
 //===================================================================
 aldeg_cas02.gat,82,71,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -25,20 +25,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,67,30,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -60,20 +60,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,183,140,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -95,20 +95,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,212,152,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -130,20 +130,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,108,39,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -165,20 +165,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,57,213,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -200,20 +200,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,91,181,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -235,20 +235,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,103,53,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -270,20 +270,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,73,53,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -305,20 +305,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,63,41,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -340,20 +340,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,229,6,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -375,20 +375,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,230,40,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -410,20 +410,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,197,40,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -445,20 +445,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,32,213,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -480,20 +480,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,88,180,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -515,20 +515,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 aldeg_cas02.gat,121,29,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (@GIDa2 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -550,13 +550,13 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国と";
 		mes "シュバルツバルド共和国の協定により、";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDa2) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDa2) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDa2) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
@@ -564,11 +564,11 @@ LStartg:
 //------------------------------カプラ--------------------------------
 aldeg_cas02.gat,84,74,0	script	カプラ職員	117,{
 	cutin "kafra_01",2;
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (getcharid(2) == @GID) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (getcharid(2) == @GIDa2) goto LStartg;
 	mes "[カプラ職員]";
 	mes "私は、ギルド";
-	mes " ^ff0000" + GetGuildName(@GID) + "^000000";
+	mes " ^ff0000" + GetGuildName(@GIDa2) + "^000000";
 	mes "の皆様にだけお仕えするように";
 	mes "契約されております。";
 	mes "他のカプラサービスを";
@@ -576,7 +576,7 @@ aldeg_cas02.gat,84,74,0	script	カプラ職員	117,{
 	goto L_EXIT;
 LStartg:
 	mes "[カプラ職員]";
-	mes "いらっしゃいませ ^ff0000" + GetGuildName(@GID) + "^000000 の皆さん";
+	mes "いらっしゃいませ ^ff0000" + GetGuildName(@GIDa2) + "^000000 の皆さん";
 	mes "カプラサービスは";
 	mes "いつも皆様のそばにいます。";
 	next;
@@ -667,15 +667,15 @@ L_EXIT:
 }
 //-------------------------------執事---------------------------------
 aldeg_cas02.gat,78,74,0	script	チェンチェンリ	55,{
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (getcharid(2) == @GID) goto LStartg;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (getcharid(2) == @GIDa2) goto LStartg;
 	mes "NO MSG";
 	close;
 LStartgm:
 	mes "[執事チェンチェンリ]";
 	mes "あなた方がいくら脅そうとも、";
 	mes "私は私のマスターである";
-	mes "^ff0000GUILDMASTER^000000 様にのみ";
+	mes "^ff0000" + getguildmaster(@GIDa2) + "^000000 様にのみ";
 	mes "お仕えする身である。";
 	mes "ガーディアンたちはどこか！";
 	mes "早くこの無礼な者等を追放しなさい！";
@@ -705,8 +705,8 @@ aldeg_cas02.gat,194,136,0	script	　	111,{
 	mes "引きますか？";
 	next;
 	menu "引く",-,"引かない",L2;
-	getcastledata "aldeg_cas02.gat",1,@GID;
-	if (getcharid(2) != @GID) goto L1n;
+	getcastledata "aldeg_cas02.gat",1,@GIDa2;
+	if (getcharid(2) != @GIDa2) goto L1n;
 	warp "gld_dun02",79,30;
 	end;
 L1n:

@@ -4,8 +4,9 @@
 //とりあえず、TEST作成('A`)
 //prtg_cas01.txtのアブライはコメントアウトですよ～
 prtg_cas01.gat,112,181,0	script	アブライ	55,{
-	getcastledata "prtg_cas01.gat",1,@GID;
-	if (getcharid(2) == @GID) goto LStart3;
+	getcastledata "prtg_cas01.gat",0;
+	getcastledata "prtg_cas01.gat",1,@GIDp1;
+	if (getcharid(2) == @GIDp1) goto LStart3;
 // ------- アジト未占領 ----------------------------------
 LStart:
 	mes "[執事アブライ]";
@@ -14,11 +15,11 @@ LStart:
 	close;
 // -------- マスターじゃない ------------------------------
 LStart2:
-//check Guildmaster?(Master -> LStart3, Other -> -)
+	if (strcharinfo(0) == getguildmaster(@GIDp1)) goto LStart3;
 	mes "[執事アルプレド]";
 	mes "あなた方がいくら脅そうとも、";
 	mes "私は私のマスターである";
-	mes "^ff0000 $[$@GUILDMASTER] ^000000様にのみ";
+	mes "^ff0000" + getguildmaster(@GIDp1) + "^000000様にのみ";
 	mes "お仕えする身である。";
 	mes "ガーディアンたちはどこか！";
 	mes "早くこの無礼な者等を追放しなさい！";
@@ -27,7 +28,7 @@ LStart2:
 LStart3:
 	mes "[執事アブライ]";
 	mes "ようこそ！";
-	mes "我がマスター ^ff0000 GUILDMASTER ^000000 様!";
+	mes "我がマスター ^ff0000 " + getguildmaster(@GIDp1) + " ^000000 様!";
 	mes "用事があるならなんなりと";
 	mes "お申し付けくださいませ！";
 	next;
@@ -346,7 +347,7 @@ L7:
 		setcastledata "prtg_cas01.gat",15,0;
 		setcastledata "prtg_cas01.gat",16,0;
 		setcastledata "prtg_cas01.gat",17,0;
-		Announce "砦 [" + GetCastleName("prtg_cas01.gat") + "]を [" + GetGuildName(@GID) + "]ギルドが破棄しました。",0;
+		Announce "砦 [" + GetCastleName("prtg_cas01.gat") + "]を [" + GetGuildName(@GIDp1) + "]ギルドが破棄しました。",0;
 		MapRespawnGuildID "prtg_cas01.gat",GetCastleData("prtg_cas01.gat",1),0;
 		end;
 		L7_2:

@@ -1,11 +1,12 @@
 //==============================
-//TEST Script(Case prtg_cas01)　Ver.20040214-#test
+//TEST Script(Case prtg_cas01)　Ver.20040215-#test
 // by kalen
 //==============================
-//現時点での課題02/14
+//現時点での課題02/15
 //
-//ギルドマスター個別識別不可
 //フラグイメージ読み込み不可
+//ガーディアンAI(自友軍へ攻撃しない、時間外攻撃しないetc)
+//ギルドスキルの判定(もうできるのかな？)
 prtg_cas01.gat,104,26,0	script	yobidashi	-1,{
 OnInit:
 	if (getcastledata("prtg_cas01.gat",1) != 0) end;
@@ -24,14 +25,6 @@ OnInit:
 	monster "prtg_cas01.gat",197,197,"ハティー",1252,1;
 	monster "prtg_cas01.gat",197,197,"深淵の騎士",1219,2;
 	monster "prtg_cas01.gat",197,197,"レイドリックアーチャー",1276,1;
-//	monster "prtg_cas01.gat",107,179,"ナイトガーディアン",1286,1;
-//	monster "prtg_cas01.gat",153,86,"ソルジャーガーディアン",1287,1;
-//	monster "prtg_cas01.gat",182,68,"ソルジャーガーディアン",1287,1;
-//	monster "prtg_cas01.gat",182,116,"ソルジャーガーディアン",1287,1;
-//	monster "prtg_cas01.gat",184,183,"ナイトガーディアン",1286,1;
-//	monster "prtg_cas01.gat",196,189,"ナイトガーディアン",1286,1;
-//	monster "prtg_cas01.gat",50,36,"アーチャーガーディアン",1285,1;
-//	monster "prtg_cas01.gat",59,28,"アーチャーガーディアン",1285,1;
 	end;
 }
 prontera.gat,151,187,4	script	テストギルドフラッグ	722,{
@@ -64,7 +57,7 @@ LStartg:
 		mes " ";
 		mes "2.";
 		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "^ff0000 " + getguildmaster(@GID) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;

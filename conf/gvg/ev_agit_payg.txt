@@ -7,14 +7,14 @@ OnAgitStart:
 	GvgOn "payg_cas01.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "payg_cas01.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("payg_cas01.gat") + "]を " + GetGuildName(@GID) + " が占領しました"
+	set @GIDf1,getcharid(2);
+	if (@GIDf1 <= 0) end;
+	SetCastleData "payg_cas01.gat",1,@GIDf1;
+	Announce "砦 [" + GetCastleName("payg_cas01.gat") + "]を [" + GetGuildName(@GIDf1) + "]ギルドが占領しました"
 	MapAnnounce "payg_cas01.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "payg_cas01.gat",GetCastleData("payg_cas01.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "payg_cas01.gat",GetCastleData("payg_cas01.gat",1),0;
 	Monster "payg_cas01.gat",139,139,"エンペリウム",1288,1,"Agit_C01::OnAgitBreak";
 	End;
 OnAgitEnd:
@@ -32,14 +32,14 @@ OnAgitStart:
 	GvgOn "payg_cas02.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "payg_cas02.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("payg_cas02.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	set @GIDf2,getcharid(2);
+	if (@GIDf2 <= 0) end;
+	SetCastleData "payg_cas02.gat",1,@GIDf2;
+	Announce "砦 [" + GetCastleName("payg_cas02.gat") + "]を [" + GetGuildName(@GIDf2) + "]ギルドが占領しました",0;
 	MapAnnounce "payg_cas02.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),0;
 	Monster "payg_cas02.gat",39,25,"エンペリウム",1288,1,"Agit_C02::OnAgitBreak";
 	End;
 OnAgitEnd:
@@ -57,14 +57,14 @@ OnAgitStart:
 	GvgOn "payg_cas03.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "payg_cas03.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("payg_cas03.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	set @GIDf3,getcharid(2);
+	if (@GIDf3 <= 0) end;
+	SetCastleData "payg_cas03.gat",1,@GIDf3;
+	Announce "砦 [" + GetCastleName("payg_cas03.gat") + "]を [" + GetGuildName(@GIDf3) + "]ギルドが占領しました",0;
 	MapAnnounce "payg_cas03.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "payg_cas03.gat",GetCastleData("payg_cas03.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "payg_cas03.gat",GetCastleData("payg_cas03.gat",1),0;
 	Monster "payg_cas03.gat",269,265,"エンペリウム",1288,1,"Agit_C03::OnAgitBreak";
 	End;
 OnAgitEnd:
@@ -82,14 +82,14 @@ OnAgitStart:
 	GvgOn "payg_cas04.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "payg_cas04.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("payg_cas04.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	set @GIDf4,getcharid(2);
+	if (@GIDf4 <= 0) end;
+	SetCastleData "payg_cas04.gat",1,@GIDf4;
+	Announce "砦 [" + GetCastleName("payg_cas04.gat") + "]を [" + GetGuildName(@GIDf4) + "]ギルドが占領しました",0;
 	MapAnnounce "payg_cas04.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "payg_cas04.gat",GetCastleData("payg_cas04.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "payg_cas04.gat",GetCastleData("payg_cas04.gat",1),0;
 	Monster "payg_cas04.gat",271,29,"エンペリウム",1288,1,"Agit_C04::OnAgitBreak";
 	End;
 OnAgitEnd:
@@ -107,14 +107,14 @@ OnAgitStart:
 	GvgOn "payg_cas05.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "payg_cas05.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("payg_cas05.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	set @GIDf5,getcharid(2);
+	if (@GIDf5 <= 0) end;
+	SetCastleData "payg_cas05.gat",1,@GIDf5;
+	Announce "砦 [" + GetCastleName("payg_cas05.gat") + "]を [" + GetGuildName(@GIDf5) + "]ギルドが占領しました",0;
 	MapAnnounce "payg_cas05.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "payg_cas05.gat",GetCastleData("payg_cas05.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "payg_cas05.gat",GetCastleData("payg_cas05.gat",1),0;
 	Monster "payg_cas05.gat",30,30,"エンペリウム",1288,1,"Agit_C05::OnAgitBreak";
 	End;
 OnAgitEnd:

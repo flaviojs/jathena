@@ -7,14 +7,14 @@ OnAgitStart:
 	GvgOn "gefg_cas01.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "gefg_cas01.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("gefg_cas01.gat") + "]を " + GetGuildName(@GID) + " が占領しました"
+	set @GIDg1,getcharid(2);
+	if (@GIDg1 <= 0) end;
+	SetCastleData "gefg_cas01.gat",1,@GIDg1;
+	Announce "砦 [" + GetCastleName("gefg_cas01.gat") + "]を [" + GetGuildName(@GIDg1) + "]ギルドが占領しました"
 	MapAnnounce "gefg_cas01.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "gefg_cas01.gat",GetCastleData("gefg_cas01.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "gefg_cas01.gat",GetCastleData("gefg_cas01.gat",1),0;
 	Monster "gefg_cas01.gat",198,182,"エンペリウム",1288,1,"Agit_B01::OnAgitBreak";
 	End;
 OnAgitEnd:
@@ -32,14 +32,14 @@ OnAgitStart:
 	GvgOn "gefg_cas02.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "gefg_cas02.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("gefg_cas02.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	set @GIDg2,getcharid(2);
+	if (@GIDg2 <= 0) end;
+	SetCastleData "gefg_cas02.gat",1,@GIDg2;
+	Announce "砦 [" + GetCastleName("gefg_cas02.gat") + "]を [" + GetGuildName(@GIDg2) + "]ギルドが占領しました",0;
 	MapAnnounce "gefg_cas02.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "gefg_cas02.gat",GetCastleData("gefg_cas02.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "gefg_cas02.gat",GetCastleData("gefg_cas02.gat",1),0;
 	Monster "gefg_cas02.gat",176,178,"エンペリウム",1288,1,"Agit_B02::OnAgitBreak";
 	End;
 OnAgitEnd:
@@ -57,14 +57,14 @@ OnAgitStart:
 	GvgOn "gefg_cas03.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "gefg_cas03.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("gefg_cas03.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	set @GIDg3,getcharid(2);
+	if (@GIDg3 <= 0) end;
+	SetCastleData "gefg_cas03.gat",1,@GIDg3;
+	Announce "砦 [" + GetCastleName("gefg_cas03.gat") + "]を [" + GetGuildName(@GIDg3) + "]ギルドが占領しました",0;
 	MapAnnounce "gefg_cas03.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "gefg_cas03.gat",GetCastleData("gefg_cas03.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "gefg_cas03.gat",GetCastleData("gefg_cas03.gat",1),0;
 	Monster "gefg_cas03.gat",245,167,"エンペリウム",1288,1,"Agit_B03::OnAgitBreak";
 	End;
 OnAgitEnd:
@@ -82,14 +82,14 @@ OnAgitStart:
 	GvgOn "gefg_cas04.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "gefg_cas04.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("gefg_cas04.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	set @GIDg4,getcharid(2);
+	if (@GIDg4 <= 0) end;
+	SetCastleData "gefg_cas04.gat",1,@GIDg4;
+	Announce "砦 [" + GetCastleName("gefg_cas04.gat") + "]を [" + GetGuildName(@GIDg4) + "]ギルドが占領しました",0;
 	MapAnnounce "gefg_cas04.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "gefg_cas04.gat",GetCastleData("gefg_cas04.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "gefg_cas04.gat",GetCastleData("gefg_cas04.gat",1),0;
 	Monster "gefg_cas04.gat",174,178,"エンペリウム",1288,1,"Agit_B04::OnAgitBreak";
 	End;
 OnAgitEnd:
@@ -107,14 +107,14 @@ OnAgitStart:
 	GvgOn "gefg_cas05.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "gefg_cas05.gat",1,@GID;
-	Announce "砦 [" + GetCastleName("gefg_cas05.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	set @GIDg5,getcharid(2);
+	if (@GIDg5 <= 0) end;
+	SetCastleData "gefg_cas05.gat",1,@GIDg5;
+	Announce "砦 [" + GetCastleName("gefg_cas05.gat") + "]を [" + GetGuildName(@GIDg5) + "]ギルドが占領しました",0;
 	MapAnnounce "gefg_cas05.gat","エンペリウムが破壊されました",17;
-	MapRespawnGuildID "gefg_cas05.gat",GetCastleData("gefg_cas05.gat",1),0;
 	End;
 OnAgitEliminate:
+	MapRespawnGuildID "gefg_cas05.gat",GetCastleData("gefg_cas05.gat",1),0;
 	Monster "gefg_cas05.gat",194,184,"エンペリウム",1288,1,"Agit_B05::OnAgitBreak";
 	End;
 OnAgitEnd:

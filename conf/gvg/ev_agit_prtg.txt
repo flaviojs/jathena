@@ -7,10 +7,10 @@ OnAgitStart:
 	GvgOn "prtg_cas01.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "prtg_cas01.gat",1,@GID;
-	Announce "Ô [" + GetCastleName("prtg_cas01.gat") + "]‚ð [" + GetGuildName(@GID) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
+	set @GIDp1,getcharid(2);
+	if (@GIDp1 <= 0) end;
+	SetCastleData "prtg_cas01.gat",1,@GIDp1;
+	Announce "Ô [" + GetCastleName("prtg_cas01.gat") + "]‚ð [" + GetGuildName(@GIDp1) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
 	MapAnnounce "prtg_cas01.gat","ƒGƒ“ƒyƒŠƒEƒ€‚ª”j‰ó‚³‚ê‚Ü‚µ‚½",17;
 	End;
 OnAgitEliminate:
@@ -32,10 +32,10 @@ OnAgitStart:
 	GvgOn "prtg_cas02.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "prtg_cas02.gat",1,@GID;
-	Announce "Ô [" + GetCastleName("prtg_cas02.gat") + "]‚ð [" + GetGuildName(@GID) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
+	set @GIDp2,getcharid(2);
+	if (@GIDp2 <= 0) end;
+	SetCastleData "prtg_cas02.gat",1,@GIDp2;
+	Announce "Ô [" + GetCastleName("prtg_cas02.gat") + "]‚ð [" + GetGuildName(@GIDp2) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
 	MapAnnounce "prtg_cas02.gat","ƒGƒ“ƒyƒŠƒEƒ€‚ª”j‰ó‚³‚ê‚Ü‚µ‚½",17;
 	End;
 OnAgitEliminate:
@@ -57,10 +57,10 @@ OnAgitStart:
 	GvgOn "prtg_cas03.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "prtg_cas03.gat",1,@GID;
-	Announce "Ô [" + GetCastleName("prtg_cas03.gat") + "]‚ð [" + GetGuildName(@GID) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
+	set @GIDp3,getcharid(2);
+	if (@GIDp3 <= 0) end;
+	SetCastleData "prtg_cas03.gat",1,@GIDp3;
+	Announce "Ô [" + GetCastleName("prtg_cas03.gat") + "]‚ð [" + GetGuildName(@GIDp3) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
 	MapAnnounce "prtg_cas03.gat","ƒGƒ“ƒyƒŠƒEƒ€‚ª”j‰ó‚³‚ê‚Ü‚µ‚½",17;
 	End;
 OnAgitEliminate:
@@ -82,10 +82,10 @@ OnAgitStart:
 	GvgOn "prtg_cas04.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "prtg_cas04.gat",1,@GID;
-	Announce "Ô [" + GetCastleName("prtg_cas04.gat") + "]‚ð [" + GetGuildName(@GID) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
+	set @GIDp4,getcharid(2);
+	if (@GIDp4 <= 0) end;
+	SetCastleData "prtg_cas04.gat",1,@GIDp4;
+	Announce "Ô [" + GetCastleName("prtg_cas04.gat") + "]‚ð [" + GetGuildName(@GIDp4) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
 	MapAnnounce "prtg_cas04.gat","ƒGƒ“ƒyƒŠƒEƒ€‚ª”j‰ó‚³‚ê‚Ü‚µ‚½",17;
 	End;
 OnAgitEliminate:
@@ -107,12 +107,11 @@ OnAgitStart:
 	GvgOn "prtg_cas05.gat";
 	End;
 OnAgitBreak:
-	set @GID,getcharid(2);
-	if (@GID <= 0) end;
-	SetCastleData "prtg_cas05.gat",1,@GID;
-	Announce "Ô [" + GetCastleName("prtg_cas05.gat") + "]‚ð [" + GetGuildName(@GID) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
+	set @GIDp5,getcharid(2);
+	if (@GIDp5 <= 0) end;
+	SetCastleData "prtg_cas05.gat",1,@GIDp5;
+	Announce "Ô [" + GetCastleName("prtg_cas05.gat") + "]‚ð [" + GetGuildName(@GIDp5) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
 	MapAnnounce "prtg_cas05.gat","ƒGƒ“ƒyƒŠƒEƒ€‚ª”j‰ó‚³‚ê‚Ü‚µ‚½",17;
-	MapRespawnGuildID "prtg_cas05.gat",GetCastleData("prtg_cas05.gat",1),0;
 	End;
 OnAgitEliminate:
 	MapRespawnGuildID "prtg_cas05.gat",GetCastleData("prtg_cas05.gat",1),0;

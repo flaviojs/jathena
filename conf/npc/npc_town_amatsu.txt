@@ -242,7 +242,7 @@ amatsu.gat,217,179,0	script	お婆さん	760,{
 }
 //=====================================================================
 ama_in01.gat,162,17,0	script	寿司職人	765,{
-	if (event_sushi == 1) goto LStart2;
+	if ((event_sushi >= 1) && (event_sushi <= 3)) goto LStart2;
 	mes "[マグマグ]";
 	mes "へい、らっしゃい！";
 	mes "ふぃ～ 大変だ……";
@@ -333,7 +333,8 @@ L3:
 		mes "もちろん礼はするつもりだ。";
 		mes "それじゃ……";
 		next;
-//複数あり
+		set @sushirand,rand(3);
+		if (@sushirand == 1) goto Lrand1
 		set event_sushi,1;
 		mes "[マグマグ]";
 		mes "汁のダシに使う";
@@ -341,19 +342,42 @@ L3:
 		mes "^0000FFかにのこうら 10個^000000ほど";
 		mes "仕入れてきてくれ。";
 		mes "頼んだ。";
+		goto Lrandend;
+Lrand1:
+		set event_sushi,2;
+		mes "[マグマグ]";
+		mes "つまみに使う貝を仕入れてきてほしい。";
+		mes "^0000ff貝 10個^000000あれば足りるだろう。";
+		mes "近くで仕入れるのが大変でさ…….";
+		mes "悪いけどちょっと頼むよ。";
+		goto Lrandend;
+Lrand2:
+		set event_sushi,3;
+		mes "[マグマグ]";
+		mes "お客さんの口直しにキャンディが";
+		mes "ほしい。";
+		mes "^0000ffキャンディ 10個^000000ほど";
+		mes "仕入れてきてくれ。";
+		mes "そんなに難しくはないはずだ。";
+		goto Lrandend;
+Lrandend:
 		next;
 		mes "[マグマグ]";
 		mes "それじゃ、大変かと思うが頼む。";
 		mes "頼んだものを忘れないようにな！";
 		close;
 LStart2:
-	if (countitem(964)>=10) goto Lok;
+	if ((event_sushi == 1) && (countitem(964)>=10)) goto Lok;
+	if ((event_sushi == 2) && (countitem(961)>=10)) goto Lok;
+	if ((event_sushi == 3) && (countitem(529)>=10)) goto Lok;
 	mes "[マグマグ]";
 	mes "おい、俺が頼んだ物はまだか？";
 	mes "忘れずに頼むぞ……";
 	next;
 	mes "[マグマグ]";
-	mes "^0000FFかにのこうら 10個^000000";
+	if (event_sushi == 1) mes "^0000FFかにのこうら 10個^000000";
+	if (event_sushi == 2) mes "^0000FF貝 10個^000000";
+	if (event_sushi == 3) mes "^0000FFキャンディ 10個^000000";
 	mes "頼んだはずだ。";
 	mes "待っているから早く頼む……";
 	close;
@@ -362,9 +386,23 @@ Lok:
 	mes "おお、これだこれだ";
 	mes "ありがとう。";
 	next;
-	getitem 551,20
+	if (event_sushi == 2) goto Ldel1;
+	if (event_sushi == 3) goto Ldel2;
+	delitem 964,10;
+	getitem 551,20;
+	goto Ldelend;
+Ldel1:
+	delitem 961,10;
+	getitem 551,30;
+	goto Ldelend;
+Ldel2:
+	delitem 529,10;
+	getitem 544,15;
+	goto Ldelend;
+Ldelend:
 	mes "[マグマグ]";
-	mes "お礼にこの寿司を持っていってくれ";
+	mes "お礼にこれを持っていってくれ";
+	mes "また暇だったら手伝ってくれよな";
 	set event_sushi,0;
 	close;
 }
