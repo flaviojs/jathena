@@ -1,4 +1,35 @@
 --------------------
+//1049 by code
+・霧、落葉の2つの天候操作コマンドを追加しました。
+※落ち葉に関してはクライアント依存なのでjROだと落ちるかも…
+
+	GMコマンド追加
+	@fog       霧
+	@maple     落葉
+
+	(conf/)
+		atcommand_athena.conf
+			fog: 1 追加
+			maple: 1 追加
+
+		msg_athena.conf
+			87: 霧が立ち込めました。 追加
+			88: 落ち葉が降ってきました。 追加
+	(/src/common/)
+		version.h
+			Ver 1048->1049 変更
+	(/src/map)
+		atcommand.c
+			ATCOMMAND_FUNC(fog);  追加
+			ATCOMMAND_FUNC(maple);  追加
+			{ AtCommand_fog,"@fog",0, atcommand_fog }, 追加
+			{ AtCommand_maple,"@maple",0, atcommand_maple }, 追加
+
+		atcommand.h
+			AtCommand_Fog, 追加
+			AtCommand_Maple, 追加
+
+--------------------
 //1048 by code
 ・雨、雪、サクラ吹雪の3つの天候操作コマンドを追加しました。
 ※衝動的に追加してしまったのでバグがあるかも知れません(汗

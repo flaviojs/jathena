@@ -27,6 +27,8 @@
 #define STATE_RAIN 0x3d
 #define STATE_SNOW 0x3e
 #define STATE_CHERRY 0x3f
+#define STATE_FOG 0xe9
+#define STATE_MAPLE 0x014d
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -121,6 +123,8 @@ ATCOMMAND_FUNC(summon);
 ATCOMMAND_FUNC(rain);
 ATCOMMAND_FUNC(snow);
 ATCOMMAND_FUNC(cherry);
+ATCOMMAND_FUNC(fog);
+ATCOMMAND_FUNC(maple);
 
 /*==========================================
  *AtCommandInfo atcommand_info[]ç\ë¢ëÃÇÃíËã`
@@ -224,6 +228,8 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_rain,			"@rain",	0, atcommand_rain },
 	{ AtCommand_snow,			"@snow",	0, atcommand_snow },
 	{ AtCommand_cherry,			"@cherry",	0, atcommand_cherry },
+	{ AtCommand_fog,			"@fog",	0, atcommand_fog },
+	{ AtCommand_maple,			"@maple",	0, atcommand_maple },
 	//--- by code
 	{ AtCommand_Unknown,				NULL,				0, NULL }
 };
@@ -2342,6 +2348,51 @@ atcommand_cherry(
 	return 0;
 }
 
+/*==========================================
+ * ñ∂Ç™óßÇøçûÇﬂÇÈ
+ *------------------------------------------
+ */
+int
+atcommand_fog(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd = NULL;
+	int i = 0;
+	for(i = 0; i < fd_max; i++) {
+		if (session[i] && (pl_sd = session[i]->session_data) &&
+			pl_sd->state.auth) {
+			pl_sd->opt2 |= STATE_FOG;
+					clif_changeoption(&pl_sd->bl);
+			clif_displaymessage(pl_sd->fd, msg_table[87]);
+			}
+		}
+	
+	return 0;
+}
+
+/*==========================================
+ * óéÇøótÇ™ç~ÇÈ
+ *------------------------------------------
+ */
+int
+atcommand_maple(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd = NULL;
+	int i = 0;
+	for(i = 0; i < fd_max; i++) {
+		if (session[i] && (pl_sd = session[i]->session_data) &&
+			pl_sd->state.auth) {
+			pl_sd->opt2 |= STATE_MAPLE;
+					clif_changeoption(&pl_sd->bl);
+			clif_displaymessage(pl_sd->fd, msg_table[88]);
+			}
+		}
+	
+	return 0;
+}
 
 /*==========================================
  * 

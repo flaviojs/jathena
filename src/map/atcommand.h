@@ -101,6 +101,8 @@ enum AtCommandType {
 	AtCommand_Rain,
 	AtCommand_Snow,
 	AtCommand_Cherry,
+	AtCommand_Fog,
+	AtCommand_Maple,
 	AtCommand_Unknown,
 	AtCommand_MAX
 };
