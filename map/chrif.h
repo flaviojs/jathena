@@ -16,6 +16,7 @@ int chrif_changemapserver(struct map_session_data *sd,char *name,int x,int y,int
 
 int chrif_searchcharid(int char_id);
 int chrif_changegm(int id,const char *pass,int len);
+int chrif_changesex(int id,int sex);
 
 int do_init_chrif(void);
 

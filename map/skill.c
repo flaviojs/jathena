@@ -2219,7 +2219,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 					else if(tmpy >= map[src->m].ys)
 						tmpy = map[src->m].ys - 1;
 					j++;
-				} while(((c=map_getcell(src->m,x,y))==1 || c==5) && j<100);
+				} while(((c=map_getcell(src->m,tmpx,tmpy))==1 || c==5) && j<100);
 				if(j >= 100)
 					continue;
 				if(flag==0){
