@@ -19,7 +19,7 @@ date
 	date
 	printf "Restoration:"
 	date
-	./athena-start start
+	./athena-start restart
 	else
 	printf "Check Miss Sorry:"
 	date

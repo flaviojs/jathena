@@ -380,15 +380,19 @@ AthenaNPCScript
 		getitem命令
 			getitem <itemid>,<num>;
 			
-			itemid,num	数値
+			itemid		数値または文字列
+			num		数値
 			
 			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分入手します。
+			<itemid>が文字列の場合、その名前(name,jname)を持つアイテムのIDを使用します。
+			ただし、アイテム名はitem_db.txtなどに依存するため、テスト目的以外では使用すべきではありません。
 
 		getitem2命令
 			getitem <itemid>,<num>,<identify>,<refine>,<attribute>,<card1>,
 			<card2>,<card3>,<card4>
 			
-			itemid,num,identify,refine,attribute,card1,card2,card3,card4	数値
+			itemid		数値または文字列
+			num,identify,refine,attribute,card1,card2,card3,card4	数値
 			
 			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分入手します。
 			<identify> 鑑定状態(0で未鑑定、1で鑑定)
@@ -398,6 +402,9 @@ AthenaNPCScript
 			<card2> 差さているカード、製造武器なら属性と星のかけらの数を設定。星のかけらの数(範囲:0~3)*5*256 + 属性(無:0、火:3、水:1、風:4、土:2)
 			<card3> 差さているカード、製造武器やキャラの名前が入るアイテムはキャラIDの下の2バイト
 			<card4> 差さているカード、製造武器やキャラの名前が入るアイテムはキャラIDの上の2バイト
+
+			<itemid>が文字列の場合、その名前(name,jname)を持つアイテムのIDを使用します。
+			ただし、アイテム名はitem_db.txtなどに依存するため、テスト目的以外では使用すべきではありません。
 			
 		delitem命令
 			delitem <itemid>,<num>;
@@ -796,6 +803,12 @@ AthenaNPCScript
 			
 			<gatname>のmapflagにnosave、引数として<savegatname>,<x>,<y>を設定します。
 		
+		detachrid命令
+			detachrid;
+			
+			NPCにアタッチされているIDをクリアします。
+			以後、キャラクター情報を必要とする命令が実行できなくなります。
+		
 	＊関数
 		rand関数
 			rand(<n1>[,<n2>])
@@ -809,17 +822,22 @@ AthenaNPCScript
 		countitem関数
 			countitem(<itemid>)
 			
-			itemid		数値
+			itemid		数値または文字列
 			
 			<itemid>に指定されたIDを持つアイテムの所持数を返します。
+			<itemid>が文字列の場合、その名前(name,jname)を持つアイテムのIDを使用します。
+			ただし、アイテム名はitem_db.txtなどに依存するため、テスト目的以外では使用すべきではありません。
 			
 		checkweight関数
 			checkweight(<itemid>,<num>)
 			
-			itemid,num	数値
+			itemid		数値または文字列
+			num		数値
 			
 			<itemid>に指定されたIDを持つアイテムを<num>個持つことができるのならば1を、
 			できなければ0を返します。
+			<itemid>が文字列の場合、その名前(name,jname)を持つアイテムのIDを使用します。
+			ただし、アイテム名はitem_db.txtなどに依存するため、テスト目的以外では使用すべきではありません。
 			
 		strcharinfo関数
 			strcharinfo(<n>)
@@ -993,9 +1011,16 @@ AthenaNPCScript
 			これはスクリプトが終了/中断する(close,end,menu,next,inputなどの実行)まで有効です。
 			主にイベントで起動されたスクリプト内でマップ変数を使って別キャラクターを
 			アタッチするのに使用します。getcharid(3)で所得したアカウントIDを使ってください。
+			なお、デタッチにはdetachrid命令を使います。
 
 			この関数はアタッチに成功したかどうかを返します。
 			偽(0)が返って来た場合は、該当キャラクターが存在していません。
+		
+		isloggedin関数
+			isloggedin(<num>)
+			
+			<num>で指定されたIDのキャラクターがこのマップサーバーに
+			ログインしているかどうか調べます。
 		
 	＊定数ラベル
 		-ラベル
@@ -1123,6 +1148,10 @@ AthenaNPCScript
 			キャラクター情報が不要な命令を使用してください。
 			もしくは、attachrid関数で設定された情報が不正です。
 			なお、このエラーが起こると直後にコアを吐くと思われます。
+			
+			イベントでannounceしたときにフラグ0x08を指定していない
+			場合もこのエラーがでます。
+			
 		
 		illeagal scope string variable.
 			文字列変数のスコープが不正です。

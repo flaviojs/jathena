@@ -1,4 +1,34 @@
 --------------------
+//0925 by 胡蝶蘭
+
+・スクリプトのバグ修正
+	・monster,areamonsterの問題修正
+	  これらはscript_rid2sdを使用しないようにしました。
+	  sdがNULLのとき、レベルチェックを行わないようにしました。
+	
+	(map/)
+	script.c/mob.c
+		buildin_monster(),buildin_areamonster(),mob_once_spawn()他
+
+・スクリプトの機能追加
+	・detachrid命令（プレイヤーのデタッチ）追加
+	・isloggedin関数（プレイヤーのログインチェック）追加
+	・getitem,getitem2命令,countitem,checkweight関数で
+	  nameidにアイテムの名前を指定可能に。
+	  (item_dbなどに依存するため、使用すべきではありませんが、一応)
+
+	(map/)
+	script.c
+		色々
+	(doc/)
+	script_ref.txt
+		変更部分とエラー説明修正
+
+・athena-startとstartを修正
+	・athena-start stopでプロセスが終了するまで待つように
+	・startで再起動させるときathena-start restartを呼ぶように。
+
+--------------------
 //0924 by (凸)
 
 ・バグ報告スレッド part4 >>66のnpcを取り込み

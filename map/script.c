@@ -174,6 +174,8 @@ int buildin_disablewaitingroomevent(struct script_state *st);
 int buildin_getwaitingroomstate(struct script_state *st);
 int buildin_warpwaitingpc(struct script_state *st);
 int buildin_attachrid(struct script_state *st);
+int buildin_detachrid(struct script_state *st);
+int buildin_isloggedin(struct script_state *st);
 int buildin_setmapflagnosave(struct script_state *st);
 int buildin_setmapflag(struct script_state *st);
 int buildin_removemapflag(struct script_state *st);
@@ -302,6 +304,8 @@ struct {
 	{buildin_getwaitingroomstate,"getwaitingroomstate","i*"},
 	{buildin_warpwaitingpc,"warpwaitingpc","sii*"},
 	{buildin_attachrid,"attachrid","i"},
+	{buildin_detachrid,"detachrid",""},
+	{buildin_isloggedin,"isloggedin","i"},
 	{buildin_setmapflag,"setmapflagnosave","ssii"},
 	{buildin_setmapflag,"setmapflag","si"},
 	{buildin_removemapflag,"removemapflag","si"},
@@ -1739,9 +1743,21 @@ int buildin_countitem(struct script_state *st)
 	int nameid,count,i;
 	struct map_session_data *sd;
 
-	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	struct script_data *data;
 
-	sd=script_rid2sd(st);
+	sd = script_rid2sd(st);
+	
+	data=&(st->stack->stack_data[st->start+2]);
+	get_val(st,data);
+	if( data->type==C_STR || data->type==C_CONSTSTR ){
+		const char *name=conv_str(st,data);
+		struct item_data *item_data = itemdb_searchname(name);
+		nameid=512;
+		if( item_data )
+			nameid=item_data->nameid;
+	}else
+		nameid=conv_num(st,data);
+	
 	for(i=0,count=0;i<MAX_INVENTORY;i++){
 		if(sd->status.inventory[i].nameid==nameid)
 			count+=sd->status.inventory[i].amount;
@@ -1760,8 +1776,21 @@ int buildin_checkweight(struct script_state *st)
 {
 	int nameid,amount;
 	struct map_session_data *sd;
+	struct script_data *data;
 
-	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	sd = script_rid2sd(st);
+	
+	data=&(st->stack->stack_data[st->start+2]);
+	get_val(st,data);
+	if( data->type==C_STR || data->type==C_CONSTSTR ){
+		const char *name=conv_str(st,data);
+		struct item_data *item_data = itemdb_searchname(name);
+		nameid=512;
+		if( item_data )
+			nameid=item_data->nameid;
+	}else
+		nameid=conv_num(st,data);
+	
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
 	sd=script_rid2sd(st);
@@ -1783,9 +1812,21 @@ int buildin_getitem(struct script_state *st)
 	int nameid,amount,flag = 0;
 	struct item item_tmp;
 	struct map_session_data *sd;
+	struct script_data *data;
 
 	sd = script_rid2sd(st);
-	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	
+	data=&(st->stack->stack_data[st->start+2]);
+	get_val(st,data);
+	if( data->type==C_STR || data->type==C_CONSTSTR ){
+		const char *name=conv_str(st,data);
+		struct item_data *item_data = itemdb_searchname(name);
+		nameid=512;
+		if( item_data )
+			nameid=item_data->nameid;
+	}else
+		nameid=conv_num(st,data);
+		
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
 	if(nameid<0) { // ランダム
@@ -1820,9 +1861,21 @@ int buildin_getitem2(struct script_state *st)
 	struct item_data *item_data;
 	struct item item_tmp;
 	struct map_session_data *sd;
+	struct script_data *data;
 
 	sd = script_rid2sd(st);
-	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	
+	data=&(st->stack->stack_data[st->start+2]);
+	get_val(st,data);
+	if( data->type==C_STR || data->type==C_CONSTSTR ){
+		const char *name=conv_str(st,data);
+		struct item_data *item_data = itemdb_searchname(name);
+		nameid=512;
+		if( item_data )
+			nameid=item_data->nameid;
+	}else
+		nameid=conv_num(st,data);
+	
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	iden=conv_num(st,& (st->stack->stack_data[st->start+4]));
 	ref=conv_num(st,& (st->stack->stack_data[st->start+5]));
@@ -1880,8 +1933,21 @@ int buildin_delitem(struct script_state *st)
 {
 	int nameid,amount,i;
 	struct map_session_data *sd;
+	struct script_data *data;
 
-	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	sd = script_rid2sd(st);
+	
+	data=&(st->stack->stack_data[st->start+2]);
+	get_val(st,data);
+	if( data->type==C_STR || data->type==C_CONSTSTR ){
+		const char *name=conv_str(st,data);
+		struct item_data *item_data = itemdb_searchname(name);
+		nameid=512;
+		if( item_data )
+			nameid=item_data->nameid;
+	}else
+		nameid=conv_num(st,data);
+	
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
 	sd=script_rid2sd(st);
@@ -2611,7 +2677,6 @@ int buildin_monster(struct script_state *st)
 {
 	int class,amount,x,y;
 	char *str,*map,*event="";
-	struct map_session_data *sd=NULL;
 
 	map	=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	x	=conv_num(st,& (st->stack->stack_data[st->start+3]));
@@ -2622,10 +2687,7 @@ int buildin_monster(struct script_state *st)
 	if( st->end>st->start+8 )
 		event=conv_str(st,& (st->stack->stack_data[st->start+8]));
 
-	if(x<=0 || y<=0)
-		sd=script_rid2sd(st);
-
-	mob_once_spawn(sd,map,x,y,str,class,amount,event);
+	mob_once_spawn(map_id2sd(st->rid),map,x,y,str,class,amount,event);
 	return 0;
 }
 /*==========================================
@@ -2648,7 +2710,7 @@ int buildin_areamonster(struct script_state *st)
 	if( st->end>st->start+10 )
 		event=conv_str(st,& (st->stack->stack_data[st->start+10]));
 
-	mob_once_spawn_area(NULL,map,x0,y0,x1,y1,str,class,amount,event);
+	mob_once_spawn_area(map_id2sd(st->rid),map,x0,y0,x1,y1,str,class,amount,event);
 	return 0;
 }
 /*==========================================
@@ -3338,6 +3400,26 @@ int buildin_attachrid(struct script_state *st)
 	push_val(st->stack,C_INT, (map_id2sd(st->rid)!=NULL));
 	return 0;
 }
+/*==========================================
+ * RIDのデタッチ
+ *------------------------------------------
+ */
+int buildin_detachrid(struct script_state *st)
+{
+	st->rid=0;
+	return 0;
+}
+/*==========================================
+ * 存在チェック
+ *------------------------------------------
+ */
+int buildin_isloggedin(struct script_state *st)
+{
+	push_val(st->stack,C_INT, map_id2sd(
+		conv_num(st,& (st->stack->stack_data[st->start+2])) ));
+	return 0;
+}
+
 
 /*==========================================
  *

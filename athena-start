@@ -73,6 +73,11 @@ case $1 in
 ;;
 	'stop')
 		ps ax | grep -E "${L_SRV}|${C_SRV}|${M_SRV}" | awk '{print $1}' | xargs kill -9
+		while	[ "      0" != "$(ps | grep -e login | wc -l)" ] ||
+			[ "      0" != "$(ps | grep -e char | wc -l)" ] ||
+			[ "      0" != "$(ps | grep -e map  | wc -l)" ]; do
+			sleep 1
+		done
 	;;
 	'restart')
 		$0 stop

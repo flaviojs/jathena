@@ -93,7 +93,10 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 	int x,int y,const char *mobname,int class,int amount,const char *event)
 {
 	struct mob_data *md=NULL;
-	int m,count;
+	int m,count,lv=255;
+	
+	if( sd )
+		lv=sd->status.base_level;
 
 	if(strcmp(mapname,"this")==0)
 		m=sd->bl.m;
@@ -111,7 +114,8 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 			do{
 				class=rand()%1000+1001;
 				k=rand()%1000000;
-			}while((mob_db[class].max_hp <= 0 || mob_db[class].summonper[j] <= k || (sd->status.base_level<mob_db[class].lv && battle_config.random_monster_checklv)) && (i++) < 2000);
+			}while((mob_db[class].max_hp <= 0 || mob_db[class].summonper[j] <= k ||
+				 (lv<mob_db[class].lv && battle_config.random_monster_checklv)) && (i++) < 2000);
 			if(i>=2000){
 				class=mob_db[0].summonper[j];
 			}
@@ -121,8 +125,12 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 //		if(battle_config.etc_log)
 //			printf("mobclass=%d try=%d\n",class,i);
 	}
-	if(x<=0) x=sd->bl.x;
-	if(y<=0) y=sd->bl.y;
+	if(sd){
+		if(x<=0) x=sd->bl.x;
+		if(y<=0) y=sd->bl.y;
+	}else if(x<=0 || y<=0){
+		printf("mob_once_spawn: ??\n");
+	}
 
 	for(count=0;count<amount;count++){
 		md=calloc(sizeof(struct mob_data), 1);
