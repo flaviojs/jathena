@@ -147,8 +147,8 @@ LStart2:
 		end;
 }
 gef_fild00.gat,73,209,4	script	聖なるピエロ	715,{
-	if ((countitem(536)>=1) || (countitem(530)>=1)) goto LStart2;
 	if (pump_event == 2) goto LStart3;
+	if ((countitem(536)>=1) || (countitem(530)>=1)) goto LStart2;
 	mes "[聖なるピエロ]";
 	mes "あああ･･･。";
 	mes "僕の大好きなお菓子が";
@@ -313,43 +313,77 @@ Ltri_11:/*シュバルツバルド共和国の首都ジュノー*/
 	warp "yuno.gat",210,310;
 	end;
 //=======================================================
-LTreat:/*確率等倍*/
+LTreat:/*確率は500回試行した確率(某サイトより参考)*/
 	set pump_event,0;
-	set @treat,rand(17);
-	if (@treat == 0) goto LTre_1;
-	if (@treat == 1) goto LTre_2;
-	if (@treat == 2) goto LTre_3;
-	if (@treat == 3) goto LTre_4;
-	if (@treat == 4) goto LTre_5;
-	if (@treat == 5) goto LTre_6;
-	if (@treat == 6) goto LTre_7;
-	if (@treat == 7) goto LTre_8;
-	if (@treat == 8) goto LTre_9;
-	if (@treat == 9) goto LTre_10;
-	if (@treat == 10) goto LTre_11;
-	if (@treat == 11) goto LTre_12;
-	if (@treat == 12) goto LTre_13;
-	if (@treat == 13) goto LTre_14;
-	if (@treat == 14) goto LTre_15;
-	if (@treat == 15) goto LTre_16;
-	if (@treat == 16) goto LTre_17;
-LTre_1: additem 715,2; goto LTre_Fin;
-LTre_2: additem 716,2; goto LTre_Fin;
-LTre_3: additem 717,2; goto LTre_Fin;
-LTre_4: additem 536,1; goto LTre_Fin;
-LTre_5: additem 909,1; goto LTre_Fin;
-LTre_6: additem 911,1; goto LTre_Fin;
-LTre_7: additem 7126,1; goto LTre_Fin;
-LTre_8: additem 741,1; goto LTre_Fin;
-LTre_9: additem 2209,1; goto LTre_Fin;
-LTre_10: additem 2262,1; goto LTre_Fin;
-LTre_11: additem 545,1; goto LTre_Fin;
-LTre_12: additem 546,1; goto LTre_Fin;
-LTre_13: additem 547,1; goto LTre_Fin;
-LTre_14: additem 1093,1; goto LTre_Fin;
-LTre_15: additem 1092,1; goto LTre_Fin;
-LTre_16: additem 713,1; goto LTre_Fin;
-LTre_17: additem 644,1; goto LTre_Fin;
+	set @treat,rand(100);
+	if ((@treat >= 0) && (@treat < 10)) goto L_Tre_1;
+	if ((@treat >= 10) && (@treat < 20)) goto L_Tre_2;
+	if ((@treat >= 20) && (@treat < 29)) goto L_Tre_3;
+	if ((@treat >= 29) && (@treat < 38)) goto L_Tre_4;
+	if ((@treat >= 38) && (@treat < 47)) goto L_Tre_5;
+	if ((@treat >= 47) && (@treat < 55)) goto L_Tre_6;
+	if ((@treat >= 55) && (@treat < 63)) goto L_Tre_7;
+	if ((@treat >= 63) && (@treat < 69)) goto L_Tre_8;
+	if ((@treat >= 69) && (@treat < 75)) goto L_Tre_9;
+	if ((@treat >= 75) && (@treat < 81)) goto L_Tre_10;
+	if ((@treat >= 81) && (@treat < 85)) goto L_Tre_11;
+	if ((@treat >= 85) && (@treat < 89)) goto L_Tre_12;
+	if ((@treat >= 89) && (@treat < 92)) goto L_Tre_13;
+	if ((@treat >= 92) && (@treat < 94)) goto L_Tre_14;
+	if ((@treat >= 94) && (@treat < 96)) goto L_Tre_15;
+	if ((@treat >= 96) && (@treat < 98)) goto L_Tre_16;
+	if ((@treat >= 98) && (@treat < 100)) goto L_Tre_17;
+L_Tre_1:/*アイスクリーム(12.4%)*/
+	getitem 536,1;
+	goto LTre_Fin;
+L_Tre_2:/*ピエロの鼻(10.6%)*/
+	getitem 2262,1;
+	goto LTre_Fin;
+L_Tre_3:/*イエロジェムストーン(9.6%)*/
+	getitem 715,2;
+	goto LTre_Fin;
+L_Tre_4:/*でっかいゼロピー(9.4%)*/
+	getitem 7126,1;
+	goto LTre_Fin;
+L_Tre_5:/*レッドジェムストーン(8.6%)*/
+	getitem 716,2;
+	goto LTre_Fin;
+L_Tre_6:/*ブルージェムストーン(8%)*/
+	getitem 717,2;
+	goto LTre_Fin;
+L_Tre_7:/*リボン(8%)*/
+	getitem 2209,1;
+	goto LTre_Fin;
+L_Tre_8:/*セルー(5.8%)*/
+	getitem 911,1;
+	goto LTre_Fin;
+L_Tre_9:/*空き瓶(5.4%)*/
+	getitem 713,1;
+	goto LTre_Fin;
+L_Tre_10:/*空のポーション瓶(4.8%)*/
+	getitem 1093,1;
+	goto LTre_Fin;
+L_Tre_11:/*空の試験管(3.8%)*/
+	getitem 1092,1;
+	goto LTre_Fin;
+L_Tre_12:/*ゼロピー(3.6%)*/
+	getitem 909,1;
+	goto LTre_Fin;
+L_Tre_13:/*ポリン人形(3.4%)*/
+	getitem 741,1;
+	goto LTre_Fin;
+L_Tre_14:/*イエロースリムポーション(2.2%)*/
+	getitem 546,1;
+	goto LTre_Fin;
+L_Tre_15:/*ホワイトスリムポーション(1.4%)*/
+	getitem 547,1;
+	goto LTre_Fin;
+L_Tre_16:/*レッドスリムポーション(1.2%)*/
+	getitem 545,1;
+	goto LTre_Fin;
+L_Tre_17:/*プレゼントボックス(1.6%)*/
+	getitem 644,1;
+	goto LTre_Fin;
 LTre_Fin:
 	mes "[聖なるピエロ]";
 	mes "君にこれをあげよう！";

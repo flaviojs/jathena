@@ -642,6 +642,7 @@ LStart2:
 		mes "[タシンチェ]";
 		mes "さあ、出来た！";
 		additem 536,1;
+		set pump_event,0;
 		next;
 		mes "[タシンチェ]";
 		mes "普通のアイスとは";
