@@ -1175,8 +1175,11 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->paramb[5]+= 30;
 		if(sd->sc_data[SC_LOUD].timer!=-1 && sd->sc_data[SC_QUAGMIRE].timer == -1)	// ラウドボイス
 			sd->paramb[0]+= 4;
-		if(sd->sc_data[SC_QUAGMIRE].timer!=-1)	// クァグマイア(AGI/DEXはbattle.cで)
+		if(sd->sc_data[SC_QUAGMIRE].timer!=-1){	// クァグマイア
 			sd->speed = sd->speed*3/2;
+			sd->paramb[1]-=(sd->status.agi+sd->paramb[1]+sd->parame[1])/2;
+			sd->paramb[4]-=(sd->status.dex+sd->paramb[4]+sd->parame[4])/2;
+		}
 	}
 
 	sd->paramc[0]=sd->status.str+sd->paramb[0]+sd->parame[0];
