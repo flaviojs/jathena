@@ -3,7 +3,7 @@ all: map-server
 COMMON_OBJ = ../common/core.o ../common/socket.o ../common/timer.o ../common/grfio.o ../common/db.o ../common/lock.o ../common/nullpo.o ../common/malloc.o
 LIBS = -lz -lm
 
-map-server: map.o chrif.o clif.o pc.o npc.o chat.o path.o itemdb.o mob.o script.o storage.o skill.o atcommand.o battle.o intif.o trade.o party.o vending.o guild.o pet.o $(COMMON_OBJ)
+map-server: map.o chrif.o clif.o pc.o npc.o chat.o path.o itemdb.o mob.o script.o storage.o skill.o atcommand.o battle.o intif.o trade.o party.o vending.o guild.o pet.o status.o $(COMMON_OBJ)
 	$(CC) -o ../../bin/$@ $> $(LIBS)
 
 map.o: map.c map.h chrif.h clif.h npc.h pc.h mob.h chat.h skill.h itemdb.h storage.h party.h pet.h atcommand.h ../common/core.h ../common/timer.h ../common/db.h ../common/grfio.h ../common/mmo.h
@@ -26,6 +26,7 @@ party.o: party.c party.h clif.h intif.h pc.h map.h battle.h ../common/db.h ../co
 vending.o: vending.c vending.h clif.h itemdb.h map.h pc.h ../common/mmo.h
 guild.o: guild.c guild.h storage.h battle.h clif.h intif.h pc.h npc.h map.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
 pet.o:pet.c pet.h map.h clif.h chrif.h intif.h pc.h itemdb.h battle.h mob.h npc.h script.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
+status.o: status.c status.h
 
 clean:
 	rm -f *.o

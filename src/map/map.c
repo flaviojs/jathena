@@ -31,6 +31,7 @@
 #include "guild.h"
 #include "pet.h"
 #include "atcommand.h"
+#include "status.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -910,7 +911,7 @@ int map_quit(struct map_session_data *sd)
 	pc_delspiritball(sd,sd->spiritball,1);
 	skill_gangsterparadise(sd,0);
 
-	pc_calcstatus(sd,4);
+	status_calc_pc(sd,4);
 
 	clif_clearchar_area(&sd->bl,2);
 
@@ -1960,6 +1961,7 @@ int do_init(int argc,char *argv[])
 	do_init_storage();
 	do_init_skill();
 	do_init_pet();
+	do_init_status();
 	npc_event_do_oninit();	// npcのOnInitイベント実行
 
 	return 0;

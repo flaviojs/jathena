@@ -25,7 +25,6 @@ void pc_set_gm_account_fname(char *str);
 int pc_isGM(struct map_session_data *sd);
 int pc_numisGM(int account_id);
 int pc_isquitable(struct map_session_data *sd);
-int pc_getrefinebonus(int lv,int type);
 
 int pc_counttargeted(struct map_session_data *sd,struct block_list *src,int target_lv);
 int pc_setrestartvalue(struct map_session_data *sd,int type);
@@ -73,7 +72,6 @@ int pc_dropitem(struct map_session_data*,int,int);
 
 int pc_checkweighticon(struct map_session_data *sd);
 
-int pc_calcstatus(struct map_session_data*,int);
 int pc_bonus(struct map_session_data*,int,int);
 int pc_bonus2(struct map_session_data *sd,int,int,int);
 int pc_bonus3(struct map_session_data *sd,int,int,int,int);
@@ -132,7 +130,6 @@ int pc_readaccountreg(struct map_session_data*,char*);
 int pc_setaccountreg(struct map_session_data*,char*,int);
 int pc_readaccountreg2(struct map_session_data*,char*);
 int pc_setaccountreg2(struct map_session_data*,char*,int);
-int pc_percentrefinery(struct map_session_data *sd,struct item *item);
 
 int pc_addeventtimer(struct map_session_data *sd,int tick,const char *name);
 int pc_deleventtimer(struct map_session_data *sd,const char *name);
@@ -152,6 +149,7 @@ int pc_break_equip(struct map_session_data *sd, unsigned short where);
 int pc_candrop(struct map_session_data *sd,int item_id);
 
 void pc_setstand(struct map_session_data *sd);
+int pc_calc_skilltree(struct map_session_data *sd);
 
 
 struct pc_base_job{

@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "../common/" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D PACKETVER=6 /D "NEW_006b" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "../common/" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D PACKETVER=6 /D "NEW_006b" /D FD_SETSIZE=4096 /YX /FD /c
 # ADD BASE RSC /l 0x411 /d "NDEBUG"
 # ADD RSC /l 0x411 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -66,7 +66,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "../common/" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D PACKETVER=6 /D "NEW_006b" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "../common/" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D PACKETVER=6 /D "NEW_006b" /D FD_SETSIZE=4096 /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x411 /d "_DEBUG"
 # ADD RSC /l 0x411 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -183,6 +183,10 @@ SOURCE=..\..\src\common\socket.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\status.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\map\storage.c
 # End Source File
 # Begin Source File
@@ -296,6 +300,10 @@ SOURCE=..\..\src\map\skill.h
 # Begin Source File
 
 SOURCE=..\..\src\common\socket.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\status.h
 # End Source File
 # Begin Source File
 

@@ -25,6 +25,7 @@
 #include "atcommand.h"
 #include "script.h"
 #include "npc.h"
+#include "status.h"
 //#include "trade.h"
 //#include "core.h"
 
@@ -1293,7 +1294,7 @@ atcommand_baselevelup(
 		clif_updatestatus(sd, SP_BASELEVEL);
 		clif_updatestatus(sd, SP_NEXTBASEEXP);
 		clif_updatestatus(sd, SP_STATUSPOINT);
-		pc_calcstatus(sd, 0);
+		status_calc_pc(sd, 0);
 		pc_heal(sd, sd->status.max_hp, sd->status.max_sp);
 		clif_misceffect(&sd->bl, 0);
 		clif_displaymessage(fd, msg_table[21]);
@@ -1301,7 +1302,7 @@ atcommand_baselevelup(
 		sd->status.base_level += level;
 		clif_updatestatus(sd, SP_BASELEVEL);
 		clif_updatestatus(sd, SP_NEXTBASEEXP);
-		pc_calcstatus(sd, 0);
+		status_calc_pc(sd, 0);
 		clif_displaymessage(fd, msg_table[22]);
 							}
 	
@@ -1342,14 +1343,14 @@ atcommand_joblevelup(
 		clif_updatestatus(sd, SP_NEXTJOBEXP);
 		sd->status.skill_point += level;
 		clif_updatestatus(sd, SP_SKILLPOINT);
-		pc_calcstatus(sd, 0);
+		status_calc_pc(sd, 0);
 		clif_misceffect(&sd->bl, 1);
 		clif_displaymessage(fd, msg_table[24]);
 	} else if (level < 0 && sd->status.job_level + level > 0) {
 		sd->status.job_level += level;
 		clif_updatestatus(sd, SP_JOBLEVEL);
 		clif_updatestatus(sd, SP_NEXTJOBEXP);
-		pc_calcstatus(sd, 0);
+		status_calc_pc(sd, 0);
 		clif_displaymessage(fd, msg_table[25]);
 						}
 	
@@ -2028,7 +2029,7 @@ atcommand_param(
 	
 	clif_updatestatus(sd, SP_STR + index);
 	clif_updatestatus(sd, SP_USTR + index);
-	pc_calcstatus(sd, 0);
+	status_calc_pc(sd, 0);
 	clif_displaymessage(fd, msg_table[42]);
 	
 	return 0;
@@ -2147,9 +2148,9 @@ atcommand_petfriendly(
 				if ((sd->pet.intimate > 0 && t <= 0) ||
 					(sd->pet.intimate <= 0 && t > 0)) {
 					if (sd->bl.prev != NULL)
-						pc_calcstatus(sd, 0);
+						status_calc_pc(sd, 0);
 							else
-						pc_calcstatus(sd, 2);
+						status_calc_pc(sd, 2);
 					}
 				}
 		} else {
@@ -2756,7 +2757,7 @@ atcommand_character_baselevel(
 				clif_updatestatus(pl_sd, SP_BASELEVEL); //クライアントに上げたベースレベルを送る
 				clif_updatestatus(pl_sd, SP_NEXTBASEEXP); //クライアントに次のベースレベルアップまでの必要経験値を送る
 				clif_updatestatus(pl_sd, SP_STATUSPOINT); //クライアントにステータスポイントを送る
-				pc_calcstatus(pl_sd, 0); //ステータスを計算しなおす
+				status_calc_pc(pl_sd, 0); //ステータスを計算しなおす
 				pc_heal(pl_sd, pl_sd->status.max_hp, pl_sd->status.max_sp); //HPとSPを完全回復させる
 				clif_misceffect(&pl_sd->bl, 0); //ベースレベルアップエフェクトの送信
 				clif_displaymessage(fd, msg_table[65]); //レベルを上げたメッセージを表示する
@@ -2764,7 +2765,7 @@ atcommand_character_baselevel(
 				pl_sd->status.base_level += level; //対象キャラのレベルを下げる
 				clif_updatestatus(pl_sd, SP_BASELEVEL); //クライアントに下げたベースレベルを送る
 				clif_updatestatus(pl_sd, SP_NEXTBASEEXP); //クライアントに次のベースレベルアップまでの必要経験値を送る
-				pc_calcstatus(pl_sd, 0); //ステータスを計算しなおす
+				status_calc_pc(pl_sd, 0); //ステータスを計算しなおす
 				clif_displaymessage(fd, msg_table[66]); //レベルを下げたメッセージを表示する
 			}
 		}
@@ -2809,14 +2810,14 @@ atcommand_character_joblevel(
 				clif_updatestatus(pl_sd, SP_NEXTJOBEXP);
 				pl_sd->status.skill_point += level;
 				clif_updatestatus(pl_sd, SP_SKILLPOINT);
-				pc_calcstatus(pl_sd, 0);
+				status_calc_pc(pl_sd, 0);
 				clif_misceffect(&pl_sd->bl, 1);
 				clif_displaymessage(fd, msg_table[68]);
 			} else if (level < 0 && sd->status.job_level + level > 0) {
 				pl_sd->status.job_level += level;
 				clif_updatestatus(pl_sd, SP_JOBLEVEL);
 				clif_updatestatus(pl_sd, SP_NEXTJOBEXP);
-				pc_calcstatus(pl_sd, 0);
+				status_calc_pc(pl_sd, 0);
 				clif_displaymessage(fd, msg_table[69]);
 				}
 			}

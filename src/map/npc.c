@@ -1690,19 +1690,29 @@ int do_init_npc(void)
 			if (line[0] == '/' && line[1] == '/')
 				continue;
 			// 不要なスペースやタブの連続は詰める
-			for( i = j = 0 ; line[ i ] >= 0 ; i++ ){
-				if( line[ i ] == ' ' ){
-					if( !( ( line[ i + 1 ] >= 0 && ( isspace( line[ i + 1 ] ) || line[ i + 1 ] == ',' ) ) || ( j >= 0 && line[ j - 1 ] == ',' ) ) ){
-						line[ j++ ] = ' ';
+			i = j = 0;
+			while(line[i]) {
+				switch(line[i]) {
+				case ' ':
+					if(!j || line[j-1]!=',') {
+						if(!line[i + 1]) {
+							line[j++]=' ';
+						} else if(!isspace(line[i+1]) && line[i+1]!=',') {
+							line[j++]=' ';
+						}
 					}
-				}else if( line[ i ] == '\t' ){
-					if( j != 0 && line[j-1]!='\t' ){
-						line[ j++ ] = '\t';
+					break;
+				case '\t':
+					if(!j || line[j-1]!='\t') {
+						line[ j++ ]='\t';
 					}
-				}else{
- 					line[ j++ ] = line[ i ];
+					break;
+				default:
+					line[j++]=line[i];
 				}
+				i++;
 			}
+			line[j] = 0;
 			// 最初はタブ区切りでチェックしてみて、ダメならスペース区切りで確認
 			if ((count=sscanf(line,"%[^\t]\t%[^\t]\t%[^\t\r\n]\t%n%[^\t\r\n]",w1,w2,w3,&w4pos,w4)) < 3 &&
 			   (count=sscanf(line,"%s%s%s%n%s",w1,w2,w3,&w4pos,w4)) < 3) {

@@ -1,4 +1,40 @@
 --------------------
+//1091 by End_of_exam
+
+＊＊　注意　＊＊
+
+　今回のパッチは改造内容が複雑なので、導入は慎重に行ってください。
+　status.c / h への分離は、関数名の置き換えだけに留めたつもりですが、
+　思わぬバグが潜んでいる可能性があります。
+
+・スパゲティ対策の一環として、ステータス計算、状態異常に関わる部分を
+　status.c / h として分離。battle.c から39KB程 , skill.c から41KB程 ,
+　pc.c から38KB程移動できました。少々強引ですが、スキル使用や攻撃などの
+　処理の流れをつかみやすくするためには、battle.c / skill.c の中身を
+　減らす必要があると考えたためです。
+
+	battle_get_*          => status_get_*
+	skill_status_change_* => status_change_*
+	pc_calcstatus         => status_calc_pc
+	pc_calc_sigma         => status_calc_sigma
+	pc_getrefinebonus     => status_getrefinebonus
+	pc_percentrefinery    => status_percentrefinery
+
+・battle.c , script.c の巻き戻りを戻す
+・npc.c の怪しい変更を戻し、きちんとNUL を付け加えるようにする
+・script.c のミスを直す（jump_non_zero => jump_zero　意味が逆になってました…）
+・skill.c の武器修理 のコメントミスを修正
+・WIN32でコンパイルした時、最大接続人数が60人程に制限されていたバグを修正
+
+	(/)
+	athena.dsw , athena.dsp , bcc32_make.bat , src/login/login.dsp
+	src/char/char.dsp , src/map/map.dsp
+		コンパイル条件の変更
+
+	(src/map/)
+		上の分離に合わせてコンパイルエラーの出ないように修正
+
+--------------------
 //1090 by Sapientia
 ・チャットの便利さのために叫ぶ追加 (ギルドチャットと区分するためにウェチギシの前に [叫ぶこと]が付き)
 ・atcomand_athena.conf で onlymes を 0で設定して皆使うように活性化

@@ -34,6 +34,7 @@
 #include "party.h"
 #include "guild.h"
 #include "atcommand.h"
+#include "status.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -45,7 +46,7 @@ static unsigned char * script_buf;
 static int script_pos,script_size;
 
 static char *str_buf;
-static unsigned int str_pos,str_size;
+static int str_pos,str_size;
 static struct {
 	int type;
 	int str;
@@ -80,8 +81,25 @@ static struct Script_Config {
 	int check_cmdcount;
 	int check_gotocount;
 } script_config;
-static int parse_cmd_if=0;
 static int parse_cmd;
+
+// if , switch の実装
+enum { TYPE_NULL = 0 , TYPE_IF , TYPE_SWITCH , TYPE_WHILE , TYPE_FOR , TYPE_DO };
+static struct {
+	struct {
+		int type;
+		int index;
+		int count;
+		int flag;
+	} curly[256];		// 右カッコの情報
+	int curly_count;	// 右カッコの数
+	int index;			// スクリプト内で使用した構文の数
+} syntax;
+unsigned char* parse_curly_close(unsigned char *p);
+unsigned char* parse_syntax_close(unsigned char *p);
+unsigned char* parse_syntax_close_sub(unsigned char *p,int *flag);
+unsigned char* parse_syntax(unsigned char *p);
+static int parse_syntax_for_flag = 0;
 
 /*==========================================
  * ローカルプロトタイプ宣言 (必要な物のみ)
@@ -114,7 +132,6 @@ int buildin_copyarray(struct script_state *st);
 int buildin_getarraysize(struct script_state *st);
 int buildin_deletearray(struct script_state *st);
 int buildin_getelementofarray(struct script_state *st);
-int buildin_if(struct script_state *st);
 int buildin_getitem(struct script_state *st);
 int buildin_getitem2(struct script_state *st);
 int buildin_delitem(struct script_state *st);
@@ -251,6 +268,8 @@ int buildin_recovery(struct script_state *st);
 int buildin_getpetinfo(struct script_state *st);
 int buildin_checkequipedcard(struct script_state *st);
 
+int buildin_jump_zero(struct script_state *st);
+int buildin_select(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -285,7 +304,6 @@ struct {
 	{buildin_getarraysize,"getarraysize","i"},
 	{buildin_deletearray,"deletearray","ii"},
 	{buildin_getelementofarray,"getelementofarray","ii"},
-	{buildin_if,"if","i*"},
 	{buildin_getitem,"getitem","ii**"},
 	{buildin_getitem2,"getitem2","iiiiiiiii*"},
 	{buildin_delitem,"delitem","ii"},
@@ -425,6 +443,8 @@ struct {
 	{buildin_recovery,"recovery",""},
 	{buildin_getpetinfo,"getpetinfo","i"},
 	{buildin_checkequipedcard,"checkequipedcard","i"},
+	{buildin_jump_zero,"jump_zero","ii"},
+	{buildin_select,"select","*"},
 	{NULL,NULL,NULL}
 };
 enum {
@@ -628,6 +648,7 @@ void set_label(int l,int pos)
 		script_buf[i+2]=pos>>16;
 		i=next;
 	}
+	// printf("set_label pos:%d str:%s\n",pos,&str_buf[str_data[l].str]);
 }
 
 /*==========================================
@@ -775,9 +796,6 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 		l=add_str(p);
 
 		parse_cmd=l;	// warn_*_mismatch_paramnumのために必要
-		if(l==search_str("if"))	// warn_cmd_no_commaのために必要
-			parse_cmd_if++;
-
 		// 廃止予定のl14/l15,およびプレフィックスｌの警告
 		if(	strcmp(str_buf+str_data[l].str,"l14")==0 ||
 			strcmp(str_buf+str_data[l].str,"l15")==0 ){
@@ -787,7 +805,6 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 		}
 
 		*p2=c;	p=p2;
-
 
 		if(str_data[l].type!=C_FUNC && c=='['){
 			// array(name[i] => getelementofarray(name,i) )
@@ -944,12 +961,26 @@ unsigned char* parse_line(unsigned char *p)
 	int i=0,cmd;
 	const char *plist[128];
 	char *p2;
+	char end;
 
 	p=skip_space(p);
 	if(*p==';')
-		return p;
+		return p+1;
 
-	parse_cmd_if=0;	// warn_cmd_no_commaのために必要
+	p = skip_space(p);
+	if(p[0] == '{') {
+		syntax.curly[syntax.curly_count].type  = TYPE_NULL;
+		syntax.curly[syntax.curly_count].count = -1;
+		syntax.curly[syntax.curly_count].index = -1;
+		syntax.curly_count++;
+		return p + 1;
+	} else if(p[0] == '}') {
+		return parse_curly_close(p);
+	}
+
+	// 構文関連の処理
+	p2 = parse_syntax(p);
+	if(p2 != NULL) { return p2; }
 
 	// 最初は関数名
 	p2=p;
@@ -962,26 +993,43 @@ unsigned char* parse_line(unsigned char *p)
 		exit(0);
 	}
 
+	// 通常の関数
 	add_scriptc(C_ARG);
-	while(p && *p && *p!=';' && i<128){
+	if(parse_syntax_for_flag) {
+		end = ')';
+	} else {
+		end = ';';
+	}
+	while(p && *p && *p != end && i<128){
 		plist[i]=p;
 
 		p=parse_expr(p);
 		p=skip_space(p);
 		// 引数区切りの,処理
 		if(*p==',') p++;
-		else if(*p!=';' && script_config.warn_cmd_no_comma && parse_cmd_if*2<=i ){
-			disp_error_message("expect ',' or ';' at cmd params",p);
+		else if(*p!=end && script_config.warn_cmd_no_comma){
+			if(parse_syntax_for_flag) {
+				disp_error_message("expect ',' or ')' at cmd params",p);
+			} else {
+				disp_error_message("expect ',' or ';' at cmd params",p);
+			}
 		}
 		p=skip_space(p);
 		i++;
 	}
 	plist[i]=p;
-	if(!p || *(p++)!=';'){
-		disp_error_message("need ';'",p);
+	if(!p || *(p++)!=end){
+		if(parse_syntax_for_flag) {
+			disp_error_message("need ')'",p);
+		} else {
+			disp_error_message("need ';'",p);
+		}
 		exit(1);
 	}
 	add_scriptc(C_FUNC);
+
+	// if, for , while の閉じ判定
+	p = parse_syntax_close(p);
 
 	if( str_data[cmd].type==C_FUNC && script_config.warn_cmd_mismatch_paramnum){
 		const char *arg=buildin_func[str_data[cmd].val].arg;
@@ -991,9 +1039,596 @@ unsigned char* parse_line(unsigned char *p)
 			disp_error_message("illeagal number of parameters",plist[(i<j)?i:j]);
 		}
 	}
-
-
 	return p;
+}
+
+// { ... } の閉じ処理
+unsigned char* parse_curly_close(unsigned char *p) {
+	if(syntax.curly_count <= 0) {
+		disp_error_message("unexpected string",p);
+		return p + 1;
+	} else if(syntax.curly[syntax.curly_count-1].type == TYPE_NULL) {
+		syntax.curly_count--;
+		// if, for , while の閉じ判定
+		p = parse_syntax_close(p + 1);
+		return p;
+	} else if(syntax.curly[syntax.curly_count-1].type == TYPE_SWITCH) {
+		// switch() 閉じ判定
+		int pos = syntax.curly_count-1;
+		char label[256];
+		int l;
+		// 無条件で終了ポインタに移動
+		sprintf(label,"goto __SW%x_FIN;",syntax.curly[pos].index);
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		parse_line(label);
+		syntax.curly_count--;
+
+		// 現在地のラベルを付ける
+		sprintf(label,"__SW%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+
+		if(syntax.curly[pos].flag) {
+			// default が存在する
+			sprintf(label,"goto __SW%x_DEF;",syntax.curly[pos].index);
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			parse_line(label);
+			syntax.curly_count--;
+		}
+
+		// 終了ラベルを付ける
+		sprintf(label,"__SW%x_FIN",syntax.curly[pos].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+
+		// 一時変数を消す
+		sprintf(label,"set @__SW%x_VAL,0;",syntax.curly[pos].index);
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		parse_line(label);
+		syntax.curly_count--;
+		syntax.curly_count--;
+		return p+1;
+	} else {
+		disp_error_message("unexpected string",p);
+		return p + 1;
+	}
+}
+
+// 構文関連の処理
+unsigned char* parse_syntax(unsigned char *p) {
+	if(!strncmp(p,"break",5) && !isalpha(*(p + 5))) {
+		// break の処理
+		char label[256];
+		int pos = syntax.curly_count - 1;
+		while(pos >= 0) {
+			if(syntax.curly[pos].type == TYPE_DO) {
+				sprintf(label,"goto __DO%x_FIN;",syntax.curly[pos].index);
+				break;
+			} else if(syntax.curly[pos].type == TYPE_FOR) {
+				sprintf(label,"goto __FR%x_FIN;",syntax.curly[pos].index);
+				break;
+			} else if(syntax.curly[pos].type == TYPE_WHILE) {
+				sprintf(label,"goto __WL%x_FIN;",syntax.curly[pos].index);
+				break;
+			} else if(syntax.curly[pos].type == TYPE_SWITCH) {
+				sprintf(label,"goto __SW%x_FIN;",syntax.curly[pos].index);
+				break;
+			}
+			pos--;
+		}
+		if(pos < 0) {
+			disp_error_message("unexpected 'break'",p);
+		} else {
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			parse_line(label);
+			syntax.curly_count--;
+		}
+		p = skip_word(p);
+		p++;
+		// if, for , while の閉じ判定
+		p = parse_syntax_close(p + 1);
+		return p;
+	} else if(!strncmp(p,"continue",8) && !isalpha(*(p + 8))) {
+		// continue の処理
+		char label[256];
+		int pos = syntax.curly_count - 1;
+		while(pos >= 0) {
+			if(syntax.curly[pos].type == TYPE_DO) {
+				sprintf(label,"goto __DO%x_NXT;",syntax.curly[pos].index);
+				syntax.curly[pos].flag = 1; // continue 用のリンク張るフラグ
+				break;
+			} else if(syntax.curly[pos].type == TYPE_FOR) {
+				sprintf(label,"goto __FR%x_NXT;",syntax.curly[pos].index);
+				break;
+			} else if(syntax.curly[pos].type == TYPE_WHILE) {
+				sprintf(label,"goto __WL%x_NXT;",syntax.curly[pos].index);
+				break;
+			}
+			pos--;
+		}
+		if(pos < 0) {
+			disp_error_message("unexpected 'continue'",p);
+		} else {
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			parse_line(label);
+			syntax.curly_count--;
+		}
+		p = skip_word(p);
+		p++;
+		// if, for , while の閉じ判定
+		p = parse_syntax_close(p + 1);
+		return p;
+	} else if(!strncmp(p,"if",2) && !isalpha(*(p + 2))) {
+		// if() の処理
+		char label[256];
+		p=skip_word(p);
+		p=skip_space(p);
+
+		syntax.curly[syntax.curly_count].type  = TYPE_IF;
+		syntax.curly[syntax.curly_count].count = 1;
+		syntax.curly[syntax.curly_count].index = syntax.index++;
+		syntax.curly[syntax.curly_count].flag  = 0;
+		sprintf(label,"__IF%x_%x",syntax.curly[syntax.curly_count].index,syntax.curly[syntax.curly_count].count);
+		syntax.curly_count++;
+		add_scriptl(add_str("jump_zero"));
+		add_scriptc(C_ARG);
+		p=parse_expr(p);
+		p=skip_space(p);
+		add_scriptl(add_str(label));
+		add_scriptc(C_FUNC);
+		return p;
+	} else if(!strncmp(p,"do",2) && !isalpha(*(p + 2))) {
+		int l;
+		char label[256];
+		p=skip_word(p);
+		p=skip_space(p);
+
+		syntax.curly[syntax.curly_count].type  = TYPE_DO;
+		syntax.curly[syntax.curly_count].count = 1;
+		syntax.curly[syntax.curly_count].index = syntax.index++;
+		syntax.curly[syntax.curly_count].flag  = 0;
+		// 現在地のラベル形成する
+		sprintf(label,"__DO%x_BGN",syntax.curly[syntax.curly_count].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+		syntax.curly_count++;
+		return p;
+	} else if(!strncmp(p,"for",3) && !isalpha(*(p + 3))) {
+		int l;
+		char label[256];
+		int  pos = syntax.curly_count;
+		syntax.curly[syntax.curly_count].type  = TYPE_FOR;
+		syntax.curly[syntax.curly_count].count = 1;
+		syntax.curly[syntax.curly_count].index = syntax.index++;
+		syntax.curly[syntax.curly_count].flag  = 0;
+		syntax.curly_count++;
+
+		p=skip_word(p);
+		p=skip_space(p);
+
+		if(*p != '(') {
+			disp_error_message("need '('",p);
+			return p+1;
+		}
+		p++;
+
+		// 初期化文を実行する
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		p=parse_line(p);
+		syntax.curly_count--;
+	
+		// 条件判断開始のラベル形成する
+		sprintf(label,"__FR%x_J",syntax.curly[pos].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+
+		if(*p == ';') {
+			// for(;;) のパターンなので必ず真
+			;
+		} else {
+			// 条件が偽なら終了地点に飛ばす
+			sprintf(label,"__FR%x_FIN",syntax.curly[pos].index);
+			add_scriptl(add_str("jump_zero"));
+			add_scriptc(C_ARG);
+			p=parse_expr(p);
+			p=skip_space(p);
+			add_scriptl(add_str(label));
+			add_scriptc(C_FUNC);
+		}
+		if(*p != ';') {
+			disp_error_message("need ';'",p);
+			return p+1;
+		}
+		p++;
+
+		// ループ開始に飛ばす
+		sprintf(label,"goto __FR%x_BGN;",syntax.curly[pos].index);
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		parse_line(label);
+		syntax.curly_count--;
+
+		// 次のループへのラベル形成する
+		sprintf(label,"__FR%x_NXT",syntax.curly[pos].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+
+		// 次のループに入る時の処理
+		// for 最後の '(' を ';' として扱うフラグ
+		parse_syntax_for_flag = 1;
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		p=parse_line(p);
+		syntax.curly_count--;
+		parse_syntax_for_flag = 0;
+
+		// 条件判定処理に飛ばす
+		sprintf(label,"goto __FR%x_J;",syntax.curly[pos].index);
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		parse_line(label);
+		syntax.curly_count--;
+
+		// ループ開始のラベル付け
+		sprintf(label,"__FR%x_BGN",syntax.curly[pos].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+		return p;
+	} else if(!strncmp(p,"while",5) && !isalpha(*(p + 5))) {
+		int l;
+		char label[256];
+		p=skip_word(p);
+		p=skip_space(p);
+
+		syntax.curly[syntax.curly_count].type  = TYPE_WHILE;
+		syntax.curly[syntax.curly_count].count = 1;
+		syntax.curly[syntax.curly_count].index = syntax.index++;
+		syntax.curly[syntax.curly_count].flag  = 0;
+		// 条件判断開始のラベル形成する
+		sprintf(label,"__WL%x_NXT",syntax.curly[syntax.curly_count].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+
+		// 条件が偽なら終了地点に飛ばす
+		sprintf(label,"__WL%x_FIN",syntax.curly[syntax.curly_count].index);
+		add_scriptl(add_str("jump_zero"));
+		add_scriptc(C_ARG);
+		p=parse_expr(p);
+		p=skip_space(p);
+		add_scriptl(add_str(label));
+		add_scriptc(C_FUNC);
+		syntax.curly_count++;
+		return p;
+	} else if(!strncmp(p,"switch",6) && !isalpha(*(p + 6))) {
+		// switch() の処理
+		char label[256];
+		syntax.curly[syntax.curly_count].type  = TYPE_SWITCH;
+		syntax.curly[syntax.curly_count].count = 1;
+		syntax.curly[syntax.curly_count].index = syntax.index++;
+		syntax.curly[syntax.curly_count].flag  = 0;
+		sprintf(label,"@__SW%x_VAL",syntax.curly[syntax.curly_count].index);
+		syntax.curly_count++;
+		add_scriptl(add_str("set"));
+		add_scriptc(C_ARG);
+		add_scriptl(add_str(label));
+		p=skip_word(p);
+		p=skip_space(p);
+		p=parse_expr(p);
+		p=skip_space(p);
+		if(*p != '{') {
+			disp_error_message("need '{'",p);
+		}
+		add_scriptc(C_FUNC);
+		return p + 1;
+	} else if(!strncmp(p,"case",4) && !isalpha(*(p + 4))) {
+		// case の処理
+		if(syntax.curly_count <= 0 || syntax.curly[syntax.curly_count - 1].type != TYPE_SWITCH) {
+			disp_error_message("unexpected 'case' ",p);
+			return p+1;
+		} else {
+			char *p2;
+			char label[256];
+			int  l;
+			int pos = syntax.curly_count-1;
+			if(syntax.curly[pos].count != 1) {
+				// FALLTHRU 用のジャンプ
+				sprintf(label,"goto __SW%x_%xJ;",syntax.curly[pos].index,syntax.curly[pos].count);
+				syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+				parse_line(label);
+				syntax.curly_count--;
+
+				// 現在地のラベルを付ける
+				sprintf(label,"__SW%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+				l=add_str(label);
+				if(str_data[l].label!=-1){
+					disp_error_message("dup label ",p);
+					exit(1);
+				}
+				set_label(l,script_pos);
+			}
+			// switch 判定文
+			p = skip_word(p);
+			p = skip_space(p);
+			p2 = p;
+			p = skip_word(p);
+			p = skip_space(p);
+			if(*p != ':') {
+				disp_error_message("expect ':'",p);
+				exit(1);
+			}
+			*p = 0;
+			sprintf(label,"if(%s != @__SW%x_VAL) goto __SW%x_%x;",
+				p2,syntax.curly[pos].index,syntax.curly[pos].index,syntax.curly[pos].count+1);
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			*p = ':';
+			// ２回parse しないとダメ
+			p2 = parse_line(label);
+			parse_line(p2);
+			syntax.curly_count--;
+			if(syntax.curly[pos].count != 1) {
+				// FALLTHRU 終了後のラベル
+				sprintf(label,"__SW%x_%xJ",syntax.curly[pos].index,syntax.curly[pos].count);
+				l=add_str(label);
+				if(str_data[l].label!=-1){
+					disp_error_message("dup label ",p);
+					exit(1);
+				}
+				set_label(l,script_pos);
+			}
+			syntax.curly[pos].count++;
+		}
+		return p + 1;
+	} else if(!strncmp(p,"default",7) && !isalpha(*(p + 7))) {
+		// switch - default の処理
+		if(syntax.curly_count <= 0 || syntax.curly[syntax.curly_count - 1].type != TYPE_SWITCH) {
+			disp_error_message("unexpected 'delault'",p);
+			return p+1;
+		} else if(syntax.curly[syntax.curly_count - 1].flag) {
+			disp_error_message("dup 'delault'",p);
+			return p+1;
+		} else {
+			char label[256];
+			int l;
+			int pos = syntax.curly_count-1;
+			// 現在地のラベルを付ける
+			p = skip_word(p);
+			p = skip_space(p);
+			if(*p != ':') {
+				disp_error_message("need ':'",p);
+			}
+			p++;
+			sprintf(label,"__SW%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+			l=add_str(label);
+			if(str_data[l].label!=-1){
+				disp_error_message("dup label ",p);
+				exit(1);
+			}
+			set_label(l,script_pos);
+
+			// 無条件で次のリンクに飛ばす
+			sprintf(label,"goto __SW%x_%x;",syntax.curly[pos].index,syntax.curly[pos].count+1);
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			parse_line(label);
+			syntax.curly_count--;
+
+			// default のラベルを付ける
+			sprintf(label,"__SW%x_DEF",syntax.curly[pos].index);
+			l=add_str(label);
+			if(str_data[l].label!=-1){
+				disp_error_message("dup label ",p);
+				exit(1);
+			}
+			set_label(l,script_pos);
+
+			syntax.curly[syntax.curly_count - 1].flag = 1;
+			syntax.curly[pos].count++;
+			p = skip_word(p);
+			return p + 1;
+		}
+	} else {
+		return NULL;
+	}
+}
+
+unsigned char* parse_syntax_close(unsigned char *p) {
+	// if(...) for(...) hoge(); のように、１度閉じられたら再度閉じられるか確認する
+	int flag;
+	
+	do {
+		p = parse_syntax_close_sub(p,&flag);
+	} while(flag);
+	return p;
+}
+
+// if, for , while , do の閉じ判定
+//     flag == 1 : 閉じられた
+//     flag == 0 : 閉じられない
+unsigned char* parse_syntax_close_sub(unsigned char *p,int *flag) {
+	char label[256];
+	int pos = syntax.curly_count - 1;
+	int l;
+	*flag = 1;
+
+	if(syntax.curly_count <= 0) {
+		*flag = 0;
+		return p;
+	} else if(syntax.curly[pos].type == TYPE_IF) {
+		char *p2 = p;
+		// if 最終場所へ飛ばす
+		sprintf(label,"goto __IF%x_FIN;",syntax.curly[pos].index);
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		parse_line(label);
+		syntax.curly_count--;
+
+		// 現在地のラベルを付ける
+		sprintf(label,"__IF%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+
+		syntax.curly[pos].count++;
+		p = skip_space(p);
+		if(!syntax.curly[pos].flag && !strncmp(p,"else",4) && !isalpha(*(p + 4))) {
+			// else  or else - if
+			p = skip_word(p);
+			p = skip_space(p);
+			if(!strncmp(p,"if",2) && !isalpha(*(p + 2))) {
+				// else - if
+				p=skip_word(p);
+				p=skip_space(p);
+				sprintf(label,"__IF%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+				add_scriptl(add_str("jump_zero"));
+				add_scriptc(C_ARG);
+				p=parse_expr(p);
+				p=skip_space(p);
+				add_scriptl(add_str(label));
+				add_scriptc(C_FUNC);
+				*flag = 0;
+				return p;
+			} else {
+				// else
+				if(!syntax.curly[pos].flag) {
+					syntax.curly[pos].flag = 1;
+					*flag = 0;
+					return p;
+				}
+			}
+		}
+		// if 閉じ
+		syntax.curly_count--;
+		// 最終地のラベルを付ける
+		sprintf(label,"__IF%x_FIN",syntax.curly[pos].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+		if(syntax.curly[pos].flag == 1) {
+			// このifに対するelseじゃないのでポインタの位置は同じ
+			return p2;
+		}
+		return p;
+	} else if(syntax.curly[pos].type == TYPE_DO) {
+		int l;
+		char label[256];
+		unsigned char *p2;
+
+		if(syntax.curly[pos].flag) {
+			// 現在地のラベル形成する(continue でここに来る)
+			sprintf(label,"__DO%x_NXT",syntax.curly[pos].index);
+			l=add_str(label);
+			if(str_data[l].label!=-1){
+				disp_error_message("dup label ",p);
+				exit(1);
+			}
+			set_label(l,script_pos);
+		}
+
+		// 条件が偽なら終了地点に飛ばす
+		p = skip_space(p);
+		p2 = skip_word(p);
+		if(p2 - p != 5 || strncmp("while",p,5)) {
+			disp_error_message("need 'while'",p);
+		}
+		p = p2;
+
+		sprintf(label,"__DO%x_FIN",syntax.curly[pos].index);
+		add_scriptl(add_str("jump_zero"));
+		add_scriptc(C_ARG);
+		p=parse_expr(p);
+		p=skip_space(p);
+		add_scriptl(add_str(label));
+		add_scriptc(C_FUNC);
+
+		// 開始地点に飛ばす
+		sprintf(label,"goto __DO%x_BGN;",syntax.curly[pos].index);
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		parse_line(label);
+		syntax.curly_count--;
+
+		// 条件終了地点のラベル形成する
+		sprintf(label,"__DO%x_FIN",syntax.curly[pos].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+		p = skip_space(p);
+		if(*p != ';') {
+			disp_error_message("need ';'",p);
+			return p+1;
+		}
+		p++;
+		syntax.curly_count--;
+		return p;
+	} else if(syntax.curly[pos].type == TYPE_FOR) {
+		// 次のループに飛ばす
+		sprintf(label,"goto __FR%x_NXT;",syntax.curly[pos].index);
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		parse_line(label);
+		syntax.curly_count--;
+
+		// for 終了のラベル付け
+		sprintf(label,"__FR%x_FIN",syntax.curly[pos].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+		syntax.curly_count--;
+		return p;
+	} else if(syntax.curly[pos].type == TYPE_WHILE) {
+		// while 条件判断へ飛ばす
+		sprintf(label,"goto __WL%x_NXT;",syntax.curly[pos].index);
+		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+		parse_line(label);
+		syntax.curly_count--;
+
+		// while 終了のラベル付け
+		sprintf(label,"__WL%x_FIN",syntax.curly[pos].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+		syntax.curly_count--;
+		return p;
+	} else {
+		*flag = 0;
+		return p;
+	}
 }
 
 /*==========================================
@@ -1055,6 +1690,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 	int i;
 	static int first=1;
 
+	memset(&syntax,0,sizeof(syntax));
 	if(first){
 		add_buildin_func();
 		read_constdb();
@@ -1089,11 +1725,11 @@ unsigned char* parse_script(unsigned char *src,int line)
 		disp_error_message("not found '{'",p);
 		return NULL;
 	}
-	for(p++;p && *p && *p!='}';){
+	for(p++;p && *p && (*p!='}' || syntax.curly_count != 0);) {
 		p=skip_space(p);
 		// labelだけ特殊処理
 		tmpp=skip_space(skip_word(p));
-		if(*tmpp==':'){
+		if(*tmpp==':' && !(!strncmp(p,"default:",8) && p + 7 == tmpp)){
 			int l,c;
 
 			c=*skip_word(p);
@@ -1158,7 +1794,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 //
 // 実行系
 //
-enum {STOP=1,END,RERUNLINE,GOTO,RETFUNC};
+enum {STOP=1,END,RERUNLINE,GOTO,RETFUNC,SLEEP};
 
 /*==========================================
  * ridからsdへの解決
@@ -1807,33 +2443,6 @@ int buildin_input(struct script_state *st)
 	return 0;
 }
 
-
-/*==========================================
- *
- *------------------------------------------
- */
-int buildin_if(struct script_state *st)
-{
-	int sel,i;
-
-	sel=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	if(!sel)
-		return 0;
-
-	// 関数名をコピー
-	push_copy(st->stack,st->start+3);
-	// 間に引数マーカを入れて
-	push_val(st->stack,C_ARG,0);
-	// 残りの引数をコピー
-	for(i=st->start+4;i<st->end;i++){
-		push_copy(st->stack,i);
-	}
-	run_func(st);
-
-	return 0;
-}
-
-
 /*==========================================
  * 変数設定
  *------------------------------------------
@@ -1867,6 +2476,7 @@ int buildin_set(struct script_state *st)
 
 	return 0;
 }
+
 /*==========================================
  * 配列変数設定
  *------------------------------------------
@@ -2774,7 +3384,7 @@ int buildin_getequippercentrefinery(struct script_state *st)
 	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0)
-		push_val(st->stack,C_INT,pc_percentrefinery(sd,&sd->status.inventory[i]));
+		push_val(st->stack,C_INT,status_percentrefinery(sd,&sd->status.inventory[i]));
 	else
 		push_val(st->stack,C_INT,0);
 
@@ -3803,7 +4413,7 @@ int buildin_sc_start(struct script_state *st)
 	bl = map_id2bl(st->rid);
 	if(bl->type == BL_PC && ((struct map_session_data *)bl)->state.potionpitcher_flag)
 		bl = map_id2bl(((struct map_session_data *)bl)->skilltarget);
-	skill_status_change_start(bl,type,val1,0,0,0,tick,0);
+	status_change_start(bl,type,val1,0,0,0,tick,0);
 	return 0;
 }
 
@@ -3826,7 +4436,7 @@ int buildin_sc_start2(struct script_state *st)
 	if(bl->type == BL_PC && ((struct map_session_data *)bl)->state.potionpitcher_flag)
 		bl = map_id2bl(((struct map_session_data *)bl)->skilltarget);
 	if(rand()%10000 < per)
-		skill_status_change_start(bl,type,val1,0,0,0,tick,0);
+		status_change_start(bl,type,val1,0,0,0,tick,0);
 	return 0;
 }
 
@@ -3842,7 +4452,7 @@ int buildin_sc_end(struct script_state *st)
 	bl = map_id2bl(st->rid);
 	if(bl->type == BL_PC && ((struct map_session_data *)bl)->state.potionpitcher_flag)
 		bl = map_id2bl(((struct map_session_data *)bl)->skilltarget);
-	skill_status_change_end(bl,type,-1);
+	status_change_end(bl,type,-1);
 //	if(battle_config.etc_log)
 //		printf("sc_end : %d %d\n",st->rid,type);
 	return 0;
@@ -3864,10 +4474,10 @@ int buildin_getscrate(struct script_state *st)
 	else
 		bl = map_id2bl(st->rid);
 
-	luk = battle_get_luk(bl);
-	sc_def_mdef2=100 - (3 + battle_get_mdef(bl) + luk/3);
-	sc_def_vit2=100 - (3 + battle_get_vit(bl) + luk/3);
-	sc_def_int2=100 - (3 + battle_get_int(bl) + luk/3);
+	luk = status_get_luk(bl);
+	sc_def_mdef2=100 - (3 + status_get_mdef(bl) + luk/3);
+	sc_def_vit2=100 - (3 + status_get_vit(bl) + luk/3);
+	sc_def_int2=100 - (3 + status_get_int(bl) + luk/3);
 	sc_def_luk2=100 - (3 + luk);
 
 	if(type==SC_STONE || type==SC_FREEZE)
@@ -5136,6 +5746,62 @@ int buildin_checkequipedcard(struct script_state *st)
 		}
 	}
 	push_val(st->stack,C_INT,0);
+	return 0;
+}
+
+int buildin_jump_zero(struct script_state *st) {
+	int sel;
+	sel=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if(!sel) {
+		int pos;
+		if( st->stack->stack_data[st->start+3].type!=C_POS ){
+			printf("script: jump_zero: not label !\n");
+			st->state=END;
+			return 0;
+		}
+
+		pos=conv_num(st,& (st->stack->stack_data[st->start+3]));
+		st->pos=pos;
+		st->state=GOTO;
+		// printf("script: jump_zero: jumpto : %d\n",pos);
+	} else {
+		// printf("script: jump_zero: fail\n");
+	}
+	return 0;
+}
+
+int buildin_select(struct script_state *st)
+{
+	char *buf;
+	int len,i;
+	struct map_session_data *sd;
+
+	sd=script_rid2sd(st);
+
+	if(sd->state.menu_or_input==0){
+		st->state=RERUNLINE;
+		sd->state.menu_or_input=1;
+		for(i=st->start+2,len=16;i<st->end;i++){
+			conv_str(st,& (st->stack->stack_data[i]));
+			len+=strlen(st->stack->stack_data[i].u.str)+1;
+		}
+		buf=(char *)aCalloc(len,sizeof(char));
+		buf[0]=0;
+		for(i=st->start+2,len=0;i<st->end;i++){
+			strcat(buf,st->stack->stack_data[i].u.str);
+			strcat(buf,":");
+		}
+		clif_scriptmenu(script_rid2sd(st),st->oid,buf);
+		free(buf);
+	} else if(sd->npc_menu==0xff){	// cansel
+		sd->state.menu_or_input=0;
+		st->state=END;
+	} else {
+		pc_setreg(sd,add_str("l15"),sd->npc_menu);
+		pc_setreg(sd,add_str("@menu"),sd->npc_menu);
+		sd->state.menu_or_input=0;
+		push_val(st->stack,C_INT,sd->npc_menu);
+	}
 	return 0;
 }
 

@@ -1,5 +1,5 @@
 set __common__=..\common\core.c ..\common\db.c ..\common\grfio.c ..\common\lock.c ..\common\malloc.c ..\common\nullpo.c ..\common\socket.c ..\common\timer.c
-set __define__=-DPACKETVER=6 -DNEW_006b
+set __define__=-DPACKETVER=6 -DNEW_006b -DFD_SETSIZE=4096
 set __include__=-I../common/
 
 @rem Warning ‚ª900ŒÂão‚Ä‚«‚Ä‰½‚ª‚È‚ñ‚¾‚©•ª‚©‚ç‚È‚¢‚Ì‚ÅAˆê•”—}§B
@@ -20,7 +20,7 @@ bcc32 -j255 %__warning__% %__define__% %__include__% char.c int_pet.c int_guild.
 copy char.exe ..\..\char-server.exe
 
 cd ..\map
-bcc32 -j255 %__warning__% %__define__% %__include__% map.c npc.c battle.c chat.c chrif.c clif.c guild.c intif.c itemdb.c mob.c atcommand.c party.c path.c pc.c pet.c script.c skill.c storage.c trade.c vending.c %__common__%
+bcc32 -j255 %__warning__% %__define__% %__include__% map.c npc.c battle.c chat.c chrif.c clif.c guild.c intif.c itemdb.c mob.c atcommand.c party.c path.c pc.c pet.c status.c script.c skill.c storage.c trade.c vending.c %__common__%
 copy map.exe ..\..\map-server.exe
 
 cd ..\..\

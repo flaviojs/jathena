@@ -127,17 +127,14 @@ void skill_devotion2(struct block_list *bl,int crusader);
 int skill_devotion3(struct block_list *bl,int target);
 void skill_devotion_end(struct map_session_data *md,struct map_session_data *sd,int target);
 
-#define skill_calc_heal(bl,skill_lv) (( battle_get_lv(bl)+battle_get_int(bl) )/8 *(4+ skill_lv*8))
+#define skill_calc_heal(bl,skill_lv) (( status_get_lv(bl)+status_get_int(bl) )/8 *(4+ skill_lv*8))
 
 // その他
 int skill_check_cloaking(struct block_list *bl);
 int skill_is_danceskill(int id);
 
 // ステータス異常
-int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,int val3,int val4,int tick,int flag);
-int skill_status_change_timer(int tid, unsigned int tick, int id, int data);
 int skill_encchant_eremental_end(struct block_list *bl, int type);
-int skill_status_change_end( struct block_list* bl , int type,int tid );
 int skill_status_change_clear(struct block_list *bl,int type);
 
 
@@ -800,6 +797,8 @@ enum {
 //	GD_CHARISMA,
 //	GD_EXTENSION,
 };
+
+struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,int skilllv,int x,int y,int flag);
 
 #endif
 
