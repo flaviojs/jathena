@@ -7,6 +7,7 @@
 #include "trade.h"
 #include "pc.h"
 #include "npc.h"
+#include "battle.h"
 
 /*==========================================
  * æˆø—v¿‚ğ‘Šè‚É‘—‚é
@@ -22,6 +23,12 @@ void trade_traderequest(struct map_session_data *sd,int target_id)
 	}
 
 	if((target_sd = map_id2sd(target_id)) != NULL){
+		if(!battle_config.invite_request_check) {
+			if(target_sd->guild_invite>0 || target_sd->party_invite>0){
+				clif_tradestart(sd,2);	// ‘Šè‚ÍPT—v¿’†‚©Guild—v¿’†
+				return;
+			}
+		}
 		if((target_sd->trade_partner !=0) || (sd->trade_partner !=0)){
 			clif_tradestart(sd,2); //person is in another trade
 		}

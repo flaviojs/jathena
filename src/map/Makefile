@@ -28,4 +28,9 @@ guild.o: guild.c guild.h storage.h battle.h clif.h intif.h pc.h npc.h map.h ../c
 pet.o:pet.c pet.h map.h clif.h chrif.h intif.h pc.h itemdb.h battle.h mob.h npc.h script.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
 
 clean:
-	rm -f *.o ../../bin/map-server
+	rm -f *.o
+ifeq ($(findstring CYGWIN,$(shell uname)), CYGWIN)
+		rm -f ../../bin/map-server.exe
+else
+		rm -f ../../bin/map-server
+endif

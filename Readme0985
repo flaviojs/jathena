@@ -1,4 +1,23 @@
 --------------------
+//1011 by パイン
+・パーティ要請やギルド要請を出しているときに他の要請を拒否る処理を追加
+　battle_athena.confで切り替えが出来るようになっています。
+・make clean で事が足りるので、objectdel.batを消去
+
+	(map)
+	clif.c
+		clif_party_invite()変更(nullpoの文言違ってました)
+	guild.c
+		guild_invite()変更
+	party.c
+		party_invite()変更
+	battle.c
+		battle_config_read()変更
+	battle.h変更
+	trade.c
+		trade_traderequest()変更
+
+--------------------
 //1010 by (凸)
 ・gcc 2.95対策
 ・スパノビの1度死ぬまでAll+10をスクリプト変数で実装してみる試み

@@ -9,4 +9,9 @@ login.o: login.c login.h md5calc.h $(COMMON_H)
 md5calc.o: md5calc.c md5calc.h
 
 clean:
-	rm -f *.o ../../bin/login-server
+	rm -f *.o
+ifeq ($(findstring CYGWIN,$(shell uname)), CYGWIN)
+		rm -f ../../bin/login-server.exe
+else
+		rm -f ../../bin/login-server
+endif

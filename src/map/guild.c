@@ -476,6 +476,12 @@ int guild_invite(struct map_session_data *sd,int account_id)
 
 	if(tsd==NULL || g==NULL)
 		return 0;
+	if(!battle_config.invite_request_check) {
+		if (tsd->party_invite>0 || tsd->trade_partner) {	// ‘Šè‚ªæˆø’†‚©‚Ç‚¤‚©
+			clif_guild_inviteack(sd,0);
+			return 0;
+		}
+	}
 	if( tsd->status.guild_id>0 || tsd->guild_invite>0 ){	// ‘Šè‚ÌŠ‘®Šm”F
 		clif_guild_inviteack(sd,0);
 		return 0;

@@ -5379,7 +5379,7 @@ int clif_party_invite(struct map_session_data *sd,struct map_session_data *tsd)
 	struct party *p;
 
 	if( sd == NULL || tsd == NULL ){
-		printf("clif_cart_itemlist nullpo\n");
+		printf("clif_party_invite nullpo\n");
 		return 0;
 	}
 
