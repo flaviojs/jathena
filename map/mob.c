@@ -627,9 +627,9 @@ int mob_stop_walking(struct mob_data *md,int type)
 	md->walkpath.path_len=0;
 	md->to_x=md->bl.x;
 	md->to_y=md->bl.y;
-	if(type != 2)
+	if(type&0x01)
 		clif_fixpos(&md->bl);
-	if(type == 1) {
+	if(type&0x02) {
 		mob_changestate(md,MS_DELAY);
 		md->timer=add_timer(gettick()+delay,mob_timer,md->bl.id,0);
 		md->state.state=MS_DELAY;
@@ -1147,7 +1147,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 				md->state.skillstate=MSS_ATTACK;
 
 				if(md->state.state==MS_WALK){	// •às’†‚È‚ç’âŽ~
-					mob_stop_walking(md,0);
+					mob_stop_walking(md,1);
 				}
 				if(md->state.state==MS_ATTACK)
 					return 0; // Šù‚ÉUŒ‚’†
@@ -1205,7 +1205,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 				if(md->state.state==MS_ATTACK)
 					return 0; // UŒ‚’†
 				if(md->state.state==MS_WALK){	// •às’†‚È‚ç’âŽ~
-					mob_stop_walking(md,0);
+					mob_stop_walking(md,1);
 				}
 				
 				fitem = (struct flooritem_data *)bl_item;
@@ -1452,7 +1452,7 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 	if(md->state.state==MS_WALK){
 //		mob_changestate(md,MS_IDLE);
 //		clif_fixpos(&md->bl);
-		mob_stop_walking(md,1);
+		mob_stop_walking(md,3);
 	}
 
 	if(md->hp>mob_db[md->class].max_hp)

@@ -2046,17 +2046,17 @@ int pc_walktoxy(struct map_session_data *sd,int x,int y)
  */
 int pc_stop_walking(struct map_session_data *sd,int type)
 {
-	if(sd->walktimer>0){
+	if(sd->walktimer != -1){
 		delete_timer(sd->walktimer,pc_walk);
 		sd->walktimer=-1;
 		sd->walkpath.path_len=0;
-		if(type != 2)
+		if(type&0x01)
 			clif_fixpos(&sd->bl);
 		if(sd->status.pet_id && sd->pet_npcdata) {
 			pet_stop_walking(sd,sd->dir);
 		}
 	}
-	if(type == 1)
+	if(type&0x02)
 		sd->canmove_tick = gettick() + sd->dmotion;
 
 	return 0;
@@ -2557,7 +2557,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		pc_setstand(sd);
 	// •à ‚¢‚Ä‚¢‚½‚ç‘«‚ðŽ~‚ß‚é
 	if(sd->sc_data[SC_ENDURE].timer == -1)
-		pc_stop_walking(sd,1);
+		pc_stop_walking(sd,3);
 
 	sd->status.hp-=damage;
 	if(sd->status.hp>0){

@@ -516,11 +516,13 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	if( flag&0xff00 )
 		type=(flag&0xff00)>>8;
 
+	if(dmg.damage + dmg.damage2 <= 0)
+		dmg.blewcount = 0;
+
 	if( dmg.blewcount ){	/* 吹き飛ばし処理とそのパケット */
+		skill_blown(dsrc,bl,dmg.blewcount);
 		clif_skill_damage2(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 			dmg.damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
-//		if(dmg.damage + dmg.damage2 > 0)
-//			skill_blown(dsrc,bl,dmg.blewcount);
 	} else			/* スキルのダメージパケット */
 		clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 			dmg.damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
@@ -1520,7 +1522,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 
 	case TF_BACKSLIDING:		/* バックステップ */
-		battle_stopwalking(src,0);
+		battle_stopwalking(src,1);
 		skill_blown(src,bl,5|0x10000);
 		clif_fixpos(src);
 		skill_addtimerskill(src,tick + 200,src->id,0,0,skillid,skilllv,0,flag);
@@ -2271,7 +2273,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 
 	case 0x90:	/* スキッドトラップ */
 		if(sg->val2==0){
-			battle_stopwalking(bl,0);
+			battle_stopwalking(bl,1);
 			skill_blown(&src->bl,bl,sg->skill_lv|0x30000);
 			sg->limit=DIFF_TICK(tick,sg->tick)+3000;
 			sg->val2=bl->id;
@@ -3341,7 +3343,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			return 0;
 		}
 		if(type==SC_STONE || type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
-			mob_stop_walking(md,0);
+			mob_stop_walking(md,1);
 	}else if(bl->type==BL_PC){
 		sd=(struct map_session_data *)bl;
 		
@@ -3352,7 +3354,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			}
 		}
 		if(type==SC_STONE || type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
-			pc_stop_walking(sd,0);
+			pc_stop_walking(sd,1);
 	}else{
 		printf("skill_status_change_start: neither MOB nor PC !\n");
 		return 0;

@@ -4561,7 +4561,7 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 		return;
 
 	// ステータス異常やハイディング中(トンネルドライブ無)で動けない
-	if(sd->opt1 || sd->sc_data[SC_ANKLE].timer!=-1 || (sd->status.option&2 && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0) )
+	if(sd->opt1 > 0 || sd->sc_data[SC_ANKLE].timer!=-1 || (sd->status.option&2 && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0) )
 		return;
 
 	pc_stopattack(sd);
