@@ -447,8 +447,8 @@
 1226,Damascus_,ダマスカス,4,49000,,800,118,,1,2,2055918,2,2,3,24,1,{},{}
 1227,Weeder_Knife,ウィーダーナイフ,4,20,,400,80,,1,0,2055918,2,2,4,36,1,{},{ bonus bIgnoreDefRace,3; bonus2 bAddRace,3,15; bonus2 bSubRace,3,15; }
 1228,Combat_Knife,コンバットナイフ,4,20,,400,80,,1,0,2055918,2,2,4,36,1,{},{ bonus bIgnoreDefRace,7; bonus2 bSubRace,7,10; bonus2 bSubRace,6,-10; }
-1229,Mama's_Knife,包丁,4,20,,500,75,,1,0,2055918,2,2,4,36,1,{},{ bonus bCritical,30; bonus2 bAddRace,7,3; }
-1230,House_Auger,錐,4,20,,600,80,,1,0,2055918,2,2,4,36,1,{},{ bonus bDefRatioAtk; }
+1229,Mama's_Knife,包丁,4,20,,500,75,,1,0,2055918,2,2,4,36,1,{},{ bonus bCritical,30; bonus2 bAddRace,7,3; bonus3 bAddMonsterDropItem,517,2,50; }
+1230,House_Auger,錐,4,20,,600,80,,1,0,2055918,2,2,4,36,1,{},{ bonus bDefRatioAtk,0; }
 1231,Bazerald,バゼラルド,4,20,,500,70,,1,0,2055918,2,2,4,36,1,{},{ bonus bAtkEle,3; bonus bInt,5; bonus bMatkRate,10; }
 1232,Assassin_Dagger,アサシンダガー,4,20,,600,140,,1,0,4096,2,2,4,36,1,{},{ bonus bMaxHPrate,20; bonus bMaxSPrate,15; bonus bAspdAddRate,2; }
 1233,Exercise,エキサーサイズ,4,20,,700,90,,1,0,2055918,2,2,4,36,1,{},{ bonus bIgnoreDefRace,6; bonus2 bSubRace,6,5; bonus2 bSubRace,7,-10; }
@@ -478,7 +478,7 @@
 1302,Axe_,アックス,4,500,,1200,35,,1,4,8803555,2,2,1,3,6,{},{}
 1303,Axe__,アックス,4,500,,1200,35,,1,0,8803555,2,2,1,3,6,{},{}
 1304,Orcish_Axe,オーキッシュアックス,4,20,,2000,60,,1,0,8803555,2,2,3,3,6,{},{}
-1305,Cleaver,クリーヴァー,4,20,,1200,140,,1,0,8668323,2,2,4,44,6,{},{ bonus2 bAddRace,7,5; }
+1305,Cleaver,クリーヴァー,4,20,,1200,140,,1,0,8668323,2,2,4,44,6,{},{ bonus2 bAddRace,7,5; bonus3 bAddMonsterDropItem,517,2,30; }
 1306,War_Axe,ウォーアクス,4,20,,4200,160,,1,1,263168,2,2,3,76,6,{},{ bonus bDex,2; bonus bLuk,2; }
 1351,Battle_Axe,バトルアックス,4,5400,,1800,75,,1,3,279714,2,34,1,3,7,{},{}
 1352,Battle_Axe_,バトルアックス,4,5400,,1800,75,,1,4,279714,2,34,1,3,7,{},{}
@@ -777,7 +777,7 @@
 2284,Antler,鹿の角,5,20,,500,,4,,0,2088958,2,256,,0,71,{},{}
 2285,Apple_Of_Archer,名射手のりんご,5,20,,200,,0,,0,2088958,2,256,,30,72,{},{ bonus bDex,3; }
 2286,Elven_Ears,妖精の耳,5,20,,100,,0,,0,2088958,2,512,,70,73,{},{}
-2287,Pirate_Bandana,海賊の頭巾,5,20,,100,,1,,0,2088958,2,256,,0,74,{},{ bonus bStr,1; }
+2287,Pirate_Bandana,海賊の頭巾,5,20,,100,,3,,0,2088958,2,256,,0,74,{},{ bonus bStr,1; }
 2288,Mr_Scream,スクラッチマスク,5,20,,100,,1,,0,2088958,2,513,,0,75,{},{}
 2289,Poo_Poo_Hat,あれ,5,20,,700,,0,,0,10477567,2,256,,0,76,{},{ bonus2 bSubRace,7,10; }
 2290,Funeral_Costume,葬式用の帽子,5,3000,,100,,1,,0,10477567,2,256,,0,77,{},{}
@@ -972,7 +972,7 @@
 4074,BigFoot_Card,ビックフットカード,6,20,,10,,,,,,,32,,,,{},{ bonus2 bSubRace,4,30; }
 4075,Argos_Card,アルゴスカード,6,20,,10,,,,,,,32,,,,{},{ bonus2 bResEff,Eff_Stone,20; bonus bDef,1; }
 4076,Magnolia_Card,白蓮玉カード,6,20,,10,,,,,,,2,,,,{},{ bonus2 bAddEff,Eff_Curse,5; bonus bBaseAtk,5; }
-4077,Phen_Card,フェンカード,6,20,,10,,,,,,,136,,,,{},{ bonus bNoCastCancel; bonus bCastrate,25; }
+4077,Phen_Card,フェンカード,6,20,,10,,,,,,,136,,,,{},{ bonus bNoCastCancel,0; bonus bCastrate,25; }
 4078,Savage_Card,サベージカード,6,20,,10,,,,,,,16,,,,{},{ bonus bVit,3; }
 4079,Mantis_Card,マンティスカード,6,20,,10,,,,,,,136,,,,{},{ bonus bStr,3; }
 4080,Flora_Card,フローラカード,6,20,,10,,,,,,,2,,,,{},{ bonus2 bAddRace,5,20; }
@@ -1018,28 +1018,28 @@
 4120,Petit__Card,プティットカード,6,20,,10,,,,,,,32,,,,{},{ bonus2 bSubRace,9,30; }
 4121,Phreeoni_Card,フリオニカード,6,20,,10,,,,,,,2,,,,{},{ bonus bHit,100; }
 4122,Deviruchi_Card,デビルチカード,6,20,,10,,,,,,,769,,,,{},{ bonus bStr,1; bonus2 bResEff,Eff_Blind,100;  }
-4123,Eddga_Card,エドガカード,6,20,,10,,,,,,,64,,,,{},{ bonus bMaxHPrate,-25; }
+4123,Eddga_Card,エドガカード,6,20,,10,,,,,,,64,,,,{},{ bonus bInfiniteEndure,0; bonus bMaxHPrate,-25; }
 4124,Medusa_Card,メドゥーサカード,6,20,,10,,,,,,,32,,,,{},{ bonus2 bSubRace,6,15; bonus2 bResEff,Eff_Stone,100; }
 4125,Deviace_Card,デビアスカード,6,20,,10,,,,,,,2,,,,{},{ bonus2 bAddRace,7,7; bonus2 bAddRace,2,7; bonus2 bAddRace,3,7; bonus2 bAddRace,4,7; }
 4126,Minorous_Card,ミノタウロスカード,6,20,,10,,,,,,,2,,,,{},{ bonus2 bAddSize,2,15; bonus bBaseAtk,5; }
 4127,Nightmare_Card,ナイトメアカード,6,20,,10,,,,,,,769,,,,{},{ bonus2 bResEff,Eff_Sleep,100; bonus bAgi,1; }
-4128,Golden_Bug_Card,黄金蟲カード,6,20,,10,,,,,,,32,,,,{},{ bonus bNoMagicDamage; bonus bUseSPrate,100; }
+4128,Golden_Bug_Card,黄金蟲カード,6,20,,10,,,,,,,32,,,,{},{ bonus bNoMagicDamage,0; bonus bUseSPrate,100; }
 4129,Baphomet__Card,バフォメットジュニアカード,6,20,,10,,,,,,,4,,,,{},{ bonus bAgi,3; bonus bCritical,1; }
 4130,Scorpion_King_Card,スコーピオンキングカード,6,20,,10,,,,,,,2,,,,{},{ bonus2 bAddEle,9,20; }
 4131,Moonlight_Flower_Card,月夜花カード,6,20,,10,,,,,,,64,,,,{},{ bonus bSpeedAddRate,25; }
-4132,Mistress_Card,ミストレスカード,6,20,,10,,,,,,,769,,,,{},{ bonus bNoGemStone; bonus bUseSPrate,25; }
+4132,Mistress_Card,ミストレスカード,6,20,,10,,,,,,,769,,,,{},{ bonus bNoGemStone,0; bonus bUseSPrate,25; }
 4133,Daydric_Card,レイドリックカード,6,20,,10,,,,,,,4,,,,{},{ bonus2 bSubEle,0,20; }
 4134,Dracula_Card,ドラキュラカード,6,20,,10,,,,,,,2,,,,{},{}
 4135,Orc_Load_Card,オークロードカード,6,20,,10,,,,,,,16,,,,{},{}
 4136,Khalitzburg_Card,カーリッツバーグカード,6,20,,10,,,,,,,32,,,,{},{ bonus2 bSubRace,6,30; }
-4137,Drake_Card,ドレイクカード,6,20,,10,,,,,,,2,,,,{},{ bonus bNoSizeFix; }
+4137,Drake_Card,ドレイクカード,6,20,,10,,,,,,,2,,,,{},{ bonus bNoSizeFix,0; }
 4138,Anubis_Card,アヌビスカード,6,20,,10,,,,,,,32,,,,{},{ bonus2 bSubRace,8,30; }
 4139,Joker_Card,ジョーカーカード,6,20,,10,,,,,,,136,,,,{},{ skill 50,1; }
 4140,Knight_Of_Abyss_Card,深淵の騎士カード,6,20,,10,,,,,,,2,,,,{},{ bonus2 bAddRace,10,25; }
 4141,Evil_Druid_Card,イビルドルイドカード,6,20,,10,,,,,,,16,,,,{},{ bonus bDefEle,9; bonus bInt,1; bonus bDef,1; }
 4142,Doppelganger_Card,ドッペルゲンガーカード,6,20,,10,,,,,,,2,,,,{},{ bonus bAspdAddRate,30; }
 4143,Orc_Hero_Card,オークヒーローカード,6,20,,10,,,,,,,769,,,,{},{ bonus bVit,3; bonus2 bResEff,Eff_Stan,100; }
-4144,Osiris_Card,オシリスカード,6,20,,10,,,,,,,136,,,,{},{ bonus bRestartFullRecover; }
+4144,Osiris_Card,オシリスカード,6,20,,10,,,,,,,136,,,,{},{ bonus bRestartFullRecover,0; }
 4145,Berzebub_Card,ヴェルゼブブカード,6,20,,10,,,,,,,136,,,,{},{ bonus bCastrate,-30; }
 4146,Maya_Card,マヤーカード,6,20,,10,,,,,,,32,,,,{},{}
 4147,Baphomet_Card,バフォメットカード,6,20,,10,,,,,,,2,,,,{},{ bonus bHit,-10; }
