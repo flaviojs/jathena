@@ -4,7 +4,7 @@ COMMON_OBJ = ../common/core.o ../common/socket.o ../common/timer.o ../common/grf
 LIBS = -lz -lm
 
 map-server: map.o chrif.o clif.o pc.o npc.o chat.o path.o itemdb.o mob.o script.o storage.o skill.o atcommand.o battle.o intif.o trade.o party.o vending.o guild.o pet.o $(COMMON_OBJ)
-	$(CC) -o ../$@ $> $(LIBS)
+	$(CC) -o ../../bin/$@ $> $(LIBS)
 
 map.o: map.c map.h chrif.h clif.h npc.h pc.h mob.h chat.h skill.h itemdb.h storage.h party.h pet.h atcommand.h ../common/core.h ../common/timer.h ../common/db.h ../common/grfio.h ../common/mmo.h
 chrif.o: chrif.c map.h battle.h chrif.h clif.h intif.h pc.h npc.h ../common/socket.h ../common/timer.h ../common/mmo.h
@@ -28,4 +28,4 @@ guild.o: guild.c guild.h storage.h battle.h clif.h intif.h pc.h npc.h map.h ../c
 pet.o:pet.c pet.h map.h clif.h chrif.h intif.h pc.h itemdb.h battle.h mob.h npc.h script.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
 
 clean:
-	rm -f *.o ../map-server
+	rm -f *.o ../../bin/map-server

@@ -3541,16 +3541,12 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		}
 
 		if (wd.div_ == 255 && src->type == BL_PC)	{ //三段掌
-			int delay = 300,skilllv;
+			int delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
+			int skilllv;
 			if(wd.damage+wd.damage2 < battle_get_hp(target)) {
-				delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
-				if(delay < sd->aspd*2) delay = sd->aspd*2;
-				if(battle_config.combo_delay_rate != 100)
-					delay = delay * battle_config.combo_delay_rate /100;
 				if((skilllv = pc_checkskill(sd, MO_CHAINCOMBO)) > 0)
-					delay += 300;
-				else
-					delay = 300;
+					delay += 300 * battle_config.combo_delay_rate /100; //追加ディレイをconfにより調整
+
 				skill_status_change_start(src,SC_COMBO,MO_TRIPLEATTACK,skilllv,0,0,delay,0);
 			}
 			sd->attackabletime = sd->canmove_tick = tick + delay;
@@ -3912,7 +3908,7 @@ int battle_config_read(const char *cfgName)
 	if( (count++)==0 ){
 
 		battle_config.warp_point_debug=0;
-		battle_config.enemy_critical=1;
+		battle_config.enemy_critical=0;
 		battle_config.enemy_critical_rate=100;
 		battle_config.enemy_str=1;
 		battle_config.enemy_perfect_flee=0;
@@ -4052,6 +4048,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.pet_lootitem = 1;
 		battle_config.pet_weight = 1000;
 		battle_config.show_steal_in_same_party = 0;
+		battle_config.enable_upper_class = 0;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4204,7 +4201,8 @@ int battle_config_read(const char *cfgName)
 			{ "vending_max_value", 			&battle_config.vending_max_value		},
 			{ "pet_lootitem", 				&battle_config.pet_lootitem				},
 			{ "pet_weight", 				&battle_config.pet_weight				},
-			{ "show_steal_in_same_party", 			&battle_config.show_steal_in_same_party		},
+			{ "show_steal_in_same_party", 	&battle_config.show_steal_in_same_party	},
+			{ "enable_upper_class", 		&battle_config.enable_upper_class		},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

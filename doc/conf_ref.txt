@@ -438,7 +438,7 @@ warp_point_debug
 enemy_critical
 	プレイヤーと同じLUKによるクリティカル判定をMOBとペットに有効にするかどうかです。
 	このクリティカルはもちろん必中なので、onにすると高Fleeでも、
-	LUKの高い敵の攻撃が避けづらくなります。デフォルトはyesです。
+	LUKの高い敵の攻撃が避けづらくなります。デフォルトはnoです。
 
 enemy_critical_rate
 	モンスターとペットのクリティカル頻度の百分率です。enemy_criticalがyesじゃないと設定しても何の意味もありません。デフォルトは100です。
@@ -1072,13 +1072,17 @@ show_steal_in_same_party
 	スティールしたアイテムの情報を公開するかどうかです。
 	デフォルトはnoです。
 
+enable_upper_class
+	転生、養子職を有効にするかどうかです。
+	デフォルトはnoです。
+
 import
 	その行を別ファイルの中身と置き換えます。
 
 < 例 >
 
 warp_point_debug: no
-enemy_critical: yes
+enemy_critical: no
 enemy_critical_rate: 100
 enemy_perfect_flee: no
 casting_rate: 100
@@ -1214,6 +1218,7 @@ mob_warpportal: no
 dead_branch_active: no
 vending_max_value: 10000000
 show_steal_in_same_party: no
+enable_upper_class: no
 
 ==========================================================================
 6. atcommand_athena.conf

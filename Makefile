@@ -20,17 +20,17 @@ CFLAGS = -g -O2 -Wall -I../common $(PACKETDEF) $(OS_TYPE)
 MKDEF = CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 
-all clean: common/GNUmakefile login/GNUmakefile char/GNUmakefile map/GNUmakefile
-	cd common ; make $(MKDEF) $@ ; cd ..
-	cd login ; make $(MKDEF) $@ ; cd ..
-	cd char ; make $(MKDEF) $@ ; cd ..
-	cd map ; make $(MKDEF) $@ ; cd ..
+all clean: src/common/GNUmakefile src/login/GNUmakefile src/char/GNUmakefile src/map/GNUmakefile
+	cd src ; cd common ; make $(MKDEF) $@ ; cd ..
+	cd src ; cd login ; make $(MKDEF) $@ ; cd ..
+	cd src ; cd char ; make $(MKDEF) $@ ; cd ..
+	cd src ; cd map ; make $(MKDEF) $@ ; cd ..
 
-common/GNUmakefile: common/Makefile
-	sed -e 's/$$>/$$^/' common/Makefile > common/GNUmakefile
-login/GNUmakefile: login/Makefile
-	sed -e 's/$$>/$$^/' login/Makefile > login/GNUmakefile
-char/GNUmakefile: char/Makefile
-	sed -e 's/$$>/$$^/' char/Makefile > char/GNUmakefile
-map/GNUmakefile: map/Makefile
-	sed -e 's/$$>/$$^/' map/Makefile > map/GNUmakefile
+src/common/GNUmakefile: src/common/Makefile
+	sed -e 's/$$>/$$^/' src/common/Makefile > src/common/GNUmakefile
+src/login/GNUmakefile: src/login/Makefile
+	sed -e 's/$$>/$$^/' src/login/Makefile > src/login/GNUmakefile
+src/char/GNUmakefile: src/char/Makefile
+	sed -e 's/$$>/$$^/' src/char/Makefile > src/char/GNUmakefile
+src/map/GNUmakefile: src/map/Makefile
+	sed -e 's/$$>/$$^/' src/map/Makefile > src/map/GNUmakefile

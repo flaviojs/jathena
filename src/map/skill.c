@@ -695,126 +695,124 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	int type,lv,damage;
 
 	rdamage = 0;
-	if(src == NULL || dsrc == NULL || bl == NULL)
+//何もしない判定ここから
+	if(src == NULL || dsrc == NULL || bl == NULL) //指定されていなければ何もしない
 		return 0;
-	if(dsrc->m != bl->m) return 0;
-	if(src->prev == NULL || dsrc->prev == NULL || bl->prev == NULL)
+	if(dsrc->m != bl->m) //対象が同じマップにいなければ何もしない
 		return 0;
-	if(src->type == BL_PC && pc_isdead((struct map_session_data *)src))
+	if(src->prev == NULL || dsrc->prev == NULL || bl->prev == NULL) //prevよくわからない※
 		return 0;
-	if(dsrc->type == BL_PC && pc_isdead((struct map_session_data *)dsrc))
+	if(src->type == BL_PC && pc_isdead((struct map_session_data *)src)) //術者？がPCですでに死んでいたら何もしない
 		return 0;
-	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
+	if(dsrc->type == BL_PC && pc_isdead((struct map_session_data *)dsrc)) //術者？がPCですでに死んでいたら何もしない
 		return 0;
-
-	if(sc_data && sc_data[SC_HIDING].timer != -1) {
-		if(skill_get_pl(skillid) != 2)
+	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl)) //対象がPCですでに死んでいたら何もしない
+		return 0;
+	if(sc_data && sc_data[SC_HIDING].timer != -1) { //ハイディング状態で
+		if(skill_get_pl(skillid) != 2) //スキルの属性が地属性でなければ何もしない
 			return 0;
 	}
-
-	if(sc_data && sc_data[SC_TRICKDEAD].timer != -1)
+	if(sc_data && sc_data[SC_TRICKDEAD].timer != -1) //死んだふり中は何もしない
 		return 0;
-
-	if(skillid == WZ_STORMGUST) {
-		struct status_change *sc_data = battle_get_sc_data(bl);
-		if(sc_data && sc_data[SC_FREEZE].timer != -1)
+	if(skillid == WZ_STORMGUST) { //使用スキルがストームガストで
+		struct status_change *sc_data = battle_get_sc_data(bl); //最初に呼んでるのと違うの？※
+		if(sc_data && sc_data[SC_FREEZE].timer != -1) //凍結状態なら何もしない
 			return 0;
 	}
-	if(skillid == WZ_FROSTNOVA && dsrc->x == bl->x && dsrc->y == bl->y)
+	if(skillid == WZ_FROSTNOVA && dsrc->x == bl->x && dsrc->y == bl->y) //使用スキルがフロストノヴァで、dsrcとblが同じ場所なら何もしない
 		return 0;
+//何もしない判定ここまで
 
 	type=-1;
 	lv=(flag>>20)&0xf;
-	dmg=battle_calc_attack(attack_type,src,bl,skillid,skilllv,flag&0xff );
+	dmg=battle_calc_attack(attack_type,src,bl,skillid,skilllv,flag&0xff ); //ダメージ計算
 
-	if(attack_type&BF_MAGIC && sc_data && sc_data[SC_MAGICROD].timer != -1 && src == dsrc) {
-		dmg.damage = dmg.damage2 = 0;
-		if(bl->type == BL_PC) {
-			int sp = skill_get_sp(skillid,skilllv);
-			sp = sp * sc_data[SC_MAGICROD].val2 / 100;
-			if(skillid == WZ_WATERBALL && skilllv > 1)
-				sp = sp/((skilllv|1)*(skilllv|1));
-			if(sp > 0x7fff) sp = 0x7fff;
-			else if(sp < 1) sp = 1;
-			if(((struct map_session_data *)bl)->status.sp + sp > ((struct map_session_data *)bl)->status.max_sp) {
-				sp = ((struct map_session_data *)bl)->status.max_sp - ((struct map_session_data *)bl)->status.sp;
-				((struct map_session_data *)bl)->status.sp = ((struct map_session_data *)bl)->status.max_sp;
+//マジックロッド処理ここから
+	if(attack_type&BF_MAGIC && sc_data && sc_data[SC_MAGICROD].timer != -1 && src == dsrc) { //魔法攻撃でマジックロッド状態でsrc=dsrcなら
+		dmg.damage = dmg.damage2 = 0; //ダメージ0
+		if(bl->type == BL_PC) { //対象がPCの場合
+			int sp = skill_get_sp(skillid,skilllv); //使用されたスキルのSPを吸収
+			sp = sp * sc_data[SC_MAGICROD].val2 / 100; //吸収率計算
+			if(skillid == WZ_WATERBALL && skilllv > 1) //ウォーターボールLv1以上
+				sp = sp/((skilllv|1)*(skilllv|1)); //さらに計算？
+			if(sp > 0x7fff) sp = 0x7fff; //SP多すぎの場合は理論最大値
+			else if(sp < 1) sp = 1; //1以下の場合は1
+			if(((struct map_session_data *)bl)->status.sp + sp > ((struct map_session_data *)bl)->status.max_sp) { //回復SP+現在のSPがMSPより大きい場合
+				sp = ((struct map_session_data *)bl)->status.max_sp - ((struct map_session_data *)bl)->status.sp; //SPをMSP-現在SPにする
+				((struct map_session_data *)bl)->status.sp = ((struct map_session_data *)bl)->status.max_sp; //現在のSPにMSPを代入
 			}
-			else
+			else //回復SP+現在のSPがMSPより小さい場合は回復SPを加算
 				((struct map_session_data *)bl)->status.sp += sp;
-			clif_heal(((struct map_session_data *)bl)->fd,SP_SP,sp);
-			((struct map_session_data *)bl)->canact_tick = tick + skill_delayfix(bl, skill_get_delay(SA_MAGICROD,sc_data[SC_MAGICROD].val1));
+			clif_heal(((struct map_session_data *)bl)->fd,SP_SP,sp); //SP回復エフェクトの表示
+			((struct map_session_data *)bl)->canact_tick = tick + skill_delayfix(bl, skill_get_delay(SA_MAGICROD,sc_data[SC_MAGICROD].val1)); //
 		}
-		clif_skill_nodamage(bl,bl,SA_MAGICROD,sc_data[SC_MAGICROD].val1,1);
+		clif_skill_nodamage(bl,bl,SA_MAGICROD,sc_data[SC_MAGICROD].val1,1); //マジックロッドエフェクトを表示
 	}
+//マジックロッド処理ここまで
 
 	damage = dmg.damage + dmg.damage2;
 
-	if(lv==15)lv=-1;
+	if(lv==15)
+		lv=-1;
 
 	if( flag&0xff00 )
 		type=(flag&0xff00)>>8;
 
-	if(damage <= 0 || damage < dmg.div_)
+	if(damage <= 0 || damage < dmg.div_) //吹き飛ばし判定？※
 		dmg.blewcount = 0;
 
-	if(skillid == CR_GRANDCROSS && src == bl)
+	if(skillid == CR_GRANDCROSS && src == bl) //グランドクロスで使用者と対象が同じ場合？※
 		dsrc = src;
 
+//使用者がPCの場合の処理ここから
 	if(src->type == BL_PC) {
 		struct map_session_data *sd = (struct map_session_data *)src;
+//連打掌(MO_CHAINCOMBO)ここから
 		if(skillid == MO_CHAINCOMBO) {
-			int delay = 300;
-			if(damage < battle_get_hp(bl)) {
-				delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
-				if(delay < sd->aspd*2) delay = sd->aspd*2;
-				if(battle_config.combo_delay_rate != 100)
-					delay = delay * battle_config.combo_delay_rate /100;
-				if(pc_checkskill(sd, MO_COMBOFINISH) > 0)
-					delay += 300;
-				else
-					delay = 300;
-				skill_status_change_start(src,SC_COMBO,MO_CHAINCOMBO,skilllv,0,0,delay,0);
+			int delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src); //基本ディレイの計算
+			if(damage < battle_get_hp(bl)) { //ダメージが対象のHPより小さい場合
+				if(pc_checkskill(sd, MO_COMBOFINISH) > 0 && sd->spiritball >= 0) //猛龍拳(MO_COMBOFINISH)取得＆気球保持時は+300ms
+					delay += 300 * battle_config.combo_delay_rate /100; //追加ディレイをconfにより調整
+
+				skill_status_change_start(src,SC_COMBO,MO_CHAINCOMBO,skilllv,0,0,delay,0); //コンボ状態に
 			}
 			sd->attackabletime = sd->canmove_tick = tick + delay;
-			clif_combo_delay(src,delay);
+			clif_combo_delay(src,delay); //コンボディレイパケットの送信
 		}
+//連打掌(MO_CHAINCOMBO)ここまで
+//猛龍拳(MO_COMBOFINISH)ここから
 		else if(skillid == MO_COMBOFINISH) {
-			int delay = 300;
+			int delay = 700 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
 			if(damage < battle_get_hp(bl)) {
-				delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
-				if(delay < sd->aspd*2) delay = sd->aspd*2;
-				if(battle_config.combo_delay_rate != 100)
-					delay = delay * battle_config.combo_delay_rate /100;
-				if(pc_checkskill(sd, MO_EXTREMITYFIST) > 0 && sd->spiritball >= 4 && sd->sc_data[SC_EXPLOSIONSPIRITS].timer != -1)
-					delay += 300;
-				else
-					delay = 300;
-				skill_status_change_start(src,SC_COMBO,MO_COMBOFINISH,skilllv,0,0,delay,0);
+				if(pc_checkskill(sd, MO_EXTREMITYFIST) > 0 && sd->spiritball >= 4 && sd->sc_data[SC_EXPLOSIONSPIRITS].timer != -1) //阿修羅覇凰拳(MO_EXTREMITYFIST)取得＆気球4個保持＆爆裂波動(MO_EXPLOSIONSPIRITS)状態時は+300ms
+					delay += 300 * battle_config.combo_delay_rate /100; //追加ディレイをconfにより調整
+
+				skill_status_change_start(src,SC_COMBO,MO_COMBOFINISH,skilllv,0,0,delay,0); //コンボ状態に
 			}
 			sd->attackabletime = sd->canmove_tick = tick + delay;
-			clif_combo_delay(src,delay);
+			clif_combo_delay(src,delay); //コンボディレイパケットの送信
 		}
 	}
-
-	if(attack_type&BF_WEAPON && damage > 0 && src != bl && src == dsrc) {
-		if(dmg.flag&BF_SHORT) {
-			if(bl->type == BL_PC) {
+//猛龍拳(MO_COMBOFINISH)ここまで
+//武器スキル？ここから
+	if(attack_type&BF_WEAPON && damage > 0 && src != bl && src == dsrc) { //武器スキル＆ダメージあり＆使用者と対象者が違う＆src=dsrc
+		if(dmg.flag&BF_SHORT) { //近距離攻撃時？※
+			if(bl->type == BL_PC) { //対象がPCの時
 				struct map_session_data *tsd = (struct map_session_data *)bl;
-				if(tsd->short_weapon_damage_return > 0) {
+				if(tsd->short_weapon_damage_return > 0) { //近距離攻撃跳ね返し？※
 					rdamage += damage * tsd->short_weapon_damage_return / 100;
 					if(rdamage < 1) rdamage = 1;
 				}
 			}
-			if(sc_data && sc_data[SC_REFLECTSHIELD].timer != -1) {
-				rdamage += damage * sc_data[SC_REFLECTSHIELD].val2 / 100;
+			if(sc_data && sc_data[SC_REFLECTSHIELD].timer != -1) { //リフレクトシールド時
+				rdamage += damage * sc_data[SC_REFLECTSHIELD].val2 / 100; //跳ね返し計算
 				if(rdamage < 1) rdamage = 1;
 			}
 		}
-		else if(dmg.flag&BF_LONG) {
-			if(bl->type == BL_PC) {
+		else if(dmg.flag&BF_LONG) { //遠距離攻撃時？※
+			if(bl->type == BL_PC) { //対象がPCの時
 				struct map_session_data *tsd = (struct map_session_data *)bl;
-				if(tsd->long_weapon_damage_return > 0) {
+				if(tsd->long_weapon_damage_return > 0) { //遠距離攻撃跳ね返し？※
 					rdamage += damage * tsd->long_weapon_damage_return / 100;
 					if(rdamage < 1) rdamage = 1;
 				}

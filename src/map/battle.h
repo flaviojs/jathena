@@ -257,6 +257,7 @@ extern struct Battle_Config {
 	int pet_lootitem;
 	int pet_weight;
 	int show_steal_in_same_party;
+	int enable_upper_class;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

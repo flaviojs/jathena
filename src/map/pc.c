@@ -780,8 +780,12 @@ int pc_calc_skilltree(struct map_session_data *sd)
 			sd->status.skill[i].id=i;
 		for(i=210;i<291;i++)
 			sd->status.skill[i].id=i;
-		for(i=304;i<MAX_SKILL;i++)
+		for(i=304;i<337;i++)
 			sd->status.skill[i].id=i;
+		if(battle_config.enable_upper_class){ //conf‚Å–³Œø‚Å‚È‚¯‚ê‚Î“Ç‚İ‚Ş
+			for(i=355;i<MAX_SKILL;i++)
+				sd->status.skill[i].id=i;
+		}
 	}else{
 		// ’Êí‚ÌŒvZ
 		do{
@@ -3384,6 +3388,10 @@ struct pc_base_job pc_calc_base_job(int b_class)
 		bj.upper = 2;
 	}
 
+	if(battle_config.enable_upper_class==0){ //conf‚Å–³Œø‚É‚È‚Á‚Ä‚¢‚½‚çupper=0
+		bj.upper = 0;
+	}
+
 	if(bj.job == 0){
 		bj.type = 0;
 	}else if(bj.job < 7){
@@ -4402,6 +4410,10 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
 
+	if(battle_config.enable_upper_class==0){ //conf‚Å–³Œø‚É‚È‚Á‚Ä‚¢‚½‚çupper=0
+		upper = 0;
+	}
+	
 	if(upper < 0) //Œ»İ“]¶‚©‚Ç‚¤‚©‚ğ”»’f‚·‚é
 		upper = s_class.upper;
 
@@ -4423,6 +4435,7 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 	   (sd->status.sex == 1 && job == 20) ||
 	   job ==22 || sd->status.class == b_class) //Š‚Íƒo[ƒh‚É‚È‚ê‚È‚¢A‰‚Íƒ_ƒ“ƒT[‚É‚È‚ê‚È‚¢AŒ‹¥ˆßÖ‚à‚¨’f‚è
 		return 1;
+
 
 	sd->status.class = sd->view_class = b_class;
 	clif_changelook(&sd->bl,LOOK_BASE,sd->view_class);
@@ -5813,6 +5826,9 @@ int pc_readdb(void)
 		if(j<14)
 			continue;
 		upper=atoi(split[0]);
+		if(upper>0 && battle_config.enable_upper_class==0){ //conf‚Å–³Œø‚É‚È‚Á‚Ä‚¢‚½‚ç
+			continue;
+		}
 		i=atoi(split[1]);
 		for(j=0;skill_tree[upper][i][j].id;j++);
 		skill_tree[upper][i][j].id=atoi(split[2]);

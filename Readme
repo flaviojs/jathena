@@ -1,4 +1,412 @@
 --------------------
+//0965 by ぴざまん
+・@mapexit実行時全セッションをkickするように変更。
+・白刃取り時に片方が倒れても、もう片方の白刃が解除されない問題修正。(未テスト)
+・スティール情報公開機能実装。(未テスト)
+　スティールに成功すると、何をスティールしたのか
+　画面内のPTメンバー全員に知らせる機能です。
+　battle_athena.confのshow_steal_in_same_partyで設定できます。
+　オリジナルアップデートの為、デフォルトはnoにしています。
+・イドゥンの林檎の回復効果実装。
+
+	(conf/)
+	battle_athena.confに項目追加。
+	(map/)
+	atcommand.c
+		atcommand_mapexit() 修正。
+	pc.c
+		pc_steal_item() 修正。
+		pc_show_steal() 追加。
+	skill.c
+		skill_unitsetting()、skill_unit_onplace() 修正。
+	battle.c
+		battle_config_read() 修正。
+	battle.h 修正。
+	(doc/)
+	conf_ref.txt 抜けてたのを色々追加。
+
+--------------------
+//0964 by (凸)
+
+・この前追加したskill_tree2.txtを廃止したので削除してください
+・skill_tree.txtのフォーマットを変更＆Kalenさんなどの情報を元に転生ツリーの見直し
+・それにともなってpc.cのファイル読み出し部分などを変更
+・Athena雑談スレッド part3 >>14 miyaさんの指摘があるまですっかり忘れていたatcommand_athena.confの修正を同梱
+
+	(conf/)
+	atcommand_athena.conf 修正
+	(db/)
+	skill_tree.txt 修正
+	skill_tree2.txt 廃止
+	(map/)
+	map.h PC_CLASS_BASE等追加
+	pc.c
+		pc_calc_skilltree() 修正
+		pc_allskillup() 修正
+		pc_readdb() 修正
+
+--------------------
+//0963 by (凸)
+
+・@jobchange2, @jobchange3廃止 @jobchangeに引数追加 @help参照
+	例: @jobchange2 10 → @jobchange 10 1
+・同様に@charjob2, @charjob3廃止 @charjobに引数追加 @help参照
+	例: @charjob2 10 ほげほげ → @charjob 10 1 ほげほげ
+・同様にスクリプトのjobchange2, jobchange3命令廃止 jobchangeに引数追加 script_ref.txt参照
+	例: jobchange2 10; → jobchange 10,1;
+・↑どれも追加された引数は省略可能です。なので、転生ノービスは現状のスクリプトで転生一次職に転職できます。
+	例:	Novice High → @jobchange 10 → Whitesmith
+		Novice → @jobchange 10 → Blacksmith
+・スクリプトから転生しているか判定するためにUpperを追加しました。Upper 0=通常, 1=転生, 2=養子
+	Upper=0の時にBaseLevel=99なら転生させる～とかそういうスクリプト誰か書いてください
+	その時に元の職業は記憶していないので永続変数とかで覚えさせて判定させないと転生後何にでも転職できちゃう？
+・バイオプラントとスフィアマインで呼び出されるMobの名前を--ja--にしてmob_db.txtから読むようにした
+
+	(conf/)
+	help.txt 修正
+	(db/)
+	const.txt
+	(doc/)
+	help.txt 修正
+	script_ref.txt 修正
+	(map/)
+	atcommand.c
+		atcommand_jobchange() 修正
+		atcommand_jobchange2() 削除
+		atcommand_jobchange3() 削除
+		atcommand_character_job() 修正
+		atcommand_character_job2() 削除
+		atcommand_character_job3() 削除
+	map.h 修正
+	pc.c
+		pc_readparam() 修正
+		pc_jobchange() 修正
+	pc.h 修正
+	script.c
+		buildin_jobchange() 修正
+		buildin_jobchange2() 削除
+		buildin_jobchange3() 削除
+	skill.c
+		skill_castend_pos2() 修正
+
+--------------------
+//0962 by (凸)
+
+・職業は0～23で処理したいので転生職用のスキルツリー追加、eAthenaを参考に拡張
+	っていうか韓国本サーバでの実装の資料が見当たらないので適当
+・sakexe.exeを解析してskill_db.txt変更、これもeAthenaを参考に拡張
+	どれが本サーバで実装されているスキルか分かりませんっ！！
+※スキルツリーが表示されたからといって使えるわけじゃありませんっ！！
+
+	(common/)
+	mmo.h 定数修正
+	(db/)
+	skill_db.txt 変更
+	skill_require_db.txt 変更
+	skill_tree2.txt 追加
+	(map/)
+	skill.h 定数修正
+	pc.c
+		pc_calcstatus() 修正
+		pc_allskillup() 修正
+		pc_calc_skilltree() 修正
+		pc_readdb() 修正
+	
+--------------------
+//0961 by 胡蝶蘭
+
+・スクリプトにサブルーチン/ユーザー定義関数機能追加
+	詳しくはサンプルとscript_ref.txtを読んでください。
+	地味に大改造なので、スクリプト関係でバグがあるかもしれません。
+	
+	(map/)
+	map.h/map.c
+		struct map_session_data にスクリプト情報退避用のメンバ追加
+		map_quit()修正
+	script.h/script.c
+		色々修正(run_script(),run_func()が主)
+	npc.c
+		npc_parse_function()追加他
+	(conf/sample)
+	npc_test_func.txt
+		ユーザー定義関数/サブルーティンのテストスクリプト
+	(doc/)
+	script_ref.txt
+		サブルーティンなどの説明追加
+
+--------------------
+//0960 by (凸)
+・本鯖相違スレッド part2 >>62 KKさんのアンクルスネア修正を同梱
+・バグ報告スレッド part5 >>14-16 rbさんのバグ修正を同梱
+・For English User Forum >>15 Mugendaiさんの指摘で0x1d7を使うのはVal>255に修正(0xc3のValは1バイトだから0x1d7を使うのかと納得)
+・pc_calc_base_job()を変更して元jobだけでなくノビか一次職か二次職(type)、通常か転生か養子(upper)を返すようにした
+
+	(map/)
+	atcommand.c
+		atcommand_joblevelup() 修正
+		atcommand_character_joblevel() 修正
+	clif.c
+		clif_changelook() 修正
+	pc.h 修正
+	pc.c
+		pc_setrestartvalue() 修正
+		pc_equippoint() 修正
+		pc_isequip() 修正
+		pc_calc_skilltree() 修正
+		pc_calcstatus() 修正
+		pc_isUseitem() 修正
+		pc_calc_base_job() 修正
+		pc_allskillup() 修正
+		pc_damage() 修正
+		pc_jobchange() 修正
+		pc_equipitem() 修正
+	script.c
+		buildin_changesex() 修正
+	skill.c
+		skill_castend_nodamage_id() 修正
+		skill_unit_onplace() 修正
+		
+--------------------
+//0959 by (凸)
+・help.txtがdocじゃなくてconfのが読み出されてた＿|￣|○
+・gamejokeを参考に転生二次職のステータス加重値をjob_db2-2.txtに記述
+・スクリプトにjobchange2とjobchange3を追加それぞれ転生職と養子職へ転職させる命令です
+
+	(conf/)
+	help.txt 修正
+	(db/)
+	job_db2.txt 修正
+	job_db2-2.txt 追加
+	(doc/)
+	help.txt 修正
+	script_ref.txt 修正
+	(map/)
+	pc.c
+		pc_calcstatus() 修正
+		pc_readdb() 修正
+	script.c
+		buildin_jobchange() 修正
+		buildin_jobchange2() 追加
+		buildin_jobchange3() 追加
+
+--------------------
+//0958 by (凸)
+・転生職方面の実装を色々
+・重量制限は良く分からないので元の職業の値をそのまま使っています(モンク＝チャンピオン等)
+・装備品も同上、HPやSPのテーブルも同上なので、転生してもHPなどが増えないガッカリ仕様です
+
+	(map/)
+	atcommand.c
+		atcommand_joblevelup() 修正
+		atcommand_character_joblevel() 修正
+	pc.c
+		pc_setrestartvalue() 修正
+		pc_equippoint() 修正
+		pc_isequip() 修正
+		pc_calcstatus() 修正
+		pc_isUseitem() 修正
+		pc_calc_base_job() 追加
+		pc_damage() 修正
+		pc_jobchange() 修正
+		pc_equipitem() 修正
+	pc.h 修正
+	script.c
+		buildin_changesex() 修正
+	skill.c
+		skill_castend_nodamage_id() 修正
+
+--------------------
+//0957 by (凸)
+・@charjob2と@charjob3を追加、関係としては@charjob⇔@jobchange、@charjob2⇔@jobchange2、(ry
+・@mapexitを追加、map-serverを落とすコマンドですatcommand_athena.confでは99設定にされてますので使用には十分注意してください。
+
+	(map/)
+	atcommand.c
+		atcommand_character_job2() 追加
+		atcommand_character_job3() 追加
+	atcommand.h 修正
+	(conf/)
+	atcommand_athena.conf 修正
+	(doc/)
+	help.txt 修正
+
+--------------------
+//0956 by (凸)
+・転生職仮実装(@jobchange2)、見た目と経験値テーブルだけです
+・養子職仮実装(@jobchange3)、見た目だけです現状では経験値は転生二次職と同じというマゾ仕様
+※上記2点は転生職が実装されているクライアントでなければ実行するとエラー落ちするので注意！！
+　その後直接セーブデータを弄らないとキャラセレにも行けなくなります！！
+・Athena雑談スレッド part2 >>149 稀枝さんの報告を元にガーディアンを修正
+・砦以外でガーディアンとかエンペリウムを殴るとmap-serverが落ちていたのも修正(未確認)
+・スパノビのJobテーブルはFor English User Forum >>13 kingboさんのデータを元に修正
+・転生職の経験値テーブルはOWNを参照してBase99の経験値は不明だったので適当に設定
+
+	(map/)
+	atcommand.c
+		atcommand_jobchange() 修正
+		atcommand_jobchange2() 追加
+		atcommand_jobchange3() 追加
+	atcommand.h 修正
+	clif.c
+		clif_changelook() 修正
+	pc.c
+		pc_nextbaseexp() 修正
+		pc_nextjobexp() 修正
+		pc_jobchange() 修正
+		pc_readdb() 修正
+	battle.c
+		battle_calc_damage() 修正
+		mob_can_reach() 修正
+
+--------------------
+//0955 by huge
+・ペットのルート機能。
+  ・仕様はmobのルートに近い感じですが、射程を短くしてます。
+  ・拾ったアイテムは、パフォーマンスをすると床に落とします。
+  ・卵に戻したり、ログオフしたときはPCの手元に入るようにしました。(重量超過はドロップ)
+  ・拾える個数はルートmob同様の10個ですが、11個目は拾いに行きません。
+  ・ルート権の問題から、アイテムにfirst_idが入っていて、それが飼い主以外だったら、何秒経とうと拾いません。(未確認)
+  ・それと、荷物持ちにされると可哀想なので、重量制限もつけました。これはconfで設定可能です。
+・atcommandで、@whereがうまく働いてなかったので修正(またウチだけかなぁ･･･）
+・@memoでmemoする時は、mapflagを無視するように。
+・スフィアマインの名前だけ修正。
+
+	(conf/)
+	battle_athena.conf
+		pet_lootitem,pet_weight 追加
+	(doc/)
+	conf_ref.txt 修正
+	(map/)
+	atcommand.c
+		atcommand_memo() 修正
+		atcommand_where() 修正
+	battle.c
+		battle_config_read() 修正
+	battle.h 修正
+	map.c
+		map_quit() 修正
+	map.h
+		pet_data{} 修正
+	pc.c
+		pc_memo() 修正
+	pet.c
+		pet_performance() 修正
+		pet_return_egg() 修正
+		pet_data_init() 修正
+		pet_ai_sub_hard() 修正
+		pet_lootitem_drop() 追加
+		pet_delay_item_drop2() 追加
+		pet_ai_sub_hard_lootsearch() 追加
+	pet.h 修正
+	skill.c
+		skill_castend_pos2() 修正
+
+--------------------
+//0954 by (凸)
+・object_del.batで各server.exeも削除するようにした
+・For English User Forum >>11 kingboさんの修正を取り込み
+・バグ報告スレッド part5 >>10 Sinさんの修正を取り込み
+・ついでに見かけたatcommand_character_joblevelの不具合を修正
+・@コマンドでジョブレベルを上げるときにスパノビはJob70まで対応(未確認)
+
+	(/)
+	object_del.bat 修正
+	(map/)
+	atcommand.c
+		atcommand_joblevelup() 修正
+		atcommand_character_joblevel() 修正
+		atcommand_character_baselevel() 修正
+
+	code by kingbo 2004/4/29 PM 06:15
+	base on 0953
+	now i sure it works well
+	(map/)
+	mob.c
+		mob_can_reach() fix
+
+--------------------
+//0953 by (凸)
+・mob_skill_db.txtの条件値に0以外入っていなかったのを訂正
+・gcc 2.95でコンパイルできるように訂正(by バグスレpart5 >>2 茜さん)
+・↑やLinuxなどを考慮してstartやMakefileなどの改行をLFに変更
+・0952で出たコンパイル警告を出ないように修正
+・0952で更新されなかったconf_ref.txtを修正
+
+	(/)
+	start 改行コード変更
+	athena-start 改行コード変更
+	(db/)
+	mob_skill_db.txt 修正
+	(doc/)
+	conf_ref.txt 修正
+	(login/)
+	Makefile 改行コード変更
+	(map/)
+	Makefile 改行コード変更
+	atcommand.c
+		atcommand() 宣言位置修正
+		atcommand_where() 宣言位置修正
+	battle.c 
+		battle_calc_pet_weapon_attack() 修正
+		battle_calc_mob_weapon_attack() 修正
+		battle_calc_pc_weapon_attack() 修正
+		battle_calc_magic_attack() 修正
+	clif.c
+		clif_skill_fail() 宣言位置修正
+	guild.c
+		guild_gvg_eliminate_timer() 宣言位置修正
+	mob.c
+		mob_damage() 宣言位置修正
+	script.c
+		buildin_deletearray() 宣言位置修正
+		buildin_getequipcardcnt() 宣言位置修正
+		buildin_successremovecards() 宣言位置修正
+
+--------------------
+//0952 by CG
+・confでDEFとMDEFの計算方法を選択できるように。
+
+	(conf/)
+	battle_athena.conf 変更
+	(map/)
+	battle.c 
+		battle_calc_pet_weapon_attack() 修正
+		battle_calc_mob_weapon_attack() 修正
+		battle_calc_pc_weapon_attack() 修正
+		battle_calc_magic_attack() 修正
+	battle.h 修正
+
+--------------------
+//0951 by (凸)
+・サーバーsnapshot
+・バグ報告スレッド part4 >>95 KAJIKENさんの修正を同梱
+・同 >>138 バグかな？さんの修正を同梱
+・Athena雑談スレッド part2 >>112 名無しさんのPVPナイトメアモードのアンダークロスマップワープポイントを同梱
+・同 >>96 稀枝さんのnpc_gldcheck.txtを同梱
+・スナップショットにsave/を入れるのをやめました。無い場合はathena-startが作ってくれます
+・athena-startでlog/が無い場合に作るように変更
+・その他？
+
+	(/)
+	athena-start 変更
+	(db/)
+	mob_db.txt 変更
+	(conf/)
+	map_athena.conf 変更
+	(conf/extension/)
+	npc_gldcheck.txt 追加
+	(conf/npc/)
+	npc_event_ice.txt 変更
+	npc_job_alchemist.txt 変更
+	npc_event_valentine.txt 変更
+	npc_town_geffen.txt 変更
+	npc_event_whiteday.txt 変更
+	npc_event_potion.txt 変更
+	npc_town_comodo.txt 変更
+	(conf/warp/)
+	npc_warp_pvp.txt 追加
+
+--------------------
 //0950 by (凸)
 ・mob_dbのModeフラグに以下の物を追加
 	0x40(64) ダメージを1に固定(草やクリスタルなど)

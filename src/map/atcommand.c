@@ -1101,7 +1101,7 @@ atcommand_joblevelup(
 		up_level -= 40;
 	if ((s_class.job == 23) || (s_class.upper == 1 && s_class.type == 2)) //ƒXƒpƒmƒr‚Æ“]¶“ñŽŸE‚ÍJobƒŒƒxƒ‹‚ÌÅ‚‚ª70
 		up_level += 20;
-	if (sd->status.job_level == up_level) {
+	if (sd->status.job_level == up_level && level > 0) {
 		clif_displaymessage(fd, msg_table[23]);
 	} else if (level >= 1) {
 		if (sd->status.job_level + level > up_level)
@@ -2341,7 +2341,7 @@ atcommand_character_joblevel(
 				max_level -= 40;
 			if ((pl_s_class.job == 23) || (pl_s_class.upper == 1 && pl_s_class.type == 2)) //ƒXƒpƒmƒr‚Æ“]¶E‚ÍJobƒŒƒxƒ‹‚ÌÅ‚‚ª70
 				max_level += 20;
-			if (pl_sd->status.job_level == max_level) {
+			if (pl_sd->status.job_level == max_level && level > 0) {
 				clif_displaymessage(fd, msg_table[67]);
 			} else if (level >= 1) {
 				if (pl_sd->status.job_level + level > max_level)

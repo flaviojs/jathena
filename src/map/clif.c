@@ -2105,7 +2105,7 @@ int clif_changelook(struct block_list *bl,int type,int val)
 		}
 		clif_send(buf,packet_len_table[0x1d7],bl,AREA);
 	}
-	else if(sd && (type == LOOK_BASE) && (val > 4000))
+	else if(sd && (type == LOOK_BASE) && (val > 255))
 		{
 		WBUFW(buf,0)=0x1d7;
 		WBUFL(buf,2)=bl->id;
