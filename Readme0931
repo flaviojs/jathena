@@ -1,4 +1,32 @@
 --------------------
+//0938 by ぴざまん
+
+・ポーションピッチャーで青ポを投げてもエフェクトだけだったバグ修正。
+・露店開設が特定のアイテム配置で失敗するバグ修正。
+・スクリプト関数getareadropitem実装。
+　指定エリア内のドロップアイテムをカウントする関数です
+
+　書式：getareadropitem <mapname>,<x0>,<y0>,<x1>,<y1>,<item>;
+　　mapname：対象マップ名(例：prontera.gat)
+　　x0とx1：対象X座標範囲
+　　y0とy1：対象Y座標範囲
+　　item：カウントする対象アイテム
+
+　戻り値：mapname内座標(x0,y0)-(x1,y1)の範囲内に落ちているitemの総個数
+　　　　　取得失敗時には-1を返します。
+　・itemの値はIDでもアイテム名("Red_Jemstone"とか)でもいいです。
+
+	(map/)
+	battle.c
+		battle_heal() 修正。
+	vending.c
+		vending_openvending() 修正。
+	script.c
+		ローカルプロトタイプ宣言修正。
+		struct buildin_func[] 修正。
+		buildin_getareadropitem()、buildin_getareadropitem_sub() 追加。
+
+--------------------
 //0937 by netwarrior
 
 - Fix Japanese remarks problem in 0936

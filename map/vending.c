@@ -104,7 +104,7 @@ void vending_openvending(struct map_session_data *sd,int len,char *message,int f
 			sd->vending[i].amount=*(short*)(p+2+8*i);
 			sd->vending[i].value=*(int*)(p+4+8*i);
 			//カート内のアイテム数と販売するアイテム数に相違があったら中止
-			if(pc_cartitem_amount(sd,sd->vending[i].index,sd->vending[i].amount)!=0){
+			if(pc_cartitem_amount(sd,sd->vending[i].index,sd->vending[i].amount)<0){
 				clif_skill_fail(sd,MC_VENDING,0,0);
 				return;
 			}

@@ -165,6 +165,7 @@ int buildin_areaannounce(struct script_state *st);
 int buildin_getusers(struct script_state *st);
 int buildin_getmapusers(struct script_state *st);
 int buildin_getareausers(struct script_state *st);
+int buildin_getareadropitem(struct script_state *st);
 int buildin_enablenpc(struct script_state *st);
 int buildin_disablenpc(struct script_state *st);
 int buildin_sc_start(struct script_state *st);
@@ -301,6 +302,7 @@ struct {
 	{buildin_getusers,"getusers","i"},
 	{buildin_getmapusers,"getmapusers","s"},
 	{buildin_getareausers,"getareausers","siiii"},
+	{buildin_getareadropitem,"getareadropitem","siiiii"},
 	{buildin_enablenpc,"enablenpc","s"},
 	{buildin_disablenpc,"disablenpc","s"},
 	{buildin_sc_start,"sc_start","iii"},
@@ -3244,6 +3246,53 @@ int buildin_getareausers(struct script_state *st)
 	return 0;
 }
 
+/*==========================================
+ * エリア指定ドロップアイテム数所得
+ *------------------------------------------
+ */
+int buildin_getareadropitem_sub(struct block_list *bl,va_list ap)
+{
+	int item=va_arg(ap,int);
+	int *amount=va_arg(ap,int *);
+	struct flooritem_data *drop=(struct flooritem_data *)bl;
+
+	if(drop->item_data.nameid==item)
+		(*amount)+=drop->item_data.amount;
+
+	return 0;
+}
+int buildin_getareadropitem(struct script_state *st)
+{
+	char *str;
+	int m,x0,y0,x1,y1,item,amount=0;
+	struct script_data *data;
+
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	x0=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	y0=conv_num(st,& (st->stack->stack_data[st->start+4]));
+	x1=conv_num(st,& (st->stack->stack_data[st->start+5]));
+	y1=conv_num(st,& (st->stack->stack_data[st->start+6]));
+
+	data=&(st->stack->stack_data[st->start+7]);
+	get_val(st,data);
+	if( data->type==C_STR || data->type==C_CONSTSTR ){
+		const char *name=conv_str(st,data);
+		struct item_data *item_data = itemdb_searchname(name);
+		item=512;
+		if( item_data )
+			item=item_data->nameid;
+	}else
+		item=conv_num(st,data);
+
+	if( (m=map_mapname2mapid(str))< 0){
+		push_val(st->stack,C_INT,-1);
+		return 0;
+	}
+	map_foreachinarea(buildin_getareadropitem_sub,
+		m,x0,y0,x1,y1,BL_ITEM,item,&amount);
+	push_val(st->stack,C_INT,amount);
+	return 0;
+}
 /*==========================================
  * NPCの有効化
  *------------------------------------------
