@@ -439,7 +439,7 @@ L0_2:
 	mes "またいらっしゃい。";
 	mes "期待しています。";
 	close;
-LstartOther:
+LStartOther:
 	mes "[ファン]";
 	mes "楽しい旅をしていますか？";
 	mes "明るい毎日を送れるようお祈りします。";
@@ -1043,7 +1043,7 @@ LStartTwice:
 //==== カートレボリューション Cart Revolution ===
 //-----------------------------------------------
 alberta.gat,232,106,6	script	コサンス	57,{
-	if ((Class == Job_Merchant) && (JobLevel < 30)) goto LStartLowlv;
+	if ((Class == Job_Merchant) && (JobLevel < 35)) goto LStartLowlv;
 	if (!((Class == Job_Merchant) || (Class == Job_Blacksmith) || (Class == Job_Alchem))) goto LStartOther;
 	if (getskilllv(153)>0) goto LStartTwice;
 	mes "[コサンス]";
