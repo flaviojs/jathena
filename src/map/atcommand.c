@@ -1478,6 +1478,8 @@ atcommand_go(
 				{	"amatsu.gat",	198,  84	},	//	10=アマツ
 				{	"gonryun.gat",	160, 120	},	//	11=ゴンリュン
 				{	"umbala.gat",	153, 126	},	//	12=ウンバラ
+				{	"niflheim.gat",	21,153	},	//	13=ニフルヘイム
+				{	"louyang.gat",	217,40	},	//	14=洛陽
 			};
 	
 	if( sd == NULL ){
