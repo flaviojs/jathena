@@ -34,6 +34,10 @@
 #define WBUFW(p,pos) (*(unsigned short*)WBUFP((p),(pos)))
 #define WBUFL(p,pos) (*(unsigned int*)WBUFP((p),(pos)))
 
+#ifdef __INTERIX
+#define FD_SETSIZE 4096
+#endif	// __INTERIX
+
 // Struct declaration
 
 struct socket_data{

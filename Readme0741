@@ -1,4 +1,13 @@
 --------------
+//0756 by ll3y
+
+・Interix(Windows Services for Unix 3.5)でコンパイルが通るように修正
+  Interop Systems(http://www.interopsystems.com/)よりgmakeとzlibを取ってくるか、
+  自前でInterix用を用意する必要があります。
+	(common/)
+	socket.h 修正。
+
+--------------
 //0755 by 死神
 
 ・バグ修正と説明追加。(報告されたのは多分全て修正されたのかと...)
