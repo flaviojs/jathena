@@ -598,23 +598,23 @@ z [0～4]服の色
 		if (strcmpi(command, "@monster") == 0 && gm_level >= atcommand_config.monster) {
 			i1 = i2 = x = y = 0;
 			if(sscanf(message, "%s %s %s %d%d%d", command, temp1, temp0, &i2, &x, &y) >= 3) {
+				int count=0;
 				if( (i1=atoi(temp0))==0 )
 					i1=mobdb_searchname(temp0);
 				if( i2 <= 0 ) i2 = 1;
 				printf("%s name=%s id=%d count=%d (%d,%d)\n", command, temp1, i1, i2, x, y);
 
-				if(i1>1000 && i1<=2000 && mob_db[i1].max_hp>0){
-					for(i=0;i<i2;i++) {
-						int mx,my;
-						if(x<=0) mx = sd->bl.x + (rand()%10 - 5);
-						else mx = x;
-						if(y<=0) my=sd->bl.y + (rand()%10 - 5);
-						else my = y;
-						mob_once_spawn(sd,"this",mx,my,temp1,i1,1,"");
-					}
-					clif_displaymessage(fd,"モンスター召喚 !!");
+				for(i=0;i<i2;i++) {
+					int mx,my;
+					if(x<=0) mx = sd->bl.x + (rand()%10 - 5);
+					else mx = x;
+					if(y<=0) my=sd->bl.y + (rand()%10 - 5);
+					else my = y;
+					count+=mob_once_spawn(sd,"this",mx,my,temp1,i1,1,"");
 				}
-				else{
+				if(count != 0){
+					clif_displaymessage(fd,"モンスター召喚 !!");
+				}else{
 					clif_displaymessage(fd,"無効なモンスターIDです。");
 				}
 			}

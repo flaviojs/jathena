@@ -106,7 +106,7 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 			do{
 				class=rand()%1000+1001;
 				k=rand()%1000000;
-			}while( (mob_db[class].max_hp<=0 || k >= mob_db[class].summonper[j] || (sd->status.base_level < mob_db[class].lv && battle_config.random_monster_checklv))&& (i++)<2000);
+			}while((mob_db[class].max_hp <= 0 || mob_db[class].summonper[j] <= k || (sd->status.base_level<mob_db[class].lv && battle_config.random_monster_checklv)) && (i++) < 2000);
 			if(i>=2000){
 				class=mob_db[0].summonper[j];
 			}
@@ -1703,7 +1703,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 		struct delay_item_drop *ditem;
 		int drop_rate;
 
-		if(mob_db[md->class].dropitem[i].nameid <=0)
+		if(mob_db[md->class].dropitem[i].nameid <= 0)
 			continue;
 		drop_rate = mob_db[md->class].dropitem[i].p;
 		if(drop_rate <= 0 && battle_config.drop_rate0item)
@@ -1733,7 +1733,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 			drop_rate = sd->monster_drop_itemrate[i];
 			if(battle_config.item_rate != 100)
 				drop_rate = (drop_rate * battle_config.item_rate)/100;
-			if(rand()%10000 >= drop_rate)
+			if(drop_rate <= rand()%10000)
 				continue;
 
 			ditem=malloc(sizeof(*ditem));
@@ -1776,8 +1776,13 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 		for(i=0;i<3;i++){
 			struct item item;
 			int ret;
-			if( mob_db[md->class].mvpitem[i].nameid <=0 ||
-				mob_db[md->class].mvpitem[i].p<rand()%10000 )
+			int drop_rate;
+			if(mob_db[md->class].mvpitem[i].nameid <= 0)
+				continue;
+			drop_rate = mob_db[md->class].mvpitem[i].p;
+			if(drop_rate <= 0 && battle_config.drop_rate0item)
+				drop_rate = 1;
+			if(drop_rate <= rand()%10000)
 				continue;
 			memset(&item,0,sizeof(item));
 			item.nameid=mob_db[md->class].mvpitem[i].nameid;
