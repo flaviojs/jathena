@@ -1,4 +1,767 @@
 --------------------
+//0885 by huge
+
+・ギルド共有倉庫の実装。guildstorageで開けます。
+    自分の鯖で実験はしてみましたが、過疎地なので多人数ギルドになるとどう動くか分かりません。
+    (念のためバックアップは必ず取っておいて下さい)
+・areawarpで、対象マップ名を"Random"にすると、同マップ内でランダムに飛ぶように修正。
+・GMコマンドで生き返したときにSPも全回復するように修正。
+・ディボーションの条件をちょっと修正。
+
+	(char/)
+	int_storage.c
+		mapif_load_storage() 修正。
+		mapif_parse_SaveStorage() 修正。
+	inter.c
+		inter_send_packet_length[] 修正。
+		inter_recv_packet_length[] 修正。
+	(map/)
+	atcommand.c
+		@alive,@raise,@raisemap 修正。
+	intif.c
+		packet_len_table[] 修正。
+		intif_request_storage() 修正。
+		intif_send_storage() 修正。
+		intif_parse_LoadStorage() 修正。
+
+	map.h
+		map_session_data stateにstorage_flag 追加。
+	script.c
+		buildin_areawarp_sub() 修正。
+		buildin_openstorage() 修正。
+		buildin_guildstorage() 追加。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+	storage.c
+		account2storage() 修正。
+		storage_storageopen() 修正。
+		storage_storage_save() 修正。
+
+--------------------
+//0884 by 死神
+
+・細かいバグ修正。
+・battle_athena.confにpet_str、zeny_penalty、resurrection_exp 追加。
+・0878の銀行関係のコードはもういらないので全て削除。
+・zeny_penaltyを設定して使う場合は手数料はなくした方がいいかも。
+・ポーションピッチャーでpercenthealにもPPとLPによる回復ボーナスが付くように変更。(ただvitやint、HPR、MPRによる回復ボーナスが付きません。)
+・ほとんど未テスト。
+	(common/)
+	mmo.h 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(map/)
+	map.c
+		do_init()、do_final() 修正。
+	script.c
+		buildin_openbank() 削除。
+		buildin_failedrefitem() 修正。
+	storage.h 修正。
+	storage.c
+		do_init_bank()、do_final_bank()、account2bank() 削除。
+		storage_bank()、storage_readbank() 削除。
+	skill.c
+		skill_castend_nodamage_id()、skill_attack() 修正。
+	battle.h 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_config_read() 修正。
+	pc.c
+		pc_setrestartvalue() 修正。
+	clif.c
+		clif_skill_nodamage()、clif_refine() 修正。
+	itemdb.c
+		itemdb_isequip3() 修正。
+	atcommand.c
+		atcommand() 修正。
+
+--------------------
+//0883 by Kalen
+
+・Warp色々修正
+	・アサシンギルド周り修正(昔のままのリンクだったので現在の状態に修正。)
+	・YunoのWarp全面見直し(YumilLoop修正、SageCastleRandomWarp追加、女医さんの家追加)
+	・モンクギルド周り追加
+・NPC色々修正
+	・帽子作成NPCを別ファイルへ。一部追加(ep2.5追加分)
+	　参考Data(R.O.M776): ttp://green.sakura.ne.jp/~youc/ro/data/itemmaking.html#04
+	・アサシンギルド修正
+	・二次職転職関係NPC一部追加(これでコモド小劇場へ行けます)
+	・マスターアルケミストの台詞修正
+	・アルデバランの案内要員を移動&台詞修正&イメージ追加
+	・BBSにあがっていたコモドスクリプト追加(event_hat等へ分散)
+	・コンロンクエスト関係NPC一部追加(女医[yuno]、ネル[prontera])
+	(conf/warp/)
+		npc_warp.txt
+		npc_warp30.txt
+		npc_warp_job.txt
+	(conf/npc/)
+		npc_event_hat.txt(新規)
+		npc_job_2nd.txt
+		npc_job_alchemist.txt
+		npc_town_aldebaran.txt
+		npc_town_comodo.txt
+		npc_town_gonryun.txt
+		npc_town_guide.txt
+		npc_town_yuno.txt
+		npc_town_lutie.txt
+
+--------------------
+//0882 by 胡蝶蘭
+
+・スクリプトに0881相当のアカウント共有変数機能のプレフィックス変更
+	・0881のアカウント変数はプレフィックス##になりました。
+	・0881のアカウント変数は全ワールドで共有されます。
+	・変数の個数はmmo.hのACCOUNT_REG2_NUMで定義されています(16)。
+・ワールド内のアカウント共有変数機能追加
+	・変数名のプレフィックスは#です。
+	・変数の個数はmmo.hのACCOUNT_REG_NUMで定義されています(16)。
+	・0881の銀行スクリプトはこちらを使用するようになります。
+	  よって以前のデータがつかえないのであらかじめ引き出しておいてください.
+	・変数データは save/accreg.txt に保存されます。
+	  このファイル名は inter_athena.conf で変更可能です。conf_ref.txt参照。
+
+	(common/)
+	mmo.h
+		ACCOUNT_REG_NUMを16に、ACCOUNT_REG_NUM2追加
+		struct mmo_charstatusにaccount_reg2_num,account_reg2メンバ追加
+	(login/)
+	login.c
+		account_regを全てaccount_reg2に置き換え
+	(char/)
+	char.c
+		account_regを全てaccount_reg2に置き換え
+	inter.c
+		ワールド内アカウント変数機能追加。
+		inter_accreg*()追加、accreg_db追加など。
+	(map/)
+	chrif.c/chrif.h
+		account_regを全てaccount_reg2に置き換え
+		0881でのバグを修正
+	intif.c/intif.h
+		ワールド内アカウント変数機能追加。
+	pc.c/pc.h
+		pc_*accountreg()=>pc_*accountreg2()に。
+		pc_setaccountreg(),pc_readaccountreg()追加。
+	script.c
+		buildin_set(),buildin_get_val(),buildin_input()修正
+	(doc/)
+	inter_server_packet.txt
+		ワールド内アカウント変数関係
+	conf_ref.txt
+		accreg_txt追加
+	
+--------------------
+//0881 by 胡蝶蘭
+
+・スクリプトにアカウント共有変数機能追加
+	・変数名にプレフィックス#を付けることでアカウント共有変数になります。
+	・アカウント変数は変更した時点で全サーバーにポストされるので
+	  頻繁に書き換えるとサーバー間通信が肥大化します。
+	・アカウント変数は変更した時点（そしてそれがlogin鯖に届いた時点）で
+	  account.txtに書き出されます。
+	・グローバル変数（永続変数）の個数を96に減らし、減った32個分を
+	  アカウント変数にしていますが、mmo_charstatusのサイズが
+	  16000byteを超えない限り増やすことができます。＜0879の変更を参照
+	  変数の個数はmmo.hのACCOUNT_REG_NUMで定義されています。
+	・0878の銀行をアカウント変数を使用するように修正
+	  bank.txtのデータが使えなくなるのであらかじめ引き出しておいて下さい。
+	
+	(common/)
+	mmo.h
+		GLOBAL_REG_NUMを96に、ACCOUNT_REG_NUMを追加
+		struct mmo_charstatusにaccount_reg_num,account_regメンバ追加
+	(login/)
+	login.c
+		パケット2728処理追加
+	(char/)
+	char.c
+		パケット2729,2b10処理追加
+	(map/)
+	chrif.c
+		chrif_saveaccountreg(),chrif_accountreg()
+		(パケット2b10,2b11処理)追加。
+	pc.c/pc.h
+		pc_readaccountreg(),pc_setaccountreg()追加
+	script.c
+		buildin_set(),buildin_get_val(),buildin_input()修正
+	(conf/sample/)
+	bank_test.txt
+		アカウント変数使用版の銀行スクリプト
+
+--------------------
+//0880 by 死神
+
+・ポーションピッチャーを正しく実装とちょっと機能拡張。
+・ポーションピッチャーでレベル別に使えるアイテムをskill_require_db.txtに設定できるようにしました。ただポーションピッチャーで使えるアイテムはitemheal、percentheal、sc_start、sc_end以外の物が入っていると正しく動作しません。
+レベル5までは本鯖に合わせていますが最大レベルを10まで拡張するとレベル6 - マステラの実、7 - ローヤルゼリー、8 - イグドラシルの種、9 - イグドラシルの実、10 - バーサークポーションに設定しています。skill_db.txtを修正すればこれが有効になります。(どこを修正するかもわからない人は諦めることです。) ポーションピッチャーによるアイテム使用は使用条件を無視します。少しはアルケミストに希望ができたかも...(多分無理...)
+・battle_athane.confにproduce_item_name_input、produce_potion_name_input、making_arrow_name_input、holywater_name_input 追加。
+・パーティ員にだけ使うスキルとギルド員にだけ使うスキルを設定できるように修正。
+・その他細かい修正。
+	(conf/)
+	battle_athane.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	db_ref.txt 修正。
+	(db/)
+	skill_db.txt 修正。
+	skill_require_db.txt 修正。
+	(map/)
+	map.h 修正。
+	skill.h 修正。
+	skill.c
+		skill_status_change_timer()、skill_attack()、skill_use_id() 修正。
+		skill_castend_nodamage_id()、skill_castend_damage_id() 修正。
+		skill_castend_id()、skill_castend_pos()、skill_produce_mix() 修正。
+		skill_arrow_create()、skill_check_condition() 修正。
+		skill_status_change_clear()、skill_readdb() 修正。
+	mob.c
+		mobskill_use_id()、mob_changestate() 修正。
+	pc.c
+		pc_itemheal()、pc_percentheal()、pc_calcstatus() 修正。
+	battle.h 修正。
+	battle.c
+		battle_delay_damage()、battle_damage()、battle_heal() 修正。
+		battle_get_adelay()、battle_get_amotion() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_weapon_attack()、battle_config_read() 修正。
+	clif.c
+		clif_skill_fail() 修正。
+	script.c
+		buildin_sc_start()、buildin_sc_end() 修正。
+	makefile 修正。
+
+--------------------
+//0879 by 胡蝶蘭
+
+・送信FIFOのバッファオーバーフローの脆弱性の修正
+	・2048バイト以上のパケットを送るとき、FIFOが満杯に近ければ
+	  バッファオーバーフローによる不正アクセスが起こっていた問題修正。
+	・FIFOが満杯に近いときWFIFOSETされたパケットが捨てられていた問題修正。
+	・FIFOがオーバーフローする場合、自動的にFIFOを拡張するようにした。
+	  （ただし、一度にWFIFOSETするパケットが16384バイト以下と仮定している）
+	・「socket: ? wdata expanded to ???? bytes」はFIFOが拡張されたときに
+	  でるログだが、エラーではなく、パケットは正しく送信される。
+	・「socket: ? wdata lost !!」はパケットが喪失したことを表すログで、
+	  エラーであるが64KBを超える超巨大なパケットをWFIFOSETしないと出ない。
+	・16384バイトを超えるパケットをWFIFOSETするとエラーメッセージなしに、
+	  不正アクセスが起こる可能性があるので、超えないようにすること。
+	
+	(common/)
+	socket.c /socket.h
+		WFIFOSET()をマクロから関数に変更
+		realloc_fifo()追加
+	
+・サーバー間通信FIFOのバッファサイズを大きくした
+	・大量のデータが通信されたときにデータ処理遅延が起きにくくするため。
+	・メモリ使用量が増えた。(ぎりぎりの人は65536に設定すると元通りになる)
+	・サーバー間通信のFIFOサイズは mmo.h で定義されている。
+	  変更する場合は64KB(65536)以上の値にすること。
+	  大きくすると巨大データ受信時の遅延が減るがメモリを多く使う。
+	・@kickall時などにデータ送信が激しくなるので変更したが、
+	  同時ログイン人数が少ないと増やしても意味は無い。
+
+	(common/)
+	mmo.h
+		FIFOSIZE_SERVERLINKマクロ追加。
+	(login/)
+	login.c
+		2710パケットでrealloc_fifo()を呼ぶように
+	(char/)
+	char.c
+		2af8パケットでrealloc_fifo()を呼ぶように
+		check_connect_login_server()でrealloc_fifo()を呼ぶように
+	(map/)
+	chrif.c
+		check_connect_char_server()でrealloc_fifo()を呼ぶように
+
+--------------------
+//0878 by huge
+
+・カプラ銀行サービス。
+	自分の鯖で実装してたんですが、意外と好感触だったので出してみます。
+	NPCscriptで、openbank(0);で預金額を返して、中に数字を入れると出し入れします。
+	詳しくはサンプルを同封したので、それを参照。
+
+	(common/)
+	mmo.h
+		struct bank 追加。
+	(map/)
+	map.c
+		do_final(),do_init() 修正。
+	script.c
+		buildin_openbank() 追加。
+	storage.c
+	storage.h
+		グローバル変数追加。
+		do_init_bank(),do_final_bank(),account2bank() 追加。
+		storage_bank(),storage_readbank() 追加。
+
+--------------------
+//0877 by 胡蝶蘭
+
+・login鯖のアクセスコントロールがネットマスク表記に対応
+	192.168.0.0/24 や 192.168.0.0/255.255.0.0 といった表記に対応。
+・battle_athena.confにGMが無条件で装備品を装備できる＆
+  無条件でスキルを使用できる設定追加
+	これらはデバグ用なので動作に不都合があるかもしれません。
+
+	(login/)
+	login.c
+		check_ip()修正,check_ipmask()追加
+	(map/)
+	battle.c/battle.h
+		battle_configにgm_allequip,gm_skilluncond追加
+		battle_config_read()修正更
+	skill.c
+		skill_check_conditio()修正
+	pc.c
+		pc_isequp()修正
+	(doc/)
+	conf_ref.txt
+		allow変更、gm_all_equipment、gm_skill_unconditional追加
+
+--------------------
+//0876 by 死神
+
+・細かいバグ修正。
+・@コマンドにテストの為に入れていた物が入っていたので修正。
+・ハンマーフォールの射程を5から4に修正(本鯖射程は不明)とリザレクションが無属性だったのを聖属性に修正。
+	(db/)
+	skill_db.txt 修正。
+	(map/)
+	mob.c
+		mob_catch_delete()、mob_stop_walking() 修正。
+	storage.c
+		storage_additem() 修正。
+	pc.c
+		pc_damage()、pc_stop_walking() 修正。
+	clif.c
+		clif_parse_UseSkillToId()、clif_parse_UseSkillToPos() 修正。
+	battle.c
+		battle_calc_magic_attack() 修正。
+	skill.c
+		skill_check_condition() 修正。
+	atcommand.c 修正。
+
+--------------------
+//0875 by 胡蝶蘭
+
+・party_share_levelをinter_athena.confに移した
+  (パーティ関連の処理の管轄がinter鯖のため)
+・inter_athena.confにinter_log_file項目追加
+・ギルド作成/解散/城占領/城破棄がログに残るように
+・ギルド解散時にメモリリークしていた問題を修正
+	(char/)
+	char.c/char.h
+		party_share_level関連
+	(inter/)
+	inter.c/inter.h
+		party_share_level / inter_log_file 関連
+		ログ出力用にinter_log()追加
+	int_guild.c
+		作成/解散/城占領/城破棄をログに出力
+		メモリリーク修正
+	(doc/)
+	conf_ref.txt
+		修正
+
+・サーバー状態確認用CGIスクリプト添付など
+	・自己責任＆詳細な解説無し、質問されてもスルーする可能性有り
+	・エディタで開いたら少し説明有り
+	・CGI設置の基本さえわかれば問題ないはず
+	
+	(tool/cgi/)
+	serverstatus.cgi
+		サーバー状態確認用CGIスクリプト
+	addaccount.cgi
+		説明修正
+
+--------------------
+//0874 by Kalen
+・WhiteDayイベント追加
+	conf/npc/npc_event_whiteday.txt(新規)
+	 ただ、お菓子売ってるだけみたい…GMがなにやるのかは知りませんが。
+	 sakROのほうではホワイトチョコらしきものが追加されたのに
+	 jROで追加されたのは雛壇撤去パッチのみ(*´д`;)…
+
+・Alchemistギルドで乳鉢、製造書を変えるように
+	conf/npc/npc_job_alchemist.txt(新規)
+	 転職クエストが分からなかったので温めていましたが
+	 買えないと不便と聞いたので、追加
+
+・染色NPC実装
+	conf/npc/npc_event_dye.txt(更新)
+	 髪型変更がsakROに来たらしいので
+	 なんとなーく更新
+
+--------------------
+//0873 by 死神
+
+・@コマンドitem2とkillmonster 追加。
+・スクリプトgetitem2とkillmonsterall 追加。
+・矢作成で作られた矢も製造者の名前が付くように修正。
+・battle_athena.confにmonster_class_change_full_recover追加。
+・装備スクリプトにbWeaponComaEleとbWeaponComaRace 追加。
+・少し間違いがあったダメージ計算式修正。
+・bInfiniteEndureの処理をインデュア表示なしで内部処理するように変更。
+・オートスペルでcastend_nodamage_id()を呼ぶスキルも使用できるように修正。
+・その他細かい修正とバグ修正。
+・ほとんど未テストなのでバグがあったら報告お願いします。
+	(conf/)
+	help.txt 修正。
+	atcommand_athena.conf 修正。
+	battle_athena.conf 修正。
+	char_athena.conf 修正。
+	(db/)
+	const.txt 修正。
+	item_db.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	script_ref.txt 修正。
+	conf_ref.txt 修正。
+	(map/)
+	map.h 修正。
+	map.c
+		map_quit() 修正。
+	skill.h 修正。
+	skill.c
+		skill_castend_nodamage_id()、skill_status_change_clear() 修正。
+		skill_castend_id()、skill_castend_pos()、skill_arrow_create() 修正。
+		skill_status_change_timer() 修正。
+	pc.c
+		pc_calcstatus()、pc_bonus2()、pc_equipitem() 修正。
+		pc_unequipitem()、pc_damage() 修正。
+	battle.h 修正。
+	battle.c
+		battle_get_dmotion()、battle_weapon_attack() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_calc_magic_attack()、battle_config_read() 修正。
+	clif.c
+		clif_parse_LoadEndAck()、clif_damage()、clif_skill_damage() 修正。
+		clif_skill_damage2() 修正。
+	itemdb.h 修正。
+	itemdb.c
+		itemdb_isequip3() 追加。
+	mob.h 修正。
+	mob.c
+		mob_delay_item_drop()、mob_damage()、mob_changestate() 修正。
+		mob_class_change()、mob_delete()、mob_catch_delete() 修正。
+	script.c
+		buildin_getitem() 修正。
+		buildin_killmonsterall_sub()、buildin_killmonsterall() 追加。
+	atcommand.h 修正。
+	atcommand.c
+		atcommand() 修正。
+		atkillmonster_sub() 追加。
+
+--------------------
+//0872 by ElFinLazz
+
+・スキルポーションピッチャー修正
+・スキルギムソバングドンボルオッネ具現
+・スキルアブラカダブなら義コーマ具現
+・コーマの武器オプション追加(種族, 千分率)
+・オプション説明追加
+	(db/)
+	const.txt 修正.
+	(doc/)
+	item_bonus.txt 修正.
+	(map/)
+	map.h 修正.
+	skill.c
+		skill_castend_nodamage_id(), skill_unit_group(), skill_status_change_start() 修正.
+	pc.c
+		pc_calcstatus(), pc_bonus2(), pc_gainexp() 修正.
+	battle.c
+		battle_weapon_attack() 修正.
+
+--------------------
+//0871 by 死神
+
+・0869のバグ修正。
+・char_athena.confとlogin_athena.confに項目追加。(キャラ鯖とログイン鯖のログファイルを変えることができるようにしました。デフォルトでlog/フォルダーに入るのでlogフォルダーを作る必要があります。)
+・エナジーコートの処理を少し修正。モンスターが使った場合はスキルレベル*6%の物理ダメージを減らすように変更。
+・武器以外の物でも製造者の名前を表示するように変更。(本鯖ではプレゼントボックスと手作りチョコレット以外は表示されませんがパケットはあることだし入れてみました。)
+・その他スキル関係の細かい修正。
+・@コマンド一つとスクリプト一つを追加しましたが説明は後のパッチで書きます。
+	(conf/)
+	char_athena.conf 修正。
+	login_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(login/)
+	login.c
+		parse_login()、login_config_read()、login_log() 修正。
+	(char/)
+	char.h 修正。
+	char.c
+		char_config_read()、make_new_char()、parse_char() 修正。
+	int_party.c 修正。
+	int_storage.c 修正。
+	int_guild.c 修正。
+	int_pet.c 修正。
+	(map/)
+	map.h 修正。
+	skill.c
+		skill_status_change_start()、skill_additional_effect() 修正。
+		skill_castend_nodamage_id()、skill_check_condition() 修正。
+		skill_status_change_clear()、skill_produce_mix() 修正。
+		skill_status_change_timer() 修正。
+	pc.c
+		pc_calcstatus()、pc_insert_card()、pc_additem()、pc_cart_additem() 修正。
+	storage.c
+		storage_additem() 修正。
+	battle.c
+		battle_get_adelay()、battle_get_amotion()、battle_calc_damage() 修正。
+	clif.c
+		clif_additem()、clif_equiplist()、clif_storageequiplist() 修正。
+		clif_tradeadditem()、clif_storageitemadded()、clif_use_card() 修正。
+		clif_cart_additem()、clif_cart_equiplist()、clif_vendinglist() 修正。
+		clif_openvending()、clif_arrow_create_list() 修正。
+		clif_skill_produce_mix_list()、clif_parse_SelectArrow() 修正。
+		clif_parse_ProduceMix() 修正。
+	script.c
+		buildin_produce() 修正。
+		buildin_getitem2() 追加。
+	atcommand.c
+		atcommand() 修正。
+
+--------------------
+//0870 by shuto
+
+・mapflagの攻城戦MAPにnomemo追加
+・ギルド宝箱で、宝箱出現と同時にMAP鯖が落ちる問題修正(by ぴざまん)
+
+--------------------
+//0869 by 死神
+
+・battle_athena.confにplayer_land_skill_limit、monster_land_skill_limit、party_skill_penaly 追加。
+・char_athena.confにparty_share_level 追加。
+・その他細かい修正。
+	(conf/)
+	char_athena.conf 修正。
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(char/)
+	char.h 修正。
+	char.c
+		char_config_read() 修正。
+	int_party.c
+		party_check_exp_share() 修正。
+	(map/)
+	map.h 修正。
+	skill.c
+		skill_attack()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_status_change_start() 修正。
+		skill_castend_pos() 修正。
+	pc.c
+		pc_calcstatus() 修正。
+	mob.c
+		mobskill_castend_pos() 修正。
+	battle.h
+	battle.c
+		battle_get_adelay()、battle_get_amotion()、battle_calc_damage() 修正。
+		battle_config_read() 修正。
+	pet.c
+		pet_data_init() 修正。
+
+--------------------
+//0868 by 死神
+
+・マジックロッド実装とスペルブレイカー修正。
+・マジックロッドの場合本鯖で使ってもなんの表示もなく発動の前には使ったかどうかの確認ができないのでスキル詠唱パケット(0x13e)を利用して使用する時スキル名が出るようにしています。(本鯖と違うぞとかで文句がこないように)
+・スペルブレイカー詠唱キャンセルに関係なくskill_db.txtに設定されてるskill_typeがmagicのスキルのみ破ることができます。(ラグナゲートの説明を適用)
+・skill_db.txtの書式が変わったので注意してください。ノックバック距離の設定もできますが念の為にいっておきますがA鯖でのテストでFWのノックバック距離は2でサンクも2であることを確認しています。韓国の2003年11月19日パッチ前の鯖ではありますが2-2は適用されている所なので本鯖の違いはないと思います。
+・その他スキル関係の細かい修正。
+・0867で書き忘れ。モンスターのヒールでアンデッドモンスターが攻撃されて自滅するのでヒールやリザの場合mob_skill_db.txtのval1(値1)に1を入れるとアンデッドモンスターも攻撃を受けず回復するようになります。本鯖ではモンスターのヒールはアンデッドに関係なく回復するようです。ただ個人的にはゾンビがヒールして自滅する方が正しいと思うのでmob_skill_db.txtで設定できるようにしております。
+	(doc/)
+	db_ref.txt 修正。
+	(db/)
+	cast_db.txt 修正。
+	skill_db.txt 修正。
+	(map/)
+	skill.h 修正。
+	skill.c
+		skill_status_change_start()、skill_status_change_end() 修正。
+		skill_castend_damage_id()、skill_castend_nodamage_id() 修正。
+		skill_attack()、skill_status_change_timer()、skill_castcancel() 修正。
+		skill_unit_onplace()、skill_use_id()、skill_castend_id() 修正。
+		skill_readdb() 修正。
+		skill_get_blewcount() 追加。
+	mob.c
+		mobskill_use_id()、mob_spawn()、mob_attack() 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack()、battle_calc_magic_attack() 修正。
+		battle_calc_misc_attack()、battle_weapon_attack() 修正。
+	clif.c
+		clif_damage() 修正。
+	pet.c
+		pet_attack() 修正。
+	pc.c
+		pc_attack_timer()、pc_authok() 修正。
+		pc_spirit_heal()、pc_natural_heal_sub() 修正。
+
+--------------------
+//0867 by 死神
+
+・スキル関係の細かい修正。
+・battle_athena.confにplayer_undead_nofreeze追加。
+・新しいアイテムパケットに対応。(PACKETVERを5以上にする必要があります。)
+・mob_avail.txtでプレイヤーの姿を指定した時ペコペコや鷹を付けることができるように変更。頭下段次にオプションを設定できます。(ただハイディングとクローキングは指定できないようになっています。)
+	makefile 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	client_packet.txt 修正。
+	(map/)
+	battle.h 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack()、battle_config_read() 修正。
+	clif.c
+		clif_mob_class_change()、clif_spawnmob()、clif_spawnpet() 修正。
+		clif_damage()、clif_skill_damage()、clif_skill_damage2() 修正。
+		clif_itemlist()、clif_cart_itemlist()、clif_storageitemlist() 修正。
+		clif_mob0078()、clif_mob007b()、clif_pet0078()、clif_pet007b() 修正。
+	pc.c
+		pc_attack_timer() 修正。
+	skill.c
+		skill_castend_nodamage_id()、skill_additional_effect() 修正。
+		skill_status_change_start() 修正。
+	mob.h 修正。
+	mob.c
+		mobskill_castend_id()、mob_getfriendstatus_sub() 修正。
+		mob_readdb_mobavail() 修正。
+
+--------------------
+//0866 by ぴざまん
+
+・MOTDのメッセージを全て編集できるように変更。
+・クローンスキル実装。
+　ドル服のヒールアタックによるヒール習得は未テストです。
+・ギルド宝箱仮実装。
+　ヴァルキリー１のみです。
+　商業投資による宝箱個数の算出式は適当です(初期個数4個としか知らないので)。
+　Onclockイベントで動作させています。任意の時刻に変更してください。
+・AthenaDB計画のmob_db.txtとmapflag.txtを入れておきました。
+
+	(map/)
+	pc.c
+		pc_makesavestatus()、pc_calc_skilltree() 修正。
+		pc_allskillup()、pc_calc_skillpoint() 修正。
+		pc_resetskill()、pc_authok() 修正。
+	skill.c
+		skill_attack() 修正。
+	map.h 修正。
+	(conf/)
+	gvg/TEST_prtg_cas01_AbraiJ.txt 修正。
+	motd.txt 修正。
+	mapflag.txt 修正。
+	(db/)
+	mob_db.txt 修正。
+
+--------------------
+//0865 by ぴざまん
+
+・自分が占領しているアジトのエンペリウムを攻撃できたバグ修正。
+・アブライが占領ギルドメンバー全員をマスターとみなしていたバグ修正。
+　この修正に伴ってスクリプトリファレンスに改変があります。
+	・getcharid(0)で、自分のcharIDを返すように。
+	・getguildmasterid(<n>)追加。
+	　<n>=ギルドID
+	　該当ギルドのマスターのcharIDを返します。
+
+	(map/)
+	guild.c
+		guild_mapname2gc() 追加。
+	battle.c
+		battle_calc_damage() 修正。
+	script.c
+		buildin_getcharid() 修正。
+		buildin_getguildmasterid() 追加。
+		ローカルプロトタイプ宣言の一部を修正、追加。
+	guild.h 修正。
+
+--------------------
+//0864 by 胡蝶蘭
+
+・inter鯖のwisの処理変更
+	・自前リンクリストからdb.hで提供されているデータベースを使用するように
+	・WISのIDを16ビットから32ビットに増やした（パケットも修正）
+	・メッセージのサイズチェックを入れた
+	・パケットスキップが二回行われる可能性があるバグ修正
+	
+	(char/)
+	inter.c
+		wis関係大幅変更
+	(map/)
+	intif.c
+		wis関係の修正。主にパケット処理。
+	(doc/)
+	inter_server_packet.txt
+		パケット3002,3801を変更
+
+--------------------
+//0863 by 死神
+
+・細かい修正。
+・battle_athena.confにplayer_attack_direction_change追加。
+・mob_skill_db.txtを修正する時挑発の修正を間違って修正。
+・モンスターのスキル自爆問題修正。(未テスト)
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(db/)
+	mob_skill_db.txt 修正。
+	(map/)
+	mob.c
+		mobskill_use_id()、mobskill_use()、mobskill_castend_id() 修正。
+	pc.c
+		pc_skill()、pc_attack_timer() 修正。
+	skill.c
+		skill_castend_damage_id() 修正。
+	battle.h 修正。
+	battle.c
+		battle_weapon_attack()、battle_config_read() 修正。
+
+--------------------
+//0862 by 胡蝶蘭
+
+・mobスキル使用条件追加
+	・friendhpltmaxrate : 味方のHPが指定％未満のとき(テスト済み)
+	・friendstatuson  : 味方が指定したステータス異常になっているとき
+	・friendstatusoff : 味方が指定したステータス異常になっていないとき
+	・mystatuson  : 自分が指定したステータス異常になっているとき
+	・mystatusoff : 自分が指定したステータス異常になっていないとき
+	ステータス系は未テストです。mob_skill_db.txtに指定方法を書いています。
+	たとえば自分が毒かどうかは mystatus,poison で、
+	ハイディング中かどうかは mystatuson,hiding で指定します。
+・mobスキル使用ターゲット追加
+	・friend : 味方
+	・around : 自分の周囲（現在の仕様では周囲81マス）のどれか
+	・around1～around4 : 自分の周囲９,25,49,81マスのどれか(範囲を明示)
+	friendは条件がfriend系(friendhpltmaxrateなど)のときに使用可能。
+	around系は場所指定スキルで使用可能。
+
+	(map/)
+	mob.c / mob.h
+		mob_getfriend*()追加、mobskill_use()修正など
+	(db/)
+	mob_skill_db.txt
+		最初の説明のみ修正。データは修正していません。
+
+--------------------
+//0861 by いど
+
+・サーバーsnapshot
+
+--------------------
 //0860 by J
 
 ・死神さんの手下召喚の修正に合わせてMOBスキルDBを修正
