@@ -388,9 +388,21 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case WZ_STORMGUST:		/* ストームガスト */
-		rate=skilllv*3+35;
-		if(battle_get_elem_type(bl)!=9 && rand()%100 < rate*sc_def_mdef/100)
-			skill_status_change_start(bl,SC_FREEZE,skilllv,10000);/* SG用凍結 */
+		if(sd2){
+			sd2->sg_count++;
+			if(battle_get_elem_type(bl)!=9 && sd2->sg_count==3){
+				sd2->sg_count=0;
+				skill_status_change_start(bl,SC_FREEZE,skilllv,13000*sc_def_mdef/100);
+			}
+			break;
+		}else if(md){
+			md->sg_count++;
+			if(battle_get_elem_type(bl)!=9 && md->sg_count==3){
+				md->sg_count=0;
+				skill_status_change_start(bl,SC_FREEZE,skilllv,13000*sc_def_mdef/100);
+			}
+			break;
+		}
 		break;
 
 	case HT_LANDMINE:		/* ランドマイン */
@@ -639,6 +651,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	struct Damage dmg;
 	int type,lv,damage;
 
+
 	if(src == NULL || dsrc == NULL || bl == NULL)
 		return 0;
 	if(src->prev == NULL || dsrc->prev == NULL || bl->prev == NULL)
@@ -649,6 +662,11 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		return 0;
 	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
 		return 0;
+	if(skillid == WZ_STORMGUST){
+			struct status_change *sc_data = battle_get_sc_data(bl);
+			if(sc_data && sc_data[SC_FREEZE].timer != -1)
+				return 0;
+		}
 
 	type=-1;
 	lv=(flag>>20)&0xf;
@@ -1428,7 +1446,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case MG_ENERGYCOAT:		/* エナジーコート */
 	case SM_PROVOKE:		/* プロボック */
 	case SM_ENDURE:			/* インデュア */
-	case PR_SUFFRAGIUM:		/* サフラギウム */
 	case MG_SIGHT:			/* サイト */
 	case AL_RUWACH:			/* ルアフ */
 	case PR_BENEDICTIO:		/* 聖体降福 */
@@ -1451,6 +1468,14 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			SkillStatusChangeTable[skillid], skilllv, 0 );
 		if(skillid==SM_PROVOKE && bl->type==BL_MOB)
 			mob_target((struct mob_data *)bl,src,skill_get_range(skillid));
+		break;
+
+	case PR_SUFFRAGIUM:		/* サフラギウム */
+		if(bl==src)
+			break;/*自分にかけることはできない*/
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		skill_status_change_start( bl,
+			SkillStatusChangeTable[skillid], skilllv, 0 );
 		break;
 	case KN_AUTOCOUNTER:	/* オートカウンター */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);

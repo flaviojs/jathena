@@ -21,7 +21,7 @@
 #define MAX_EVENTQUEUE	2
 #define MAX_EVENTTIMER	32
 #define NATURAL_HEAL_INTERVAL 500
-#define MAX_FLOORITEM 100000
+#define MAX_FLOORITEM 262144
 #define MAX_LEVEL 255
 
 #define DEFAULT_AUTOSAVE_INTERVAL 60*1000
@@ -118,6 +118,7 @@ struct map_session_data {
 		unsigned connect_new : 1;
 		unsigned arrow_atk : 1;
 		unsigned attack_type : 3;
+		unsigned skill_flag : 1;
 	} state;
 	struct {
 		unsigned restart_full_recover : 1;
@@ -135,7 +136,7 @@ struct map_session_data {
 	short equip_index[11];
 	int weight,max_weight;
 	int cart_weight,cart_max_weight,cart_num,cart_max_num;
-	char mapname[16];
+	char mapname[24];
 	int fd,new_fd;
 	short to_x,to_y;
 	short speed,prev_speed;
@@ -160,6 +161,7 @@ struct map_session_data {
 	short skillx,skilly;
 	short skillid,skilllv;
 	short skillitem,skillitemlv;
+	short skillid_old,skilllv_old;
 	struct skill_unit_group skillunit[MAX_SKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
@@ -206,8 +208,6 @@ struct map_session_data {
 	int double_add_rate,speed_add_rate,aspd_add_rate,perfect_hit_add,get_zeny_add_num;
 	short spiritball, spiritball_old;
 	int spirit_timer[10];
-	unsigned short combo_flag, skill_old;
-	unsigned int combo_delay1, combo_delay2, combo_delay3, triple_delay;
 
 	int reg_num;
 	struct script_reg *reg;
@@ -242,6 +242,8 @@ struct map_session_data {
 
 	char eventqueue[MAX_EVENTQUEUE][50];
 	int eventtimer[MAX_EVENTTIMER];
+
+	int sg_count;
 };
 
 struct npc_item_list {
@@ -322,6 +324,8 @@ struct mob_data {
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL/2];
 	char npc_event[50];
+
+	int sg_count;
 };
 struct pet_data {
 	struct block_list bl;
@@ -349,7 +353,7 @@ enum { MS_IDLE,MS_WALK,MS_ATTACK,MS_DEAD,MS_DELAY };
 enum { NONE_ATTACKABLE,ATTACKABLE };
 
 struct map_data {
-	char name[16];
+	char name[24];
 	unsigned char *gat;	// NULL‚È‚ç‰º‚Ìmap_data_other_server‚Æ‚µ‚Äˆµ‚¤
 	struct block_list **block,**block_mob;
 	int m;
@@ -373,7 +377,7 @@ struct map_data {
 	struct npc_data *npc[MAX_NPC_PER_MAP];
 };
 struct map_data_other_server {
-	char name[16];
+	char name[24];
 	unsigned char *gat;	// NULLŒÅ’è‚É‚µ‚Ä”»’f
 	unsigned long ip;
 	unsigned int port;

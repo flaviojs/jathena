@@ -1,12 +1,20 @@
 --------------
+//0738 by ぴざまん
+・ストームガストを完全に本鯖仕様に修正(3回で絶対凍結＆凍結状態の敵はSGをくらわない)
+・サフラギウムが自分にかけられるバグ修正
+	(map/)
+	skill.c
+		skill_additional_effect()、skill_attack()修正
+		skill_castend_nodamage_id()修正
+	map.h 修正
+--------------
 //0737 by ぽぽぽ
 ・アンクルが歩いている敵に効かない&複数の敵に効くのを修正。
 	(map/)
-		skill.c
-			skill_unit_onplace()、skill_unit_onout()修正
-		mob.c
-			mob_stop_walking()修正
-
+	skill.c
+		skill_unit_onplace()、skill_unit_onout()修正
+	mob.c
+		mob_stop_walking()修正
 
 --------------
 //0736 by ぴざまん
@@ -21,7 +29,6 @@
 		skill_status_change_start()修正
 	pc.c
 		pc_damage() 修正
-
 
 --------------
 //0735 by ぽぽぽ
