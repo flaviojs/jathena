@@ -138,6 +138,8 @@ int pc_calc_pvprank_timer(int tid,unsigned int tick,int id,int data);
 int pc_read_gm_account(void);
 int pc_setghosttimer(struct map_session_data *sd,int);
 int pc_delghosttimer(struct map_session_data *sd);
+int pc_setgvginvincibletimer(struct map_session_data *sd,int);
+int pc_delgvginvincibletimer(struct map_session_data *sd);
 int pc_addspiritball(struct map_session_data *sd,int,int);
 int pc_delspiritball(struct map_session_data *sd,int,int);
 

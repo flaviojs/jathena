@@ -169,7 +169,7 @@ struct map_session_data {
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
 	short sg_count;
 
-	int ghost_timer;
+	int ghost_timer,gvg_invincible_timer;
 	unsigned int canact_tick;
 	unsigned int canmove_tick;
 	int hp_sub,sp_sub;

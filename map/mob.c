@@ -338,7 +338,7 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 
 	sd=map_id2sd(md->target_id);
 	if(sd==NULL || pc_isdead(sd) || md->bl.m != sd->bl.m || sd->bl.prev == NULL || sd->ghost_timer != -1 ||
-	   distance(md->bl.x,md->bl.y,sd->bl.x,sd->bl.y)>=13 || pc_isinvisible(sd)){
+		sd->gvg_invincible_timer != -1 || distance(md->bl.x,md->bl.y,sd->bl.x,sd->bl.y)>=13 || pc_isinvisible(sd)){
 		md->target_id=0;
 		md->state.targettype = NONE_ATTACKABLE;
 		return 0;
@@ -795,7 +795,7 @@ int mob_target(struct mob_data *md,struct block_list *bl,int dist)
 		 ( (option && !(*option&0x06) ) || race==4 || race==6) ) ){
 		if(bl->type == BL_PC) {
 			sd = (struct map_session_data *)bl;
-			if(sd->ghost_timer != -1 || pc_isinvisible(sd))
+			if(sd->ghost_timer != -1 || sd->gvg_invincible_timer != -1 || pc_isinvisible(sd))
 				return 0;
 			if(mob_db[md->class].mexp <= 0 && !(mode&0x20) && race!=4 && race!=6 && sd->state.gangsterparadise)
 				return 0;
@@ -829,8 +829,8 @@ static int mob_ai_sub_hard_activesearch(struct block_list *bl,va_list ap)
 
 	// アクティブでターゲット射程内にいるなら、ロックする
 	if( mode&0x04 ){
-		if( !pc_isdead(sd) && sd->bl.m == md->bl.m && sd->ghost_timer == -1 && !pc_isinvisible(sd) &&
-			(dist=distance(md->bl.x,md->bl.y,sd->bl.x,sd->bl.y))<9){
+		if( !pc_isdead(sd) && sd->bl.m == md->bl.m && sd->ghost_timer == -1 && sd->gvg_invincible_timer == -1 &&
+			!pc_isinvisible(sd) && (dist=distance(md->bl.x,md->bl.y,sd->bl.x,sd->bl.y))<9){
 
 			race=mob_db[md->class].race;
 			if(	mob_db[md->class].mexp > 0 || mode&0x20 ||
@@ -987,7 +987,7 @@ static int mob_ai_sub_hard_mastersearch(struct block_list *bl,va_list ap)
 	// 主がいて、主がロックしていて自分はロックしていない
 	if( (mmd->target_id>0 && mmd->state.targettype == ATTACKABLE) && (!md->target_id || md->state.targettype == NONE_ATTACKABLE) ){
 		struct map_session_data *sd=map_id2sd(mmd->target_id);
-		if(sd!=NULL && !pc_isdead(sd) && sd->ghost_timer == -1 && !pc_isinvisible(sd)){
+		if(sd!=NULL && !pc_isdead(sd) && sd->ghost_timer == -1 && sd->gvg_invincible_timer == -1 && !pc_isinvisible(sd)){
 
 			race=mob_db[md->class].race;
 			if(	mob_db[md->class].mexp > 0 || mode&0x20 ||
@@ -1005,7 +1005,7 @@ static int mob_ai_sub_hard_mastersearch(struct block_list *bl,va_list ap)
 	// 主がいて、主がロックしてなくて自分はロックしている
 /*	if( (md->target_id>0 && mmd->state.targettype == ATTACKABLE) && (!mmd->target_id || mmd->state.targettype == NONE_ATTACKABLE) ){
 		struct map_session_data *sd=map_id2sd(md->target_id);
-		if(sd!=NULL && !pc_isdead(sd) && sd->ghost_timer == -1){
+		if(sd!=NULL && !pc_isdead(sd) && sd->ghost_timer == -1 && sd->gvg_invincible_timer == -1 && !pc_isinvisible(sd)){
 
 			race=mob_db[mmd->class].race;
 			if(	mob_db[md->class].mexp > 0 || mode&0x20 ||
@@ -1120,7 +1120,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 	if(md->attacked_id > 0 && mode&0x08){	// リンクモンスター
 		sd=map_id2sd(md->attacked_id);
 		if(sd) {
-			if(sd->ghost_timer == -1 && !pc_isinvisible(sd)) {
+			if(sd->ghost_timer == -1 && sd->gvg_invincible_timer == -1 && !pc_isinvisible(sd)) {
 				map_foreachinarea(mob_ai_sub_hard_linksearch,md->bl.m,
 					md->bl.x-13,md->bl.y-13,
 					md->bl.x+13,md->bl.y+13,
@@ -1133,8 +1133,8 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 	if( mode>0 && md->attacked_id>0 && (!md->target_id || md->state.targettype == NONE_ATTACKABLE
 		|| (mob_db[md->class].mode&0x04 && rand()%100<25 )  )){
 		sd=map_id2sd(md->attacked_id);
-		if(sd==NULL || md->bl.m != sd->bl.m || sd->bl.prev == NULL || sd->ghost_timer != -1 || pc_isinvisible(sd) ||
-			(dist=distance(md->bl.x,md->bl.y,sd->bl.x,sd->bl.y))>=32){
+		if(sd==NULL || md->bl.m != sd->bl.m || sd->bl.prev == NULL || sd->ghost_timer != -1 || sd->gvg_invincible_timer != -1 ||
+			pc_isinvisible(sd) || (dist=distance(md->bl.x,md->bl.y,sd->bl.x,sd->bl.y))>=32){
 			md->attacked_id=0;
 		}
 		else {
@@ -1798,7 +1798,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	}
 
 	// mvp処理
-	if(mvp_sd && mob_db[md->class].mexp ){
+	if(mvp_sd && mob_db[md->class].mexp > 0 ){
 		int mexp = mob_db[md->class].mexp*(9+count)/10;
 		clif_mvp_effect(mvp_sd);					// エフェクト
 		clif_mvp_exp(mvp_sd,mexp);	// 無条件で経験値
@@ -2099,6 +2099,7 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 
 	if(battle_config.mob_skill_log)
 		printf("MOB skill castend skill=%d, class = %d\n",md->skillid,md->class);
+	mob_stop_walking(md,0);
 
 	switch( skill_get_nk(md->skillid) )
 	{
@@ -2176,6 +2177,7 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 
 	if(battle_config.mob_skill_log)
 		printf("MOB skill castend skill=%d, class = %d\n",md->skillid,md->class);
+	mob_stop_walking(md,0);
 
 	skill_castend_pos2(&md->bl,md->skillx,md->skilly,md->skillid,md->skilllv,tick,0);
 

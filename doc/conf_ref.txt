@@ -734,6 +734,14 @@ gvg_misc_attack_damage_rate
 	シーズモードで物理攻撃と魔法攻撃以外の攻撃(鷹やトラップ等)の
 	ダメージ倍率です。デフォルトは100です。
 
+gvg_invincible_time: 10000
+	シーズモードでマップ移動した後の無敵時間です。この時間中は攻撃、
+	スキル使用ができませんがどんな攻撃も受けなくなります。
+	単位はms(ミリ秒)です。デフォルトは10000です。(10秒)
+
+gvg_continuous_attack
+	シーズモードでCtrlに左クリックによる連続攻撃を許可するかどうかです。
+	デフォルトはnoです。
 
 
 < 例 >
@@ -835,6 +843,8 @@ gvg_short_attack_damage_rate: 100
 gvg_long_attack_damage_rate: 100
 gvg_magic_attack_damage_rate: 100
 gvg_misc_attack_damage_rate: 100
+gvg_invincible_time: 10000
+gvg_continuous_attack: no
 
 
 =====================================================================ghos6. atcommand_athena.conf
