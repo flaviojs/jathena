@@ -226,6 +226,7 @@ extern struct Battle_Config {
 	int gvg_misc_damage_rate;
 	int gvg_eliminate_time;
 	int mob_changetarget_byskill;
+	int pc_attack_direction_change;
 	int monster_attack_direction_change;
 } battle_config;
 

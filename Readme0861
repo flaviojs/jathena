@@ -1,4 +1,28 @@
 --------------------
+//863 by 死神
+
+・細かい修正。
+・battle_athena.confにplayer_attack_direction_change追加。
+・mob_skill_db.txtを修正する時挑発の修正を間違って修正。
+・モンスターのスキル自爆問題修正。(未テスト)
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(db/)
+	mob_skill_db.txt 修正。
+	(map/)
+	mob.c
+		mobskill_use_id()、mobskill_use()、mobskill_castend_id() 修正。
+	pc.c
+		pc_skill()、pc_attack_timer() 修正。
+	skill.c
+		skill_castend_damage_id() 修正。
+	battle.h 修正。
+	battle.c
+		battle_weapon_attack()、battle_config_read() 修正。
+
+--------------------
 //862 by 胡蝶蘭
 
 ・mobスキル使用条件追加

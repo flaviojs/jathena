@@ -1620,7 +1620,12 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			int heal;
 			heal = skill_attack((skillid==NPC_BLOODDRAIN)?BF_WEAPON:BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
 			if( heal > 0 ){
-				clif_skill_nodamage(src,src,AL_HEAL,heal,1);
+				struct block_list tbl;
+				tbl.id = 0;
+				tbl.m = src->m;
+				tbl.x = src->x;
+				tbl.y = src->y;
+				clif_skill_nodamage(&tbl,src,AL_HEAL,heal,1);
 				battle_heal(NULL,src,heal,0);
 			}
 		}

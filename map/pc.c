@@ -2076,7 +2076,7 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 			printf("support card skill only!\n");
 		return 0;
 	}
-	if(!flag && sd->status.skill[id].id == id){	// クエスト所得ならここで条件を確認して送信する
+	if(!flag && (sd->status.skill[id].id == id || level == 0)){	// クエスト所得ならここで条件を確認して送信する
 		sd->status.skill[id].lv=level;
 		pc_calcstatus(sd,0);
 		clif_skillinfoblock(sd);
@@ -3284,7 +3284,8 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 		sd->attackabletime = tick + (sd->aspd<<1);
 	}
 	else {
-		sd->dir=sd->head_dir=map_calc_dir(&sd->bl, bl->x,bl->y );	// 向き設定
+		if(battle_config.pc_attack_direction_change)
+			sd->dir=sd->head_dir=map_calc_dir(&sd->bl, bl->x,bl->y );	// 向き設定
 
 		if(sd->sc_data[SC_COMBO].timer == -1) {
 			map_freeblock_lock();

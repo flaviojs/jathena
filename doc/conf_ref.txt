@@ -839,8 +839,12 @@ mob_changetarget_byskill: no
 	条件がskillusedのスキルをMOBがPCに使用するとき、その対象をスキル使用者にするかどうかです。
 	MOBスキル使用後にタゲは戻ります。デフォルトはnoです。
 
+player_attack_direction_change
+	プレイヤーが攻撃した時方向を変更するかどうかです。本鯖では動けない限り方向が変えらないのですがバグぽい仕様なのでデフォルトはyesです。
+	noにすれば動くことだけで方向が変えるようになります。
+
 monster_attack_direction_change
-	モンスターが攻撃した時方向を変更するかどうかです。本鯖ではモンスターは動けない限り方向が変えらないのですがバグぽい仕様なのでデフォルトはyesです。
+	モンスターが攻撃した時方向を変更するかどうかです。本鯖では動けない限り方向が変えらないのですがバグぽい仕様なのでデフォルトはyesです。
 	noにすれば動くことだけで方向が変えるようになります。
 
 
@@ -955,6 +959,7 @@ gvg_long_attack_damage_rate: 100
 gvg_magic_attack_damage_rate: 100
 gvg_misc_attack_damage_rate: 100
 mob_changetarget_byskill: no
+player_attack_direction_change:yes
 monster_attack_direction_change:yes
 
 

@@ -2278,7 +2278,8 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 		md->sc_data[SC_STEELBODY].timer != -1)
 		return 0;
 	if(md->sc_data[SC_AUTOCOUNTER].timer != -1 && md->skillid != KN_AUTOCOUNTER) return 0;
-	md->last_thinktime=tick + battle_get_adelay(&md->bl);
+	if(md->skillid != NPC_EMOTION)
+		md->last_thinktime=tick + battle_get_adelay(&md->bl);
 
 	bl=map_id2bl(md->skilltarget);
 	if(bl==NULL || bl->prev==NULL)
@@ -2302,6 +2303,10 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 		range = battle_get_range(&md->bl) - (range + 1);
 	if(range + battle_config.mob_skill_add_range < distance(md->bl.x,md->bl.y,bl->x,bl->y))
 		return 0;
+	if( ( (skill_get_inf(md->skillid)&1) || (skill_get_inf2(md->skillid)&4) ) &&	// 彼我敵対関係チェック
+		battle_check_target(&md->bl,bl, BCT_ENEMY)<=0 )
+		return 0;
+
 	md->skilldelay[md->skillidx]=tick;
 
 	if(battle_config.mob_skill_log)
@@ -2458,6 +2463,9 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 		skill_id == WZ_ICEWALL || skill_id == TF_BACKSLIDING))
 		return 0;
 
+	if(skill_get_inf2(skill_id)&0x200 && md->bl.id == target->id)
+		return 0;
+
 	// 射程と障害物チェック
 	range = skill_get_range(skill_id,skill_lv);
 	if(range < 0)
@@ -2475,17 +2483,17 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 		printf("MOB skill use target_id=%d skill=%d lv=%d cast=%d, class = %d\n",target->id,skill_id,skill_lv,casttime,md->class);
 
 	if( casttime>0 ){ 	// 詠唱が必要
-		struct mob_data *md2;
+//		struct mob_data *md2;
 		clif_skillcasting( &md->bl,
 			md->bl.id, target->id, 0,0, skill_id,casttime);
 	
 		// 詠唱反応モンスター
-		if( target->type==BL_MOB && mob_db[(md2=(struct mob_data *)target)->class].mode&0x10 &&
+/*		if( target->type==BL_MOB && mob_db[(md2=(struct mob_data *)target)->class].mode&0x10 &&
 			md2->state.state!=MS_ATTACK){
 				md2->target_id=md->bl.id;
 				md->state.targettype = ATTACKABLE;
 				md2->min_chase=13;
-		}
+		}*/
 	}
 
 	if( casttime<=0 )	// 詠唱の無いものはキャンセルされない
@@ -2714,7 +2722,7 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 
 			if( skill_get_inf(ms[i].skill_id)&2 ){
 				// 場所指定
-				struct block_list *bl;
+				struct block_list *bl = NULL;
 				int x=0,y=0;
 				if( ms[i].target<=MST_AROUND ){
 					bl= ((ms[i].target==MST_TARGET)? map_id2bl(md->target_id):
@@ -2744,7 +2752,7 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 			}else{
 				// ID指定
 				if( ms[i].target<=MST_FRIEND ){
-					struct block_list *bl;
+					struct block_list *bl = NULL;
 					bl= ((ms[i].target==MST_TARGET)? map_id2bl(md->target_id):
 						 (ms[i].target==MST_FRIEND)? &fmd->bl : &md->bl);
 					if(!mobskill_use_id(md,bl,i))
