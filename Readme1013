@@ -1,3 +1,18 @@
+//1036 by Michael
+ÅEí«â¡ Script Command:
+  getequipid(EquipPos);		EquipPos: 1-10
+  gettimetick(Type);		Type: 0 SystemTick, 1 TimeSecondTick(0-86399)
+  gettime(Type);		Type: 1 Sec, 2 Min, 3 Hour, 4 Weekday, 5, Monthday, 6 Month, 7 Year
+  gettimestr("TimeFMT", Len);	TimeFMT: Time format strinf / Len: String Length
+ 
+	(map/)
+	script.c
+		buildin_getequipid(); í«â¡
+		buildin_gettimetick(); í«â¡
+		buildin_gettime(); í«â¡
+		buildin_gettimestr(); í«â¡
+
+----------------------------------------
 //1035 by Michael
 ÅEí«â¡ GVG Script NPC edit from Aegis NPC(Chinese-big5 version), Please someone translate to Japanese.
 ÅEèCê≥ NPC Script Command - buildin_getgdskilllv()
