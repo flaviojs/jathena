@@ -1430,12 +1430,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case CR_HOLYCROSS:		/* ホーリークロス */
 	case CR_SHIELDCHARGE:
 	case CR_SHIELDBOOMERANG:
-	case LK_AURABLADE:		/* オーラブレード */
-	case LK_SPIRALPIERCE:	/* スパイラルピアース */
-	case LK_HEADCRUSH:	/* ヘッドクラッシュ */
-	case LK_JOINTBEAT:	/* ジョイントビート */
-	case PA_PRESSURE:	/* プレッシャー */
-	case PA_SACRIFICE:	/* サクリファイス */
+
 	/* 以下MOB専用 */
 	/* 単体攻撃、SP減少攻撃、遠距離攻撃、防御無視攻撃、多段攻撃 */
 	case NPC_PIERCINGATT:
@@ -1464,6 +1459,15 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case NPC_HOLYATTACK:
 	case NPC_DARKNESSATTACK:
 	case NPC_TELEKINESISATTACK:
+	case LK_AURABLADE:		/* オーラブレード */
+	case LK_SPIRALPIERCE:	/* スパイラルピアース */
+	case LK_HEADCRUSH:	/* ヘッドクラッシュ */
+	case LK_JOINTBEAT:	/* ジョイントビート */
+	case PA_PRESSURE:	/* プレッシャー */
+	case PA_SACRIFICE:	/* サクリファイス */
+	case SN_SHARPSHOOTING:			/* シャープシューティング */
+	case CG_ARROWVULCAN:			/* アローバルカン */
+	case ASC_BREAKER:				/* ソウルブレーカー */
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case NPC_DARKBREATH:
@@ -1477,6 +1481,9 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			if(sc_data[SC_BLADESTOP].timer != -1)
 				skill_status_change_end(src,SC_BLADESTOP,-1);
 		}
+		break;
+	case SN_FALCONASSAULT:			/* ファルコンアサルト */
+		skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case KN_BRANDISHSPEAR:		/* ブランディッシュスピア */
 		{
@@ -1697,6 +1704,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case MG_FROSTDIVER:			/* フロストダイバー */
 	case WZ_JUPITEL:			/* ユピテルサンダー */
 	case NPC_MAGICALATTACK:		/* MOB:魔法打撃攻撃 */
+	case HW_MAGICCRASHER:		/* マジッククラッシャー */
 		skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 

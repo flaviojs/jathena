@@ -1,4 +1,27 @@
 --------------------
+//0978 by (凸)
+・転生スキルを修正したり色々
+	スナイパー ファルコンアサルト とりあえず飛ぶだけだと思ってください
+	スナイパー シャープシューティング ダメージ増加だけど1体だけ
+	クラウン・ジプシー アローバルカン ダメージ増加と9回攻撃
+	ハイウィザード マジッククラッシャー エフェクトだけ
+	
+・アイテム交換で重量の計算が違っていたのを修正
+	(doc/)
+	client_packet.txt パケット長テーブル更新
+	(map/)
+	battle.c
+		battle_calc_misc_attack() 変更
+		battle_calc_pet_weapon_attack() 変更
+		battle_calc_mob_weapon_attack() 変更
+		battle_calc_pc_weapon_attack() 変更
+	clif.c パケット長の定義を更新
+	skill.c
+		skill_castend_damage_id() 変更
+	trade.c
+		trade_tradeadditem() 修正
+	
+--------------------
 //0977 by (凸)
 ・転生スキルを修正したり色々
 	アサシンクロス メテオアサルト エフェクトが違う？

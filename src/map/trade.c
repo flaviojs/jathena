@@ -69,6 +69,7 @@ void trade_tradeadditem(struct map_session_data *sd,int index,int amount)
 {
 	struct map_session_data *target_sd;
 	int trade_i;
+	int trade_weight=0;
 
 	if(((target_sd = map_id2sd(sd->trade_partner)) != NULL) && (sd->deal_locked < 1)){
 		if(index<2 || index>=MAX_INVENTORY+2){
@@ -79,7 +80,8 @@ void trade_tradeadditem(struct map_session_data *sd,int index,int amount)
 		}else if(amount <= sd->status.inventory[index-2].amount && amount > 0){
 			for(trade_i=0; trade_i<10;trade_i++){
 				if(sd->deal_item_amount[trade_i] == 0){
-					if(target_sd->weight + sd->inventory_data[index-2]->weight*sd->status.inventory[index-2].amount > target_sd->max_weight){
+					trade_weight+=sd->inventory_data[index-2]->weight*amount;
+					if(target_sd->weight + trade_weight > target_sd->max_weight){
 						clif_tradeitemok(sd,index,1); //fail to add item -- the player was over weighted.
 					}else{
 						sd->deal_item_index[trade_i] =index;
@@ -88,6 +90,8 @@ void trade_tradeadditem(struct map_session_data *sd,int index,int amount)
 						clif_tradeadditem(sd,target_sd,index,amount);
 					}
 					break;
+				}else{
+					trade_weight+=sd->inventory_data[sd->deal_item_index[trade_i]-2]->weight*sd->deal_item_amount[trade_i];
 				}
 			}
 		}

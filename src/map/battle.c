@@ -1891,6 +1891,13 @@ static struct Damage battle_calc_pet_weapon_attack(
 			case ASC_METEORASSAULT:			/* メテオアサルト */
 				damage = damage*(40+ 40*skill_lv)/100;
 				break;
+			case SN_SHARPSHOOTING:			/* シャープシューティング */
+				damage += damage*(30*skill_lv)/100;
+				break;
+			case CG_ARROWVULCAN:			/* アローバルカン */
+				damage = damage*(160+40*skill_lv)/100;
+				div_=9;
+				break;
 			}
 		}
 
@@ -2337,6 +2344,13 @@ static struct Damage battle_calc_mob_weapon_attack(
 				break;
 			case ASC_METEORASSAULT:			/* メテオアサルト */
 				damage = damage*(40+ 40*skill_lv)/100;
+				break;
+			case SN_SHARPSHOOTING:			/* シャープシューティング */
+				damage += damage*(30*skill_lv)/100;
+				break;
+			case CG_ARROWVULCAN:			/* アローバルカン */
+				damage = damage*(160+40*skill_lv)/100;
+				div_=9;
 				break;
 			}
 		}
@@ -3094,6 +3108,15 @@ static struct Damage battle_calc_pc_weapon_attack(
 				damage = damage*(40+ 40*skill_lv)/100;
 				damage2 = damage2*(40+ 40*skill_lv)/100;
 				break;
+			case SN_SHARPSHOOTING:			/* シャープシューティング */
+				damage += damage*(30*skill_lv)/100;
+				damage2 += damage2*(30*skill_lv)/100;
+				break;
+			case CG_ARROWVULCAN:			/* アローバルカン */
+				damage = damage*(160+40*skill_lv)/100;
+				damage2 = damage2*(160+40*skill_lv)/100;
+				div_=9;
+				break;
 			}
 		}
 		if(da == 2) { //三段掌が発動しているか
@@ -3825,6 +3848,9 @@ struct Damage  battle_calc_misc_attack(
 				if(damage > 9999) damage = 9999;
 			}
 		}
+		break;
+	case SN_FALCONASSAULT:			/* ファルコンアサルト */
+		damage=(100+50*skill_lv)/100;
 		break;
 	}
 
