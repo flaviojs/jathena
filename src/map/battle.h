@@ -168,6 +168,7 @@ extern struct Battle_Config {
 	int skillup_limit;
 	int wp_rate;
 	int pp_rate;
+	int cdp_rate;
 	int monster_active_enable;
 	int monster_damage_delay_rate;
 	int monster_loot_type;

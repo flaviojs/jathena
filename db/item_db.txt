@@ -5,12 +5,12 @@
 503,Yellow_Potion,黄ポーション,0,550,,130,,,,,10477567,2,,,,,,{ itemheal rand(175,234),0; },{}
 504,White_Potion,白ポーション,0,1200,,150,,,,,10477567,2,,,,,,{ itemheal rand(325,404),0; },{}
 505,Blue_Potion,青ポーション,0,5000,,150,,,,,10477567,2,,,,,,{ itemheal 0,rand(40,59); },{}
-506,Green_Potion,緑ポーション,0,40,,70,,,,,10477567,2,,,,,,{ sc_end SC_Poison; sc_end SC_Silence; sc_end SC_Blind; sc_end SC_Confusion; },{}
+506,Green_Potion,緑ポーション,0,40,,70,,,,,10477567,2,,,,,,{ sc_end SC_Poison; sc_end SC_DPoison; sc_end SC_Silence; sc_end SC_Blind; sc_end SC_Confusion; },{}
 507,Red_Herb,赤ハーブ,0,18,,30,,,,,10477567,2,,,,,,{ itemheal rand(18,27),0; },{}
 508,Yellow_Herb,黄ハーブ,0,40,,50,,,,,10477567,2,,,,,,{ itemheal rand(38,57),0; },{}
 509,White_Herb,白ハーブ,0,120,,70,,,,,10477567,2,,,,,,{ itemheal rand(75,114),0; },{}
 510,Blue_Herb,青ハーブ,0,60,,70,,,,,10477567,2,,,,,,{ itemheal 0,rand(15,29); },{}
-511,Green_Herb,緑ハーブ,0,10,,30,,,,,10477567,2,,,,,,{ sc_end SC_Poison; },{}
+511,Green_Herb,緑ハーブ,0,10,,30,,,,,10477567,2,,,,,,{ sc_end SC_Poison; sc_end SC_DPoison; },{}
 512,Apple,リンゴ,0,15,,20,,,,,10477567,2,,,,,,{ itemheal rand(16,21),0; },{}
 513,Banana,バナナ,0,15,,20,,,,,10477567,2,,,,,,{ itemheal rand(17,20),0; },{}
 514,Grape,ブドウ,0,200,,20,,,,,10477567,2,,,,,,{ itemheal 0,rand(10,14); },{}
@@ -24,7 +24,7 @@
 522,Mastela_Fruit,マステラの実,0,840,,30,,,,,10477567,2,,,,,,{ itemheal rand(400,599),0; },{}
 523,Holy_Water,聖水,0,20,,30,,,,,10477567,2,,,,,,{ sc_end SC_Curse; },{}
 
-525,Panacea,万能薬,0,500,,100,,,,,10477567,2,,,,,,{ sc_end SC_Poison; sc_end SC_Silence; sc_end SC_Blind; sc_end SC_Confusion; sc_end SC_Curse; },{}
+525,Panacea,万能薬,0,500,,100,,,,,10477567,2,,,,,,{ sc_end SC_Poison; sc_end SC_DPoison; sc_end SC_Silence; sc_end SC_Blind; sc_end SC_Confusion; sc_end SC_Curse; },{}
 526,Royal_Jelly,ローヤルゼリー,0,7000,,150,,,,,10477567,2,,,,,,{ itemheal rand(325,404),rand(40,59); sc_end SC_Posion; sc_end SC_Silence; sc_end SC_Blind; sc_end SC_Confusion; sc_end SC_Curse; },{}
 
 528,Monster's_Feed,化け物のエサ,0,60,,150,,,,,10477567,2,,,,,,{ itemheal rand(72,107),0; },{}

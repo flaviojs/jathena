@@ -5,6 +5,7 @@
 
 #define MAX_SKILL_DB			450
 #define MAX_SKILL_PRODUCE_DB	 150
+#define MAX_PRODUCE_RESOURCE	7
 #define MAX_SKILL_ARROW_DB	 150
 #define MAX_SKILL_ABRA_DB	 350
 
@@ -27,7 +28,7 @@ extern struct skill_db skill_db[MAX_SKILL_DB];
 struct skill_produce_db {
 	int nameid, trigger;
 	int req_skill,itemlv;
-	int mat_id[5],mat_amount[5];
+	int mat_id[MAX_PRODUCE_RESOURCE],mat_amount[MAX_PRODUCE_RESOURCE];
 };
 extern struct skill_produce_db skill_produce_db[MAX_SKILL_PRODUCE_DB];
 
@@ -296,6 +297,8 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 
 	SC_SPIDERWEB			=180,		/* スパイダーウェッブ */
 	SC_MEMORIZE				=181,		/* メモライズ */
+	SC_DPOISON				=182,		/* 猛毒 */
+	SC_EDP					=183,		/* エフェクトが判明したら移動 */
 
 	SC_INCATK				=185,	//item 682用
 	SC_INCMATK				=186,	//item 683用
@@ -303,8 +306,6 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_NOCHAT				=188,	//赤エモ状態
 	SC_SPLASHER				=189,	/* ベナムスプラッシャー */
 	SC_SELFDESTRUCTION		=190,	/* 自爆 */
-
-
 };
 extern int SkillStatusChangeTable[];
 
