@@ -3452,10 +3452,24 @@ static struct Damage battle_calc_pc_weapon_attack(
 	// 状態異常中のダメージ追加でクリティカルにも有効なスキル
 	if (sc_data) {
 		// エンチャントデッドリーポイズン
-		if (sc_data[SC_EDP].timer != -1) {
+		if (!no_cardfix && sc_data[SC_EDP].timer != -1) {
+			// 右手のみに効果がのる。カード効果無効のスキルには乗らない
 			damage += damage * (150 + sc_data[SC_EDP].val1 * 50) / 100;
-			damage2 += damage2 * (150 + sc_data[SC_EDP].val1 * 50) / 100;
 			no_cardfix = 1;
+		}
+		// サクリファイス
+		if (!skill_num && !(t_mode&0x20) && sc_data[SC_SACRIFICE].timer != -1) {
+			int mhp = battle_get_max_hp(src);
+			int dmg = mhp * (5 + sc_data[SC_SACRIFICE].val1 * 5) / 1000;
+			pc_heal(sd, -dmg, 0);
+			damage = dmg * (90 + sc_data[SC_SACRIFICE].val1 * 15) / 100;
+			damage2 = 0;
+			hitrate = 1000000;
+			s_ele = 0;
+			s_ele_ = 0;
+			sc_data[SC_SACRIFICE].val2 --;
+			if (sc_data[SC_SACRIFICE].val2 == 0)
+				skill_status_change_end(src, SC_SACRIFICE,-1);
 		}
 	}
 
@@ -3954,7 +3968,7 @@ struct Damage battle_calc_magic_attack(
 			break;
 		case WZ_STORMGUST:	// ストームガスト
 			MATK_FIX( skill_lv*40+100 ,100 );
-			blewcount|=0x10000;
+//			blewcount|=0x10000;
 			break;
 		case AL_HOLYLIGHT:	// ホーリーライト
 			MATK_FIX( 125,100 );
@@ -4484,7 +4498,8 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			battle_weapon_attack(target,src,tick,0x8000|t_sc_data[SC_AUTOCOUNTER].val1);
 		skill_status_change_end(target,SC_AUTOCOUNTER,-1);
 	}
-	if(t_sc_data && t_sc_data[SC_BLADESTOP_WAIT].timer != -1){
+	if (t_sc_data && t_sc_data[SC_BLADESTOP_WAIT].timer != -1 &&
+			!(battle_get_mode(src)&0x20)) { // ボスには無効
 		int lv = t_sc_data[SC_BLADESTOP_WAIT].val1;
 		skill_status_change_end(target,SC_BLADESTOP_WAIT,-1);
 		skill_status_change_start(src,SC_BLADESTOP,lv,1,(int)src,(int)target,skill_get_time2(MO_BLADESTOP,lv),0);

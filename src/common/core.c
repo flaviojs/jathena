@@ -69,7 +69,9 @@ int main(int argc,char **argv)
 	int next;
 
 	do_socket();
-#ifndef _WIN32
+#ifdef _WIN32
+	atexit(sig_proc);
+#else
 	signal(SIGPIPE,SIG_IGN);
 	signal(SIGTERM,sig_proc);
 	signal(SIGINT,sig_proc);

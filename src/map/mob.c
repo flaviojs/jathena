@@ -1877,7 +1877,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	int mvp_damage,max_hp;
 	unsigned int tick = gettick();
 	struct map_session_data *mvp_sd = NULL, *second_sd = NULL,*third_sd = NULL;
-	double dmg_rate,tdmg,temp;
+	double tdmg,temp;
 	struct item item;
 	int ret;
 	int drop_rate;
@@ -2065,9 +2065,9 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 			mvp_damage=md->dmglog[i].dmg;
 		}
 	}
-	if((double)max_hp < tdmg)
-		dmg_rate = ((double)max_hp) / tdmg;
-	else dmg_rate = 1;
+//	if((double)max_hp < tdmg)
+//		dmg_rate = ((double)max_hp) / tdmg;
+//	else dmg_rate = 1;
 
 	// ŒoŒ±’l‚Ì•ª”z
 	for(i=0;i<DAMAGELOG_SIZE;i++){
@@ -2077,7 +2077,8 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		if(tmpsd[i]==NULL || tmpsd[i]->bl.m != md->bl.m)
 			continue;
 
-		per = ((double)md->dmglog[i].dmg)*(9.+(double)((count > 6)? 6:count))/10./((double)max_hp) * dmg_rate;
+//		per = ((double)md->dmglog[i].dmg)*(9.+(double)((count > 6)? 6:count))/10./((double)max_hp) * dmg_rate;
+		per = ((double)md->dmglog[i].dmg)*(9.+(double)((count > 6)? 6:count))/10./tdmg;
 		temp = ((double)mob_db[md->class].base_exp * (double)battle_config.base_exp_rate / 100. * per);
 		base_exp = (temp > 2147483647.)? 0x7fffffff:(int)temp;
 		if(mob_db[md->class].base_exp > 0 && base_exp < 1) base_exp = 1;

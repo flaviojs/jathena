@@ -1539,7 +1539,7 @@ unsigned char* parse_syntax_close_sub(unsigned char *p,int *flag) {
 	} else if(syntax.curly[pos].type == TYPE_DO) {
 		int l;
 		char label[256];
-		char *p2;
+		unsigned char *p2;
 
 		if(syntax.curly[pos].flag) {
 			// Œ»İ’n‚Ìƒ‰ƒxƒ‹Œ`¬‚·‚é(continue ‚Å‚±‚±‚É—ˆ‚é)

@@ -1009,6 +1009,51 @@ int npc_convertlabel_db(void *key,void *data,va_list ap)
  * script行解析
  *------------------------------------------
  */
+
+// 全角かどうか判定(shift_jis)
+#define is_zenkaku(x) ((x>=0x80 && x<=0x9F) || x>=0xE0)
+
+static void npc_parse_script_line(unsigned char *p,int *curly_count,int line) {
+	int i = strlen(p),j;
+	int string_flag = 0;
+	for(j = 0; j < i ; j++) {
+		if(string_flag) {
+			if(p[j] == '\"') {
+				string_flag = 0;
+			} else if(p[j] == '\\') {
+				// エスケープ
+				j++;
+			} else if(is_zenkaku(p[j])) {
+				// 全角文字
+				j++;
+			}
+		} else {
+			if(p[j] == '\"') {
+				string_flag = 1;
+			} else if(p[j] == '}') {
+				if(*curly_count == 0) {
+					// 抜けるのはfor だけ
+					break;
+				} else {
+					(*curly_count)--;
+				}
+			} else if(p[j] == '{') {
+				(*curly_count)++;
+			} else if(p[j] == '/' && p[j+1] == '/') {
+				// コメント
+				break;
+			} else if(is_zenkaku(p[j])) {
+				// 全角文字
+				j++;
+			}
+		}
+	}
+	if(string_flag) {
+		printf("Missing '\"' at line %d\n",line);
+		exit(1);
+	}
+}
+
 static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line,FILE *fp,int *lines)
 {
 	int x,y,dir,m,xs,ys,class;
@@ -1042,48 +1087,20 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 		// スクリプトの解析
 		// { , } の入れ子許したらこっちでも簡易解析しないといけなくなったりもする
 		int curly_count = 0;
-		int string_flag = 0;
-		int j;
 		srcbuf=(char *)aCalloc(srcsize,sizeof(char));
 		if (strchr(first_line,'{')) {
 			strcpy(srcbuf,strchr(first_line,'{'));
 			startline=*lines;
 		} else
 			srcbuf[0]=0;
-		while(1) {
+		npc_parse_script_line(srcbuf,&curly_count,*lines);
+		while(curly_count > 0) {
+			// line の中に文字列 , {} が含まれているか調査
 			fgets(line,1020,fp);
 			(*lines)++;
+			npc_parse_script_line(line,&curly_count,*lines);
 			if (feof(fp))
 				break;
-
-			// line の中に文字列 , {} が含まれているか調査
-			i = strlen(line);
-			for(j = 0; j < i ; j++) {
-				if(string_flag) {
-					if(line[j] == '\"' && (j <= 0 || line[j-1] != '\\')) {
-						string_flag = 0;
-					}
-				} else {
-					if(line[j] == '\"') {
-						string_flag = 1;
-					} else if(line[j] == '}') {
-						if(curly_count == 0) {
-							// 抜けるのはfor だけ
-							break;
-						} else {
-							curly_count--;
-						}
-					} else if(line[j] == '{') {
-						curly_count++;
-					} else if(line[j] == '/' && line[j+1] == '/') {
-						// コメント
-						break;
-					} else if(*(unsigned char*)(line + j) >= 0x80) {
-						// 全角文字
-						j++;
-					}
-				}
-			}
 			if (strlen(srcbuf)+strlen(line)+1>=srcsize) {
 				srcsize += 65536;
 				srcbuf = (char *)aRealloc(srcbuf, srcsize);
@@ -1096,9 +1113,6 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 				}
 			} else
 				strcat(srcbuf,line);
-			if(!string_flag && line[j] == '}' && curly_count == 0) {
-				break;
-			}
 		}
 		if(curly_count > 0) {
 			printf("warning: Missing right curly at line %d\n",*lines);
@@ -1308,7 +1322,7 @@ static int npc_parse_function(char *w1,char *w2,char *w3,char *w4,char *first_li
 	int srcsize=65536;
 	int startline=0;
 	char line[1024];
-	int i;
+	int curly_count = 0;
 //	struct dbt *label_db;
 	char *p;
 
@@ -1319,12 +1333,11 @@ static int npc_parse_function(char *w1,char *w2,char *w3,char *w4,char *first_li
 		startline=*lines;
 	} else
 		srcbuf[0]=0;
-	while(1) {
-		for(i=strlen(srcbuf)-1;i>=0 && isspace(srcbuf[i]);i--);
-		if (i>=0 && srcbuf[i]=='}')
-			break;
+	npc_parse_script_line(srcbuf,&curly_count,*lines);
+	while(curly_count > 0) {
 		fgets(line,1020,fp);
 		(*lines)++;
+		npc_parse_script_line(line,&curly_count,*lines);
 		if (feof(fp))
 			break;
 		if (strlen(srcbuf)+strlen(line)+1>=srcsize) {
@@ -1340,7 +1353,13 @@ static int npc_parse_function(char *w1,char *w2,char *w3,char *w4,char *first_li
 		} else
 			strcat(srcbuf,line);
 	}
-	script=parse_script(srcbuf,startline);
+	if(curly_count > 0) {
+		printf("warning: Missing right curly at line %d\n",*lines);
+		script=NULL;
+		exit(1);
+	} else {
+		script=parse_script(srcbuf,startline);
+	}
 	if (script==NULL) {
 		// script parse error?
 		free(srcbuf);

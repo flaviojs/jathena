@@ -299,7 +299,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_MEMORIZE				=181,		/* メモライズ */
 	SC_DPOISON				=182,		/* 猛毒 */
 	SC_EDP					=183,		/* エフェクトが判明したら移動 */
-
+	SC_SACRIFICE			=184,		/* サクリファイス */
 	SC_INCATK				=185,	//item 682用
 	SC_INCMATK				=186,	//item 683用
 	SC_WEDDING				=187,	//結婚用(結婚衣裳になって歩くのが遅いとか)
