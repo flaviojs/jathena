@@ -3129,7 +3129,7 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 			}
 			else
 				battle_weapon_attack(&sd->bl,bl,tick,0);
-			if(sd->status.pet_id > 0 && sd->pd && sd->petDB)
+			if(sd->status.pet_id > 0 && sd->pd && sd->petDB && battle_config.pet_attack_support)
 				pet_target_check(sd,bl,0);
 			map_freeblock_unlock();
 			if(sd->skilltimer != -1 && (skill = pc_checkskill(sd,SA_FREECAST)) > 0 ) // フリーキャスト
@@ -3609,10 +3609,8 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 
 	sd->status.hp-=damage;
 
-/*
-	if(sd->status.pet_id > 0 && sd->pd && sd->petDB)
+	if(sd->status.pet_id > 0 && sd->pd && sd->petDB && battle_config.pet_damage_support)
 		pet_target_check(sd,src,1);
-*/
 
 	if(sd->status.hp>0){
 		// まだ生きているならHP更新

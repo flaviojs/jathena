@@ -3268,7 +3268,8 @@ int battle_config_read(const char *cfgName)
 	battle_config.pet_friendly_rate=100;
 	battle_config.pet_hungry_delay_rate=100;
 	battle_config.pet_status_support=0;
-	battle_config.pet_support=0;
+	battle_config.pet_attack_support=0;
+	battle_config.pet_damage_support=0;
 	battle_config.pet_support_rate=100;
 	battle_config.pet_attack_exp_to_master=0;
 	battle_config.skill_min_damage=0;
@@ -3359,7 +3360,8 @@ int battle_config_read(const char *cfgName)
 			{ "pet_friendly_rate",		&battle_config.pet_friendly_rate	},
 			{ "pet_hungry_delay_rate",	&battle_config.pet_hungry_delay_rate	},
 			{ "pet_status_support",	&battle_config.pet_status_support },
-			{ "pet_support",	&battle_config.pet_support },
+			{ "pet_attack_support",	&battle_config.pet_attack_support },
+			{ "pet_damage_support",	&battle_config.pet_damage_support },
 			{ "pet_support_rate",	&battle_config.pet_support_rate },
 			{ "pet_attack_exp_to_master",	&battle_config.pet_attack_exp_to_master },
 			{ "skill_min_damage",		&battle_config.skill_min_damage		},

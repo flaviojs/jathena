@@ -160,7 +160,8 @@ extern struct Battle_Config {
 	int pet_friendly_rate;
 	int pet_hungry_delay_rate;
 	int pet_status_support;
-	int pet_support;
+	int pet_attack_support;
+	int pet_damage_support;
 	int pet_support_rate;
 	int pet_attack_exp_to_master;
 	int skill_min_damage;

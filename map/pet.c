@@ -269,7 +269,7 @@ int pet_target_check(struct map_session_data *sd,struct block_list *bl,int type)
 	struct mob_data *md;
 	int rate,mode,race;
 
-	if(bl && pd && bl->type == BL_MOB && battle_config.pet_support && sd->pet.intimate > 900 &&
+	if(bl && pd && bl->type == BL_MOB && sd->pet.intimate > 900 &&
 		pd->class != battle_get_class(bl) && pd->state.state != MS_DELAY) {
 		mode=mob_db[pd->class].mode;
 		race=mob_db[pd->class].race;
