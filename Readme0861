@@ -1,11 +1,37 @@
 --------------------
+//862 by 胡蝶蘭
+
+・mobスキル使用条件追加
+	・friendhpltmaxrate : 味方のHPが指定％未満のとき(テスト済み)
+	・friendstatuson  : 味方が指定したステータス異常になっているとき
+	・friendstatusoff : 味方が指定したステータス異常になっていないとき
+	・mystatuson  : 自分が指定したステータス異常になっているとき
+	・mystatusoff : 自分が指定したステータス異常になっていないとき
+	ステータス系は未テストです。mob_skill_db.txtに指定方法を書いています。
+	たとえば自分が毒かどうかは mystatus,poison で、
+	ハイディング中かどうかは mystatuson,hiding で指定します。
+・mobスキル使用ターゲット追加
+	・friend : 味方
+	・around : 自分の周囲（現在の仕様では周囲81マス）のどれか
+	・around1～around4 : 自分の周囲９,25,49,81マスのどれか(範囲を明示)
+	friendは条件がfriend系(friendhpltmaxrateなど)のときに使用可能。
+	around系は場所指定スキルで使用可能。
+
+	(map/)
+	mob.c / mob.h
+		mob_getfriend*()追加、mobskill_use()修正など
+	(db/)
+	mob_skill_db.txt
+		最初の説明のみ修正。データは修正していません。
+
+--------------------
 //861 by いど
 
 ・サーバーsnapshot
 
 --------------------
 
-//0860以前の変更点はReadmeを参照してください
+//0827以前の変更点はReadmeを参照してください
 
 --------------------
 
