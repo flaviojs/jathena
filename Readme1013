@@ -1,3 +1,14 @@
+//1038 by Plala
+・転職NPC関連の重大なバグ修正
+	(script/npc/job)
+	npc_job_aco.txt 修正
+	npc_job_merchant.txt 修正
+	npc_job_thief.txt 修正
+
+	・上記NPCで途中までクエストを進めて他の職に転職すると、
+	再び転職可能だった点を修正しました
+
+
 --------------------
 //1037 by 胡蝶蘭
 

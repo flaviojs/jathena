@@ -85,8 +85,8 @@ Ltwice:
 //==============================================================================
 moc_prydb1.gat,42,133,2	script	ギルド関係者	118,{
 	if (Class == 6) goto Ltwice;
-	if (change_thief == 2) goto LStart2;
-	if (change_thief == 3) goto LStart3;
+	if ((change_thief == 2) && (Class == 0)) goto LStart2;
+	if ((change_thief == 3) && (Class == 0)) goto LStart3;
 	if (Class == 0) goto Lnovice;
 	mes "[シーフギルド関係者]";
 	mes "おーい、おーい、そこの奴！";
@@ -180,6 +180,7 @@ Ltwice:
 }
 //==============================================================================
 moc_prydb1.gat,39,129,2	script	ギルド関係者	69,{
+	if (new_magin == 1) goto L_magin;
 	if (Class == 6) goto Ltwice;
 	if (change_thief == 1) goto LStart2;
 	if (change_thief == 2) goto LStart3;
@@ -202,6 +203,13 @@ moc_prydb1.gat,39,129,2	script	ギルド関係者	69,{
 		if (Sex == 0) mes "ほら、姉ちゃん。";
 	   	mes "何しに来た？帰れ、帰れ！";
 		close;
+L_magin:
+	mes "[シーフギルド関係者]";
+	mes "ん？それは・・・";
+	mes "そこにいる奴に話かけな";
+	enablenpc "magin1";
+	addtimer 5000,"magin0000";
+	close;
 Lnovice:
 	mes "[シーフギルド関係者]";
 	if (Sex == 1) goto Lman;

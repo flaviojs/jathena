@@ -4,7 +4,7 @@
 
 alberta_in.gat,53,43,6	script	商人組合員	86,{
 	mes "[組合員マンス]";
-	if (JOB_MERCHANT_Q != 2) goto L_START_1;
+	if ((JOB_MERCHANT_Q != 2) || (Class != 0)) goto L_START_1;
 		set JOB_MERCHANT_Q,0;
 		set JOB_MERCHANT_Q2,0;
 		set NOV_3_MERCHANT,0;
