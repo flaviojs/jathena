@@ -15,6 +15,7 @@
 #include "battle.h"
 #include "mob.h"
 #include "npc.h"
+#include "script.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -422,7 +423,7 @@ int pet_stop_walking(struct pet_data *pd,int type)
 static int pet_hungry(int tid,unsigned int tick,int id,int data)
 {
 	struct map_session_data *sd;
-	int interval;
+	int interval,t;
 
 	sd=map_id2sd(id);
 	if(sd==NULL)
@@ -437,11 +438,19 @@ static int pet_hungry(int tid,unsigned int tick,int id,int data)
 		return 1;
 
 	sd->pet.hungry--;
+	t = sd->pet.intimate;
 	if(sd->pet.hungry < 0) {
 		sd->pet.hungry = 0;
 		sd->pet.intimate--;
-		if(sd->pet.intimate < 0)
+		if(sd->pet.intimate <= 0) {
 			sd->pet.intimate = 0;
+			if(battle_config.pet_status_support && t > 0) {
+				if(sd->bl.prev != NULL)
+					pc_calcstatus(sd,0);
+				else
+					pc_calcstatus(sd,2);
+			}
+		}
 		clif_send_petdata(sd,1,sd->pet.intimate);
 	}
 	clif_send_petdata(sd,2,sd->pet.hungry);
@@ -547,6 +556,13 @@ int pet_return_egg(struct map_session_data *sd)
 			clif_additem(sd,0,0,flag);
 			map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
 		}
+		if(battle_config.pet_status_support && sd->pet.intimate > 0) {
+			if(sd->bl.prev != NULL)
+				pc_calcstatus(sd,0);
+			else
+				pc_calcstatus(sd,2);
+		}
+
 		intif_save_petdata(sd->status.account_id,&sd->pet);
 		pc_makesavestatus(sd);
 		chrif_save(sd);
@@ -677,6 +693,12 @@ int pet_recv_petdata(int account_id,struct s_pet *p,int flag)
 //			clif_pet_equip(sd->pd,sd->pet.equip);
 			clif_send_petstatus(sd);
 		}
+	}
+	if(battle_config.pet_status_support && sd->pet.intimate > 0) {
+		if(sd->bl.prev != NULL)
+			pc_calcstatus(sd,0);
+		else
+			pc_calcstatus(sd,2);
 	}
 
 	return 0;
@@ -855,7 +877,7 @@ int pet_unequipitem(struct map_session_data *sd)
 
 int pet_food(struct map_session_data *sd)
 {
-	int i,k;
+	int i,k,t;
 
 	if(sd->petDB == NULL)
 		return 1;
@@ -865,6 +887,7 @@ int pet_food(struct map_session_data *sd)
 		return 1;
 	}
 	pc_delitem(sd,i,1,0);
+	t = sd->pet.intimate;
 	if(sd->pet.hungry > 90)
 		sd->pet.intimate -= sd->petDB->r_full;
 	else if(sd->pet.hungry > 75) {
@@ -884,8 +907,15 @@ int pet_food(struct map_session_data *sd)
 			k = sd->petDB->r_hungry;
 		sd->pet.intimate += k;
 	}
-	if(sd->pet.intimate < 0)
+	if(sd->pet.intimate <= 0) {
 		sd->pet.intimate = 0;
+		if(battle_config.pet_status_support && t > 0) {
+			if(sd->bl.prev != NULL)
+				pc_calcstatus(sd,0);
+			else
+				pc_calcstatus(sd,2);
+		}
+	}
 	else if(sd->pet.intimate > 1000)
 		sd->pet.intimate = 1000;
 	sd->pet.hungry += sd->petDB->fullness;
@@ -960,7 +990,7 @@ static int pet_ai_sub_hard(struct pet_data *pd,unsigned int tick)
 		return 0;
 	pd->last_thinktime=tick;
 
-	if(pd->state.state == MS_DELAY)
+	if(pd->state.state == MS_DELAY || pd->bl.m != sd->bl.m)
 		return 0;
 
 	if(sd->pet.intimate > 0) {
@@ -1083,7 +1113,7 @@ int read_petdb()
 	}
 	while(fgets(line,1020,fp)){
 		int nameid,i;
-		char *str[55],*p,*np;
+		char *str[32],*p,*np;
 
 		if(line[0] == '/' && line[1] == '/')
 			continue;
@@ -1126,6 +1156,10 @@ int read_petdb()
 		pet_db[j].attack_rate=atoi(str[17]);
 		pet_db[j].defence_attack_rate=atoi(str[18]);
 		pet_db[j].change_target_rate=atoi(str[19]);
+		pet_db[j].script = NULL;
+		if((np=strchr(p,'{'))==NULL)
+			continue;
+		pet_db[j].script = parse_script(np,0);
 		j++;
 	}
 	fclose(fp);

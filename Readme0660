@@ -1,4 +1,41 @@
 --------------
+//0694 by 死神
+
+・バグ修正と細かい修正。
+・bCriticalRateが正しく適用されなかった問題修正。
+・ペットによるステータスボーナス追加。ステータスボーナスは装備の
+スクリプトによって設定します。ただペットによるボーナスはカードによる物と同じ扱いをします。そして属性の適用は一番優先順位低いです。今は何も入ってませんが...
+	(conf/)
+	battle_athena.conf 修正。
+	(db/)
+	const.txt 修正。
+	pet_db.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	conf_ref.txt 修正。
+	db_ref.txt 修正。
+	(map/)
+	map.h 修正。
+	map.c
+		map_quit() 修正。
+	battle.h 修正。
+	battle.c
+		battle_calc_pc_weapon_attack()、battle_weapon_attack() 修正。
+		battle_calc_magic_attack()、battle_calc_misc_attack() 修正。
+		battle_config_read() 修正。
+	pc.c
+		pc_calcstatus()、pc_bonus()、pc_setpos()、pc_authok() 修正。
+		pc_damage()、pc_autosave_sub() 修正。
+	pet.h 修正。
+	pet.c
+		pet_hungry()、pet_birth_process()、pet_recv_petdata()、pet_food() 修正。
+		pet_return_egg()、pet_ai_sub_hard()、read_petdb() 修正。
+	clif.c
+		clif_sendegg()、clif_parse_LoadEndAck() 修正。
+	atcommand.c 修正。
+	makefile 修正。
+
+--------------
 //0693 by 胡蝶蘭
 
 ・SC_*の列挙表をリナンバリング
@@ -41,7 +78,6 @@
 		skill_status_change_timer()変更
 	battle.c
 		battle_calc_misc_attack()修正
-
 
 --------------
 //0692 by 胡蝶蘭

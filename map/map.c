@@ -734,6 +734,7 @@ int map_quit(struct map_session_data *sd)
 	pc_cleareventtimer(sd);	// イベントタイマを破棄する
 
 	storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
+
 	skill_castcancel(&sd->bl);	// 詠唱を中断する
 	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
 	skill_clear_unitgroup(&sd->bl);	// スキルユニットグループの削除
@@ -743,7 +744,10 @@ int map_quit(struct map_session_data *sd)
 	pc_delghosttimer(sd);
 	pc_delspiritball(sd,sd->spiritball,1);
 
+	pc_calcstatus(sd,4);
+
 	clif_clearchar_area(&sd->bl,2);
+
 	if(sd->status.pet_id && sd->pd) {
 		pet_remove_map(sd);
 		if(sd->pet.intimate <= 0) {
@@ -755,6 +759,7 @@ int map_quit(struct map_session_data *sd)
 		else
 			intif_save_petdata(sd->status.account_id,&sd->pet);
 	}
+
 	pc_makesavestatus(sd);
 	chrif_save(sd);
 	storage_storage_save(sd);

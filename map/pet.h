@@ -18,18 +18,27 @@ struct pet_db {
 	int die;
 	int capture;
 	int speed;
+	char s_perfor;
+	int talk_convert_class;
+	int attack_rate;
+	int defence_attack_rate;
+	int change_target_rate;
+	char *script;
 };
 extern struct pet_db pet_db[MAX_PET_DB];
 
 enum { PET_CLASS,PET_CATCH,PET_EGG,PET_EQUIP,PET_FOOD };
 
-int pet_changestate(struct npc_data *nd,int state);
-int pet_walktoxy(struct npc_data *nd,int x,int y,int easy,int dir);
-int pet_stop_walking(struct map_session_data *sd,int dir);
+int pet_hungry_val(struct map_session_data *sd);
+int pet_target_check(struct map_session_data *sd,struct block_list *bl,int type);
+int pet_stopattack(struct pet_data *pd);
+int pet_changestate(struct pet_data *pd,int state,int type);
+int pet_walktoxy(struct pet_data *pd,int x,int y);
+int pet_stop_walking(struct pet_data *pd,int type);
 int search_petDB_index(int key,int type);
 int pet_hungry_timer_delete(struct map_session_data *sd);
 int pet_remove_map(struct map_session_data *sd);
-int pet_npc_init(struct map_session_data *sd);
+int pet_data_init(struct map_session_data *sd);
 int pet_birth_process(struct map_session_data *sd);
 int pet_recv_petdata(int account_id,struct s_pet *p,int flag);
 int pet_select_egg(struct map_session_data *sd,short egg_index);

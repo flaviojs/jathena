@@ -1676,7 +1676,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	damage = damage2 = sd->base_atk;
 	atkmin = atkmin_ = dex;
 	sd->state.arrow_atk = 0;
-	if(sd->weapontype1 == 11) {
+	if(sd->status.weapon == 11) {
 		atkmin = watk * ((dex<watk)? dex:watk);
 		flag=(flag&~BF_RANGEMASK)|BF_LONG;
 		s_ele = sd->arrow_ele;
@@ -1697,7 +1697,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		atkmax_ = watk_;
 	}
 	else if( target->type==BL_MOB ){
-		if(pc_isriding(sd) && (sd->weapontype1==4 || sd->weapontype1==5) && t_size==1) {	//ペコ騎乗していて、槍で中型を攻撃
+		if(pc_isriding(sd) && (sd->status.weapon==4 || sd->status.weapon==5) && t_size==1) {	//ペコ騎乗していて、槍で中型を攻撃
 			atkmax = watk;
 			atkmax_ = watk_;
 		}
@@ -1753,7 +1753,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 
 		if(sd->state.arrow_atk)
 			cri += sd->arrow_cri*10;
-		if(sd->weapontype1 == 16)
+		if(sd->status.weapon == 16)
 				// カタールの場合、クリティカルを倍に
 			cri <<=1;
 		cri -= battle_get_luk(target) * 3;
@@ -1824,8 +1824,11 @@ static struct Damage battle_calc_pc_weapon_attack(
 			damage2 = (damage2 * sd->atk_rate)/100;
 		}
 
-		if(sd->state.arrow_atk && sd->arrow_atk > 0)
-			damage += rand()%(sd->arrow_atk+1);
+		if(sd->state.arrow_atk) {
+			if(sd->arrow_atk > 0)
+				damage += rand()%(sd->arrow_atk+1);
+			hitrate += sd->arrow_hit;
+		}
 
 		if(skill_num != MO_INVESTIGATE) {
 			if(sd->def_ratio_atk_ele & (1<<t_ele) || sd->def_ratio_atk_race & (1<<t_race)) {
@@ -2224,7 +2227,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		type = 0x08;
 	}
 
-	if(sd->weapontype1 == 16) {
+	if(sd->status.weapon == 16) {
 		// カタール追撃ダメージ
 		skill = pc_checkskill(sd,TF_DOUBLE);
 		damage2 = damage * (1 + (skill * 2))/100;
@@ -2268,7 +2271,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 			damage = 3;
 	}
 
-	if( tsd && tsd->special_state.no_weapon_damage)
+	if( tsd && tsd->special_state.no_weapon_damage && skill_num != CR_GRANDCROSS)
 		damage = damage2 = 0;
 
 	if(skill_num != CR_GRANDCROSS) {
@@ -2355,6 +2358,7 @@ struct Damage battle_calc_magic_attack(
 		sd->state.attack_type = BF_MAGIC;
 		if(sd->matk_rate != 100)
 			MATK_FIX(sd->matk_rate,100);
+		sd->state.arrow_atk = 0;
 	}
 	if( target->type==BL_PC )
 		tsd=(struct map_session_data *)target;
@@ -2573,16 +2577,16 @@ struct Damage  battle_calc_misc_attack(
 
 	int aflag=BF_MISC|BF_LONG|BF_SKILL;
 
-	if(bl->type == BL_PC)
-		((struct map_session_data *)bl)->state.attack_type = BF_MISC;
-
 	if(target->type == BL_PET) {
 		memset(&md,0,sizeof(md));
 		return md;
 	}
 
-	if( bl->type==BL_PC )
+	if(bl->type == BL_PC) {
 		sd=(struct map_session_data *)bl;
+		sd->state.attack_type = BF_MISC;
+		sd->state.arrow_atk = 0;
+	}
 
 	if( target->type==BL_PC )
 		tsd=(struct map_session_data *)target;
@@ -2712,7 +2716,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		// 攻撃対象となりうるので攻撃
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(src,target,0,0,0);
-		if(src->type == BL_PC && sd->weapontype1 == 11) {
+		if(src->type == BL_PC && sd->status.weapon == 11) {
 			if(sd->equip_index[10] >= 0) {
 				if(battle_config.arrow_decrement)
 					pc_delitem(sd,sd->equip_index[10],1,0);
@@ -2927,6 +2931,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.pet_rename=0;
 	battle_config.pet_friendly_rate=100;
 	battle_config.pet_hungry_delay_rate=100;
+	battle_config.pet_status_support=0;
 	battle_config.pet_support=0;
 	battle_config.pet_support_rate=100;
 	battle_config.pet_attack_exp_to_master=0;
@@ -3004,6 +3009,7 @@ int battle_config_read(const char *cfgName)
 			{ "pet_rename",				&battle_config.pet_rename		},
 			{ "pet_friendly_rate",		&battle_config.pet_friendly_rate	},
 			{ "pet_hungry_delay_rate",	&battle_config.pet_hungry_delay_rate	},
+			{ "pet_status_support",	&battle_config.pet_status_support },
 			{ "pet_support",	&battle_config.pet_support },
 			{ "pet_support_rate",	&battle_config.pet_support_rate },
 			{ "pet_attack_exp_to_master",	&battle_config.pet_attack_exp_to_master },

@@ -545,7 +545,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 		sd->status.last_point.x , sd->status.last_point.y, 0);
 
 	// pet
-	if(sd->status.pet_id)
+	if(sd->status.pet_id > 0)
 		intif_request_petdata(sd->status.account_id,sd->status.char_id,sd->status.pet_id);
 
 	// パーティ、ギルドデータの要求
@@ -684,6 +684,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	struct skill b_skill[MAX_SKILL];
 	int i,bl,index;
 	int skill,aspd_rate,wele,wele_,def_ele,refinedef=0;
+	int pele=0,pdef_ele=0;
 	int str,dstr,dex;
 
 	b_speed = sd->speed;
@@ -770,6 +771,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->base_atk=0;
 	sd->arrow_atk=0;
 	sd->arrow_ele=0;
+	sd->arrow_hit=0;
+	sd->arrow_range=0;
 	sd->nhealhp=sd->nhealsp=sd->nshealhp=sd->nshealsp=sd->nsshealhp=sd->nsshealsp=0;
 	memset(sd->addele,0,sizeof(sd->addele));
 	memset(sd->addrace,0,sizeof(sd->addrace));
@@ -867,6 +870,13 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	wele = sd->atk_ele;
 	wele_ = sd->atk_ele_;
 	def_ele = sd->def_ele;
+	if(battle_config.pet_status_support) {
+		if(sd->status.pet_id > 0 && sd->petDB && sd->pet.intimate > 0)
+			run_script(sd->petDB->script,0,sd->bl.id,0);
+		pele = sd->atk_ele;
+		pdef_ele = sd->def_ele;
+		sd->atk_ele = sd->def_ele = 0;
+	}
 	memcpy(sd->paramcard,sd->parame,sizeof(sd->paramcard));
 
 	// 装備品によるステータス変化はここで実行
@@ -939,12 +949,20 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if(sd->attackrange_ < 1) sd->attackrange_ = 1;
 	if(sd->attackrange < sd->attackrange_)
 		sd->attackrange = sd->attackrange_;
+	if(sd->status.weapon == 11)
+		sd->attackrange += sd->arrow_range;
 	if(wele > 0)
 		sd->atk_ele = wele;
 	if(wele_ > 0)
 		sd->atk_ele_ = wele_;
 	if(def_ele > 0)
 		sd->def_ele = def_ele;
+	if(battle_config.pet_status_support) {
+		if(pele > 0 && !sd->atk_ele)
+			sd->atk_ele = pele;
+		if(pdef_ele > 0 && !sd->def_ele)
+			sd->def_ele = pdef_ele;
+	}
 	sd->double_rate += sd->double_add_rate;
 	sd->perfect_hit += sd->perfect_hit_add;
 	sd->get_zeny_num += sd->get_zeny_add_num;
@@ -1003,7 +1021,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->paramc[4]=sd->status.dex+sd->paramb[4]+sd->parame[4];
 	sd->paramc[5]=sd->status.luk+sd->paramb[5]+sd->parame[5];
 
-	if(sd->weapontype1 == 11 || sd->weapontype1 == 13 || sd->weapontype1 == 14) {
+	if(sd->status.weapon == 11 || sd->status.weapon == 13 || sd->status.weapon == 14) {
 		str = sd->paramc[4];
 		dex = sd->paramc[0];
 	}
@@ -1045,7 +1063,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	if( (skill=pc_checkskill(sd,AC_VULTURE))>0){	// ワシの目
 		sd->hit += skill;
-		if(sd->weapontype1 == 11)
+		if(sd->status.weapon == 11)
 			sd->attackrange += skill;
 	}
 	if( (skill=pc_checkskill(sd,TF_MISS))>0 )	// 回避率増加
@@ -1246,12 +1264,16 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->speed = sd->speed*(175 - skill*5)/100;
 	}
 
-	if(first&1) {
+	if(first&4)
+		return 0;
+	if(first&3) {
 		clif_updatestatus(sd,SP_SPEED);
 		clif_updatestatus(sd,SP_MAXHP);
 		clif_updatestatus(sd,SP_MAXSP);
-		clif_updatestatus(sd,SP_HP);
-		clif_updatestatus(sd,SP_SP);
+		if(first&1) {
+			clif_updatestatus(sd,SP_HP);
+			clif_updatestatus(sd,SP_SP);
+		}
 		return 0;
 	}
 
@@ -1382,7 +1404,10 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 			sd->mdef+=val;
 		break;
 	case SP_HIT:
-		sd->hit+=val;
+		if(sd->state.lr_flag != 2)
+			sd->hit+=val;
+		else
+			sd->arrow_hit+=val;
 		break;
 	case SP_FLEE1:
 		if(sd->state.lr_flag != 2)
@@ -1437,8 +1462,10 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 	case SP_ATTACKRANGE:
 		if(!sd->state.lr_flag)
 			sd->attackrange += val;
+		else if(sd->state.lr_flag == 1)
+			sd->attackrange_ += val;
 		else if(sd->state.lr_flag == 2)
-			sd->attackrange += val;
+			sd->arrow_range += val;
 		break;
 	case SP_SPEED:
 		if(sd->state.lr_flag != 2)
@@ -1447,7 +1474,7 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 	case SP_SPEED_RATE:
 		if(sd->state.lr_flag != 2) {
 			if(sd->speed_rate > 100-val)
-				sd->aspd_rate = 100-val;
+				sd->speed_rate = 100-val;
 		}
 		break;
 	case SP_SPEED_ADDRATE:
@@ -2341,7 +2368,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 	pc_stop_walking(sd,0);		// 歩行中断
 	pc_stopattack(sd);			// 攻撃中断
 	
-	if(sd->status.pet_id && sd->pd && sd->pet.intimate > 0) {
+	if(sd->status.pet_id > 0 && sd->pd && sd->pet.intimate > 0) {
 		pet_stopattack(sd->pd);
 		pet_changestate(sd->pd,MS_IDLE,0);
 	}
@@ -2363,10 +2390,10 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 				sd->bl.y=y;
 				sd->state.waitingdisconnect=1;
 				pc_makesavestatus(sd);
+				if(sd->status.pet_id > 0 && sd->pd)
+					intif_save_petdata(sd->status.account_id,&sd->pet);
 				chrif_save(sd);
 				storage_storage_save(sd);
-				if(sd->status.pet_id && sd->pd)
-					intif_save_petdata(sd->status.account_id,&sd->pet);
 				chrif_changemapserver(sd,mapname,x,y,ip,port);
 				return 0;
 			}
@@ -2393,13 +2420,15 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		// printf("pc.c 63 clif_clearchar_area\n");
 		map_delblock(&sd->bl);
 		// pet
-		if(sd->status.pet_id && sd->pd) {
+		if(sd->status.pet_id > 0 && sd->pd) {
 			if(sd->pd->bl.m != m && sd->pet.intimate <= 0) {
 				pet_remove_map(sd);
 				intif_delete_petdata(sd->status.pet_id);
 				sd->status.pet_id = 0;
 				sd->pd = NULL;
 				sd->petDB = NULL;
+				if(battle_config.pet_status_support)
+					pc_calcstatus(sd,2);
 				pc_makesavestatus(sd);
 				chrif_save(sd);
 				storage_storage_save(sd);
@@ -2419,7 +2448,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 	sd->bl.x = x;
 	sd->bl.y = y;
 
-	if(sd->status.pet_id && sd->pd && sd->pet.intimate > 0) {
+	if(sd->status.pet_id > 0 && sd->pd && sd->pet.intimate > 0) {
 		sd->pd->bl.m = m;
 		sd->pd->bl.x = sd->pd->to_x = x;
 		sd->pd->bl.y = sd->pd->to_y = y;
@@ -3287,7 +3316,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	if(sd->vender_id)
 		vending_closevending(sd);
 
-	if(sd->status.pet_id && sd->pd) {
+	if(sd->status.pet_id > 0 && sd->pd) {
 		if(sd->petDB) {
 			sd->pet.intimate -= sd->petDB->die;
 			if(sd->pet.intimate < 0)
@@ -4536,7 +4565,7 @@ static int pc_autosave_sub(struct map_session_data *sd,va_list ap)
 	if(save_flag==0 && sd->fd>last_save_fd){
 		//printf("autosave %d\n",sd->fd);
 		// pet
-		if(sd->status.pet_id && sd->pd)
+		if(sd->status.pet_id > 0 && sd->pd)
 			intif_save_petdata(sd->status.account_id,&sd->pet);
 		pc_makesavestatus(sd);
 		chrif_save(sd);

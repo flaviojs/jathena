@@ -3982,7 +3982,7 @@ int clif_sendegg(struct map_session_data *sd)
 	int i,n=0,fd=sd->fd;
 
 	WFIFOW(fd,0)=0x1a6;
-	if(!sd->status.pet_id) {
+	if(sd->status.pet_id <= 0) {
 		for(i=0,n=0;i<MAX_INVENTORY;i++){
 			if(sd->status.inventory[i].nameid<=0 || sd->inventory_data[i] == NULL ||
 			   sd->inventory_data[i]->type!=7 ||
@@ -4829,7 +4829,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	}
 
 	// pet
-	if(sd->status.pet_id && sd->pd && sd->pet.intimate > 0) {
+	if(sd->status.pet_id > 0 && sd->pd && sd->pet.intimate > 0) {
 		map_addblock(&sd->pd->bl);
 		clif_spawnpet(sd->pd);
 		clif_send_petdata(sd,0,0);
@@ -4841,7 +4841,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 		sd->state.connect_new = 0;
 		if(sd->status.class != sd->view_class)
 			clif_changelook(&sd->bl,LOOK_BASE,sd->view_class);
-		if(sd->status.pet_id && sd->pd && sd->pet.intimate > 900)
+		if(sd->status.pet_id > 0 && sd->pd && sd->pet.intimate > 900)
 			clif_pet_emotion(sd->pd,(sd->pd->class - 100)*100 + 50 + pet_hungry_val(sd));
 	}
 

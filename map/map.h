@@ -183,7 +183,7 @@ struct map_session_data {
 	int watk_,watk_2,atkmods_[3],addele_[10],addrace_[12],addsize_[3];	//“ñ“—¬‚Ì‚½‚ß‚É’Ç‰Á
 	int atk_ele_,star_,overrefine_;				//“ñ“—¬‚Ì‚½‚ß‚É’Ç‰Á
 	int base_atk,atk_rate;
-	int arrow_atk,arrow_ele,arrow_cri;
+	int arrow_atk,arrow_ele,arrow_cri,arrow_hit,arrow_range;
 	int arrow_addele[10],arrow_addrace[12],arrow_addsize[3],arrow_addeff[10];
 	int nhealhp,nhealsp,nshealhp,nshealsp,nsshealhp,nsshealsp;
 	int aspd_rate,speed_rate,hprecov_rate,sprecov_rate,critical_def,double_rate;

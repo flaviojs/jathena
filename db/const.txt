@@ -26,9 +26,11 @@ mf_noteleport	1
 mf_nosave	2
 mf_nobranch	3
 mf_nopenalty	4
+mf_pvp		5
 mf_pvp_noparty	6
 mf_pvp_noguild	7
-mf_pvp_noguild	9
+mf_gvg		8
+mf_gvg_noparty	9
 
 
 StatusPoint	9	1
@@ -101,7 +103,7 @@ bMagicAddRace	1036
 bMagicSubRace	1037
 bPerfectHitRate	1038
 bPerfectHitAddRate	1039
-bCritacalRate	1040
+bCriticalRate	1040
 bGetZenyNum	1041
 bAddGetZenyNum	1042
 bAddDamageClass	1043
