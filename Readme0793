@@ -1,4 +1,14 @@
 --------------------
+//0794 by DRG
+
+・skillusedで指定したIW,QMなどにのってる間MOBスキルを使用するように変更
+・アップスレ３の7のathena-startを一応含めときました
+
+	athena-start
+	(map/)
+	skill.c
+		skill_unit_onplace() 修正。
+--------------------
 //0793 by huge
 
 ・サーバーsnapshot

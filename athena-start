@@ -13,7 +13,8 @@ M_SRV_C=./conf/map_athena.conf
 M_SRV_C2=./conf/battle_athena.conf
 M_SRV_C3=./conf/atcommand_athena.conf
 M_SRV_C4=./conf/script_athena.conf
-M_SRV_C5=./conf/grf-files.txt
+M_SRV_C5=./conf/msg_athena.conf
+M_SRV_C6=./conf/grf-files.txt
 
 print_start() {
 #	more << EOF

@@ -3151,6 +3151,20 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 			printf("skill_unit_onplace: Unknown skill unit id=%d block=%d\n",sg->unit_id,bl->id);
 		break;*/
 	}
+	if(bl->type==BL_MOB && ss!=bl)	/* スキル使用条件のMOBスキル */
+	{
+		if(battle_config.mob_changetarget_byskill == 1)
+		{
+			int target=((struct mob_data *)bl)->target_id;
+			if(ss->type == BL_PC)
+				((struct mob_data *)bl)->target_id=ss->id;
+			mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(sg->skill_id<<16));
+			((struct mob_data *)bl)->target_id=target;
+		}
+		else
+			mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(sg->skill_id<<16));
+	}
+
 	return 0;
 }
 /*==========================================
