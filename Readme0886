@@ -1,4 +1,22 @@
 --------------------
+//0895 by Selena
+
+・mapflagにnozenypenaltyを追加。
+　GVGや街中のテロなどで死亡した際に、Zenyペナルティー発生を外す用。
+
+	(map/)
+	pc.c
+		pc_setrestartvalue() 修正
+	script.c
+		buildin_setmapflag()、buildin_removemapflag() 修正
+	npc.c
+		npc_parse_mapflag() 修正
+	map.h
+		map_data() 修正
+	(db/)
+	const.txt 修正。
+
+--------------------
 //0894 by ぴざまん
 
 ・コーマ以外のアブラカダブラ固有スキル全実装。

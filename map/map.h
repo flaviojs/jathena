@@ -396,6 +396,7 @@ struct map_data {
 		unsigned pvp_noguild : 1;
 		unsigned gvg : 1;
 		unsigned gvg_noparty : 1;
+		unsigned nozenypenalty : 1;
 	} flag;
 	struct point save;
 	struct npc_data *npc[MAX_NPC_PER_MAP];

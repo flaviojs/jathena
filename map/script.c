@@ -2898,7 +2898,7 @@ int buildin_warpwaitingpc(struct script_state *st)
  *
  *------------------------------------------
  */
-enum { MF_NOMEMO,MF_NOTELEPORT,MF_NOSAVE,MF_NOBRANCH,MF_NOPENALTY,MF_PVP,MF_PVP_NOPARTY,MF_PVP_NOGUILD,MF_GVG,MF_GVG_NOPARTY };
+enum { MF_NOMEMO,MF_NOTELEPORT,MF_NOSAVE,MF_NOBRANCH,MF_NOPENALTY,MF_NOZENYPENALTY,MF_PVP,MF_PVP_NOPARTY,MF_PVP_NOGUILD,MF_GVG,MF_GVG_NOPARTY };
 
 int buildin_setmapflagnosave(struct script_state *st)
 {
@@ -2951,6 +2951,9 @@ int buildin_setmapflag(struct script_state *st)
 			case MF_GVG_NOPARTY:
 				map[m].flag.gvg_noparty=1;
 				break;
+			case MF_NOZENYPENALTY:
+				map[m].flag.nozenypenalty=1;
+				break;
 		}
 	}
 
@@ -2990,6 +2993,9 @@ int buildin_removemapflag(struct script_state *st)
 				break;
 			case MF_GVG_NOPARTY:
 				map[m].flag.gvg_noparty=0;
+				break;
+			case MF_NOZENYPENALTY:
+				map[m].flag.nozenypenalty=0;
 				break;
 		}
 	}
