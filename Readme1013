@@ -1,4 +1,11 @@
 --------------------
+//1042 by TEILU
+
+・@healコマンドに何も渡さないと完全回復するように変更。
+・@itemitemidentifyコマンドの追加
+　未鑑定の所持アイテムを全て鑑定します。
+
+--------------------
 //1041 by mare
 	FIX NPC Script Command - buildin_getgdskilllv()
         Add NPC Sctipt Command - buildin_agitcheck()

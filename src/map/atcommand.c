@@ -106,6 +106,7 @@ ATCOMMAND_FUNC(agitstart);
 ATCOMMAND_FUNC(agitend);
 ATCOMMAND_FUNC(mapexit);
 ATCOMMAND_FUNC(idsearch);
+ATCOMMAND_FUNC(itemidentify);
 
 /*==========================================
  *AtCommandInfo atcommand_info[]ç\ë¢ëÃÇÃíËã`
@@ -195,7 +196,8 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_AgitStart,				"@agitstart",		0, atcommand_agitstart },
 	{ AtCommand_AgitEnd,				"@agitend",			0, atcommand_agitend },
 	{ AtCommand_MapExit,				"@mapexit",			0, atcommand_mapexit },
-	{ AtCommand_IDSearch,				"@idsearch",			0, atcommand_idsearch },
+	{ AtCommand_IDSearch,				"@idsearch",		0, atcommand_idsearch },
+	{ AtCommand_ItemIdentify,			"@itemidentify",	0, atcommand_itemidentify },
 	// add here
 	{ AtCommand_MapMove,				"@mapmove",			0, NULL },
 	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
@@ -889,9 +891,8 @@ atcommand_heal(
 	
 	nullpo_retr(-1, sd);
 
-	if (!message || !*message)
-		return -1;
-	if (sscanf(message, "%d %d", &hp, &sp) < 1)
+	if (!message || !*message) {
+	} else if (sscanf(message, "%d %d", &hp, &sp) < 1)
 		return -1;
 	if (hp <= 0 && sp <= 0) {
 		hp = sd->status.max_hp-sd->status.hp;
@@ -2754,5 +2755,28 @@ atcommand_idsearch(
 	}
 	snprintf(output, sizeof output,msg_table[79],match);
 	clif_displaymessage(fd,output);
+	return 0;
+}
+
+/*==========================================
+ * 
+ *------------------------------------------
+ */
+int
+atcommand_itemidentify(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	int i = 0;
+
+	nullpo_retr(-1, sd);
+
+	for (i = 0; i < MAX_INVENTORY; i++) {
+		if (sd->status.inventory[i].amount &&
+			sd->status.inventory[i].identify == 0)
+			pc_item_identify(sd, i);
+		}
+	clif_displaymessage(fd, msg_table[80]);
+	
 	return 0;
 }
