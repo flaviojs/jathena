@@ -1,4 +1,23 @@
 --------------
+//0586 by 引退人
+・カードスキルを修正
+	(/map)
+	pc.c
+		pc_calc_skilltree()
+		pc_skill()
+			覚えられないスキルならskill[id].flag=1とする
+			またはskill[id].flagに本来のlvを+2して記憶
+		pc_skillup()
+			skill[id].flagも増やす
+	clif.c
+		clif_skillinfoblock()
+			skill[id].flag==1なら覚えられないスキル
+	(/char)
+	char.c
+		mmo_char_tostr()
+			skill[id].flagから本来のlv値を保存する
+
+--------------
 //0585 by kalen
 ・script修正
 	npc_town_guid.txt	外見変更

@@ -2561,7 +2561,7 @@ int clif_skillinfoblock(struct map_session_data *sd)
 			if(!(skill_get_inf2(id)&0x01) || battle_config.quest_skill_learn == 1 || (battle_config.gm_allskill > 0 && pc_isGM(sd) >= battle_config.gm_allskill) ) 
 				WFIFOB(fd,len+36)= 
 					(sd->status.skill[i].lv < skill_get_max(id) &&
-					 sd->status.skill[i].flag==0 )? 1:0;
+					 sd->status.skill[i].flag!=1 )? 1:0;
 			else
 				WFIFOB(fd,len+36) = 0;
 /*			printf("skill id=%d inf=%d lv=%d sp=%d range=%d up=%d\n",

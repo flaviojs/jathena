@@ -483,8 +483,8 @@ int pc_calc_skilltree(struct map_session_data *sd)
 	for(i=0;i<MAX_SKILL;i++){
 		sd->status.skill[i].id=0;
 		if (sd->status.skill[i].flag){	// cardスキルなら、
-			sd->status.skill[i].lv=0;	// 本当は覚えていないはずなので0に
-			sd->status.skill[i].flag=0;	// flagも0にしておく
+			sd->status.skill[i].lv=(sd->status.skill[i].flag==1)?0:sd->status.skill[i].flag-2;	// 本当のlvに
+			sd->status.skill[i].flag=0;	// flagは0にしておく
 		}
 	}
 	
@@ -1233,10 +1233,15 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 		pc_calcstatus(sd,0);
 		clif_skillinfoblock(sd);
 	}
-	else if(sd->status.skill[id].id!=id){	// flag==1かつ覚えていないなら
+	else if(sd->status.skill[id].id!=id){	// 覚えていないなら
 		sd->status.skill[id].id=id;
-		sd->status.skill[id].lv=level;
 		sd->status.skill[id].flag=1;	// cardスキルとする
+		sd->status.skill[id].lv=level;
+	}
+	else if(sd->status.skill[id].lv<level){	// 覚えられるがlvが小さいなら
+		sd->status.skill[id].id=id;
+		sd->status.skill[id].flag=sd->status.skill[id].lv+2;	// lvを記憶
+		sd->status.skill[id].lv=level;
 	}
 
 	return 0;
@@ -2588,6 +2593,7 @@ int pc_skillup(struct map_session_data *sd,int skill_num)
 		sd->status.skill[skill_num].lv < skill_get_max(skill_num) )
 	{
 		sd->status.skill[skill_num].lv++;
+		if(sd->status.skill[skill_num].flag>1)sd->status.skill[skill_num].flag++;
 		sd->status.skill_point--;
 		pc_calcstatus(sd,0);
 		clif_skillup(sd,skill_num);

@@ -111,8 +111,8 @@ int mmo_char_tostr(char *str,struct mmo_charstatus *p)
     }      
   strcat(str,"\t");
   for(i=0;i<MAX_SKILL;i++)
-    if(p->skill[i].id){
-      sprintf(str+strlen(str),"%d,%d ",p->skill[i].id,p->skill[i].lv);
+    if(p->skill[i].id && p->skill[i].flag!=1){
+      sprintf(str+strlen(str),"%d,%d ",p->skill[i].id,(p->skill[i].flag==0)?p->skill[i].lv:p->skill[i].flag-2);
     }      
   strcat(str,"\t");
   for(i=0;i<p->global_reg_num;i++)
