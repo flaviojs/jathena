@@ -240,6 +240,7 @@ struct map_session_data {
 	int spirit_timer[MAX_SKILL_LEVEL];
 
 	int die_counter;
+	short doridori_counter;
 
 	int reg_num;
 	struct script_reg *reg;
@@ -518,7 +519,6 @@ extern struct map_data map[];
 extern int map_num;
 extern int autosave_interval;
 extern int agit_flag;
-extern int nullpo_check;
 
 extern char motd_txt[];
 extern char help_txt[];

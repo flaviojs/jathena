@@ -653,6 +653,8 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->canmove_tick = tick;
 	sd->attackabletime = tick;
 
+	sd->doridori_counter = 0;
+
 	sd->spiritball = 0;
 	for(i=0;i<MAX_SKILL_LEVEL;i++)
 		sd->spirit_timer[i] = -1;
@@ -6206,7 +6208,7 @@ static int pc_natural_heal_hp(struct map_session_data *sd)
 	if(sd->walktimer == -1) {
 		inc_num = pc_hpheal(sd);
 		sd->hp_sub += inc_num;
-		sd->inchealhptick += inc_num;
+		sd->inchealhptick += natural_heal_diff_tick;
 	}
 	else if(hp_flag) {
 		inc_num = pc_hpheal(sd);
@@ -6299,7 +6301,7 @@ static int pc_natural_heal_sp(struct map_session_data *sd)
 	if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer == -1)
 		sd->sp_sub += inc_num;
 	if(sd->walktimer == -1)
-		sd->inchealsptick += inc_num;
+		sd->inchealsptick += natural_heal_diff_tick;
 	else sd->inchealsptick = 0;
 
 	if(sd->sp_sub >= battle_config.natural_healsp_interval){
@@ -6320,7 +6322,12 @@ static int pc_natural_heal_sp(struct map_session_data *sd)
 
 	if(sd->nshealsp > 0) {
 		if(sd->inchealsptick >= battle_config.natural_heal_skill_interval && sd->status.sp < sd->status.max_sp) {
-			bonus = sd->nshealsp;
+			struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
+			if(sd->doridori_counter && s_class.job == 23)
+				bonus = sd->nshealsp*2;
+			else
+				bonus = sd->nshealsp;
+			sd->doridori_counter = 0;
 			while(sd->inchealsptick >= battle_config.natural_heal_skill_interval) {
 				sd->inchealsptick -= battle_config.natural_heal_skill_interval;
 				if(sd->status.sp + bonus <= sd->status.max_sp)

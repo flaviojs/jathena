@@ -1,4 +1,49 @@
 --------------------
+//1020 by (凸)
+・nullpoの変更に対応してmap_athena.confの設定削除＆skill.c書き換え
+・座っているとHPRとSPRが通常の半分で発動したのを修正
+・スパノビが一定条件(クライアント依存)で/doridoriするとSPR回復量が倍になるように変更
+・結婚式用のエフェクトをスクリプトからwedding命令で発生させることが出来るようした
+・合奏を開始したPCは合奏中に終了できないようにしたつもり(未確認)
+
+	(conf/)
+	map_athena.conf nullpo_check削除
+	(doc/)
+	client_packet.txt 更新
+	conf_ref.txt nullpo_check削除
+	(map/)
+	map.c
+		map_config_read() nullpo_check削除
+	map.h 同上
+	skill.c NULLチェック再度総入れ替え
+	clif.c
+		clif_wedding_effect() 追加
+		clif_parse_QuitGame() 合奏開始者は合奏中に終了できないように変更
+		clif_parse_doridori() 追加
+		clif_parse() doridori追加
+	clif.h 変更
+	pc.c
+		pc_authok() doridori初期化追加
+		pc_natural_heal_hp() 座っているときのHPR時間修正
+		pc_natural_heal_sp() 座っているときのHPR時間修正、doridori追加
+	script.c
+		buildin_wedding_effect() 追加
+
+
+--------------------
+//1019 by Dest
+・nullpoモジュールにコーディングミス発見/修正
+・同、voidな関数から呼ばれた時のnullpo_retv_f()を追加
+・同、条件コンパイルに対応
+
+	(common/)
+	nullpo.c
+		nullpo_info_core() コーディングミス修正
+	nullpo.h
+		NULLPO_CHECKフラグによる条件コンパイル追加
+		nullpo_retv_f() 追加
+
+--------------------
 //1018 by chloe
 ・ウンバラモンスターを追加
 

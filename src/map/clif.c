@@ -6750,6 +6750,23 @@ void clif_talkiebox(struct block_list *bl,char* talkie)
 }
 
 /*==========================================
+ * 結婚エフェクト
+ *------------------------------------------
+ */
+void clif_wedding_effect(struct block_list *bl)
+{
+	unsigned char buf[6];
+
+	if( bl == NULL ){
+		printf("clif_wedding_effect nullpo\n");
+		return;
+	}
+	WBUFW(buf,0)=0x1ea;
+	WBUFL(buf,2)=bl->id;
+	clif_send(buf,packet_len_table[0x1ea],bl,AREA);
+}
+
+/*==========================================
  *
  *------------------------------------------
  */
@@ -7021,6 +7038,7 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 void clif_parse_QuitGame(int fd,struct map_session_data *sd)
 {
 	unsigned int tick=gettick();
+	struct skill_unit_group* sg;
 
 	if( sd == NULL ){
 		printf("clif_parse_QuitGame nullpo\n");
@@ -7028,7 +7046,11 @@ void clif_parse_QuitGame(int fd,struct map_session_data *sd)
 	}
 
 	WFIFOW(fd,0)=0x18b;
-	if((!pc_isdead(sd) && (sd->opt1 || sd->opt2)) || sd->skilltimer != -1 || (DIFF_TICK(tick , sd->canact_tick) < 0)){
+	if( (!pc_isdead(sd) && (sd->opt1 || sd->opt2)) ||
+		sd->skilltimer != -1 ||
+		(DIFF_TICK(tick , sd->canact_tick) < 0) ||
+		(sd->sc_data && sd->sc_data[SC_DANCING].timer!=-1 && sd->sc_data[SC_DANCING].val4 && (sg=(struct skill_unit_group *)sd->sc_data[SC_DANCING].val2) && sg->src_id == sd->bl.id)
+	){
 		WFIFOW(fd,2)=1;
 		WFIFOSET(fd,packet_len_table[0x18b]);
 		return;
@@ -8590,6 +8612,17 @@ void clif_parse_GMReqNoChatCount(int fd,struct map_session_data *sd)
 }
 
 /*==========================================
+ * スパノビの/doridoriによるSPR2倍
+ *------------------------------------------
+ */
+void clif_parse_doridori(int fd,struct map_session_data *sd)
+{
+	if(sd)
+		sd->doridori_counter = 1;
+	return;
+}
+
+/*==========================================
  * クライアントからのパケット解析
  * socket.cのdo_parsepacketから呼び出される
  *------------------------------------------
@@ -8841,7 +8874,8 @@ static int clif_parse(int fd)
 		NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 		clif_parse_GMReqNoChatCount,
 		// 1e0
-		NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+		NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+		clif_parse_doridori,
 		clif_parse_CreateParty2,
 		NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 		// 1f0

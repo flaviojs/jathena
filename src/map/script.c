@@ -212,6 +212,7 @@ int buildin_getequipcardcnt(struct script_state *st);
 int buildin_successremovecards(struct script_state *st);
 int buildin_failedremovecards(struct script_state *st);
 int buildin_marriage(struct script_state *st);
+int buildin_wedding_effect(struct script_state *st);
 int buildin_divorce(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
@@ -355,6 +356,7 @@ struct {
 	{buildin_successremovecards,"successremovecards","i"},
 	{buildin_failedremovecards,"failedremovecards","ii"},
 	{buildin_marriage,"marriage","s"},
+	{buildin_wedding_effect,"wedding",""},
 	{buildin_divorce,"divorce",""},
 	{NULL,NULL,NULL}
 };
@@ -4351,6 +4353,15 @@ int buildin_marriage(struct script_state *st)
 		return 0;
 	}
 	push_val(st->stack,C_INT,1);
+	return 0;
+}
+int buildin_wedding_effect(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+
+	if(sd==NULL)
+		return 0;
+	clif_wedding_effect(&sd->bl);
 	return 0;
 }
 int buildin_divorce(struct script_state *st)
