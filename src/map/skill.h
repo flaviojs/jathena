@@ -158,7 +158,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 
 enum {
 	ST_NONE,ST_HIDING,ST_CLOAKING,ST_HIDDEN,ST_RIDING,ST_FALCON,ST_CART,ST_SHIELD,ST_SIGHT,ST_EXPLOSIONSPIRITS,
-	ST_RECOV_WEIGHT_RATE,ST_MOVE_ENABLE,ST_WATER,ST_SITTING,
+	ST_RECOV_WEIGHT_RATE,ST_MOVE_ENABLE,ST_WATER,
 };
 
 enum {	// struct map_session_data ÇÃ status_changeÇÃî‘çÜÉeÅ[ÉuÉã

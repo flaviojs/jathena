@@ -3350,7 +3350,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		if(sd->equip_index[9] >= 0) {	//重量で追加ダメージらしいのでシールドブーメランを参考に追加
 			int index = sd->equip_index[9];
 			if(sd->inventory_data[index] && sd->inventory_data[index]->type == 4) {
-				damage += sd->inventory_data[index]->weight/10;
+				damage += (int)(double)(sd->inventory_data[index]->weight*(0.8*skill_lv*4/10));
 				damage += sd->status.inventory[index].refine * pc_getrefinebonus(0,1);
 			}
 		}

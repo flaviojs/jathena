@@ -8,7 +8,7 @@
 
 #define pc_setdead(sd) ((sd)->state.dead_sit = 1)
 #define pc_setsit(sd) ((sd)->state.dead_sit = 2)
-#define pc_setstand(sd) ((sd)->state.dead_sit = 0)
+//#define pc_setstand(sd) ((sd)->state.dead_sit = 0)
 #define pc_isdead(sd) ((sd)->state.dead_sit == 1)
 #define pc_issit(sd) ((sd)->state.dead_sit == 2)
 #define pc_setdir(sd,b,h) ((sd)->dir = (b) ,(sd)->head_dir = (h) )
@@ -144,6 +144,8 @@ int pc_ismarried(struct map_session_data *sd);
 int pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd);
 int pc_divorce(struct map_session_data *sd);
 struct map_session_data *pc_get_partner(struct map_session_data *sd);
+
+void pc_setstand(struct map_session_data *sd);
 
 
 struct pc_base_job{

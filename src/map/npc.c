@@ -1187,7 +1187,6 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 				sprintf(buf,"%s::%s",nd->exname,lname);
 				strdb_insert(ev_db,buf,ev);
 			}
-			free(buf);
 		}
 	}
 	

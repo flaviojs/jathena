@@ -2282,7 +2282,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case LK_AURABLADE:		/* オーラブレード */
 	case LK_PARRYING:		/* パリイング */
 	case LK_CONCENTRATION:	/* コンセントレーション */
-	case LK_TENSIONRELAX:	/* テンションリラックス */
 	case LK_BERSERK:		/* バーサーク */
 	case HP_ASSUMPTIO:		/*  */
 	case WS_CARTBOOST:		/* カートブースト */
@@ -2292,6 +2291,12 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case HW_MAGICPOWER:		/* 魔法力増幅 */
 	case PF_MEMORIZE:		/* メモライズ */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
+		break;
+	case LK_TENSIONRELAX:	/* テンションリラックス */
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		pc_setsit(sd);
+		clif_sitting(sd->fd,sd);
 		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
 		break;
 	case MC_CHANGECART:
@@ -5411,12 +5416,6 @@ int skill_check_condition(struct map_session_data *sd,int type)
 			return 0;
 		}
 		break;
-	case ST_SITTING:
-		if(!pc_issit(sd)) {
-			clif_skill_fail(sd,skill,0,0);
-			return 0;
-		}
-		break;
 	}
 
 	for(i=0;i<10;i++) {
@@ -5584,9 +5583,17 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	if(sd->status.option&2 && skill_num!=TF_HIDING && skill_num!=AS_GRIMTOOTH && skill_num!=RG_BACKSTAP && skill_num!=RG_RAID )
 		return 0;
 
-	if(map[sd->bl.m].flag.gvg && (skill_num == SM_ENDURE || skill_num == AL_TELEPORT || skill_num == AL_WARP ||
-		skill_num == WZ_ICEWALL || skill_num == TF_BACKSLIDING))
-		return 0;
+	if(map[sd->bl.m].flag.gvg){ //GvGで使用できないスキル
+		switch(skill_num){
+		case SM_ENDURE:
+		case AL_TELEPORT:
+		case AL_WARP:
+		case WZ_ICEWALL:
+		case TF_BACKSLIDING:
+		case LK_BERSERK:
+			return 0;
+		}
+	}
 
 	/* 演奏/ダンス中 */
 	if( sc_data && sc_data[SC_DANCING].timer!=-1 ){
@@ -6944,6 +6951,22 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 		else
 			sc_data[type].timer=add_timer(1000+tick,skill_status_change_timer, bl->id, data );
 		break;
+		case SC_TENSIONRELAX:	/* テンションリラックス */
+		if(sd){		/* SPがあって、HPが満タンでなければ継続 */
+			if( sd->status.sp > 12 && sd->status.max_hp > sd->status.hp ){
+				if(sc_data[type].val2 % (sc_data[type].val1+3) ==0 ){
+					sd->status.sp -= 12;
+					clif_updatestatus(sd,SP_SP);
+				}
+				sc_data[type].timer=add_timer(	/* タイマー再設定 */
+					10000+tick, skill_status_change_timer,
+					bl->id, data);
+				return 0;
+			}
+			if(sd->status.max_hp <= sd->status.hp)
+				skill_status_change_end(&sd->bl,SC_TENSIONRELAX,-1);
+		}
+		break;
 
 	/* 時間切れ無し？？ */
 	case SC_AETERNA:
@@ -7568,9 +7591,14 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_CONCENTRATION:	/* コンセントレーション */
 			calc_flag = 1;
 			break;
+		case SC_TENSIONRELAX:	/* テンションリラックス */
+			calc_flag = 1;
+			if(bl->type == BL_PC) {
+				tick = 10000;
+			}
+			break;
 		case SC_AURABLADE:		/* オーラブレード */
 		case SC_PARRYING:		/* パリイング */
-		case SC_TENSIONRELAX:	/* テンションリラックス */
 		case SC_ASSUMPTIO:		/*  */
 		case SC_HEADCRUSH:		/* ヘッドクラッシュ */
 		case SC_JOINTBEAT:		/* ジョイントビート */
@@ -9010,7 +9038,6 @@ int skill_readdb(void)
 		else if( strcmpi(split[7],"recover_weight_rate")==0 ) skill_db[i].state=ST_RECOV_WEIGHT_RATE;
 		else if( strcmpi(split[7],"move_enable")==0 ) skill_db[i].state=ST_MOVE_ENABLE;
 		else if( strcmpi(split[7],"water")==0 ) skill_db[i].state=ST_WATER;
-		else if( strcmpi(split[7],"sitting")==0 ) skill_db[i].state=ST_SITTING;
 		else skill_db[i].state=ST_NONE;
 
 		memset(split2,0,sizeof(split2));

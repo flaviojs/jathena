@@ -1,4 +1,40 @@
 --------------------
+//1023 by (凸)
+・1022でエンバグしたnpc_parse_script()を戻し
+・スパイラルピアースの重量追加ダメージ計算式をちょっと変更
+・魔法力増幅の計算式をちょっと変更
+・テンションリラックスが座って使うのではなく使うと座るという情報を見かけたので変更
+・↑に伴いskill_requireのsitting条件廃止
+・バーサークをGvGで使用できないように変更
+
+	(db/)
+	skill_cast_db.txt 変更
+	skill_require_db.txt 変更
+	(doc/)
+	db_ref.txt 修正
+	(map/)
+	battle.c
+		battle_calc_pc_weapon_attack() 変更
+	clif.c
+		clif_sitting() 追加
+		clif_parse_ActionRequest() 変更
+	npc.c
+		npc_parse_script() 修正
+	pc.h 変更
+	pc.c
+		pc_calcstatus() 変更
+		pc_natural_heal_hp() 変更
+		pc_setstand() 追加
+	skill.c
+		skill_castend_nodamage_id() テンションリラックスを使うと座るように
+		skill_check_condition() ST_SITTING廃止
+		skill_use_id() バーサークをGvGで使用できないように
+		skill_status_change_timer() テンションリラックスは10秒ごとにSPを12消費
+		skill_status_change_start() テンションリラックス変更
+		skill_readdb() sitting廃止
+	skill.h 変更
+
+--------------------
 //1022 by (凸)
 ・NULLチェック変更
 ・login,char,map終了時に開放されていなかったメモリを微妙に開放する努力をしてみた

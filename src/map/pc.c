@@ -1521,8 +1521,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		}
 
 		if(sd->sc_data[SC_MAGICPOWER].timer!=-1){ //魔法力増幅
-			sd->matk1 = sd->matk1*(100+sd->sc_data[SC_MAGICPOWER].val1)/100;
-			sd->matk2 = sd->matk2*(100+sd->sc_data[SC_MAGICPOWER].val1)/100;
+			sd->matk1 = sd->matk1*(100+2*sd->sc_data[SC_MAGICPOWER].val1)/100;
+			sd->matk2 = sd->matk2*(100+2*sd->sc_data[SC_MAGICPOWER].val1)/100;
 		}
 		// ASPD/移動速度変化系
 		if(sd->sc_data[SC_TWOHANDQUICKEN].timer != -1 && sd->sc_data[SC_QUAGMIRE].timer == -1 && sd->sc_data[SC_DONTFORGETME].timer == -1)	// 2HQ
@@ -5955,8 +5955,13 @@ static int pc_natural_heal_hp(struct map_session_data *sd)
 
 	if(sd->walktimer == -1) {
 		inc_num = pc_hpheal(sd);
-		sd->hp_sub += inc_num;
-		sd->inchealhptick += natural_heal_diff_tick;
+		if( sd->sc_data[SC_TENSIONRELAX].timer!=-1 ){	// テンションリラックス
+			sd->hp_sub += 2*inc_num;
+			sd->inchealhptick += 3*natural_heal_diff_tick;
+		}else{
+			sd->hp_sub += inc_num;
+			sd->inchealhptick += natural_heal_diff_tick;
+		}
 	}
 	else if(hp_flag) {
 		inc_num = pc_hpheal(sd);
@@ -6324,6 +6329,14 @@ int pc_read_gm_account()
 	return 0;
 }
 
+void pc_setstand(struct map_session_data *sd){
+	nullpo_retv(sd);
+
+	if(sd->sc_data && sd->sc_data[SC_TENSIONRELAX].timer!=-1)
+		skill_status_change_end(&sd->bl,SC_TENSIONRELAX,-1);
+
+	sd->state.dead_sit = 0;
+}
 
 //
 // 初期化物
