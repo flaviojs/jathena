@@ -369,21 +369,21 @@
 287,2,6,2,0,1,5,1,yes,0,0,0,magic,0	//SA_VIOLENTGALE#バイオレントゲイル#
 288,2,6,2,0,1,5,1,yes,0,0,0,magic,0	//SA_LANDPROTECTOR#ランドプロテクター#
 289,8,6,1,0,1,5,1,yes,0,0,0,magic,0	//SA_DISPELL#ディスペル#
-290,0,6,4,0,0,10,1,yes,0,0,0,magic,0	//SA_ABRACADABRA#アブラカタブラ#
-// ＊291-303アブラカタブラ派生スキル？
-// SA_MONOCELL#モノーセル#
-// SA_CLASSCHANGE#クラスチェンジ#
-// SA_SUMMONMONSTER#サモンモンスター#
-// SA_REVERSEORCISH#リバースオキシー#
-// SA_DEATH#デス#
-// SA_FORTUNE#フォーチュン#
-// SA_TAMINGMONSTER#テイミングモンスター#
-// SA_QUESTION#クエスション#
-// SA_GRAVITY#グラビティ#
-// SA_LEVELUP#レベルアップ#
-// SA_INSTANTDEATH#即死#
-// SA_FULLRECOVERY#完全回復#
-// SA_COMA#コーマ#
+290,0,6,4,0,1,10,1,yes,0,0,0,magic,0	//SA_ABRACADABRA#アブラカタブラ#
+// アブラカタブラ派生スキル
+291,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_MONOCELL#モノーセル#
+292,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_CLASSCHANGE#クラスチェンジ#
+293,0,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_SUMMONMONSTER#サモンモンスター#
+294,8,6,16,0,1,1,1,yes,0,0,0,magic,0	// SA_REVERSEORCISH#リバースオキシー#
+295,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_DEATH#デス#
+296,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_FORTUNE#フォーチュン#
+297,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_TAMINGMONSTER#テイミングモンスター#
+298,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_QUESTION#クエスション#
+299,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_GRAVITY#グラビティ#
+300,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_LEVELUP#レベルアップ#
+301,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_INSTANTDEATH#即死#
+302,8,6,16,0,1,1,1,yes,0,0,0,magic,0	// SA_FULLRECOVERY#完全回復#
+303,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_COMA#コーマ#
 
 // ダンサーバード共通
 304,0,6,4,0,1,1,1,no,0,0,0,none,0	//BD_ADAPTATION#アドリブ#

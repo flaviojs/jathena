@@ -10,6 +10,7 @@
 #include "map.h"
 #include "clif.h"
 #include "pc.h"
+#include "pet.h"
 #include "mob.h"
 #include "battle.h"
 #include "party.h"
@@ -237,6 +238,8 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 int skill_frostjoke_scream(struct block_list *bl,va_list ap);
 int skill_status_change_timer_sub(struct block_list *bl, va_list ap );
 int skill_attack_area(struct block_list *bl,va_list ap);
+int skill_is_danceskill(int id);
+int skill_abra_dataset(void);
 
 static int distance(int x0,int y0,int x1,int y1)
 {
@@ -1713,8 +1716,12 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	struct map_session_data *dstsd=NULL;
 	struct mob_data *md=NULL;
 	struct mob_data *dstmd=NULL;
-	int i;
+	int i,abra_skillid=0,abra_skilllv;
 	int sc_def_vit;
+	//クラスチェンジ用ボスモンスターID
+	int changeclass[]={1038,1039,1046,1059,1086,1087,1112,1115
+				,1157,1159,1190,1272,1312,1373,1492};
+	int poringclass[]={1002};
 
 	if(src->type==BL_PC)
 		sd=(struct map_session_data *)src;
@@ -1849,6 +1856,16 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			}
 		}
 		break;
+	case SA_ABRACADABRA:
+		do{
+			abra_skillid=skill_abra_dataset();
+		}while(abra_skillid == 0);
+		abra_skilllv=skill_get_max(abra_skillid)>pc_checkskill(sd,SA_ABRACADABRA)?pc_checkskill(sd,SA_ABRACADABRA):skill_get_max(abra_skillid);
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		sd->skillitem=abra_skillid;
+		sd->skillitemlv=abra_skilllv;
+		clif_item_skill(sd,abra_skillid,abra_skilllv,"アブラカダブラ");
+		break;
 	case SA_COMA:
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
@@ -1860,6 +1877,74 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			clif_updatestatus(dstsd,SP_SP);
 		}
 		if(dstmd) dstmd->hp=1;
+		break;
+	case SA_FULLRECOVERY:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
+			break;
+		if(dstsd) pc_heal(dstsd,dstsd->status.max_hp,dstsd->status.max_sp);
+		if(dstmd) dstmd->hp=battle_get_max_hp(&dstmd->bl);
+		break;
+	case SA_SUMMONMONSTER:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if (sd) mob_once_spawn(sd,map[sd->bl.m].name,sd->bl.x,sd->bl.y,"--ja--",-1,1,"");
+		break;
+	case SA_LEVELUP:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if(sd && dstsd){
+			sd->status.base_exp = 0;
+			sd->status.base_level ++;
+			clif_updatestatus(sd,SP_BASELEVEL);
+			clif_updatestatus(sd,SP_NEXTBASEEXP);
+			sd->status.status_point += (sd->status.base_level+14) / 5 ;
+			clif_updatestatus(sd,SP_STATUSPOINT);
+			pc_calcstatus(sd,0);
+			pc_heal(sd,sd->status.max_hp,sd->status.max_sp);
+			clif_misceffect(&sd->bl,0);
+			party_send_movemap(sd);
+		}
+		break;
+
+	case SA_INSTANTDEATH:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if (sd) pc_damage(NULL,sd,sd->status.max_hp);
+		break;
+
+	case SA_QUESTION:
+	case SA_GRAVITY:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		break;
+	case SA_CLASSCHANGE:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if(dstmd) mob_class_change(dstmd,changeclass);
+		break;
+	case SA_MONOCELL:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if(dstmd) mob_class_change(dstmd,poringclass);
+		break;
+	case SA_DEATH:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if (dstsd) pc_damage(NULL,dstsd,dstsd->status.max_hp);
+		if (dstmd) mob_damage(NULL,dstmd,dstmd->hp,1);
+		break;
+	case SA_REVERSEORCISH:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if (dstsd) pc_setoption(dstsd,0x0800);
+		break;
+	case SA_FORTUNE:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if(sd) pc_getzeny(sd,battle_get_lv(bl)*100);
+		break;
+	case SA_TAMINGMONSTER:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if (dstmd){
+			for(i=0;i<MAX_PET_DB;i++){
+				if(dstmd->class == pet_db[i].class){
+					pet_catch_process1(sd,dstmd->class);
+					break;
+				}
+			}
+		}
 		break;
 	case AL_INCAGI:			/* 速度増加 */
 	case AL_BLESSING:		/* ブレッシング */
@@ -4554,8 +4639,8 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	if(battle_config.pc_skill_log)
 		printf("PC %d skill use target_id=%d skill=%d lv=%d cast=%d\n",sd->bl.id,target_id,skill_num,skill_lv,casttime);
 
-	if(sd->skillitem == skill_num)
-		casttime = delay = 0;
+//	if(sd->skillitem == skill_num)
+//		casttime = delay = 0;
 
 	if( casttime>0 || forcecast ){ /* 詠唱が必要 */
 		struct mob_data *md;
@@ -4656,8 +4741,8 @@ int skill_use_pos( struct map_session_data *sd,
 	if(battle_config.pc_skill_log)
 		printf("PC %d skill use target_pos=(%d,%d) skill=%d lv=%d cast=%d\n",sd->bl.id,skill_x,skill_y,skill_num,skill_lv,casttime);
 
-	if(sd->skillitem == skill_num)
-		casttime = delay = 0;
+//	if(sd->skillitem == skill_num)
+//		casttime = delay = 0;
 
 	if( casttime>0 )	/* 詠唱が必要 */
 		clif_skillcasting( &sd->bl,
@@ -5055,6 +5140,22 @@ int skill_frostjoke_scream(struct block_list *bl,va_list ap)
 	}
 
 	return 0;
+}
+
+/*==========================================
+ *アブラカダブラの使用スキル決定(決定スキルがダメなら0を返す)
+ *------------------------------------------
+ */
+int skill_abra_dataset(void)
+{
+	int skill = rand()%331;
+
+	//NPCスキルはダメ
+	if(skill >= NPC_PIERCINGATT && skill <= NPC_SUMMONMONSTER) return 0;
+	//演奏スキルはダメ
+	if(skill_is_danceskill(skill)) return 0;
+
+	return skill;
 }
 
 /*==========================================
