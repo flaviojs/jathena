@@ -291,8 +291,8 @@ job_knt.gat,22,145,0	warp	jknt04	3,3,job_knt.gat,0,0
 //prist
 //==============================================================================
 //job_prist.gat,0,0,0	warp	warp4	0,0,hoge.gat,0,0
-job_prist.gat,97,104,0	warp	jpri	0,0,job_prist.gat,0,0
-job_prist.gat,24,109,0	warp	jpri	4,3,job_prist.gat,168,17
+//job_prist.gat,97,104,0	warp	jpri	0,0,job_prist.gat,0,0
+//job_prist.gat,24,109,0	warp	jpri	4,3,job_prist.gat,168,17
 
 //==============================================================================
 //Hunter

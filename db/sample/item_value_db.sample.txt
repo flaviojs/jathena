@@ -1,9 +1,4 @@
-// アイテム価格データ（item_db.txtのデータにオーバーライドされます）
-//ID,Name,Jname,Price,Sell,DC_notflag,OC_notflag
-//    Price,Sell各省略時はitem_db.txtの値を反映
-//    DC_notflag,OC_notflagは0でDCもしくはOCを有効、1でDCもしくはOCを無効
-//例：NPCで売るものは売却価格を販売価格の９割に、またそれらのアイテムのＯＣ＆ＤＣは無効とする設定
-//$ cat item_value_db.txt | tr ',' '\040' | awk '{print $1","$2","$3","$4","int($4*0.9)",1,1"}'
+// アイテム価格データ（item_db.txtのデータにオーバーライドされます）//ID,Name,Jname,Price,Sell,DC_notflag,OC_notflag//    Price,Sell各省略時はitem_db.txtの値を反映//    DC_notflag,OC_notflagは0でDCもしくはOCを有効、1でDCもしくはOCを無効//例：NPCで売るものは売却価格を販売価格の９割に、またそれらのアイテムのＯＣ＆ＤＣは無効とする設定//$ cat item_value_db.txt | tr ',' '\040' | awk '{print $1","$2","$3","$4","int($4*0.9)",1,1"}'
 
 
 // 装備以外のアイテム類

@@ -84,6 +84,9 @@ prt_church.gat,184,41,4	script	聖堂神父	60,{
 }
 
 prt_fild03.gat,365,255,4	script	修行中の神父	89,{
+	if (job2nd_pri == 1) goto L_End1;
+	if ((job2nd_pri >= 2) && (job2nd_pri <= 3)) goto L_Misc1_2;
+	if (job2nd_pri >= 4) goto L_Misc1_3;
 	if (JOB_ACOLYTE_Q3 == 1) goto L_START_1;
    		mes "[ルバルカバラ神父]";
    		mes "...";
@@ -99,9 +102,41 @@ prt_fild03.gat,365,255,4	script	修行中の神父	89,{
 			savepoint "prt_fild03.gat",365,255;
 			set JOB_ACOLYTE_Q2,1;
 			close;
+L_End1:
+ 	set job2nd_pri,2;
+	savepoint "prt_fild03.gat",365,255;
+   	mes "[ルバルカバラ神父]";
+   	mes "プリースト志望のアコライトだな…";
+   	mes "トーマス司教様から連絡はいただいて";
+   	mes "いる。巡礼は始まったばかりだが、";
+   	mes "最後まで諦めずに頑張ってほしい。";
+	next;
+   	mes "[ルバルカバラ神父]";
+   	mes "もし機会があれば、またいつでも";
+   	mes "来るといい…。";
+   	mes "ここは私達にとって聖地だからね。";
+	next;
+   	mes "[ルバルカバラ神父]";
+   	mes "それでは、次の巡礼地へ向かいなさい。";
+   	mes "道中くれぐれも気をつけて。";
+	close;
+L_Misc1_2:
+   	mes "[ルバルカバラ神父]";
+   	mes "はやく次の巡礼地へ向かいなさい。";
+   	mes "道中くれぐれも気をつけて。";
+	close;
+L_Misc1_3:
+   	mes "[ルバルカバラ神父]";
+   	mes "なぜここへ？";
+   	mes "貴方には貴方の修行があるはず。";
+	close;
 }
 
 moc_fild07.gat,41,355,4	script	修行中のシスター	95,{
+	if (job2nd_pri == 1) goto L_Misc1_1;
+	if (job2nd_pri == 2) goto L_End1;
+	if (job2nd_pri == 3) goto L_Misc1_2;
+	if (job2nd_pri >= 4) goto L_Misc1_3;
 	if (JOB_ACOLYTE_Q3 == 1) goto L_START_1;
    		mes "[シスターマチルダ]";
    		mes "...";
@@ -117,9 +152,53 @@ moc_fild07.gat,41,355,4	script	修行中のシスター	95,{
 			savepoint "moc_fild07.gat",41,355;
 			set JOB_ACOLYTE_Q2,1;
 			close;
+L_End1:
+ 	set job2nd_pri,3;
+ 	savepoint "moc_fild07.gat",41,355;
+   	mes "[マチルダ]";
+   	mes "あ、プリースト修行者ですね？";
+   	mes "遠いところまでお疲れ様～";
+   	mes "私たちプリーストたちは地上の全てに";
+   	mes "信義を説かなければなりません。";
+	next;
+   	mes "[マチルダ]";
+   	mes "プリーストになられたら、是非モロクの";
+   	mes "ピラミッドにいらっしゃってください。";
+   	mes "あそこにはたくさんのアンデッドが";
+   	mes "居ます。";
+   	mes "どうか彼らを解放してあげてください…";
+	next;
+   	mes "[マチルダ]";
+   	mes "それではお気をつけて…";
+   	mes "貴方に神のご加護がありますように…";
+	close;
+L_Misc1_1:
+   	mes "[マチルダ]";
+   	mes "巡礼者ですね？";
+   	mes "しかし私を訪ねる前に、他の方を";
+   	mes "訪ねなければなりません。";
+	next;
+   	mes "[マチルダ]";
+   	mes "トーマス司教様やセシル様に伺って";
+   	mes "みてはいかがでしょう。";
+   	mes "貴方に神のご加護がありますように…";
+	close;
+L_Misc1_2:
+   	mes "[マチルダ]";
+   	mes "さ、こちらに留まらず";
+   	mes "次の巡礼地へ…";
+	close;
+L_Misc1_3:
+   	mes "[マチルダ]";
+   	mes "こちらへはどのようなご用で？";
+   	mes "修行を続けてください。";
+	close;
 }
 
-prt_fild00.gat,208,255,4	script	修行中の神父	98,{
+prt_fild00.gat,208,218,4	script	修行中の神父	98,{
+	if ((job2nd_pri >= 1) && (job2nd_pri <= 2)) goto L_Misc1_1;
+	if (job2nd_pri == 3) goto L_End1;
+	if (job2nd_pri >= 4) goto L_Misc1_2;
 	if (JOB_ACOLYTE_Q3 == 1) goto L_START_1;
    		mes "[洋介神父]";
    		mes "...";
@@ -135,4 +214,39 @@ prt_fild00.gat,208,255,4	script	修行中の神父	98,{
 			savepoint "prt_fild00.gat",208,255;
 			set JOB_ACOLYTE_Q2,1;
 			close;
+L_End1:
+ 	set job2nd_pri,4;
+ 	savepoint "prt_fild00.gat",208,255;
+   	mes "[洋介神父]";
+   	mes "うん、プリースト修行者だな。";
+   	mes "ここまでよく訪ねてきた。";
+	next;
+   	mes "[洋介神父]";
+   	mes "よし、プリーストの名に恥じないよう";
+   	mes "正しく生きていきなさい。";
+	next;
+   	mes "[洋介神父]";
+   	mes "聖堂に帰ってよし。";
+   	mes "君の巡礼はここで最後だ。";
+   	mes "よくここまで旅を続けたな。";
+   	mes "帰りもくれぐれも気をつけるように。";
+	close;
+L_Misc1_1:
+   	mes "[洋介神父]";
+   	mes "うん、プリースト修行者だな。";
+   	mes "ここまでよく訪ねてきた。";
+	next;
+   	mes "[洋介神父]";
+   	mes "しかし私を尋ねて来る前に";
+   	mes "他に会って来るように。";
+   	mes "早い話が、間違えたってことだ。";
+	next;
+   	mes "[洋介神父]";
+   	mes "聖堂に帰って確認してみてくれ。";
+	close;
+L_Misc1_2:
+   	mes "[ルバルカバラ神父]";
+   	mes "ん？聖堂に帰らないのか？";
+   	mes "それともここで一生過ごしたいのか？";
+	close;
 }

@@ -1,4 +1,652 @@
 --------------------
+//1012 by (凸)
+・help.txtにある@goの説明から13と14を削除
+　機能は消えてないので使えることは使えますが、helpに載せるのはjROに来てからということで
+・cast_db.txtをskill_cast_db.txtに改名
+・ついでにmake cleanでGNUmakefileも消してみることにする
+・u-0さんの検証などを総合してダンスユニット関連を変更
+　演奏・ダンス中のハエはユニット付きで飛ぶそうです
+　演奏・ダンス中にワープポイントに乗ったら状態が解除されるようです
+　合奏中に片方がハエ飛びしたらエフェクトは元の場所に残り、飛んだ先では合奏状態が継続して動けない＆時間ごとにSP消費するようです
+・PC_DIE_COUNTERがスクリプトから変更された時にすぐに反映されるように変更
+
+	(conf/)
+	help.txt @go説明変更
+	(db/)
+	skill_cast_db.txt 改名
+	(map/)
+	pc.c
+		pc_setpos() ダンス中断のタイミング変更
+		pc_setglobalreg() PC_DIE_COUNTER特別処理追加
+	skill.c
+		skill_castend_id() NULLチェック変更
+		skill_stop_dancing() マップ移動などでの挙動を変更
+		skill_readdb() skill_cast_dbに改名
+		skill_blown() 飛ばされたらダンス移動
+	npc.c
+		npc_touch_areanpc() ワープポイントに乗ったらダンス解除
+
+--------------------
+//1011 by パイン
+・パーティ要請やギルド要請を出しているときに他の要請を拒否る処理を追加
+　battle_athena.confで切り替えが出来るようになっています。
+・make clean で事が足りるので、objectdel.batを消去
+
+	(map)
+	clif.c
+		clif_party_invite()変更(nullpoの文言違ってました)
+	guild.c
+		guild_invite()変更
+	party.c
+		party_invite()変更
+	battle.c
+		battle_config_read()変更
+	battle.h変更
+	trade.c
+		trade_traderequest()変更
+
+--------------------
+//1010 by (凸)
+・gcc 2.95対策
+・スパノビの1度死ぬまでAll+10をスクリプト変数で実装してみる試み
+	PC_DIE_COUNTER 死ぬと+1、転職すると0になります
+	↑はキャラクタ永続なスクリプト変数なのでNPCで参照＆再設定とか比較的楽かも
+
+	(map/)
+	chrif.c
+		chrif_divorce() gcc2.95対策
+	skill.c
+		skill_attack() gcc2.95対策
+		skill_unit_move_unit_group() gcc2.95対策
+	map.h map_session_dataにdie_counterを追加
+	npc.c
+		npc_click() nullpoメッセージを修正
+	pc.c
+		pc_setrestartvalue() nullpoメッセージを修正
+		pc_authok() die_counter初期化の追加
+		pc_calcstatus() die_counter=0のスパノビはAll+10
+		pc_damage() PC_DIE_COUNTER設定
+		pc_jobchange() PC_DIE_COUNTER設定
+		pc_readparam() gcc2.95対策
+		pc_divorce() gcc2.95対策
+		pc_get_partner() gcc2.95対策
+
+--------------------
+//1009 by ぴざまん
+・ダンス移動軽量化実装
+　battle_athena.confで切り替え可能です。詳しくはconf_refを
+　オリジナルアップデートの為、デフォルトではoffにしています
+　また、この軽量化モードは回線負荷を大幅に削減できる(つもり)ですが、
+　その分サーバー側の処理が重たくなります(といってもある程度のCPUがあれば全然問題にならない程度の負荷ですが)
+・結婚システム／結婚スキル実装
+　結婚指輪の特別扱いが未実装です(落とせたり取引に出せたりします)
+　離婚のみ未テストです。
+・結婚用スクリプト(marriage、divorce)追加。
+　・marriage <partner_name>
+　　<partner_name>: 結婚相手の名前
+　　戻り値: 成功:1　失敗:0
+　　結婚処理を行います。対象は話し掛けたプレイヤーと<partner_name>のキャラクターで、どちらかが既婚の場合は失敗します。
+　　1回のmarriageスクリプトで新郎→新婦と新婦→新郎の結婚処理を同時に行います。
+　　また、このスクリプトで結婚指輪は与えられません。
+　・devorce
+　　引数無し
+　　戻り値: 成功:1　失敗:0
+　　離婚処理を行います。対象は話し掛けたプレイヤーで、未婚の場合は失敗します。
+　　marriageスクリプトと同様に互いの離婚処理を同時に行います。
+　　また、このスクリプトが成功すると自動的に対象キャラクターの結婚指輪は剥奪されます。
+
+　どちらのスクリプトの処理も、2人共ログインしていないと成功しません。
+
+	(map/)
+	pc.c
+		pc_ismarried()、pc_marriage()、pc_divorce()、pc_authok()変更
+		pc_get_partner() 追加
+	map.c
+		map_quit() 変更
+	skill.c
+		skill_use_id()、skill_castend_nodamage_id() 変更
+		skill_unitsetting()、skill_unit_onlimit() 変更
+	script.c
+		buildin_marriage()、buildin_devorce() 追加
+	pc.h 変更
+	battle.h 変更
+
+--------------------
+//1008 by ぴざまん
+・GMセッション隠し実装(未テスト)
+　GMアカウントのキャラクターを@who等で表示するかどうか設定できます。
+　詳しくはconf_ref.txtを参照してください。
+・結婚システム仮実装
+　char-map間通信のみ実装です。まだ結婚することは出来ません。
+　尚、このパッチからathena.txtのバージョンが変わります。
+　データの互換性は保ったつもりですが、念の為バックアップを取っておく事を強く推奨します。
+
+	(map/)
+	clif.c
+		clif_countusers() 変更
+	battle.c
+		battle_config_read() 変更
+	atcommand.c
+		atcommand_who() 変更
+	pc.c
+		pc_ismarried()、pc_marriage()、pc_divorce() 追加
+	chrif.c
+		chrif_divorce() 追加
+		chrif_parse() 変更
+	(char/)
+	char.c
+		char_divorce() 追加
+		char_delete()、mmo_char_fromstr()、mmo_char_tostr() 変更
+
+--------------------
+//1007 by (凸)
+・NULLチェックの見直し
+
+	(map/)
+	clif.c
+		clif_send() 変更
+	skill.c
+		skill_delunit() 変更
+
+--------------------
+//1006 by (ruhu)
+･@goに洛陽とニフルヘイム追加
+
+	(conf/)
+	help.txt ニフルヘイム、洛陽追加
+	(map/)
+	atcommand.c 
+		atcommand go() ニフルヘイム、洛陽追加
+--------------------
+//1005 by (凸)
+・NULLチェックの見直しと追加、大量に変更したので問題が出る可能性が大です
+・ウンバラ分割パッチが配布されたので@go 12にウンバラを追加
+・ロードナイト バーサークをちょっとそれっぽく(ASPD増加などは未実装)
+・クラウン･ジプシー 月明りの泉に落ちる花びらの使用条件を合奏と同じに変更(効果等は未実装)
+・ブレッシングが本鯖ではステータスアップ→エフェクトだったのでそのように変更
+・本鯖相違スレッド part2 >>145 zzzさんの報告を反映
+・同スレ >>143 plalaさんの報告を反映
+
+	(db/)
+	skill_require_db.txt 変更
+	(conf/)
+	help.txt ウンバラ追加
+	map_athena.conf ウンバラ関連のコメントアウトを解除
+	(map/)
+	atcommand.c NULLチェック強化
+		atcommand() @mapmoveなどで落ちる問題を修正
+		atcommand_go() ウンバラ追加
+	battle.c NULLチェック強化
+		battle_calc_mob_weapon_attack() バーサーク時ダメージ150%
+		battle_calc_pc_weapon_attack() バーサーク時ダメージ150%
+	chat.c NULLチェック強化
+	chrif.c NULLチェック強化
+	clif.c NULLチェック強化
+		clif_parse_ActionRequest() ダンス時の処理を若干変更
+		clif_parse_GlobalMessage() バーサーク時は会話が出来ないように変更
+		clif_parse_Wis() バーサーク時は会話が出来ないように変更
+		clif_parse_PartyMessage() 同上
+		clif_parse_GuildMessage() 同上
+		clif_parse_TakeItem() バーサーク時はアイテムを取れないように変更
+		clif_parse_DropItem() バーサーク時はアイテムを落とせないように変更
+		clif_parse_UseItem() バーサーク時はアイテムを使えないように変更
+		clif_parse_EquipItem() バーサーク時は装備できないように変更
+		clif_parse_UnequipItem() バーサーク時は装備解除できないように変更
+		clif_parse_UseSkillToId() バーサーク時はスキル使用ができないように変更
+		clif_parse_UseSkillToPos() 同上
+		clif_parse_UseSkillMap() 同上
+	guild.c NULLチェック強化
+	intif.c NULLチェック強化
+	itemdb.c NULLチェック強化
+	map.c NULLチェック強化
+		map_quit() バーサーク時にログアウトするとHP 100/SP 0になるように変更
+	mob.c
+		mob_attack() clif_fixmobpos()を送信しないように変更
+		mob_timer() NULLチェック条件を変更
+		mobskill_castend_id() 同上、バーサーク時スキルを使えないように変更
+		mobskill_castend_pos() バーサーク時スキルを使えないように変更
+		mobskill_use_id() 同上
+		mobskill_use_pos() 同上
+	npc.c NULLチェック強化
+	party.c NULLチェック強化
+	path.c NULLチェック強化
+	pc.c NULLチェック強化
+		pc_calcstatus() バーサーク時は速度UP＆MHP3倍、メディテイティオのSP回復増加をSPRではなく通常回復にかかるようにした
+		pc_heal() バーサーク時は回復しない
+		pc_jobchange() 転職直後1歩動かないと服の色が反映されなかったのを修正
+		pc_natural_heal_sub() バーサーク中はSPが自然回復しないように変更(HPは良く分からなかったので回復するようにしてある)
+	pet.c NULLチェック強化
+	skill.c
+		skill_castend_nodamage_id() ブレッシング等のパケット順を変更、ストーンカースを不死には無効にした
+		skill_castend_map() しつこいくらいにバーサーク時にスキルを使えないように変更
+		skill_check_condition() 同上
+		skill_use_pos() 同上
+		skill_use_id() 同上＆月明りの泉に落ちる花びら追加
+		skill_status_change_end() バーサーク時にはIAアイコンを消去するように変更
+		skill_status_change_timer() NULLチェック条件を変更、月明りの泉に落ちる花びら時SP消費、バーサーク時HP100以上なら10秒あたり1%減らすように変更
+		skill_status_change_start() バーサーク時にはIAアイコンを表示するように変更
+		skill_delunit() NULLチェック条件を変更
+		skill_check_condition_char_sub() 月明りの泉に落ちる花びら追加
+		skill_check_condition_use_sub() 同上
+		skill_is_danceskill() 同上
+		skill_initunitgroup() 同上
+	trade.c NULLチェック強化
+	vending.c NULLチェック強化
+
+--------------------
+//1004 by (凸)
+・NULLチェックでエンバグしていたところをいくつか修正と他のNULLチェック強化
+・skill.cでもnullpoを表示するように変更
+
+	(map/)
+	battle.c
+		battle_damage() NULLチェック強化
+		battle_heal() 同上
+	clif.c
+		clif_damage() 同上
+	map.c
+		map_addflooritem() NULLチェック強化
+	mob.c
+		mob_once_spawn() 余計なNULLチェックを削除
+		mob_once_spawn_area() 同上
+		mob_damage() 同上
+		mob_counttargeted() 同上
+		mobskill_castend_id() 同上
+		mob_summonslave() メッセージ間違いを修正
+	pc.c
+		pc_damage() NULLチェック強化
+	skill.c ほぼ全部 NULL関連修正
+
+--------------------
+//1003 by (凸)
+・jROクライアントで/account使用時に繋がらない原因の0x200パケット問題を修正
+・0x1c9パケットの穴埋めを引き続き継続中
+・一人で聖体や合奏を使用できる設定(player_skill_partner_check)を追加
+	一人で合奏を実行した場合には通常のダンスと挙動が同じになります
+・プロボックは不死に対して発動しないように変更
+・FWの吹き飛ばし判定を変更
+・デリュージに水場判定を追加、聖水を作れるのを確認
+・ハイディングの有効時間が正しく機能するように修正
+・アスペルシオを不死に使用した場合、聖属性の40ダメージを与えるように変更
+・アスペルシオを不死以外のMOBに使用しても効果が無いように変更
+・合奏、ダンス、演奏中の経過時間によるSP消費を実装
+・報告のあったガーディアンがギルド未加入PCをターゲットしたらmapが落ちる問題の修正(ガーディアン実装当時からずっと落ちてた？)
+・mob.c、storage.cのnullチェックを強化
+	エラーで落ちるべきところを無理やり通常処理に戻しているので他で問題がでるかもしれません
+	その場合、コンソールに「関数名 nullpo」と表示されるので表示された場合は報告をお願いします
+	もしかしたら正常な処理でも表示されるかもしれませんが、その際も報告をお願いします
+	本来エラー、実は正常、どちらにしてもこれが表示されるのはバグです
+
+	(conf/)
+	battle_athena.conf player_skill_partner_check追加
+	(db/)
+	skill_db.txt アスペルシオの属性を聖に変更
+	(doc/)
+	conf_ref.txt player_skill_partner_check説明追加
+	(login/)
+	login.c
+		parse_login() 0x200パケット対応
+	(map/)
+	mob.c NULLチェックでほぼ全部
+	storage.c NULLチェックでほぼ全部
+	battle.h 変更
+	battle.c
+		battle_calc_magic_attack() アスペルシオを追加、FWを変更
+		battle_config_read() 設定追加
+	clif.c
+		clif_getareachar_skillunit() 調査結果の反映
+		clif_skill_setunit() 同上
+	[1001と1002の間の変更点]
+	skill.c NULLチェックを沢山
+		skill_castend_damage_id() アスペルシオ追加
+		skill_castend_nodamage_id() アスペルシオ、プロボック処理変更
+		skill_castend_id() アスペルシオ処理変更
+		skill_check_condition_char_sub() player_skill_partner_checkに対応
+		skill_check_condition_use_sub() 同上
+		skill_use_id() 同上
+		skill_check_condition() 同上＆デリュージ対応
+		skill_status_change_timer() ハイディング修正、ダンス演奏合奏中のSP消費実装
+		skill_initunitgroup() ダンスSP消費用変更
+		skill_status_change_start() 同上＆プロボックをボスに効かないように(でもbattle.cで止めてるから通常ここまで来ない)
+
+--------------------
+//1002 by ぴざまん
+・ポータルバグ修正
+・スキル関係のNullチェック強化(by(凸))
+	(map/)
+	skill.c
+		skill_castend_map() 修正
+
+--------------------
+//1001 by (凸)
+・0x1c9でいくつかパケットを見比べて変化のないところを固定値で埋め込み(今後情報が集まると変わる可能性大)
+・ダンス中はSPだけ回復しないように変更
+・聖体で相方のSPが10以下だと使用失敗にして使用したらSPを10減らしてみる(未確認)
+・合奏のスキル使用パケットを若干変更
+
+	(map/)
+	clif.c
+		clif_getareachar_skillunit() 0x1c9の穴埋め開始
+		clif_skill_setunit() 0x1c9の穴埋め開始
+	pc.c
+		pc_natural_heal_sub() ダンス中はSPのみ回復しないように変更
+	skill.c
+		skill_check_condition() 変更
+		skill_check_condition_char_sub() 聖体は相方のSPチェックするように変更
+		skill_check_condition_use_sub() 聖体は相方のSPを減らすように変更
+
+--------------------
+//1000 by ぴざまん
+・0999の変更取り戻し
+・トラップの巻き込み実装
+・イドゥンの林檎でNPCまで回復した(ように見える)問題修正(未テスト)
+・デモンストレーションのエフェクト変更(こちらに明記)
+	(map/)
+	skill.c
+		skill_count_target() 追加
+		skill_unit_onplace()、skill_trap_splash() 変更
+--------------------
+//0999 by eAthena Dev Team (Yor's Fixes)
+(login/)
+	added email for accounts
+(char/)
+	added email for character deletion
+--------------------
+//0998 by (凸)
+・battle.cで引数の存在を確認せずに値を見に行ってる関数をいくつか修正
+・ダンス中は座れないようにした(本鯖相違スレッド part2 >>114 DoTさん)
+・ダンス中はHP、SPが回復しないように変更(同上)
+・ダンス中は通常攻撃できないようにした(本鯖相違スレッド part2 >>116 ・・・さん)
+・合奏中片方が落ちた場合、残ったほうで演奏を継続するようにした(同上)
+・合奏中はアドリブ以外できないように変更(同上)
+・合奏発動条件にダンス中じゃない＆座っていないを追加(本鯖相違スレッド part2 >>118 ろろさん)
+・阿修羅使用後にHPも回復しなかったのを修正
+
+	(map/)
+	battle.c
+		battle_counttargeted() 修正
+		battle_get系 たぶん全部修正
+	clif.c
+		clif_parse_WalkToXY() 合奏の判断方法の変更
+		clif_parse_ActionRequest() ダンス中は殴らない座らないように変更
+	map.c
+		map_quit() ダンス中断追加
+	mob.c
+		mob_damage() skill_stop_dancingの引数増加による変更
+	pc.c
+		pc_setpos() 同上
+		pc_damage() 同上
+		pc_equipitem() 同上
+		pc_natural_heal_sub() ダンス中は自然回復しないように＆阿修羅時はSPのみ回復しないように
+	skill.c
+		skill_castend_nodamage_id() skill_stop_dancingの引数増加による変更
+		skill_status_change_start() 同上
+		skill_check_condition_char_sub() 相手がダンス中や座っていても合奏できないように変更
+		skill_check_condition_use_sub() 同上
+		skill_use_id() 合奏の判断方法の変更＆合奏中はアドリブ以外禁止に
+		skill_status_change_end() 合奏のダンス状態解除は相手のval4を0にするようにした
+		skill_is_danceskill() 戻り値変更
+		skill_stop_dancing() 引数増加、合奏で片方だけ落ちたときの処理追加
+		skill_delunitgroup() 合奏時のステータス変更処理を↑に移した
+		skill_clear_unitgroup() 自分のbl->idとユニットグループのgroup->src_idが違うときは削除しないように変更
+	skill.h 変更
+
+--------------------
+//0997 by (凸)
+・二人で合奏、三人で聖体を実装
+	合奏 バード・ダンサーが隣接したセルにいて同じスキルを持っている時に発動
+		スキルレベルは両者のスキルレベルの中間
+		本鯖仕様が分からないけど斜め隣接もOK
+	聖体 使用者のX軸で-1と+1の場所に一人ずつアコライトかプリーストがいる時に発動すると思う(未テスト)
+		使用者 ○ アコプリ ●
+		OK ●○●
+
+		NG ●
+		   ○●
+・トーキーボックスを使って設置時に座っていた時はスキル使用失敗にしてみた
+
+	(db/)
+	item_db.txt 村正の呪い率を5%に(by e2さん)
+	(map/)
+	skill.c
+		skill_check_condition_char_sub() 追加
+		skill_check_condition_use_sub() 追加
+		skill_check_condition() 変更
+		skill_use_id() 変更
+		skill_initunitgroup() 変更
+		skill_delunitgroup() 変更
+	clif.c
+		clif_parse_UseSkillToPos() 変更
+
+--------------------
+//0996 by (凸)
+・アドリブの5秒制限をcast_db.txtのupkeep_time2で制御できるように変更
+・村正で自分を呪わせるためにbonus2 bAddEff2を追加
+・呪われていて終了できない時にも「今は終了できません」が表示されるようにした
+・ダンスエフェクト等移動時に効果の適用判断が移動前に行われていたのを移動後に変更＆使わなくていい変数を廃止
+
+	(db/)
+	cast_db.txt
+	const.txt
+	item_db.txt
+	(doc/)
+	item_bonus.txt
+	(src/)
+	clif.c
+		clif_parse_QuitGame() 変更
+	map.h addeff2,arrow_addeff2 追加
+	pc.c
+		pc_calcstatus() 変更
+		pc_bonus2() 変更
+	skill.c
+		skill_additional_effect() 変更
+		skill_check_condition() 変更
+		skill_unit_move_unit_group() 変更
+
+--------------------
+//0995 by (凸)
+・battle.pet_lootitemのデフォルトがyesになっていたのを修正
+・battle.pet_lootitemの適用をforeach前でやるように修正
+・ペットの初期化でpd->lootitemがある時しか初期化されていなかったのを修正
+・領域が移動して対象が領域から抜けても効果が解除されない問題を修正
+・アドリブはダンス発動から5秒以上経たないと使用できないようにした
+
+	(map/)
+	pet.c
+		pet_data_init() 修正
+		pet_ai_sub_hard() 修正
+		pet_ai_sub_hard_lootsearch() 修正
+	skill.c
+		skill_blown() 変更
+		skill_unit_onlimit() エラーメッセージ修正
+		skill_check_condition() 変更
+		skill_initunitgroup() sd_data[SC_DANCING].val3にgettick()
+		skill_unit_move_unit_group_sub() 追加
+		skill_unit_move_unit_group() 変更
+	skill.h skill_unit_move_unit_group() 引数変更
+	battle.c
+		battle_config_read() pet_lootitem=0に修正
+	pc.c
+		pc_walk() 変更
+
+--------------------
+//0994 by huge
+・battle.pet_lootitemが適応されていなかったのを修正。
+・ペットにパフォーマンスをさせた後、10秒間くらいは拾わせないように。
+
+	(map/)
+	map.h	pet_dataにlootitem_timer追加。
+	pet.c
+		pet_ai_sub_hard_lootsearch() 修正。
+		pet_lootitem_drop() 修正。
+
+--------------------
+//0993 by (凸)
+・一人で合奏だけど合奏スキル中は動けないように
+・アンコール実装。直前に使ったダンススキルを半分のSPで使えます
+・ダンス中に移動するとエフェクトも移動するようにした
+・未実装のスキルが使われるとUnknown skillと表示されることがあるかもしれません
+・Sageのキャストキャンセルで実は前のスキルを覚えていなかった問題の修正
+
+	(map/)
+	clif.c
+		clif_parse_WalkToXY() 変更
+	map.h アンコール用変数の追加
+	pc.c
+		pc_walk()
+	skill.c
+		skill_blown
+		skill_castend_nodamage_id
+		skill_unitsetting() 変更
+		skill_unit_onplace() 罠で同じ処理をしているcaseをまとめた
+		skill_unit_onout() 使われてないunit2を削除
+		skill_check_condition() 変更
+		skill_use_id
+		skill_initunitgroup() 使ったダンススキルを変数に入れるようにした
+		skill_unit_move_unit_group() 追加
+	skill.h 変更
+
+--------------------
+//0992 by nokia
+
+map_quitを修正してメモリを釈放する時何度もを釈放するためメモリの間違いが起こる問題を招く
+
+	(map/)
+	map.c
+		map_quit()
+
+--------------------
+//0991 by (凸)
+・トーキーボックスを自分が踏んでも発動しない本鯖仕様に変更
+・スキル詠唱中とディレイ中はクライアントを終了できないようにしたけど、敵に攻撃されているときは終了できます(ごめんなさいっ！！)
+
+	(map/)
+	clif.c
+		clif_parse_QuitGame() 変更
+	skill.c
+		skill_unitsetting() 変更
+
+--------------------
+//0990 by ぴざまん
+・一部のトラップを範囲攻撃に変更（巻き込みは未実装）。
+・mapflagにpvp_nocalcrankとpvp_nightmaredrop追加。
+	・<gatname><tab>mapflag<tab>pvp_nocalcrank<tab>dummy
+	　PvPによるランキング計算をしないようにします。
+	・<gatname><tab>mapflag<tab>pvp_nightmaredrop<tab><item>,<type>,<per>
+	　PvPにて死亡した場合、<per>の確率でアイテムをドロップします。
+	　<item>: ドロップするアイテムIDを指定します。randomと記述すると所持品からランダムにドロップします。
+	　<type>: ドロップするアイテムのタイプを指定します。inventory:所持品 equip:装備品 all:全部
+	　<per>: ドロップする確率です。万分率で指定します。
+	(map/)
+	skill.c
+		skill_unit_onplace() 変更
+		skill_trap_splash() 追加
+	pc.c
+		pc_damage() 変更
+	npc.c
+		npc_parse_mapflag() 変更
+	map.h
+		map_dataにメンバ追加
+	(conf/)
+	mapflag.txt
+		ナイトメアモードにドロップ設定追加
+
+--------------------
+//0989 by (凸)
+・スプリングトラップを某所で見たSSを元に実装してみた。違ったら相違スレへ
+・ディテクティングを某所で見た解説文を元に実装してみた。違ったら相違スレへ
+・キャストキャンセル時のdelete_timerエラーに追加でスキルIDを表示するようにした。あわせて報告するとエラーの原因が分かるかも
+
+	(map/)
+	skill.c
+		skill_castend_nodamage_id() 変更
+		skill_castend_pos2() 変更
+		skill_castcancel() 変更
+
+--------------------
+//0988 by (凸)
+・トーキーボックスは常に足元に置けるように変更とKalenさんに貰った情報等を元にパケットを本鯖にあわせてみた
+・ショックウェーブトラップに効果を追加したつもり(未確認)
+・ブラストマインとクレイモアトラップを殴ると吹き飛ぶようにした
+・リムーブトラップで罠(skill_require_dbで指定したアイテム)を回収できるようにした
+・↑の実装により罠の時間切れで罠が出るオリジナル仕様はコメントアウト
+・ブラストマインの効果時間が長いのを修正
+
+	(db/)
+	cast_db.txt
+	(map/)
+	battle.c
+		battle_check_target() 変更
+	mob.c
+		mobskill_castend_pos() 変更
+	skill.c
+		skill_additional_effect() 変更
+		skill_blown() 変更
+		skill_castend_nodamage_id() 変更
+		skill_castend_pos2() 変更
+		skill_unitsetting() 変更
+		skill_unit_onplace() 変更
+		skill_unit_ondamaged() 変更
+		skill_castend_pos() 変更
+		skill_unit_timer_sub() 変更
+
+--------------------
+//0987 by 胡蝶蘭
+
+・ユーザー定義関数/サブルーティンに引数を指定可能に
+	詳しくは script_ref.txt を参照
+	
+	(map/)
+	scirpt.c
+		buildin_getarg()追加
+		buildin_callsub(),buildin_callfunc(),run_func()修正
+	(doc/)
+	script_ref.txt
+		引数についての説明追加
+
+・getguildname,getpartyname,getcastlename,strcharinfo修正
+	C_STRで定数文字列(C_CONSTSTR)を返していた問題修正
+	strcharinfoでギルド名などを所得する際、未所属だったときの問題
+	
+	(map/)
+	script.c
+		buildin_getguildname(),buildin_getpartyname()
+		buildin_getcastlename(),buildin_strcharinfo()
+
+--------------------
+//0986 by (凸)
+・client_packetの記述から推察してトーキーボックスを実装してみたつもり
+
+	(db/)
+	skill_db.txt
+	(map/)
+	clif.c
+		clif_talkiebox() 追加
+		clif_parse_UseSkillToPos() 変更
+		clif_parse() 変更
+	clif.h 変更
+	map.h 変更
+	skill.c
+		skill_castend_pos2() 変更
+		skill_unitsetting() 変更
+		skill_unit_onplace() 変更
+
+--------------------
+//0985 by (凸)
+・サーバーsnapshot
+・/script/extensionに語り部を追加したり
+・0984でAthena雑談スレッド part3>>92 Michaelさんの修正を取り込んでた
+・バグ報告スレッド part5 >>45に転載されてた あやねさんの修正を取り込み
+・バグ報告スレッド part5 >>54 rariさんのたぬき帽修正を取り込み
+
+	(script/extension/)
+	npc_event_kataribe6.txt 追加
+	npc_event_kataribe7.txt 追加
+	(script/npc/)
+	quest/npc_event_hat.txt 修正
+	job/npc_job_magician.txt 修正
+
+--------------------
 //0984 by (凸)
 ・セージのフリーキャストというスキルの存在を知らなかったので0983の変更を一部戻し
 ・アイテム更新したけど垂れ猫とインディアンバンダナが装備できない？
