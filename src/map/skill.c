@@ -453,9 +453,12 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		}
 		// スナッチャー
 		if(sd && sd->status.weapon != 11 && (skill=pc_checkskill(sd,RG_SNATCHER)) > 0)
-			if((skill*15 + 55) + (skill2 = pc_checkskill(sd,TF_STEAL))*10 > rand()%1000)
+			if((skill*15 + 55) + (skill2 = pc_checkskill(sd,TF_STEAL))*10 > rand()%1000) {
 				if(pc_steal_item(sd,bl))
 					clif_skill_nodamage(src,bl,TF_STEAL,skill2,1);
+				else
+					clif_skill_fail(sd,TF_STEAL,skill2,0);
+			}
 		break;
 
 	case SM_BASH:			/* バッシュ（急所攻撃） */
@@ -2668,7 +2671,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			if(pc_steal_item(sd,bl))
 				clif_skill_nodamage(src,bl,skillid,skilllv,1);
 			else
-				clif_skill_nodamage(src,bl,skillid,skilllv,0);
+				clif_skill_fail(sd,skillid,skilllv,0);
 		}
 		break;
 
@@ -2682,7 +2685,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				mob_target((struct mob_data *)bl,src,range);
 			}
 			else
-				clif_skill_nodamage(src,bl,skillid,skilllv,0);
+				clif_skill_fail(sd,skillid,skilllv,0);
 		}
 		break;
 

@@ -1,4 +1,4 @@
-// $Id: itemdb.c,v 1.8 2003/06/29 05:56:44 lemit Exp $
+// $Id: itemdb.c,v 1.1.1.1 2004/06/24 19:30:07 running_pinata Exp $
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -258,7 +258,7 @@ static int itemdb_readdb(void)
 			if(line[0]=='/' && line[1]=='/')
 				continue;
 			memset(str,0,sizeof(str));
-			for(j=0,np=p=line;j<17 && p;j++){
+			for(j=0,np=p=line;j<18 && p;j++){
 				str[j]=p;
 				p=strchr(p,',');
 				if(p){ *p++=0; np=p; }
@@ -271,7 +271,7 @@ static int itemdb_readdb(void)
 				continue;
 			ln++;
 
-			//ID,Name,Jname,Type,Price,Sell,Weight,ATK,DEF,Range,Slot,Job,Gender,Loc,wLV,eLV,View
+			//ID,Name,Jname,Type,Price,Sell,Weight,ATK,DEF,Range,Slot,Job,Gender,Loc,wLV,eLV,View,Refine
 			id=itemdb_search(nameid);
 			memcpy(id->name,str[1],24);
 			memcpy(id->jname,str[2],24);
@@ -297,6 +297,7 @@ static int itemdb_readdb(void)
 			id->wlv=atoi(str[14]);
 			id->elv=atoi(str[15]);
 			id->look=atoi(str[16]);
+			id->refine=atoi(str[17]);
 			id->flag.available=1;
 			id->flag.value_notdc=0;
 			id->flag.value_notoc=0;

@@ -20,6 +20,7 @@ struct item_data {
 	int look;
 	int elv;
 	int wlv;
+	int refine;
 	char *use_script;	// ‰ñ•œ‚Æ‚©‚à‘S•”‚±‚Ì’†‚Å‚â‚ë‚¤‚©‚È‚Æ
 	char *equip_script;	// UŒ‚,–hŒä‚Ì‘®«İ’è‚à‚±‚Ì’†‚Å‰Â”\‚©‚È?
 	struct {

@@ -1,4 +1,28 @@
 --------------------
+//1044 by TEILU
+
+・1042で@itemidentifyの権限の設定を忘れていたので追加。
+	(conf/)
+	atcommand_athena.conf
+
+・スティール、スティールコイン、スナッチャーの失敗時に
+  失敗メッセージを表示するように変更。
+	(map/)
+	skill.c
+
+・アイテムＤＢに精錬可否フラグのカラムを追加
+  精錬の可否をＤＢを参照するように修正
+	※とりあえず中段、下段、中下段の頭装備とアクセサリ以外の
+	  装備品はすべて精錬可の設定でＤＢを作りました。
+	  ＤＢは修正が必要になります。
+	(db/)
+	item_db.txt
+	(map/)
+	itemdb.c
+	itemdb.h
+	script.c
+
+--------------------
 //1043 by dusk
 ・docフォルダ・confフォルダ内のhelp.txtに1042(TEILUさん)の説明追加
 	@itemidentifyの説明は７２行目の@itemresetの下に。
@@ -15,8 +39,16 @@
 //1042 by TEILU
 
 ・@healコマンドに何も渡さないと完全回復するように変更。
+	(map/)
+	atcommand.c
+
 ・@itemitemidentifyコマンドの追加
-　未鑑定の所持アイテムを全て鑑定します。
+  未鑑定の所持アイテムを全て鑑定します。
+	(conf/)
+	msg_athena.conf
+	(map/)
+	atcommand.c
+	atcommand.h
 
 --------------------
 //1041 by mare
