@@ -1,4 +1,17 @@
 --------------------
+//0852 by ぴざまん
+
+・亀島4F・蟻D2F・アマツD1Fをテレポ不可、シーズモードに変更。
+・nosaveの引数にSavePointが指定できてなかったので追加。
+・PVPのmapflagをmapflag.txtに統合。
+	(map/)
+	npc.c
+		npc_parse_mapflag() 修正。
+	(conf/)
+		mapflag.txt 修正。
+		npc/npc_pvp.txt 修正。
+
+--------------------
 //0851 by 胡蝶蘭
 
 ・ログイン時の暗号化keyが常に同じという大きな問題があったので修正

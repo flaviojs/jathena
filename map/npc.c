@@ -1031,11 +1031,17 @@ static int npc_parse_mapflag(char *w1,char *w2,char *w3,char *w4)
 		return 1;
 
 //マップフラグ
-	if( strcmpi(w3,"nosave")==0 && sscanf(w4,"%[^,],%d,%d",savemap,&savex,&savey)==3){
+	if( strcmpi(w3,"nosave")==0){
+		if(strcmp(w4,"SavePoint")==0){
+			memcpy(map[m].save.map,"SavePoint",16);
+			map[m].save.x=-1;
+			map[m].save.y=-1;
+		}else if(sscanf(w4,"%[^,],%d,%d",savemap,&savex,&savey)==3){
+			memcpy(map[m].save.map,savemap,16);
+			map[m].save.x=savex;
+			map[m].save.y=savey;
+		}
 		map[m].flag.nosave=1;
-		memcpy(map[m].save.map,savemap,16);
-		map[m].save.x=savex;
-		map[m].save.y=savey;
 	}
 	else if(strcmpi(w3,"nomemo")==0) {
 		map[m].flag.nomemo=1;
