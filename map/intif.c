@@ -131,9 +131,9 @@ int intif_wis_message(struct map_session_data *sd,char *nick,char *mes,int mes_l
 int intif_wis_replay(int id,int flag)
 {
 	WFIFOW(inter_fd,0) = 0x3002;
-	WFIFOW(inter_fd,2) = id;
-	WFIFOB(inter_fd,4) = flag;
-	WFIFOSET(inter_fd,5);
+	WFIFOL(inter_fd,2) = id;
+	WFIFOB(inter_fd,6) = flag;
+	WFIFOSET(inter_fd,7);
 //	if(battle_config.etc_log)
 //		printf("intif_wis_replay %d %d\n",id,flag);
 	return 0;
@@ -463,14 +463,14 @@ int intif_guild_castle_datasave(int castle_id,int index, int value)
 int intif_parse_WisMessage(int fd)
 {
 	struct map_session_data* sd;
-	int id=RFIFOW(fd,4);
+	int id=RFIFOL(fd,4);
 
 //	if(battle_config.etc_log)
 //		printf("intif_parse_wismessage: %d %s %s %s\n",id,RFIFOP(fd,6),RFIFOP(fd,30),RFIFOP(fd,54) );
 	
-	sd=map_nick2sd(RFIFOP(fd,30));	// ‘—Mæ‚ğ’T‚·
+	sd=map_nick2sd(RFIFOP(fd,32));	// ‘—Mæ‚ğ’T‚·
 	if(sd!=NULL){
-		clif_wis_message(sd->fd,RFIFOP(fd,6),RFIFOP(fd,54),RFIFOW(fd,2)-54);
+		clif_wis_message(sd->fd,RFIFOP(fd,8),RFIFOP(fd,56),RFIFOW(fd,2)-56);
 		
 		intif_wis_replay(id,0);	// ‘—M¬Œ÷
 		

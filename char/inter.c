@@ -2,6 +2,7 @@
 #include "char.h"
 #include "socket.h"
 #include "timer.h"
+#include "db.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -11,7 +12,8 @@
 #include "int_storage.h"
 #include "int_pet.h"
 
-#define WISLIST_TTL	(30*1000)	// Wisリストの生存時間(30秒)
+#define WISDATA_TTL		(60*1000)	// Wisデータの生存時間(60秒)
+#define WISDELLIST_MAX	128			// Wisデータ削除リストの要素数
 
 // 送信パケット長リスト
 int inter_send_packet_length[]={
@@ -27,7 +29,7 @@ int inter_send_packet_length[]={
 };
 // 受信パケット長リスト
 int inter_recv_packet_length[]={
-	-1,-1, 5, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	-1,-1, 7, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 6,-1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	72, 6,52,14, 10,29, 6,-1, 34, 0, 0, 0,  0, 0,  0, 0,
 	-1, 6,-1, 0, 55,19, 6,-1, 14,-1,-1,-1, 14,19,186,-1,
@@ -38,70 +40,43 @@ int inter_recv_packet_length[]={
 	48,14,-1, 6,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 };
 
-struct WisList {
-	struct WisList* next;
-	int id,fd;
-	int count;
+struct WisData {
+	int id,fd,count,len;
 	unsigned long tick;
-	unsigned char src[24];
-	unsigned char dst[24];
-	unsigned char msg[512];
-	unsigned int len;
+	unsigned char src[24],dst[24],msg[512];
 };
-struct WisList *wis_list=NULL;
-short wis_id=0;
+static struct dbt * wis_db = NULL;
+static int wis_dellist[WISDELLIST_MAX], wis_delnum;
 
-// Wisリスト登録
-int add_wislist(struct WisList* list)
+
+// WISデータの生存チェック
+int check_ttl_wisdata_sub(void *key,void *data,va_list ap)
 {
+	unsigned long tick;
+	struct WisData *wd=(struct WisData *)data;
+	tick=va_arg(ap,unsigned long);
 	
-	list->next=wis_list;
-	list->id=wis_id++;
-	list->tick=gettick();
-	wis_list=list;
-
-	if(wis_id>30000)
-		wis_id=0;
-	return list->id;
-}
-// Wisリスト検索
-struct WisList *search_wislist(int id)
-{
-	struct WisList* p;
-	for(p=wis_list;p;p=p->next){
-		if( p->id == id )
-			return p;
+	if( DIFF_TICK(tick,wd->tick)>WISDATA_TTL && wis_delnum< WISDELLIST_MAX ){
+		wis_dellist[wis_delnum++]=wd->id;
 	}
-	return NULL;
-}
-// Wisリスト削除
-int del_wislist(int id)
-{
-	struct WisList* p=wis_list, **prev=&wis_list;
-//	printf("del_wislist:start\n");
-	for( ; p; prev=&p->next,p=p->next ){
-		if( p->id == id ){
-			*prev=p->next;
-			free(p);
-//			printf("del_wislist:ok\n");
-			return 1;
-		}
-	}
-//	printf("del_wislist:not found\n");
 	return 0;
 }
-// Wisリストの生存チェック
-int check_ttl_wislist()
+int check_ttl_wisdata()
 {
 	unsigned long tick=gettick();
-	struct WisList* p=wis_list, **prev=&wis_list;
-	for( ; p; prev=&p->next,p=p->next ){
-		if( DIFF_TICK(tick,p->tick)>WISLIST_TTL ){
-			*prev=p->next;
-			free(p);
-			p=*prev;
+	int i;
+	
+	do{
+		wis_delnum=0;
+		numdb_foreach( wis_db, check_ttl_wisdata_sub, tick );
+		for(i=0;i<wis_delnum;i++){
+			struct WisData *wd=numdb_search(wis_db,wis_dellist[i]);
+			printf("inter: wis data id=%d time out : from %s to %s\n",
+				wd->id,wd->src,wd->dst);
+			numdb_erase(wis_db,wd->id);
+			free(wd);
 		}
-	}
+	}while(wis_delnum>=WISDELLIST_MAX);
 	return 0;
 }
 
@@ -159,6 +134,8 @@ int inter_init(const char *file)
 {
 	inter_config_read(file);
 
+	wis_db = numdb_init();
+
 	inter_storage_init();
 	inter_party_init();
 	inter_guild_init();
@@ -182,29 +159,28 @@ int mapif_GMmessage(unsigned char *mes,int len)
 }
 
 // Wis送信
-int mapif_wis_message(struct WisList *wl)
+int mapif_wis_message(struct WisData *wd)
 {
 	unsigned char buf[1024];
-	
 	WBUFW(buf, 0)=0x3801;
-	WBUFW(buf, 2)=6 + 48 +wl->len;
-	WBUFW(buf, 4)=wl->id;
-	memcpy(WBUFP(buf, 6),wl->src,24);
-	memcpy(WBUFP(buf,30),wl->dst,24);
-	memcpy(WBUFP(buf,54),wl->msg,wl->len);
-	wl->count = mapif_sendall(buf,WBUFW(buf,2));
-//	printf("inter server wis: %d %d %ld\n", wl->id, wl->count, wl->tick);
+	WBUFW(buf, 2)=8 + 48 +wd->len;
+	WBUFL(buf, 4)=wd->id;
+	memcpy(WBUFP(buf, 8),wd->src,24);
+	memcpy(WBUFP(buf,32),wd->dst,24);
+	memcpy(WBUFP(buf,56),wd->msg,wd->len);
+	wd->count = mapif_sendall(buf,WBUFW(buf,2));
+	
 	return 0;
 }
 // Wis送信結果
-int mapif_wis_end(struct WisList *wl,int flag)
+int mapif_wis_end(struct WisData *wd,int flag)
 {
 	unsigned char buf[32];
 	
 	WBUFW(buf, 0)=0x3802;
-	memcpy(WBUFP(buf, 2),wl->src,24);
+	memcpy(WBUFP(buf, 2),wd->src,24);
 	WBUFB(buf,26)=flag;
-	mapif_send(wl->fd,buf,27);
+	mapif_send(wd->fd,buf,27);
 //	printf("inter server wis_end %d\n",flag);
 	return 0;
 }
@@ -222,47 +198,53 @@ int mapif_parse_GMmessage(int fd)
 // Wis送信要求
 int mapif_parse_WisRequest(int fd)
 {
-	struct WisList* wl = (struct WisList *)malloc(sizeof(struct WisList));
-	if(wl==NULL){
-		// Wis送信失敗（パケットを送る必要ありかも）
-		RFIFOSKIP(fd,RFIFOW(fd,2));
+	struct WisData* wd;
+	static int wisid=0;
+	
+	if( RFIFOW(fd,2)-52 >= sizeof(wd->msg) ){
+		printf("inter: Wis message size too long.\n");
 		return 0;
 	}
-	check_ttl_wislist();
 	
-	wl->fd=fd;	// WisListセット
-	memcpy(wl->src,RFIFOP(fd, 4),24);
-	memcpy(wl->dst,RFIFOP(fd,28),24);
-	wl->len=RFIFOW(fd,2)-52;
-	memcpy(wl->msg,RFIFOP(fd,52),wl->len);
+	wd = (struct WisData *)malloc(sizeof(struct WisData));
+	if(wd==NULL){
+		// Wis送信失敗（パケットを送る必要ありかも）
+		printf("inter: WisRequest: out of memory !\n");
+		return 0;
+	}
 	
-	add_wislist(wl);
+	check_ttl_wisdata();
 	
-	mapif_wis_message(wl);
+	wd->id = ++wisid;
+	wd->fd = fd;
+	wd->len= RFIFOW(fd,2)-52;
+	memcpy(wd->src, RFIFOP(fd, 4), 24);
+	memcpy(wd->dst, RFIFOP(fd,28), 24);
+	memcpy(wd->msg, RFIFOP(fd,52), wd->len);
+	wd->tick = gettick();
+	numdb_insert(wis_db, wd->id, wd);
+	mapif_wis_message(wd);
+
 	return 0;
 }
 
 // Wis送信結果
 int mapif_parse_WisReply(int fd)
 {
-	int id=RFIFOW(fd,2),flag=RFIFOB(fd,4);
+	int id=RFIFOL(fd,2),flag=RFIFOB(fd,6);
 	
-	struct WisList* wl=search_wislist(id);
+	struct WisData *wd = numdb_search(wis_db, id);
 	
-	if(wl==NULL){
-		RFIFOSKIP(fd,5);
+	if(wd==NULL)
 		return 0;	// タイムアウトしたかIDが存在しない
-	}
 	
-	if((--wl->count)==0 || flag!=1){
-		// 全鯖終わったか、ある鯖から終了する結果が返った
-		mapif_wis_end(wl,flag);
-		del_wislist(wl->id);
+	if( (--wd->count)==0 || flag!=1){
+		mapif_wis_end(wd,flag);
+		numdb_erase(wis_db, id);
+		free(wd);
 	}
-	
 	return 0;
 }
-
 //--------------------------------------------------------
 
 // map server からの通信（１パケットのみ解析すること）
