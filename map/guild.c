@@ -1253,6 +1253,38 @@ int guild_castledatasaveack(int castle_id,int index,int value)
 	return 1;
 }
 
+// ギルドデータ一括受信（初期化時）
+int guild_castlealldataload(int len,struct guild_castle *gc)
+{
+	int i;
+	int n=(len-4)/sizeof(struct guild_castle),ev=-1;
+
+	// イベント付きで要求するデータ位置を探す(最後の占拠データ)
+	for(i=0;i<n;i++){
+		if( (gc+i)->guild_id )
+			ev=i;
+	}
+
+	// 城データ格納とギルド情報要求
+	for(i=0;i<n;i++,gc++){
+		struct guild_castle *c=guild_castle_search(gc->castle_id);
+		if(!c){
+			printf("guild_castlealldataload ??\n");
+			continue;
+		}
+		memcpy(&c->guild_id,&gc->guild_id,
+			sizeof(struct guild_castle) - ((int)&c->guild_id - (int)c) );
+		if( c->guild_id ){
+			if(i!=ev)
+				guild_request_info(c->guild_id);
+			else
+				guild_npc_request_info(c->guild_id,"::OnAgitInit");
+		}
+	}
+	if(ev==-1)
+		npc_event_doall("OnAgitInit");
+	return 0;
+}
 
 
 int guild_agit_start(void)

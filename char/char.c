@@ -1013,6 +1013,11 @@ int search_mapserver(char *map)
 	return -1;
 }
 
+int char_mapif_init(int fd)
+{
+	return inter_mapif_init(fd);
+}
+
 int parse_char(int fd)
 {
 	int i,ch;
@@ -1238,6 +1243,7 @@ int parse_char(int fd)
 				WFIFOSET(fd,3);
 				RFIFOSKIP(fd,60);
 				realloc_fifo(fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
+				char_mapif_init(fd);
 				return 0;
 			}
 			break;

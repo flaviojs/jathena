@@ -192,6 +192,9 @@ S 3041 <castle_id>.w <index>.B <value>.l
 	ギルド城データ変更要求
 R 3841 <castle_id>.w <index>.B <value>.l
 	ギルド城データ変更通知
+R 3842 <len>.w { <guild_castle>.?B }.?B
+	ギルド城データ一括送信
+
 （以下、ギルド系追加予定）
 
 S 3080 <account_id>.l <char_id>.I <pet_type>.w <pet_lv>.w <pet_egg_id>.w 

@@ -1997,10 +1997,11 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	if(md->npc_event[0] && strcmp(((md->npc_event)+strlen(md->npc_event)-13),"::OnAgitBreak") == 0) {
 		printf("MOB.C: Run NPC_Event[OnAgitBreak].\n");
 		if (agit_flag == 1) //Call to Run NPC_Event[OnAgitBreak]
-			guild_agit_break(md);
+			guild_agit_break(md);	
 	}
-
-	if(md->npc_event[0]){	// SCRIPTŽÀs
+	
+		// SCRIPTŽÀs
+	if(md->npc_event[0]){
 //		if(battle_config.battle_log)
 //			printf("mob_damage : run event : %s\n",md->npc_event);
 		if(src && src->type == BL_PET)

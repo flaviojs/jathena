@@ -33,7 +33,7 @@ static const int packet_len_table[]={
 	-1, 7, 0, 0,  0, 0, 0, 0, -1,11, 0, 0,  0, 0,  0, 0,
 	35,-1,11,15, 34,29, 7,-1,  0, 0, 0, 0,  0, 0,  0, 0,
 	10,-1,15, 0, 79,19, 7,-1,  0,-1,-1,-1, 14,67,186,-1,
-	 9, 9, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	 9, 9,-1, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
@@ -844,7 +844,11 @@ int intif_parse_GuildCastleDataSave(int fd)
 	return guild_castledatasaveack(RFIFOW(fd,2),RFIFOB(fd,4),RFIFOL(fd,5));
 }
 
-
+// ギルド城データ一括受信(初期化時)
+int intif_parse_GuildCastleAllDataLoad(int fd)
+{
+	return guild_castlealldataload(RFIFOW(fd,2),(struct guild_castle *)RFIFOP(fd,4));
+}
 
 // pet
 int intif_parse_CreatePet(int fd)
@@ -948,6 +952,7 @@ int intif_parse(int fd)
 	case 0x383f:	intif_parse_GuildEmblem(fd); break;
 	case 0x3840:	intif_parse_GuildCastleDataLoad(fd); break;
 	case 0x3841:	intif_parse_GuildCastleDataSave(fd); break;
+	case 0x3842:	intif_parse_GuildCastleAllDataLoad(fd); break;
 	case 0x3880:	intif_parse_CreatePet(fd); break;
 	case 0x3881:	intif_parse_RecvPetData(fd); break;
 	case 0x3882:	intif_parse_SavePetOk(fd); break;

@@ -7075,6 +7075,14 @@ void clif_parse_GMHide(int fd,struct map_session_data *sd)
 }
 
 /*==========================================
+ * GMによるチャット禁止時間付与
+ *------------------------------------------
+ */
+void clif_parse_GMReqNoChat(int fd,struct map_session_data *sd)
+{
+	return;
+}
+/*==========================================
  * GMによるチャット禁止時間参照（？）
  *------------------------------------------
  */
@@ -7244,7 +7252,9 @@ static int clif_parse(int fd)
 		clif_parse_NpcAmountInput,
 		NULL,NULL,
 		clif_parse_NpcCloseClicked,
-		NULL, NULL,NULL,NULL,NULL,NULL,
+		NULL, NULL,
+		clif_parse_GMReqNoChat,
+		NULL,NULL,NULL,
 		clif_parse_GuildCheckMaster,
 		NULL,
 		clif_parse_GuildReqeustInfo,

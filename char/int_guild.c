@@ -817,6 +817,26 @@ int mapif_guild_castle_datasave(int castle_id,int index,int value)
 	mapif_sendall(buf,9);
 	return 0;
 }
+
+int mapif_guild_castle_alldataload_sub(void *key,void *data,va_list ap)
+{
+	int fd=va_arg(ap,int);
+	int *p=va_arg(ap,int*);
+	memcpy(WFIFOP(fd,*p),(struct guild_castle*)data,sizeof(struct guild_castle));
+	(*p)+=sizeof(struct guild_castle);
+	return 0;
+}
+
+int mapif_guild_castle_alldataload(int fd)
+{
+	int len=4;
+	WFIFOW(fd,0)=0x3842;
+	numdb_foreach(castle_db,mapif_guild_castle_alldataload_sub,fd,&len);
+	WFIFOW(fd,2)=len;
+	WFIFOSET(fd,len);
+	return 0;
+}
+
 //-------------------------------------------------------------------
 // map serverからの通信
 
@@ -1252,6 +1272,7 @@ int mapif_parse_GuildCheck(int fd,int guild_id,int account_id,int char_id)
 	return guild_check_conflict(guild_id,account_id,char_id);
 }
 
+
 // map server からの通信
 // ・１パケットのみ解析すること
 // ・パケット長データはinter.cにセットしておくこと
@@ -1283,3 +1304,10 @@ int inter_guild_parse_frommap(int fd)
 	}
 	return 1;
 }
+
+// マップサーバーの接続時処理
+int inter_guild_mapif_init(int fd)
+{
+	return mapif_guild_castle_alldataload(fd);
+}
+

@@ -218,7 +218,7 @@ int chrif_connectack(int fd)
 		npc_event_doall("OnInterIfInit") );
 	
 	// <Agit> Run Event [AgitInit]
-	printf("NPC_Event:[OnAgitInit] do (%d) events (Agit Initialize).\n", npc_event_doall("OnAgitInit"));
+//	printf("NPC_Event:[OnAgitInit] do (%d) events (Agit Initialize).\n", npc_event_doall("OnAgitInit"));
 
 	return 0;
 }

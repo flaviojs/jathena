@@ -142,6 +142,7 @@ int buildin_areamonster(struct script_state *st);
 int buildin_killmonster(struct script_state *st);
 int buildin_killmonsterall(struct script_state *st);
 int buildin_doevent(struct script_state *st);
+int buildin_donpcevent(struct script_state *st);
 int buildin_addtimer(struct script_state *st);
 int buildin_deltimer(struct script_state *st);
 int buildin_addtimercount(struct script_state *st);
@@ -272,6 +273,7 @@ struct {
 	{buildin_killmonster,"killmonster","ss"},
 	{buildin_killmonsterall,"killmonsterall","s"},
 	{buildin_doevent,"doevent","s"},
+	{buildin_donpcevent,"donpcevent","s"},
 	{buildin_addtimer,"addtimer","is"},
 	{buildin_deltimer,"deltimer","s"},
 	{buildin_addtimercount,"addtimercount","si"},
@@ -2779,6 +2781,17 @@ int buildin_doevent(struct script_state *st)
 	return 0;
 }
 /*==========================================
+ * NPC主体イベント実行
+ *------------------------------------------
+ */
+int buildin_donpcevent(struct script_state *st)
+{
+	char *event;
+	event=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	npc_event_do(event);
+	return 0;
+}
+/*==========================================
  * イベントタイマー追加
  *------------------------------------------
  */
@@ -3416,7 +3429,7 @@ int buildin_detachrid(struct script_state *st)
 int buildin_isloggedin(struct script_state *st)
 {
 	push_val(st->stack,C_INT, map_id2sd(
-		conv_num(st,& (st->stack->stack_data[st->start+2])) ));
+		conv_num(st,& (st->stack->stack_data[st->start+2])) )!=NULL );
 	return 0;
 }
 

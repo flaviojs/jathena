@@ -1,6 +1,48 @@
 --------------------
 //0925 by 胡蝶蘭
 
+・ギルド城の初期化方法変更
+	・全てのギルド城（＋占拠ギルド情報）を所得したときにOnAgitInitが
+	  よばれるように。GetCastleDataやRequestGuildInfoの必要がなくなります。
+	  従って、現在のgvgスクリプトのOnInterIfInitやOnRecvCastleXXXは
+	  必要なくなります。（おそらく現行のスクリプトも動作は可能です）
+	  初期化が必要なNPCは変わりにOnAgitInitを使ってください。
+	  なお、不要になった命令などを削除する予定はありません。
+	
+	(char/)
+	inter.c/inter.h/char.c/int_guild.c/int_guild.h
+		マップサーバー接続時に処理を行えるように修正
+		接続時にギルド城データを送信するように
+	(map/)
+	intif.c/guild.c/guild.h
+		接続時のギルド城データ一括受信処理＆ギルド情報要求、
+		OnAgitInitの呼び出しなど
+	chrif.c
+		旧OnAgitInitの呼び出し削除
+	(doc/)
+	inter_server_packet.txt
+		ギルド城データ一括送信パケット0x3842追加
+
+・スクリプトにNPC主体イベント実行命令追加
+	・donpcevent(NPC主体イベント実行)追加
+	  こちらはdoeventと違いブロードキャスト可能です。詳細はscript_ref。
+	・isloggedinのコンパイル警告がでないように修正
+	(map/)
+	script.c
+		buildin_donpcevent()追加など
+	(doc/)
+	script_ref.txt
+		doevent,donpcevent,OnAgitInit追加など
+
+・その他修正
+	(map/)
+	clif.c
+		clif_parse_GMReqNoChat()追加
+
+
+--------------------
+//0925 by 胡蝶蘭
+
 ・スクリプトのバグ修正
 	・monster,areamonsterの問題修正
 	  これらはscript_rid2sdを使用しないようにしました。

@@ -72,6 +72,7 @@ int guild_castledataload(int castle_id,int index);
 int guild_castledataloadack(int castle_id,int index,int value);
 int guild_castledatasave(int castle_id,int index,int value);
 int guild_castledatasaveack(int castle_id,int index,int value);
+int guild_castlealldataload(int len,struct guild_castle *gc);
 
 int guild_agit_start(void);
 int guild_agit_end(void);
