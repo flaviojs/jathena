@@ -1435,7 +1435,7 @@ int mob_deleteslave_sub(struct block_list *bl,va_list ap)
 	struct mob_data *md = (struct mob_data *)bl;
 	int id;
 	id=va_arg(ap,int);
-	if(md->master_id > 0 && md->master_id == id )
+	if( md->master_id == id )
 		mob_damage(NULL,md,md->hp);
 	return 0;
 }
@@ -1664,10 +1664,8 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 				break;
 			}
 		}
-		if(!flag) {
+		if(!flag)
 			clif_mvp_exp(mvp_sd,mob_db[md->class].mexp);	// –³ğŒ‚ÅŒoŒ±’l
-			pc_gainexp(mvp_sd,mob_db[md->class].mexp,0);
-		}
 	}
 
 	if(md->npc_event[0]){	// SCRIPTÀs
@@ -1677,8 +1675,8 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 
 	clif_clearchar_area(&md->bl,1);
 	map_delblock(&md->bl);
-	mob_deleteslave(md);
 	mob_setdelayspawn(md->bl.id);
+	mob_deleteslave(md);
 
 	return 0;
 }
