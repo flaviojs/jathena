@@ -392,6 +392,7 @@ static int add_str(const unsigned char *p)
 			printf("out of memory : add_str str_data\n");
 			exit(1);
 		}
+		memset(str_data + (str_data_size - 128), '\0', 128);
 	}
 	while(str_pos+strlen(p)+1>=str_size){
 		str_size+=256;
@@ -400,6 +401,7 @@ static int add_str(const unsigned char *p)
 			printf("out of memory : add_str str_buf\n");
 			exit(1);
 		}
+		memset(str_buf + (str_size - 256), '\0', 256);
 	}
 	strcpy(str_buf+str_pos,p);
 	str_data[str_num].type=C_NOP;
@@ -426,6 +428,8 @@ static void check_script_buf(int size)
 			printf("out of memory : check_script_buf \n");
 			exit(1);
 		}
+		memset(script_buf + script_size - SCRIPT_BLOCK_SIZE, '\0',
+			SCRIPT_BLOCK_SIZE);
 	}
 }
 
@@ -950,7 +954,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 		read_constdb();
 	}
 	first=0;
-	script_buf=malloc(SCRIPT_BLOCK_SIZE);
+	script_buf=calloc(SCRIPT_BLOCK_SIZE, 1);
 	if(script_buf==NULL){
 		printf("out of memory : parse_script\n");
 		exit(1);
@@ -1120,7 +1124,7 @@ char* conv_str(struct script_state *st,struct script_data *data)
 	get_val(st,data);
 	if(data->type==C_INT){
 		char *buf;
-		buf=malloc(16);
+		buf=calloc(16, 1);
 		if(buf==NULL){
 			printf("out of memory : conv_str\n");
 			exit(1);
@@ -1162,13 +1166,16 @@ int conv_num(struct script_state *st,struct script_data *data)
  */
 void push_val(struct script_stack *stack,int type,int val)
 {
-	if(stack->sp>=stack->sp_max){
-		stack->sp_max+=64;
-		stack->stack_data=realloc(stack->stack_data,sizeof(stack->stack_data[0])*stack->sp_max);
+	if(stack->sp >= stack->sp_max){
+		stack->sp_max += 64;
+		stack->stack_data = realloc(stack->stack_data,
+			sizeof(stack->stack_data[0]) * stack->sp_max);
 		if(stack->stack_data==NULL){
 			printf("push_val:stack over flow\n");
 			exit(1);
 		}
+		memset(stack->stack_data + (stack->sp_max - 64), 0,
+			64 * sizeof(*(stack->stack_data)));
 	}
 //	if(battle_config.etc_log)
 //		printf("push (%d,%d)-> %d\n",type,val,stack->sp);
@@ -1184,12 +1191,15 @@ void push_val(struct script_stack *stack,int type,int val)
 void push_str(struct script_stack *stack,int type,unsigned char *str)
 {
 	if(stack->sp>=stack->sp_max){
-		stack->sp_max+=64;
-		stack->stack_data=realloc(stack->stack_data,sizeof(stack->stack_data[0])*stack->sp_max);
+		stack->sp_max += 64;
+		stack->stack_data = realloc(stack->stack_data,
+			sizeof(stack->stack_data[0]) * stack->sp_max);
 		if(stack->stack_data==NULL){
 			printf("push_val:stack over flow\n");
 			exit(1);
 		}
+		memset(stack->stack_data + (stack->sp_max - 64), '\0',
+			64 * sizeof(*(stack->stack_data)));
 	}
 //	if(battle_config.etc_log)
 //		printf("push (%d,%x)-> %d\n",type,str,stack->sp);
@@ -1304,7 +1314,7 @@ int buildin_menu(struct script_state *st)
 			conv_str(st,& (st->stack->stack_data[i]));
 			len+=strlen(st->stack->stack_data[i].u.str)+1;
 		}
-		buf=malloc(len);
+		buf=calloc(len, 1);
 		if(buf==NULL){
 			printf("out of memory : buildin_menu\n");
 			exit(1);
@@ -1901,7 +1911,7 @@ char *buildin_getpartyname_sub(int party_id)
 	
 	if(p!=NULL){
 		char *buf;
-		buf=malloc(24);
+		buf=calloc(24, 1);
 		if(buf==NULL){
 			if(battle_config.error_log)
 				printf("out of memory : buildin_getguildname_sub\n");
@@ -1938,7 +1948,7 @@ char *buildin_getguildname_sub(int guild_id)
 
 	if(g!=NULL){
 		char *buf;
-		buf=malloc(24);
+		buf=calloc(24, 1);
 		if(buf==NULL){
 			if(battle_config.error_log)
 				printf("out of memory : buildin_getguildname_sub\n");
@@ -1973,13 +1983,13 @@ char *buildin_getguildmaster_sub(int guild_id)
 
 	if(g!=NULL){
 		char *buf;
-		buf=malloc(24);
+		buf=calloc(24, 1);
 		if(buf==NULL){
 			if(battle_config.error_log)
 				printf("out of memory : buildin_getguildmaster_sub\n");
 			exit(1);
 		}
-		strcpy(buf,g->master);
+		strncpy(buf,g->master, 23);
 		return buf;
 	}
 
@@ -2028,12 +2038,12 @@ int buildin_strcharinfo(struct script_state *st)
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	if(num==0){
 		char *buf;
-		buf=malloc(24);
+		buf=calloc(24, 1);
 		if(buf==NULL){
 			printf("out of memory : buildin_strcharinfo\n");
 			exit(1);
 		}
-		strcpy(buf,sd->status.name);
+		strncpy(buf,sd->status.name, 23);
 		push_str(st->stack,C_STR,buf);
 	}
 	if(num==1){
@@ -2065,7 +2075,7 @@ int buildin_getequipname(struct script_state *st)
 	struct item_data* item;
 	char *buf;
 
-	buf=malloc(64);
+	buf=calloc(64, 1);
 	if(buf==NULL){
 		printf("out of memory : buildin_getequipname\n");
 		exit(1);
@@ -3014,7 +3024,7 @@ int buildin_changesex(struct script_state *st)
 int buildin_waitingroom(struct script_state *st)
 {
 	char *name,*ev="";
-	int limit,trigger=0;
+	int limit, trigger = 0;
 	name=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	limit= conv_num(st,& (st->stack->stack_data[st->start+3]));
 	
@@ -3461,7 +3471,7 @@ int buildin_getcastlename(struct script_state *st)
 	char *mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	struct guild_castle *gc;
 	int i;
-	char *buf=malloc(24);
+	char *buf=calloc(24, 1);
 	if(buf==NULL){
 		if(battle_config.error_log)
 			printf("out of memory : buildin_getcastlename\n");
@@ -3823,8 +3833,8 @@ void op_add(struct script_state* st)
 		st->stack->stack_data[st->stack->sp-1].u.num += st->stack->stack_data[st->stack->sp].u.num;
 	} else { // ss‚Ì—\’è
 		char *buf;
-		buf=malloc(strlen(st->stack->stack_data[st->stack->sp-1].u.str)+
-				strlen(st->stack->stack_data[st->stack->sp].u.str)+1);
+		buf=calloc(strlen(st->stack->stack_data[st->stack->sp-1].u.str)+
+				strlen(st->stack->stack_data[st->stack->sp].u.str)+1, 1);
 		if(buf==NULL){
 			printf("out of memory : op_add\n");
 			exit(1);
@@ -4062,7 +4072,7 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 
 	stack.sp=0;
 	stack.sp_max=64;
-	stack.stack_data=malloc(sizeof(stack.stack_data[0])*stack.sp_max);
+	stack.stack_data=calloc(sizeof(stack.stack_data[0])*stack.sp_max, 1);
 	if(stack.stack_data==NULL){
 		printf("out of memory : run_script\n");
 		exit(1);
@@ -4196,7 +4206,7 @@ int mapreg_setregstr(int num,const char *str)
 		mapreg_dirty=1;
 		return 0;
 	}
-	if( (p=malloc(strlen(str)+1))==NULL ){
+	if( (p=calloc(strlen(str)+1, 1))==NULL ){
 		printf("script: mapreg_setregstr: out of memory !!");
 		return 0;
 	}
@@ -4229,7 +4239,7 @@ static int script_load_mapreg()
 				printf("%s: %s broken data !\n",mapreg_txt,buf1);
 				continue;
 			}
-			if( (p=(char *)malloc(strlen(buf2)))==NULL ){
+			if( (p=(char *)calloc(strlen(buf2), 1))==NULL ){
 				printf("script_load_mapreg: out of memory !!");
 				exit(0);
 			}

@@ -111,12 +111,11 @@ struct item_data* itemdb_search(int nameid)
 	id=numdb_search(item_db,nameid);
 	if(id) return id;
 
-	id=malloc(sizeof(struct item_data));
+	id=calloc(sizeof(struct item_data), 1);
 	if(id==NULL){
 		printf("out of memory : itemdb_search\n");
 		exit(1);
 	}
-	memset(id,0,sizeof(struct item_data));
 	numdb_insert(item_db,nameid,id);
 
 	id->nameid=nameid;

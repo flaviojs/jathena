@@ -294,30 +294,40 @@ int mmo_char_fromstr(char *str,struct mmo_charstatus *p)
 
 int mmo_char_init(void)
 {
-  char line[65536];
-  int ret;
-  FILE *fp;
-
-  fp=fopen(char_txt,"r");
-  char_dat=malloc(sizeof(char_dat[0])*256);
-  char_max=256;
-  if(fp==NULL)
-    return 0;
-  while(fgets(line,65535,fp)){
-    if(char_num>=char_max){
-      char_max+=256;
-      char_dat=realloc(char_dat,sizeof(char_dat[0])*char_max);
-    }
-    memset(&char_dat[char_num],0,sizeof(char_dat[0]));
-    ret=mmo_char_fromstr(line,&char_dat[char_num]);
-    if(ret){
-      if(char_dat[char_num].char_id>=char_id_count)
+	char line[65536];
+	int ret;
+	FILE *fp;
+	
+	fp=fopen(char_txt,"r");
+	char_dat=calloc(sizeof(char_dat[0])*256, 1);
+	if (!char_dat) {
+		printf("out of memory: mmo_char_init\n");
+		exit(1);
+	}
+	char_max=256;
+	if(fp==NULL)
+		return 0;
+	while(fgets(line,65535,fp)){
+		if(char_num>=char_max){
+			char_max+=256;
+			char_dat=realloc(char_dat,sizeof(char_dat[0])*char_max);
+			if (!char_dat) {
+				printf("out of memory: mmo_char_init\n");
+				exit(1);
+			}
+			memset(char_dat + (char_max - 256), '\0',
+				256 * sizeof(*char_dat));
+    	}
+		memset(&char_dat[char_num],0,sizeof(char_dat[0]));
+		ret=mmo_char_fromstr(line,&char_dat[char_num]);
+		if(ret){
+			if(char_dat[char_num].char_id>=char_id_count)
 				char_id_count=char_dat[char_num].char_id+1;
-      char_num++;
-    }
-  }
-  fclose(fp);
-  return 0;
+			char_num++;
+		}
+	}
+	fclose(fp);
+	return 0;
 }
 
 void mmo_char_sync(void)
@@ -344,71 +354,76 @@ int mmo_char_sync_timer(int tid,unsigned int tick,int id,int data)
 
 int make_new_char(int fd,unsigned char *dat)
 {
-  int i;
-  struct char_session_data *sd;
-  FILE *logfp;
-
-  if(dat[24]+dat[25]+dat[26]+dat[27]+dat[28]+dat[29]>5*6 ||
-     dat[30]>=9 ||
-     dat[33]==0 || dat[33]>=20 ||
-     dat[31]>=9){
-    logfp=fopen(char_log_filename,"a");
-    if(logfp){
-      fprintf(logfp,"make new char error %d-%d %s %d,%d,%d,%d,%d,%d %d,%d" RETCODE,
-	      fd,dat[30],dat,dat[24],dat[25],dat[26],dat[27],dat[28],dat[29],dat[33],dat[31]);
-      fclose(logfp);
-    }
-    return -1;
-  }
-  logfp=fopen(char_log_filename,"a");
-  if(logfp){
-    fprintf(logfp,"make new char %d-%d %s" RETCODE,fd,dat[30],dat);
-    fclose(logfp);
-  }
-  sd=session[fd]->session_data;
-
-  for(i=0;i<char_num;i++){
-    if(strcmp(char_dat[i].name,dat)==0 || (char_dat[i].account_id==sd->account_id && char_dat[i].char_num==dat[30]))
-      break;
-  }
-  if(i!=char_num)
-    return -1;
-  if(char_num>=char_max){
-    char_max+=256;
-    char_dat=realloc(char_dat,sizeof(char_dat[0])*char_max);
-  }
-  memset(&char_dat[i],0,sizeof(char_dat[0]));
-
-  char_dat[i].char_id=char_id_count++;
-  char_dat[i].account_id=sd->account_id;
-  char_dat[i].char_num=dat[30];
-  strcpy(char_dat[i].name,dat);
-  char_dat[i].class=0;
-  char_dat[i].base_level=1;
-  char_dat[i].job_level=1;
-  char_dat[i].base_exp=0;
-  char_dat[i].job_exp=0;
-  char_dat[i].zeny=start_zeny;
-  char_dat[i].str=dat[24];
-  char_dat[i].agi=dat[25];
-  char_dat[i].vit=dat[26];
-  char_dat[i].int_=dat[27];
-  char_dat[i].dex=dat[28];
-  char_dat[i].luk=dat[29];
-  char_dat[i].max_hp=40 * (100 + char_dat[i].vit)/100;
-  char_dat[i].max_sp=11 * (100 + char_dat[i].int_)/100;;
-  char_dat[i].hp=char_dat[i].max_hp;
-  char_dat[i].sp=char_dat[i].max_sp;
-  char_dat[i].status_point=0;
-  char_dat[i].skill_point=0;
-  char_dat[i].option=0;
-  char_dat[i].karma=0;
-  char_dat[i].manner=0;
-  char_dat[i].party_id=0;
-  char_dat[i].guild_id=0;
-  char_dat[i].hair=dat[33];
-  char_dat[i].hair_color=dat[31];
-  char_dat[i].clothes_color=0;
+	int i;
+	struct char_session_data *sd;
+	FILE *logfp;
+	
+	if(dat[24]+dat[25]+dat[26]+dat[27]+dat[28]+dat[29]>5*6 ||
+		 dat[30]>=9 ||
+		 dat[33]==0 || dat[33]>=20 ||
+		 dat[31]>=9){
+		logfp=fopen(char_log_filename,"a");
+		if(logfp){
+			fprintf(logfp,"make new char error %d-%d %s %d,%d,%d,%d,%d,%d %d,%d" RETCODE,
+				fd,dat[30],dat,dat[24],dat[25],dat[26],dat[27],dat[28],dat[29],dat[33],dat[31]);
+			fclose(logfp);
+		}
+		return -1;
+	}
+	logfp=fopen(char_log_filename,"a");
+	if(logfp){
+		fprintf(logfp,"make new char %d-%d %s" RETCODE,fd,dat[30],dat);
+		fclose(logfp);
+	}
+	sd=session[fd]->session_data;
+	
+	for(i=0;i<char_num;i++){
+		if(strcmp(char_dat[i].name,dat)==0 || (char_dat[i].account_id==sd->account_id && char_dat[i].char_num==dat[30]))
+			break;
+	}
+	if(i!=char_num)
+		return -1;
+	if(char_num>=char_max){
+		char_max+=256;
+		char_dat=realloc(char_dat,sizeof(char_dat[0])*char_max);
+		if (!char_dat) {
+			printf("out of memory: make_new_char\n");
+			exit(1);
+		}
+		memset(char_dat + (char_max - 256), '\0', 256 * sizeof(*char_dat));
+	}
+	memset(&char_dat[i],0,sizeof(char_dat[0]));
+	
+	char_dat[i].char_id=char_id_count++;
+	char_dat[i].account_id=sd->account_id;
+	char_dat[i].char_num=dat[30];
+	strcpy(char_dat[i].name,dat);
+	char_dat[i].class=0;
+	char_dat[i].base_level=1;
+	char_dat[i].job_level=1;
+	char_dat[i].base_exp=0;
+	char_dat[i].job_exp=0;
+	char_dat[i].zeny=start_zeny;
+	char_dat[i].str=dat[24];
+	char_dat[i].agi=dat[25];
+	char_dat[i].vit=dat[26];
+	char_dat[i].int_=dat[27];
+	char_dat[i].dex=dat[28];
+	char_dat[i].luk=dat[29];
+	char_dat[i].max_hp=40 * (100 + char_dat[i].vit)/100;
+	char_dat[i].max_sp=11 * (100 + char_dat[i].int_)/100;;
+	char_dat[i].hp=char_dat[i].max_hp;
+	char_dat[i].sp=char_dat[i].max_sp;
+	char_dat[i].status_point=0;
+	char_dat[i].skill_point=0;
+	char_dat[i].option=0;
+	char_dat[i].karma=0;
+	char_dat[i].manner=0;
+	char_dat[i].party_id=0;
+	char_dat[i].guild_id=0;
+	char_dat[i].hair=dat[33];
+	char_dat[i].hair_color=dat[31];
+	char_dat[i].clothes_color=0;
 	char_dat[i].inventory[0].nameid = 1201; /* Knife */
 	char_dat[i].inventory[0].amount = 1;
 	char_dat[i].inventory[0].equip = 0x02;
@@ -418,22 +433,22 @@ int make_new_char(int fd,unsigned char *dat)
 	char_dat[i].inventory[1].equip = 0x10;
 	char_dat[i].inventory[1].identify = 1;
 	char_dat[i].weapon = 1;
-  char_dat[i].shield=0;
-  char_dat[i].head_top=0;
-  char_dat[i].head_mid=0;
-  char_dat[i].head_bottom=0;
-  memcpy(&char_dat[i].last_point,&start_point,sizeof(start_point));
-  memcpy(&char_dat[i].save_point,&start_point,sizeof(start_point));
+	char_dat[i].shield=0;
+	char_dat[i].head_top=0;
+	char_dat[i].head_mid=0;
+	char_dat[i].head_bottom=0;
+	memcpy(&char_dat[i].last_point,&start_point,sizeof(start_point));
+	memcpy(&char_dat[i].save_point,&start_point,sizeof(start_point));
 /*strcpy(char_dat[i].last_point.map,"new_1-1.gat");
-  char_dat[i].last_point.x=start_po;
-  char_dat[i].last_point.y=111;
-  strcpy(char_dat[i].save_point.map,"new_1-1.gat");
-  char_dat[i].save_point.x=53;
-  char_dat[i].save_point.y=111;*/
-  char_num++;
-
-  mmo_char_sync();
-  return i;
+	char_dat[i].last_point.x=start_po;
+	char_dat[i].last_point.y=111;
+	strcpy(char_dat[i].save_point.map,"new_1-1.gat");
+	char_dat[i].save_point.x=53;
+	char_dat[i].save_point.y=111;*/
+	char_num++;
+	
+	mmo_char_sync();
+	return i;
 }
 
 int count_users(void)
@@ -1021,7 +1036,7 @@ int parse_char(int fd)
 			if(RFIFOREST(fd)<17)
 				return 0;
 			if(sd==NULL){
-				sd=session[fd]->session_data=malloc(sizeof(*sd));
+				sd=session[fd]->session_data=calloc(sizeof(*sd), 1);
 				memset(sd,0,sizeof(*sd));
 			}
 			sd->account_id=RFIFOL(fd,2);

@@ -500,7 +500,7 @@ static int clif_clearchar_delay_sub(int tid,unsigned int tick,int id,int data)
 }
 int clif_clearchar_delay(unsigned int tick,struct block_list *bl,int type)
 {
-	struct block_list *tmpbl=malloc(sizeof(struct block_list));
+	struct block_list *tmpbl=calloc(sizeof(struct block_list), 1);
 	if(tmpbl == NULL) {
 		printf("clif_clearchar_delay: out of memory !\n");
 		exit(1);
@@ -5569,12 +5569,11 @@ void clif_parse_WantToConnection(int fd,struct map_session_data *sd)
 		return;
 	}
 
-	sd=session[fd]->session_data=malloc(sizeof(*sd));
+	sd=session[fd]->session_data=calloc(sizeof(*sd), 1);
 	if(sd==NULL){
 		printf("out of memory : clif_parse_WantToConnection\n");
 		exit(1);
 	}
-	memset(sd,0,sizeof(*sd));
 	sd->fd = fd;
 
 	pc_setnewpc(sd,RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10),RFIFOL(fd,14),RFIFOB(fd,18),fd);

@@ -86,7 +86,7 @@ int inter_pet_init()
 	if( (fp=fopen(pet_txt,"r"))==NULL )
 		return 1;
 	while(fgets(line,sizeof(line),fp)){
-		p=malloc(sizeof(struct s_pet));
+		p=calloc(sizeof(struct s_pet), 1);
 		if(p==NULL){
 			printf("int_pet: out of memory!\n");
 			exit(0);

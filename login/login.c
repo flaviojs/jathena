@@ -125,7 +125,7 @@ int read_gm_account()
 	while(fgets(line,sizeof(line),fp)){
 		if(line[0] == '/' && line[1] == '/')
 			continue;
-		p=malloc(sizeof(struct gm_account));
+		p=calloc(sizeof(struct gm_account), 1);
 		if(p==NULL){
 			printf("gm_account: out of memory!\n");
 			exit(0);
@@ -219,7 +219,7 @@ int mmo_auth_init(void)
 	char line[1024],*p,userid[24],pass[24],lastlogin[24],sex;
 	char str[64];
 	fp=fopen(account_filename,"r");
-	auth_dat=malloc(sizeof(auth_dat[0])*256);
+	auth_dat=calloc(sizeof(auth_dat[0])*256, 1);
 	auth_max=256;
 	if(fp==NULL)
 		return 0;
@@ -786,7 +786,7 @@ int parse_login(int fd)
   }
   if(RFIFOW(fd,0)<30000) {
   	if(RFIFOW(fd,0) == 0x64 || RFIFOW(fd,0) == 0x01dd)
-		  printf("parse_login : %d %d %d %s\n",fd,RFIFOREST(fd),RFIFOW(fd,0),RFIFOP(fd,6));
+		  printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
 		else
 		  printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
 	}
@@ -872,7 +872,7 @@ int parse_login(int fd)
 				session[fd]->eof=1;
 				return 0;
 			}
-			ld=session[fd]->session_data=malloc(sizeof(*ld));
+			ld=session[fd]->session_data=calloc(sizeof(*ld), 1);
 			if(!ld){
 				printf("login: md5key request: out of memory !\n");
 				close(fd);
@@ -1049,7 +1049,7 @@ int login_config_read(const char *cfgName)
 				if(access_allow)
 					access_allow=realloc( access_allow, (access_allownum+1)*ACO_STRSIZE);
 				else
-					access_allow=malloc( ACO_STRSIZE );
+					access_allow=calloc( ACO_STRSIZE , 1);
 				if(strcmpi(w2,"all")==0)
 					access_allow[(access_allownum++)*ACO_STRSIZE]=0;
 				else if(w2[0])
@@ -1066,7 +1066,7 @@ int login_config_read(const char *cfgName)
 				if(access_deny)
 					access_deny=realloc( access_deny,(access_denynum+1)*ACO_STRSIZE);
 				else
-					access_deny=malloc( ACO_STRSIZE );
+					access_deny=calloc( ACO_STRSIZE , 1);
 				if(strcmpi(w2,"all")==0)
 					access_deny[(access_denynum++)*ACO_STRSIZE]=0;
 				else if(w2[0])

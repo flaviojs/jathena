@@ -336,9 +336,11 @@ static FILELIST* filelist_add(FILELIST *entry)
 
 	if (filelist_entrys>=filelist_maxentry) {
 		FILELIST *new_filelist = (FILELIST*)realloc(
-			(void*)filelist,(filelist_maxentry+FILELIST_ADDS)*sizeof(FILELIST) );
-		if (new_filelist!=NULL) {
+			(void*)filelist, (filelist_maxentry+FILELIST_ADDS)*sizeof(FILELIST) );
+		if (new_filelist != NULL) {
 			filelist = new_filelist;
+			memset(filelist + filelist_maxentry, '\0',
+				FILELIST_ADDS * sizeof(FILELIST));
 			filelist_maxentry += FILELIST_ADDS;
 		} else {
 			printf("out of memory : filelist_add\n");
@@ -380,7 +382,7 @@ static void filelist_adjust(void)
 		if (filelist_maxentry>filelist_entrys) {
 			FILELIST *new_filelist = (FILELIST*)realloc(
 				(void*)filelist,filelist_entrys*sizeof(FILELIST) );
-			if (new_filelist!=NULL) {
+			if (new_filelist != NULL) {
 				filelist = new_filelist;
 				filelist_maxentry = filelist_entrys;
 			} else {
@@ -455,7 +457,7 @@ void* grfio_reads(char *fname, int *size)
 				lentry.declen = ftell(in);
 			}
 			fseek(in,0,0);	// SEEK_SET
-			buf2 = malloc(lentry.declen+1024);
+			buf2 = calloc(lentry.declen+1024, 1);
 			if (buf2==NULL) {
 				printf("file read memory allocate error : declen\n");
 				goto errret;
@@ -475,7 +477,7 @@ void* grfio_reads(char *fname, int *size)
 		}
 	}
 	if (entry!=NULL && entry->gentry>0) {	// Archive[GRF] File Read
-		buf = malloc(entry->srclen_aligned+1024);
+		buf = calloc(entry->srclen_aligned+1024, 1);
 		if (buf==NULL) {
 			printf("file read memory allocate error : srclen_aligned\n");
 			goto errret;
@@ -489,7 +491,7 @@ void* grfio_reads(char *fname, int *size)
 		fseek(in,entry->srcpos,0);
 		fread(buf,1,entry->srclen_aligned,in);
 		fclose(in);
-		buf2=malloc(entry->declen+1024);
+		buf2=calloc(entry->declen+1024, 1);
 		if (buf2==NULL) {
 			printf("file decode memory allocate error\n");
 			goto errret;
@@ -578,7 +580,7 @@ static int grfio_entryread(char *gfname,int gentry)
 
 	if (grf_version==0x01) {	//****** Grf version 01xx ******
 		list_size = grf_size-ftell(fp);
-		grf_filelist = malloc(list_size);
+		grf_filelist = calloc(list_size, 1);
 		if(grf_filelist==NULL){
 			fclose(fp);
 			printf("out of memory : grf_filelist\n");
@@ -653,13 +655,13 @@ static int grfio_entryread(char *gfname,int gentry)
 			return 4;
 		}
 		
-		rBuf = malloc( rSize );	// Get a Read Size
+		rBuf = calloc( rSize , 1);	// Get a Read Size
 		if (rBuf==NULL) {
 			fclose(fp);
 			printf("out of memory : grf compress entry table buffer\n");
 			return 3;
 		}
-		grf_filelist = malloc( eSize );	// Get a Extend Size
+		grf_filelist = calloc( eSize , 1);	// Get a Extend Size
 		if (grf_filelist==NULL) {
 			free(rBuf);
 			fclose(fp);
@@ -800,7 +802,7 @@ int grfio_add(char *fname)
 		}
 	}
 	len = strlen( fname );
-	buf = malloc(len+1);
+	buf = calloc(len+1, 1);
 	if (buf==NULL) {
 		printf("out of memory : gentry\n");
 		exit(1);

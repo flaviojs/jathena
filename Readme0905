@@ -1,4 +1,25 @@
 --------------------
+//0914 by p
+・範囲スキル使用時に解放済みメモリを参照していた問題に対応
+・メモリを初期化せずに使用していた領域を、初期化してから使用するように変更
+	(common/)
+	db.c
+	grfio.c
+	socket.c
+	timer.c
+	(char/)
+	char.c
+	int_guild.c
+	int_party.c
+	int_pet.c
+	int_storage.c
+	inter.c
+	(login/)
+	login.c
+	(map/)
+	ほとんど.c
+
+--------------------
 //0913 by Kalen
 
 ・GVGScriptの修正

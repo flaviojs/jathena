@@ -598,7 +598,7 @@ int pet_data_init(struct map_session_data *sd)
 		return 1;
 	}
 	sd->petDB = &pet_db[i];
-	sd->pd = pd = malloc(sizeof(struct pet_data));
+	sd->pd = pd = calloc(sizeof(struct pet_data), 1);
 	if(pd==NULL){
 		printf("out of memory : pet_data_init\n");
 		exit(1);

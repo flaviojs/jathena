@@ -97,7 +97,7 @@ int inter_party_init()
 			continue;
 		}
 	
-		p=malloc(sizeof(struct party));
+		p=calloc(sizeof(struct party), 1);
 		if(p==NULL){
 			printf("int_party: out of memory!\n");
 			exit(0);
@@ -362,7 +362,7 @@ int mapif_parse_CreateParty(int fd,int account_id,char *name,char *nick,char *ma
 		mapif_party_created(fd,account_id,NULL);
 		return 0;
 	}
-	p=malloc(sizeof(struct party));
+	p=calloc(sizeof(struct party), 1);
 	if(p==NULL){
 		printf("int_party: out of memory !\n");
 		mapif_party_created(fd,account_id,NULL);

@@ -140,7 +140,7 @@ int inter_accreg_init()
 		return 1;
 	while(fgets(line,sizeof(line),fp)){
 	
-		reg=malloc(sizeof(struct accreg));
+		reg=calloc(sizeof(struct accreg), 1);
 		if(reg==NULL){
 			printf("inter: accreg: out of memory!\n");
 			exit(0);
@@ -377,7 +377,7 @@ int mapif_parse_WisRequest(int fd)
 		return 0;
 	}
 	
-	wd = (struct WisData *)malloc(sizeof(struct WisData));
+	wd = (struct WisData *)calloc(sizeof(struct WisData), 1);
 	if(wd==NULL){
 		// Wis送信失敗（パケットを送る必要ありかも）
 		printf("inter: WisRequest: out of memory !\n");
@@ -423,7 +423,7 @@ int mapif_parse_AccReg(int fd)
 	int j,p;
 	struct accreg *reg=numdb_search(accreg_db,RFIFOL(fd,4));
 	if(reg==NULL){
-		if((reg=malloc(sizeof(struct accreg)))==NULL){
+		if((reg=calloc(sizeof(struct accreg), 1))==NULL){
 			printf("inter: accreg: out of memory !\n");
 			exit(0);
 		}

@@ -331,7 +331,7 @@ int inter_guild_init()
 			continue;
 		}
 	
-		g=malloc(sizeof(struct guild));
+		g=calloc(sizeof(struct guild), 1);
 		if(g==NULL){
 			printf("int_guild: out of memory!\n");
 			exit(0);
@@ -359,7 +359,7 @@ int inter_guild_init()
 	}
 
 	while(fgets(line,sizeof(line),fp)){
-		gc=malloc(sizeof(struct guild_castle));
+		gc=calloc(sizeof(struct guild_castle), 1);
 		if(gc==NULL){
 			printf("int_guild: out of memory!\n");
 			exit(0);
@@ -378,7 +378,7 @@ int inter_guild_init()
 		printf(" %s - making Default Data...\n",castle_txt);
 		//デフォルトデータを作成
 		for(i=0;i<MAX_GUILDCASTLE;i++){
-			gc=malloc(sizeof(struct guild_castle));
+			gc=calloc(sizeof(struct guild_castle), 1);
 			if(gc==NULL){
 				printf("int_guild: out of memory!\n");
 				exit(0);
@@ -832,7 +832,7 @@ int mapif_parse_CreateGuild(int fd,int account_id,char *name,struct guild_member
 		mapif_guild_created(fd,account_id,NULL);
 		return 0;
 	}
-	g=malloc(sizeof(struct guild));
+	g=calloc(sizeof(struct guild), 1);
 	if(g==NULL){
 		printf("int_guild: CreateGuild: out of memory !\n");
 		mapif_guild_created(fd,account_id,NULL);

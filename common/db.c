@@ -19,7 +19,7 @@ static void * malloc_dbn(void)
 
 	if(dbn_free==NULL){
 		if(dbn_root_rest<=0){
-			dbn_root[dbn_root_num]=malloc(sizeof(struct dbn)*ROOT_SIZE);
+			dbn_root[dbn_root_num]=calloc(sizeof(struct dbn)*ROOT_SIZE, 1);
 			if(dbn_root[dbn_root_num]==NULL){
 				printf("out of memory : malloc_dbn\n");
 				exit(1);
@@ -66,8 +66,8 @@ struct dbt* strdb_init(int maxlen)
 	int i;
 	struct dbt* table;
 
-	table=malloc(sizeof(*table));
-	if(table==NULL){
+	table = calloc(sizeof(*table), 1);
+	if (table == NULL) {
 		printf("out of memory : strdb_init\n");
 		exit(1);
 	}
@@ -86,7 +86,7 @@ static int numdb_cmp(struct dbt* table,void* a,void* b)
 	ia=(int)a;
 	ib=(int)b;
 
-	if((ia^ib)&0x80000000)
+	if((ia^ib) & 0x80000000)
 		return ia<0 ? -1 : 1;
 
 	return ia-ib;
@@ -102,8 +102,8 @@ struct dbt* numdb_init(void)
 	int i;
 	struct dbt* table;
 
-	table=malloc(sizeof(*table));
-	if(table==NULL){
+	table = calloc(sizeof *table, 1);
+	if (table == NULL) {
 		printf("out of memory : numdb_init\n");
 		exit(1);
 	}
@@ -340,7 +340,7 @@ struct dbn* db_insert(struct dbt *table,void* key,void* data)
 #ifdef MALLOC_DBN
 	p=malloc_dbn();
 #else
-	p=malloc(sizeof(*p));
+	p=calloc(sizeof(*p), 1);
 #endif
 	if(p==NULL){
 		printf("out of memory : db_insert\n");

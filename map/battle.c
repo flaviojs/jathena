@@ -941,7 +941,13 @@ int battle_delay_damage_sub(int tid,unsigned int tick,int id,int data)
 }
 int battle_delay_damage(unsigned int tick,struct block_list *src,struct block_list *target,int damage,int flag)
 {
-	struct battle_delay_damage_ *dat=malloc(sizeof(struct battle_delay_damage_));
+	struct battle_delay_damage_ *dat =
+		(struct battle_delay_damage_*)calloc(sizeof *dat, 1);
+	if (dat == NULL) {
+		printf("out of memory: battle_delay_damage\n");
+		exit(1);
+	}
+	
 	dat->src=src;
 	dat->target=target;
 	dat->damage=damage;
@@ -3338,12 +3344,12 @@ struct Damage  battle_calc_misc_attack(
 
 		if( target->type==BL_PC ){
 			cardfix=100;
-			cardfix=cardfix*(100-tsd->subele[ele])/100;	// 属 性によるダメージ耐性
+			cardfix=cardfix*(100-tsd->subele[ele])/100;	// 属性によるダメージ耐性
 			cardfix=cardfix*(100-tsd->misc_def_rate)/100;
 			damage=damage*cardfix/100;
 		}
 		if(damage < 0) damage = 0;
-		damage=battle_attr_fix(damage, ele, battle_get_element(target) );		// 属 性修正
+		damage=battle_attr_fix(damage, ele, battle_get_element(target) );		// 属性修正
 	}
 
 	div_=skill_get_num( skill_num,skill_lv );

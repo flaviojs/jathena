@@ -34,7 +34,7 @@ struct storage *account2storage(int account_id)
 	struct storage *stor;
 	stor=numdb_search(storage_db,account_id);
 	if(stor == NULL) {
-		stor = malloc(sizeof(struct storage));
+		stor = calloc(sizeof(struct storage), 1);
 		if(stor == NULL){
 			printf("storage: out of memory!\n");
 			exit(0);
@@ -276,12 +276,11 @@ struct guild_storage *guild2storage(int guild_id)
 	if(guild_search(guild_id) != NULL) {
 		gs=numdb_search(guild_storage_db,guild_id);
 		if(gs == NULL) {
-			gs = malloc(sizeof(struct guild_storage));
+			gs = calloc(sizeof(struct guild_storage), 1);
 			if(gs==NULL){
 				printf("storage: out of memory!\n");
 				exit(0);
 			}
-			memset(gs,0,sizeof(struct guild_storage));
 			gs->guild_id=guild_id;
 			numdb_insert(guild_storage_db,gs->guild_id,gs);
 		}

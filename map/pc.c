@@ -4454,19 +4454,22 @@ int pc_setreg(struct map_session_data *sd,int reg,int val)
 {
 	int i;
 
-	for(i=0;i<sd->reg_num;i++)
-		if(sd->reg[i].index==reg){
+	for (i = 0; i < sd->reg_num; i++) {
+		if (sd->reg[i].index == reg){
 			sd->reg[i].data = val;
 			return 0;
 		}
+	}
 	sd->reg_num++;
-	sd->reg=realloc(sd->reg,sizeof(sd->reg[0])*sd->reg_num);
-	if(sd->reg==NULL){
+	sd->reg = realloc(sd->reg, sizeof(*(sd->reg)) * sd->reg_num);
+	if (sd->reg == NULL){
 		printf("out of memory : pc_setreg\n");
 		exit(1);
 	}
-	sd->reg[i].index=reg;
-	sd->reg[i].data=val;
+	memset(sd->reg + (sd->reg_num - 1) * sizeof(*(sd->reg)), 0,
+		sizeof(*(sd->reg)));
+	sd->reg[i].index = reg;
+	sd->reg[i].data = val;
 
 	return 0;
 }
@@ -4505,11 +4508,13 @@ int pc_setregstr(struct map_session_data *sd,int reg,char *str)
 			return 0;
 		}
 	sd->regstr_num++;
-	sd->regstr=realloc(sd->regstr,sizeof(sd->regstr[0])*sd->regstr_num);
+	sd->regstr = realloc(sd->regstr, sizeof(sd->regstr[0]) * sd->regstr_num);
 	if(sd->regstr==NULL){
 		printf("out of memory : pc_setreg\n");
 		exit(1);
 	}
+	memset(sd->reg + (sd->reg_num - 1) * sizeof(*(sd->reg)), 0,
+		sizeof(*(sd->reg)));
 	sd->regstr[i].index=reg;
 	strcpy(sd->regstr[i].data,str);
 
@@ -4734,7 +4739,7 @@ int pc_addeventtimer(struct map_session_data *sd,int tick,const char *name)
 		if( sd->eventtimer[i]==-1 )
 			break;
 	if(i<MAX_EVENTTIMER){
-		char *evname=malloc(24);
+		char *evname=calloc(24, 1);
 		if(evname==NULL){
 			printf("pc_addeventtimer: out of memory !\n");
 			exit(1);
@@ -5481,11 +5486,12 @@ int pc_read_gm_account()
 	while(fgets(line,sizeof(line),fp)){
 		if(line[0] == '/' && line[1] == '/')
 			continue;
-		p=malloc(sizeof(struct gm_account));
+		p=calloc(sizeof(struct gm_account), 1);
 		if(p==NULL){
 			printf("gm_account: out of memory!\n");
 			exit(1);
 		}
+		memset(p, 0, sizeof *p);
 		if(sscanf(line,"%d %d",&p->account_id,&p->level) != 2 || p->level <= 0) {
 			printf("gm_account: broken data [%s] line %d\n",GM_account_filename,c);
 		}

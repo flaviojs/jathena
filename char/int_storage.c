@@ -147,7 +147,7 @@ struct storage *account2storage(int account_id)
 	struct storage *s;
 	s=numdb_search(storage_db,account_id);
 	if(s == NULL) {
-		s = malloc(sizeof(struct storage));
+		s = calloc(sizeof(struct storage), 1);
 		if(s==NULL){
 			printf("int_storage: out of memory!\n");
 			exit(0);
@@ -165,7 +165,7 @@ struct guild_storage *guild2storage(int guild_id)
 	if(inter_guild_search(guild_id) != NULL) {
 		gs=numdb_search(guild_storage_db,guild_id);
 		if(gs == NULL) {
-			gs = malloc(sizeof(struct guild_storage));
+			gs = calloc(sizeof(struct guild_storage), 1);
 			if(gs==NULL){
 				printf("int_storage: out of memory!\n");
 				exit(0);
@@ -197,7 +197,7 @@ int inter_storage_init()
 	}
 	while(fgets(line,65535,fp)){
 		sscanf(line,"%d",&tmp_int);
-		s=malloc(sizeof(struct storage));
+		s=calloc(sizeof(struct storage), 1);
 		if(s==NULL){
 			printf("int_storage: out of memory!\n");
 			exit(0);
@@ -225,7 +225,7 @@ int inter_storage_init()
 	}
 	while(fgets(line,65535,fp)){
 		sscanf(line,"%d",&tmp_int);
-		gs=malloc(sizeof(struct guild_storage));
+		gs=calloc(sizeof(struct guild_storage), 1);
 		if(gs==NULL){
 			printf("int_storage: out of memory!\n");
 			exit(0);

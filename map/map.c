@@ -276,12 +276,12 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 	int blockcount=bl_list_count,i,c;
 
 	va_start(ap,type);
-	if(x0<0) x0=0;
-	if(y0<0) y0=0;
-	if(x1>=map[m].xs) x1=map[m].xs-1;
-	if(y1>=map[m].ys) y1=map[m].ys-1;
-	if(type==0 || type!=BL_MOB)
-		for(by=y0/BLOCK_SIZE;by<=y1/BLOCK_SIZE;by++){
+	if (x0 < 0) x0 = 0;
+	if (y0 < 0) y0 = 0;
+	if (x1 >= map[m].xs) x1 = map[m].xs-1;
+	if (y1 >= map[m].ys) y1 = map[m].ys-1;
+	if (type == 0 || type != BL_MOB)
+		for (by = y0 / BLOCK_SIZE; by <= y1 / BLOCK_SIZE; by++) {
 			for(bx=x0/BLOCK_SIZE;bx<=x1/BLOCK_SIZE;bx++){
 				bl = map[m].block[bx+by*map[m].bxs];
 				c = map[m].block_count[bx+by*map[m].bxs];
@@ -636,7 +636,7 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y,struct 
 		return 0;
 	r=rand();
 
-	fitem = malloc(sizeof(*fitem));
+	fitem = calloc(sizeof(*fitem), 1);
 	if(fitem==NULL){
 		printf("out of memory : map_addflooritem\n");
 		exit(1);
@@ -704,7 +704,7 @@ void map_addchariddb(int charid,char *name)
 	int req=0;
 	p=numdb_search(charid_db,charid);
 	if(p==NULL){	// データベースにない
-		p = malloc(sizeof(struct charid2nick));
+		p = calloc(sizeof(struct charid2nick), 1);
 		if(p==NULL){
 			printf("out of memory : map_addchariddb\n");
 			exit(1);
@@ -733,12 +733,11 @@ int map_reqchariddb(struct map_session_data * sd,int charid)
 	p=numdb_search(charid_db,charid);
 	if(p!=NULL)	// データベースにすでにある
 		return 0;
-	p = malloc(sizeof(struct charid2nick));
+	p = calloc(sizeof(struct charid2nick), 1);
 	if(p==NULL){
 		printf("out of memory : map_reqchariddb\n");
 		exit(1);
 	}
-	memset(p->nick,0,24);
 	p->req_id=sd->bl.id;
 	numdb_insert(charid_db,charid,p);
 	return 0;
@@ -1073,7 +1072,7 @@ int map_setipport(char *name,unsigned long ip,int port)
 
 	md=strdb_search(map_db,name);
 	if(md==NULL){ // not exist -> add new data
-		mdos=malloc(sizeof(*mdos));
+		mdos=calloc(sizeof(*mdos), 1);
 		if(mdos==NULL){
 			printf("out of memory : map_setipport\n");
 			exit(1);
@@ -1162,6 +1161,7 @@ static int map_readmap(int m,char *fn)
 	int x,y,xs,ys;
 	struct gat_1cell {float high[4]; int type;} *p;
 	int wh;
+	size_t size;
 
 	// read & convert fn
 	gat=grfio_read(fn);
@@ -1174,7 +1174,7 @@ static int map_readmap(int m,char *fn)
 	map[m].m=m;
 	xs=map[m].xs=*(int*)(gat+6);
 	ys=map[m].ys=*(int*)(gat+10);
-	map[m].gat=malloc(s=map[m].xs*map[m].ys);
+	map[m].gat = calloc(s = map[m].xs * map[m].ys, 1);
 	if(map[m].gat==NULL){
 		printf("out of memory : map_readmap gat\n");
 		exit(1);
@@ -1199,34 +1199,35 @@ static int map_readmap(int m,char *fn)
 
 	map[m].bxs=(xs+BLOCK_SIZE-1)/BLOCK_SIZE;
 	map[m].bys=(ys+BLOCK_SIZE-1)/BLOCK_SIZE;
+	size = map[m].bxs * map[m].bys * sizeof(struct block_list*);
 
-	map[m].block=malloc(map[m].bxs*map[m].bys*sizeof(struct block_list*));
-	if(map[m].block==NULL){
+	map[m].block = calloc(size, 1);
+	if(map[m].block == NULL){
 		printf("out of memory : map_readmap block\n");
 		exit(1);
 	}
-	memset(map[m].block,0,map[m].bxs*map[m].bys*sizeof(struct block_list*));
 
-	map[m].block_mob=malloc(map[m].bxs*map[m].bys*sizeof(struct block_list*));
-	if(map[m].block_mob==NULL){
+	map[m].block_mob = calloc(size, 1);
+	if (map[m].block_mob == NULL) {
 		printf("out of memory : map_readmap block_mob\n");
 		exit(1);
 	}
-	memset(map[m].block_mob,0,map[m].bxs*map[m].bys*sizeof(struct block_list*));
+	
+	size = map[m].bxs*map[m].bys*sizeof(int);
 
-	map[m].block_count=malloc(map[m].bxs*map[m].bys*sizeof(int));
+	map[m].block_count = calloc(size, 1);
 	if(map[m].block_count==NULL){
 		printf("out of memory : map_readmap block\n");
 		exit(1);
 	}
-	memset(map[m].block_count,0,map[m].bxs*map[m].bys*sizeof(int));
+	memset(map[m].block_count,0,size);
 
-	map[m].block_mob_count=malloc(map[m].bxs*map[m].bys*sizeof(int));
+	map[m].block_mob_count=calloc(size, 1);
 	if(map[m].block_mob_count==NULL){
 		printf("out of memory : map_readmap block_mob\n");
 		exit(1);
 	}
-	memset(map[m].block_mob_count,0,map[m].bxs*map[m].bys*sizeof(int));
+	memset(map[m].block_mob_count,0,size);
 
 	strdb_insert(map_db,map[m].name,&map[m]);
 	

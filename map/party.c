@@ -57,12 +57,11 @@ int party_created(int account_id,int fail,int party_id,char *name)
 			printf("party: id already exists!\n");
 			exit(1);
 		}
-		p=malloc(sizeof(struct party));
+		p=calloc(sizeof(struct party), 1);
 		if(p==NULL){
 			printf("party: out of memory!\n");
 			exit(1);
 		}
-		memset(p,0,sizeof(struct party));
 		p->party_id=party_id;
 		memcpy(p->name,name,24);
 		numdb_insert(party_db,party_id,p);
@@ -127,7 +126,7 @@ int party_recv_info(struct party *sp)
 	int i;
 	
 	if((p=numdb_search(party_db,sp->party_id))==NULL){
-		p=malloc(sizeof(struct party));
+		p=calloc(sizeof(struct party), 1);
 		if(p==NULL){
 			printf("party: out of memory!\n");
 			exit(1);

@@ -66,7 +66,7 @@ static int guild_read_castledb(void)
 		if(line[0]=='/' && line[1]=='/')
 			continue;
 		memset(str,0,sizeof(str));
-		gc=malloc(sizeof(struct guild_castle));
+		gc=calloc(sizeof(struct guild_castle), 1);
 		if(gc==NULL){
 			printf("guild: out of memory!\n");
 			exit(0);
@@ -298,7 +298,7 @@ int guild_npc_request_info(int guild_id,const char *event)
 	if(event==NULL || *event==0)
 		return guild_request_info(guild_id);
 
-	if((ev=(struct eventlist *)malloc(sizeof(struct eventlist)) )==NULL){
+	if((ev=(struct eventlist *)calloc(sizeof(struct eventlist), 1) )==NULL){
 		printf("guild_npc_request_info: out of memory !");
 		exit(0);
 	}
@@ -355,7 +355,7 @@ int guild_recv_info(struct guild *sg)
 	struct eventlist *ev,*ev2;
 	
 	if((g=numdb_search(guild_db,sg->guild_id))==NULL){
-		g=malloc(sizeof(struct guild));
+		g=calloc(sizeof(struct guild), 1);
 		if(g==NULL){
 			printf("guild_recv_info: out of memory!\n");
 			exit(1);
@@ -822,7 +822,7 @@ int guild_payexp(struct map_session_data *sd,int exp)
 		return 0;
 	
 	if( (c=numdb_search(guild_expcache_db,sd->status.char_id))==NULL ){
-		c=malloc(sizeof(struct guild_expcache));
+		c=calloc(sizeof(struct guild_expcache), 1);
 		if(c==NULL){
 			printf("guild_payexp: out of memory !\n");
 			exit(1);
@@ -1165,7 +1165,7 @@ int guild_addcastleinfoevent(int castle_id,int index,const char *name)
 	if( name==NULL || *name==0 )
 		return 0;
 		
-	if( (ev=malloc(sizeof(struct eventlist)))==NULL ){
+	if( (ev=calloc(sizeof(struct eventlist), 1))==NULL ){
 		printf("guild_addcastleinfoevent: out of memory !!");
 		exit(0);
 	}
@@ -1271,11 +1271,16 @@ int guild_agit_end(void)
 
 int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data)
 {	// Run One NPC_Event[OnAgitEliminate]
-	char *evname=malloc(strlen((const char *)data)+4);
+	size_t len = strlen((const char*)data) + 4;
+	char *evname=(char*)calloc(len, 1);
+	if (evname == NULL) {
+		printf("out of memory: guild_gvg_eliminate_timer\n");
+		exit(1);
+	}
 	int c=0;
 	if(!agit_flag) return 0;	// Agit already End
-	memcpy(evname,(const char *)data,strlen((const char *)data)-5);
-	strcpy(evname+strlen((const char *)data)-5,"Eliminate");
+	memcpy(evname,(const char *)data,len - 1);
+	strcpy(evname + len - 1,"Eliminate");
 	c = npc_event_do(evname);
 	printf("NPC_Event:[%s] Run (%d) Events.\n",evname,c);
 	return 0;
@@ -1283,7 +1288,11 @@ int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data)
 
 int guild_agit_break(struct mob_data *md)
 {	// Run One NPC_Event[OnAgitBreak]
-	char *evname=malloc(strlen(md->npc_event)+1);
+	char *evname=calloc(strlen(md->npc_event) + 1, 1);
+	if (evname == NULL) {
+		printf("out of memory: guild_agit_break\n");
+		exit(1);
+	}
 	strcpy(evname,md->npc_event);
 // Now By User to Run [OnAgitBreak] NPC Event...
 // It's a little impossible to null point with player disconnect in this!

@@ -25,12 +25,11 @@ int chat_createchat(struct map_session_data *sd,int limit,int pub,char* pass,cha
 {
 	struct chat_data *cd;
 
-	cd = malloc(sizeof(*cd));
+	cd = calloc(sizeof(*cd), 1);
 	if(cd==NULL){
 		printf("out of memory : chat_createchat\n");
 		exit(1);
 	}
-	memset(cd,0,sizeof(*cd));
 
 	cd->limit = limit;
 	cd->pub = pub;
@@ -251,12 +250,11 @@ int chat_createnpcchat(struct npc_data *nd,int limit,int trigger,char* title,int
 {
 	struct chat_data *cd;
 
-	cd = malloc(sizeof(*cd));
+	cd = calloc(sizeof(*cd), 1);
 	if(cd==NULL){
 		printf("out of memory : chat_createchat\n");
 		exit(1);
 	}
-	memset(cd,0,sizeof(*cd));
 
 	cd->limit = cd->trigger = limit;
 	if(trigger>0)

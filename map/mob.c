@@ -125,13 +125,14 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 	if(y<=0) y=sd->bl.y;
 
 	for(count=0;count<amount;count++){
-		md=malloc(sizeof(struct mob_data));
+		md=calloc(sizeof(struct mob_data), 1);
 		if(md==NULL){
 			printf("mob_once_spawn: out of memory !\n");
 			exit(1);
 		}
+		memset(md, '\0', sizeof *md);
 		if(mob_db[class].mode&0x02) {
-			md->lootitem=malloc(sizeof(struct item)*LOOTITEM_SIZE);
+			md->lootitem=calloc(sizeof(struct item)*LOOTITEM_SIZE, 1);
 			if(md->lootitem==NULL){
 				printf("mob_once_spawn: out of memory !\n");
 				exit(1);
@@ -1879,7 +1880,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 			if(drop_rate <= rand()%10000)
 				continue;
 
-			ditem=malloc(sizeof(*ditem));
+			ditem=calloc(sizeof(*ditem), 1);
 			if(ditem==NULL){
 				printf("out of memory : mob_damage\n");
 				exit(1);
@@ -1907,7 +1908,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 					if(sd->monster_drop_itemrate[i] <= rand()%10000)
 						continue;
 
-					ditem=malloc(sizeof(*ditem));
+					ditem=calloc(sizeof(*ditem), 1);
 					if(ditem==NULL){
 						printf("out of memory : mob_damage\n");
 						exit(1);
@@ -1931,7 +1932,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 			for(i=0;i<md->lootitem_count;i++) {
 				struct delay_item_drop2 *ditem;
 
-				ditem=malloc(sizeof(*ditem));
+				ditem=calloc(sizeof(*ditem), 1);
 				if(ditem==NULL){
 					printf("out of memory : mob_damage\n");
 					exit(1);
@@ -2083,7 +2084,7 @@ int mob_class_change(struct mob_data *md,int *value)
 	md->skilllv=0;
 
 	if(md->lootitem == NULL && mob_db[class].mode&0x02) {
-		md->lootitem=malloc(sizeof(struct item)*LOOTITEM_SIZE);
+		md->lootitem=calloc(sizeof(struct item)*LOOTITEM_SIZE, 1);
 		if(md->lootitem==NULL){
 			printf("mob_class_change: out of memory !\n");
 			exit(1);
@@ -2218,13 +2219,13 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,int flag)
 		if(class<=1000 || class>2000) continue;
 		for(;amount>0;amount--){
 			int x=0,y=0,c=0,i=0;
-			md=malloc(sizeof(struct mob_data));
+			md=calloc(sizeof(struct mob_data), 1);
 			if(md==NULL){
 				printf("mob_once_spawn: out of memory !\n");
 				exit(1);
 			}
 			if(mob_db[class].mode&0x02) {
-				md->lootitem=malloc(sizeof(struct item)*LOOTITEM_SIZE);
+				md->lootitem=calloc(sizeof(struct item)*LOOTITEM_SIZE, 1);
 				if(md->lootitem==NULL){
 					printf("mob_once_spawn: out of memory !\n");
 					exit(1);
