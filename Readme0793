@@ -1,4 +1,20 @@
 --------------------
+//0824 by ぴざまん
+・セイフティウォール・ニューマの足元置きができなかった問題修正。
+・エンペリウムにヒール等の支援スキルが効いていた問題修正。
+・闘技場でモンスターリセットができなかった問題修正。
+　killmonsterは"killmonster <mapname>,<eventname>"と記述して
+　該当eventnameを持つモンスターを削除しますが
+　eventnameにAllと入れると該当MAPの全モンスターを消去するようにしました。
+
+	(map/)
+	skill.c
+		skill_check_unit_range_sub()、skill_castend_nodamage_id() 修正。
+	script.c
+		buildin_killmonster()、buildin_killmonster_sub() 修正。
+	(conf/npc/)
+	npc_event_tougijou.txt 修正。
+--------------------
 //0823 by Kalen
 ・闘技場データ揃ったので、完成
 	conf/npc/npc_event_tougijou.txt

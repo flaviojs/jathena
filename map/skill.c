@@ -849,7 +849,6 @@ static int skill_check_unit_range_sub( struct block_list *bl,va_list ap )
 	if(unit){
 		if(!unit->alive) return 0;
 
-
 		if(skillid == MG_SAFETYWALL || skillid == AL_PNEUMA) {
 			if(unit->group->unit_id != 0x7e && unit->group->unit_id != 0x85)
 				return 0;
@@ -875,11 +874,15 @@ static int skill_check_unit_range_sub( struct block_list *bl,va_list ap )
 		t_y=unit->bl.y;
 	}
 	if(sd){
+		if(skillid == MG_SAFETYWALL || skillid == AL_PNEUMA)
+			return 0;
 		t_range=1;
 		t_x=sd->bl.x;
 		t_y=sd->bl.y;
 	}
 	if(md){
+		if(skillid == MG_SAFETYWALL || skillid == AL_PNEUMA)
+			return 0;
 		t_range=1;
 		t_x=md->bl.x;
 		t_y=md->bl.y;
@@ -903,6 +906,7 @@ static int skill_check_unit_range_sub( struct block_list *bl,va_list ap )
 			break;
 		}
 	}
+
 	if(r_flag) (*c)++;
 
 	return 0;
@@ -1566,6 +1570,8 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	if(sd && pc_isdead(sd))
 		return 0;
 	if(dstsd && pc_isdead(dstsd) && skillid != ALL_RESURRECTION)
+		return 0;
+	if(sd && dstmd && dstmd->class == 1288)
 		return 0;
 
 	switch(skillid)

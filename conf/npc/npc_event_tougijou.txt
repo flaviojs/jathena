@@ -92,7 +92,7 @@ Onwarp:
 	set @addmon,0;
 	set @kengaku,0;
 	warp "gon_test.gat",44,86;
-	KillMonster "gon_test.gat";
+	KillMonster "gon_test.gat","All";
 	addtimer 120000,"gontimer120000";
 	disablenpc "TºŠÇ—Ò";
 	end;
@@ -336,7 +336,7 @@ Onend:
 	areawarp "gon_test.gat",42,82,73,91,"gon_test.gat",44,4;
 	deltimer "gontimer180000";
 	enablenpc "TºŠÇ—Ò";
-	killmonster "gon_test.gat";
+	killmonster "gon_test.gat","All";
 	end;
 }
 //===============================================================================

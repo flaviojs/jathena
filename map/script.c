@@ -2268,21 +2268,31 @@ int buildin_areamonster(struct script_state *st)
 int buildin_killmonster_sub(struct block_list *bl,va_list ap)
 {
 	char *event=va_arg(ap,char *);
-	if(strcmp(event,((struct mob_data *)bl)->npc_event)==0)
+	int allflag=va_arg(ap,int);
+
+	if(!allflag){
+		if(strcmp(event,((struct mob_data *)bl)->npc_event)==0)
+			mob_delete((struct mob_data *)bl);
+		return 0;
+	}else if(allflag){
 		mob_delete((struct mob_data *)bl);
+		return 0;
+	}
 	return 0;
 }
 int buildin_killmonster(struct script_state *st)
 {
 	char *mapname,*event;
-	int m;
+	int m,allflag=0;
 	mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	event=conv_str(st,& (st->stack->stack_data[st->start+3]));
+	if(strcmp(event,"All")==0)
+		allflag++;
 
 	if( (m=map_mapname2mapid(mapname))<0 )
 		return 0;
 	map_foreachinarea(buildin_killmonster_sub,
-		m,0,0,map[m].xs,map[m].ys,BL_MOB, event );
+		m,0,0,map[m].xs,map[m].ys,BL_MOB, event ,allflag);
 	return 0;
 }
 
