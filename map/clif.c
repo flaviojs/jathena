@@ -4565,10 +4565,10 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 	x = RFIFOB(fd,2)*4+(RFIFOB(fd,3)>>6);
 	y = ((RFIFOB(fd,3)&0x3f)<<4)+(RFIFOB(fd,4)>>4);
 
-	// ステータス異常やハイディング中で動けない
+	// ステータス異常やハイディング中(トンネルドライブ無)で動けない
 	if(sd->opt1>0 || sd->status.option&2 || sd->sc_data[SC_ANKLE].timer!=-1 )
-		return;
-
+		if(sd->status.option&2 && !pc_checkskill(sd,RG_TUNNELDRIVE))
+			return;
 	pc_walktoxy(sd,x,y);
 }
 

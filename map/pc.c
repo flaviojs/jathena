@@ -724,6 +724,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		}
 		if(sd->sc_data[SC_DECREASEAGI].timer!=-1)	// 速度減少(agiはbattle.cで)
 			sd->speed = sd->speed *125/100;
+		if(sd->sc_data[RG_TUNNELDRIVE].timer!=-1 && sd->status.option&2)	// トンネルドライブ	// トンネルドライブ
+			sd->speed += sd->speed*(20-pc_checkskill(sd,RG_TUNNELDRIVE))/40;
 		if(sd->sc_data[SC_BLESSING].timer!=-1){	// ブレッシング
 			sd->paramb[0]+= sd->sc_data[SC_BLESSING].val1;
 			sd->paramb[3]+= sd->sc_data[SC_BLESSING].val1;
