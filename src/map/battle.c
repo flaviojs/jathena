@@ -4245,8 +4245,13 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 		return -1;
 
 	if(target->type == BL_SKILL) {
-		if(((struct skill_unit *)target)->group->unit_id == 0x8d)
+		switch(((struct skill_unit *)target)->group->unit_id){
+		case 0x8d:
+		case 0x8f:
+		case 0x98:
 			return 0;
+			break;
+		}
 	}
 
 	if(target->type == BL_PET)

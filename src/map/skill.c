@@ -503,6 +503,12 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		}
 		break;
 
+	case HT_SHOCKWAVE:				/* ショックウェーブトラップ */
+		if(map[bl->m].flag.pvp && dstsd){
+			dstsd->status.sp -= dstsd->status.sp*(5+15*skilllv)/100;
+			pc_calcstatus(dstsd,0);
+		}
+		break;
 	case HT_SANDMAN:		/* サンドマン */
 		if( rand()%100 < (5*skilllv+30)*sc_def_int/100 )
 			skill_status_change_start(bl,SC_SLEEP,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
@@ -662,6 +668,7 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 	struct map_session_data *sd=NULL;
 	struct mob_data *md=NULL;
 	struct pet_data *pd=NULL;
+	struct skill_unit *su=NULL;
 
 	if(target->type==BL_PC)
 		sd=(struct map_session_data *)target;
@@ -669,9 +676,11 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 		md=(struct mob_data *)target;
 	else if(target->type==BL_PET)
 		pd=(struct pet_data *)target;
+	else if(target->type==BL_SKILL)
+		su=(struct skill_unit *)target;
 	else return 0;
 
-	if(!(count&0x10000 && (sd||md||pd))){	/* 指定なしなら位置関係から方向を求める */
+	if(!(count&0x10000 && (sd||md||pd||su))){	/* 指定なしなら位置関係から方向を求める */
 		dx=target->x-src->x; dx=(dx>0)?1:((dx<0)?-1: 0);
 		dy=target->y-src->y; dy=(dy>0)?1:((dy<0)?-1: 0);
 	}
@@ -728,6 +737,7 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 	if(moveblock) map_delblock(target);
 	target->x=nx;
 	target->y=ny;
+	if(su) clif_skill_setunit(su);
 	if(moveblock) map_addblock(target);
 
 	if(sd) {	/* 画面内に入ってきたので表示 */
@@ -3100,6 +3110,34 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			clif_heal(sd->fd,SP_SP,conv_sp);
 		}
 		break;
+	case HT_REMOVETRAP:				/* リムーブトラップ */
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		{
+			struct skill_unit *su=NULL;
+			struct item item_tmp;
+			int flag;
+			if((bl->type==BL_SKILL) &&
+			   (su=(struct skill_unit *)bl) &&
+			   (su->group->src_id == src->id || map[bl->m].flag.pvp || map[bl->m].flag.gvg) &&
+			   (su->group->unit_id >= 0x8f && su->group->unit_id <= 0x99) &&
+			   (su->group->unit_id != 0x92)){ //罠を取り返す
+				if(sd){
+					for(i=0;i<10;i++) {
+						if(skill_db[su->group->skill_id].itemid[i] > 0){
+							memset(&item_tmp,0,sizeof(item_tmp));
+							item_tmp.nameid = skill_db[su->group->skill_id].itemid[i];
+							item_tmp.identify = 1;
+							if((flag=pc_additem(sd,&item_tmp,skill_db[su->group->skill_id].amount[i]))){
+								clif_additem(sd,0,0,flag);
+								map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+							}
+						}
+					}
+				}
+				skill_delunit(su);
+			}
+		}
+		break;
 	default:
 		map_freeblock_unlock();
 		return 1;
@@ -3311,21 +3349,10 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case AM_DEMONSTRATION:		/* デモンストレーション */
 	case PF_SPIDERWEB:			/* スパイダーウェッブ */
 	case PF_FOGWALL:			/* フォグウォール */
+	case HT_TALKIEBOX:			/* トーキーボックス */
+	case RG_GRAFFITI:			/* グラフィティ */
 		skill_unitsetting(src,skillid,skilllv,x,y,0);
 		break;
-
-	case HT_TALKIEBOX:			/* トーキーボックス */
-		{
-			struct skill_unit_group *group;
-			group=skill_unitsetting(src,skillid,skilllv,x,y,0);
-			group->valstr=calloc(80, 1);
-			if(group->valstr==NULL){
-				printf("skill_castend_map: out of memory !\n");
-				exit(1);
-			}
-			memcpy(group->valstr,talkie_mes,80);
-			break;
-		}
 
 	case SA_VOLCANO:		/* ボルケーノ */
 	case SA_DELUGE:			/* デリュージ */
@@ -3789,6 +3816,10 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		count=15;
 		limit=skill_get_time(skillid,skilllv);
 		break;
+	case RG_GRAFFITI:			/* グラフィティ */
+		count=25;
+		limit=skill_get_time(skillid,skilllv);
+		break;
 	};
 
 	group=skill_initunitgroup(src,count,skillid,skilllv,
@@ -3799,7 +3830,15 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 	group->target_flag=target;
 	group->interval=interval;
 	group->range=range;
-
+	if(skillid==HT_TALKIEBOX ||
+	   skillid==RG_GRAFFITI){
+		group->valstr=calloc(80, 1);
+		if(group->valstr==NULL){
+			printf("skill_castend_map: out of memory !\n");
+			exit(1);
+		}
+		memcpy(group->valstr,talkie_mes,80);
+	}
 	for(i=0;i<count;i++){
 		struct skill_unit *unit;
 		int ux=x,uy=y,val1=skilllv,val2=0,limit=group->limit,alive=1;
@@ -3995,6 +4034,11 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		case PF_FOGWALL:	/* フォグウォール */
 			ux+=(i%5-2);
 			uy+=(i/5-1);
+			break;
+		case RG_GRAFFITI:	/* グラフィティ */
+			ux+=(i%5-2);
+			uy+=(i/5-2);
+			//val1=talkie_mes[i];
 			break;
 		}
 		//直上スキルの場合設置座標上にランドプロテクターがないかチェック
@@ -4306,6 +4350,8 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0x99:				/* トーキーボックス */
 		if(sg->val2==0){
 			clif_talkiebox(&src->bl,sg->valstr);
+			sg->unit_id = 0x8c;
+			clif_changelook(&src->bl,LOOK_BASE,sg->unit_id);
 			sg->limit=DIFF_TICK(tick,sg->tick)+5000;
 			sg->val2=-1; //踏んだ
 		}
@@ -4547,6 +4593,10 @@ int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,
 	case 0x8d:	/* アイスウォール */
 		src->val1-=damage;
 		break;
+	case 0x8f:	/* ブラストマイン */
+	case 0x98:	/* クレイモアートラップ */
+		skill_blown(bl,&src->bl,2); //吹き飛ばしてみる
+		break;
 	default:
 		damage = 0;
 		break;
@@ -4602,6 +4652,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_TALKIEBOX:
 			case AL_WARP:
 			case PF_SPIDERWEB:		/* スパイダーウェッブ */
+			case RG_GRAFFITI:		/* グラフィティ */
 				range = 0;
 				break;
 			case AL_PNEUMA:
@@ -4633,6 +4684,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_CLAYMORETRAP:
 			case HT_TALKIEBOX:
 			case PF_SPIDERWEB:		/* スパイダーウェッブ */
+			case RG_GRAFFITI:		/* グラフィティ */
 				range = 1;
 				break;
 			case AL_WARP:
@@ -6050,6 +6102,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 			printf("skill_status_change_timer %d != %d\n",tid,sc_data[type].timer);
 	}
 
+
 	switch(type){	/* 特殊な処理になる場合 */
 	case SC_MAXIMIZEPOWER:	/* マキシマイズパワー */
 	case SC_CLOAKING:		/* クローキング */
@@ -7275,8 +7328,27 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 	/* 時間切れ削除 */
 	if(unit->alive &&
 		(DIFF_TICK(tick,group->tick)>=group->limit || DIFF_TICK(tick,group->tick)>=unit->limit) ){
+		switch(group->unit_id){
+			case 0x8f:	/* ブラストマイン */
+			case 0x90:	/* スキッドトラップ */
+			case 0x93:	/* ランドマイン */
+			case 0x94:	/* ショックウェーブトラップ */
+			case 0x95:	/* サンドマン */
+			case 0x96:	/* フラッシャー */
+			case 0x97:	/* フリージングトラップ */
+			case 0x98:	/* クレイモアートラップ */
+			case 0x99:	/* トーキーボックス */
+				group->unit_id = 0x8c;
+				clif_changelook(bl,LOOK_BASE,group->unit_id);
+				group->limit=DIFF_TICK(tick+1500,group->tick);
+				unit->limit=DIFF_TICK(tick+1500,group->tick);
+				break;
+			default:
+				skill_delunit(unit);
+		}
+		/*
 		struct block_list *ss = map_id2bl(group->src_id);
-		if(ss && ss->type == BL_PC && (group->unit_id >= 0x8f && group->unit_id <= 0x98) && group->unit_id != 0x92) {
+		if(ss && ss->type == BL_PC && (group->unit_id >= 0x8f && group->unit_id <= 0x99) && group->unit_id != 0x92) {
 			if(group->unit_id != 0x91 || group->val2 == 0) {
 				struct item item_tmp;
 				memset(&item_tmp,0,sizeof(item_tmp));
@@ -7286,8 +7358,9 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 			}
 		}
 		skill_delunit(unit);
+		*/
 	}
-		
+
 	if(group->unit_id == 0x8d) {
 		unit->val1 -= 5;
 		if(unit->val1 <= 0 && unit->limit + group->tick > tick + 700)

@@ -2536,7 +2536,6 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_FREEZINGTRAP:
 			case HT_BLASTMINE:
 			case HT_CLAYMORETRAP:
-			case HT_TALKIEBOX:
 			case PF_SPIDERWEB:		/* スパイダーウェッブ */
 				range = 0;
 				break;
@@ -2563,7 +2562,6 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_FREEZINGTRAP:
 			case HT_BLASTMINE:
 			case HT_CLAYMORETRAP:
-			case HT_TALKIEBOX:
 			case AM_DEMONSTRATION:
 			case PF_SPIDERWEB:		/* スパイダーウェッブ */
 				range = 1;

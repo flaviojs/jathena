@@ -1,4 +1,31 @@
 --------------------
+//0988 by (凸)
+・トーキーボックスは常に足元に置けるように変更とKalenさんに貰った情報等を元にパケットを本鯖にあわせてみた
+・ショックウェーブトラップに効果を追加したつもり(未確認)
+・ブラストマインとクレイモアトラップを殴ると吹き飛ぶようにした
+・リムーブトラップで罠(skill_require_dbで指定したアイテム)を回収できるようにした
+・↑の実装により罠の時間切れで罠が出るオリジナル仕様はコメントアウト
+・ブラストマインの効果時間が長いのを修正
+
+	(db/)
+	cast_db.txt
+	(map/)
+	battle.c
+		battle_check_target() 変更
+	mob.c
+		mobskill_castend_pos() 変更
+	skill.c
+		skill_additional_effect() 変更
+		skill_blown() 変更
+		skill_castend_nodamage_id() 変更
+		skill_castend_pos2() 変更
+		skill_unitsetting() 変更
+		skill_unit_onplace() 変更
+		skill_unit_ondamaged() 変更
+		skill_castend_pos() 変更
+		skill_unit_timer_sub() 変更
+
+--------------------
 //0987 by 胡蝶蘭
 
 ・ユーザー定義関数/サブルーティンに引数を指定可能に
