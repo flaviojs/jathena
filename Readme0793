@@ -1,10 +1,58 @@
 --------------------
+//0805 by Ž€_
+
+E•¶Žš‰»‚¯C³B
+EƒV[ƒYƒ‚[ƒh‚Å‚ÌƒeƒŒƒ|[ƒg‹ÖŽ~‚âŒÃ–Ø‚ÌŽ}Žg—p‹ÖŽ~‚Íƒ\[ƒXƒŒƒxƒ‹‚Å
+ˆ—‚µ‚Ä‚¢‚é‚Ì‚Åmapflag.txt‚©‚çíœB(ˆö‚Ý‚Énopenalty‚àƒ\[ƒXƒŒƒxƒ‹‚Å
+ˆ—‚µ‚Ä‚¢‚Ü‚·B)
+Ebattle_athena.conf‚Ìagit_eliminate_time‚ðgvg_eliminate_time‚É•ÏXB
+E@ƒRƒ}ƒ“ƒh@GMíœB
+EFD_SETSIZE‚©cygwin‚Å64‚ÉÝ’è‚³‚ê‚Ä‚¢‚½‚Ì‚¹‚¢‚ÅÅ‘åÚ‘±l”‚ª56–¼‚ð
+‰z‚¦‚é‚Æƒ}ƒbƒvŽI‚ª–³ŒÀƒ‹[ƒv‚·‚é–â‘èC³B(‚½‚¾ƒeƒXƒg‚ª‚Å‚«‚È‚©‚Á‚½•¨‚È‚Ì‚Å–{“–‚É‘åä•v‚É‚È‚Á‚½‚©‚Ç‚¤‚©‚Í•s–¾‚Å‚·B‚ ‚­‚Ü‚Å‚àŽ©•ª‚Ì—\‘ª‚É‚·‚¬‚È‚¢•¨‚Å‚·‚ª...)
+E•¶Žš‰»‚¯‚Ì‚¹‚¢‚Å‚Ç‚±‚ð‚Ç‚¤C³‚µ‚½‚©Šo‚¦‚Ä‚È‚¢‚Ì‚ÅC³‚µ‚½ƒtƒ@ƒCƒ‹‚¾‚¯B
+	(conf/)
+	atcommand_athena.conf
+	battle_athena.conf
+	mapflag.txt
+	(db/)
+	castle_db.txt
+	(doc/)
+	conf_ref.txt
+	(common/)
+	mmo.h
+	(login/)
+	login.c
+	(char/)
+	inter.c
+	int_guild.c
+	(map/)
+	atcommand.h
+	atcommand.c
+	battle.h
+	battle.c
+	chrif.c
+	guild.h
+	guild.c
+	intif.h
+	intif.c
+	map.h
+	map.c
+	mob.c
+	npc.c
+	npc.h
+	script.c
+	skill.c
+	pc.c
+	makefile
+
+--------------------
 //0804 by Žß‘¸
 
 EƒAƒ‹ƒxƒ‹ƒ^‚Ì‚Ê‚¢‚®‚é‚ÝƒCƒxƒ“ƒg‚Å‚¤‚³‚¬‚Ì‚Ê‚¢‚®‚é‚Ý‚ð‚ ‚°‚é‚ÆƒT[ƒo[‚ª—Ž‚¿‚éƒoƒOC³
 
 	(conf/npc/)
 	npc_event_doll.txt C³B
+
 --------------------
 //0803 by ‚Ò‚´‚Ü‚ñ
 
@@ -20,6 +68,7 @@
 	(map/)
 	int_guild.c
 		inter_guild_init() C³B
+
 --------------------
 //0802 by Michael_Huang
 
@@ -451,5 +500,3 @@ bSplashRange‚ÆbSplashAddRange‚Í•Ší‚Åƒ_ƒ[ƒW‚ð—^‚¦‚½Žž‚Ì‚Ý”­“®A’Êí‚Ì•ŠíUŒ‚ˆ
 
 
 (c) 2003 Athena Project.
-
--->>J2KWorkBench<<--

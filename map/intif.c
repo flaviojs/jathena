@@ -449,14 +449,13 @@ int intif_guild_castle_dataload(int castle_id,int index)
 //ギルド城占領ギルド変更要求
 int intif_guild_castle_datasave(int castle_id,int index, int value)
 {
-        WFIFOW(inter_fd,0)=0x3041;
-        WFIFOW(inter_fd,2)=castle_id;
-        WFIFOB(inter_fd,4)=index;
-        WFIFOL(inter_fd,5)=value;
-        WFIFOSET(inter_fd,9);
-        return 0;
+	WFIFOW(inter_fd,0)=0x3041;
+	WFIFOW(inter_fd,2)=castle_id;
+	WFIFOB(inter_fd,4)=index;
+	WFIFOL(inter_fd,5)=value;
+	WFIFOSET(inter_fd,9);
+	return 0;
 }
-
 //-----------------------------------------------------------------
 // inter serverから受信
 
@@ -776,7 +775,6 @@ int intif_parse_DeletePetOk(int fd)
 
 	return 0;
 }
-
 int intif_parse_GuildCastleDataLoad(int fd)
 {
 	int c_id=RFIFOW(fd,2);
@@ -845,7 +843,6 @@ int intif_parse_GuildCastleDataSave(int fd)
 	}
 	return 1;
 }
-
 //-----------------------------------------------------------------
 // inter serverからの通信
 // エラーがあれば0(false)を返すこと

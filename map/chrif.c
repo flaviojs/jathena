@@ -35,7 +35,7 @@ static int char_port = 6121;
 static char userid[24],passwd[24];
 static int chrif_state;
 
-// 設定ファイ?読み?み関係
+// 設定ファイル読み込み関係
 /*==========================================
  *
  *------------------------------------------
@@ -120,7 +120,7 @@ int chrif_connect(int fd)
 }
 
 /*==========================================
- * マップ?信
+ * マップ送信
  *------------------------------------------
  */
 int chrif_sendmap(int fd)
@@ -144,7 +144,7 @@ int chrif_recvmap(int fd)
 	int i,j,ip,port;
 	unsigned char *p=(unsigned char *)&ip;
 	
-	if(chrif_state<2)	// まだ?備?
+	if(chrif_state<2)	// まだ準備中
 		return -1;
 	
 	ip=RFIFOL(fd,4);
@@ -160,7 +160,7 @@ int chrif_recvmap(int fd)
 	return 0;
 }
 /*==========================================
- * マップ鯖間移動のためのデータ?備要?
+ * マップ鯖間移動のためのデータ準備要求
  *------------------------------------------
  */
 int chrif_changemapserver(struct map_session_data *sd,char *name,int x,int y,int ip,short port)
@@ -261,7 +261,7 @@ int chrif_charselectreq(struct map_session_data *sd)
 }
 
 /*==========================================
- * キ??名問い?わせ
+ * キャラ名問い合わせ
  *------------------------------------------
  */
 int chrif_searchcharid(int char_id)
@@ -272,7 +272,7 @@ int chrif_searchcharid(int char_id)
 	return 0;
 }
 /*==========================================
- * GMに変化要?
+ * GMに変化要求
  *------------------------------------------
  */
 int chrif_changegm(int id,const char *pass,int len)
@@ -287,7 +287,7 @@ int chrif_changegm(int id,const char *pass,int len)
 	return 0;
 }
 /*==========================================
- * 性別変化要?
+ * 性別変化要求
  *------------------------------------------
  */
 int chrif_changesex(int id,int sex)
@@ -336,7 +336,6 @@ int chrif_changedsex(int fd)
 	acc=RFIFOL(fd,2);
 	if(battle_config.etc_log)
 		printf("chrif_changedsex %d \n",acc);
-
 	sd=map_id2sd(acc);
 	if(acc>0){
 		if(sd!=NULL){	// 変更による強制切断
@@ -371,10 +370,10 @@ int chrif_parse(int fd)
 		   
 		   	int r=intif_parse(fd);// intifに渡す
 		   
-			if( r==1 )	continue;	// intifで??した
-			if( r==2 )	return 0;	// intifで??したが、データが足りない
+			if( r==1 )	continue;	// intifで処理した
+			if( r==2 )	return 0;	// intifで処理したが、データが足りない
 			
-			close(fd);	// intifで??できなかった
+			close(fd);	// intifで処理できなかった
 			session[fd]->eof = 1;
 			return 0;
 		}
@@ -416,8 +415,8 @@ int chrif_parse(int fd)
  *
  *------------------------------------------
  */
-// timer関?
-// 今このmap鯖に繋がっているク?イア?ト人?をchar鯖へ?る
+// timer関数
+// 今このmap鯖に繋がっているクライアント人数をchar鯖へ送る
 int send_users_tochar(int tid,unsigned int tick,int id,int data)
 {
 	if(char_fd<=0 || session[char_fd]==NULL)
@@ -434,7 +433,7 @@ int send_users_tochar(int tid,unsigned int tick,int id,int data)
  *
  *------------------------------------------
  */
-// timer関?
+// timer関数
 // char鯖との接続を確認し、もし切れていたら再度接続する
 int check_connect_char_server(int tid,unsigned int tick,int id,int data)
 {

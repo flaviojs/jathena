@@ -239,12 +239,12 @@ int inter_guildcastle_tostr(char *str,struct guild_castle *gc)
 {
 //	int i,c;
 	int len;
-	
-        len=sprintf(str,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
-                gc->castle_id,gc->guild_id,gc->economy,gc->defense,gc->triggerE,
-                gc->triggerD,gc->nextTime,gc->payTime,gc->createTime,gc->visibleC,
-                gc->visibleG0,gc->visibleG1,gc->visibleG2,gc->visibleG3,gc->visibleG4,
-                gc->visibleG5,gc->visibleG6,gc->visibleG7);
+
+	len=sprintf(str,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+		gc->castle_id,gc->guild_id,gc->economy,gc->defense,gc->triggerE,
+		gc->triggerD,gc->nextTime,gc->payTime,gc->createTime,gc->visibleC,
+		gc->visibleG0,gc->visibleG1,gc->visibleG2,gc->visibleG3,gc->visibleG4,
+		gc->visibleG5,gc->visibleG6,gc->visibleG7);
 
 	return 0;
 }
@@ -253,7 +253,7 @@ int inter_guildcastle_fromstr(char *str,struct guild_castle *gc)
 {
 //	int i,j,c;
 	int tmp_int[20];
-	
+
 	memset(gc,0,sizeof(struct guild_castle));
 	if( sscanf(str,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
 		&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],&tmp_int[4],&tmp_int[5],&tmp_int[6],
@@ -278,6 +278,7 @@ int inter_guildcastle_fromstr(char *str,struct guild_castle *gc)
 	gc->visibleG5=tmp_int[15];
 	gc->visibleG6=tmp_int[16];
 	gc->visibleG7=tmp_int[17];
+
 	return 0;
 }
 
@@ -313,10 +314,10 @@ int inter_guild_init()
 	struct guild *g;
 	struct guild_castle *gc;
 	FILE *fp;
-	int c=0,i;
-	
+	int i,c=0;
+
 	inter_guild_readdb();
-	
+
 	guild_db=numdb_init();
 	castle_db=numdb_init();
 	
@@ -479,7 +480,7 @@ int guild_check_empty(struct guild *g)
 	free(g);
 	return 1;
 }
-// ギルドの競合がないかチェック用
+// キャラの競合がないかチェック用
 int guild_check_conflict_sub(void *key,void *data,va_list ap)
 {
 	struct guild *g=(struct guild *)data;
@@ -496,7 +497,7 @@ int guild_check_conflict_sub(void *key,void *data,va_list ap)
 		if(g->member[i].account_id==account_id && g->member[i].char_id==char_id){
 			// 別のギルドに偽の所属データがあるので脱退
 			printf("int_guild: guild conflict! %d,%d %d!=%d\n",account_id,char_id,guild_id,g->guild_id);
-			mapif_parse_GuildLeave(-1,g->guild_id,account_id,char_id,0,"**データ競?**");
+			mapif_parse_GuildLeave(-1,g->guild_id,account_id,char_id,0,"**データ競合**");
 		}
 	}
 	
@@ -534,7 +535,7 @@ int guild_calcinfo(struct guild *g)
 	if(g->guild_lv<=0) g->guild_lv=1;
 	nextexp = guild_nextexp(g->guild_lv);
 	if(nextexp > 0) {
-		while(g->exp >= nextexp){	// ?ベ?アップ??
+		while(g->exp >= nextexp){	// レベルアップ処理
 			g->exp-=nextexp;
 			g->guild_lv++;
 			g->skill_point++;
@@ -600,7 +601,7 @@ int mapif_guild_noinfo(int fd,int guild_id)
 	printf("int_guild: info not found %d\n",guild_id);
 	return 0;
 }
-// ギルド情報まとめ?り
+// ギルド情報まとめ送り
 int mapif_guild_info(int fd,struct guild *g)
 {
 	unsigned char buf[16384];
@@ -748,7 +749,7 @@ int mapif_guild_position(struct guild *g,int idx)
 	return 0;
 }
 
-// ギルド公知変更通知
+// ギルド告知変更通知
 int mapif_guild_notice(struct guild *g)
 {
 	unsigned char buf[256];
@@ -772,7 +773,7 @@ int mapif_guild_emblem(struct guild *g)
 	return 0;
 }
 
-int mapif_guild_castle_dataload(int castle_id,int index,int value)      // <Agit>
+int mapif_guild_castle_dataload(int castle_id,int index,int value)
 {
 	unsigned char buf[16];
 	WBUFW(buf, 0)=0x3840;
@@ -783,7 +784,7 @@ int mapif_guild_castle_dataload(int castle_id,int index,int value)      // <Agit
 	return 0;
 }
 
-int mapif_guild_castle_datasave(int castle_id,int index,int value)      // <Agit>
+int mapif_guild_castle_datasave(int castle_id,int index,int value)
 {
 	unsigned char buf[16];
 	WBUFW(buf, 0)=0x3841;
@@ -793,7 +794,6 @@ int mapif_guild_castle_datasave(int castle_id,int index,int value)      // <Agit
 	mapif_sendall(buf,9);
 	return 0;
 }
-
 //-------------------------------------------------------------------
 // map serverからの通信
 
@@ -1144,8 +1144,7 @@ int mapif_parse_GuildEmblem(int fd,int len,int guild_id,int dummy,const char *da
 	g->emblem_id++;
 	return mapif_guild_emblem(g);
 }
-
-int mapif_parse_GuildCastleDataLoad(int fd,int castle_id,int index)     // <Agit>
+int mapif_parse_GuildCastleDataLoad(int fd,int castle_id,int index)
 {
 	struct guild_castle *gc=numdb_search(castle_db,castle_id);
 	if(gc==NULL){
@@ -1173,9 +1172,10 @@ int mapif_parse_GuildCastleDataLoad(int fd,int castle_id,int index)     // <Agit
 		printf("mapif_parse_GuildCastleDataLoad ERROR!! (Not found index=%d)\n", index);
 		return 0;
 	}
+	return 0;
 }
 
-int mapif_parse_GuildCastleDataSave(int fd,int castle_id,int index,int value)   // <Agit>
+int mapif_parse_GuildCastleDataSave(int fd,int castle_id,int index,int value)
 {
 	struct guild_castle *gc=numdb_search(castle_db,castle_id);
 	if(gc==NULL){

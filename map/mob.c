@@ -1861,7 +1861,6 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 			guild_agit_break(md);
 	}
 
-
 	if(md->npc_event[0]){	// SCRIPTÀs
 //		if(battle_config.battle_log)
 //			printf("mob_damage : run event : %s\n",md->npc_event);

@@ -54,7 +54,6 @@ struct map_data map[MAX_MAP_PER_SERVER];
 int map_num=0;
 
 int autosave_interval=DEFAULT_AUTOSAVE_INTERVAL;
-
 int agit_flag=0;
 
 struct charid2nick {

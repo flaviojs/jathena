@@ -4137,9 +4137,8 @@ void skill_brandishspear_dir(struct brandish *tc,int dir,int are){
 static int skill_gangster_count(struct block_list *bl,va_list ap)
 {
 	int *c;
-	struct map_session_data *sd;
+	struct map_session_data *sd=(struct map_session_data*)bl;
 	c=va_arg(ap,int *);
-	sd=(struct map_session_data*)bl;
 
 	if(pc_issit(sd) && pc_checkskill(sd,RG_GANGSTER) > 0)
 		(*c)++;

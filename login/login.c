@@ -456,7 +456,7 @@ int parse_fromchar(int fd)
       break;
 	
 	case 0x2720:	// GM
-	  {
+/*	  {
 	  	int newacc=0,oldacc,i=0,j;
 		if(RFIFOREST(fd)<4)
 			return 0;
@@ -490,7 +490,7 @@ int parse_fromchar(int fd)
 		WFIFOL(fd,2)=oldacc;
 		WFIFOL(fd,6)=newacc;
 		WFIFOSET(fd,10);
-	  }
+	  }*/
 	  return 0;
 
 	case 0x2722:	// changesex
@@ -644,7 +644,7 @@ int parse_login(int fd)
   if(session[fd]->eof){
     for(i=0;i<MAX_SERVERS;i++)
       if(server_fd[i]==fd)
-	server_fd[i]=-1;
+				server_fd[i]=-1;
     close(fd);
     delete_session(fd);
     return 0;
@@ -662,9 +662,9 @@ int parse_login(int fd)
 			login_log("client connection request %s from %d.%d.%d.%d" RETCODE,
 				RFIFOP(fd,6),p[0],p[1],p[2],p[3]);
 		}
-		
+
 		if( !check_ip(session[fd]->client_addr.sin_addr.s_addr) ){
-			struct timeval tv;
+		  struct timeval tv;
 			char tmpstr[256];
 			gettimeofday(&tv,NULL);
 			strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&(tv.tv_sec)));
@@ -878,15 +878,15 @@ int login_config_read(const char *cfgName)
 int do_init(int argc,char **argv)
 {
   int i;
-  
+
   login_config_read( (argc>1)?argv[1]:LOGIN_CONF_NAME );
-  
+
   // à√çÜâªKeyÇÃê∂ê¨
   memset(md5key,0,sizeof(md5key));
   md5keylen=rand()%4+12;
   for(i=0;i<md5keylen;i++)
 	md5key[i]=rand()%255+1;
-  
+
   for(i=0;i<AUTH_FIFO_SIZE;i++){
     auth_fifo[i].delflag=1;
   }
@@ -898,5 +898,6 @@ int do_init(int argc,char **argv)
 	read_gm_account();
   set_termfunc(mmo_auth_sync);
   set_defaultparse(parse_login);
+
   return 0;
 }

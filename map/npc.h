@@ -30,6 +30,5 @@ int npc_event_do_oninit(void);
 int npc_event_doall(const char *name);
 int npc_event_do(const char *name);
 
-
 #endif
 

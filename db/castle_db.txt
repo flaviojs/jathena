@@ -1,4 +1,4 @@
-//ギ?ド城テー'? by sakage,shuto
+//ギルド城データ by sakage,shuto
 // AgitDB Modify by Michael_Huang at 2004-02/13.
 // <Castle_ID>,<Map_Name>,<Castle_Name>,<Switch_Flag:(reserved)>
 0,aldeg_cas01.gat,Luina Guild 1,1

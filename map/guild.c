@@ -38,7 +38,7 @@ int guild_checkskill(struct guild *g,int id){ return g->skill[id-10000].lv; }
 
 
 int guild_payexp_timer(int tid,unsigned int tick,int id,int data);
-int guild_agit_eliminate_timer(int tid,unsigned int tick,int id,int data);	// <Agit>
+int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data);
 
 
 static int guild_read_castledb(void)
@@ -99,7 +99,7 @@ void do_init_guild(void)
 
 	guild_read_castledb();
 
-	add_timer_func_list(guild_agit_eliminate_timer,"guild_agit_eliminate_timer");	// <Agit>
+	add_timer_func_list(guild_gvg_eliminate_timer,"guild_gvg_eliminate_timer");
 	add_timer_func_list(guild_payexp_timer,"guild_payexp_timer");
 	add_timer_interval(gettick()+GUILD_PAYEXP_INVERVAL,guild_payexp_timer,0,0,GUILD_PAYEXP_INVERVAL);
 }
@@ -316,14 +316,13 @@ int guild_recv_info(struct guild *sg)
 		}
 		numdb_insert(guild_db,sg->guild_id,g);
 		before=*sg;
-		
-		
+
 		// 最初のロードなのでユーザーのチェックを行う
 		guild_check_member(sg);
 	}else
 		before=*g;
 	memcpy(g,sg,sizeof(struct guild));
-	
+
 	for(i=bm=m=0;i<g->max_member;i++){	// sdの設定と人数の確認
 		if(g->member[i].account_id>0){
 			struct map_session_data *sd = map_id2sd(g->member[i].account_id);
@@ -341,20 +340,20 @@ int guild_recv_info(struct guild *sg)
 		struct map_session_data *sd = g->member[i].sd;
 		if( sd==NULL )
 			continue;
-		
+
 		if(	before.guild_lv!=g->guild_lv || bm!=m ||
 			before.max_member!=g->max_member ){
 			clif_guild_basicinfo(sd);	// 基本情報送信
 			clif_guild_emblem(sd,g);	// エンブレム送信
 		}
-		
+
 		if(bm!=m){		// メンバー情報送信
 			clif_guild_memberlist(g->member[i].sd);
 		}
-		
+
 		if( before.skill_point!=g->skill_point)
 			clif_guild_skillinfo(sd);	// スキル情報送信
-		
+
 		if( sd->guild_sended==0){	// 未送信なら所属情報も送る
 			clif_guild_belonginfo(sd,g);
 			clif_guild_notice(sd,g);
@@ -362,7 +361,7 @@ int guild_recv_info(struct guild *sg)
 			sd->guild_sended=1;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -1113,7 +1112,7 @@ int guild_agit_end(void)
 	return 0;
 }
 
-int guild_agit_eliminate_timer(int tid,unsigned int tick,int id,int data)
+int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data)
 {	// Run One NPC_Event[OnAgitEliminate]
 	char *evname=malloc(strlen((const char *)data)+4);
 	int c=0;
@@ -1135,8 +1134,7 @@ int guild_agit_break(struct mob_data *md)
 // Maybe will be changed in the futher..
 //      int c = npc_event_do(evname);
 	if(!agit_flag) return 0;	// Agit already End
-	add_timer(gettick()+battle_config.agit_eliminate_time,guild_agit_eliminate_timer,md->bl.m,(int)evname);
+	add_timer(gettick()+battle_config.gvg_eliminate_time,guild_gvg_eliminate_timer,md->bl.m,(int)evname);
 	return 0;
 }
-
 
