@@ -1,4 +1,15 @@
 --------------------
+//0917 by RR
+・スクリプト修正
+	桃太郎イベントと闘技場イベントをNPCタイマーに変更
+	(conf/npc/)
+	npc_event_momotarou.txt
+	npc_event_tougijou.txt 修正
+・スキルツリー修正(バグ報告スレ25より)
+	(db/)
+	skill_db.txt 修正
+
+--------------------
 //0916 by (凸)
 ・npc_monsterにnpc_mob_jobを統合。npc_mob_job.txtは削除してかまいません
 

@@ -212,18 +212,16 @@ OnInit:
 	waitingroom "体験館控室",1,"待機室担当者::OnMax";
 	end;
 OnMax:
-	doevent "roomt";
 	warpwaitingpc "ama_test.gat",50,83;
 	disablenpc "待機室担当者";
 	disablenpc "管理人";
 	enablenpc "お婆さん";
 	enablenpc "お爺さん";
+	initnpctimer "roomt";
 	end;
 }
-ama_test.gat,49,93,4	script	お爺さん	766,{
-	close;
-}
 ama_test.gat,50,93,4	script	お婆さん	761,{
+Onstart:
 	mes "[お婆さん]";
 	mes "フォーー!?";
 	next;
@@ -280,6 +278,9 @@ ama_test.gat,50,93,4	script	お婆さん	761,{
 	monster "ama_test.gat",45,99,"小鬼",1110,1,"mobcount";
 	close;
 }
+ama_test.gat,49,93,4	script	お爺さん	766,{
+	close;
+}
 ama_test.gat,50,100,4	script	管理人	762,{
 	mes "[管理人]";
 	mes "ホホッやるな……";
@@ -316,7 +317,7 @@ L1:
 	mes "失うなかれ！";
 	next;
 	set event_momo,1;
-	deltimer "roomt";
+	stopnpctimer "roomt";
 	disablenpc "管理人";
 	enablenpc "待機室担当者";
 	warp "amatsu.gat",223,230;
@@ -357,7 +358,7 @@ L2_1:
 	mes "失うなかれ！";
 	next;
 	set event_momo,2;
-	deltimer "roomt";
+	stopnpctimer "roomt";
 	disablenpc "管理人";
 	enablenpc "待機室担当者";
 	warp "amatsu.gat",223,230;
@@ -408,32 +409,31 @@ ama_test.gat,50,101,0	script	mobcount2	-1,{
 	areaannounce "ama_test.gat",30,78,68,120,"AMMUT: ぐおおおお…",8;end;
 Lfin:
 	set event_momo,4;
-	deltimer "roomt";
+	stopnpctimer "roomt";
 	enablenpc "待機室担当者";
 	warp "amatsu.gat",223,230;
 	end;
 }
 //=======================================TIMER==================================-
 ama_test.gat,50,102,0	script	roomt	-1,{
-	deltimer "roomt";
+	close;
+
+OnTimer1000:
 	mapannounce "ama_test.gat","今から制限時間は６分間です。",8;
-	addtimer 180000,"roomt::On180000";
 	end;
-On180000:
-	deltimer "roomt";
+OnTimer180000:
 	mapannounce "ama_test.gat","あと三分です。",8;
-	addtimer 120000,"roomt::On300000";
 	end;
-On300000:
-	deltimer "roomt";
+OnTimer300000:
 	mapannounce "ama_test.gat","あと一分。",8;
-	addtimer 60000,"roomt::On360000";
 	end;
-On360000:
+OnTimer360000:
 	mapannounce "ama_test.gat","ピ- ピ- ピ- 持ち時間が無くなりました。",8;
-	deltimer "roomt";
+	end;
+OnTimer360500:
 	disablenpc "管理人";
 	enablenpc "待機室担当者";
 	areawarp "ama_test.gat",30,78,68,120,"amatsu.gat",223,230;
+	stopnpctimer "roomt";
 	end;
 }
