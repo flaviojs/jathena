@@ -196,7 +196,6 @@ struct map_session_data {
 	struct npc_data *pet_npcdata;
 	int pet_hungry_timer;
 
-	int pvp_flag;
 	int pvp_point,pvp_rank,pvp_timer,pvp_lastusers;
 
 	char eventqueue[MAX_EVENTQUEUE][50];
@@ -292,14 +291,6 @@ enum { MS_IDLE,MS_WALK,MS_ATTACK,MS_DEAD,MS_DELAY };
 
 enum { NONE_ATTACKABLE,ATTACKABLE };
 
-enum {
-	MF_NOMEMO		=0x0001,
-	MF_NOTELEPORT	=0x0002,
-	MF_NOSAVE		=0x0010,
-	MF_NOBRANCH		=0x0020,
-	MF_PVP			=0x0100,
-	MF_GVG			=0x0200,
-};
 struct map_data {
 	char name[16];
 	unsigned char *gat;	// NULL‚È‚ç‰º‚Ìmap_data_other_server‚Æ‚µ‚Äˆµ‚¤
@@ -309,7 +300,18 @@ struct map_data {
 	short bxs,bys;
 	int npc_num;
 	int users;
-	int flag;
+	struct {
+		unsigned nomemo : 1;
+		unsigned noteleport : 1;
+		unsigned nosave : 1;
+		unsigned nobranch : 1;
+		unsigned nopenalty : 1;
+		unsigned pvp : 1;
+		unsigned pvp_noparty : 1;
+		unsigned pvp_noguild : 1;
+		unsigned gvg : 1;
+		unsigned gvg_noparty : 1;
+	} flag;
 	struct point save;
 	struct npc_data *npc[MAX_NPC_PER_MAP];
 };

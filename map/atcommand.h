@@ -33,7 +33,7 @@ extern struct Atcommand_Config {
 	int help;
 	int gm;
 	int pvpoff;
-	int pvp;
+	int pvpon;
 	int model;
 	int go;
 	int monster;

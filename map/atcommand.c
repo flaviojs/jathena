@@ -451,18 +451,36 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 //PVP‰ðœ@@‚½‚¾Aƒ}ƒbƒvˆÚ“®‚µ‚È‚¢‚Æ‰ðœ‚³‚ê‚Ü‚¹‚ñB
 //u@pvpoffv‚Æ“ü—Í
 		if (strcmpi(command, "@pvpoff") == 0 && gm_level >= atcommand_config.pvpoff) {
-			sd->pvp_flag=0;
-//			clif_pvpoff(fd);
+			map[sd->bl.m].flag.pvp = 0;
+			clif_send0199(sd->bl.m,0);
+			clif_pvpset(sd,0,0);
+			for(i=0;i<fd_max;i++){	//l”•ªƒ‹[ƒv
+				if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
+					if(sd->bl.m == pl_sd->bl.m && pl_sd->pvp_timer != -1) {
+						delete_timer(pl_sd->pvp_timer,pc_calc_pvprank_timer);
+						pl_sd->pvp_timer = -1;
+					}
+				}
+			}
 			clif_displaymessage(fd,"(L[`)‚Ü‚Á‚½[‚èô’‡—Ç‚­‚Ë");
 			return 1;
 		}
 
 //PVPŽÀ‘•i‰¼j
 //u@pvpv‚Æ“ü—Í
-		if (strcmpi(command, "@pvp") == 0 && gm_level >= atcommand_config.pvp) {
-			sd->pvp_flag=1;
-//			clif_pvpon(fd);
-//			clif_pvpset(fd,sd,1,1);
+		if (strcmpi(command, "@pvpon") == 0 && gm_level >= atcommand_config.pvpon) {
+			map[sd->bl.m].flag.pvp = 1;
+			clif_send0199(sd->bl.m,1);
+			for(i=0;i<fd_max;i++){	//l”•ªƒ‹[ƒv
+				if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
+					if(sd->bl.m == pl_sd->bl.m && pl_sd->pvp_timer == -1) {
+						pl_sd->pvp_timer=add_timer(gettick(),pc_calc_pvprank_timer,pl_sd->bl.id,0);
+						pl_sd->pvp_rank=0;
+						pl_sd->pvp_lastusers=0;
+						pl_sd->pvp_point=5;
+					}
+				}
+			}
 			clif_displaymessage(fd,"Kill Kill Kill Kill Kill Kill````````(K„DK#)");
 			return 1;
 		}
@@ -610,11 +628,12 @@ z [0`4]•ž‚ÌF
 
 // ƒfƒoƒO—piŽü•Ógat‚ð’²‚×‚éj
 		if(strcmpi(command,"@gat")==0 && gm_level >= atcommand_config.gat){
-			int x,y;
 			for(y=2;y>=-2;y--){
-				for(x=-2;x<=2;x++)
-					printf("%02X ",map_getcell(sd->bl.m,sd->bl.x+x,sd->bl.y+y));
-				printf("\n");
+				sprintf(moji,"%s (x= %d, y= %d) %02X %02X %02X %02X %02X",map[sd->bl.m].name,sd->bl.x-2,sd->bl.y+y,
+					map_getcell(sd->bl.m,sd->bl.x-2,sd->bl.y+y),map_getcell(sd->bl.m,sd->bl.x-1,sd->bl.y+y),
+					map_getcell(sd->bl.m,sd->bl.x,sd->bl.y+y),map_getcell(sd->bl.m,sd->bl.x+1,sd->bl.y+y),
+					map_getcell(sd->bl.m,sd->bl.x+2,sd->bl.y+y));
+				clif_displaymessage(fd,moji);
 			}
 			return 1;
 		}
@@ -1102,6 +1121,14 @@ z [0`4]•ž‚ÌF
 			return 1;
 		}
 
+		if(strcmpi(command, "@test") == 0){
+			sscanf(message, "%s %d", command, &x);
+			WFIFOW(sd->fd,0)=0x199;
+			WFIFOW(sd->fd,2)=x;
+			WFIFOSET(sd->fd,4);
+			return 1;
+		}
+
 	}
 
 	return 0;
@@ -1155,7 +1182,7 @@ int atcommand_config_read(const char *cfgName)
 				{ "help",&atcommand_config.help },
 				{ "GM",&atcommand_config.gm },
 				{ "pvpoff",&atcommand_config.pvpoff },
-				{ "pvp",&atcommand_config.pvp },
+				{ "pvpon",&atcommand_config.pvpon },
 				{ "model",&atcommand_config.model },
 				{ "go",&atcommand_config.go },
 				{ "monster",&atcommand_config.monster },

@@ -281,11 +281,6 @@ map: prt_castle.gat
 
 < キーの説明 >
 
-pvp
-	常にPVPモードを有効にするかどうかです。
-	有効になっていると、範囲攻撃がパーティ/ギルドメンバでないPCにも
-	効果を及ぼすようになります。デフォルトはonです。
-
 enemy_critical
 	プレイヤーと同じLUKによるクリティカル判定をMOBに有効にするかどうかです
 	このクリティカルはもちろん必中なので、onにすると高Fleeでも、
@@ -329,17 +324,20 @@ job_exp_rate
 	JobEXPの所得倍率を百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
 
+death_penalty_type: 0
+	 デスペナルティのタイプを決定します。0で持っているEXPの量から
+	比率の分を減らす仕様で1で次のレベルアップまでのEXPから比率の分を
+	減らす仕様です。デフォルトは0です。
+
 death_penalty_base
 	デスペナルティによるBASE経験値減少率を百分率で調整します。
-	あまり低すぎる値を使うと減りません。
-	必要ベース経験値の１％減を１００としています。
-	0-1000程度の数値を指定してください。デフォルトは100です。
+	あまり低すぎる値を使うと減りません。単位は0.01%です。
+	デフォルトは0です。
 
 death_penalty_job
 	デスペナルティによるJOB経験値減少率を百分率で調整します。
-	あまり低すぎる値を使うと減りません。
-	必要ジョブ経験値の１％減を１００としています。
-	0-1000程度の数値を指定してください。デフォルトは100です。
+	あまり低すぎる値を使うと減りません。単位は0.01%です。
+	デフォルトは0です。
 
 mvp_hp_rate
 	MVP MOBのHPを百分率で調整します。
@@ -428,7 +426,6 @@ shop_exp
 
 < 例 >
 
-pvp: on
 enemy_critical: yes
 casting_rate: 100
 delay_rate: 100
@@ -439,6 +436,7 @@ flooritem_lifetime: 60000
 item_rate: 100
 base_exp_rate: 100
 job_exp_rate: 100
+death_penalty_type: 0
 death_penalty_base: 100
 death_penalty_job: 100
 mvp_hp_rate: 100
@@ -526,8 +524,8 @@ GM
 	@コマンド @GM
 pvpoff
 	@コマンド @pvpoff
-pvp
-	@コマンド @pvp
+pvpon
+	@コマンド @pvpon
 model
 	@コマンド @model
 go
@@ -631,7 +629,7 @@ joblvup:1
 help: 1
 gm: 1
 pvpoff: 1
-pvp: 1
+pvpon: 1
 model: 1
 go: 1
 monster: 1

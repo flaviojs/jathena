@@ -161,7 +161,7 @@ int pet_changestate(struct npc_data *nd,int state)
 {
 	int i;
 
-	if(nd->timer>0)
+	if(nd->timer != -1)
 		delete_timer(nd->timer,pet_timer);
 	nd->timer=-1;
 	nd->state.state=state;

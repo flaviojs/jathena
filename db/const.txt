@@ -21,6 +21,16 @@ Job_Bard	19
 Job_Dancer	20
 Job_Crusader2	21
 
+mf_nomemo	0
+mf_noteleport	1
+mf_nosave	2
+mf_nobranch	3
+mf_nopenalty	4
+mf_pvp_noparty	6
+mf_pvp_noguild	7
+mf_pvp_noguild	9
+
+
 StatusPoint	9	1
 BaseLevel	11	1
 SkillPoint	12	1

@@ -92,9 +92,9 @@
 642,Book_of_Devil,悪魔召喚書,2,1800,,50,,,,,,,,,,,{ pet 1101; },{},,
 643,Pet_Incubator,携帯卵孵化機,2,3000,,30,,,,,,,,,,,{ bpet; },{},,
 644,Gift_Box,プレゼントボックス,2,2,,200,,,,,,,,,,,{ getitem -4; },{},,
-645,Concentration_Potion,スピードアップポーション,2,1000,,100,,,,,,,,,,,{ sc_start SC_SpeedPot0,1,0; },{}
-656,Awakening_Potion,ハイスピードポーション,2,1000,,150,,,,,,,,,,,{ sc_start SC_SpeedPot1,1,0; },{}
-657,Verserk_Potion,バーサークポーション,2,1000,,200,,,,,,,,,,,{ sc_start SC_SpeedPot2,1,0; },{}
+645,Concentration_Potion,スピードアップポーション,2,1000,,100,,,,,,,,,,,{ sc_start SC_SpeedPot0,1800,0; },{}
+656,Awakening_Potion,ハイスピードポーション,2,1000,,150,,,,,,,,,,,{ sc_start SC_SpeedPot1,1800,0; },{}
+657,Verserk_Potion,バーサークポーション,2,1000,,200,,,,,,,,,,,{ sc_start SC_SpeedPot2,1800,0; },{}
 658,Union_of_Tribe,組織の団結力,2,1000,,500,,,,,,,,,,,{},{},,
 659,Heart_of_Her,彼女の想い,2,50,,50,,,,,,,,,,,{ pet 1188; },{},,
 660,Forbidden_Red_Candle,赤いろうそく,2,,,50,,,,,,,,,,,{},{},,

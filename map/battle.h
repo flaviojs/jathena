@@ -113,13 +113,13 @@ int battle_check_range(struct block_list *src,int x,int y,int range);
 
 // İ’è
 extern struct Battle_Config {
-	int	pvp_flag;
 	int enemy_critical;
 	int cast_rate,delay_rate,delay_dependon_dex;
 	int defnotenemy;
 	int attr_recover;
 	int flooritem_lifetime;
 	int item_rate,base_exp_rate,job_exp_rate;
+	int death_penalty_type;
 	int death_penalty_base,death_penalty_job;
 	int mvp_item_rate,mvp_exp_rate;
 	int mvp_hp_rate;

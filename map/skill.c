@@ -433,26 +433,33 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 		}
 	}
 
-	ret=path_blownpos(target->m,x,y,dx,dy,count&0xff);
+	ret=path_blownpos(target->m,x,y,dx,dy,count&0xffff);
 	nx=ret>>16;
 	ny=ret&0xffff;
 	moveblock=( x/BLOCK_SIZE != nx/BLOCK_SIZE || y/BLOCK_SIZE != ny/BLOCK_SIZE);
 
-	if(sd){
-		sd->to_x=nx;
-		sd->to_y=ny;
-	}else if(md){
-		md->to_x=nx;
-		md->to_y=ny;
-	}
-	if(count&0x20000){
+	if(count&0x20000) {
 		if(sd){
+			sd->to_x=nx;
+			sd->to_y=ny;
+			if(sd->walktimer != -1)
+				pc_stop_walking(sd,1);
+			sd->walktimer = 1;
 			clif_walkok(sd);
 			clif_movechar(sd);
 		}
-		if(md)
+		else if(md) {
+			md->to_x=nx;
+			md->to_y=ny;
+			if(md->state.state == MS_WALK)
+				mob_stop_walking(md,1);
+			md->state.state = MS_WALK;
 			clif_fixmobpos(md);
+		}
 	}
+
+	dx = nx - x;
+	dy = ny - y;
 
 	if(sd)	/* 画面外に出たので消去 */
 		map_foreachinmovearea(clif_pcoutsight,
@@ -469,16 +476,23 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 	if(moveblock) map_addblock(target);
 
 
-	skill_unit_move(target,gettick(),count+2);	/* スキルユニットの判定 */
+	skill_unit_move(target,gettick(),(count&0xffff)+5);	/* スキルユニットの判定 */
 
-	if(sd)	/* 画面内に入ってきたので表示 */
+	if(sd) {	/* 画面内に入ってきたので表示 */
 		map_foreachinmovearea(clif_pcinsight,
 			target->m,nx-AREA_SIZE,ny-AREA_SIZE,
 			nx+AREA_SIZE,ny+AREA_SIZE,-dx,-dy,0,sd);
-	if(md)
+		if(count&0x20000)
+			sd->walktimer = -1;
+	}
+	if(md) {
 		map_foreachinmovearea(clif_mobinsight,
 			target->m,nx-AREA_SIZE,ny-AREA_SIZE,
 			nx+AREA_SIZE,ny+AREA_SIZE,-dx,-dy,BL_PC,md);
+		if(count&0x20000)
+			md->state.state = MS_IDLE;
+	}
+
 	return 0;
 }
 
@@ -568,7 +582,7 @@ int skill_area_sub( struct block_list *bl,va_list ap )
 	flag=va_arg(ap,int);
 	func=va_arg(ap,SkillFunc);
 
-	if(battle_check_target(src,bl,flag))
+	if(battle_check_target(src,bl,flag) > 0)
 		func(src,bl,skill_id,skill_lv,tick,flag);
 	return 0;
 }
@@ -1097,7 +1111,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			int per=0;
 			struct map_session_data *tsd=(struct map_session_data*)bl;
 
-			if( (map[bl->m].flag&MF_PVP) && tsd->pvp_point<=0 )
+			if( (map[bl->m].flag.pvp) && tsd->pvp_point<=0 )
 				break;			/* PVPで復活不可能状態 */
 
 			if(pc_isdead(tsd)){	/* 死亡判定 */
@@ -1175,7 +1189,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 	case MO_ABSORBSPIRITS:	// 気奪
 		if(sd && dstsd) {
-			if(sd == dstsd || map[sd->bl.m].flag&MF_PVP) {
+			if(sd == dstsd || map[sd->bl.m].flag.pvp || map[sd->bl.m].flag.gvg) {
 				if(dstsd->spiritball > 0) {
 					clif_skill_nodamage(src,bl,skillid,0,1);
 					i = dstsd->spiritball * 7;
@@ -1348,7 +1362,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case AL_TELEPORT:			/* テレポート */
 		clif_skill_nodamage(src,bl,skillid,0,1);
 		if( sd ){
-			if(map[sd->bl.m].flag&MF_NOTELEPORT)	/* テレポ禁止 */
+			if(map[sd->bl.m].flag.noteleport)	/* テレポ禁止 */
 				break;
 			if( sd->skilllv==1 )
 				pc_randomwarp(sd,3);
@@ -1462,7 +1476,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 	case RG_INTIMIDATE:			/* インティミデイト */
 		if( sd ){
-			if(map[sd->bl.m].flag&MF_NOTELEPORT)	/* テレポ禁止 */
+			if(map[sd->bl.m].flag.noteleport)	/* テレポ禁止 */
 				break;
 			if( sd->skilllv==1 )
 				pc_randomwarp(sd,3);
@@ -1729,7 +1743,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 		break;
 
 	case AL_WARP:				/* ワープポータル */
-		if(map[sd->bl.m].flag&MF_NOTELEPORT)	/* テレポ禁止 */
+		if(map[sd->bl.m].flag.noteleport)	/* テレポ禁止 */
 			break;
 		clif_skill_warppoint(sd,sd->skillid,sd->status.save_point.map,
 			(sd->skilllv>1)?sd->status.memo_point[0].map:"",
@@ -2197,14 +2211,26 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	switch(sg->unit_id){
 	case 0x83:	/* サンクチュアリ */
 		{
-			int element=battle_get_element(bl) % 10;
-			int race=battle_get_race(bl);
+			int *list=sg->vallist;
+			int i,ei=0,race=battle_get_race(bl);
 
 			if( battle_get_hp(bl)>=battle_get_max_hp(bl) &&
-				 element!=9 && race!=6  )
+				 race!=1 && race!=6  )
 				break;
 
-			if( element!=9 && race!=6 ){
+			for(i=0;i<16;i++)	/* 人数制限の計算 */
+				if(list[i]==0)
+					ei=i;
+				else if(list[i]==bl->id)
+					break;
+			if(i==16){
+				list[ei]=bl->id;
+				if((sg->val1--)<=0){
+					skill_delunitgroup(sg);
+					return 0;
+				}
+			}
+			if( race!=1 && race!=6 ){
 				int heal=sg->val2;
 				if( bl->type==BL_PC &&
 					pc_check_equip_dcard((struct map_session_data *)bl,4128) )
@@ -2214,20 +2240,13 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 			}else
 				skill_attack(BF_MAGIC,ss,&src->bl,bl,
 					sg->skill_id,sg->skill_lv,tick,0);
-
-			if((sg->val1--)<=1){	/* 回復回数カウント */
-				skill_delunitgroup(sg);
-				return 0;
-			}
-
 		}
 		break;
 
 	case 0x84:	/* マグヌスエクソシズム */
 		{
-			int element=battle_get_element(bl) % 10;
 			int race=battle_get_race(bl);
-			if( element!=9 && race!=6 )
+			if( race!=1 && race!=6 )
 				return 0;
 			skill_attack(BF_MAGIC,ss,&src->bl,bl,
 				sg->skill_id,sg->skill_lv,tick,0);
@@ -2275,11 +2294,13 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 
 	case 0x90:	/* スキッドトラップ */
 		if(sg->val2==0){
-			battle_stopwalking(bl,1);
-			skill_blown(&src->bl,bl,sg->skill_lv|0x30000);
+			int i;
+			for(i=0;i<sg->skill_lv;i++)
+				skill_blown(&src->bl,bl,1|0x30000);
 			sg->limit=DIFF_TICK(tick,sg->tick)+3000;
 			sg->val2=bl->id;
-		}break;
+		}
+		break;
 
 	case 0x93:	/* ランドマイン */
 		skill_attack(BF_MISC,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
@@ -2381,15 +2402,15 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 		return 0;
 
 	switch(sg->unit_id){
-//	case 0x83:	/* サンクチュアリ 人数カウント不要のためいらなくなった…はず */ 
-/*		{
+	case 0x83:	/* サンクチュアリ */
+		{
 			int i,*list=sg->vallist;
 			for(i=0;i<list[i];i++)
 				if(list[i]==bl->id)
 					list[i]=0;
 		}
 		break;
-*/
+
 	case 0x7e:	/* セイフティウォール */
 	case 0x85:	/* ニューマ */
 	case 0x8e:	/* クァグマイア */
@@ -2992,7 +3013,7 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	if(casttime > 0)
 		sd->skilltimer = add_timer( tick+casttime, skill_castend_id, sd->bl.id, 0 );
 	else {
-		sd->skilltimer = 0;
+		sd->skilltimer = -1;
 		skill_castend_id(sd->skilltimer,tick,sd->bl.id,0);
 	}
 
@@ -3050,7 +3071,7 @@ int skill_use_pos( struct map_session_data *sd,
 	if(casttime > 0)
 		sd->skilltimer = add_timer( tick+casttime, skill_castend_pos, sd->bl.id, 0 );
 	else {
-		sd->skilltimer = 0;
+		sd->skilltimer = -1;
 		skill_castend_pos(sd->skilltimer,tick,sd->bl.id,0);
 	}
 
@@ -3125,7 +3146,7 @@ int skill_status_change_timer_sub(struct block_list *bl, va_list ap )
 		if( (*battle_get_option(bl))&6 ){
 			skill_status_change_end( bl, SC_HIDDING, -1);
 			skill_status_change_end( bl, SC_CLOAKING, -1);
-			if( type==SC_RUWACH && battle_check_target( src,bl, BCT_ENEMY ))
+			if( type==SC_RUWACH && battle_check_target( src,bl, BCT_ENEMY ) > 0)
 				skill_attack(BF_MAGIC,src,src,bl,(type==SC_SIGHT)?10:24,1,tick,0);
 		}
 
@@ -3537,7 +3558,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 		case SC_SPEEDPOTION0:		/* 増速ポーション */
 		case SC_SPEEDPOTION1:
 		case SC_SPEEDPOTION2:
-			tick = 1000 * 60 * 30;
+			tick = 1000 * val1;
 			val2 = 100- 5*(2+type-SC_SPEEDPOTION0);
 			break;
 
@@ -4098,7 +4119,8 @@ int skill_unit_move( struct block_list *bl,unsigned int tick,int range)
 	if(bl->prev==NULL)
 		return 0;
 
-	if(range<5)range=5;
+	if(range<5)
+		range=5;
 	map_foreachinarea( skill_unit_move_sub,
 		bl->m,bl->x-range,bl->y-range,bl->x+range,bl->y+range,BL_SKILL,
 		bl,tick );

@@ -72,7 +72,7 @@ int mob_spawn_dataset(struct mob_data *md,const char *mobname,int class)
 	md->bl.id= npc_get_new_npc_id();
 
 	memset(&md->state,0,sizeof(md->state));
-	md->timer=0;
+	md->timer = -1;
 	md->target_id=0;
 	md->attacked_id=0;
 
@@ -102,7 +102,7 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 		int i=0;
 		do{
 			class=rand()%1000+1000;
-		}while( (mob_db[class].max_hp<=0 || !mob_db[class].summonflag)&& (i++)<1000);
+		}while( (mob_db[class].max_hp<=0 || !mob_db[class].summonflag || sd->status.base_level < mob_db[class].lv)&& (i++)<1000);
 		if(i>=1000)class=1002;	// 強制ポリン
 //		printf("mobclass=%d try=%d\n",class,i);
 	}
@@ -357,7 +357,7 @@ int mob_changestate(struct mob_data *md,int state)
 {
 	int i;
 
-	if(md->timer>0)
+	if(md->timer != -1)
 		delete_timer(md->timer,mob_timer);
 	md->timer=-1;
 	md->state.state=state;
@@ -1098,8 +1098,8 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 				md->state.skillstate=MSS_CHASE;	// 突撃時スキル
 				mobskill_use(md,tick,-1);
 						
-//				if(md->timer>0 && (DIFF_TICK(md->next_walktime,tick)<0 || distance(md->to_x,md->to_y,sd->bl.x,sd->bl.y)<2) )
-				if(md->timer>0 && md->state.state!=MS_ATTACK && (DIFF_TICK(md->next_walktime,tick)<0 || distance(md->to_x,md->to_y,sd->bl.x,sd->bl.y)<2) )
+//				if(md->timer != -1 && (DIFF_TICK(md->next_walktime,tick)<0 || distance(md->to_x,md->to_y,sd->bl.x,sd->bl.y)<2) )
+				if(md->timer != -1 && md->state.state!=MS_ATTACK && (DIFF_TICK(md->next_walktime,tick)<0 || distance(md->to_x,md->to_y,sd->bl.x,sd->bl.y)<2) )
 					return 0; // 既に移動中
 
 				if( !mob_can_reach(md,&sd->bl,(md->min_chase>13)?md->min_chase:13) ){
@@ -1182,8 +1182,8 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 				md->state.skillstate=MSS_LOOT;	// ルート時スキル使用
 				mobskill_use(md,tick,-1);
 
-//				if(md->timer>0 && (DIFF_TICK(md->next_walktime,tick)<0 || distance(md->to_x,md->to_y,bl_item->x,bl_item->y)<2) )
-				if(md->timer>0 && md->state.state!=MS_ATTACK && (DIFF_TICK(md->next_walktime,tick)<0 || distance(md->to_x,md->to_y,bl_item->x,bl_item->y) <= 0))
+//				if(md->timer != -1 && (DIFF_TICK(md->next_walktime,tick)<0 || distance(md->to_x,md->to_y,bl_item->x,bl_item->y)<2) )
+				if(md->timer != -1 && md->state.state!=MS_ATTACK && (DIFF_TICK(md->next_walktime,tick)<0 || distance(md->to_x,md->to_y,bl_item->x,bl_item->y) <= 0))
 					return 0; // 既に移動中
 
 
@@ -1958,7 +1958,7 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 		md->skilltimer =
 			add_timer( gettick()+casttime, mobskill_castend_id, md->bl.id, 0 );
 	}else{
-		md->skilltimer=0;
+		md->skilltimer = -1;
 		mobskill_castend_id(md->skilltimer,gettick(),md->bl.id, 0);
 	}
 
@@ -2014,7 +2014,7 @@ int mobskill_use_pos( struct mob_data *md,
 		md->skilltimer =
 			add_timer( gettick()+casttime, mobskill_castend_pos, md->bl.id, 0 );
 	}else{
-		md->skilltimer=0;
+		md->skilltimer = -1;
 		mobskill_castend_pos(md->skilltimer,gettick(),md->bl.id, 0);
 	}
 

@@ -1,4 +1,63 @@
 --------------
+//0532 by 死神
+
+・修正した所を全然チェックしてなかったので修正したファイルだけ...汗
+・mapflagにnopenalty追加。使用方法は
+	mapflag	nopenalty	dummy
+です。機能はそのマップで死んだ時経験が減らないようにします。
+・mapflagにpvp_noparty、pvp_noguild、gvg、gvg_noparty追加。
+pvp_nopartyはPVPモードで同じパーティに攻撃が当たらない、pvp_noguildはPVPモードで同じギルドに攻撃が当たらない、gvgはシーズモードに、gvg_nopartyはシーズモードで同じパーティに攻撃が当たらない物です。
+・可動してないタイマーは全て-1になるように変更。
+・吹き飛ばし処理修正。
+・マップロード直後気功が見えない問題修正。
+・残影の処理修正。
+・マップをロードすると死んだふりが解除されるように変更。
+・PVPを少し変更。
+・古木の枝で出るモンスターを自分のレベルより高い物は出ないように変更。
+・加速ポーションのsc_start SC_SpeedPot0,1,0;をsc_start SC_SpeedPot0,1800,0;のように変更。SC_SpeedPot？の後の数値は持続時間です。(単位は秒)
+・@コマンド@pvpを@pvponに変更と@pvponと@pvpoff、@gatの機能変更。
+・battle_athena.confのpvp削除。
+・battle_athena.confにdeath_penalty_type追加。
+・ペナルティの適用を死んだ時から死んだ後リスタートした時に変更。(リザで復活すると経験が減りません。本鯖の仕様がかなり気にいらなかったので変更しました。)
+・スクリプトsetmapflag、removemapflag、pvpon、pvpoff、gvgon、gvgoff追加。
+	setmapflag マップ名、マップフラグタイプ
+		指定したマップフラグをonします。(ただpvp、gvgはpvpon、gvgonでできるので指定しても動作しません。あとnosaveの場合処理がちょっと複雑になるので対応してません。)
+	removemapflag マップ名、マップフラグタイプ
+		指定したマップフラグをoffします。(ただpvp、gvgはpvpoff、gvgoffでできるので指定しても動作しません。こちらはnosaveも可能です。)
+	pvpon マップ名
+		指定したマップをPVPモードにします。
+	pvpoff マップ名
+		指定したマップのPVPモードを解除します。
+	gvgon マップ名
+		指定したマップをシーズモードにします。
+	gvgoff マップ名
+		指定したマップのシーズモードを解除します。
+ただ全てのスクリプトの動作は確認してませんので注意してください。
+・サンクチュアリ、マグヌスエクソシズムの処理を0529に戻しました。
+自分の調査ではサンクチュアリは人数の制限があります。(レベル1で4名で
+1レベルに一人ずつ増えます。)
+・その後少し修正。(したはず...)
+	(db/)
+	const.txt 修正。
+	item_db.txt 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(map/)
+	clif.h、clif.c 修正。
+	mob.c 修正。
+	pc.h、pc.c 修正。
+	skill.c 修正。
+	pet.c 修正。
+	npc.c 修正。
+	map.h、map.c 修正。
+	battle.h、battle.c 修正。
+	atcommand.h、atcommand.c 修正。
+	script.c 修正。
+	makefile 修正。
+
+--------------
 //0531 by 獅子o^.^o
 
 conf/npc_turtle.txt
@@ -82,6 +141,7 @@ set Zeny - 10000,0; --> set Zeny,Zeny-10000; 修正
 どなたかいい式を思いついたら変更お願いします。
 
 ところで転職NPCが一部かぶってるんですが修正しないでいいんでしょうか？
+
 --------------
 //0527 by 死神
 
@@ -695,7 +755,7 @@ atcommnad_gm_onlyがnoじゃなくても使用レベル設定を0にしたコマンドはGMじゃないキャ
 --------------
 //0494 by 獅子o^.^o
 
-conf/npc_warp.txt
+conf/mpc_warp.txt
 ．ハンタ一転職地出ていない修正
 
 --------------

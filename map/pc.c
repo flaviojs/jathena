@@ -23,6 +23,7 @@
 #include "chat.h"
 #include "trade.h"
 #include "storage.h"
+#include "vending.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -198,6 +199,46 @@ int pc_delspiritball(struct map_session_data *sd,int count,int type)
 	return 0;
 }
 
+int pc_setrestartvalue(struct map_session_data *sd,int type)
+{
+	//-----------------------
+	// 死亡した
+	if( pc_check_equip_dcard(sd,4144) ) {	// オシリスカード
+		sd->status.hp=sd->status.max_hp;
+		sd->status.sp=sd->status.max_sp;
+	}
+	else if(sd->status.class == 0) {	// ノービス
+		sd->status.hp=(sd->status.max_hp)/2;
+	}
+	else {
+		sd->status.hp = 1;
+	}
+	if(!type)
+		clif_updatestatus(sd,SP_HP);
+	//経験値の減少
+	if(sd->status.class && !map[sd->bl.m].flag.nopenalty){
+		if(battle_config.death_penalty_type && battle_config.death_penalty_base > 0)
+			sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
+		else if(battle_config.death_penalty_base > 0)
+			sd->status.base_exp -= (int)((double)sd->status.base_exp * (double)battle_config.death_penalty_base/10000.);
+		if(sd->status.base_exp < 0)
+			sd->status.base_exp = 0;
+		if(!type)
+			clif_updatestatus(sd,SP_BASEEXP);
+		
+		if(battle_config.death_penalty_type && battle_config.death_penalty_job > 0)
+			sd->status.job_exp -= (int)((double)pc_nextjobexp(sd) * (double)battle_config.death_penalty_job/10000.);
+		else if(battle_config.death_penalty_job > 0)
+			sd->status.job_exp -= (int)((double)sd->status.job_exp * (double)battle_config.death_penalty_job/10000.);
+		if(sd->status.job_exp < 0)
+			sd->status.job_exp = 0;
+		if(!type)
+			clif_updatestatus(sd,SP_JOBEXP);
+	}
+
+	return 0;
+}
+
 
 /*==========================================
  * ローカルプロトタイプ宣言 (必要な物のみ)
@@ -217,14 +258,7 @@ int pc_makesavestatus(struct map_session_data *sd)
 
 	// 死亡状態だったのでhpを1、位置をセーブ場所に変更
 	if(pc_isdead(sd)){
-		if( pc_check_equip_dcard(sd,4144) ){	// オシリスカード
-			sd->status.hp=sd->status.max_hp;
-			sd->status.sp=sd->status.max_sp;
-//		}else if(sd->status.class == 0){	// ノービス
-//			sd->status.hp=(sd->status.max_hp)/2;
-		}else
-			sd->status.hp=1;
-
+		pc_setrestartvalue(sd,1);
 		memcpy(&sd->status.last_point,&sd->status.save_point,sizeof(sd->status.last_point));
 	} else {
 		memcpy(sd->status.last_point.map,sd->mapname,16);
@@ -233,7 +267,7 @@ int pc_makesavestatus(struct map_session_data *sd)
 	}
 
 	// セーブ禁止マップだったので指定位置に移動
-	if(map[sd->bl.m].flag&MF_NOSAVE){
+	if(map[sd->bl.m].flag.nosave){
 		struct map_data *m=&map[sd->bl.m];
 		if(strcmp(m->save.map,"SavePoint")==0)
 			memcpy(&sd->status.last_point,&sd->status.save_point,sizeof(sd->status.last_point));
@@ -355,7 +389,8 @@ int pc_authok(int id,struct mmo_charstatus *st)
 
 	// イベント関係の初期化
 	memset(sd->eventqueue,0,sizeof(sd->eventqueue));
-	memset(sd->eventtimer,-1,sizeof(sd->eventtimer));
+	for(i=0;i<MAX_EVENTTIMER;i++)
+		sd->eventtimer[i] = -1;
 
 	// 位置の設定
 	pc_setpos(sd,sd->status.last_point.map ,
@@ -372,7 +407,6 @@ int pc_authok(int id,struct mmo_charstatus *st)
 		guild_request_info(sd->status.guild_id);
 
 	// pvpの設定
-	sd->pvp_flag=0;
 	sd->pvp_rank=0;
 	sd->pvp_point=0;
 	sd->pvp_timer=-1;
@@ -1482,7 +1516,7 @@ int pc_useitem(struct map_session_data *sd,int n)
 
 	if(sd->status.inventory[n].nameid==0||
 		sd->status.inventory[n].amount<1||
-	((sd->status.inventory[n].nameid==604)&&(map[sd->bl.m].flag&MF_NOBRANCH)) ){
+	((sd->status.inventory[n].nameid==604)&&(map[sd->bl.m].flag.nobranch)) ){
 		clif_useitemack(sd,n,0,0);
 		return 1;
 	}
@@ -1808,7 +1842,7 @@ int pc_randomwarp(struct map_session_data *sd,int type)
 	int x,y,c,i=0;
 	int m=sd->bl.m;
 	
-	if(map[sd->bl.m].flag&MF_NOTELEPORT)	// テレポート禁止
+	if(map[sd->bl.m].flag.noteleport)	// テレポート禁止
 		return 0;
 	
 	do{
@@ -1832,7 +1866,7 @@ int pc_memo(struct map_session_data *sd,int i)
 	int skill=pc_checkskill(sd,AL_WARP);
 	int j;
 	
-	if(skill<2 || i<-1 || i>2 || map[sd->bl.m].flag&MF_NOMEMO){
+	if(skill<2 || i<-1 || i>2 || map[sd->bl.m].flag.nomemo){
 		clif_skill_memo(sd,1);
 		return 0;
 	}
@@ -2029,7 +2063,7 @@ int pc_walktoxy(struct map_session_data *sd,int x,int y)
 	sd->to_x=x;
 	sd->to_y=y;
 	
-	if(sd->walktimer>0 && sd->state.change_walk_target==0){
+	if(sd->walktimer != -1 && sd->state.change_walk_target==0){
 		// 現在歩いている最中の目的地変更なのでマス目の中心に来た時に
 		// timer関 ?からpc_walktoxy_subを呼ぶようにする
 		sd->state.change_walk_target=1;
@@ -2069,53 +2103,45 @@ int pc_stop_walking(struct map_session_data *sd,int type)
  */
 int pc_movepos(struct map_session_data *sd,int dst_x,int dst_y)
 {
-	int i;
-	int x,y,dx,dy;
+	int moveblock;
+	int dx,dy,dist;
 
 	struct walkpath_data wpd;
 
 	if(path_search(&wpd,sd->bl.m,sd->bl.x,sd->bl.y,dst_x,dst_y,0))
 		return 1;
 
-	for(i=0;i<wpd.path_len;i++) {
-		int moveblock;
+	sd->dir = sd->head_dir = map_calc_dir(&sd->bl, dst_x,dst_y);
 
-		if(wpd.path[i]>=8)
-			break;
+	dx = dst_x - sd->bl.x;
+	dy = dst_y - sd->bl.y;
+	dist = distance(sd->bl.x,sd->bl.y,dst_x,dst_y);
 
-		x = sd->bl.x;
-		y = sd->bl.y;
-		sd->dir=sd->head_dir=wpd.path[i];
-		dx = dirx[(int)sd->dir];
-		dy = diry[(int)sd->dir];
-		moveblock = ( x/BLOCK_SIZE != (x+dx)/BLOCK_SIZE || y/BLOCK_SIZE != (y+dy)/BLOCK_SIZE);
+	moveblock = ( sd->bl.x/BLOCK_SIZE != dst_x/BLOCK_SIZE || sd->bl.y/BLOCK_SIZE != dst_y/BLOCK_SIZE);
 
-		map_foreachinmovearea(clif_pcoutsight,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,dx,dy,0,sd);
+	map_foreachinmovearea(clif_pcoutsight,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,dx,dy,0,sd);
 
-		x += dx;
-		y += dy;
+	if(moveblock) map_delblock(&sd->bl);
+	sd->bl.x = dst_x;
+	sd->bl.y = dst_y;
+	if(moveblock) map_addblock(&sd->bl);
 
-		if(moveblock) map_delblock(&sd->bl);
-		sd->bl.x = x;
-		sd->bl.y = y;
-		if(moveblock) map_addblock(&sd->bl);
+	map_foreachinmovearea(clif_pcinsight,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,-dx,-dy,0,sd);
 
-		map_foreachinmovearea(clif_pcinsight,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,-dx,-dy,0,sd);
-
-		if(sd->status.party_id>0){	// パーティのＨＰ情報通知検査
-			struct party *p=party_search(sd->status.party_id);
-			if(p!=NULL){
-				int flag=0;
-				map_foreachinmovearea(party_send_hp_check,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,-dx,-dy,BL_PC,sd->status.party_id,&flag);
-				if(flag)
-					sd->party_hp=-1;
-			}
+	if(sd->status.party_id>0){	// パーティのＨＰ情報通知検査
+		struct party *p=party_search(sd->status.party_id);
+		if(p!=NULL){
+			int flag=0;
+			map_foreachinmovearea(party_send_hp_check,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,-dx,-dy,BL_PC,sd->status.party_id,&flag);
+			if(flag)
+				sd->party_hp=-1;
 		}
 	}
+
 	if(sd->status.option&4)	// クローキングの消滅検査
 		skill_check_cloaking(&sd->bl);
 
-	skill_unit_move(&sd->bl,gettick(),1);	// スキルユニットの検査
+	skill_unit_move(&sd->bl,gettick(),dist+5);	// スキルユニットの検査
 
 	if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y)&0x80)
 		npc_touch_areanpc(sd,sd->bl.m,sd->bl.x,sd->bl.y);
@@ -2229,7 +2255,7 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
 	bl=map_id2bl(target_id);
 	if(bl==NULL || (bl->type!=BL_MOB && bl->type!=BL_PC))
 		return 1;
-	if(sd->attacktimer>0)
+	if(sd->attacktimer != -1)
 		pc_stopattack(sd);
 	sd->attacktarget=target_id;
 	sd->state.attack_continue=type;
@@ -2252,7 +2278,7 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
  */
 int pc_stopattack(struct map_session_data *sd)
 {
-	if(sd->attacktimer>0){
+	if(sd->attacktimer != -1) {
 		delete_timer(sd->attacktimer,pc_attack_timer);
 		sd->attacktimer=-1;
 	}
@@ -2571,14 +2597,10 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 
 		return 0;
 	}
-	//-----------------------
-	// 死亡した
-	if(sd->status.class == 0){	// ノービス
-		sd->status.hp=(sd->status.max_hp)/2;
-	}else{
-		sd->status.hp = 1;
-	}
+	sd->status.hp = 0;
 	pc_setdead(sd);
+	if(sd->vender_id)
+		vending_closevending(sd);
 	if(sd->status.pet_id && sd->pet_npcdata) {
 		if(sd->petDB) {
 			sd->pet.intimate -= sd->petDB->die;
@@ -2588,28 +2610,15 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		}
 	}
 
-	//経験値の減少
-	if(sd->status.class){
-		sd->status.base_exp -= pc_nextbaseexp(sd) * battle_config.death_penalty_base / 10000;
-		if(sd->status.base_exp < 0)
-			sd->status.base_exp = 0;
-		clif_updatestatus(sd,SP_BASEEXP);
-		
-		sd->status.job_exp -= pc_nextjobexp(sd) * battle_config.death_penalty_job / 10000;
-		if(sd->status.job_exp < 0)
-			sd->status.job_exp = 0;
-		clif_updatestatus(sd,SP_JOBEXP);
-	}
-
 	pc_stop_walking(sd,0);
 	skill_castcancel(&sd->bl);	// 詠唱の中止
-	clif_updatestatus(sd,SP_HP);
 	clif_clearchar_area(&sd->bl,1);
 	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
+	clif_updatestatus(sd,SP_HP);
 	pc_calcstatus(sd,0);
 
 	// pvp
-	if( map[sd->bl.m].flag&MF_PVP ){
+	if( map[sd->bl.m].flag.pvp){
 		sd->pvp_point-=5;
 		if( src->type==BL_PC )
 			((struct map_session_data *)src)->pvp_point++;
@@ -3382,12 +3391,12 @@ int pc_calc_pvprank(struct map_session_data *sd)
 {
 	int old=sd->pvp_rank;
 	struct map_data *m=&map[sd->bl.m];
-	if( !(m->flag&MF_PVP) )
+	if( !(m->flag.pvp) )
 		return 0;
 	sd->pvp_rank=1;
 	map_foreachinarea(pc_calc_pvprank_sub,sd->bl.m,0,0,m->xs,m->ys,BL_PC,sd);
 	if(old!=sd->pvp_rank || sd->pvp_lastusers!=m->users)
-		clif_pvpset(sd->fd,sd,sd->pvp_rank,sd->pvp_lastusers=m->users);
+		clif_pvpset(sd,sd->pvp_rank,sd->pvp_lastusers=m->users);
 	return sd->pvp_rank;
 }
 /*==========================================

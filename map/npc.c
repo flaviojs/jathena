@@ -855,7 +855,7 @@ int npc_parse_mob(char *w1,char *w2,char *w3,char *w4)
 
 		md->state.state=0;
 		md->state.skillstate=0;
-		md->timer=0;
+		md->timer = -1;
 		md->target_id=0;
 		md->state.targettype=0;
 		md->attacked_id=0;
@@ -893,7 +893,7 @@ int npc_parse_mob(char *w1,char *w2,char *w3,char *w4)
  */
 static int npc_parse_mapflag(char *w1,char *w2,char *w3,char *w4)
 {
-	int m,i;
+	int m;
 	char mapname[24],savemap[16];
 	int savex,savey;
 
@@ -909,29 +909,42 @@ static int npc_parse_mapflag(char *w1,char *w2,char *w3,char *w4)
 
 //マップフラグ
 	if( strcmp(w3,"nosave")==0 && sscanf(w4,"%[^,],%d,%d",savemap,&savex,&savey)==3){
-		map[m].flag|=MF_NOSAVE;
+		map[m].flag.nosave=1;
 		memcpy(map[m].save.map,savemap,16);
 		map[m].save.x=savex;
 		map[m].save.y=savey;
-	}else{
-		const struct {
-			char name[32];
-			int flag;
-		} data[] = {
-			{	"nomemo",		MF_NOMEMO		},
-			{	"noteleport",	MF_NOTELEPORT	},
-			{	"nobranch",		MF_NOBRANCH		},
-			{	"pvp",			MF_PVP			},
-			{	"gvg",			MF_GVG			},
-		};
-		
-		for(i=0;i<sizeof(data)/sizeof(data[0]);i++){
-			if( strcmp(w3,data[i].name)==0 )
-				map[m].flag|=data[i].flag;
-		}
 	}
-	
-		
+	else if(strcmp(w3,"nomemo")==0) {
+		map[m].flag.nomemo=1;
+	}
+	else if(strcmp(w3,"noteleport")==0) {
+		map[m].flag.noteleport=1;
+	}
+	else if(strcmp(w3,"nobranch")==0) {
+		map[m].flag.nobranch=1;
+	}
+	else if(strcmp(w3,"nopenalty")==0) {
+		map[m].flag.nopenalty=1;
+	}
+	else if(strcmp(w3,"pvp")==0) {
+		map[m].flag.pvp=1;
+		map[m].flag.pvp_noparty=0;
+		map[m].flag.pvp_noguild=0;
+	}
+	else if(strcmp(w3,"pvp_noparty")==0) {
+		map[m].flag.pvp_noparty=1;
+	}
+	else if(strcmp(w3,"pvp_noguild")==0) {
+		map[m].flag.pvp_noguild=1;
+	}
+	else if(strcmp(w3,"gvg")==0) {
+		map[m].flag.gvg=1;
+		map[m].flag.gvg_noparty=0;
+	}
+	else if(strcmp(w3,"gvg_noparty")==0) {
+		map[m].flag.gvg_noparty=1;
+	}
+
 	return 0;
 }
 

@@ -8,6 +8,9 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "socket.h"
+#include "timer.h"
+
 #include "map.h"
 #include "clif.h"
 #include "itemdb.h"
@@ -19,7 +22,6 @@
 #include "pet.h"
 #include "intif.h"
 #include "db.h"
-#include "timer.h"
 #include "skill.h"
 #include "chat.h"
 #include "battle.h"
@@ -130,6 +132,12 @@ int buildin_resetstatus(struct script_state *st);
 int buildin_resetskill(struct script_state *st);
 int buildin_waitingroom(struct script_state *st);
 int buildin_warpwaitingpc(struct script_state *st);
+int buildin_setmapflag(struct script_state *st);
+int buildin_removemapflag(struct script_state *st);
+int buildin_pvpon(struct script_state *st);
+int buildin_pvpoff(struct script_state *st);
+int buildin_gvgon(struct script_state *st);
+int buildin_gvgoff(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -210,6 +218,12 @@ struct {
 	{buildin_resetskill,"resetskill",""},
 	{buildin_waitingroom,"waitingroom","si*"},
 	{buildin_warpwaitingpc,"warpwaitingpc","sii"},
+	{buildin_setmapflag,"setmapflag","si"},
+	{buildin_removemapflag,"removemapflag","si"},
+	{buildin_pvpon,"pvpon","s"},
+	{buildin_pvpoff,"pvpoff","s"},
+	{buildin_pvpon,"gvgon","s"},
+	{buildin_pvpoff,"gvgoff","s"},
 	{NULL,NULL,NULL}
 };
 enum {
@@ -1146,7 +1160,7 @@ int buildin_warp(struct script_state *st)
 	if(strcmp(str,"Random")==0)
 		pc_randomwarp(sd,3);
 	else if(strcmp(str,"SavePoint")==0){
-		if(map[sd->bl.m].flag&MF_NOTELEPORT)	// テレポ禁止
+		if(map[sd->bl.m].flag.noteleport)	// テレポ禁止
 			return 0;
 
 		pc_setpos(sd,sd->status.save_point.map,
@@ -2311,7 +2325,7 @@ int buildin_warpwaitingpc(struct script_state *st)
 		if(strcmp(str,"Random")==0)
 			pc_randomwarp(sd,3);
 		else if(strcmp(str,"SavePoint")==0){
-			if(map[sd->bl.m].flag&MF_NOTELEPORT)	// テレポ禁止
+			if(map[sd->bl.m].flag.noteleport)	// テレポ禁止
 				return 0;
 	
 			pc_setpos(sd,sd->status.save_point.map,
@@ -2321,6 +2335,171 @@ int buildin_warpwaitingpc(struct script_state *st)
 	}
 	return 0;
 }
+/*==========================================
+ *
+ *------------------------------------------
+ */
+enum { MF_NOMEMO,MF_NOTELEPORT,MF_NOSAVE,MF_NOBRANCH,MF_NOPENALTY,MF_PVP,MF_PVP_NOPARTY,MF_PVP_NOGUILD,MF_GVG,MF_GVG_NOPARTY };
+
+int buildin_setmapflag(struct script_state *st)
+{
+	int m,i;
+	char *str;
+
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	i=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	m = map_mapname2mapid(str);
+	if(m >= 0) {
+		switch(i) {
+			case MF_NOMEMO:
+				map[m].flag.nomemo=1;
+				break;
+			case MF_NOTELEPORT:
+				map[m].flag.noteleport=1;
+				break;
+			case MF_NOBRANCH:
+				map[m].flag.nobranch=1;
+				break;
+			case MF_NOPENALTY:
+				map[m].flag.nopenalty=1;
+				break;
+			case MF_PVP_NOPARTY:
+				map[m].flag.pvp_noparty=1;
+				break;
+			case MF_PVP_NOGUILD:
+				map[m].flag.pvp_noguild=1;
+				break;
+			case MF_GVG_NOPARTY:
+				map[m].flag.gvg_noparty=1;
+				break;
+		}
+	}
+
+	return 0;
+}
+
+int buildin_removemapflag(struct script_state *st)
+{
+	int m,i;
+	char *str;
+
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	i=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	m = map_mapname2mapid(str);
+	if(m >= 0) {
+		switch(i) {
+			case MF_NOMEMO:
+				map[m].flag.nomemo=0;
+				break;
+			case MF_NOTELEPORT:
+				map[m].flag.noteleport=0;
+				break;
+			case MF_NOSAVE:
+				map[m].flag.nosave=0;
+				break;
+			case MF_NOBRANCH:
+				map[m].flag.nobranch=0;
+				break;
+			case MF_NOPENALTY:
+				map[m].flag.nopenalty=0;
+				break;
+			case MF_PVP_NOPARTY:
+				map[m].flag.pvp_noparty=0;
+				break;
+			case MF_PVP_NOGUILD:
+				map[m].flag.pvp_noguild=0;
+				break;
+			case MF_GVG_NOPARTY:
+				map[m].flag.gvg_noparty=0;
+				break;
+		}
+	}
+
+	return 0;
+}
+
+int buildin_pvpon(struct script_state *st)
+{
+	int m,i;
+	char *str;
+	struct map_session_data *pl_sd=NULL;
+
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	m = map_mapname2mapid(str);
+	if(m >= 0) {
+		map[m].flag.pvp = 1;
+		clif_send0199(m,1);
+		for(i=0;i<fd_max;i++){	//人数分ループ
+			if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
+				if(m == pl_sd->bl.m && pl_sd->pvp_timer == -1) {
+					pl_sd->pvp_timer=add_timer(gettick(),pc_calc_pvprank_timer,pl_sd->bl.id,0);
+					pl_sd->pvp_rank=0;
+					pl_sd->pvp_lastusers=0;
+					pl_sd->pvp_point=5;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+int buildin_pvpoff(struct script_state *st)
+{
+	int m,i;
+	char *str;
+	struct map_session_data *pl_sd=NULL;
+
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	m = map_mapname2mapid(str);
+	if(m >= 0) {
+		struct block_list bl;
+		bl.m = m;
+		map[m].flag.pvp = 0;
+		clif_send0199(m,0);
+		clif_pvpset((struct map_session_data *)&bl,0,0);
+		for(i=0;i<fd_max;i++){	//人数分ループ
+			if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
+				if(m == pl_sd->bl.m && pl_sd->pvp_timer != -1) {
+					delete_timer(pl_sd->pvp_timer,pc_calc_pvprank_timer);
+					pl_sd->pvp_timer = -1;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+int buildin_gvgon(struct script_state *st)
+{
+	int m;
+	char *str;
+
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	m = map_mapname2mapid(str);
+	if(m >= 0) {
+		map[m].flag.gvg = 1;
+		clif_send0199(m,3);
+	}
+
+	return 0;
+}
+int buildin_gvgoff(struct script_state *st)
+{
+	int m;
+	char *str;
+
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	m = map_mapname2mapid(str);
+	if(m >= 0) {
+		map[m].flag.gvg = 0;
+		clif_send0199(m,0);
+	}
+
+	return 0;
+}
+
 //
 // 実行部main
 //

@@ -388,8 +388,8 @@ int battle_get_party_id(struct block_list *bl)
 	else if( bl->type==BL_MOB ){
 		struct mob_data *md=(struct mob_data *)bl;
 		if( md->master_id>0 )
-			return md->master_id|0x40000000;
-		return md->bl.id|0x40000000;
+			return md->master_id;
+		return md->bl.id;
 	}else if( bl->type==BL_SKILL )
 		return ((struct skill_unit *)bl)->group->party_id;
 	else
@@ -1672,7 +1672,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	if(target->type == BL_PC && pc_isdead((struct map_session_data *)target))
 		return 0;
 
-	if(battle_check_target(src,target,BCT_ENEMY) &&
+	if(battle_check_target(src,target,BCT_ENEMY) > 0 &&
 		battle_check_range(src,target->x,target->y,0)){
 		// 攻撃対象となりうるので攻撃
 		struct Damage wd;
@@ -1749,23 +1749,32 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	if( s_p<0 || t_p<0 )	// PCとMOBじゃない
 		return -1;
 
-	if( s_p>0 && s_p==t_p )	// 同じパーティなら肯定（味方）
+	if(flag&0x10000 && s_p>0 && s_p == t_p )	// 同じパーティなら肯定（味方）
 		return 1;
 
-	if( flag&0x10000 )		// パーティ検索なら同じパーティじゃない時点で否定
+	if(flag&0x10000 && s_p>0 && s_p != t_p )		// パーティ検索なら同じパーティじゃない時点で否定
 		return 0;
 
-	if( s_g>0 && s_g==t_g )	// 同じギルド/mobクラスなら肯定（味方）
+	if(ss->type == BL_MOB && s_g>0 && s_g == t_g )	// 同じギルド/mobクラスなら肯定（味方）
 		return 1;
-	
-	if( battle_config.pvp_flag )	// 常にpvpなら否定（敵）
-		return 0;
-	
-	if( ss->type==BL_PC && target->type==BL_PC && // 両 方PVPモードなら否定（敵）
-		((struct map_session_data *)ss)->pvp_flag &&
-		((struct map_session_data *)target)->pvp_flag)
-		return 0;
-	
+
+	if( ss->type==BL_PC && target->type==BL_PC) { // 両 方PVPモードなら否定（敵）
+		if(map[src->m].flag.pvp) {
+			if(map[src->m].flag.pvp_noparty && s_p > 0 && s_p == t_p)
+				return 1;
+			else if(map[src->m].flag.pvp_noguild && s_g > 0 && s_g == t_g)
+				return 1;
+			return 0;
+		}
+		if(map[src->m].flag.gvg) {
+			if(s_g > 0 && s_g == t_g)
+				return 1;
+			else if(map[src->m].flag.gvg_noparty && s_p > 0 && s_p == t_p)
+				return 1;
+			return 0;
+		}
+	}
+
 	return 1;	// 該当しないので無関係人物（まあ敵じゃないので味方）
 }
 /*==========================================
@@ -1811,7 +1820,6 @@ int battle_config_read(const char *cfgName)
 	char line[1024],w1[1024],w2[1024];
 	FILE *fp;
 
-	battle_config.pvp_flag=1;
 	battle_config.enemy_critical=1;
 	battle_config.cast_rate=100;
 	battle_config.delay_rate=100;
@@ -1822,8 +1830,9 @@ int battle_config_read(const char *cfgName)
 	battle_config.item_rate=100;
 	battle_config.base_exp_rate=100;
 	battle_config.job_exp_rate=100;
-	battle_config.death_penalty_base=100;
-	battle_config.death_penalty_job=100;
+	battle_config.death_penalty_type=0;
+	battle_config.death_penalty_base=0;
+	battle_config.death_penalty_job=0;
 	battle_config.mvp_item_rate=100;
 	battle_config.mvp_exp_rate=100;
 	battle_config.mvp_hp_rate=100;
@@ -1852,7 +1861,6 @@ int battle_config_read(const char *cfgName)
 			char str[32];
 			int *val;
 		} data[] ={
-			{	"pvp",					&battle_config.pvp_flag				},
 			{	"enemy_critical",		&battle_config.enemy_critical		},
 			{	"casting_rate",			&battle_config.cast_rate			},
 			{	"delay_rate",			&battle_config.delay_rate			},
@@ -1863,6 +1871,7 @@ int battle_config_read(const char *cfgName)
 			{	"item_rate",			&battle_config.item_rate			},
 			{	"base_exp_rate",		&battle_config.base_exp_rate		},
 			{	"job_exp_rate",			&battle_config.job_exp_rate			},
+			{	"death_penalty_type",			&battle_config.death_penalty_type			},
 			{	"death_penalty_base",			&battle_config.death_penalty_base			},
 			{	"death_penalty_job",			&battle_config.death_penalty_job			},
 			{	"mvp_hp_rate",			&battle_config.mvp_hp_rate			},

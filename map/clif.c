@@ -14,6 +14,7 @@
 
 #include "socket.h"
 #include "timer.h"
+
 #include "map.h"
 #include "chrif.h"
 #include "clif.h"
@@ -612,6 +613,9 @@ int clif_spawnpc(struct map_session_data *sd)
 	WFIFOW(sd->fd,0)=0x79;
 	WFIFOW(sd->fd,51)=(sd->status.base_level>99)?99:sd->status.base_level;
 	clif_send(WFIFOP(sd->fd,0),packet_len_table[0x79],&sd->bl,AREA_WOS);
+
+	if(sd->spiritball > 0)
+		clif_spiritball(sd);
 
 	return 0;
 }
@@ -2207,7 +2211,7 @@ int clif_damage(struct block_list *src,struct block_list *dst,unsigned int tick,
 
 	if(dst->type==BL_PC) {
 		sd=(struct map_session_data *)dst;
-		if(sd->sc_data[SC_ENDURE].timer >= 0)
+		if(sd->sc_data[SC_ENDURE].timer != -1)
 			type = 9;
 	}
 	WBUFW(buf,0)=0x8a;
@@ -2619,7 +2623,7 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,
 
 	if(dst->type==BL_PC) {
 		sd=(struct map_session_data *)dst;
-		if(sd->sc_data[SC_ENDURE].timer >= 0)
+		if(sd->sc_data[SC_ENDURE].timer != -1)
 			type = 9;
 	}
 
@@ -2669,7 +2673,7 @@ int clif_skill_damage2(struct block_list *src,struct block_list *dst,
 
 	if(dst->type==BL_PC) {
 		sd=(struct map_session_data *)dst;
-		if(sd->sc_data[SC_ENDURE].timer >= 0)
+		if(sd->sc_data[SC_ENDURE].timer != -1)
 			type = 9;
 	}
 
@@ -2938,22 +2942,10 @@ int clif_resurrection(struct block_list *bl,int type)
  * PVP実装？（仮）
  *------------------------------------------
  */
-int clif_pvpon(int fd)
+int clif_set0199(int fd,int type)
 {
 	WFIFOW(fd,0)=0x199;
-	WFIFOW(fd,2)=1;
-	WFIFOSET(fd,packet_len_table[0x199]);
-
-	return 0;
-}
-/*==========================================
- * PVP実装？（仮）
- *------------------------------------------
- */
-int clif_pvpoff(int fd)
-{
-	WFIFOW(fd,0)=0x199;
-	WFIFOW(fd,2)=0;
+	WFIFOW(fd,2)=type;
 	WFIFOSET(fd,packet_len_table[0x199]);
 
 	return 0;
@@ -2963,13 +2955,32 @@ int clif_pvpoff(int fd)
  * PVP実装？(仮)
  *------------------------------------------
  */
-int clif_pvpset(int fd,struct map_session_data *sd,int pvprank,int pvpnum)
+int clif_pvpset(struct map_session_data *sd,int pvprank,int pvpnum)
 {
-	WFIFOW(fd,0)=0x19a;
-	WFIFOL(fd,2)=sd->bl.id;
-	WFIFOL(fd,6)=pvprank;
-	WFIFOL(fd,10)=pvpnum;
-	clif_send(WFIFOP(fd,0),packet_len_table[0x19a],&sd->bl,AREA);
+	char buf[32];
+
+	WBUFW(buf,0)=0x19a;
+	WBUFL(buf,2)=sd->bl.id;
+	WBUFL(buf,6)=pvprank;
+	WBUFL(buf,10)=pvpnum;
+	clif_send(buf,packet_len_table[0x19a],&sd->bl,ALL_SAMEMAP);
+
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int clif_send0199(int map,int type)
+{
+	struct block_list bl;
+	char buf[16];
+
+	bl.m = map;
+	WBUFW(buf,0)=0x199;
+	WBUFW(buf,2)=type;
+	clif_send(buf,packet_len_table[0x199],&bl,ALL_SAMEMAP);
 
 	return 0;
 }
@@ -4490,18 +4501,20 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	// pvp
 	if(sd->pvp_timer!=-1)
 		delete_timer(sd->pvp_timer,pc_calc_pvprank_timer);
-	if(map[sd->bl.m].flag&MF_PVP){
+	if(map[sd->bl.m].flag.pvp){
 		sd->pvp_timer=add_timer(
 			gettick(),pc_calc_pvprank_timer,sd->bl.id,0);
-		sd->pvp_flag=1;
 		sd->pvp_rank=0;
 		sd->pvp_lastusers=0;
 		sd->pvp_point=5;
-		clif_pvpon(sd->fd);
-	}else{
-		sd->pvp_flag=0;
+		clif_set0199(sd->fd,1);
+	}
+	else {
 		sd->pvp_timer=-1;
-	}	
+	}
+	if(map[sd->bl.m].flag.gvg) {
+		clif_set0199(sd->fd,3);
+	}
 	
 	// pet
 	if(sd->status.pet_id && sd->pet_npcdata && sd->pet.intimate > 0) {
@@ -4523,6 +4536,8 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 		skill_status_change_start(&sd->bl,SC_PROVOKE,10,1);
 	// option
 	clif_changeoption(&sd->bl);
+	if(sd->sc_data[SC_TRICKDEAD].timer != -1)
+		skill_status_change_end(&sd->bl,SC_TRICKDEAD,-1);
 
 	map_foreachinarea(clif_getareachar,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,0,sd);
 }
@@ -4561,7 +4576,9 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 		return;
 
 	// ステータス異常やハイディング中(トンネルドライブ無)で動けない
-	if(sd->opt1 > 0 || sd->sc_data[SC_ANKLE].timer!=-1 || (sd->status.option&2 && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0) )
+	if(sd->opt1 > 0 || sd->sc_data[SC_ANKLE].timer!=-1)
+		return;
+	if( (sd->status.option&2) && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0)
 		return;
 
 	pc_stopattack(sd);
@@ -4778,6 +4795,7 @@ void clif_parse_Restart(int fd,struct map_session_data *sd)
 	case 0x00:
 		if(pc_isdead(sd)){
 			pc_setstand(sd);
+			pc_setrestartvalue(sd,0);
 			pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,2);
 		}
 		break;

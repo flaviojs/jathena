@@ -208,9 +208,9 @@ int clif_displaymessage(int fd,char* mes);
 int clif_GMmessage(struct block_list *bl,char* mes,int len,int flag);
 int clif_heal(int fd,int type,int val);
 int clif_resurrection(struct block_list *bl,int type);
-int clif_pvpon(int fd);
-int clif_pvpoff(int fd);
-int clif_pvpset(int fd,struct map_session_data *sd, int pvprank, int pvpnum);
+int clif_set0199(int fd,int type);
+int clif_pvpset(struct map_session_data *sd, int pvprank, int pvpnum);
+int clif_send0199(int map,int type);
 int clif_refine(int fd,struct map_session_data *sd,int fail,int index,int val);
 
 //petsystem

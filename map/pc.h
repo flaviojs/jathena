@@ -21,6 +21,7 @@
 
 int pc_isGM(struct map_session_data *sd);
 
+int pc_setrestartvalue(struct map_session_data *sd,int type);
 int pc_makesavestatus(struct map_session_data *);
 int pc_setnewpc(struct map_session_data*,int,int,int,int,int,int);
 int pc_authok(int,struct mmo_charstatus *);

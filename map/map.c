@@ -45,6 +45,9 @@ static int first_free_object_id,last_object_id;
 static void *block_free[block_free_max];
 static int block_free_count=0,block_free_lock=0;
 
+#define blockmax 4096
+static struct block_list *list[blockmax];
+
 struct map_data map[MAX_MAP_PER_SERVER];
 int map_num=0;
 
@@ -245,8 +248,7 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 	int bx,by;
 	struct block_list *bl;
 	va_list ap;
-	const size_t blockmax=4096;
-	struct block_list *list[blockmax];
+
 	int blockcount=0,i;
 
 	va_start(ap,type);
@@ -305,8 +307,6 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 	struct block_list *bl;
 	va_list ap;
 
-	const size_t blockmax=4096;
-	struct block_list *list[blockmax];
 	int blockcount=0,i;
 
 	va_start(ap,type);
@@ -985,7 +985,7 @@ static int map_readmap(int m,char *fn)
 	}
 	map[m].npc_num=0;
 	map[m].users=0;
-	map[m].flag=0;
+	memset(&map[m].flag,0,sizeof(map[m].flag));
 	for(y=0;y<ys;y++){
 		p=(struct gat_1cell*)(gat+y*xs*20+14);
 		for(x=0;x<xs;x++){
