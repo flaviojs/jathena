@@ -163,6 +163,10 @@ int buildin_resetskill(struct script_state *st);
 int buildin_changebase(struct script_state *st);
 int buildin_changesex(struct script_state *st);
 int buildin_waitingroom(struct script_state *st);
+int buildin_delwaitingroom(struct script_state *st);
+int buildin_enablewaitingroomevent(struct script_state *st);
+int buildin_disablewaitingroomevent(struct script_state *st);
+int buildin_getwaitingroomstate(struct script_state *st);
 int buildin_warpwaitingpc(struct script_state *st);
 int buildin_setmapflagnosave(struct script_state *st);
 int buildin_setmapflag(struct script_state *st);
@@ -251,7 +255,7 @@ struct {
 	{buildin_setriding,"setriding",""},
 	{buildin_savepoint,"savepoint","sii"},
 	{buildin_openstorage,"openstorage",""},
-	{buildin_guildopenstorage,"guildopenstorage",""},
+	{buildin_guildopenstorage,"guildopenstorage","*"},
 	{buildin_itemskill,"itemskill","iis"},
 	{buildin_produce,"produce","i"},
 	{buildin_monster,"monster","siisii*"},
@@ -261,7 +265,7 @@ struct {
 	{buildin_doevent,"doevent","s"},
 	{buildin_addtimer,"addtimer","is"},
 	{buildin_deltimer,"deltimer","s"},
-	{buildin_addtimer,"addtimercount","si"},
+	{buildin_addtimercount,"addtimercount","si"},
 	{buildin_announce,"announce","si"},
 	{buildin_mapannounce,"mapannounce","ssi"},
 	{buildin_areaannounce,"areaannounce","siiiisi"},
@@ -280,7 +284,11 @@ struct {
 	{buildin_changebase,"changebase","i"},
 	{buildin_changesex,"changesex",""},
 	{buildin_waitingroom,"waitingroom","si*"},
-	{buildin_warpwaitingpc,"warpwaitingpc","sii"},
+	{buildin_delwaitingroom,"delwaitingroom","*"},
+	{buildin_enablewaitingroomevent,"enablewaitingroomevent","*"},
+	{buildin_disablewaitingroomevent,"disablewaitingroomevent","*"},
+	{buildin_getwaitingroomstate,"getwaitingroomstate","i*"},
+	{buildin_warpwaitingpc,"warpwaitingpc","sii*"},
 	{buildin_setmapflag,"setmapflagnosave","ssii"},
 	{buildin_setmapflag,"setmapflag","si"},
 	{buildin_removemapflag,"removemapflag","si"},
@@ -718,6 +726,7 @@ unsigned char* parse_subexpr(unsigned char *p,int limit)
 			return p;
 		}
 	}
+	tmpp=p;
 	if((op=C_NEG,*p=='-') || (op=C_LNOT,*p=='!') || (op=C_NOT,*p=='~')){
 		p=parse_subexpr(p+1,100);
 		add_scriptc(op);
@@ -744,10 +753,10 @@ unsigned char* parse_subexpr(unsigned char *p,int limit)
 		p+=len;
 		if(op==C_FUNC){
 			int i=0,func=parse_cmd;
-			const char *plist[32];
+			const char *plist[128];
 			
 			if( str_data[func].type!=C_FUNC ){
-				disp_error_message("expect function",p);
+				disp_error_message("expect function",tmpp);
 				exit(0);
 			}
 			
@@ -762,7 +771,7 @@ unsigned char* parse_subexpr(unsigned char *p,int limit)
 				}
 				p=skip_space(p);
 				i++;
-			} while(*p && *p!=')' && i<32);
+			} while(*p && *p!=')' && i<128);
 			plist[i]=p;
 			if(*(p++)!=')'){
 				disp_error_message("func request '(' ')'",p);
@@ -821,7 +830,8 @@ unsigned char* parse_expr(unsigned char *p)
 unsigned char* parse_line(unsigned char *p)
 {
 	int i=0,cmd;
-	const char *plist[32];
+	const char *plist[128];
+	char *p2;
 
 	p=skip_space(p);
 	if(*p==';')
@@ -830,17 +840,18 @@ unsigned char* parse_line(unsigned char *p)
 	parse_cmd_if=0;	// warn_cmd_no_commaのために必要
 
 	// 最初は関数名
+	p2=p;
 	p=parse_simpleexpr(p);
 	p=skip_space(p);
 
 	cmd=parse_cmd;
 	if( str_data[cmd].type!=C_FUNC ){
-		disp_error_message("expect command",p);
+		disp_error_message("expect command",p2);
 		exit(0);
 	}
 	
 	add_scriptc(C_ARG);
-	while(p && *p && *p!=';' && i<32){
+	while(p && *p && *p!=';' && i<128){
 		plist[i]=p;
 		
 		p=parse_expr(p);
@@ -3001,22 +3012,149 @@ int buildin_changesex(struct script_state *st)
 int buildin_waitingroom(struct script_state *st)
 {
 	char *name,*ev="";
-	int limit;
+	int limit,trigger=0;
 	name=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	limit= conv_num(st,& (st->stack->stack_data[st->start+3]));
-	if( st->end>st->start+4 )
-		ev=conv_str(st,& (st->stack->stack_data[st->start+4]));
-	chat_createcnpchat( (struct npc_data *)map_id2bl(st->oid),
-		limit,name,strlen(name)+1,ev);
+	
+	if( (st->end > st->start+5) ){
+		struct script_data* data=&(st->stack->stack_data[st->start+5]);
+		get_val(st,data);
+		if(data->type==C_INT){
+			// 新Athena仕様(旧Athena仕様と互換性あり)
+			ev=conv_str(st,& (st->stack->stack_data[st->start+4]));
+			trigger=conv_num(st,& (st->stack->stack_data[st->start+5]));		
+		}else{
+			// eathena仕様
+			trigger=conv_num(st,& (st->stack->stack_data[st->start+4]));		
+			ev=conv_str(st,& (st->stack->stack_data[st->start+5]));	
+		}
+	}else{
+		// 旧Athena仕様
+		if( st->end > st->start+4 )
+			ev=conv_str(st,& (st->stack->stack_data[st->start+4]));
+	}
+	chat_createnpcchat( (struct npc_data *)map_id2bl(st->oid),
+		limit,trigger,name,strlen(name)+1,ev);
 	return 0;
 }
 /*==========================================
- * チャットメンバー全員ワープ
+ * npcチャット削除
+ *------------------------------------------
+ */
+int buildin_delwaitingroom(struct script_state *st)
+{
+	struct npc_data *nd=(struct npc_data *)map_id2bl(st->oid);
+	chat_deletenpcchat(nd);
+	return 0;
+}
+/*==========================================
+ * npcチャット全員蹴り出す
+ *------------------------------------------
+ */
+int buildin_waitingroomkickall(struct script_state *st)
+{
+	struct npc_data *nd;
+	struct chat_data *cd;
+	
+	if( st->end > st->start+2 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+2])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
+	
+	if(nd==NULL || (cd=(struct chat_data *)map_id2bl(nd->chat_id))==NULL )
+		return 0;
+	chat_npckickall(cd);
+	return 0;
+}
+
+/*==========================================
+ * npcチャットイベント有効化
+ *------------------------------------------
+ */
+int buildin_enablewaitingroomevent(struct script_state *st)
+{
+	struct npc_data *nd;
+	struct chat_data *cd;
+	
+	if( st->end > st->start+2 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+2])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
+	
+	if(nd==NULL || (cd=(struct chat_data *)map_id2bl(nd->chat_id))==NULL )
+		return 0;
+	chat_enableevent(cd);
+	return 0;
+}
+
+/*==========================================
+ * npcチャットイベント無効化
+ *------------------------------------------
+ */
+int buildin_disablewaitingroomevent(struct script_state *st)
+{
+	struct npc_data *nd;
+	struct chat_data *cd;
+	
+	if( st->end > st->start+2 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+2])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
+	
+	if(nd==NULL || (cd=(struct chat_data *)map_id2bl(nd->chat_id))==NULL )
+		return 0;
+	chat_disableevent(cd);
+	return 0;
+}
+/*==========================================
+ * npcチャット状態所得
+ *------------------------------------------
+ */
+int buildin_getwaitingroomstate(struct script_state *st)
+{
+	struct npc_data *nd;
+	struct chat_data *cd;
+	int val=0,type;
+	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if( st->end > st->start+3 )
+		nd=npc_name2id(conv_str(st,& (st->stack->stack_data[st->start+3])));
+	else
+		nd=(struct npc_data *)map_id2bl(st->oid);
+
+	if(nd==NULL || (cd=(struct chat_data *)map_id2bl(nd->chat_id))==NULL ){
+		push_val(st->stack,C_INT,-1);
+		return 0;
+	}
+	
+	switch(type){
+	case 0: val=cd->users; break;
+	case 1: val=cd->limit; break;
+	case 2: val=cd->trigger&0x7f; break;
+	case 3: val=((cd->trigger&0x80)>0); break;
+	case 32: val=(cd->users >= cd->limit); break;
+	case 33: val=(cd->users >= cd->trigger); break;
+
+	case 4:
+		push_str(st->stack,C_CONSTSTR,cd->title);
+		return 0;
+	case 5:
+		push_str(st->stack,C_CONSTSTR,cd->pass);
+		return 0;
+	case 16:
+		push_str(st->stack,C_CONSTSTR,cd->npc_event);
+		return 0;
+	}
+	push_val(st->stack,C_INT,val);
+	return 0;
+}
+
+/*==========================================
+ * チャットメンバー(規定人数)ワープ
  *------------------------------------------
  */
 int buildin_warpwaitingpc(struct script_state *st)
 {
-	int x,y,i;
+	int x,y,i,n;
 	char *str;
 	struct npc_data *nd=(struct npc_data *)map_id2bl(st->oid);
 	struct chat_data *cd;
@@ -3024,11 +3162,15 @@ int buildin_warpwaitingpc(struct script_state *st)
 	if(nd==NULL || (cd=(struct chat_data *)map_id2bl(nd->chat_id))==NULL )
 		return 0;
 
+	n=cd->trigger&0x7f;
 	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	x=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	y=conv_num(st,& (st->stack->stack_data[st->start+4]));
 
-	for(i=0;i<cd->users;i++){
+	if( st->end > st->start+5 )
+		n=conv_num(st,& (st->stack->stack_data[st->start+5]));
+
+	for(i=0;i<n;i++){
 		struct map_session_data *sd=cd->usersd[i];
 	
 		if(strcmp(str,"Random")==0)
@@ -3429,7 +3571,8 @@ int buildin_requestguildinfo(struct script_state *st)
 	if( st->end>st->start+3 )
 		event=conv_str(st,& (st->stack->stack_data[st->start+3]));
 	
-	guild_npc_request_info(guild_id,event);	
+	if(guild_id>0)
+		guild_npc_request_info(guild_id,event);	
 	return 0;
 }
 

@@ -9,6 +9,11 @@ int chat_leavechat(struct map_session_data* );
 int chat_changechatowner(struct map_session_data *,char *);
 int chat_changechatstatus(struct map_session_data *,int,int,char*,char*,int);
 int chat_kickchat(struct map_session_data *,char *);
-int chat_createcnpchat(struct npc_data *nd,int limit,char* title,int titlelen,const char *ev);
+
+int chat_createnpcchat(struct npc_data *nd,int limit,int trigger,char* title,int titlelen,const char *ev);
+int chat_deletenpcchat(struct npc_data *nd);
+int chat_enableevent(struct chat_data *cd);
+int chat_disableevent(struct chat_data *cd);
+int chat_npckickall(struct chat_data *cd);
 
 #endif

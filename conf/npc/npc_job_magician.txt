@@ -415,7 +415,7 @@ Ltasc:
 							next;
 							mes "[アイテム合成機]";
 							mes "- 今日のことわざ -";
-							set @kotowaza,rand(3)
+							set @kotowaza,rand(3);
 							if (@kotowaza == 1) goto Lkotowaza2;
 							if (@kotowaza == 2) goto Lkotowaza3;
 								mes "｢横槍を入れる｣";

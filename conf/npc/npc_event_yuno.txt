@@ -98,7 +98,7 @@ LStart3:
 	mes "これで我が街も少しは平和に";
 	mes "なるでしょう……";
 	next;
-	additem 717,5;
+	getitem 717,5;
 	set npc_yuno,9;
 	mes "[ウェイコン]";
 	mes "それではあなたの未来に";

@@ -1,4 +1,65 @@
 --------------------
+//0909 by 胡蝶蘭
+
+・NPCチャット関係の命令追加
+	・waitingroom（NPCチャット作成）修正（イベントを起こす人数を指定可能）
+	・delwaitingroom（NPCチャット終了）追加
+	・enablewaitingroomevent（NPCチャットイベント有効化）追加
+	・disablewaitingroomevent（NPCチャットイベント無効化）追加
+	・getwaitingroomstate（NPCチャット状態所得）追加
+	・warpwaitingpc（NPCチャットメンバーワープ）修正
+	詳しくはscript_ref.txtを参照
+
+	(map/)
+	script.c/npc.c/npc.h/chat.c/chat.h/clif.c
+		多々修正
+	(doc/)
+	script_ref.txt
+		修正
+	(conf/sample/)
+	npc_test_chat.txt
+		追加命令のテストスクリプト
+
+・スクリプトの間違いを修正
+	(conf/npc/)
+	npc_event_skillget.txt
+	npc_event_yuno.txt
+	npc_town_lutie.txt
+	npc_turtle.txt
+		謎命令additemをgetitemに置換
+	npc_town_guide.txt
+		謎命令scriptlabelをコメント化
+	npc_event_momotaro.txt
+	npc_job_swordman.txt
+	npc_job_magician.txt
+		';'付け忘れ修正
+	(conf/gvg/)
+	ev_agit_aldeg.txt
+		@GID4を@GIDa4に置換
+	ev_agit_gefg.txt
+	ev_agit_payg.txt
+		Annouceに色指定と';'の付け忘れを習性
+	
+
+・AthenaDB計画のデータとりこみ、その他修正
+	安定しているデータかどうかわかりませんが。
+
+	(db/)
+	item_db.txt/mob_db.txt/mob_skill_db.txt
+		AthenaDB計画のデータとりこみ
+	mob_skill_db.txt.orig
+		以前のデータ（コメント部分などの参考に）
+	(conf/)
+	water_height.txt/mapflag.txt
+		AthenaDB計画のデータとりこみ
+	map_athena.conf
+		npc_monster3*.txtを削除
+		追加マップデータ (by ID:UVsq5AE)
+	(conf/mob/)
+	npc_monster.txt
+		AthenaDB計画のデータとりこみ
+
+--------------------
 //0908 by 胡蝶蘭
 
 ・スクリプトのエラーチェック処理を増やした

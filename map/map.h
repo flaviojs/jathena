@@ -464,6 +464,7 @@ struct chat_data {
 	unsigned char pass[8];   /* password */
 	unsigned char title[61]; /* room title MAX 60 */
 	unsigned char limit;     /* join limit */
+	unsigned char trigger;
 	unsigned char users;     /* current users */
 	unsigned char pub;       /* room attribute */
 	struct map_session_data *usersd[20];

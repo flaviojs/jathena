@@ -2442,7 +2442,7 @@ int clif_clearchat(struct chat_data *cd,int fd)
 		memcpy(WFIFOP(fd,0),buf,packet_len_table[0xd8]);
 		WFIFOSET(fd,packet_len_table[0xd8]);
 	} else {
-		clif_send(buf,packet_len_table[0xd8],&cd->usersd[0]->bl,AREA_WOSC);
+		clif_send(buf,packet_len_table[0xd8],*cd->owner,AREA_WOSC);
 	}		
 	return 0;
 }

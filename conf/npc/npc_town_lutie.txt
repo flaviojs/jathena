@@ -522,7 +522,7 @@ LStart2:
 		next;
 		mes "[タシンチェ]";
 		mes "さあ、出来た！";
-		additem 536,1;
+		getitem 536,1;
 		set pump_event,0;
 		next;
 		mes "[タシンチェ]";

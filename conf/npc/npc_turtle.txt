@@ -885,7 +885,7 @@ LStart2:
 	mes "- ^3355ff岩の上部が -";
 	mes "- 開いて何かが出てきた -^000000";
 	next;
-	additem 513,5;
+	getitem 513,5;
 	set kame_quest,6;
 	mes "- ^3355ffあなたはバナナ -";
 	mes "- 五つを手に入れた -^000000";
@@ -1054,7 +1054,7 @@ LStart2:
 	mes "- 色々なアイテムがある -";
 	mes "- あなたは｢レッドジェムストーン｣ -";
 	mes "- を手に入れた -";
-	additem 716,1;
+	getitem 716,1;
 	set kame_quest,6;
 	close;
 }

@@ -64,7 +64,14 @@ int npc_enable(const char *name,int flag)
 	}
 	return 0;
 }
-
+/*==========================================
+ * NPCを名前で探す
+ *------------------------------------------
+ */
+struct npc_data* npc_name2id(const char *name)
+{
+	return strdb_search(npcname_db,name);
+}
 /*==========================================
  * イベントキューのイベント処理
  *------------------------------------------

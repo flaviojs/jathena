@@ -1,11 +1,12 @@
 //MapFlag By Jioh L. Jung
-//mapflag.txtÅóAthenaDBåvâÊ 2004/03/08 01:28:50 +0900 (JST)
+//mapflag.txtÅóAthenaDBåvâÊ 2004/03/31 18:51:54 +0900 (JST)
 xmas_in.gat	mapflag	nomemo	dummy
 xmas_in.gat	mapflag	noteleport	dummy
 xmas_in.gat	mapflag	nobranch	dummy
 xmas_dun02.gat	mapflag	nomemo	dummy
 xmas_dun01.gat	mapflag	nomemo	dummy
 xmas.gat	mapflag	nopenalty	dummy
+xmas.gat	mapflag	nozenypenalty	dummy
 mjolnir_01.gat	mapflag	nomemo	dummy
 mjolnir_02.gat	mapflag	nomemo	dummy
 mjolnir_03.gat	mapflag	nomemo	dummy
@@ -104,11 +105,13 @@ sword_3-1.gat	mapflag	noteleport	dummy
 sword_3-1.gat	mapflag	nobranch	dummy
 job_thief1.gat	mapflag	nomemo	dummy
 alberta.gat	mapflag	nopenalty	dummy
+alberta.gat	mapflag	nozenypenalty	dummy
 alberta_in.gat	mapflag	nomemo	dummy
 alberta_in.gat	mapflag	noteleport	dummy
 alberta_in.gat	mapflag	nobranch	dummy
 alb2trea.gat	mapflag	nomemo	dummy
 aldebaran.gat	mapflag	nopenalty	dummy
+aldebaran.gat	mapflag	nozenypenalty	dummy
 aldeba_in.gat	mapflag	nomemo	dummy
 aldeba_in.gat	mapflag	noteleport	dummy
 aldeba_in.gat	mapflag	nobranch	dummy
@@ -116,6 +119,7 @@ gef_tower.gat	mapflag	nomemo	dummy
 gef_tower.gat	mapflag	noteleport	dummy
 gef_tower.gat	mapflag	nobranch	dummy
 geffen.gat	mapflag	nopenalty	dummy
+geffen.gat	mapflag	nozenypenalty	dummy
 geffen_in.gat	mapflag	nomemo	dummy
 geffen_in.gat	mapflag	noteleport	dummy
 geffen_in.gat	mapflag	nobranch	dummy
@@ -123,12 +127,14 @@ moc_castle.gat	mapflag	nomemo	dummy
 moc_castle.gat	mapflag	noteleport	dummy
 moc_castle.gat	mapflag	nobranch	dummy
 morocc.gat	mapflag	nopenalty	dummy
+morocc.gat	mapflag	nozenypenalty	dummy
 morocc_in.gat	mapflag	nomemo	dummy
 morocc_in.gat	mapflag	noteleport	dummy
 morocc_in.gat	mapflag	nobranch	dummy
 pay_arche.gat	mapflag	noteleport	dummy
 pay_arche.gat	mapflag	nobranch	dummy
 payon.gat	mapflag	nopenalty	dummy
+payon.gat	mapflag	nozenypenalty	dummy
 payon_in01.gat	mapflag	nomemo	dummy
 payon_in01.gat	mapflag	noteleport	dummy
 payon_in01.gat	mapflag	nobranch	dummy
@@ -136,6 +142,7 @@ payon_in02.gat	mapflag	nomemo	dummy
 payon_in02.gat	mapflag	noteleport	dummy
 payon_in02.gat	mapflag	nobranch	dummy
 prontera.gat	mapflag	nopenalty	dummy
+prontera.gat	mapflag	nozenypenalty	dummy
 prt_in.gat	mapflag	nomemo	dummy
 prt_in.gat	mapflag	noteleport	dummy
 prt_in.gat	mapflag	nobranch	dummy
@@ -146,6 +153,7 @@ prt_church.gat	mapflag	nomemo	dummy
 prt_church.gat	mapflag	noteleport	dummy
 prt_church.gat	mapflag	nobranch	dummy
 izlude.gat	mapflag	nopenalty	dummy
+izlude.gat	mapflag	nozenypenalty	dummy
 izlude_in.gat	mapflag	nomemo	dummy
 izlude_in.gat	mapflag	noteleport	dummy
 izlude_in.gat	mapflag	nobranch	dummy
@@ -588,6 +596,7 @@ pvp_y_8-5.gat	mapflag	nosave	SavePoint
 pvp_y_8-5.gat	mapflag	pvp	dummy
 pvp_y_8-5.gat	mapflag	pvp_noparty	dummy
 comodo.gat	mapflag	nopenalty	dummy
+comodo.gat	mapflag	nozenypenalty	dummy
 cmd_in01.gat	mapflag	nomemo	dummy
 cmd_in01.gat	mapflag	noteleport	dummy
 cmd_in01.gat	mapflag	nobranch	dummy
@@ -606,10 +615,23 @@ beach_dun3.gat	mapflag	nomemo	dummy
 beach_dun.gat	mapflag	nomemo	dummy
 gef_fild12.gat	mapflag	nomemo	dummy
 gef_fild14.gat	mapflag	nomemo	dummy
+job_wiz.gat	mapflag	nomemo	dummy
+job_wiz.gat	mapflag	noteleport	dummy
+job_wiz.gat	mapflag	nosave	SavePoint
+job_wiz.gat	mapflag	nobranch	dummy
+job_wiz.gat	mapflag	nopenalty	dummy
 gld_dun01.gat	mapflag	nomemo	dummy
+gld_dun01.gat	mapflag	nosave	SavePoint
+gld_dun01.gat	mapflag	gvg_noparty	dummy
 gld_dun02.gat	mapflag	nomemo	dummy
+gld_dun02.gat	mapflag	nosave	SavePoint
+gld_dun02.gat	mapflag	gvg_noparty	dummy
 gld_dun03.gat	mapflag	nomemo	dummy
+gld_dun03.gat	mapflag	nosave	SavePoint
+gld_dun03.gat	mapflag	gvg_noparty	dummy
 gld_dun04.gat	mapflag	nomemo	dummy
+gld_dun04.gat	mapflag	nosave	SavePoint
+gld_dun04.gat	mapflag	gvg_noparty	dummy
 payg_cas01.gat	mapflag	nomemo	dummy
 payg_cas01.gat	mapflag	noteleport	dummy
 payg_cas01.gat	mapflag	nobranch	dummy
@@ -704,6 +726,11 @@ yuno_in05.gat	mapflag	nobranch	dummy
 yuno_in04.gat	mapflag	nomemo	dummy
 yuno_in04.gat	mapflag	noteleport	dummy
 yuno_in04.gat	mapflag	nobranch	dummy
+job_sage.gat	mapflag	nomemo	dummy
+job_sage.gat	mapflag	noteleport	dummy
+job_sage.gat	mapflag	nosave	SavePoint
+job_sage.gat	mapflag	nobranch	dummy
+job_sage.gat	mapflag	nopenalty	dummy
 mag_dun02.gat	mapflag	nomemo	dummy
 mag_dun01.gat	mapflag	nomemo	dummy
 yuno_fild02.gat	mapflag	nomemo	dummy
@@ -714,6 +741,7 @@ yuno_in01.gat	mapflag	nomemo	dummy
 yuno_in01.gat	mapflag	noteleport	dummy
 yuno_in01.gat	mapflag	nobranch	dummy
 yuno.gat	mapflag	nopenalty	dummy
+yuno.gat	mapflag	nozenypenalty	dummy
 ama_dun03.gat	mapflag	nomemo	dummy
 ama_dun02.gat	mapflag	nomemo	dummy
 ama_dun01.gat	mapflag	nomemo	dummy
@@ -725,11 +753,13 @@ ama_in01.gat	mapflag	nomemo	dummy
 ama_in01.gat	mapflag	noteleport	dummy
 ama_in01.gat	mapflag	nobranch	dummy
 amatsu.gat	mapflag	nopenalty	dummy
+amatsu.gat	mapflag	nozenypenalty	dummy
 gon_test.gat	mapflag	nomemo	dummy
 gon_test.gat	mapflag	noteleport	dummy
 gon_test.gat	mapflag	nosave	SavePoint
 gon_test.gat	mapflag	nobranch	dummy
 gon_test.gat	mapflag	nopenalty	dummy
+gon_test.gat	mapflag	nozenypenalty	dummy
 gon_dun01.gat	mapflag	nomemo	dummy
 gon_dun02.gat	mapflag	nomemo	dummy
 gon_dun03.gat	mapflag	nomemo	dummy
@@ -737,3 +767,14 @@ gon_in.gat	mapflag	nomemo	dummy
 gon_in.gat	mapflag	noteleport	dummy
 gon_in.gat	mapflag	nobranch	dummy
 gonryun.gat	mapflag	nopenalty	dummy
+gonryun.gat	mapflag	nozenypenalty	dummy
+umbala.gat	mapflag	nopenalty	dummy
+umbala.gat	mapflag	nozenypenalty	dummy
+um_in.gat	mapflag	nomemo	dummy
+um_in.gat	mapflag	noteleport	dummy
+um_in.gat	mapflag	nobranch	dummy
+nif_in.gat	mapflag	nomemo	dummy
+nif_in.gat	mapflag	noteleport	dummy
+nif_in.gat	mapflag	nobranch	dummy
+louyang.gat	mapflag	nopenalty	dummy
+louyang.gat	mapflag	nozenypenalty	dummy

@@ -645,22 +645,52 @@ AthenaNPCScript
 			<skilllv>を0にするとこでそのスキルを忘れさせることも可能です。
 			
 		waitingroom命令
-			waitingroom <title>,<limit>[,<event>];
+			waitingroom <title>,<limit>[,<event>[,<trigger>]];
 			
 			title		文字列
 			limit		数値
 			event		文字列、省略可
+			trigger		数値、省略可
 			
 			<title>をタイトルとしてチャットルームを表示させます。
-			<limit>を満たしたとき、<event>を動作させることが可能です。
+			<trigger>を満たしたとき、<event>を動作させることが可能です。
+			<trigger>を省略すると<limit>の数値が使用されます。
+		
+		delwaitingroom命令
+			delewaitingroom [<name>]
+			
+			name	文字列、省略可
+			
+			指定したNPCのチャットルームを閉じます。
+			<name>を省略すると、命令を実行したNPCが対象になります。
+		
+		disablewaitingroomevent命令
+			disablewaitingroomevent [<name>]
+			
+			name	文字列、省略可
+			
+			<name>で指定したNPCのチャットルームのイベントを無効にします。
+			<name>を省略すると、命令を実行したNPCが対象になります。
+		
+		enablewaitingroomevent命令
+			enablewaitingroomevent [<name>]
+			
+			name	文字列、省略可
+			
+			<name>で指定したNPCのチャットルームのイベントを有効にします。
+			<name>を省略すると、命令を実行したNPCが対象になります。
+			また、既にイベントが起こる人数に達している場合、
+			即座にイベントを実行します。
 			
 		warpwaitingnpc命令
-			warpwaitingnpc <gatname>,<x>,<y>;
+			warpwaitingnpc <gatname>,<x>,<y>[,<num>];
 			
 			gatname		文字列
-			x,y		数値
+			x,y,num		数値
 			
-			waitingroom文によって作成されたチャットルームに入っているPCを<gatname>の座標<x>,<y>に移動させます。
+			命令を実行したNPCのチャットルームに入っているPCのうち、
+			<num>で指定した人数を、<gatname>の座標<x>,<y>に移動させます。
+			<num>を省略すると waitingroomの<trigger>で指定した人数を使用します。
 			
 		emotion命令
 			emotion <n>;
@@ -878,6 +908,25 @@ AthenaNPCScript
 			1なら他のギルドメンバーが倉庫を使用中の意味です。
 			0なら成功的にギルド倉庫が開いたとのことです。
 
+		getwaitingroomstate関数
+			getwaitingroomstate <num>,[<name>]
+			
+			num	数値
+			name	文字列、省略可
+			
+			<name>で指定したNPCのチャットルームの状態を返します。
+			<name>を省略すると、命令を実行したNPCが対象になります。
+			<num>で得たい情報を指定します。
+			
+			num=0	現在チャットルームに入っている人数（数値）
+			num=1	チャットルームの限界人数（数値）
+			num=2	チャットルームのイベントを起こす人数（数値）
+			num=3	チャットルームのイベントが有効かどうか（数値）
+			num=4	チャットルームのタイトル（文字列）
+			num=5	チャットルームのパスワード（文字列）
+			num=16	チャットルームのイベント名（文字列）
+			num=32	チャットルームが満員かどうか（数値）
+			num=33	チャットルームでイベントが起こる人数かどうか（数値）
 			
 	＊定数ラベル
 		-ラベル
@@ -885,7 +934,13 @@ AthenaNPCScript
 			
 		OnInitラベル
 			MAPがロードされたときスクリプトを開始します。
-			
+		
+		OnInterIfInitラベル
+			MAPサーバーがInterサーバーに接続したときに実行します。
+		
+		OnCharIfInitラベル
+			MAPサーバーがCharサーバーに接続したときに実行します。
+		
 	＊注意事項
 		文字列と説明されている引数は""で囲ってください。
 		

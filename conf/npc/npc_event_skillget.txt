@@ -2477,7 +2477,7 @@ L1:
 	delitem 952,1;
 	delitem 1055,1;
 	delitem 1025,1;
-	additem 7042,1;
+	getitem 7042,1;
 	set skill_thief_1,2;
 	close;
 LE:

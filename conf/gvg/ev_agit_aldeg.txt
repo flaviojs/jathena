@@ -102,9 +102,9 @@ OnAgitStart:
 	End;
 OnAgitBreak:
 	set @GIDa4,getcharid(2);
-	if (@GID4 <= 0) end;
+	if (@GIDa4 <= 0) end;
 	SetCastleData "aldeg_cas04.gat",1,@GIDa4;
-	Announce "Ô [" + GetCastleName("aldeg_cas04.gat") + "]‚ð [" + GetGuildName(@GID4) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
+	Announce "Ô [" + GetCastleName("aldeg_cas04.gat") + "]‚ð [" + GetGuildName(@GIDa4) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
 	MapAnnounce "aldeg_cas04.gat","ƒGƒ“ƒyƒŠƒEƒ€‚ª”j‰ó‚³‚ê‚Ü‚µ‚½",17;
 	End;
 OnAgitEliminate:

@@ -398,7 +398,7 @@ Lrand4:
 Lfin:
 	areaannounce "ama_test.gat",30,78,68,120,"DOKEBI: ゴオオオオ……",8;
 	enablenpc "管理人";
-	doevent "管理人::Onstart"
+	doevent "管理人::Onstart";
 	end;
 }
 //=======================================MobCount2==============================-

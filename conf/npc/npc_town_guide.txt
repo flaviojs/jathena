@@ -1082,7 +1082,7 @@ L_START_1:
 //[案内要員 - ゲフェン]
 
 geffen.gat,203,116,0	script	案内要員	705,{
-	scriptlabel GuideGeffen;
+//	scriptlabel GuideGeffen;
 		cutin "gef_soldier",2;
 		mes "[ゲフェン案内要員]";
 		mes "魔法の都市ゲフェンによくぞ参られた。";
@@ -1312,7 +1312,7 @@ L_START_1:
 //[案内要員 - フェイヨン]
 
 payon.gat,82,116,4	script	案内要員	708,{
-	scriptlabel GuidePayon1;
+//	scriptlabel GuidePayon1;
 	cutin "pay_soldier",2;
 	mes "[フェイヨン案内要員]";
 	mes "山岳都市フェイヨンにようこそ。";
@@ -1713,7 +1713,7 @@ L_START_1:
 //[案内要員 - モロク]
 
 morocc.gat,153,286,6	script	案内要員	707,{
-	scriptlabel GuideMorocc;
+//	scriptlabel GuideMorocc;
 		cutin "moc_soldier",2;
 		mes "[モロク案内要員]";
 		mes "……ようこそ、辺境の地モロクへ。";

@@ -14,6 +14,9 @@
 #include "memwatch.h"
 #endif
 
+int chat_triggerevent(struct chat_data *cd);
+
+
 /*==========================================
  * チャットルーム作成
  *------------------------------------------
@@ -84,19 +87,13 @@ int chat_joinchat(struct map_session_data *sd,int chatid,char* pass)
 
 	pc_setchatid(sd,cd->bl.id);
 
-	// 新たに参加した人には全員のリスト
-	clif_joinchatok(sd,cd);
+	
+	clif_joinchatok(sd,cd);	// 新たに参加した人には全員のリスト
+	clif_addchat(cd,sd);	// 既に中に居た人には追加した人の報告
+	clif_dispchat(cd,0);	// 周囲の人には人数変化報告
 
-	// 既に中に居た人には追加した人の報告
-	clif_addchat(cd,sd);
-
-	// 周囲の人には人数変化報告
-	clif_dispchat(cd,0);
-
-	// 満員でイベントが定義されてるなら実行
-	if(cd->users>=cd->limit && cd->npc_event[0])
-		npc_event(sd,cd->npc_event);
-		
+	chat_triggerevent(cd); // イベント
+	
 	return 0;
 }
 
@@ -250,7 +247,7 @@ int chat_kickchat(struct map_session_data *sd,char *kickusername)
  * npcチャットルーム作成
  *------------------------------------------
  */
-int chat_createcnpchat(struct npc_data *nd,int limit,char* title,int titlelen,const char *ev)
+int chat_createnpcchat(struct npc_data *nd,int limit,int trigger,char* title,int titlelen,const char *ev)
 {
 	struct chat_data *cd;
 
@@ -261,7 +258,9 @@ int chat_createcnpchat(struct npc_data *nd,int limit,char* title,int titlelen,co
 	}
 	memset(cd,0,sizeof(*cd));
 
-	cd->limit = limit;
+	cd->limit = cd->trigger = limit;
+	if(trigger>0)
+		cd->trigger = trigger;
 	cd->pub = 1;
 	cd->users = 0;
 	memcpy(cd->pass,"",8);
@@ -288,4 +287,60 @@ int chat_createcnpchat(struct npc_data *nd,int limit,char* title,int titlelen,co
 
 	return 0;
 }
+/*==========================================
+ * npcチャットルーム削除
+ *------------------------------------------
+ */
+int chat_deletenpcchat(struct npc_data *nd)
+{
+	struct chat_data *cd=(struct chat_data*)map_id2bl(nd->chat_id);
+	
+	chat_npckickall(cd);
+	clif_clearchat(cd,0);
+	map_delobject(cd->bl.id);	// freeまでしてくれる
+	nd->chat_id=0;
+	
+	return 0;
+}
 
+/*==========================================
+ * 規定人数以上でイベントが定義されてるなら実行
+ *------------------------------------------
+ */
+int chat_triggerevent(struct chat_data *cd)
+{
+	if(cd->users>=cd->trigger && cd->npc_event[0])
+		npc_event_do(cd->npc_event);
+	return 0;
+}
+
+/*==========================================
+ * イベントの有効化
+ *------------------------------------------
+ */
+int chat_enableevent(struct chat_data *cd)
+{
+	cd->trigger&=0x7f;
+	chat_triggerevent(cd);
+	return 0;
+}
+/*==========================================
+ * イベントの無効化
+ *------------------------------------------
+ */
+int chat_disableevent(struct chat_data *cd)
+{
+	cd->trigger|=0x80;
+	return 0;
+}
+/*==========================================
+ * チャットルームから全員蹴り出す
+ *------------------------------------------
+ */
+int chat_npckickall(struct chat_data *cd)
+{
+	while(cd->users>0){
+		chat_leavechat(cd->usersd[cd->users-1]);
+	}
+	return 0;
+}
