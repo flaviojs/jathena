@@ -1,4 +1,9 @@
 --------------
+//0507 by Diex
+0505の修正
+・三段掌のエフェクト実装
+
+--------------
 //0506 by hoenny
 全体的に少し式修正
 セイジのスキルがアイテムを消耗するように修正
@@ -13,6 +18,13 @@
 ・発勁実装
 ・金剛が減算DEFと減算MDEFが90に固定されていたのを乗算DEFと乗算MDEFが90になるように修正
 ・三段掌実装（ただしコンボは未実装）
+	map/clif.c
+	map/clif.h
+		clif_skill_damage3()追加
+	map/pc.c
+	map/skill.c
+	map/battle.c
+		修正・及び追加
 （計算式は+ Acolyte Maniax +を参考にしました。）
 
 --------------
@@ -65,7 +77,8 @@ atcommnad_gm_onlyがnoじゃなくても使用レベル設定を0にしたコマンドはGMじゃないキャ
 		pc_natural_heal_hp()修正
 		pc_natural_heal_sp()修正
 
--------------
+500SP回復力向上
+--------------
 //0500 by hoenny
 
 ・修道僧の息吹実装

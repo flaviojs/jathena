@@ -512,10 +512,10 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	if( dmg.blewcount ){	/* 吹き飛ばし処理とそのパケット */
 		skill_blown(dsrc,bl,dmg.blewcount);
 		clif_skill_damage2(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
-			dmg.damage,dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
-	}else				/* スキルのダメージパケット */
+			dmg.damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
+	} else			/* スキルのダメージパケット */
 		clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
-			dmg.damage,dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
+			dmg.damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
 
 	/* 実際にダメージ処理を行う */
 	battle_damage(src,bl,(dmg.damage+dmg.damage2));

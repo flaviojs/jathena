@@ -88,7 +88,7 @@ static const int packet_len_table[0x200]={
    11,  7, -1, 67, 12, 18,114,  6,   3,  6, 26, 26, 26, 26,  2,  3,
 
     2, 14, 10, -1, 22, 22,  0,  0,  13,  0,  0,  0,  0,  0,  0,  0,
-    8,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
+    8,  0, 10,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0, 33,  0,
     0,  8,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
 
@@ -2597,6 +2597,36 @@ int clif_skill_damage2(struct block_list *src,struct block_list *dst,
 	return 0;
 }
 /*==========================================
+ * スキル攻撃エフェクト＆ダメージ(三段掌etc.?)
+ *------------------------------------------
+ */
+int clif_skill_damage3(struct block_list *src,struct block_list *dst,
+	unsigned int tick,int sdelay,int ddelay,int damage,int div,int skill_id,int skill_lv,int type)
+{
+	unsigned char buf[64];
+	struct map_session_data *sd;
+
+	if(dst->type==BL_PC) {
+		sd=(struct map_session_data *)dst;
+		if(sd->sc_data[SC_ENDURE].timer >= 0)
+			type = 9;
+	}
+
+	WBUFW(buf,0)=0x1de;
+	WBUFW(buf,2)=skill_id;
+	WBUFL(buf,4)=src->id;
+	WBUFL(buf,8)=dst->id;
+	WBUFL(buf,12)=tick;
+	WBUFL(buf,16)=sdelay;
+	WBUFL(buf,20)=ddelay;
+	WBUFW(buf,24)=damage;
+	WBUFW(buf,28)=skill_lv;
+	WBUFW(buf,30)=div;
+	WBUFB(buf,32)=(type>0)?type:skill_get_hit(skill_id);
+	clif_send(buf,packet_len_table[0x1de],src,AREA);
+	return 0;
+}
+/*==========================================
  * 支援/回復スキルエフェクト
  *------------------------------------------
  */
@@ -3723,7 +3753,6 @@ int clif_spiritball_ext(struct map_session_data *sd,int num)
 	clif_send(buf,packet_len_table[0x1e1],&sd->bl,AREA);
 	return 0;
 }
-
 
 /*==========================================
  * MVPエフェクト

@@ -1278,14 +1278,17 @@ struct Damage battle_calc_weapon_attack(
 		}
 		// 右手,短剣のみ
 		if(da == 1) { //ダブルアタックが発動しているか
- 				div_ = 2;
-				damage <<= 1;
-				type = 0x08;
+ 			div_ = 2;
+			damage <<= 1;
+			type = 0x08;
 		}
 		if(da == 2) { //三段掌が発動しているか
- 				div_ = 3;
-				damage = damage * (100 + 20 * pc_checkskill(sd, MO_TRIPLEATTACK)) / 100;
-				type = 0x08;
+			type = 0x08;
+			div_ = 3;
+			damage = damage * (100 + 20 * pc_checkskill(sd, MO_TRIPLEATTACK)) / 100;
+			clif_skill_damage3(src,target,gettick(), battle_get_amotion(src), battle_get_dmotion(target),
+				damage, div_ , MO_TRIPLEATTACK, 
+				pc_checkskill(sd,MO_TRIPLEATTACK), type );
 		}
 		item_id = pc_checkequip(sd,34);		// 両 手用か？
 		if(item_id != -1) {
@@ -1636,6 +1639,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		// 攻撃対象となりうるので攻撃
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(src,target,0,0,0);
+		if (wd.div_ != 3)
 		clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
 			wd.damage, wd.div_, wd.type, wd.damage2);
 		//二刀流左手とカタール追撃のミス表示(無理やり～)
