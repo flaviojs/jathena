@@ -120,7 +120,6 @@ int buildin_setfalcon(struct script_state *st);
 int buildin_setriding(struct script_state *st);
 int buildin_savepoint(struct script_state *st);
 int buildin_openstorage(struct script_state *st);
-int buildin_openbank(struct script_state *st);
 int buildin_itemskill(struct script_state *st);
 int buildin_produce(struct script_state *st);
 int buildin_monster(struct script_state *st);
@@ -229,7 +228,6 @@ struct {
 	{buildin_setriding,"setriding",""},
 	{buildin_savepoint,"savepoint","sii"},
 	{buildin_openstorage,"openstorage",""},
-	{buildin_openbank,"openbank","i"},
 	{buildin_itemskill,"itemskill","iis"},
 	{buildin_produce,"produce","i"},
 	{buildin_monster,"monster","siisii*"},
@@ -2034,6 +2032,7 @@ int buildin_failedrefitem(struct script_state *st)
 	sd=map_id2sd(st->rid);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0) {
+		sd->status.inventory[i].refine = 0;
 		pc_unequipitem(sd,i,0);
 		// 精錬失敗エフェクトのパケット
 		clif_refine(sd->fd,sd,1,i,sd->status.inventory[i].refine);
@@ -2289,24 +2288,7 @@ int buildin_openstorage(struct script_state *st)
 	storage_storageopen(map_id2sd(st->rid));
 	return 0;
 }
-/*==========================================
- * カプラ銀行サービス
- *------------------------------------------
- */
-int buildin_openbank(struct script_state *st)
-{
-	int amount=0;
-	amount=conv_num(st,& (st->stack->stack_data[st->start+2]));
 
-	if(amount==0){
-		amount = storage_readbank(map_id2sd(st->rid));
-		push_val(st->stack,C_INT,amount);
-		return 0;
-	}
-	storage_bank(map_id2sd(st->rid),amount);
-
-	return 0;
-}
 /*==========================================
  * アイテムによるスキル発動
  *------------------------------------------

@@ -189,7 +189,7 @@ int itemdb_isequip2(struct item_data *data)
 int itemdb_isequip3(int nameid)
 {
 	int type=itemdb_type(nameid);
-	if(type==4 || type==5)
+	if(type==4 || type==5 || type == 8)
 		return 1;
 	return 0;
 }

@@ -721,7 +721,12 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 				sp = sp/((skilllv|1)*(skilllv|1));
 			if(sp > 0x7fff) sp = 0x7fff;
 			else if(sp < 1) sp = 1;
-			((struct map_session_data *)bl)->status.sp += sp;
+			if(((struct map_session_data *)bl)->status.sp + sp > ((struct map_session_data *)bl)->status.max_sp) {
+				sp = ((struct map_session_data *)bl)->status.max_sp - ((struct map_session_data *)bl)->status.sp;
+				((struct map_session_data *)bl)->status.sp = ((struct map_session_data *)bl)->status.max_sp;
+			}
+			else
+				((struct map_session_data *)bl)->status.sp += sp;
 			clif_heal(((struct map_session_data *)bl)->fd,SP_SP,sp);
 			((struct map_session_data *)bl)->canact_tick = tick + skill_delayfix(bl, skill_get_delay(SA_MAGICROD,sc_data[SC_MAGICROD].val1));
 		}
@@ -1748,7 +1753,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			heal_get_jobexp = battle_heal(NULL,bl,heal,0,0);
 			
 			// JOBŒoŒ±’lŠl“¾
-			if(src->type == BL_PC && bl->type==BL_PC && heal > 0 && src != bl){
+			if(src->type == BL_PC && bl->type==BL_PC && heal > 0 && src != bl && battle_config.heal_exp > 0){
 				heal_get_jobexp = heal_get_jobexp * battle_config.heal_exp / 100;
 				if(heal_get_jobexp <= 0)
 					heal_get_jobexp = 1;
@@ -1784,6 +1789,20 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 					pc_setinvincibletimer(tsd,battle_config.pc_invincible_time);
 				clif_updatestatus(tsd,SP_HP);
 				clif_resurrection(&tsd->bl,1);
+				if(src != bl && sd && battle_config.resurrection_exp > 0) {
+					int exp = 0,jexp = 0;
+					int lv = tsd->status.base_level - sd->status.base_level, jlv = tsd->status.job_level - sd->status.job_level;
+					if(lv > 0) {
+						exp = (int)((double)tsd->status.base_exp * (double)lv * (double)battle_config.resurrection_exp / 1000000.);
+						if(exp < 1) exp = 1;
+					}
+					if(jlv > 0) {
+						jexp = (int)((double)tsd->status.job_exp * (double)lv * (double)battle_config.resurrection_exp / 1000000.);
+						if(jexp < 1) jexp = 1;
+					}
+					if(exp > 0 || jexp > 0)
+						pc_gainexp(sd,exp,jexp);
+				}
 			}
 		}
 		break;
@@ -2429,14 +2448,19 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				sd->state.potionpitcher_flag = 0;
 				if(sd->potion_per_hp > 0 || sd->potion_per_sp > 0) {
 					hp = battle_get_max_hp(bl) * sd->potion_per_hp / 100;
-					if(dstsd)
+					hp = hp * (100 + pc_checkskill(sd,AM_POTIONPITCHER)*10 + pc_checkskill(sd,AM_LEARNINGPOTION)*5)/100;
+					if(dstsd) {
 						sp = dstsd->status.max_sp * sd->potion_per_sp / 100;
+						sp = sp * (100 + pc_checkskill(sd,AM_POTIONPITCHER) + pc_checkskill(sd,AM_LEARNINGPOTION)*5)/100;
+					}
 				}
 				else {
-					hp = sd->potion_hp * (100 + pc_checkskill(sd,AM_POTIONPITCHER)*10 + pc_checkskill(sd,AM_LEARNINGPOTION)*5)/100;
-					hp = hp * (100 + (battle_get_vit(bl)<<1)) / 100;
-					if(dstsd)
-						hp = hp * (100 + pc_checkskill(dstsd,SM_RECOVERY)*10) / 100;
+					if(sd->potion_hp > 0) {
+						hp = sd->potion_hp * (100 + pc_checkskill(sd,AM_POTIONPITCHER)*10 + pc_checkskill(sd,AM_LEARNINGPOTION)*5)/100;
+						hp = hp * (100 + (battle_get_vit(bl)<<1)) / 100;
+						if(dstsd)
+							hp = hp * (100 + pc_checkskill(dstsd,SM_RECOVERY)*10) / 100;
+					}
 					if(sd->potion_sp > 0) {
 						sp = sd->potion_sp * (100 + pc_checkskill(sd,AM_POTIONPITCHER) + pc_checkskill(sd,AM_LEARNINGPOTION)*5)/100;
 						sp = sp * (100 + (battle_get_int(bl)<<1)) / 100;
@@ -2516,8 +2540,13 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 					sp = skill_get_sp(skillid,skilllv);
 					sp = sp * sc_data[SC_MAGICROD].val2 / 100;
 					if(sp > 0x7fff) sp = 0x7fff;
-					if(sp < 1) sp = 1;
-					dstsd->status.sp += sp;
+					else if(sp < 1) sp = 1;
+					if(dstsd->status.sp + sp > dstsd->status.max_sp) {
+						sp = dstsd->status.max_sp - dstsd->status.sp;
+						dstsd->status.sp = dstsd->status.max_sp;
+					}
+					else
+						dstsd->status.sp += sp;
 					clif_heal(dstsd->fd,SP_SP,sp);
 				}
 				clif_skill_nodamage(bl,bl,SA_MAGICROD,sc_data[SC_MAGICROD].val1,1);
@@ -2551,8 +2580,13 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 						sp = sp*(25*(skilllv-1))/100;
 						if(skilllv > 1 && sp < 1) sp = 1;
 						if(sp > 0x7fff) sp = 0x7fff;
-						if(sp < 1) sp = 1;
-						sd->status.sp += sp;
+						else if(sp < 1) sp = 1;
+						if(sd->status.sp + sp > sd->status.max_sp) {
+							sp = sd->status.max_sp - sd->status.sp;
+							sd->status.sp = sd->status.max_sp;
+						}
+						else
+							sd->status.sp += sp;
 						clif_heal(sd->fd,SP_SP,sp);
 					}
 				}

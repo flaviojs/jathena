@@ -106,10 +106,6 @@ struct storage {
 	short storage_amount;
 	struct item storage[MAX_STORAGE];
 };
-struct bank {
-	int account_id;
-	int amount;
-};
 
 struct map_session_data;
 

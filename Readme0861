@@ -1,5 +1,45 @@
 --------------------
+//0884 by 死神
+
+・細かいバグ修正。
+・battle_athena.confにpet_str、zeny_penalty、resurrection_exp 追加。
+・0878の銀行関係のコードはもういらないので全て削除。
+・zeny_penaltyを設定して使う場合は手数料はなくした方がいいかも。
+・ポーションピッチャーでpercenthealにもPPとLPによる回復ボーナスが付くように変更。(ただvitやint、HPR、MPRによる回復ボーナスが付きません。)
+・ほとんど未テスト。
+	(common/)
+	mmo.h 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(map/)
+	map.c
+		do_init()、do_final() 修正。
+	script.c
+		buildin_openbank() 削除。
+		buildin_failedrefitem() 修正。
+	storage.h 修正。
+	storage.c
+		do_init_bank()、do_final_bank()、account2bank() 削除。
+		storage_bank()、storage_readbank() 削除。
+	skill.c
+		skill_castend_nodamage_id()、skill_attack() 修正。
+	battle.h 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_config_read() 修正。
+	pc.c
+		pc_setrestartvalue() 修正。
+	clif.c
+		clif_skill_nodamage()、clif_refine() 修正。
+	itemdb.c
+		itemdb_isequip3() 修正。
+	atcommand.c
+		atcommand() 修正。
+
+--------------------
 //0883 by Kalen
+
 ・Warp色々修正
 	・アサシンギルド周り修正(昔のままのリンクだったので現在の状態に修正。)
 	・YunoのWarp全面見直し(YumilLoop修正、SageCastleRandomWarp追加、女医さんの家追加)

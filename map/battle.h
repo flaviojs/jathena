@@ -149,6 +149,7 @@ extern struct Battle_Config {
 	int drop_rate0item;
 	int death_penalty_type;
 	int death_penalty_base,death_penalty_job;
+	int zeny_penalty;
 	int restart_hp_rate;
 	int restart_sp_rate;
 	int mvp_item_rate,mvp_exp_rate;
@@ -178,6 +179,7 @@ extern struct Battle_Config {
 	int pet_friendly_rate;
 	int pet_hungry_delay_rate;
 	int pet_hungry_friendly_decrease;
+	int pet_str;
 	int pet_status_support;
 	int pet_attack_support;
 	int pet_damage_support;
@@ -186,7 +188,9 @@ extern struct Battle_Config {
 	int pet_attack_exp_rate;
 	int skill_min_damage;
 	int finger_offensive_type;
-	int heal_exp,shop_exp;
+	int heal_exp;
+	int resurrection_exp;
+	int shop_exp;
 	int combo_delay_rate;
 	int item_check;
 	int wedding_modifydisplay;

@@ -17,10 +17,6 @@ char stor_txt[]="storage.txt";
 struct storage *storage;
 int storage_num;
 
-char bank_txt[]="save/bank.txt";
-struct bank *bank;
-int bank_num;
-
 int do_init_storage(void) // map.c::do_init()から呼ばれる
 {
 /*	char line[65536];
@@ -357,79 +353,4 @@ int storage_storage_save(struct map_session_data *sd)
 		}
 	}
 	return 0;
-}
-/*==========================================
- * カプラ銀行サービス
- *------------------------------------------
- */
-int do_init_bank(void) // map.c::do_init()から呼ばれる
-{
-	char line[65536];
-	int i=0,set,tmp_int[2];
-	FILE *fp;
-	fp=fopen(bank_txt,"r");
-	if(fp==NULL)
-		return 0;
-	while(fgets(line,65535,fp)){
-		set=sscanf(line,"%d,%d",&tmp_int[0],&tmp_int[1]);
-		if(set==2) {
-			if(i==0){
-				bank_num=1;
-				bank=malloc(sizeof(struct bank));
-			}else{
-				bank=realloc(bank,sizeof(struct bank)*(++bank_num));
-			}
-			memset(&bank[i],0,sizeof(struct bank));
-			bank[i].account_id=tmp_int[0];
-			bank[i].amount=tmp_int[1];
-			i++;
-		}
-	}
-	fclose(fp);
-	return 1;
-}
-void do_final_bank(void) // map.c::do_final()から呼ばれる
-{
-	int i;
-	FILE *fp;
-
-	fp=fopen(bank_txt,"w");
-	if(fp==NULL)
-		return;
-	for(i=0;i<bank_num;i++){
-		fprintf(fp,"%d,%d\n",bank[i].account_id,bank[i].amount);
-	}
-	fclose(fp);
-}
-
-int account2bank(int account_id)
-{
-	int i;
-	for(i=0;i<bank_num;i++)
-		if(account_id==bank[i].account_id)
-			return i;
-	if(i==0){
-		bank=malloc(sizeof(struct bank));
-		bank_num=1;
-	}else{
-		bank=realloc(bank,sizeof(struct bank)*(++bank_num));
-	}
-	memset(&bank[i],0,sizeof(struct bank));
-	bank[i].account_id=account_id;
-	bank[i].amount=0;
-	return i;
-}
-//------------------------------------
-int storage_bank(struct map_session_data *sd,int amount)
-{
-	bank[account2bank(sd->status.account_id)].amount+=amount;
-	return 0;
-}
-//------------------------------------
-int storage_readbank(struct map_session_data *sd)
-{
-	int amount=0;
-	account2bank(sd->status.account_id);
-	amount=bank[account2bank(sd->status.account_id)].amount;
-	return amount;
 }

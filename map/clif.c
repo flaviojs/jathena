@@ -3319,7 +3319,7 @@ int clif_skill_nodamage(struct block_list *src,struct block_list *dst,
 
 	WBUFW(buf,0)=0x11a;
 	WBUFW(buf,2)=skill_id;
-	WBUFW(buf,4)=heal;
+	WBUFW(buf,4)=(heal > 0x7fff)? 0x7fff:heal;
 	WBUFL(buf,6)=dst->id;
 	WBUFL(buf,10)=src->id;
 	WBUFB(buf,14)=fail;
@@ -3632,7 +3632,7 @@ int clif_refine(int fd,struct map_session_data *sd,int fail,int index,int val)
 {
 	WFIFOW(fd,0)=0x188;
 	WFIFOW(fd,2)=fail;
-	WFIFOW(fd,4)=index;
+	WFIFOW(fd,4)=index+2;
 	WFIFOW(fd,6)=val;
 	WFIFOSET(fd,packet_len_table[0x188]);
 

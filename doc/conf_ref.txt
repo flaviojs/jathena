@@ -515,6 +515,11 @@ death_penalty_job
 	あまり低すぎる値を使うと減りません。単位は0.01%です。
 	デフォルトは0です。
 
+zeny_penalty
+	死んだ時無くなるゼニ量の比率です。単位は0.01%です。死んだ時
+	減るわけではなく死んだ後セーヴポイントに戻る時適用されます。
+	デフォルトは0です。
+
 restart_hp_rate
 	リスタートする時に回復するHP比率を百分率で調整します。単位は%です。
 	デフォルトは0です。0の場合1回復になります。
@@ -655,6 +660,10 @@ pet_hungry_delay_rate
 pet_hungry_friendly_decrease
 	ペットの腹が完全に減った時減る親密度の量です。デフォルトは5です。
 
+pet_str
+	ペットのATK計算にSTRを適用するかどうかです。
+	デフォルトはyesです。
+
 pet_status_support
 	ペットによるステータスボーナスを適用するかどうかです。yesにすると
 	ペットを持ってる時ペット毎に設定されているステータスボーナスが
@@ -691,6 +700,11 @@ heal_exp
 	スキル「ヒール」を使った際にもらえるジョブ経験値量の設定です。
 	100で回復した量と同量になります。
 	モンスターの経験値を変更してない場合は5～10程度が適当だと思われます。
+	デフォルトは0です。
+
+resurrection_exp
+ 	スキル「リザレクション」を使った際にもらえる経験値量の設定です。
+	単位は0.01%です。復活したプレイヤーが持っている経験値 * レベル差/100 * resurrection_exp/10000 分の経験が貰えます。
 	デフォルトは0です。
 
 shop_exp
@@ -987,6 +1001,7 @@ job_exp_rate: 100
 death_penalty_type: 0
 death_penalty_base: 100
 death_penalty_job: 100
+zeny_penalty: 0
 restart_hp_rate: 0
 restart_sp_rate: 0
 mvp_hp_rate: 100
@@ -1017,6 +1032,7 @@ pet_rename: no
 pet_friendly_rate: 100
 pet_hungry_delay_rate: 100
 pet_hungry_friendly_decrease: 5
+pet_str: yes
 pet_status_support: no
 pet_support: no
 pet_support_rate: 100
@@ -1025,7 +1041,8 @@ pet_attack_exp_rate: no
 skill_min_damage: no
 finger_offensive_type: 0
 heal_exp: 0
-shop_exp: 0
+resurrection_exp: 0
+hop_exp: 0
 combo_delay_rate: 100
 item_check: on
 wedding_modifydisplay: no

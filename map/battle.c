@@ -1387,7 +1387,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 
 	luk=battle_get_luk(src);
 
-	if(battle_config.enemy_str)
+	if(battle_config.pet_str)
 		damage = battle_get_baseatk(src);
 	else
 		damage = 0;
@@ -3848,6 +3848,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.death_penalty_type=0;
 	battle_config.death_penalty_base=0;
 	battle_config.death_penalty_job=0;
+	battle_config.zeny_penalty=0;
 	battle_config.restart_hp_rate=0;
 	battle_config.restart_sp_rate=0;
 	battle_config.mvp_item_rate=100;
@@ -3878,6 +3879,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.pet_friendly_rate=100;
 	battle_config.pet_hungry_delay_rate=100;
 	battle_config.pet_hungry_friendly_decrease=5;
+	battle_config.pet_str=1;
 	battle_config.pet_status_support=0;
 	battle_config.pet_attack_support=0;
 	battle_config.pet_damage_support=0;
@@ -3887,6 +3889,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.skill_min_damage=0;
 	battle_config.finger_offensive_type=0;
 	battle_config.heal_exp=0;
+	battle_config.resurrection_exp=0;
 	battle_config.shop_exp=0;
 	battle_config.combo_delay_rate=100;
 	battle_config.item_check=1;
@@ -3984,6 +3987,7 @@ int battle_config_read(const char *cfgName)
 			{ "death_penalty_type",		&battle_config.death_penalty_type	},
 			{ "death_penalty_base",		&battle_config.death_penalty_base	},
 			{ "death_penalty_job",		&battle_config.death_penalty_job	},
+			{ "zeny_penalty",		&battle_config.zeny_penalty	},
 			{ "restart_hp_rate",		&battle_config.restart_hp_rate		},
 			{ "restart_sp_rate",		&battle_config.restart_sp_rate		},
 			{ "mvp_hp_rate",			&battle_config.mvp_hp_rate			},
@@ -4014,6 +4018,7 @@ int battle_config_read(const char *cfgName)
 			{ "pet_friendly_rate",		&battle_config.pet_friendly_rate	},
 			{ "pet_hungry_delay_rate",	&battle_config.pet_hungry_delay_rate	},
 			{ "pet_hungry_friendly_decrease",	&battle_config.pet_hungry_friendly_decrease	},
+			{ "pet_str",			&battle_config.pet_str		},
 			{ "pet_status_support",	&battle_config.pet_status_support },
 			{ "pet_attack_support",	&battle_config.pet_attack_support },
 			{ "pet_damage_support",	&battle_config.pet_damage_support },
@@ -4023,6 +4028,7 @@ int battle_config_read(const char *cfgName)
 			{ "skill_min_damage",		&battle_config.skill_min_damage		},
 			{ "finger_offensive_type",	&battle_config.finger_offensive_type},
 			{ "heal_exp",				&battle_config.heal_exp				},
+			{ "resurrection_exp",				&battle_config.resurrection_exp				},
 			{ "shop_exp",				&battle_config.shop_exp				},
 			{ "combo_delay_rate",				&battle_config.combo_delay_rate			},
 			{ "item_check",				&battle_config.item_check			},

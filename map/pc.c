@@ -271,6 +271,14 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 					clif_updatestatus(sd,SP_JOBEXP);
 			}
 		}
+		if(battle_config.zeny_penalty > 0) {
+			int zeny = (int)((double)sd->status.zeny * (double)battle_config.zeny_penalty / 10000.);
+			if(zeny < 1) zeny = 1;
+			sd->status.zeny -= zeny;
+			if(sd->status.zeny < 0) sd->status.zeny = 0;
+			if(type&1)
+				clif_updatestatus(sd,SP_ZENY);
+		}
 	}
 
 	return 0;

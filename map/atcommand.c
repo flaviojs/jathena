@@ -360,7 +360,7 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 
 			if( x>0 ) {
 				int a1=1,a2=y,i;
-				if(item_data->type==4 || item_data->type==5 || item_data->type==7){
+				if(item_data->type==4 || item_data->type==5 || item_data->type==7 || item_data->type==8){
 					a1=y;
 					a2=1;
 				}
@@ -400,13 +400,14 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 
 				if( x>0 ) {
 					int a1=1,a2=y,i;
-					if(item_data->type==4 || item_data->type==5 || item_data->type==7){
+					if(item_data->type==4 || item_data->type==5 || item_data->type==7 || item_data->type==8){
 						a1=y;
 						a2=1;
 						if(item_data->type==7) {
 							iden = 1;
 							ref = 0;
 						}
+						if(item_data->type==8) ref = 0;
 						if(ref > 10) ref = 10;
 					}
 					else {
@@ -1321,24 +1322,6 @@ z [0`4]•‚ÌF
 			agit_flag=0;
 			guild_agit_end();
 			clif_displaymessage(fd,msg_table[74]);
-			return 1;
-		}
-
-		if(strcmpi(command, "@test") == 0){
-			sscanf(message, "%s %d %d %d", command, &x, &y, &z);
-			clif_skill_nodamage(&sd->bl,&sd->bl,x,y,z);
-			return 1;
-		}
-
-		if(strcmpi(command, "@test2") == 0){
-			sscanf(message, "%s %d", command, &x);
-			clif_skill_damage(&sd->bl,&sd->bl,gettick(),battle_get_amotion(&sd->bl),battle_get_dmotion(&sd->bl),100,1,x,10,6);
-			return 1;
-		}
-
-		if(strcmpi(command, "@test3") == 0){
-			sscanf(message, "%s %d", command, &x);
-			clif_emotion(&sd->bl,x);
 			return 1;
 		}
 
