@@ -143,19 +143,43 @@ int read_gm_account()
 	return 0;
 }
 
+// IPマスクチェック
+int check_ipmask(unsigned int ip,const unsigned char *str)
+{
+	unsigned int mask=0,i,m,ip2, a0,a1,a2,a3;
+	unsigned char *p=(unsigned char *)&ip2, *p2=(unsigned char *)&mask;
+	if( sscanf(str,"%d.%d.%d.%d/%n",&a0,&a1,&a2,&a3,&i)!=4 )
+		return 0;
+	p[0]=a0; p[1]=a1; p[2]=a2; p[3]=a3;
+
+	if( sscanf(str+i,"%d.%d.%d.%d",&a0,&a1,&a2,&a3)==4 ){
+		p2[0]=a0; p2[1]=a1; p2[2]=a2; p2[3]=a3;
+		mask=ntohl(mask);
+	}else if( sscanf(str+i,"%d",&m)==1 ){
+		for(i=0;i<m;i++)
+			mask=(mask>>1)|0x80000000;
+	}else
+		return 0;
+	
+//	printf("%08x %08x %08x\n",
+//		(unsigned int)ntohl(ip),(unsigned int)ntohl(ip2),(unsigned int)mask);
+	return ( (ntohl(ip)&mask) == (ntohl(ip2)&mask) );
+}
+
+// アクセスコントロール
 int check_ip(unsigned int ip)
 {
-	char buf[64];
 	int i;
 	unsigned char *p=(unsigned char *)&ip;
+	char buf[128];
 	enum { ACF_DEF, ACF_ALLOW, ACF_DENY } flag = ACF_DEF;
 
 	if( access_allownum==0 && access_denynum==0 )
 		return 1;		// 制限を使わない場合は常に許可
 
-	// + 現在は 012.345. 形式の前方一致と all のみ対応。
-	// + 012.345.678.901/24 形式のネットマスク付き表記は対応してないが、
-	//   対応したほうがいいと思われる。
+	// + 012.345. 形式の前方一致と all（全てのIPにマッチ）および、
+	//   012.345.678.901/24 形式、012.345.678.901/234.567.890.123 形式の
+	//   ネットマスク付き表記に対応。
 	// + .ne.jpなどのDNS後方一致はホスト名逆引きのコストを考えると
 	//   対応しないほうがいいと思われる。(短い時間でDNSが引ける保障はないし、
 	//   実際にタイムアウトまで1分近く待たされるケースがあることを確認している)
@@ -163,8 +187,8 @@ int check_ip(unsigned int ip)
 	sprintf(buf,"%d.%d.%d.%d",p[0],p[1],p[2],p[3]);
 	
 	for(i=0;i<access_allownum;i++){
-		if( memcmp(access_allow+i*ACO_STRSIZE,buf,
-			strlen(access_allow+i*ACO_STRSIZE))==0){
+		const char *p=access_allow+i*ACO_STRSIZE;
+		if( memcmp(p,buf,strlen(p))==0 || check_ipmask(ip,p)){
 			flag=ACF_ALLOW;
 			if( access_order==ACO_DENY_ALLOW )
 				return 1;	// deny,allow ならallowにあった時点で許可
@@ -172,8 +196,8 @@ int check_ip(unsigned int ip)
 		}
 	}
 	for(i=0;i<access_denynum;i++){
-		if( memcmp(access_deny+i*ACO_STRSIZE,buf,
-			strlen(access_deny+i*ACO_STRSIZE))==0){
+		const char *p=access_deny+i*ACO_STRSIZE;
+		if( memcmp(p,buf,strlen(p))==0 || check_ipmask(ip,p)){
 			flag=ACF_DENY;
 			return 0;		// denyにあると不許可
 			break;

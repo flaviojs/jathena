@@ -1,4 +1,28 @@
 --------------------
+//0877 by 胡蝶蘭
+
+・login鯖のアクセスコントロールがネットマスク表記に対応
+	192.168.0.0/24 や 192.168.0.0/255.255.0.0 といった表記に対応。
+・battle_athena.confにGMが無条件で装備品を装備できる＆
+  無条件でスキルを使用できる設定追加
+	これらはデバグ用なので動作に不都合があるかもしれません。
+
+	(login/)
+	login.c
+		check_ip()修正,check_ipmask()追加
+	(map/)
+	battle.c/battle.h
+		battle_configにgm_allequip,gm_skilluncond追加
+		battle_config_read()修正更
+	skill.c
+		skill_check_conditio()修正
+	pc.c
+		pc_isequp()修正
+	(doc/)
+	conf_ref.txt
+		allow変更、gm_all_equipment、gm_skill_unconditional追加
+
+--------------------
 //0876 by 死神
 
 ・細かいバグ修正。

@@ -471,6 +471,10 @@ int pc_isequip(struct map_session_data *sd,int n)
 {
 	struct item_data *item = sd->inventory_data[n];
 
+ 	if( battle_config.gm_allequip>0 &&
+		pc_isGM(sd)>=battle_config.gm_allequip )
+		return 1;
+		
 	if(item == NULL)
 		return 0;
 	if(item->sex != 2 && sd->status.sex != item->sex)
@@ -3246,6 +3250,7 @@ int pc_checkallowskill(struct map_session_data *sd)
 int pc_checkequip(struct map_session_data *sd,int pos)
 {
 	int i;
+	
 	for(i=0;i<11;i++){
 		if(pos & equip_pos[i])
 			return sd->equip_index[i];
@@ -4619,7 +4624,9 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	pos = pc_equippoint(sd,n);
 	if(battle_config.battle_log)
 		printf("equip %d(%d) %x:%x\n",nameid,n,id->equip,pos);
-	if(!pc_isequip(sd,n) || !pos) {
+	
+	if( !pc_isequip(sd,n) || !pos ) {
+		
 		clif_equipitemack(sd,n,0,0);	// fail
 		return 0;
 	}

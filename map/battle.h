@@ -155,7 +155,10 @@ extern struct Battle_Config {
 	int mvp_hp_rate;
 	int monster_hp_rate;
 	int monster_max_aspd;
-	int atc_gmonly,gm_allskill;
+	int atc_gmonly;
+	int gm_allskill;
+	int gm_allequip;
+	int gm_skilluncond;
 	int skillfree;
 	int skillup_limit;
 	int wp_rate;

@@ -4040,6 +4040,10 @@ int skill_check_condition(struct map_session_data *sd,int type)
 	int i,hp,sp,hp_rate,sp_rate,zeny,weapon,state,spiritball,skill,lv;
 	int	index[5],itemid[5],amount[5];
 
+	if( battle_config.gm_skilluncond>0 &&
+		pc_isGM(sd)>= battle_config.gm_skilluncond )
+		return 1;
+
 	if( sd->opt1>0) {
 		clif_skill_fail(sd,sd->skillid,0,0);
 		sd->skillitem = sd->skillitemlv = -1;

@@ -3850,6 +3850,8 @@ int battle_config_read(const char *cfgName)
 	battle_config.monster_max_aspd=199;
 	battle_config.atc_gmonly=0;
 	battle_config.gm_allskill=0;
+	battle_config.gm_allequip=0;
+	battle_config.gm_skilluncond=0;
 	battle_config.skillfree = 0;
 	battle_config.skillup_limit = 0;
 	battle_config.wp_rate=100;
@@ -3980,6 +3982,8 @@ int battle_config_read(const char *cfgName)
 			{ "monster_max_aspd" ,&battle_config.monster_max_aspd },
 			{ "atcommand_gm_only",		&battle_config.atc_gmonly			},
 			{ "gm_all_skill",			&battle_config.gm_allskill			},
+			{ "gm_all_equipment",		&battle_config.gm_allequip			},
+			{ "gm_skill_unconditional",	&battle_config.gm_skilluncond		},
 			{ "player_skillfree", &battle_config.skillfree },
 			{ "player_skillup_limit", &battle_config.skillup_limit },
 			{ "weapon_produce_rate",	&battle_config.wp_rate				},
