@@ -11,6 +11,7 @@ yuno_fild02.gat,0,0,0,0		monster	ダスティネス		1114,20,0,0,0
 yuno_fild02.gat,0,0,0,0		monster	ドリラー		1380,10,0,0,0
 yuno_fild02.gat,0,0,0,0		monster	ジオグラファー		1368,10,0,0,0
 yuno_fild02.gat,0,0,0,0		monster	グランペコ		1369,10,0,0,0
+yuno_fild02.gat,0,0,0,0		monster	一反木綿		1375,10,0,0,0
 yuno_fild02.gat,0,0,0,0		monster	スリーパー		1386,5,0,0,0
 yuno_fild02.gat,0,0,0,0		monster	アークエンジェリング	1388,1,3600000,1800000,1
 
@@ -20,6 +21,7 @@ yuno_fild03.gat,0,0,0,0		monster	ジオグラファー		1368,10,0,0,0
 yuno_fild03.gat,0,0,0,0		monster	スリーパー		1386,5,0,0,0
 yuno_fild03.gat,0,0,0,0		monster	ゴート			1372,20,0,0,0
 yuno_fild03.gat,0,0,0,0		monster	ハーピー		1376,5,0,0,0
+yuno_fild03.gat,0,0,0,0		monster	一反木綿		1375,10,0,0,0
 
 //エルメスプレート（yuno_fild04）
 yuno_fild04.gat,0,0,0,0		monster	ポリン			1002,40,0,0,0
@@ -28,6 +30,7 @@ yuno_fild04.gat,0,0,0,0		monster	ジオグラファー		1368,10,0,0,0
 yuno_fild04.gat,0,0,0,0		monster	スリーパー		1386,5,0,0,0
 yuno_fild04.gat,0,0,0,0		monster	ゴート			1372,10,0,0,0
 yuno_fild04.gat,0,0,0,0		monster	ハーピー		1376,5,0,0,0
+yuno_fild04.gat,0,0,0,0		monster	一反木綿		1375,10,0,0,0
 
 //溶岩洞窟 1F (mag_dun01) 
 mag_dun01.gat,0,0,0,0		monster	エクスプロージョン	1383,10,0,0,0

@@ -1,4 +1,20 @@
 --------------------
+//0819 by Kalen
+・コンロン(NPC、Warp)修正
+	conf/npc/npc_town_gonryun.txt(案内員補充)
+	conf/npc/npc_event_tougijou.txt
+	conf/warp/npc_warp_gonryun.txt(宿2FとD2Fなど)
+
+・MOB修正
+	conf/mob/npc_monster30.txt(一反木綿不足追加)
+	conf/mob/npc_monster35.txt(コンロンMob追加)
+
+・DB修正
+	db/mob_db.txt(コンロン[全て]+ウンバラ[定義]追加。Aspeed等適当です。まぁ無いよりましということで)
+	db/mob_skill_db.txt(情報を元にコンロンのMob分追加)
+	db/item_db.txt(Athena DB Project 2/19 21:10DL分)
+
+--------------------
 //0818 by あゆみ
 
 ・テレポートスキルLv1で、選択ウインドウが出てこないバグを修正。
