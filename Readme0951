@@ -1,4 +1,27 @@
 --------------------
+//0962 by (凸)
+
+・職業は0～23で処理したいので転生職用のスキルツリー追加、eAthenaを参考に拡張
+	っていうか韓国本サーバでの実装の資料が見当たらないので適当
+・sakexe.exeを解析してskill_db.txt変更、これもeAthenaを参考に拡張
+	どれが本サーバで実装されているスキルか分かりませんっ！！
+※スキルツリーが表示されたからといって使えるわけじゃありませんっ！！
+
+	(common/)
+	mmo.h 定数修正
+	(db/)
+	skill_db.txt 変更
+	skill_require_db.txt 変更
+	skill_tree2.txt 追加
+	(map/)
+	skill.h 定数修正
+	pc.c
+		pc_calcstatus() 修正
+		pc_allskillup() 修正
+		pc_calc_skilltree() 修正
+		pc_readdb() 修正
+	
+--------------------
 //0961 by 胡蝶蘭
 
 ・スクリプトにサブルーチン/ユーザー定義関数機能追加
