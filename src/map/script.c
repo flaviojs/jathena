@@ -2284,7 +2284,7 @@ char *buildin_getpartyname_sub(int party_id)
 		buf=calloc(24, 1);
 		if(buf==NULL){
 			if(battle_config.error_log)
-				printf("out of memory : buildin_getguildname_sub\n");
+				printf("out of memory : buildin_getpartyname_sub\n");
 			exit(1);
 		}
 		strcpy(buf,p->name);
@@ -2315,7 +2315,7 @@ char *buildin_getguildname_sub(int guild_id)
 {
 	struct guild *g=NULL;
 	g=guild_search(guild_id);
-
+	
 	if(g!=NULL){
 		char *buf;
 		buf=calloc(24, 1);

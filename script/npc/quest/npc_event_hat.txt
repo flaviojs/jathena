@@ -10,8 +10,8 @@ xmas.gat,115,297,4	script	自動販売機	111,{
 	next;
 	menu "^ff0000- 注意事項(必読) -^000000",Lteach,"たぬき帽",L1,"スポア帽",L2,"神秘の木の実",L3,"まだら卵殻",L4,"ほお紅",L5,"コック帽",L6,"ろうそく",L7,"ケーキ帽",L8,"取り消し",Lend;
 L1:/*たぬき帽*/
-	if ((countitem(719) < 1) || (countitem(1036) < 20) || (countitem(7012) < 200) || (countitem(7065) < 300)) goto LError;
-		delitem 719,1;
+	if ((countitem(2213) < 1) || (countitem(1036) < 20) || (countitem(7012) < 200) || (countitem(7065) < 300)) goto LError;
+		delitem 2213,1;
 		delitem 1036,20;
 		delitem 7012,200;
 		delitem 7065,300;

@@ -437,7 +437,7 @@ int chrif_parse(int fd)
 		case 0x2af9: chrif_connectack(fd); break;
 		case 0x2afb: chrif_sendmapack(fd); break;
 		case 0x2afd: pc_authok(RFIFOL(fd,4),(struct mmo_charstatus*)RFIFOP(fd,12)); break;
-		case 0x2afe: pc_authfail(RFIFOL(fd,4)); break;
+		case 0x2afe: pc_authfail(RFIFOL(fd,2)); break;
 		case 0x2b00: map_setusers(RFIFOL(fd,2)); break;
 		case 0x2b03: clif_charselectok(RFIFOL(fd,2)); break;
 		case 0x2b04: chrif_recvmap(fd); break;
