@@ -211,7 +211,7 @@ int mob_get_viewclass(int class)
  */
 int mob_can_move(struct mob_data *md)
 {
-	if(md->canmove_tick > gettick())
+	if(md->canmove_tick > gettick() || (md->opt1 > 0 && md->opt1 != 6))
 		return 0;
 	if( md->sc_data[SC_ANKLE].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1 )	// アンクル中で動けない
 		return 0;
@@ -1118,7 +1118,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 	race=mob_db[md->class].race;
 
 	// 異常
-	if( md->opt1>0 || md->state.state==MS_DELAY){
+	if((md->opt1 > 0 && md->opt1 != 6) || md->state.state==MS_DELAY){
 		return 0;
 	}
 
@@ -1828,6 +1828,8 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		int j;
 		int mexp = mob_db[md->class].mexp*(9+count)/10;
 		clif_mvp_effect(mvp_sd);					// エフェクト
+		clif_mvp_exp(mvp_sd,mexp);
+		pc_gainexp(mvp_sd,mexp,0);
 		for(j=0;j<3;j++){
 			i = rand() % 3;
 			struct item item;
@@ -1851,10 +1853,6 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 				map_addflooritem(&item,1,mvp_sd->bl.m,mvp_sd->bl.x,mvp_sd->bl.y,mvp_sd,second_sd,third_sd,1);
 			}
 			break;
-		}
-		if(j == 3){
-			clif_mvp_exp(mvp_sd,mexp);	// アイテムが貰えなかった場合は経験値
-			pc_gainexp(mvp_sd,mexp,0);
 		}
 	}
 

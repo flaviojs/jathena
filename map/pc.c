@@ -2553,22 +2553,24 @@ int pc_steal_item(struct map_session_data *sd,struct block_list *bl)
 		md=(struct mob_data *)bl;
 		if(!md->state.steal_flag && mob_db[md->class].mexp <= 0 && !(mob_db[md->class].mode&0x20) &&
 			md->sc_data[SC_STONE].timer == -1 && md->sc_data[SC_FREEZE].timer == -1) {
-			skill = pc_checkskill(sd,TF_STEAL) * 50;
-			for(i=0;i<8;i++) {
-				itemid = mob_db[md->class].dropitem[i].nameid;
-				if(itemid > 0 && itemdb_type(itemid) != 6) {
-					rate = (mob_db[md->class].dropitem[i].p * (sd->status.base_level*4 + sd->paramc[4]*3 + skill))/1000;
-					if(rand()%10000 < rate) {
-						struct item tmp_item;
-						memset(&tmp_item,0,sizeof(tmp_item));
-						tmp_item.nameid = itemid;
-						tmp_item.amount = 1;
-						tmp_item.identify = 1;
-						flag = pc_additem(sd,&tmp_item,1);
-						if(flag)
-							clif_additem(sd,0,0,flag);
-						md->state.steal_flag = 1;
-						return 1;
+			skill = sd->status.base_level*4 + sd->paramc[4]*3 + pc_checkskill(sd,TF_STEAL) * 50;
+			if(rand()%1000 < skill) {
+				for(i=0;i<8;i++) {
+					itemid = mob_db[md->class].dropitem[i].nameid;
+					if(itemid > 0 && itemdb_type(itemid) != 6) {
+						rate = (mob_db[md->class].dropitem[i].p * skill)/1000;
+						if(rand()%10000 < rate) {
+							struct item tmp_item;
+							memset(&tmp_item,0,sizeof(tmp_item));
+							tmp_item.nameid = itemid;
+							tmp_item.amount = 1;
+							tmp_item.identify = 1;
+							flag = pc_additem(sd,&tmp_item,1);
+							if(flag)
+								clif_additem(sd,0,0,flag);
+							md->state.steal_flag = 1;
+							return 1;
+						}
 					}
 				}
 			}

@@ -3664,6 +3664,8 @@ int clif_closevendingboard(struct block_list* bl,int fd)
 	}else{
 		clif_send(buf,packet_len_table[0x132],bl,AREA_WOS);
 	}
+	if(bl->type == BL_PC && ((struct map_session_data *)bl)->npc_id != 0)
+		npc_event_dequeue((struct map_session_data *)bl);
 
 	return 0;
 }
@@ -5008,7 +5010,7 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 		return;
 
 	// ステータス異常やハイディング中(トンネルドライブ無)で動けない
-	if(sd->opt1 > 0 ||
+	if((sd->opt1 > 0 && sd->opt1 != 6) ||
 		sd->sc_data[SC_ANKLE].timer !=-1 || sd->sc_data[SC_AUTOCOUNTER].timer!=-1 || sd->sc_data[SC_TRICKDEAD].timer!=-1)
 		return;
 	if( (sd->status.option&2) && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0)

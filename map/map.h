@@ -15,9 +15,10 @@
 #define MAX_SKILL_LEVEL 100
 #define MAX_STATUSCHANGE 192
 #define MAX_SKILLUNITGROUP	32
-#define MAX_MOBSKILLUNITGROUP	4
+#define MAX_MOBSKILLUNITGROUP	8
 #define MAX_SKILLUNITGROUPTICKSET	128
 #define MAX_SKILLTIMERSKILL 32
+#define MAX_MOBSKILLTIMERSKILL 10
 #define MAX_MOBSKILL	24
 #define MAX_EVENTQUEUE	2
 #define MAX_EVENTTIMER	32
@@ -78,7 +79,6 @@ struct skill_unit_group {
 
 	int skill_id,skill_lv;
 	int val1,val2;
-	int vallist[16];
 	char *valstr;
 	int unit_id;
 	int group_id;
@@ -325,9 +325,9 @@ struct mob_data {
 	unsigned int skilldelay[MAX_MOBSKILL];
 	int def_ele;
 	int master_id,master_dist;
+	struct skill_timerskill skilltimerskill[MAX_MOBSKILLTIMERSKILL];
 	struct skill_unit_group skillunit[MAX_MOBSKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
-	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL/2];
 	char npc_event[50];
 };
 struct pet_data {

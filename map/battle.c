@@ -1105,7 +1105,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 				if(sc->val2>=0)	damage=0;
 				else damage=-sc->val2;
 			}
-			if((--sc->val1)<=0 || (sc->val2<=0) || skill_num == AL_HOLYLIGHT)
+			if((--sc->val3)<=0 || (sc->val2<=0) || skill_num == AL_HOLYLIGHT)
 				skill_status_change_end(bl, SC_KYRIE, -1);
 		}
 
@@ -1556,13 +1556,16 @@ static struct Damage battle_calc_pet_weapon_attack(
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
 						if(battle_config.vit_penaly_type == 1) {
+							def1 = (def1 * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 							def2 = (def2 * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 							t_vit = (t_vit * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 						}
 						else if(battle_config.vit_penaly_type == 2) {
+							def1 -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 							def2 -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 							t_vit -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 						}
+						if(def1 < 0) def1 = 0;
 						if(def2 < 1) def2 = 1;
 						if(t_vit < 1) t_vit = 1;
 					}
@@ -1661,22 +1664,24 @@ static struct Damage battle_calc_mob_weapon_attack(
 	t_mode=battle_get_mode( target );
 	t_sc_data=battle_get_sc_data( target );
 
-	if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
-		int dir = map_calc_dir(src,target->x,target->y),t_dir = battle_get_dir(target);
-		int dist = distance(src->x,src->y,target->x,target->y);
-		if(dist <= 0 || map_check_dir(dir,t_dir) ) {
-			memset(&wd,0,sizeof(wd));
-			t_sc_data[SC_AUTOCOUNTER].val3 = 0;
-			t_sc_data[SC_AUTOCOUNTER].val4 = 1;
-			if(sc_data && sc_data[SC_AUTOCOUNTER].timer == -1) {
-				int range = battle_get_range(target);
-				if((target->type == BL_PC && ((struct map_session_data *)target)->status.weapon != 11 && dist <= range+1) ||
-					(target->type == BL_MOB && range <= 3 && dist <= range+1) )
-					t_sc_data[SC_AUTOCOUNTER].val3 = src->id;
+	if((battle_config.monster_auto_counter_type&2 || (skill_num == 0 && skill_lv >= 0))) {
+		if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
+			int dir = map_calc_dir(src,target->x,target->y),t_dir = battle_get_dir(target);
+			int dist = distance(src->x,src->y,target->x,target->y);
+			if(dist <= 0 || map_check_dir(dir,t_dir) ) {
+				memset(&wd,0,sizeof(wd));
+				t_sc_data[SC_AUTOCOUNTER].val3 = 0;
+				t_sc_data[SC_AUTOCOUNTER].val4 = 1;
+				if(sc_data && sc_data[SC_AUTOCOUNTER].timer == -1) {
+					int range = battle_get_range(target);
+					if((target->type == BL_PC && ((struct map_session_data *)target)->status.weapon != 11 && dist <= range+1) ||
+						(target->type == BL_MOB && range <= 3 && dist <= range+1) )
+						t_sc_data[SC_AUTOCOUNTER].val3 = src->id;
+				}
+				return wd;
 			}
-			return wd;
+			else ac_flag = 1;
 		}
-		else ac_flag = 1;
 	}
 	flag=BF_SHORT|BF_WEAPON|BF_NORMAL;	// çUåÇÇÃéÌóﬁÇÃê›íË
 
@@ -1725,7 +1730,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if(ac_flag) cri = 1000;
 
 	if(skill_num == KN_AUTOCOUNTER) {
-		if(battle_config.monster_auto_counter_type == 0)
+		if(!(battle_config.monster_auto_counter_type&1))
 			cri = 1000;
 		else
 			cri <<= 1;
@@ -1811,7 +1816,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 				//blewcount=4;skill.cÇ≈êÅÇ´îÚÇŒÇµÇ‚Ç¡ÇƒÇ›ÇΩ
 				break;
 			case KN_AUTOCOUNTER:
-				if(battle_config.monster_auto_counter_type)
+				if(battle_config.monster_auto_counter_type&1)
 					hitrate += 20;
 				else
 					hitrate = 1000000;
@@ -1921,13 +1926,16 @@ static struct Damage battle_calc_mob_weapon_attack(
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
 						if(battle_config.vit_penaly_type == 1) {
+							def1 = (def1 * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 							def2 = (def2 * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 							t_vit = (t_vit * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 						}
 						else if(battle_config.vit_penaly_type == 2) {
+							def1 -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 							def2 -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 							t_vit -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 						}
+						if(def1 < 0) def1 = 0;
 						if(def2 < 1) def2 = 1;
 						if(t_vit < 1) t_vit = 1;
 					}
@@ -2072,22 +2080,24 @@ static struct Damage battle_calc_pc_weapon_attack(
 	t_mode=battle_get_mode( target );
 	t_sc_data=battle_get_sc_data( target );
 
-	if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
-		int dir = map_calc_dir(src,target->x,target->y),t_dir = battle_get_dir(target);
-		int dist = distance(src->x,src->y,target->x,target->y);
-		if(dist <= 0 || map_check_dir(dir,t_dir) ) {
-			memset(&wd,0,sizeof(wd));
-			t_sc_data[SC_AUTOCOUNTER].val3 = 0;
-			t_sc_data[SC_AUTOCOUNTER].val4 = 1;
-			if(sc_data && sc_data[SC_AUTOCOUNTER].timer == -1) {
-				int range = battle_get_range(target);
-				if((target->type == BL_PC && ((struct map_session_data *)target)->status.weapon != 11 && dist <= range+1) ||
-					(target->type == BL_MOB && range <= 3 && dist <= range+1) )
-					t_sc_data[SC_AUTOCOUNTER].val3 = src->id;
+	if((battle_config.pc_auto_counter_type&2 || (skill_num == 0 && skill_lv >= 0))) {
+		if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
+			int dir = map_calc_dir(src,target->x,target->y),t_dir = battle_get_dir(target);
+			int dist = distance(src->x,src->y,target->x,target->y);
+			if(dist <= 0 || map_check_dir(dir,t_dir) ) {
+				memset(&wd,0,sizeof(wd));
+				t_sc_data[SC_AUTOCOUNTER].val3 = 0;
+				t_sc_data[SC_AUTOCOUNTER].val4 = 1;
+				if(sc_data && sc_data[SC_AUTOCOUNTER].timer == -1) {
+					int range = battle_get_range(target);
+					if((target->type == BL_PC && ((struct map_session_data *)target)->status.weapon != 11 && dist <= range+1) ||
+						(target->type == BL_MOB && range <= 3 && dist <= range+1) )
+						t_sc_data[SC_AUTOCOUNTER].val3 = src->id;
+				}
+				return wd;
 			}
-			return wd;
+			else ac_flag = 1;
 		}
-		else ac_flag = 1;
 	}
 
 	flag=BF_SHORT|BF_WEAPON|BF_NORMAL;	// çUåÇÇÃéÌóﬁÇÃê›íË
@@ -2202,7 +2212,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		if(ac_flag) cri = 1000;
 
 		if(skill_num == KN_AUTOCOUNTER) {
-			if(battle_config.pc_auto_counter_type == 0)
+			if(!(battle_config.pc_auto_counter_type&1))
 				cri = 1000;
 			else
 				cri <<= 1;
@@ -2411,7 +2421,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 				//blewcount=4;skill.cÇ≈êÅÇ´îÚÇŒÇµÇ‚Ç¡ÇƒÇ›ÇΩ
 				break;
 			case KN_AUTOCOUNTER:
-				if(battle_config.pc_auto_counter_type)
+				if(battle_config.pc_auto_counter_type&1)
 					hitrate += 20;
 				else
 					hitrate = 1000000;
@@ -2596,13 +2606,16 @@ static struct Damage battle_calc_pc_weapon_attack(
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
 						if(battle_config.vit_penaly_type == 1) {
+							def1 = (def1 * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 							def2 = (def2 * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 							t_vit = (t_vit * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 						}
 						else if(battle_config.vit_penaly_type == 2) {
+							def1 -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 							def2 -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 							t_vit -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 						}
+						if(def1 < 0) def1 = 0;
 						if(def2 < 1) def2 = 1;
 						if(t_vit < 1) t_vit = 1;
 					}
@@ -3423,7 +3436,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			return -1;
 		if(ss->prev == NULL)
 			return -1;
-		if(inf2&0x80	&& map[src->m].flag.pvp)
+		if(inf2&0x80	&& map[src->m].flag.pvp && !(target->type == BL_PC && pc_isinvisible((struct map_session_data *)target)))
 			return 0;
 		if(ss == target) {
 			if(inf2&0x100)
@@ -3646,7 +3659,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.save_clothcolor = 0;
 	battle_config.undead_detect_type = 2;
 	battle_config.pc_auto_counter_type = 1;
-	battle_config.monster_auto_counter_type = 0;
+	battle_config.monster_auto_counter_type = 1;
 	battle_config.agi_penaly_type = 0;
 	battle_config.agi_penaly_count = 3;
 	battle_config.agi_penaly_num = 0;
