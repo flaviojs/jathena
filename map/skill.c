@@ -5363,6 +5363,25 @@ int skill_can_produce_mix( struct map_session_data *sd, int nameid, int trigger 
 				return 0;
 		}
 	}
+	/* »‘¢‚Ì‘ Šm”F */
+	if(trigger==32){
+		int bookid=0;
+		if	(nameid < 510)	bookid=7144;
+		else if	(nameid < 550)	bookid=7133;
+		else if	(nameid== 970)	bookid=7127;
+//		else	bookid=nameid-7;
+		else if	(nameid==7135)	bookid=7128;
+		else if	(nameid==7136)	bookid=7129;
+		else if	(nameid==7137)	bookid=7130;
+		else if	(nameid==7138)	bookid=7131;
+		else if	(nameid==7139)	bookid=7132;
+		else return 0;
+
+
+		if(pc_search_inventory(sd,bookid) < 0)
+			return 0;
+	}
+
 	return i+1;
 }
 
