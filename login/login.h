@@ -10,8 +10,8 @@
 							// passwordencrypt2‚Ì‚Æ‚«‚Í2‚É‚·‚éB
 							// 3‚É‚·‚é‚Æ—¼•û‚É‘Î‰
 
-#define START_ACCOUNT_NUM 500000
-#define END_ACCOUNT_NUM 100000000
+#define START_ACCOUNT_NUM	  2000000
+#define END_ACCOUNT_NUM		100000000
 
 struct mmo_account {
 	char* userid;

@@ -194,6 +194,7 @@ int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 	auth_dat[i].account_id=account_id_count++;
 	strncpy(auth_dat[i].userid,account->userid,24);
 	strncpy(auth_dat[i].pass,account->passwd,24);
+	memcpy(auth_dat[i].lastlogin,"-",2);
 	auth_dat[i].sex= sex=='M';
 	auth_dat[i].logincount=0;
 	auth_num++;
@@ -457,8 +458,8 @@ int parse_admin(int fd)
 					return 0;
 				ma.userid=RFIFOP(fd, 4);
 				ma.passwd=RFIFOP(fd,28);
-				ma.sex=RFIFOB(fd,52);
 				memcpy(ma.lastlogin,"-",2);
+				ma.sex=RFIFOB(fd,52);
 				WFIFOW(fd,0)=0x7931;
 				WFIFOW(fd,2)=0;
 				memcpy(WFIFOP(fd,4),RFIFOP(fd,4),24);
@@ -650,7 +651,7 @@ int parse_login(int fd)
 	case 0x7532:	// 接続の切断(defaultと処理は一緒だが明示的にするため)
 		close(fd);
 		session[fd]->eof=1;
-		break;
+		return 0;
 	
 	case 0x7918:	// 管理モードログイン
 		if(RFIFOREST(fd)<4 || RFIFOREST(fd)<RFIFOW(fd,2))

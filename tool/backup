@@ -37,7 +37,7 @@ $sdir="../";			#バックアップ元(Athenaのディレクトリ)
 $tdir="./backup_data/";		#バックアップ先
 
 @files=(			#ファイルのリスト
-	"account","athena","storage","party","guild"
+	"account","athena","storage","party","guild","pet"
 );
 
 
