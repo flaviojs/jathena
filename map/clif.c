@@ -4293,6 +4293,24 @@ int clif_combo_delay(struct block_list *bl,int wait)
 
 	return 0;
 }
+/*==========================================
+ *”’nŽæ‚è
+ *------------------------------------------
+ */
+int clif_bladestop(struct block_list *src,struct block_list *dst,
+	int bool)
+{
+	unsigned char buf[32];
+
+	WBUFW(buf,0)=0x1d1;
+	WBUFL(buf,2)=src->id;
+	WBUFL(buf,6)=dst->id;
+	WBUFL(buf,10)=bool;
+	
+	clif_send(buf,packet_len_table[0x1d1],src,AREA);
+
+	return 0;
+}
 
 /*==========================================
  *

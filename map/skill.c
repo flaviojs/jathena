@@ -1806,6 +1806,13 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			pc_addspiritball(sd,skill_get_time(skillid,skilllv),skilllv);
 		}
 		break;
+	case MO_BLADESTOP:	// ”’nŽæ‚è
+		if(sd) {
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+//			clif_bladestop(src,bl,1);	//”’nŽæ‚èó‘Ô‚É‚È‚é
+//			clif_bladestop(src,bl,0);	//”’nŽæ‚èó‘Ô‚Ì‰ðœ
+		}
+		break;
 	case MO_ABSORBSPIRITS:	// ‹C’D
 		if(sd && dstsd) {
 			if(sd == dstsd || map[sd->bl.m].flag.pvp || map[sd->bl.m].flag.gvg) {
