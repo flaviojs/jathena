@@ -2869,7 +2869,7 @@ struct Damage battle_calc_weapon_attack(
 	//GvGÇÃê≥ãKÉMÉãÉhè≥îFÇÕÇ±Ç±Ç≈èàóù
 	if(sd && md){
 		struct guild *g=NULL;
-		if(map[sd->bl.m].flag.gvg && md->class == 1288){
+		if(md->class == 1288 && map[sd->bl.m].flag.gvg){
 
 			if((g=guild_search(sd->status.guild_id))==NULL)
 				wd.damage=0;//ÉMÉãÉhñ¢â¡ì¸Ç»ÇÁÉ_ÉÅÅ[ÉWñ≥Çµ
@@ -3270,6 +3270,11 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		return 0;
 	if(target->type == BL_PC && pc_isdead((struct map_session_data *)target))
 		return 0;
+	if(map[src->m].flag.gvg){
+		if(src->type == BL_PC && target->type == BL_PC
+			&& (sd->ghost_timer!=-1 || ((struct map_session_data *)target)->ghost_timer!=-1))
+			return 0;
+	}
 
 	opt1=battle_get_opt1(src);
 	if(opt1 && *opt1 > 0) {
@@ -3297,10 +3302,9 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				((struct mob_data *)src)->dir = map_calc_dir(src, target->x,target->y );
 			wd=battle_calc_weapon_attack(src,target,KN_AUTOCOUNTER,flag&0xff,0);
 		}
-		else{
-			printf("debug : start calc\n");
+		else
 			wd=battle_calc_weapon_attack(src,target,0,0,0);
-}
+
 		if (wd.div_ == 255 && src->type == BL_PC)	{ //éOíiè∂
 			int delay = 300;
 			if(wd.damage+wd.damage2 < battle_get_hp(target)) {
@@ -3454,10 +3458,24 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			return 0;
 		}
 		if(map[src->m].flag.gvg) {
-			if(s_g > 0 && s_g == t_g)
+			int i;
+			struct guild *g=guild_search(s_g);
+
+			if( s_g > 0 && s_g == t_g)
 				return 1;
-			else if(map[src->m].flag.gvg_noparty && s_p > 0 && t_p > 0 && s_p == t_p)
+			if (g){
+				for(i=0;i<MAX_GUILDALLIANCE;i++){
+					if(g->alliance[i].guild_id > 0){
+						if(g->alliance[i].opposition && g->alliance[i].guild_id == t_g)
+							return 0;//ìGëŒÉMÉãÉhÇ»ÇÁñ≥èåèÇ…ìG
+						if(!(g->alliance[i].opposition) && g->alliance[i].guild_id == t_g)
+							return 1;//ìØñøÉMÉãÉhÇ»ÇÁñ≥èåèÇ…ñ°ï˚
+					}
+				}
+			}
+			if(map[src->m].flag.gvg_noparty && s_p > 0 && t_p > 0 && s_p == t_p)
 				return 1;
+
 			return 0;
 		}
 	}

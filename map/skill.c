@@ -1072,6 +1072,12 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		return 0;
 	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
 		return 0;
+	//こっちは範囲攻撃用
+	if(sd && map[sd->bl.m].flag.gvg){
+		if(sd->ghost_timer!=-1 || ((struct map_session_data *)bl)->ghost_timer!=-1)
+			return 0;
+	}
+
 	switch(skillid)
 	{
 	/* 武器攻撃系スキル */
@@ -2093,7 +2099,9 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
  */
 int skill_castend_id( int tid, unsigned int tick, int id,int data )
 {
-	struct map_session_data* sd=NULL/*,*target_sd=NULL*/;
+	struct map_session_data *sd=NULL,*tsd=NULL;
+	struct mob_data	*tmd=NULL;
+
 	struct block_list *bl;
 	int range;
 
@@ -2109,11 +2117,20 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 	if(sd->skillid != SA_CASTCANCEL)
 		sd->skilltimer=-1;
 	bl=map_id2bl(sd->skilltarget);
+	if(bl->type == BL_PC)
+		tsd=(struct map_session_data *)bl;
+	else if(bl->type == BL_MOB)
+		tmd=(struct mob_data *)bl;
+
 	if(bl==NULL || bl->prev==NULL)
 		return 0;
 	if(sd->bl.m != bl->m || pc_isdead(sd))
 		return 0;
-
+	//ID指定攻撃用。範囲攻撃はkill_castend_damage_id()で
+	if(map[sd->bl.m].flag.gvg && tsd){
+		if(sd->ghost_timer!=-1 || tsd->ghost_timer!=-1)
+			return 0;
+	}
 	range = skill_get_range(sd->skillid,sd->skilllv);
 	if(range < 0)
 		range = battle_get_range(&sd->bl) - (range + 1);
@@ -2761,6 +2778,10 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		return 0;
 	if( bl->type!=BL_PC && bl->type!=BL_MOB)
 		return 0;
+	//スキルユニット用
+	if(map[bl->m].flag.gvg && ss->type == BL_PC && bl->type == BL_PC
+		&& ( ((struct map_session_data *)bl)->ghost_timer!=-1 || ((struct map_session_data *)ss)->ghost_timer!=-1) )
+		return 0;
 
 	if(ss==NULL)
 		return 0;
@@ -3166,9 +3187,9 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 
 	if( (sd=map_id2sd(id))==NULL )
 		return 0;
-	
 	if( sd->skilltimer != tid )	/* タイマIDの確認 */
 		return 0;
+
 	if(sd->skilltimer != -1 && pc_checkskill(sd,SA_FREECAST) > 0) {
 		sd->speed = sd->prev_speed;
 		clif_updatestatus(sd,SP_SPEED);
@@ -3302,6 +3323,18 @@ int skill_check_condition( struct map_session_data *sd )
 			case CR_DEFENDER:
 				if(sd->sc_data[SkillStatusChangeTable[skill]].timer!=-1)
 					return 1;			/* 解除する場合はSP消費しない */
+				break;
+
+			case SM_ENDURE:
+			case AL_TELEPORT:
+			case AL_WARP:
+			case WZ_ICEWALL:
+			case TF_BACKSLIDING:
+/*			case RG_INTIMIDATE:	インティミはskill_attack()で処理*/
+				if(map[sd->bl.m].flag.gvg){
+					clif_skill_fail(sd,skill,0,0);
+					return 0;
+				}
 				break;
 
 			case MO_CALLSPIRITS:

@@ -2316,6 +2316,8 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 		return 0;
 	if(((1<<sd->status.class)&item->class) == 0)
 		return 0;
+	if((nameid == 605 || nameid == 601) && map[sd->bl.m].flag.gvg)
+		return 0;
 	return 1;
 }
 
@@ -3682,13 +3684,20 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		}
 	}
 
-	// pvp
-	if( map[sd->bl.m].flag.pvp){
+	//PvP
+	if(map[sd->bl.m].flag.pvp){
 		sd->pvp_point-=5;
 		if(src && src->type==BL_PC )
 			((struct map_session_data *)src)->pvp_point++;
 	}
-
+	//GvG
+	if(map[sd->bl.m].flag.gvg){
+		if(pc_isdead(sd)){//€‚ñ‚¾‚È‚ç‘¦‘Ş‹‚Å‚·ƒˆ
+			pc_setstand(sd);
+			pc_setrestartvalue(sd,3);
+			pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,0);
+		}
+	}		 
 	return 0;
 }
 
