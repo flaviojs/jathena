@@ -4797,6 +4797,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.skill_removetrap_type = 0;
 		battle_config.disp_experience = 0;
 		battle_config.castle_defense_rate = 100;
+		battle_config.riding_weight = 0;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4968,6 +4969,7 @@ int battle_config_read(const char *cfgName)
 			{ "skill_removetrap_type",		&battle_config.skill_removetrap_type	},
 			{ "disp_experience",			&battle_config.disp_experience			},
 			{ "castle_defense_rate",		&battle_config.castle_defense_rate		},
+			{ "riding_weight",		&battle_config.riding_weight		},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

@@ -733,7 +733,8 @@ int pc_authok(int id,struct mmo_charstatus *st)
 
 	//スパノビ用死にカウンターのスクリプト変数からの読み出しとsdへのセット
 	sd->die_counter = pc_readglobalreg(sd,"PC_DIE_COUNTER");
-
+	//倒したmobカウンターのスクリプト変数からの読み出しとsdへのセット
+	sd->kill_counter = pc_readglobalreg(sd,"KILL_MOB_COUNTER");
 	// ステータス初期計算など
 	pc_calcstatus(sd,1);
 
@@ -994,6 +995,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	pc_calc_skilltree(sd);	// スキルツリーの計算
 
 	sd->max_weight = max_weight_base[s_class.job]+sd->status.str*300;
+	if(pc_checkskill(sd,KN_RIDING)==1) // ライディングスキル所持
+	sd->max_weight +=battle_config.riding_weight; // Weight+α(初期設定は0)
 	if( (skill=pc_checkskill(sd,MC_INCCARRY))>0 )	// 所持量増加
 		sd->max_weight += skill*1000;
 
@@ -1409,8 +1412,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->speed += (1.2*DEFAULT_WALK_SPEED - skill*9);
 	if (pc_iscarton(sd) && (skill=pc_checkskill(sd,MC_PUSHCART))>0)	// カートによる速度低下
 		sd->speed += (10-skill) * (DEFAULT_WALK_SPEED * 0.1);
-	else if (pc_isriding(sd))	// ペコペコ乗りによる速度増加
-		sd->speed -= (0.25 * DEFAULT_WALK_SPEED);
+	else if (pc_isriding(sd))
+		sd->speed -= (0.25 * DEFAULT_WALK_SPEED);	// ペコペコ乗りによる速度増加
 	if(sd->sc_count){
 		if(sd->sc_data[SC_WINDWALK].timer!=-1) 	//ウィンドウォーク時はLv*2%減算
 			sd->speed -= sd->speed *(sd->sc_data[SC_WINDWALK].val1*2)/100;
@@ -2783,6 +2786,8 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 	if(nameid == 602 && map[sd->bl.m].flag.noreturn)
 		return 0;
 	if(nameid == 604 && (map[sd->bl.m].flag.nobranch || map[sd->bl.m].flag.gvg))
+		return 0;
+	if(nameid == 823 && (map[sd->bl.m].flag.nobranch || map[sd->bl.m].flag.gvg))
 		return 0;
 	if(item->sex != 2 && sd->status.sex != item->sex)
 		return 0;
@@ -5269,6 +5274,11 @@ int pc_setglobalreg(struct map_session_data *sd,char *reg,int val)
 	if(strcmp(reg,"PC_DIE_COUNTER") == 0 && sd->die_counter != val){
 		sd->die_counter = val;
 		pc_calcstatus(sd,0);
+	}
+	//KILL_MOB_COUNTERがスクリプトなどで変更された時の処理
+	if(strcmp(reg,"KILL_MOB_COUNTER") == 0 && sd->kill_counter != val){
+	sd->kill_counter = val;
+	pc_calcstatus(sd,0);
 	}
 	if(val==0){
 		for(i=0;i<sd->status.global_reg_num;i++){

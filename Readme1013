@@ -1,4 +1,27 @@
 --------------------
+//1051 by Plala
+・ライディング習得時MAX Weightを増やせるようにしました。
+増加数はbattle_athena.confで設定可能です。
+
+	(conf/)
+		battle_athena.conf
+			riding_weight 追加
+	(map/)
+		battle.c
+			battle_config.riding_weight = 0; 追加
+			battle_config.riding_weight 追加
+		battle.h
+			int riding_weight; 追加
+		clif.c
+			追加の修正分
+		pc.c
+			int pc_calcstatus 変更
+				998にif(pc_checkskill(sd,KN_RIDING)>0) を
+				999にsd->max_weight +=battle_config.riding_weight; を追加
+	(common/)
+		version.h
+			Ver 1050->1051 変更
+--------------------
 //1050 by code
 ・各種天候操作コマンドの見直し
 ※いちいち@misceffectで呼び出さずに簡単に天候操作を行えるように

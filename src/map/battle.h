@@ -279,6 +279,7 @@ extern struct Battle_Config {
 	int skill_removetrap_type;
 	int disp_experience;
 	int castle_defense_rate;
+	int riding_weight;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"
