@@ -30,12 +30,46 @@ echo "checking..."
 }
 
 check_account() {
+	if [ ! -d ./save ]; then
+		mkdir ./save
+	fi
+
 	if [ ! -f ./save/account.txt ]; then
-		echo "0	s1	p1	-	S	0" > save/account.txt
-		echo "1	s2	p2	-	S	0" >>save/account.txt
-		echo "2	s3	p3	-	S	0" >>save/account.txt
-		echo "3	s4	p4	-	S	0" >>save/account.txt
-		echo "4	s5	p5	-	S	0" >>save/account.txt
+		for i in `seq 0 4`
+		do
+			echo -e "$i\ts`expr $i + 1`\tp`expr $i + 1`\t-\tS\t0\t0\r" >> save/account.txt
+		done
+	fi
+
+	if [ ! -f ./save/athena.txt ]; then
+		echo -n > save/athena.txt
+	fi
+
+	if [ ! -f ./save/bank.txt ]; then
+		echo -n > save/bank.txt
+	fi
+
+	if [ ! -f ./save/guild.txt ]; then
+		echo -n > save/guild.txt
+	fi
+
+	if [ ! -f ./save/party.txt ]; then
+		echo -n > save/party.txt
+	fi
+
+	if [ ! -f ./save/pet.txt ]; then
+		echo -n > save/pet.txt
+	fi
+
+	if [ ! -f ./save/storage.txt ]; then
+		echo -n > save/storage.txt
+	fi
+
+	if [ ! -f ./save/castle.txt ]; then
+		for i in `seq 0 19`
+		do
+			echo -e "$i,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\r" >> save/castle.txt
+		done
 	fi
 }
 

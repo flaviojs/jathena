@@ -147,7 +147,7 @@ R 008a <src ID>.l <dst ID>.l <server tick>.l <src speed>.l <dst speed>.l <param1
 	type=09 ダメージモーションなしにダメージだけ表示される物(インデュア)
 	type=0a クリティカル
 	type=0b 完全回避
-R 008c <len>.w <str>.?B
+S 008c <len>.w <str>.?B
 	通常発言送信。チャット中はチャット内発言用になる
 	先頭の"<nick> : "の部分はクライアント側で付ける事
 R 008d <len>.w <ID>.l <str>.?B
@@ -291,10 +291,10 @@ R 00c5 <ID>.l <type>.B
 R 00c6 <len>.w {<value>.l <DCvalue>.l <type>.B <item ID>.w}.11B*
 	NPCのお店buy選択時。DCvalueは商人DC後の値段
 R 00c7 <len>.w {<index>.w <value>.l <OCvalue>.l}.10B*
-	NPCのお店sey選択時。OCvalueは商人OC後の値段
+	NPCのお店sell選択時。OCvalueは商人OC後の値段
 S 00c8 <len>.w {<amount>.w <item ID>.w}.4B*
 	NPCのお店から買う
-S 00c9 <>.w {<index>.w <amount>.w}.4B*
+S 00c9 <len>.w {<index>.w <amount>.w}.4B*
 	NPCのお店に売る
 R 00ca <type>.B
 	NPCから購入終了。type=00成功
@@ -386,16 +386,17 @@ S 00f3 <index>.w <amount>.l
 R 00f4 <index>.w <amount>.l <type ID>.w <identify flag>.B <attribute?>.B <refine>.B <card>.4w
 	カプラさん倉庫のアイテム追加
 S 00f5 <index>.w <amount>.l
-	カプラさん倉庫からアイテム取り出し
+	カプラさん倉庫からアイテム取り出し要求
 R 00f6 <index>.w <amount>.l
-	カプラさん倉庫のアイテム削除
+	カプラさん倉庫からアイテム取り出し応答
 S 00f7
-	カプラさん倉庫閉じ
+	カプラさん倉庫閉じ要求
 R 00f8
 	カプラさん倉庫閉じ応答
 S 00f9 <party name>.24B
-	パーティ作成
+	パーティ作成要求
 R 00fa <fail>.B
+	パーティ作成応答
 	fail=00 「パーティーを結成しました。」
 	fail=01 「同じ名前のパーティーがあります。」
 	fail=02 「すでにパーティーに加入しています。」
@@ -449,6 +450,7 @@ R 0110 <skill ID>.w <basic type>.w ?.w <fail>.B <type>.B
 	05:shout? 06:PK 07:マナーポイント
 R 0111 <skill ID>.w <target type>.w ?.w <lv>.w <sp>.w <range>.w <skill name>.24B <up>.B
 	010fの1つ分。β2だと未使用?
+	20040415転職時に観測
 S 0112 <skill ID>.w
 	スキルlvup要求
 S 0113 <level>.w <skill ID>.w <ID>.l
@@ -577,6 +579,10 @@ R 013e <src ID>.l <dst ID>.l <X>.w <Y>.w <lv?>.w ?.w <wait>.l
 R 0141 <type>.l <base>.l <bonus>.l
 	ステータス情報。typeは0dから12が順にSTR,AGI,VIT,INT,DEX,LUKに対応
 	base+bonusと表示される
+R 0142 <ID>.l
+	数値入力用窓表示
+S 0143 <ID>.l <amount>.l
+	0142の窓に入力した数値の送信
 R 0144 <ID>.l <type>.l <X>.l <Y>.l <point ID>.B <color>.3B ?.B
 	案内員用、マップ上アイコン表示パケット
 	type=1 アイコンを表示
@@ -589,7 +595,7 @@ S 0146 <ID>.l
 	IDのNPCとの会話。CLOSEボタンを押した。ack無しにNPCメッセージウィンドを同時に閉じる
 R 0147 <skill ID>.w <target type>.w ?.w <lv>.w <sp>.w <range>.w <skill name>.24B <up>.B
 	アイテム利用の結果一時的に得られたスキル情報
-S 0148 <ID>.l
+R 0148 <ID>.l
 	リザレクションの相手決め? @ β1
 S 0149 <ID>.l <type>.B
 	IDにマナーポイントを与える。type=00 プラス type=01 マイナス
@@ -930,6 +936,8 @@ R 01b0 <monster id>.l <?>.b <new monster code>.l
 S 01b2 <len>.w <message>.80B <flag>.B {<index>.w <amount>.w <value>.l}.8B*
 	露店開設
 	flag ： 0=キャンセル , 1=オープン
+R 01b3 <filename>.64B <type>.B
+	R 0145の上位互換
 R 01B6 <guildID>.l <guildLv>.l <connum>.l <定員>.l <Avl.lvl>.l <now_exp>.l <next_exp>.l <上納ポイント>.l <性向F-V>.l <性向R-W>.l <members>.l <guild name>.24B <guild master>.24B <agit?>.20B
 	ギルド情報 
 R 01b9 <ID>.I

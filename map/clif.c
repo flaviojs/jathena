@@ -1380,10 +1380,10 @@ int clif_cutin(struct map_session_data *sd,char *image,int type)
 {
 	int fd=sd->fd;
 
-	WFIFOW(fd,0)=0x145;
-	memcpy(WFIFOP(fd,2),image,16);
-	WFIFOB(fd,18)=type;
-	WFIFOSET(fd,packet_len_table[0x145]);
+	WFIFOW(fd,0)=0x1b3;
+	memcpy(WFIFOP(fd,2),image,64);
+	WFIFOB(fd,66)=type;
+	WFIFOSET(fd,packet_len_table[0x1b3]);
 	return 0;
 }
 
