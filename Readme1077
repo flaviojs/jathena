@@ -1,4 +1,10 @@
 --------------------
+//1084 by lizorett
+・経験値獲得のバグ修正(バグ報告スレッド part7 >>134)
+	(src/map)
+		mob.c	経験値計算修正
+
+--------------------
 //1083 by End_of_exam special thanks to lizorettさん
 ・ソケットのデストラクタ処理の追加
 		(common/socket.c common/socket.h login/login.c char/char.c map/clif.c map/chrif.c)
