@@ -7,7 +7,8 @@ prtg_cas01.gat,112,181,0	script	アブライ	55,{
 	set @GIDp1,getcastledata("prtg_cas01.gat",1);
 	if (@GIDp1 == 0) goto LStart;
 	if (getcharid(2) != @GIDp1) goto LStart2;
-	if (strcharinfo(0) == getguildmaster(@GIDp1)) goto LStart3;
+	if (getcharid(0) == getguildmasterid(@GIDp1)) goto LStart3;
+	goto LStart2;
 
 // ------- アジト未占領 ----------------------------------
 LStart:

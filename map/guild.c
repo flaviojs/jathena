@@ -116,6 +116,19 @@ struct guild_castle *guild_castle_search(int gcid)
 	return numdb_search(castle_db,gcid);
 }
 
+// mapnameに対応したアジトのgcを返す
+struct guild_castle *guild_mapname2gc(char *mapname)
+{
+	int i;
+	struct guild_castle *gc=NULL;
+	for(i=0;i<MAX_GUILDCASTLE;i++){
+		gc=guild_castle_search(i);
+		if(!gc) continue;
+		if(strcmp(gc->map_name,mapname)==0) return gc;
+	}
+	return NULL;
+}
+
 // ログイン中のギルドメンバーの１人のsdを返す
 struct map_session_data *guild_getavailablesd(struct guild *g)
 {

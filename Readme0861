@@ -1,5 +1,27 @@
 --------------------
-//864 by 胡蝶蘭
+//0865 by ぴざまん
+
+・自分が占領しているアジトのエンペリウムを攻撃できたバグ修正。
+・アブライが占領ギルドメンバー全員をマスターとみなしていたバグ修正。
+　この修正に伴ってスクリプトリファレンスに改変があります。
+	・getcharid(0)で、自分のcharIDを返すように。
+	・getguildmasterid(<n>)追加。
+	　<n>=ギルドID
+	　該当ギルドのマスターのcharIDを返します。
+
+	(map/)
+	guild.c
+		guild_mapname2gc() 追加。
+	battle.c
+		battle_calc_damage() 修正。
+	script.c
+		buildin_getcharid() 修正。
+		buildin_getguildmasterid() 追加。
+		ローカルプロトタイプ宣言の一部を修正、追加。
+	guild.h 修正。
+
+--------------------
+//0864 by 胡蝶蘭
 
 ・inter鯖のwisの処理変更
 	・自前リンクリストからdb.hで提供されているデータベースを使用するように
@@ -18,7 +40,7 @@
 		パケット3002,3801を変更
 
 --------------------
-//863 by 死神
+//0863 by 死神
 
 ・細かい修正。
 ・battle_athena.confにplayer_attack_direction_change追加。
@@ -42,7 +64,7 @@
 		battle_weapon_attack()、battle_config_read() 修正。
 
 --------------------
-//862 by 胡蝶蘭
+//0862 by 胡蝶蘭
 
 ・mobスキル使用条件追加
 	・friendhpltmaxrate : 味方のHPが指定％未満のとき(テスト済み)
@@ -68,13 +90,13 @@
 		最初の説明のみ修正。データは修正していません。
 
 --------------------
-//861 by いど
+//0861 by いど
 
 ・サーバーsnapshot
 
 --------------------
 
-//0827以前の変更点はReadmeを参照してください
+//0860以前の変更点はReadmeを参照してください
 
 --------------------
 
@@ -212,4 +234,4 @@
      This release is just fixed some bugs in timer.c, script.c and map_athena1.conf.
 
 
-(c) 2003 Athena Proje
+(c) 2003 Athena Project.

@@ -90,6 +90,7 @@ int buildin_getcharid(struct script_state *st);
 int buildin_getpartyname(struct script_state *st);
 int buildin_getguildname(struct script_state *st);
 int buildin_getguildmaster(struct script_state *st);
+int buildin_getguildmasterid(struct script_state *st);
 int buildin_strcharinfo(struct script_state *st);
 int buildin_getequipname(struct script_state *st);
 int buildin_getequipisequiped(struct script_state *st);
@@ -196,6 +197,7 @@ struct {
 	{buildin_getpartyname,"getpartyname","i"},
 	{buildin_getguildname,"getguildname","i"},
 	{buildin_getguildmaster,"getguildmaster","i"},
+	{buildin_getguildmasterid,"getguildmasterid","i"},
 	{buildin_strcharinfo,"strcharinfo","i"},
 	{buildin_getequipname,"getequipname","i"},
 	{buildin_getequipisequiped,"getequipisequiped","i"},
@@ -1572,6 +1574,8 @@ int buildin_getcharid(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=map_id2sd(st->rid);
+	if(num==0)
+		push_val(st->stack,C_INT,sd->status.char_id);
 	if(num==1)
 		push_val(st->stack,C_INT,sd->status.party_id);
 	if(num==2)
@@ -1684,6 +1688,24 @@ int buildin_getguildmaster(struct script_state *st)
 		push_str(st->stack,C_STR,master);
 	else
 		push_str(st->stack,C_STR,"null");
+	return 0;
+}
+
+int buildin_getguildmasterid(struct script_state *st)
+{
+	char *master;
+	struct map_session_data *sd=NULL;
+	int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	master=buildin_getguildmaster_sub(guild_id);
+	if(master!=0){
+		if((sd=map_nick2sd(master)) == NULL){
+			push_val(st->stack,C_INT,0);
+			return 0;
+		}
+		push_val(st->stack,C_INT,sd->status.char_id);
+	}else{
+		push_val(st->stack,C_INT,0);
+	}
 	return 0;
 }
 

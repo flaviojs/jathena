@@ -1138,8 +1138,12 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 			damage=0;
 		if(src->type == BL_PC) {
 			struct guild *g=guild_search(((struct map_session_data *)src)->status.guild_id);
+			struct guild_castle *gc=guild_mapname2gc(map[bl->m].name);
+
 			if(g == NULL)
 				damage=0;//ギルド未加入ならダメージ無し
+			else if(g->guild_id == gc->guild_id)
+				damage=0;//自占領ギルドのエンペならダメージ無し
 			else if(guild_checkskill(g,GD_APPROVAL) <= 0)
 				damage=0;//正規ギルド承認がないとダメージ無し
 		}

@@ -19,6 +19,8 @@ void do_init_guild(void);
 struct guild *guild_search(int guild_id);
 struct guild_castle *guild_castle_search(int gcid);
 
+struct guild_castle *guild_mapname2gc(char *mapname);
+
 struct map_session_data *guild_getavailablesd(struct guild *g);
 int guild_getindex(struct guild *g,int account_id,int char_id);
 int guild_getposition(struct map_session_data *sd,struct guild *g);
