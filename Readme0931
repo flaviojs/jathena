@@ -1,4 +1,27 @@
 --------------------
+//0950 by (凸)
+・mob_dbのModeフラグに以下の物を追加
+	0x40(64) ダメージを1に固定(草やクリスタルなど)
+	0x80(128) 攻撃を受けたときに反撃をする
+・上記の変更のためmob_db.txtほぼ全部変更、mob_db2.txtを作っている人は
+	草など1ダメ固定にはModeに64を足さないと普通にダメージ
+	その他MobはModeに128を足さないと反撃してこなくなるので注意
+
+	(db/)
+	mob_db.txt 修正
+	(map/)
+	battle.c
+		battle_calc_pet_weapon_attack()
+		battle_calc_mob_weapon_attack()
+		battle_calc_pc_weapon_attack()
+		battle_calc_magic_attack()
+	mob.c
+		mob_once_spawn()
+		mob_attack()
+		mob_target()
+		mob_ai_sub_hard()
+
+--------------------
 //0949 by ぴざまん
 
 ・ステータス異常耐性全面修正。

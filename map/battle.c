@@ -1698,7 +1698,8 @@ static struct Damage battle_calc_pet_weapon_attack(
 		}
 	}
 
-	if(def1 >= 1000000 && damage > 0)
+//	if(def1 >= 1000000 && damage > 0)
+	if(t_mode&0x40 && damage > 0)
 		damage = 1;
 
 	if(skill_num != CR_GRANDCROSS)
@@ -2119,7 +2120,8 @@ static struct Damage battle_calc_mob_weapon_attack(
 		}
 	}
 
-	if(def1 >= 1000000 && damage > 0)
+//	if(def1 >= 1000000 && damage > 0)
+	if(t_mode&0x40 && damage > 0)
 		damage = 1;
 
 	if( tsd && tsd->special_state.no_weapon_damage)
@@ -2976,7 +2978,8 @@ static struct Damage battle_calc_pc_weapon_attack(
 		}
 	}
 
-	if(def1 >= 1000000) {
+//	if(def1 >= 1000000) {
+	if(t_mode&0x40){
 		if(damage > 0)
 			damage = 1;
 		if(damage2 > 0)
@@ -3257,7 +3260,8 @@ struct Damage battle_calc_magic_attack(
 	if(div_>1 && skill_num != WZ_VERMILION)
 		damage*=div_;
 
-	if(mdef1 >= 1000000 && damage > 0)
+//	if(mdef1 >= 1000000 && damage > 0)
+	if(t_mode&0x40 && damage > 0)
 		damage = 1;
 
 	if( target->type==BL_PC && ((struct map_session_data *)target)->special_state.no_magic_damage)

@@ -153,7 +153,7 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 		md->bl.m=m;
 		md->bl.x=x;
 		md->bl.y=y;
-		if(r<0&&battle_config.dead_branch_active) md->mode=21;
+		if(r<0&&battle_config.dead_branch_active) md->mode=0x1+0x4+0x80; //移動してアクティブで反撃する
 		md->m =m;
 		md->x0=x;
 		md->y0=y;
@@ -431,6 +431,10 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 		mode=md->mode;
 	}
 	race=mob_db[md->class].race;
+	if(!(mode&0x80)){
+		md->target_id=0;
+		return 0;
+	}
 	if(!(mode&0x20) && (sd->sc_data[SC_TRICKDEAD].timer != -1 ||
 		 ((pc_ishiding(sd) || sd->state.gangsterparadise) && race!=4 && race!=6) ) ) {
 		md->target_id=0;
@@ -894,8 +898,7 @@ int mob_target(struct mob_data *md,struct block_list *bl,int dist)
 	}else{
 		mode=md->mode;
 	}
-
-	if(!mode) {
+	if(!(mode&0x80)) {
 		md->target_id = 0;
 		return 0;
 	}
@@ -1242,7 +1245,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 		return 0;
 	}
 
-	if(!mode && md->target_id > 0)
+	if(!(mode&0x80) && md->target_id > 0)
 		md->target_id = 0;
 
 	if(md->attacked_id > 0 && mode&0x08){	// リンクモンスター
