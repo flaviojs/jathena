@@ -3041,6 +3041,10 @@ struct Damage battle_calc_magic_attack(
 			matk1+=50;
 			matk2+=50;
 			break;
+		case WZ_SIGHTRASHER:
+			MATK_FIX( 100+skill_lv*20, 100);
+			blewcount=5|0x10000;
+			break;
 		case WZ_METEOR:
 			break;
 		case WZ_JUPITEL:	// ユピテルサンダー

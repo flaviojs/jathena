@@ -248,6 +248,7 @@ int skill_get_unit_id(int id,int flag)
 	case AL_PNEUMA:			return 0x85;				/* ニューマ */
 	case MG_THUNDERSTORM:	return 0x86;		/* サンダーストーム */
 	case WZ_HEAVENDRIVE:	return 0x86;		/* ヘヴンズドライブ */
+	case WZ_SIGHTRASHER:	return 0x86;
 	case WZ_METEOR:			return 0x86;				/* メテオストーム */
 	case WZ_VERMILION:		return 0x86;				/* ロードオブヴァーミリオン */
 	case WZ_FROSTNOVA:		return 0x86;			/* フロストノヴァ */
@@ -1453,10 +1454,14 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case WZ_FROSTNOVA:			/* フロストノヴァ */
-		/* スキルユニット配置 */
 		skill_castend_pos2(src,bl->x,bl->y,skillid,skilllv,tick,0);
 		break;
 
+	case WZ_SIGHTRASHER:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		skill_castend_pos2(src,bl->x,bl->y,skillid,skilllv,tick,0);
+		skill_status_change_end(src,SC_SIGHT,-1);
+		break;
 
 	/* その他 */
 	case HT_BLITZBEAT:			/* ブリッツビート */
@@ -2378,7 +2383,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				maxlv = 3;
 			}
 			if(spellid > 0)
-				skill_status_change_start(src,SC_AUTOSPELL,skilllv,skillid,maxlv,0,
+				skill_status_change_start(src,SC_AUTOSPELL,skilllv,spellid,maxlv,0,
 					skill_get_time(SA_AUTOSPELL,skilllv),0);
 		}
 		break;
@@ -2532,7 +2537,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 
 	if(src->type==BL_PC)
 		sd=(struct map_session_data *)src;
-	if(skillid != WZ_METEOR)
+	if(skillid != WZ_METEOR && skillid != WZ_SIGHTRASHER)
 		clif_skill_poseffect(src,skillid,skilllv,x,y,tick);
 
 	switch(skillid)
@@ -2565,6 +2570,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case AL_PNEUMA:				/* ニューマ */
 	case WZ_ICEWALL:			/* アイスウォール */
 	case WZ_FIREPILLAR:			/* ファイアピラー */
+	case WZ_SIGHTRASHER:
 	case WZ_QUAGMIRE:			/* クァグマイア */
 	case WZ_VERMILION:			/* ロードオブヴァーミリオン */
 	case WZ_FROSTNOVA:			/* フロストノヴァ */
@@ -2787,6 +2793,11 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 	case WZ_METEOR:				/* メテオストーム */
 		limit=500;
 		range=2;
+		break;
+
+	case WZ_SIGHTRASHER:
+		limit=500;
+		count=41;
 		break;
 
 	case WZ_VERMILION:			/* ロードオブヴァーミリオン */
@@ -3048,6 +3059,17 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 				static const int dy[]={
 					-3,-3,-3, -2,-2,-2, -1,-1,-1,-1,-1,-1,-1,
 					0,0,0,0,0,0,0, 1,1,1,1,1,1,1, 2,2,2, 3,3,3 };
+				ux+=dx[i];
+				uy+=dy[i];
+			}
+			break;
+
+		case WZ_SIGHTRASHER:
+			{
+				static const int dx[]={
+					-5, 0, 5, -4, 0, 4, -3, 0, 3, -2, 0, 2, -1, 0, 1, -5,-4,-3,-2,-1, 0, 1, 2, 3, 4, 5, -1, 0, 1, -2, 0, 2, -3, 0, 3, -4, 0, 4, -5, 0, 5 };
+				static const int dy[]={
+					-5,-5,-5, -4,-4,-4, -3,-3,-3, -2,-2,-2, -1,-1,-1,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1, 1, 1,  2, 2, 2,  3, 3, 3,  4, 4, 4,  5, 5, 5 };
 				ux+=dx[i];
 				uy+=dy[i];
 			}
@@ -5183,14 +5205,13 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_WEAPONPERFECTION:	/* ウェポンパーフェクション */
 			break;
-			break;
 		case SC_OVERTHRUST:			/* オーバースラスト */
 			break;
 		case SC_MAXIMIZEPOWER:		/* マキシマイズパワー(SPが1減る時間,val2にも) */
 			if(bl->type == BL_PC)
 				val2 = tick;
 			else
-				tick = skill_get_time(BS_WEAPONPERFECT,val1);
+				tick = 5000*val1;
 			break;
 		case SC_ENCPOISON:			/* エンチャントポイズン */
 			calc_flag = 1;
@@ -5437,7 +5458,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			if(bl->type == BL_PC)
 				val2 = tick;
 			else
-				tick = skill_get_time(TF_HIDING,val1);
+				tick = 5000*val1;
 			break;
 		case SC_SIGHT:			/* サイト/ルアフ */
 		case SC_RUWACH:

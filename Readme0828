@@ -1,4 +1,20 @@
 --------------------
+//0838 by 死神
+
+・スキルサイトラッシャー実装。
+・モンスターのクローキングとマキシマイズパワーは持続時間をレベル*5秒に変更。
+・その他細かいバグ修正。
+	(db/)
+	skill_db.txt 修正。
+	(map/)
+	skill.c
+		skill_castend_damage_id()、skill_castend_nodamage_id() 修正。
+		skill_castend_pos2()、skill_unitsetting()、skill_get_unit_id() 修正。
+		skill_status_change_start() 修正。
+	battle.c
+		battle_calc_magic_attack() 修正。
+
+--------------------
 //0837 by 死神
 
 ・スキル関係の細かい修正。
