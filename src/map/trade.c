@@ -190,15 +190,23 @@ void trade_tradecommit(struct map_session_data *sd)
 				for(trade_i=0; trade_i<10;trade_i++) {
 					if(sd->deal_item_amount[trade_i] != 0) {
 						int n=sd->deal_item_index[trade_i]-2;
-						pc_additem(target_sd,&sd->status.inventory[n],sd->deal_item_amount[trade_i]);
-						pc_delitem(sd,n,sd->deal_item_amount[trade_i],1);
+						int flag;
+						flag = pc_additem(target_sd,&sd->status.inventory[n],sd->deal_item_amount[trade_i]);
+						if(flag==0)
+							pc_delitem(sd,n,sd->deal_item_amount[trade_i],1);
+						else
+							clif_additem(sd,n,sd->deal_item_amount[trade_i],0);
 						sd->deal_item_index[trade_i] =0;
 						sd->deal_item_amount[trade_i]=0;
 					}
 					if(target_sd->deal_item_amount[trade_i] != 0) {
 						int n=target_sd->deal_item_index[trade_i]-2;
-						pc_additem(sd,&target_sd->status.inventory[n],target_sd->deal_item_amount[trade_i]);
-						pc_delitem(target_sd,n,target_sd->deal_item_amount[trade_i],1);
+						int flag;
+						flag = pc_additem(sd,&target_sd->status.inventory[n],target_sd->deal_item_amount[trade_i]);
+						if(flag==0)
+							pc_delitem(target_sd,n,target_sd->deal_item_amount[trade_i],1);
+						else
+							clif_additem(target_sd,n,target_sd->deal_item_amount[trade_i],0);
 						target_sd->deal_item_index[trade_i] =0;
 						target_sd->deal_item_amount[trade_i]=0;
 					}

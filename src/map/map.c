@@ -829,6 +829,8 @@ void map_addnickdb(struct map_session_data *sd)
  */
 int map_quit(struct map_session_data *sd)
 {
+	int i;
+
 	nullpo_retr(0, sd);
 
 	if(sd->chatID)	// チャットから出る
@@ -891,6 +893,14 @@ int map_quit(struct map_session_data *sd)
 	if(pc_isdead(sd))
 		pc_setrestartvalue(sd,2);
 	pc_makesavestatus(sd);
+	//クローンスキルで覚えたスキルは消す
+	for(i=0;i<MAX_SKILL;i++){
+		if(sd->status.skill[i].flag == 13){
+			sd->status.skill[i].id=0;
+			sd->status.skill[i].lv=0;
+			sd->status.skill[i].flag=0;
+		}
+	}
 	chrif_save(sd);
 	storage_storage_save(sd);
 

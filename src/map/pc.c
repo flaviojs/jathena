@@ -354,8 +354,6 @@ static int pc_walktoxy_sub(struct map_session_data *);
  */
 int pc_makesavestatus(struct map_session_data *sd)
 {
-	int i;
-
 	nullpo_retr(0, sd);
 
 	// 服の色は色々弊害が多いので保存対象にはしない
@@ -379,14 +377,6 @@ int pc_makesavestatus(struct map_session_data *sd)
 			memcpy(&sd->status.last_point,&sd->status.save_point,sizeof(sd->status.last_point));
 		else
 			memcpy(&sd->status.last_point,&m->save,sizeof(sd->status.last_point));
-	}
-	//クローンスキルで覚えたスキルは消す
-	for(i=0;i<MAX_SKILL;i++){
-		if(sd->status.skill[i].flag == 13){
-			sd->status.skill[i].id=0;
-			sd->status.skill[i].lv=0;
-			sd->status.skill[i].flag=0;
-		}
 	}
 	return 0;
 }

@@ -1,4 +1,27 @@
 --------------------
+//1030 by (凸)
+・map_athena.confに新婚島ザワイをコメントアウトして追加
+・クローンスキルで覚えたスキルを自動セーブごとに忘れていたのでとりあえずログオフ時にのみ忘れるように変更したつもり
+・mobskill_castend_posの無害nullpoチェックを変更
+・Emotionの設定がないMobがスキルを使用するときに/!を出していたのを修正
+・バグスレに投げたtrade.cを添付。とりあえず相手が所持できる種類の限界を超えた場合は渡さずに元に戻すように変更
+
+	(conf/)
+	map_athena.conf ザワイ追加
+	(doc/)
+	client_packet.txt パケット長の更新
+	(map/)
+	map.c
+		map_quit() 終了時にクローンスキルで覚えたスキルを忘れるように変更
+	mob.c
+		mobskill_castend_pos() nullpoチェック変更
+		mob_readskilldb() 修正
+	pc.c
+		pc_makesavestatus() クローンスキルを忘れるのをmap_quitに任せた
+	trade.c
+		trade_tradecommit() 所持できる種類以上を取引した場合にアイテムが消えないように
+
+--------------------
 //1029 by (凸)
 ・20040619RagexeHC_jp.rgzの0x204と0x20bパケットに対応
 ・charとloginも知らないパケットが来たらパケットダンプを出力するようにclif.cからコピペ

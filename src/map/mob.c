@@ -2673,9 +2673,14 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 {
 	struct mob_data* md=NULL;
+	struct block_list *bl;
 	int range,maxcount;
 
-	nullpo_retr(0, md=(struct mob_data *)map_id2bl(id));
+	//mobskill_castend_id“¯—l‰r¥‚µ‚½Mob‚ª‰r¥Š®—¹Žž‚É‚à‚¤‚¢‚È‚¢‚Æ‚¢‚¤‚Ì‚Í‚ ‚è‚»‚¤‚È‚Ì‚Ånullpo‚©‚çœŠO
+	if((bl=map_id2bl(id))==NULL)
+		return 0;
+
+	nullpo_retr(0, md=(struct mob_data *)bl);
 	
 	if( md->bl.type!=BL_MOB || md->bl.prev==NULL )
 		return 0;
@@ -3629,7 +3634,10 @@ static int mob_readskilldb(void)
 			ms->val[2]=atoi(sp[14]);
 			ms->val[3]=atoi(sp[15]);
 			ms->val[4]=atoi(sp[16]);
-			ms->emotion=(sp[17]=="")?-1:atoi(sp[17]);
+			if(strlen(sp[17])>2)
+				ms->emotion=atoi(sp[17]);
+			else
+				ms->emotion=-1;
 			mob_db[mob_id].maxskill=i+1;
 		}
 		fclose(fp);
