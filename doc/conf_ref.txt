@@ -968,6 +968,9 @@ holywater_name_input
 	アクアベネディクタで作られた聖水に製造者の名前を付けるかどうかです。
 	デフォルトはyesです。
 
+display_delay_skill_fail
+	スキル使用のディレイ中に「スキル使用の後は、しばらくお待ちください」を表示するかどうか。
+	デフォルトはyesです。
 
 < 例 >
 
@@ -1095,7 +1098,7 @@ produce_item_name_input: yes
 produce_potion_name_input: yes
 making_arrow_name_input: yes
 holywater_name_input: yes
-
+display_delay_skill_fail: yes
 
 =====================================================================ghos6. atcommand_athena.conf
 --------------------------------------------------------------------------

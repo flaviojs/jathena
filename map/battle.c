@@ -3943,6 +3943,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.produce_potion_name_input = 1;
 	battle_config.making_arrow_name_input = 1;
 	battle_config.holywater_name_input = 1;
+	battle_config.display_delay_skill_fail = 1;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -4081,6 +4082,7 @@ int battle_config_read(const char *cfgName)
 			{ "produce_potion_name_input" ,&battle_config.produce_potion_name_input },
 			{ "making_arrow_name_input" ,&battle_config.making_arrow_name_input },
 			{ "holywater_name_input" ,&battle_config.holywater_name_input },
+			{ "display_delay_skill_fail" ,&battle_config.display_delay_skill_fail },
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

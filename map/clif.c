@@ -3435,6 +3435,10 @@ int clif_skillcastcancel(struct block_list* bl)
 int clif_skill_fail(struct map_session_data *sd,int skill_id,int type,int btype)
 {
 
+	if(type==0x4 && battle_config.display_delay_skill_fail==0){
+		return 0;
+	}
+
 	int fd=sd->fd;
 	WFIFOW(fd,0) = 0x110;
 	WFIFOW(fd,2) = skill_id;
