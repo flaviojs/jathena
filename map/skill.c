@@ -809,11 +809,29 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		if(rand()%100 < rate)
 			skill_addtimerskill(src,tick + 800,bl->id,0,0,skillid,skilllv,0,flag);
 	}
+	if(damage > 0 && dmg.flag&BF_SKILL && bl->type==BL_PC && pc_checkskill((struct map_session_data *)bl,RG_PLAGIARISM)){
+		struct map_session_data *tsd = (struct map_session_data *)bl;
+		if(!tsd->status.skill[skillid].id && !tsd->status.skill[skillid].id 
+			&& !(skillid > NPC_PIERCINGATT && skillid < NPC_SUMMONMONSTER) ){
+			//既に盗んでいるスキルがあれば該当スキルを消す
+			if (tsd->cloneskill_id && tsd->cloneskill_lv && tsd->status.skill[tsd->cloneskill_id].flag==13){
+				tsd->status.skill[tsd->cloneskill_id].id=0;
+				tsd->status.skill[tsd->cloneskill_id].lv=0;
+				tsd->status.skill[tsd->cloneskill_id].flag=0;
+			}
+			tsd->cloneskill_id=skillid;
+			tsd->cloneskill_lv=skilllv;
+			tsd->status.skill[skillid].id=skillid;
+			tsd->status.skill[skillid].lv=(pc_checkskill(tsd,RG_PLAGIARISM) > skill_get_max(skillid))?
+							skill_get_max(skillid):pc_checkskill(tsd,RG_PLAGIARISM);
+			tsd->status.skill[skillid].flag=13;//cloneskill flag
+			clif_skillinfoblock(tsd);
+		}
+	}
 	/* ダメージがあるなら追加効果判定 */
 	if(!(bl->prev == NULL || (bl->type == BL_PC && pc_isdead((struct map_session_data *)bl) ) ) ) {
 		if(damage > 0)
 			skill_additional_effect(src,bl,skillid,skilllv,attack_type,tick);
-
 		if(bl->type==BL_MOB && src!=bl)	/* スキル使用条件のMOBスキル */
 		{
 				if(battle_config.mob_changetarget_byskill == 1)

@@ -321,6 +321,7 @@ static int pc_walktoxy_sub(struct map_session_data *);
  */
 int pc_makesavestatus(struct map_session_data *sd)
 {
+	int i;
 	// 服の色は色々弊害が多いので保存対象にはしない
 	if(!battle_config.save_clothcolor)
 		sd->status.clothes_color=0;
@@ -343,7 +344,14 @@ int pc_makesavestatus(struct map_session_data *sd)
 		else
 			memcpy(&sd->status.last_point,&m->save,sizeof(sd->status.last_point));
 	}
-
+	//クローンスキルで覚えたスキルは消す
+	for(i=0;i<MAX_SKILL;i++){
+		if(sd->status.skill[i].flag == 13){
+			sd->status.skill[i].id=0;
+			sd->status.skill[i].lv=0;
+			sd->status.skill[i].flag=0;
+		}
+	}
 	return 0;
 }
 
@@ -619,7 +627,6 @@ int pc_authok(int id,struct mmo_charstatus *st)
 		char buf[256];
 		FILE *fp;
 		if(	(fp = fopen(motd_txt, "r"))!=NULL){
-			clif_displaymessage(sd->fd,"< Message of the Day >");
 			while (fgets(buf, 250, fp) != NULL){
 				int i;
 				for( i=0; buf[i]; i++){
@@ -631,7 +638,6 @@ int pc_authok(int id,struct mmo_charstatus *st)
 				clif_displaymessage(sd->fd,buf);
 			}
 			fclose(fp);
-			clif_displaymessage(sd->fd,"< End of MOTD >");
 		}
 	}
 
@@ -670,7 +676,7 @@ static int pc_calc_skillpoint(struct map_session_data* sd)
 			if(!(skill_get_inf2(i)&0x01) || battle_config.quest_skill_learn) {
 				if(!sd->status.skill[i].flag)
 					skill_point += skill;
-				else if(sd->status.skill[i].flag > 2) {
+				else if(sd->status.skill[i].flag > 2 && sd->status.skill[i].flag != 13) {
 					skill_point += (sd->status.skill[i].flag - 2);
 				}
 			}
@@ -725,8 +731,8 @@ int pc_calc_skilltree(struct map_session_data *sd)
 	}
 
 	for(i=0;i<MAX_SKILL;i++){
-		sd->status.skill[i].id=0;
-		if (sd->status.skill[i].flag){	// cardスキルなら、
+		if (sd->status.skill[i].flag != 13) sd->status.skill[i].id=0;
+		if (sd->status.skill[i].flag && sd->status.skill[i].flag != 13){	// cardスキルなら、
 			sd->status.skill[i].lv=(sd->status.skill[i].flag==1)?0:sd->status.skill[i].flag-2;	// 本当のlvに
 			sd->status.skill[i].flag=0;	// flagは0にしておく
 		}
@@ -3691,7 +3697,7 @@ int pc_allskillup(struct map_session_data *sd)
 
 	for(i=0;i<MAX_SKILL;i++){
 		sd->status.skill[i].id=0;
-		if (sd->status.skill[i].flag){	// cardスキルなら、
+		if (sd->status.skill[i].flag && sd->status.skill[i].flag != 13){	// cardスキルなら、
 			sd->status.skill[i].lv=(sd->status.skill[i].flag==1)?0:sd->status.skill[i].flag-2;	// 本当のlvに
 			sd->status.skill[i].flag=0;	// flagは0にしておく
 		}
@@ -3768,7 +3774,7 @@ int pc_resetskill(struct map_session_data* sd)
 			if(!(skill_get_inf2(i)&0x01) || battle_config.quest_skill_learn) {
 				if(!sd->status.skill[i].flag)
 					sd->status.skill_point += skill;
-				else if(sd->status.skill[i].flag > 2) {
+				else if(sd->status.skill[i].flag > 2 && sd->status.skill[i].flag != 13) {
 					sd->status.skill_point += (sd->status.skill[i].flag - 2);
 				}
 				sd->status.skill[i].lv = 0;

@@ -1,4 +1,30 @@
 --------------------
+//0866 by ぴざまん
+
+・MOTDのメッセージを全て編集できるように変更。
+・クローンスキル実装。
+　ドル服のヒールアタックによるヒール習得は未テストです。
+・ギルド宝箱仮実装。
+　ヴァルキリー１のみです。
+　商業投資による宝箱個数の算出式は適当です(初期個数4個としか知らないので)。
+　Onclockイベントで動作させています。任意の時刻に変更してください。
+・AthenaDB計画のmob_db.txtとmapflag.txtを入れておきました。
+
+	(map/)
+	pc.c
+		pc_makesavestatus()、pc_calc_skilltree() 修正。
+		pc_allskillup()、pc_calc_skillpoint() 修正。
+		pc_resetskill()、pc_authok() 修正。
+	skill.c
+		skill_attack() 修正。
+	map.h 修正。
+	(conf/)
+	gvg/TEST_prtg_cas01_AbraiJ.txt 修正。
+	motd.txt 修正。
+	mapflag.txt 修正。
+	(db/)
+	mob_db.txt 修正。
+--------------------
 //0865 by ぴざまん
 
 ・自分が占領しているアジトのエンペリウムを攻撃できたバグ修正。

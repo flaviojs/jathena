@@ -5,6 +5,12 @@
 //prtg_cas01.txtのアブライはコメントアウトですよ～
 prtg_cas01.gat,112,181,0	script	アブライ	55,{
 	set @GIDp1,getcastledata("prtg_cas01.gat",1);
+	mes "Debug :@GIDp1="+@GIDp1;
+	mes "       getcharid(2)="+getcharid(2);
+	mes "       strcharinfo(0)="+strcharinfo(0);
+	mes "       getcharid(0)="+getcharid(0);
+	mes "       getguildmasterid(@GIDp1)="+getguildmasterid(@GIDp1);
+	next;
 	if (@GIDp1 == 0) goto LStart;
 	if (getcharid(2) != @GIDp1) goto LStart2;
 	if (getcharid(0) == getguildmasterid(@GIDp1)) goto LStart3;
@@ -356,6 +362,7 @@ L7:
 			mes "もう、そんな冗談よしてくださいよ^^.";
 			close;
 }
+
 prontera.gat,151,187,4	script	テストギルドフラッグ	722,{
 	set @GIDp1,getcastledata("prtg_cas01.gat",1);
 	if (@GIDp1 != 0) goto LStartg;
@@ -396,4 +403,16 @@ LStartg2:
 		mes "ギルドアジトに戻ります";
 		next;
 		warp "prtg_cas01.gat",97,174;end;
+}
+
+//ギルド宝箱(暫定)
+prtg_cas01.gat,10,209,0	script	t_box_p1	-1,{
+OnClock0000:
+	killmonster "prtg_cas01.gat","T_BOX_P1";
+	if (getcastledata("prtg_cas01.gat",1) == 0) end;
+	set @Economy,getcastledata("prtg_cas01.gat",2);
+	set @boxnum,2+@Economy/100000;
+	areamonster "prtg_cas01.gat",6,204,15,213,"宝箱",1324,@boxnum,"T_BOX_P1";
+	areamonster "prtg_cas01.gat",6,204,15,213,"宝箱",1325,@boxnum,"T_BOX_P1";
+	end;
 }
