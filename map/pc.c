@@ -3849,10 +3849,10 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	}
 	if(pos==0x88){ // アクセサリ用例外処理
 		int epor=0;
-		if(sd->equip_index[6] >= 0)
-			epor |= sd->status.inventory[sd->equip_index[6]].equip;
-		if(sd->equip_index[7] >= 0)
-			epor |= sd->status.inventory[sd->equip_index[7]].equip;
+		if(sd->equip_index[0] >= 0)
+			epor |= sd->status.inventory[sd->equip_index[0]].equip;
+		if(sd->equip_index[1] >= 0)
+			epor |= sd->status.inventory[sd->equip_index[1]].equip;
 		epor &= 0x88;
 		pos = epor == 0x08 ? 0x80 : 0x08;
 	}
@@ -3863,10 +3863,10 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	 &&	(pc_checkskill(sd, AS_LEFT) > 0) // 左手修錬有
 	){
 		int tpos=0;
-		if(sd->equip_index[2] >= 0)
-			tpos |= sd->status.inventory[sd->equip_index[2]].equip;
-		if(sd->equip_index[3] >= 0)
-			tpos |= sd->status.inventory[sd->equip_index[3]].equip;
+		if(sd->equip_index[8] >= 0)
+			tpos |= sd->status.inventory[sd->equip_index[8]].equip;
+		if(sd->equip_index[9] >= 0)
+			tpos |= sd->status.inventory[sd->equip_index[9]].equip;
 		tpos &= 0x02;
 		pos = tpos == 0x02 ? 0x20 : 0x02;
 	}
