@@ -17,6 +17,7 @@
 #include "intif.h"
 #include "npc.h"
 #include "pc.h"
+#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -89,10 +90,7 @@ int chrif_isconnect(void)
  */
 int chrif_save(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("chrif_save nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if(char_fd<0)
 		return -1;
@@ -172,10 +170,7 @@ int chrif_recvmap(int fd)
 int chrif_changemapserver(struct map_session_data *sd,char *name,int x,int y,int ip,short port)
 {
 
-	if( sd == NULL ){
-		printf("chrif_changemapserver nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	WFIFOW(char_fd,0)=0x2b05;
 	WFIFOL(char_fd,2)=sd->bl.id;
@@ -255,10 +250,7 @@ int chrif_sendmapack(int fd)
  */
 int chrif_authreq(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("chrif_authreq nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	WFIFOW(char_fd,0) = 0x2afc;
 	WFIFOL(char_fd,2) = sd->bl.id;
@@ -275,10 +267,8 @@ int chrif_authreq(struct map_session_data *sd)
  */
 int chrif_charselectreq(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("chrif_charselectreq nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
+
 	WFIFOW(char_fd,0)=0x2b02;
 	WFIFOL(char_fd,2)=sd->bl.id;
 	WFIFOL(char_fd,6)=sd->login_id1;
@@ -381,10 +371,8 @@ int chrif_changedsex(int fd)
 int chrif_saveaccountreg2(struct map_session_data *sd)
 {
 	int p,j;
-	if( sd == NULL ){
-		printf("chrif_saveaccountreg2 nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
+
 	for(p=8,j=0;j<sd->status.account_reg2_num;j++){
 		struct global_reg *reg=&sd->status.account_reg2[j];
 		if(reg->str[0] && reg->value!=0){
@@ -426,9 +414,7 @@ int chrif_divorce(int char_id ,int partner_id){
 	struct map_session_data *sd = NULL;
 	if(!char_id || !partner_id )
 		return 0;
-	if((sd=(map_nick2sd(map_charid2nick(partner_id)))) == NULL){
-		printf("chrif_divorce nullpo\n");
-	}
+	nullpo_retr(0, sd=(map_nick2sd(map_charid2nick(partner_id))));
 	if(sd->status.partner_id == char_id){
 		int i;
 		//—£¥(‘Š•û‚ÍŠù‚ÉƒLƒƒƒ‰‚ªÁ‚¦‚Ä‚¢‚é”¤‚È‚Ì‚Å)

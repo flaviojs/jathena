@@ -23,6 +23,7 @@
 #include "party.h"
 #include "guild.h"
 #include "pet.h"
+#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -116,10 +117,7 @@ int intif_GMmessage(char* mes,int len,int flag)
 // Wisの送信
 int intif_wis_message(struct map_session_data *sd,char *nick,char *mes,int mes_len)
 {
-	if( sd == NULL ){
-		printf("intif_wis_message nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	WFIFOW(inter_fd,0) = 0x3001;
 	WFIFOW(inter_fd,2) = mes_len+52;
@@ -149,10 +147,7 @@ int intif_saveaccountreg(struct map_session_data *sd)
 {
 	int j,p;
 
-	if( sd == NULL ){
-		printf("intif_saveaccountreg nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	WFIFOW(inter_fd,0) = 0x3004;
 	WFIFOL(inter_fd,4) = sd->bl.id;
@@ -167,10 +162,7 @@ int intif_saveaccountreg(struct map_session_data *sd)
 // アカウント変数要求
 int intif_request_accountreg(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("intif_request_accountreg nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	WFIFOW(inter_fd,0) = 0x3005;
 	WFIFOL(inter_fd,2) = sd->bl.id;
@@ -189,10 +181,8 @@ int intif_request_storage(int account_id)
 // 倉庫データ送信
 int intif_send_storage(struct storage *stor)
 {
-	if( stor == NULL ){
-		printf("intif_send_storage nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, stor);
+
 	WFIFOW(inter_fd,0) = 0x3011;
 	WFIFOW(inter_fd,2) = sizeof(struct storage)+8;
 	WFIFOL(inter_fd,4) = stor->account_id;
@@ -223,10 +213,7 @@ int intif_send_guild_storage(int account_id,struct guild_storage *gstor)
 // パーティ作成要求
 int intif_create_party(struct map_session_data *sd,char *name)
 {
-	if( sd == NULL ){
-		printf("intif_create_party nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	WFIFOW(inter_fd,0) = 0x3020;
 	WFIFOL(inter_fd,2) = sd->status.account_id;
@@ -340,10 +327,7 @@ int intif_party_checkconflict(int party_id,int account_id,char *nick)
 // ギルド作成要求
 int intif_guild_create(const char *name,const struct guild_member *master)
 {
-	if( master == NULL ){
-		printf("intif_guild_create nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, master);
 
 	WFIFOW(inter_fd,0)=0x3030;
 	WFIFOW(inter_fd,2)=sizeof(struct guild_member)+32;

@@ -8,7 +8,7 @@
 #include "pc.h"
 #include "skill.h"
 #include "battle.h"
-
+#include "nullpo.h"
 
 /*==========================================
  * ˜I“X•Â½
@@ -17,10 +17,8 @@
 void vending_closevending(struct map_session_data *sd)
 {
 
-	if( sd == NULL ){
-		printf("vending_closevending nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
+
 	sd->vender_id=0;
 	clif_closevendingboard(&sd->bl,0);
 }
@@ -33,10 +31,7 @@ void vending_vendinglistreq(struct map_session_data *sd,int id)
 {
 	struct map_session_data *vsd;
 
-	if( sd == NULL ){
-		printf("vending_vendinglistreq nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	if( (vsd=map_id2sd(id)) == NULL )
 		return;
@@ -55,10 +50,7 @@ void vending_purchasereq(struct map_session_data *sd,int len,int id,unsigned cha
 	short amount,index;
 	struct map_session_data *vsd=map_id2sd(id);
 
-	if( sd == NULL ){
-		printf("vending_purchasereq nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	blank=pc_inventoryblank(sd);
 
@@ -131,10 +123,9 @@ void vending_purchasereq(struct map_session_data *sd,int len,int id,unsigned cha
 void vending_openvending(struct map_session_data *sd,int len,char *message,int flag,unsigned char *p)
 {
 	int i;
-	if( sd == NULL ){
-		printf("vending_openvending nullpo\n");
-		return;
-	}
+
+	nullpo_retv(sd);
+
 	if(flag){
 		for(i=0;85+8*i<len;i++){
 			sd->vending[i].index=*(short*)(p+8*i)-2;

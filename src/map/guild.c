@@ -14,6 +14,7 @@
 #include "intif.h"
 #include "clif.h"
 #include "socket.h"
+#include "nullpo.h"
 
 static struct dbt *guild_db;
 static struct dbt *castle_db;
@@ -143,10 +144,7 @@ struct map_session_data *guild_getavailablesd(struct guild *g)
 {
 	int i;
 
-	if( g == NULL ){
-		printf("guild_getavailablesd nullpo\n");
-		return NULL;
-	}
+	nullpo_retr(NULL, g);
 
 	for(i=0;i<g->max_member;i++)
 		if(g->member[i].sd!=NULL)
@@ -170,10 +168,9 @@ int guild_getindex(struct guild *g,int account_id,int char_id)
 int guild_getposition(struct map_session_data *sd,struct guild *g)
 {
 	int i;
-	if( sd == NULL ){
-		printf("guild_getposition nullpo\n");
-		return -1;
-	}
+
+	nullpo_retr(-1, sd);
+
 	if(g==NULL && (g=guild_search(sd->status.guild_id))==NULL)
 		return -1;
 	for(i=0;i<g->max_member;i++)
@@ -186,10 +183,7 @@ int guild_getposition(struct map_session_data *sd,struct guild *g)
 // メンバー情報の作成
 void guild_makemember(struct guild_member *m,struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("guild_makemember nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	memset(m,0,sizeof(struct guild_member));
 	m->account_id	=sd->status.account_id;
@@ -209,10 +203,7 @@ void guild_makemember(struct guild_member *m,struct map_session_data *sd)
 // ギルド競合確認
 int guild_check_conflict(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("guild_getposition nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	intif_guild_checkconflict(sd->status.guild_id,
 		sd->status.account_id,sd->status.char_id);
@@ -226,10 +217,10 @@ int guild_payexp_timer_sub(void *key,void *data,va_list ap)
 	struct guild_expcache *c;
 	struct guild *g;
 
-	if( ap == NULL || (c=(struct guild_expcache *)data) == NULL || (dellist=va_arg(ap,int *)) == NULL || (delp=va_arg(ap,int *)) == NULL ){
-		printf("guild_payexp_timer_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, ap);
+	nullpo_retr(0, c=(struct guild_expcache *)data);
+	nullpo_retr(0, dellist=va_arg(ap,int *));
+	nullpo_retr(0, delp=va_arg(ap,int *));
 	
 	if( *delp>=GUILD_PAYEXP_LIST || (g=guild_search(c->guild_id))==NULL )
 		return 0;
@@ -262,10 +253,7 @@ int guild_payexp_timer(int tid,unsigned int tick,int id,int data)
 // 作成要求
 int guild_create(struct map_session_data *sd,char *name)
 {
-	if( sd == NULL ){
-		printf("guild_create nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->status.guild_id==0){
 		if(!battle_config.guild_emperium_check || pc_search_inventory(sd,714) >= 0) {
@@ -284,8 +272,8 @@ int guild_create(struct map_session_data *sd,char *name)
 // 作成可否
 int guild_created(int account_id,int guild_id)
 {
-	struct map_session_data *sd;
-	sd=map_id2sd(account_id);
+	struct map_session_data *sd=map_id2sd(account_id);
+
 	if(sd==NULL)
 		return 0;
 	if(guild_id>0) {
@@ -342,10 +330,7 @@ int guild_check_member(const struct guild *g)
 	int i;
 	struct map_session_data *sd;
 
-	if( g == NULL ){
-		printf("guild_check_member nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, g);
 
 	for(i=0;i<fd_max;i++){
 		if(session[i] && (sd=session[i]->session_data) && sd->state.auth){
@@ -388,10 +373,7 @@ int guild_recv_info(struct guild *sg)
 	int i,bm,m;
 	struct eventlist *ev,*ev2;
 	
-	if( sg == NULL ){
-		printf("guild_recv_info nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sg);
 
 	if((g=numdb_search(guild_db,sg->guild_id))==NULL){
 		g=calloc(sizeof(struct guild), 1);
@@ -466,10 +448,7 @@ int guild_invite(struct map_session_data *sd,int account_id)
 	struct guild *g;
 	int i;
 	
-	if( sd == NULL ){
-		printf("guild_invite nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	tsd= map_id2sd(account_id);
 	g=guild_search(sd->status.guild_id);
@@ -507,10 +486,8 @@ int guild_reply_invite(struct map_session_data *sd,int guild_id,int flag)
 {
 	struct map_session_data *tsd;
 
-	if( sd == NULL || (tsd= map_id2sd( sd->guild_invite_account )) == NULL ){
-		printf("guild_reply_invite nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, tsd= map_id2sd( sd->guild_invite_account ));
 
 	if(sd->guild_invite!=guild_id)	// 勧誘とギルドIDが違う
 		return 0;
@@ -597,10 +574,7 @@ int guild_leave(struct map_session_data *sd,int guild_id,
 	struct guild *g;
 	int i;
 
-	if( sd == NULL ){
-		printf("guild_leave nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	g = guild_search(sd->status.guild_id);
 
@@ -627,10 +601,7 @@ int guild_explusion(struct map_session_data *sd,int guild_id,
 	struct guild *g;
 	int i,ps;
 
-	if( sd == NULL ){
-		printf("guild_explusion nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	g = guild_search(sd->status.guild_id);
 
@@ -697,10 +668,7 @@ int guild_send_memberinfoshort(struct map_session_data *sd,int online)
 {
 	struct guild *g;
 
-	if( sd == NULL ){
-		printf("guild_send_memberinfoshort nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->status.guild_id<=0)
 		return 0;
@@ -784,10 +752,7 @@ int guild_recv_memberinfoshort(int guild_id,int account_id,int char_id,int onlin
 // ギルド会話送信
 int guild_send_message(struct map_session_data *sd,char *mes,int len)
 {
-	if( sd == NULL ){
-		printf("guild_send_message nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->status.guild_id==0)
 		return 0;
@@ -812,10 +777,8 @@ int guild_change_memberposition(int guild_id,int account_id,int char_id,int idx)
 // ギルドメンバの役職変更通知
 int guild_memberposition_changed(struct guild *g,int idx,int pos)
 {
-	if( g == NULL ){
-		printf("guild_memberposition_changed nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, g);
+
 	g->member[idx].position=pos;
 	clif_guild_memberpositionchanged(g,idx);
 	return 0;
@@ -825,10 +788,9 @@ int guild_change_position(struct map_session_data *sd,int idx,
 	int mode,int exp_mode,const char *name)
 {
 	struct guild_position p;
-	if( sd == NULL ){
-		printf("guild_change_position nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	if(exp_mode>battle_config.guild_exp_limit)
 		exp_mode=battle_config.guild_exp_limit;
 	if(exp_mode<0)exp_mode=0;
@@ -850,10 +812,8 @@ int guild_position_changed(int guild_id,int idx,struct guild_position *p)
 // ギルド告知変更
 int guild_change_notice(struct map_session_data *sd,int guild_id,const char *mes1,const char *mes2)
 {
-	if( sd == NULL ){
-		printf("guild_change_notice nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	if(guild_id!=sd->status.guild_id)
 		return 0;
 	return intif_guild_notice(guild_id,mes1,mes2);
@@ -879,10 +839,7 @@ int guild_notice_changed(int guild_id,const char *mes1,const char *mes2)
 // ギルドエンブレム変更
 int guild_change_emblem(struct map_session_data *sd,int len,const char *data)
 {
-	if( sd == NULL ){
-		printf("guild_change_emblem nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	return intif_guild_emblem(sd->status.guild_id,len,data);
 }
@@ -915,10 +872,8 @@ int guild_payexp(struct map_session_data *sd,int exp)
 	struct guild *g;
 	struct guild_expcache *c;
 	int per,exp2;
-	if( sd == NULL ){
-		printf("guild_payexp nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 	if(sd->status.guild_id==0 || (g=guild_search(sd->status.guild_id))==NULL )
 		return 0;
@@ -952,10 +907,7 @@ int guild_skillup(struct map_session_data *sd,int skill_num)
 	struct guild *g;
 	int idx;
 
-	if( sd == NULL ){
-		printf("guild_skillup nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->status.guild_id==0 || (g=guild_search(sd->status.guild_id))==NULL)
 		return 0;
@@ -990,10 +942,9 @@ int guild_skillupack(int guild_id,int skill_num,int account_id)
 int guild_get_alliance_count(struct guild *g,int flag)
 {
 	int i,c;
-	if( g == NULL ){
-		printf("guild_get_alliance_count nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, g);
+
 	for(i=c=0;i<MAX_GUILDALLIANCE;i++){
 		if(	g->alliance[i].guild_id>0 &&
 			g->alliance[i].opposition==flag )
@@ -1008,10 +959,7 @@ int guild_reqalliance(struct map_session_data *sd,int account_id)
 	struct guild *g[2];
 	int i;
 	
-	if( sd == NULL ){
-		printf("guild_reqalliance nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(tsd==NULL || tsd->status.guild_id<=0)
 		return 0;
@@ -1051,10 +999,8 @@ int guild_reply_reqalliance(struct map_session_data *sd,int account_id,int flag)
 {
 	struct map_session_data *tsd;
 
-	if( sd == NULL || (tsd= map_id2sd( account_id )) == NULL ){
-		printf("guild_reply_reqalliance nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, tsd= map_id2sd( account_id ));
 
 	if(sd->guild_alliance!=tsd->status.guild_id)	// 勧誘とギルドIDが違う
 		return 0;
@@ -1109,10 +1055,7 @@ int guild_reply_reqalliance(struct map_session_data *sd,int account_id,int flag)
 // ギルド関係解消
 int guild_delalliance(struct map_session_data *sd,int guild_id,int flag)
 {
-	if( sd == NULL ){
-		printf("guild_delalliance nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	intif_guild_alliance( sd->status.guild_id,guild_id,
 		sd->status.account_id,0,flag|8 );
@@ -1125,10 +1068,7 @@ int guild_opposition(struct map_session_data *sd,int char_id)
 	struct guild *g;
 	int i;
 
-	if( sd == NULL ){
-		printf("guild_opposition nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	g=guild_search(sd->status.guild_id);
 	if(g==NULL || tsd==NULL)
@@ -1230,10 +1170,7 @@ int guild_broken_sub(void *key,void *data,va_list ap)
 	int i,j;
 	struct map_session_data *sd=NULL;
 
-	if( g == NULL ){
-		printf("guild_broken_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, g);
 
 	for(i=0;i<MAX_GUILDALLIANCE;i++){	// 関係を破棄
 		if(g->alliance[i].guild_id==guild_id){
@@ -1277,10 +1214,7 @@ int guild_break(struct map_session_data *sd,char *name)
 	struct guild *g;
 	int i;
 
-	if( sd == NULL ){
-		printf("guild_break nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if( (g=guild_search(sd->status.guild_id))==NULL )
 		return 0;
@@ -1411,10 +1345,7 @@ int guild_castlealldataload(int len,struct guild_castle *gc)
 	int i;
 	int n=(len-4)/sizeof(struct guild_castle),ev=-1;
 
-	if( gc == NULL ){
-		printf("guild_castlealldataload nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, gc);
 
 	// イベント付きで要求するデータ位置を探す(最後の占拠データ)
 	for(i=0;i<n;i++){
@@ -1479,10 +1410,7 @@ int guild_agit_break(struct mob_data *md)
 {	// Run One NPC_Event[OnAgitBreak]
 	char *evname;
 
-	if( md == NULL ){
-		printf("guild_agit_break nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
 
 	evname=calloc(strlen(md->npc_event) + 1, 1);
 

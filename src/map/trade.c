@@ -8,6 +8,7 @@
 #include "pc.h"
 #include "npc.h"
 #include "battle.h"
+#include "nullpo.h"
 
 /*==========================================
  * æˆø—v¿‚ğ‘Šè‚É‘—‚é
@@ -17,10 +18,7 @@ void trade_traderequest(struct map_session_data *sd,int target_id)
 {
 	struct map_session_data *target_sd;
 
-	if( sd == NULL ){
-		printf("trade_traderequest nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	if((target_sd = map_id2sd(target_id)) != NULL){
 		if(!battle_config.invite_request_check) {
@@ -58,10 +56,7 @@ void trade_tradeack(struct map_session_data *sd,int type)
 {
 	struct map_session_data *target_sd;
 
-	if( sd == NULL ){
-		printf("trade_tradeack nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	if((target_sd = map_id2sd(sd->trade_partner)) != NULL){
 		clif_tradestart(target_sd,type);
@@ -89,10 +84,7 @@ void trade_tradeadditem(struct map_session_data *sd,int index,int amount)
 	int trade_i;
 	int trade_weight=0;
 
-	if( sd == NULL ){
-		printf("trade_tradeadditem nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	if(((target_sd = map_id2sd(sd->trade_partner)) != NULL) && (sd->deal_locked < 1)){
 		if(index<2 || index>=MAX_INVENTORY+2){
@@ -129,10 +121,7 @@ void trade_tradeok(struct map_session_data *sd)
 {
 	struct map_session_data *target_sd;
 
-	if( sd == NULL ){
-		printf("trade_tradeok nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	if((target_sd = map_id2sd(sd->trade_partner)) != NULL){
 		sd->deal_locked=1;
@@ -151,10 +140,7 @@ void trade_tradecancel(struct map_session_data *sd)
 	struct map_session_data *target_sd;
 	int trade_i;
 
-	if( sd == NULL ){
-		printf("trade_tradecancel nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	if((target_sd = map_id2sd(sd->trade_partner)) != NULL){
 		for(trade_i=0; trade_i<10;trade_i++) { //give items back (only virtual)
@@ -195,10 +181,7 @@ void trade_tradecommit(struct map_session_data *sd)
 	struct map_session_data *target_sd;
 	int trade_i;
 
-	if( sd == NULL ){
-		printf("trade_tradecommit nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	if((target_sd = map_id2sd(sd->trade_partner)) != NULL){
 		if( (sd->deal_locked >=1) && (target_sd->deal_locked >=1) ){ // both have pressed 'ok'

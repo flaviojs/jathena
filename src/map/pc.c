@@ -23,6 +23,7 @@
 #include "trade.h"
 #include "storage.h"
 #include "vending.h"
+#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -67,10 +68,8 @@ void pc_set_gm_account_fname(char *str)
 int pc_isGM(struct map_session_data *sd)
 {
 	struct gm_account *p;
-	if( sd == NULL ){
-		printf("pc_isGM nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 	if( (p = numdb_search(gm_account_db,sd->status.account_id)) == NULL )
 		return 0;
@@ -112,10 +111,8 @@ static int pc_invincible_timer(int tid,unsigned int tick,int id,int data)
 
 int pc_setinvincibletimer(struct map_session_data *sd,int val)
 {
-	if( sd == NULL ){
-		printf("pc_setinvincibletimer nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	if(sd->invincible_timer != -1)
 		delete_timer(sd->invincible_timer,pc_invincible_timer);
 	sd->invincible_timer = add_timer(gettick()+val,pc_invincible_timer,sd->bl.id,0);
@@ -124,10 +121,8 @@ int pc_setinvincibletimer(struct map_session_data *sd,int val)
 
 int pc_delinvincibletimer(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("pc_delinvincibletimer nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	if(sd->invincible_timer != -1) {
 		delete_timer(sd->invincible_timer,pc_invincible_timer);
 		sd->invincible_timer = -1;
@@ -165,10 +160,7 @@ int pc_addspiritball(struct map_session_data *sd,int interval,int max)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_addspiritball nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(max > MAX_SKILL_LEVEL)
 		max = MAX_SKILL_LEVEL;
@@ -199,10 +191,7 @@ int pc_delspiritball(struct map_session_data *sd,int count,int type)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_delspiritball nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->spiritball <= 0) {
 		sd->spiritball = 0;
@@ -237,10 +226,7 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){
-		printf("pc_setrestartvalue nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	s_class = pc_calc_base_job(sd->status.class);
 
@@ -322,16 +308,13 @@ static int pc_counttargeted_sub(struct block_list *bl,va_list ap)
 	int id,*c,target_lv;
 	struct block_list *src;
 
-	if( bl == NULL || ap == NULL ){
-		printf("pc_counttargeted_sub 1 nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
 
 	id=va_arg(ap,int);
-	if( (c=va_arg(ap,int *)) == NULL ){
-		printf("pc_counttargeted_sub 2 nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, c=va_arg(ap,int *));
+
 	src=va_arg(ap,struct block_list *);
 	target_lv=va_arg(ap,int);
 	if(id == bl->id || (src && id == src->id)) return 0;
@@ -372,10 +355,9 @@ static int pc_walktoxy_sub(struct map_session_data *);
 int pc_makesavestatus(struct map_session_data *sd)
 {
 	int i;
-	if( sd == NULL ){
-		printf("pc_makesavestatus nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	// •‚ÌF‚ÍFX•¾ŠQ‚ª‘½‚¢‚Ì‚Å•Û‘¶‘ÎÛ‚É‚Í‚µ‚È‚¢
 	if(!battle_config.save_clothcolor)
 		sd->status.clothes_color=0;
@@ -416,10 +398,8 @@ int pc_makesavestatus(struct map_session_data *sd)
  */
 int pc_setnewpc(struct map_session_data *sd,int account_id,int char_id,int login_id1,int client_tick,int sex,int fd)
 {
-	if( sd == NULL ){
-		printf("pc_setnewpc nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	sd->bl.id        = account_id;
 	sd->char_id      = char_id;
 	sd->login_id1    = login_id1;
@@ -440,10 +420,7 @@ int pc_equippoint(struct map_session_data *sd,int n)
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){
-		printf("pc_equippoint nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	s_class = pc_calc_base_job(sd->status.class);
 
@@ -461,10 +438,7 @@ int pc_setinventorydata(struct map_session_data *sd)
 {
 	int i,id;
 
-	if( sd == NULL ){
-		printf("pc_setinventorydata nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<MAX_INVENTORY;i++) {
 		id = sd->status.inventory[i].nameid;
@@ -475,10 +449,7 @@ int pc_setinventorydata(struct map_session_data *sd)
 
 int pc_calcweapontype(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("pc_calcweapontype nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->weapontype1 != 0 &&	sd->weapontype2 == 0)
 		sd->status.weapon = sd->weapontype1;
@@ -509,10 +480,7 @@ int pc_setequipindex(struct map_session_data *sd)
 {
 	int i,j;
 
-	if( sd == NULL ){
-		printf("pc_setequipindex nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<11;i++)
 		sd->equip_index[i] = -1;
@@ -558,10 +526,7 @@ int pc_isequip(struct map_session_data *sd,int n)
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){
-		printf("pc_isequip nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	item = sd->inventory_data[n];
 	sc_data = battle_get_sc_data(&sd->bl);
@@ -789,10 +754,9 @@ int pc_authfail(int id)
 static int pc_calc_skillpoint(struct map_session_data* sd)
 {
 	int  i,skill,skill_point=0;
-	if( sd == NULL ){
-		printf("pc_calc_skillpoint nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	for(i=1;i<MAX_SKILL;i++){
 		if( (skill = pc_checkskill(sd,i)) > 0) {
 			if(!(skill_get_inf2(i)&0x01) || battle_config.quest_skill_learn) {
@@ -818,10 +782,8 @@ int pc_calc_skilltree(struct map_session_data *sd)
 	int c=0, s=0;
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	struct pc_base_job s_class;
-	if( sd == NULL ){
-		printf("pc_isGM nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 	s_class = pc_calc_base_job(sd->status.class);
 	c = s_class.job;
@@ -916,10 +878,9 @@ int pc_calc_skilltree(struct map_session_data *sd)
 int pc_checkweighticon(struct map_session_data *sd)
 {
 	int flag=0;
-	if( sd == NULL ){
-		printf("pc_checkweighticon nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	if(sd->weight*2 >= sd->max_weight)
 		flag=1;
 	if(sd->weight*10 >= sd->max_weight*9)
@@ -960,10 +921,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	int str,dstr,dex;
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){
-		printf("pc_calcstatus nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	s_class = pc_calc_base_job(sd->status.class);
@@ -1319,13 +1277,13 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	}
 
 	//1“x‚à€‚ñ‚Å‚È‚¢Job70ƒXƒpƒmƒr‚É+10
-	if(s_class.job == 23 && sd->die_counter == 0 && sd->status.base_level >= 99){
-		sd->paramb[0]+= 10;
-		sd->paramb[1]+= 10;
-		sd->paramb[2]+= 10;
-		sd->paramb[3]+= 10;
-		sd->paramb[4]+= 10;
-		sd->paramb[5]+= 10;
+	if(s_class.job == 23 && sd->die_counter == 0 && sd->status.job_level >= 70){
+		sd->paramb[0]+= 15;
+		sd->paramb[1]+= 15;
+		sd->paramb[2]+= 15;
+		sd->paramb[3]+= 15;
+		sd->paramb[4]+= 15;
+		sd->paramb[5]+= 15;
 	}
 	sd->paramc[0]=sd->status.str+sd->paramb[0]+sd->parame[0];
 	sd->paramc[1]=sd->status.agi+sd->paramb[1]+sd->parame[1];
@@ -1439,6 +1397,9 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if(sd->sc_data && sd->sc_data[SC_BERSERK].timer!=-1){	// ƒo[ƒT[ƒN
 		sd->status.max_hp = sd->status.max_hp * 3;
 		sd->status.hp = sd->status.hp * 3;
+	}
+	if(s_class.job == 23 && sd->status.base_level >= 99){
+		sd->status.max_hp = sd->status.max_hp + 2000;
 	}
 
 	if(sd->status.max_hp < 0 || sd->status.max_hp > battle_config.max_hp)
@@ -1650,8 +1611,12 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->critical += (10+sd->sc_data[SC_FORTUNE].val1+sd->sc_data[SC_FORTUNE].val2
 						+sd->sc_data[SC_FORTUNE].val3)*10;
 
-		if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer!=-1)	// ”š—ô”g“®
-			sd->critical += sd->sc_data[SC_EXPLOSIONSPIRITS].val2;
+		if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer!=-1){	// ”š—ô”g“®
+			if(s_class.job==23)
+				sd->critical += sd->sc_data[SC_EXPLOSIONSPIRITS].val1*100;
+			else
+				sd->critical += sd->sc_data[SC_EXPLOSIONSPIRITS].val2;
+		}
 
 		if(sd->sc_data[SC_STEELBODY].timer!=-1){	// ‹à„
 			sd->def = 90;
@@ -1795,10 +1760,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
  */
 int pc_bonus(struct map_session_data *sd,int type,int val)
 {
-	if( sd == NULL ){
-		printf("pc_bonus nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	switch(type){
 	case SP_STR:
 	case SP_AGI:
@@ -2131,10 +2094,9 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 {
 	int i;
-	if( sd == NULL ){
-		printf("pc_bonus2 nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	switch(type){
 	case SP_ADDELE:
 		if(!sd->state.lr_flag)
@@ -2350,10 +2312,7 @@ int pc_bonus3(struct map_session_data *sd,int type,int type2,int type3,int val)
  */
 int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 {
-	if( sd == NULL ){
-		printf("pc_skill nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(level>MAX_SKILL_LEVEL){
 		if(battle_config.error_log)
@@ -2384,10 +2343,8 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
  */
 int pc_insert_card(struct map_session_data *sd,int idx_card,int idx_equip)
 {
-	if( sd == NULL ){
-		printf("pc_insert_card nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	if(idx_card >= 0 && idx_card < MAX_INVENTORY && idx_equip >= 0 && idx_equip < MAX_INVENTORY && sd->inventory_data[idx_card]) {
 		int i;
 		int nameid=sd->status.inventory[idx_equip].nameid;
@@ -2477,10 +2434,7 @@ int pc_checkadditem(struct map_session_data *sd,int nameid,int amount)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_checkadditem nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(itemdb_isequip(nameid))
 		return ADDITEM_NEW;
@@ -2506,10 +2460,9 @@ int pc_checkadditem(struct map_session_data *sd,int nameid,int amount)
 int pc_inventoryblank(struct map_session_data *sd)
 {
 	int i,b;
-	if( sd == NULL ){
-		printf("pc_inventoryblank nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	for(i=0,b=0;i<MAX_INVENTORY;i++){
 		if(sd->status.inventory[i].nameid==0)
 			b++;
@@ -2526,10 +2479,8 @@ int pc_inventoryblank(struct map_session_data *sd)
 int pc_payzeny(struct map_session_data *sd,int zeny)
 {
 	double z;
-	if( sd == NULL ){
-		printf("pc_payzeny nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 	z = (double)sd->status.zeny;
 	if(sd->status.zeny<zeny || z - (double)zeny > MAX_ZENY)
@@ -2548,10 +2499,8 @@ int pc_payzeny(struct map_session_data *sd,int zeny)
 int pc_getzeny(struct map_session_data *sd,int zeny)
 {
 	double z;
-	if( sd == NULL ){
-		printf("pc_getzeny nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 	z = (double)sd->status.zeny;
 	if(z + (double)zeny > MAX_ZENY) {
@@ -2572,10 +2521,8 @@ int pc_getzeny(struct map_session_data *sd,int zeny)
 int pc_search_inventory(struct map_session_data *sd,int item_id)
 {
 	int i;
-	if( sd == NULL ){
-		printf("pc_search_inventory nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(-1, sd);
 
 	for(i=0;i<MAX_INVENTORY;i++) {
 		if(sd->status.inventory[i].nameid == item_id &&
@@ -2596,10 +2543,8 @@ int pc_additem(struct map_session_data *sd,struct item *item_data,int amount)
 	struct item_data *data;
 	int i,w;
 
-	if( sd == NULL || item_data == NULL ){
-		printf("pc_additem nullpo\n");
-		return 1; //‚Æ‚è‚ ‚¦‚¸1‚ğ•Ô‚µ‚Ä‚¨‚±‚¤
-	}
+	nullpo_retr(1, sd);
+	nullpo_retr(1, item_data);
 
 	if(item_data->nameid <= 0 || amount <= 0)
 		return 1;
@@ -2646,10 +2591,7 @@ int pc_additem(struct map_session_data *sd,struct item *item_data,int amount)
  */
 int pc_delitem(struct map_session_data *sd,int n,int amount,int type)
 {
-	if( sd == NULL ){
-		printf("pc_delitem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	if(sd->status.inventory[n].nameid==0 || amount <= 0 || sd->status.inventory[n].amount<amount || sd->inventory_data[n] == NULL)
 		return 1;
@@ -2677,10 +2619,7 @@ int pc_delitem(struct map_session_data *sd,int n,int amount,int type)
  */
 int pc_dropitem(struct map_session_data *sd,int n,int amount)
 {
-	if( sd == NULL ){
-		printf("pc_dropitem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	if(sd->status.inventory[n].nameid <=0 || sd->status.inventory[n].amount < amount)
 		return 1;
@@ -2701,10 +2640,8 @@ int pc_takeitem(struct map_session_data *sd,struct flooritem_data *fitem)
 	unsigned int tick = gettick();
 	struct map_session_data *first_sd = NULL,*second_sd = NULL,*third_sd = NULL;
 
-	if( sd == NULL || fitem == NULL ){
-		printf("pc_takeitem nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, fitem);
 
 	if(fitem->first_get_id > 0) {
 		first_sd = map_id2sd(fitem->first_get_id);
@@ -2755,10 +2692,7 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 	int nameid;
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){
-		printf("pc_isUseitem nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	item = sd->inventory_data[n];
 	nameid = sd->status.inventory[n].nameid;
@@ -2794,10 +2728,7 @@ int pc_useitem(struct map_session_data *sd,int n)
 {
 	int nameid,amount;
 
-	if( sd == NULL ){
-		printf("pc_useitem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	if(n >=0 && n < MAX_INVENTORY) {
 		nameid = sd->status.inventory[n].nameid;
@@ -2828,10 +2759,8 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 	struct item_data *data;
 	int i,w;
 
-	if( sd == NULL || item_data == NULL ){
-		printf("pc_cart_additem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
+	nullpo_retr(1, item_data);
 
 	if(item_data->nameid <= 0 || amount <= 0)
 		return 1;
@@ -2882,10 +2811,7 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
  */
 int pc_cart_delitem(struct map_session_data *sd,int n,int amount,int type)
 {
-	if( sd == NULL ){
-		printf("pc_cart_delitem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	if(sd->status.cart[n].nameid==0 ||
 	   sd->status.cart[n].amount<amount)
@@ -2914,10 +2840,8 @@ int pc_putitemtocart(struct map_session_data *sd,int idx,int amount)
 {
 	struct item *item_data;
 
-	if( sd == NULL || (item_data=&sd->status.inventory[idx]) == NULL ){
-		printf("pc_putitemtocart nullpo\n");
-		return 0;//ŒÄ‚Ño‚µŒ³‚Å–ß‚è‚ğŒ©‚Ä‚¢‚È‚¢‚Ì‚Å‚Æ‚è‚ ‚¦‚¸0
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, item_data=&sd->status.inventory[idx]);
 
 	if( item_data->nameid==0 || item_data->amount<amount || sd->vender_id )
 		return 1;
@@ -2934,10 +2858,9 @@ int pc_putitemtocart(struct map_session_data *sd,int idx,int amount)
 int pc_cartitem_amount(struct map_session_data *sd,int idx,int amount)
 {
 	struct item *item_data;
-	if( sd == NULL || (item_data=&sd->status.cart[idx]) == NULL ){
-		printf("pc_cartitem_amount nullpo\n");
-		return -1;
-	}
+
+	nullpo_retr(-1, sd);
+	nullpo_retr(-1, item_data=&sd->status.cart[idx]);
 
 	if( item_data->nameid==0 || !item_data->amount)
 		return -1;
@@ -2953,10 +2876,8 @@ int pc_getitemfromcart(struct map_session_data *sd,int idx,int amount)
 	struct item *item_data;
 	int flag;
 
-	if( sd == NULL || (item_data=&sd->status.cart[idx]) == NULL ){
-		printf("pc_getitemfromcart nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, item_data=&sd->status.cart[idx]);
 
 
 	if( item_data->nameid==0 || item_data->amount<amount || sd->vender_id )
@@ -2977,10 +2898,7 @@ int pc_item_identify(struct map_session_data *sd,int idx)
 {
 	int flag=1;
 
-	if( sd == NULL ){
-		printf("pc_item_identify nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(idx >= 0 && idx < MAX_INVENTORY) {
 		if(sd->status.inventory[idx].nameid > 0 && sd->status.inventory[idx].identify == 0 ){
@@ -3008,10 +2926,9 @@ int pc_show_steal(struct block_list *bl,va_list ap)
 	struct item_data *item=NULL;
 	char output[100];
 
-	if( bl == NULL || ap == NULL || (sd=va_arg(ap,struct map_session_data *)) == NULL ){
-		printf("pc_show_steal nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, sd=va_arg(ap,struct map_session_data *));
 
 	itemid=va_arg(ap,int);
 	type=va_arg(ap,int);
@@ -3105,10 +3022,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 	char mapname[24];
 	int m,c;
 
-	if( sd == NULL ){
-		printf("pc_setpos nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->chatID)	// ƒ`ƒƒƒbƒg‚©‚ço‚é
 		chat_leavechat(sd);
@@ -3264,10 +3178,7 @@ int pc_randomwarp(struct map_session_data *sd,int type)
 	int x,y,c,i=0;
 	int m;
 
-	if( sd == NULL ){
-		printf("pc_randomwarp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	m=sd->bl.m;
 
@@ -3295,10 +3206,7 @@ int pc_memo(struct map_session_data *sd,int i)
 	int skill;
 	int j;
 
-	if( sd == NULL ){
-		printf("pc_memo nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	skill=pc_checkskill(sd,AL_WARP);
 
@@ -3349,10 +3257,7 @@ int pc_can_reach(struct map_session_data *sd,int x,int y)
 {
 	struct walkpath_data wpd;
 
-	if( sd == NULL ){
-		printf("pc_can_reach nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if( sd->bl.x==x && sd->bl.y==y )	// “¯‚¶ƒ}ƒX
 		return 1;
@@ -3373,10 +3278,7 @@ int pc_can_reach(struct map_session_data *sd,int x,int y)
  */
 static int calc_next_walk_step(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("calc_next_walk_step nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->walkpath.path_pos>=sd->walkpath.path_len)
 		return -1;
@@ -3508,10 +3410,7 @@ static int pc_walktoxy_sub(struct map_session_data *sd)
 	struct walkpath_data wpd;
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_walktoxy_sub nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	if(path_search(&wpd,sd->bl.m,sd->bl.x,sd->bl.y,sd->to_x,sd->to_y,0))
 		return 1;
@@ -3537,10 +3436,7 @@ static int pc_walktoxy_sub(struct map_session_data *sd)
 int pc_walktoxy(struct map_session_data *sd,int x,int y)
 {
 
-	if( sd == NULL ){
-		printf("pc_walktoxy nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	sd->to_x=x;
 	sd->to_y=y;
@@ -3562,10 +3458,7 @@ int pc_walktoxy(struct map_session_data *sd,int x,int y)
  */
 int pc_stop_walking(struct map_session_data *sd,int type)
 {
-	if( sd == NULL ){
-		printf("pc_stop_walking nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->walktimer != -1) {
 		delete_timer(sd->walktimer,pc_walk);
@@ -3598,10 +3491,7 @@ int pc_movepos(struct map_session_data *sd,int dst_x,int dst_y)
 
 	struct walkpath_data wpd;
 
-	if( sd == NULL ){
-		printf("pc_movepos nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(path_search(&wpd,sd->bl.m,sd->bl.x,sd->bl.y,dst_x,dst_y,0))
 		return 1;
@@ -3679,10 +3569,10 @@ int pc_checkskill(struct map_session_data *sd,int skill_id)
  */
 int pc_checkallowskill(struct map_session_data *sd)
 {
-	if( sd == NULL || sd->sc_data == NULL ){
-		printf("pc_checkallowskill nullpo\n");
+	nullpo_retr(0, sd);
+
+	if( sd->sc_data == NULL )
 		return 0;
-	}
 
 	if(!(skill_get_weapontype(KN_TWOHANDQUICKEN)&(1<<sd->status.weapon)) && sd->sc_data[SC_TWOHANDQUICKEN].timer!=-1) {	// 2HQ
 		skill_status_change_end(&sd->bl,SC_TWOHANDQUICKEN,-1);	// 2HQ‚ğ‰ğœ
@@ -3735,10 +3625,9 @@ int pc_checkallowskill(struct map_session_data *sd)
 int pc_checkequip(struct map_session_data *sd,int pos)
 {
 	int i;
-	if( sd == NULL ){
-		printf("pc_checkequip nullpo\n");
-		return -1;
-	}
+
+	nullpo_retr(-1, sd);
+
 	for(i=0;i<11;i++){
 		if(pos & equip_pos[i])
 			return sd->equip_index[i];
@@ -3907,10 +3796,7 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
 	struct block_list *bl;
 	int d;
 
-	if( sd == NULL ){
-		printf("pc_attack nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	bl=map_id2bl(target_id);
 	if(bl==NULL)
@@ -3940,10 +3826,7 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
  */
 int pc_stopattack(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("pc_stopattack nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->attacktimer != -1) {
 		delete_timer(sd->attacktimer,pc_attack_timer);
@@ -3960,10 +3843,7 @@ int pc_checkbaselevelup(struct map_session_data *sd)
 {
 	int next = pc_nextbaseexp(sd);
 
-	if( sd == NULL ){
-		printf("pc_checkbaselevelup nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->status.base_exp >= next && next > 0){
 		struct pc_base_job 	s_class = pc_calc_base_job(sd->status.class);
@@ -4003,10 +3883,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 {
 	int next = pc_nextjobexp(sd);
 
-	if( sd == NULL ){
-		printf("pc_checkjoblevelup nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->status.job_exp >= next && next > 0){
 		// job‘¤ƒŒƒxƒ‹ƒAƒbƒvˆ—
@@ -4032,10 +3909,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
  */
 int pc_gainexp(struct map_session_data *sd,int base_exp,int job_exp)
 {
-	if( sd == NULL ){
-		printf("pc_gainexp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->bl.prev == NULL || pc_isdead(sd))
 		return 0;
@@ -4077,10 +3951,8 @@ int pc_nextbaseexp(struct map_session_data *sd)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_nextbaseexp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	if(sd->status.base_level>=MAX_LEVEL || sd->status.base_level<=0)
 		return 0;
 
@@ -4103,10 +3975,7 @@ int pc_nextjobexp(struct map_session_data *sd)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_nextjobexp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->status.job_level>=MAX_LEVEL || sd->status.job_level<=0)
 		return 0;
@@ -4130,10 +3999,7 @@ int pc_need_status_point(struct map_session_data *sd,int type)
 {
 	int val;
 
-	if( sd == NULL ){
-		printf("pc_need_status_point nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if(type<SP_STR || type>SP_LUK)
 		return -1;
@@ -4156,10 +4022,7 @@ int pc_statusup(struct map_session_data *sd,int type)
 {
 	int need,val;
 
-	if( sd == NULL ){
-		printf("pc_statusup nullpo\n");
-		return 0; //ŒÄ‚Ño‚µŒ³‚Å–ß‚è‚ğQÆ‚µ‚Ä‚¢‚È‚¢‚Ì‚Å0‚ğ•Ô‚µ‚Ä‚¨‚­
-	}
+	nullpo_retr(0, sd);
 
 	need=pc_need_status_point(sd,type);
 	if(type<SP_STR || type>SP_LUK || need<0 || need>sd->status.status_point){
@@ -4228,10 +4091,7 @@ int pc_statusup(struct map_session_data *sd,int type)
  */
 int pc_statusup2(struct map_session_data *sd,int type,int val)
 {
-	if( sd == NULL ){
-		printf("pc_statusup2 nullpo\n");
-		return 0;//ŒÄ‚Ño‚µŒ³‚Å–ß‚è‚ğŒ©‚Ä‚¢‚È‚¢‚Ì‚Å‚Æ‚è‚ ‚¦‚¸0‚ğ•Ô‚µ‚Ä‚¨‚­
-	}
+	nullpo_retr(0, sd);
 
 	if(type<SP_STR || type>SP_LUK){
 		clif_statusupack(sd,type,0,0);
@@ -4307,10 +4167,7 @@ int pc_statusup2(struct map_session_data *sd,int type,int val)
  */
 int pc_skillup(struct map_session_data *sd,int skill_num)
 {
-	if( sd == NULL ){
-		printf("pc_skillup nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if( skill_num>=10000 ){
 		guild_skillup(sd,skill_num);
@@ -4344,10 +4201,8 @@ int pc_allskillup(struct map_session_data *sd)
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){
-		printf("pc_allskillup nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	s_class = pc_calc_base_job(sd->status.class);
 	c = s_class.job;
 	s = (s_class.upper==1) ? 1 : 0 ; //“]¶ˆÈŠO‚Í’Êí‚ÌƒXƒLƒ‹H
@@ -4389,10 +4244,7 @@ int pc_resetstate(struct map_session_data* sd)
 	#define sumsp(a) ((a)*((a-2)/10+2) - 5*((a-2)/10)*((a-2)/10) - 6*((a-2)/10) -2)
 	int add=0;
 
-	if( sd == NULL ){
-		printf("pc_resetstate nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	add += sumsp(sd->status.str);
 	add += sumsp(sd->status.agi);
@@ -4432,10 +4284,7 @@ int pc_resetskill(struct map_session_data* sd)
 {
 	int  i,skill;
 
-	if( sd == NULL ){
-		printf("pc_resetskill nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=1;i<MAX_SKILL;i++){
 		if( (skill = pc_checkskill(sd,i)) > 0) {
@@ -4471,10 +4320,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	int i=0,j=0;
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){ //src‚ÍNULL‚ÅŒÄ‚Î‚ê‚é‚±‚Æ‚ª‚ ‚é‚Ì‚Å‘¼‚Åƒ`ƒFƒbƒN
-		printf("pc_damage nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	s_class = pc_calc_base_job(sd->status.class);
@@ -4663,10 +4509,8 @@ int pc_readparam(struct map_session_data *sd,int type)
 	struct pc_base_job s_class;
 	
 	s_class = pc_calc_base_job(sd->status.class);
-	if( sd == NULL ){
-		printf("pc_readparam nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 
 	switch(type){
@@ -4738,10 +4582,8 @@ int pc_setparam(struct map_session_data *sd,int type,int val)
 {
 	int i = 0,up_level = 50;
 	struct pc_base_job s_class;
-	if( sd == NULL ){
-		printf("pc_isUseitem nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 	s_class = pc_calc_base_job(sd->status.class);
 
@@ -4826,10 +4668,8 @@ int pc_heal(struct map_session_data *sd,int hp,int sp)
 {
 //	if(battle_config.battle_log)
 //		printf("heal %d %d\n",hp,sp);
-	if( sd == NULL ){
-		printf("pc_heal nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 	if(pc_checkoverhp(sd)) {
 		if(hp > 0)
@@ -4874,10 +4714,8 @@ int pc_itemheal(struct map_session_data *sd,int hp,int sp)
 	int bonus;
 //	if(battle_config.battle_log)
 //		printf("heal %d %d\n",hp,sp);
-	if( sd == NULL ){
-		printf("pc_itemheal nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 	if(sd->state.potionpitcher_flag) {
 		sd->potion_hp = hp;
@@ -4937,10 +4775,7 @@ int pc_itemheal(struct map_session_data *sd,int hp,int sp)
  */
 int pc_percentheal(struct map_session_data *sd,int hp,int sp)
 {
-	if( sd == NULL ){
-		printf("pc_percentheal nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->state.potionpitcher_flag) {
 		sd->potion_per_hp = hp;
@@ -5011,10 +4846,7 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 	int b_class = 0;
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){
-		printf("pc_isUseitem nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	s_class = pc_calc_base_job(sd->status.class);
@@ -5056,8 +4888,6 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 	clif_updatestatus(sd,SP_JOBLEVEL);
 	clif_updatestatus(sd,SP_JOBEXP);
 	clif_updatestatus(sd,SP_NEXTJOBEXP);
-	sd->die_counter=0;
-	pc_setglobalreg(sd,"PC_DIE_COUNTER",sd->die_counter); //€‚ÉƒJƒEƒ“ƒ^[‘‚«‚İ
 
 	for(i=0;i<11;i++) {
 		if(sd->equip_index[i] >= 0)
@@ -5079,10 +4909,7 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
  */
 int pc_equiplookall(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("pc_equiplookall nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 #if PACKETVER < 4
 	clif_changelook(&sd->bl,LOOK_WEAPON,sd->status.weapon);
@@ -5105,10 +4932,7 @@ int pc_equiplookall(struct map_session_data *sd)
  */
 int pc_changelook(struct map_session_data *sd,int type,int val)
 {
-	if( sd == NULL ){
-		printf("pc_changelook nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	switch(type){
 	case LOOK_HAIR:
@@ -5150,10 +4974,7 @@ int pc_changelook(struct map_session_data *sd,int type,int val)
  */
 int pc_setoption(struct map_session_data *sd,int type)
 {
-	if( sd == NULL ){
-		printf("pc_setoption nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	sd->status.option=type;
 	clif_changeoption(&sd->bl);
@@ -5171,10 +4992,7 @@ int pc_setcart(struct map_session_data *sd,int type)
 {
 	int cart[6]={0x0000,0x0008,0x0080,0x0100,0x0200,0x0400};
 
-	if( sd == NULL ){
-		printf("pc_setcart nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(pc_checkskill(sd,MC_PUSHCART)>0){ // ƒvƒbƒVƒ…ƒJ[ƒgƒXƒLƒ‹Š
 		if(!pc_iscarton(sd)){ // ƒJ[ƒg‚ğ•t‚¯‚Ä‚¢‚È‚¢
@@ -5229,10 +5047,7 @@ int pc_readreg(struct map_session_data *sd,int reg)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_readreg nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<sd->reg_num;i++)
 		if(sd->reg[i].index==reg)
@@ -5248,10 +5063,7 @@ int pc_setreg(struct map_session_data *sd,int reg,int val)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_setreg nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for (i = 0; i < sd->reg_num; i++) {
 		if (sd->reg[i].index == reg){
@@ -5283,10 +5095,7 @@ char *pc_readregstr(struct map_session_data *sd,int reg)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_readregstr nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<sd->regstr_num;i++)
 		if(sd->regstr[i].index==reg)
@@ -5302,10 +5111,7 @@ int pc_setregstr(struct map_session_data *sd,int reg,char *str)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_setregstr nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(strlen(str)+1 >= sizeof(sd->regstr[0].data)){
 		printf("pc_setregstr: string too long !\n");
@@ -5340,10 +5146,7 @@ int pc_readglobalreg(struct map_session_data *sd,char *reg)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_readglobalreg nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<sd->status.global_reg_num;i++){
 		if(strcmp(sd->status.global_reg[i].str,reg)==0)
@@ -5362,10 +5165,7 @@ int pc_setglobalreg(struct map_session_data *sd,char *reg,int val)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_setglobalreg nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	//PC_DIE_COUNTER‚ªƒXƒNƒŠƒvƒg‚È‚Ç‚Å•ÏX‚³‚ê‚½‚Ìˆ—
 	if(strcmp(reg,"PC_DIE_COUNTER") == 0 && sd->die_counter != val){
@@ -5408,10 +5208,7 @@ int pc_readaccountreg(struct map_session_data *sd,char *reg)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_readaccountreg nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<sd->status.account_reg_num;i++){
 		if(strcmp(sd->status.account_reg[i].str,reg)==0)
@@ -5428,10 +5225,7 @@ int pc_setaccountreg(struct map_session_data *sd,char *reg,int val)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_setaccountreg nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(val==0){
 		for(i=0;i<sd->status.account_reg_num;i++){
@@ -5471,10 +5265,7 @@ int pc_readaccountreg2(struct map_session_data *sd,char *reg)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_readaccountreg2 nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<sd->status.account_reg2_num;i++){
 		if(strcmp(sd->status.account_reg2[i].str,reg)==0)
@@ -5491,10 +5282,7 @@ int pc_setaccountreg2(struct map_session_data *sd,char *reg,int val)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_setaccountreg2 nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	if(val==0){
 		for(i=0;i<sd->status.account_reg2_num;i++){
@@ -5534,11 +5322,7 @@ int pc_percentrefinery(struct map_session_data *sd,struct item *item)
 {
 	int percent;
 
-	if( item == NULL ){
-		printf("pc_percentrefinery nullpo\n");
-		return 0;
-	}
-
+	nullpo_retr(0, item);
 	percent=percentrefinery[itemdb_wlv(item->nameid)][(int)item->refine];
 
 	percent += pc_checkskill(sd,BS_WEAPONRESEARCH);	// •ŠíŒ¤‹†ƒXƒLƒ‹Š
@@ -5590,10 +5374,7 @@ int pc_addeventtimer(struct map_session_data *sd,int tick,const char *name)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_addeventtimer nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<MAX_EVENTTIMER;i++)
 		if( sd->eventtimer[i]==-1 )
@@ -5624,10 +5405,7 @@ int pc_deleventtimer(struct map_session_data *sd,const char *name)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_deleventtimer nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<MAX_EVENTTIMER;i++)
 		if( sd->eventtimer[i]!=-1 && strcmp(
@@ -5649,10 +5427,7 @@ int pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick)
 {
 	int i;
 
-	if( sd == NULL ){
-		printf("pc_addeventtimercount nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	for(i=0;i<MAX_EVENTTIMER;i++)
 		if( sd->eventtimer[i]!=-1 && strcmp(
@@ -5672,10 +5447,9 @@ int pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick)
 int pc_cleareventtimer(struct map_session_data *sd)
 {
 	int i;
-	if( sd == NULL ){
-		printf("pc_cleareventtimer nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	for(i=0;i<MAX_EVENTTIMER;i++)
 		if( sd->eventtimer[i]!=-1 ){
 			delete_timer(sd->eventtimer[i],pc_eventtimer);
@@ -5699,10 +5473,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){
-		printf("pc_equipitem nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	s_class = pc_calc_base_job(sd->status.class);
 
@@ -5826,10 +5597,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
  */
 int pc_unequipitem(struct map_session_data *sd,int n,int type)
 {
-	if( sd == NULL ){
-		printf("pc_unequipitem nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(battle_config.battle_log)
 		printf("unequip %d %x:%x\n",n,pc_equippoint(sd,n),sd->status.inventory[n].equip);
@@ -5893,10 +5661,7 @@ int pc_checkitem(struct map_session_data *sd)
 	int i,j,k,id,calc_flag = 0;
 	struct item_data *it=NULL;
 
-	if( sd == NULL ){
-		printf("pc_checkitem nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	// Š•i‹ó‚«‹l‚ß
 	for(i=j=0;i<MAX_INVENTORY;i++){
@@ -5969,10 +5734,7 @@ int pc_checkitem(struct map_session_data *sd)
 
 int pc_checkoverhp(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("pc_checkoverhp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->status.hp == sd->status.max_hp)
 		return 1;
@@ -5987,10 +5749,7 @@ int pc_checkoverhp(struct map_session_data *sd)
 
 int pc_checkoversp(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("pc_checkoversp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(sd->status.sp == sd->status.max_sp)
 		return 1;
@@ -6012,10 +5771,10 @@ int pc_calc_pvprank_sub(struct block_list *bl,va_list ap)
 {
 	struct map_session_data *sd1,*sd2=NULL;
 
-	if( bl == NULL || ap == NULL || (sd1=(struct map_session_data *)bl) == NULL || (sd2=va_arg(ap,struct map_session_data *)) == NULL ){
-		printf("mob_ai_sub_hard_activesearch nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, sd1=(struct map_session_data *)bl);
+	nullpo_retr(0, sd2=va_arg(ap,struct map_session_data *));
 
 	if( sd1->pvp_point > sd2->pvp_point )
 		sd2->pvp_rank++;
@@ -6030,10 +5789,8 @@ int pc_calc_pvprank(struct map_session_data *sd)
 	int old;
 	struct map_data *m;
 
-	if( sd == NULL || (m=&map[sd->bl.m]) == NULL ){
-		printf("pc_calc_pvprank nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, m=&map[sd->bl.m]);
 	
 	old=sd->pvp_rank;
 
@@ -6155,10 +5912,7 @@ static int pc_spheal(struct map_session_data *sd)
 {
 	int a;
 
-	if( sd == NULL ){
-		printf("pc_spheal nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	a = natural_heal_diff_tick;
 	if(pc_issit(sd)) a += a;
@@ -6176,10 +5930,7 @@ static int pc_hpheal(struct map_session_data *sd)
 {
 	int a;
 
-	if( sd == NULL ){
-		printf("pc_hpheal nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	a = natural_heal_diff_tick;
 	if(pc_issit(sd)) a += a;
@@ -6192,10 +5943,7 @@ static int pc_natural_heal_hp(struct map_session_data *sd)
 	int bhp;
 	int inc_num,bonus,skill,hp_flag;
 
-	if( sd == NULL ){
-		printf("pc_natural_heal_hp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(pc_checkoverhp(sd)) {
 		sd->hp_sub = sd->inchealhptick = 0;
@@ -6285,10 +6033,7 @@ static int pc_natural_heal_sp(struct map_session_data *sd)
 	int bsp;
 	int inc_num,bonus;
 
-	if( sd == NULL ){
-		printf("pc_natural_heal_sp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(pc_checkoversp(sd)) {
 		sd->sp_sub = sd->inchealsptick = 0;
@@ -6350,10 +6095,7 @@ static int pc_spirit_heal_hp(struct map_session_data *sd,int level)
 {
 	int bonus_hp,interval = battle_config.natural_heal_skill_interval;
 
-	if( sd == NULL ){
-		printf("pc_spirit_heal_hp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(pc_checkoverhp(sd)) {
 		sd->inchealspirithptick = 0;
@@ -6393,10 +6135,7 @@ static int pc_spirit_heal_sp(struct map_session_data *sd,int level)
 {
 	int bonus_sp,interval = battle_config.natural_heal_skill_interval;
 
-	if( sd == NULL ){
-		printf("pc_spirit_heal_sp nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(pc_checkoversp(sd)) {
 		sd->inchealspiritsptick = 0;
@@ -6442,10 +6181,7 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 {
 	int skill;
 
-	if( sd == NULL ){
-		printf("pc_natural_heal_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if( (battle_config.natural_heal_weight_rate > 100 || sd->weight*100/sd->max_weight < battle_config.natural_heal_weight_rate) &&
 		!pc_isdead(sd) && 
@@ -6494,10 +6230,7 @@ int pc_natural_heal(int tid,unsigned int tick,int id,int data)
  */
 int pc_setsavepoint(struct map_session_data *sd,char *mapname,int x,int y)
 {
-	if( sd == NULL ){
-		printf("pc_setsavepoint nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	strncpy(sd->status.save_point.map,mapname,24);
 	sd->status.save_point.x = x;
@@ -6514,10 +6247,7 @@ int pc_setsavepoint(struct map_session_data *sd,char *mapname,int x,int y)
 static int last_save_fd,save_flag;
 static int pc_autosave_sub(struct map_session_data *sd,va_list ap)
 {
-	if( sd == NULL ){
-		printf("pc_autosave_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(save_flag==0 && sd->fd>last_save_fd){
 //		if(battle_config.save_log)

@@ -36,7 +36,7 @@
 struct mmo_map_server server[MAX_MAP_SERVERS];
 int server_fd[MAX_MAP_SERVERS];
 
-int login_fd;
+int login_fd,char_fd;
 char userid[24];
 char passwd[24];
 char server_name[20];
@@ -1583,6 +1583,9 @@ void do_final(void)
 {
 	mmo_char_sync();
 	inter_save();
+	free(char_dat);
+	delete_session(login_fd);
+	delete_session(char_fd);
 }
 
 int do_init(int argc,char **argv)
@@ -1605,7 +1608,7 @@ int do_init(int argc,char **argv)
 	set_termfunc(do_final);
 	set_defaultparse(parse_char);
 
-	make_listen_port(char_port);
+	char_fd = make_listen_port(char_port);
 
 	add_timer_func_list(check_connect_login_server,"check_connect_login_server");
 	add_timer_func_list(send_users_tologin,"send_users_tologin");

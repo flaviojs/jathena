@@ -5,6 +5,7 @@
 
 #include "map.h"
 #include "battle.h"
+#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -24,10 +25,8 @@ static inline void push_heap_path(int *heap,struct tmp_path *tp,int index)
 {
 	int i,h;
 
-	if( heap == NULL || tp == NULL ){
-		printf("push_heap_path nullpo\n");
-		return;
-	}
+	nullpo_retv(heap);
+	nullpo_retv(tp);
 
 	heap[0]++;
 
@@ -47,10 +46,8 @@ static inline void update_heap_path(int *heap,struct tmp_path *tp,int index)
 {
 	int i,h;
 
-	if( heap == NULL || tp == NULL ){
-		printf("update_heap_path nullpo\n");
-		return;
-	}
+	nullpo_retv(heap);
+	nullpo_retv(tp);
 
 	for(h=0;h<heap[0];h++)
 		if(heap[h+1]==index)
@@ -75,10 +72,8 @@ static int pop_heap_path(int *heap,struct tmp_path *tp)
 	int i,h,k;
 	int ret,last;
 
-	if( heap == NULL || tp == NULL ){
-		printf("pop_heap_path nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, heap);
+	nullpo_retr(-1, tp);
 
 	if(heap[0]<=0)
 		return -1;
@@ -111,10 +106,7 @@ static inline int calc_cost(struct tmp_path *p,int x1,int y1)
 {
 	int xd,yd;
 
-	if( p == NULL ){
-		printf("calc_cost nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, p);
 
 	xd=x1-p->x;
 	if(xd<0) xd=-xd;
@@ -131,10 +123,8 @@ static int add_path(int *heap,struct tmp_path *tp,int x,int y,int dist,int dir,i
 {
 	int i;
 
-	if( heap == NULL || tp == NULL ){
-		printf("add_path nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, heap);
+	nullpo_retr(0, tp);
 
 	i=calc_index(x,y);
 
@@ -178,10 +168,7 @@ static inline int can_place(struct map_data *m,int x,int y,int flag)
 {
 	int c;
 
-	if( m == NULL ){
-		printf("can_place nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, m);
 
 	c=read_gatp(m,x,y);
 
@@ -198,10 +185,7 @@ static inline int can_place(struct map_data *m,int x,int y,int flag)
  */
 static inline int can_move(struct map_data *m,int x0,int y0,int x1,int y1,int flag)
 {
-	if( m == NULL ){
-		printf("can_move nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, m);
 
 	if(x0-x1<-1 || x0-x1>1 || y0-y1<-1 || y0-y1>1)
 		return 0;
@@ -271,10 +255,7 @@ int path_search(struct walkpath_data *wpd,int m,int x0,int y0,int x1,int y1,int 
 	struct map_data *md;
 	int dx,dy;
 
-	if( wpd == NULL ){
-		printf("path_search nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, wpd);
 
 	if(!map[m].gat)
 		return -1;

@@ -1,4 +1,45 @@
 --------------------
+//1022 by (凸)
+・NULLチェック変更
+・login,char,map終了時に開放されていなかったメモリを微妙に開放する努力をしてみた
+・スパノビ爆裂波動実装、クリティカル+50
+・スパノビボーナスを変更、最初から一度も死んでないJobLv70にAll+15、BaseLv99にMHP+2000
+
+	(doc/)
+	client_packet.txt S 01ed追加
+	(char/)
+	do_final() 変更
+	do_init() 変更
+	(login/)
+	do_final() 追加
+	do_init() 変更
+	(map/)
+	atcommand.c Destさんの変更を取り込み
+	battle.c 同上
+	chat.c NULLチェック変更
+	chrif.c NULLチェック変更
+	clif.c NULLチェック変更
+		clif_parse() 変更
+		clif_parse_sn_explosionspirits() 追加
+		clif_parse_sn_doridori() 名前変更
+	guild.c NULLチェック変更
+	intif.c NULLチェック変更
+	itemdb.c NULLチェック変更
+	map.c NULLチェック変更
+		do_final() 変更
+	mob.c NULLチェック変更
+	npc.c NULLチェック変更
+		npc_parse_script() buf開放忘れ？を開放
+	party.c NULLチェック変更
+	path.c NULLチェック変更
+	pc.c NULLチェック変更
+		pc_calcstatus() スパノビ変更
+	pet.c NULLチェック変更
+	storage.c NULLチェック変更
+	trade.c NULLチェック変更
+	vending.c NULLチェック変更
+
+--------------------
 //1021 by Kalen
 ・プロンテラ冠婚品NPCにてタキシード販売
 ・Umbalaのワープ見直し

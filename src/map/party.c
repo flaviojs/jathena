@@ -11,6 +11,7 @@
 #include "intif.h"
 #include "clif.h"
 #include "socket.h"
+#include "nullpo.h"
 
 #define PARTY_SEND_XYHP_INVERVAL	1000	// 座標やＨＰ送信の間隔
 
@@ -35,10 +36,8 @@ struct party *party_search(int party_id)
 // 作成要求
 int party_create(struct map_session_data *sd,char *name)
 {
-	if( sd == NULL ){
-		printf("party_create nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	if(sd->status.party_id==0)
 		intif_create_party(sd,name);
 	else
@@ -51,10 +50,8 @@ int party_created(int account_id,int fail,int party_id,char *name)
 {
 	struct map_session_data *sd;
 	sd=map_id2sd(account_id);
-	if( sd == NULL ){
-		printf("party_created nullpo?\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 	
 	if(fail==0){
 		struct party *p;
@@ -90,10 +87,7 @@ int party_check_member(struct party *p)
 	int i;
 	struct map_session_data *sd;
 
-	if( p == NULL ){
-		printf("party_check_member nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, p);
 
 	for(i=0;i<fd_max;i++){
 		if(session[i] && (sd=session[i]->session_data) && sd->state.auth){
@@ -137,10 +131,7 @@ int party_recv_info(struct party *sp)
 	struct party *p;
 	int i;
 
-	if( sp == NULL ){
-		printf("party_recv_info nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sp);
 
 	if((p=numdb_search(party_db,sp->party_id))==NULL){
 		p=calloc(sizeof(struct party), 1);
@@ -181,10 +172,7 @@ int party_invite(struct map_session_data *sd,int account_id)
 	struct party *p=party_search(sd->status.party_id);
 	int i;
 
-	if( sd == NULL ){
-		printf("party_invite nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(tsd==NULL || p==NULL)
 		return 0;
@@ -216,10 +204,7 @@ int party_reply_invite(struct map_session_data *sd,int account_id,int flag)
 {
 	struct map_session_data *tsd= map_id2sd(account_id);
 
-	if( sd == NULL ){
-		printf("party_invite nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if(flag==1){	// 承諾
 		//inter鯖へ追加要求
@@ -272,10 +257,8 @@ int party_removemember(struct map_session_data *sd,int account_id,char *name)
 {
 	struct party *p;
 	int i;
-	if( sd == NULL ){
-		printf("party_removemember nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 	
 	if( (p = party_search(sd->status.party_id)) == NULL )
 		return 0;
@@ -301,10 +284,7 @@ int party_leave(struct map_session_data *sd)
 	struct party *p;
 	int i;
 
-	if( sd == NULL ){
-		printf("party_leave nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 	
 	if( (p = party_search(sd->status.party_id)) == NULL )
 		return 0;
@@ -361,10 +341,7 @@ int party_changeoption(struct map_session_data *sd,int exp,int item)
 {
 	struct party *p;
 
-	if( sd == NULL ){
-		printf("party_changeoption nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if( sd->status.party_id==0 || (p=party_search(sd->status.party_id))==NULL )
 		return 0;
@@ -426,10 +403,9 @@ int party_recv_movemap(int party_id,int account_id,char *map,int online,int lv)
 int party_send_movemap(struct map_session_data *sd)
 {
 	struct party *p;
-	if( sd == NULL ){
-		printf("party_send_movemap nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	if( sd->status.party_id==0 )
 		return 0;
 	intif_party_changemap(sd,1);
@@ -456,10 +432,9 @@ int party_send_movemap(struct map_session_data *sd)
 int party_send_logout(struct map_session_data *sd)
 {
 	struct party *p;
-	if( sd == NULL ){
-		printf("party_send_logout nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	if( sd->status.party_id>0 )
 		intif_party_changemap(sd,0);
 	
@@ -494,10 +469,8 @@ int party_recv_message(int party_id,int account_id,char *mes,int len)
 // パーティ競合確認
 int party_check_conflict(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("party_check_conflict nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	intif_party_checkconflict(sd->status.party_id,sd->status.account_id,sd->status.name);
 	return 0;
 }
@@ -508,10 +481,9 @@ int party_send_xyhp_timer_sub(void *key,void *data,va_list ap)
 {
 	struct party *p=(struct party *)data;
 	int i;
-	if( p == NULL ){
-		printf("party_send_xyhp_timer_sub nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, p);
+
 	for(i=0;i<MAX_PARTY;i++){
 		struct map_session_data *sd;
 		if((sd=p->member[i].sd)!=NULL){
@@ -542,10 +514,9 @@ int party_send_xyhp_timer(int tid,unsigned int tick,int id,int data)
 int party_send_xy_clear(struct party *p)
 {
 	int i;
-	if( p == NULL ){
-		printf("party_send_xy_clear nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, p);
+
 	for(i=0;i<MAX_PARTY;i++){
 		struct map_session_data *sd;
 		if((sd=p->member[i].sd)!=NULL){
@@ -563,10 +534,9 @@ int party_send_hp_check(struct block_list *bl,va_list ap)
 	int *flag;
 	struct map_session_data *sd;
 
-	if( bl == NULL || ap == NULL || (sd=(struct map_session_data *)bl) == NULL ){
-		printf("party_send_hp_check nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, sd=(struct map_session_data *)bl);
 
 	party_id=va_arg(ap,int);
 	flag=va_arg(ap,int *);
@@ -584,10 +554,7 @@ int party_exp_share(struct party *p,int map,int base_exp,int job_exp)
 	struct map_session_data *sd;
 	int i,c;
 
-	if( p == NULL ){
-		printf("party_exp_share nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, p);
 	
 	for(i=c=0;i<MAX_PARTY;i++)
 		if((sd=p->member[i].sd)!=NULL && sd->bl.m==map)
@@ -613,10 +580,7 @@ void party_foreachsamemap(int (*func)(struct block_list*,va_list),
 	struct block_list *list[MAX_PARTY];
 	int blockcount=0;
 	
-	if( sd == NULL ){
-		printf("party_foreachsamemap nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 	
 	if((p=party_search(sd->status.party_id))==NULL)
 		return;

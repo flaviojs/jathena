@@ -10,6 +10,7 @@
 #include "pc.h"
 #include "storage.h"
 #include "guild.h"
+#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -39,18 +40,14 @@ struct item *i2=(struct item *)_i2;
 
  
 void sortage_sortitem(struct storage* stor){
-	if( stor == NULL ){
-		printf("sortage_sortitem nullpo\n");
-		return;
-	}
+	nullpo_retv(stor);
+
 	qsort(stor->storage, MAX_STORAGE, sizeof(struct item), storage_comp_item);
 }
 
 void sortage_gsortitem(struct guild_storage* gstor){
-	if( gstor == NULL ){
-		printf("sortage_gsortitem nullpo\n");
-		return;
-	}
+	nullpo_retv(gstor);
+
 	qsort(gstor->storage, MAX_GUILD_STORAGE, sizeof(struct item), storage_comp_item);
 }
 
@@ -104,10 +101,7 @@ int storage_storageopen(struct map_session_data *sd)
 {
 	struct storage *stor;
 
-	if( sd == NULL ){
-		printf("storage_storageopen nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if((stor = numdb_search(storage_db,sd->status.account_id)) != NULL) {
 		stor->storage_status = 1;
@@ -132,17 +126,13 @@ int storage_additem(struct map_session_data *sd,struct storage *stor,struct item
 	struct item_data *data;
 	int i;
 
-	if( sd == NULL || stor == NULL || item_data == NULL ){
-		printf("storage_additem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
+	nullpo_retr(1, stor);
+	nullpo_retr(1, item_data);
 
 	if(item_data->nameid <= 0 || amount <= 0)
 		return 1;
-	if((data = itemdb_search(item_data->nameid)) == NULL){
-		printf("storage_additem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, data = itemdb_search(item_data->nameid));
 
 	i=MAX_STORAGE;
 	if(!itemdb_isequip2(data)){
@@ -182,10 +172,8 @@ int storage_additem(struct map_session_data *sd,struct storage *stor,struct item
  */
 int storage_delitem(struct map_session_data *sd,struct storage *stor,int n,int amount)
 {
-	if( sd == NULL || stor == NULL ){
-		printf("storage_additem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
+	nullpo_retr(1, stor);
 
 	if(stor->storage[n].nameid==0 || stor->storage[n].amount<amount)
 		return 1;
@@ -208,10 +196,8 @@ int storage_storageadd(struct map_session_data *sd,int index,int amount)
 {
 	struct storage *stor;
 
-	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
-		printf("storage_storageadd nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, stor=account2storage(sd->status.account_id));
 
 	if( (stor->storage_amount <= MAX_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
 		if(index>=0 && index<MAX_INVENTORY) { // valid index
@@ -235,10 +221,8 @@ int storage_storageget(struct map_session_data *sd,int index,int amount)
 	struct storage *stor;
 	int flag;
 
-	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
-		printf("storage_storageget nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, stor=account2storage(sd->status.account_id));
 
 	if(stor->storage_status == 1) { //  storage open
 		if(index>=0 && index<MAX_STORAGE) { // valid index
@@ -261,10 +245,8 @@ int storage_storageaddfromcart(struct map_session_data *sd,int index,int amount)
 {
 	struct storage *stor;
 
-	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
-		printf("storage_storageaddfromcart nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, stor=account2storage(sd->status.account_id));
 
 	if( (stor->storage_amount <= MAX_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
 		if(index>=0 && index<MAX_INVENTORY) { // valid index
@@ -286,10 +268,8 @@ int storage_storagegettocart(struct map_session_data *sd,int index,int amount)
 {
 	struct storage *stor;
 
-	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
-		printf("storage_storagegettocart nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, stor=account2storage(sd->status.account_id));
 
 	if(stor->storage_status == 1) { //  storage open
 		if(index>=0 && index<MAX_STORAGE) { // valid index
@@ -313,10 +293,8 @@ int storage_storageclose(struct map_session_data *sd)
 {
 	struct storage *stor;
 
-	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
-		printf("storage_storageclose nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, stor=account2storage(sd->status.account_id));
 
 	stor->storage_status=0;
 	sd->state.storage_flag = 0;
@@ -334,10 +312,7 @@ int storage_storage_quit(struct map_session_data *sd)
 {
 	struct storage *stor;
 
-	if( sd == NULL ){
-		printf("storage_storage_quit nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	stor = numdb_search(storage_db,sd->status.account_id);
 	if(stor) stor->storage_status = 0;
@@ -349,10 +324,7 @@ int storage_storage_save(struct map_session_data *sd)
 {
 	struct storage *stor;
 
-	if( sd == NULL ){
-		printf("storage_storage_save nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	stor=numdb_search(storage_db,sd->status.account_id);
 	if(stor) intif_send_storage(stor);
@@ -391,10 +363,8 @@ int guild_storage_delete(int guild_id)
 int storage_guild_storageopen(struct map_session_data *sd)
 {
 	struct guild_storage *gstor;
-	if( sd == NULL ){
-		printf("storage_guild_storageopen nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
 
 	if(sd->status.guild_id <= 0)
 		return 2;
@@ -422,10 +392,10 @@ int guild_storage_additem(struct map_session_data *sd,struct guild_storage *stor
 	struct item_data *data;
 	int i;
 
-	if( sd == NULL || stor == NULL || item_data == NULL || (data = itemdb_search(item_data->nameid)) == NULL ){
-		printf("guild_storage_additem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
+	nullpo_retr(1, stor);
+	nullpo_retr(1, item_data);
+	nullpo_retr(1, data = itemdb_search(item_data->nameid));
 
 	if(item_data->nameid <= 0 || amount <= 0)
 		return 1;
@@ -465,10 +435,9 @@ int guild_storage_additem(struct map_session_data *sd,struct guild_storage *stor
 
 int guild_storage_delitem(struct map_session_data *sd,struct guild_storage *stor,int n,int amount)
 {
-	if( sd == NULL || stor == NULL ){
-		printf("guild_storage_delitem nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
+	nullpo_retr(1, stor);
+
 	if(stor->storage[n].nameid==0 || stor->storage[n].amount<amount)
 		return 1;
 
@@ -487,10 +456,7 @@ int storage_guild_storageadd(struct map_session_data *sd,int index,int amount)
 {
 	struct guild_storage *stor;
 
-	if( sd == NULL ){
-		printf("storage_guild_storageadd nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		if( (stor->storage_amount <= MAX_GUILD_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
@@ -512,10 +478,7 @@ int storage_guild_storageget(struct map_session_data *sd,int index,int amount)
 	struct guild_storage *stor;
 	int flag;
 
-	if( sd == NULL ){
-		printf("storage_guild_storageget nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		if(stor->storage_status == 1) { //  storage open
@@ -537,10 +500,7 @@ int storage_guild_storageaddfromcart(struct map_session_data *sd,int index,int a
 {
 	struct guild_storage *stor;
 
-	if( sd == NULL ){
-		printf("storage_guild_storageaddfromcart nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		if( (stor->storage_amount <= MAX_GUILD_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
@@ -560,10 +520,7 @@ int storage_guild_storagegettocart(struct map_session_data *sd,int index,int amo
 {
 	struct guild_storage *stor;
 
-	if( sd == NULL ){
-		printf("storage_guild_storagegettocart nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		if(stor->storage_status == 1) { //  storage open
@@ -584,10 +541,8 @@ int storage_guild_storageclose(struct map_session_data *sd)
 {
 	struct guild_storage *stor;
 
-	if( sd == NULL ){
-		printf("storage_guild_storageclose nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		intif_send_guild_storage(sd->status.account_id,stor);
 		stor->storage_status = 0;
@@ -603,10 +558,7 @@ int storage_guild_storage_quit(struct map_session_data *sd,int flag)
 {
 	struct guild_storage *stor;
 
-	if( sd == NULL ){
-		printf("storage_storage_quit nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	stor = numdb_search(guild_storage_db,sd->status.guild_id);
 	if(stor) {

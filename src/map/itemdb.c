@@ -10,6 +10,7 @@
 #include "itemdb.h"
 #include "script.h"
 #include "pc.h"
+#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -586,10 +587,8 @@ static int itemdb_final(void *key,void *data,va_list ap)
 {
 	struct item_data *id;
 
-	if( (id=data) == NULL ){
-		printf("itemdb_final nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, id=data);
+
 	if(id->use_script)
 		free(id->use_script);
 	if(id->equip_script)

@@ -43,6 +43,7 @@ char login_log_filename[1024] = "log/login.log";
 
 struct mmo_char_server server[MAX_SERVERS];
 int server_fd[MAX_SERVERS];
+int login_fd;
 
 enum {
 	ACO_DENY_ALLOW=0,
@@ -1108,6 +1109,19 @@ int login_config_read(const char *cfgName)
 
 	return 0;
 }
+void do_final(void)
+{
+	int i;
+	free(auth_dat);
+	free(gm_account_db);
+	for(i=0;i<MAX_SERVERS;i++){
+		int fd;
+		if((fd=server_fd[i])>0){
+			delete_session(fd);
+		}
+	}
+	delete_session(login_fd);
+}
 
 int do_init(int argc,char **argv)
 {
@@ -1122,11 +1136,12 @@ int do_init(int argc,char **argv)
   for(i=0;i<MAX_SERVERS;i++){
     server_fd[i]=-1;
   }
-  make_listen_port(login_port);
+  login_fd = make_listen_port(login_port);
   mmo_auth_init();
 	read_gm_account();
   set_termfunc(mmo_auth_sync);
   set_defaultparse(parse_login);
 
+	atexit(do_final);
   return 0;
 }

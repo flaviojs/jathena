@@ -27,6 +27,7 @@
 #include "guild.h"
 #include "pet.h"
 #include "atcommand.h"
+#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -162,10 +163,7 @@ int map_addblock(struct block_list *bl)
 {
 	int m,x,y;
 
-	if( bl == NULL ){
-		printf("map_addblock nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
 
 	if(bl->prev != NULL){
 			if(battle_config.error_log)
@@ -207,10 +205,8 @@ int map_addblock(struct block_list *bl)
  */
 int map_delblock(struct block_list *bl)
 {
-	if( bl == NULL ){
-		printf("map_delblock nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+
 	// 既にblocklistから抜けている
 	if(bl->prev==NULL){
 		if(bl->next!=NULL){
@@ -676,10 +672,7 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y,struct 
 	unsigned int tick;
 	struct flooritem_data *fitem;
 
-	if( item_data == NULL ){ //*_sdはNULLで呼ばれることがあるので他でチェック
-		printf("map_addflooritem nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, item_data);
 
 	if((xy=map_searchrandfreecell(m,x,y,1))<0)
 		return 0;
@@ -779,10 +772,9 @@ void map_addchariddb(int charid,char *name)
 int map_reqchariddb(struct map_session_data * sd,int charid)
 {
 	struct charid2nick *p;
-	if( sd == NULL ){
-		printf("map_reqchariddb nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, sd);
+
 	p=numdb_search(charid_db,charid);
 	if(p!=NULL)	// データベースにすでにある
 		return 0;
@@ -802,10 +794,8 @@ int map_reqchariddb(struct map_session_data * sd,int charid)
  */
 void map_addiddb(struct block_list *bl)
 {
-	if( bl == NULL ){
-		printf("map_addiddb nullpo\n");
-		return;
-	}
+	nullpo_retv(bl);
+
 	numdb_insert(id_db,bl->id,bl);
 }
 
@@ -815,10 +805,8 @@ void map_addiddb(struct block_list *bl)
  */
 void map_deliddb(struct block_list *bl)
 {
-	if( bl == NULL ){
-		printf("map_deliddb nullpo\n");
-		return;
-	}
+	nullpo_retv(bl);
+
 	numdb_erase(id_db,bl->id);
 }
 
@@ -828,10 +816,8 @@ void map_deliddb(struct block_list *bl)
  */
 void map_addnickdb(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("map_addnickdb nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
+
 	strdb_insert(nick_db,sd->status.name,sd);
 }
 
@@ -843,10 +829,8 @@ void map_addnickdb(struct map_session_data *sd)
  */
 int map_quit(struct map_session_data *sd)
 {
-	if( sd == NULL ){
-		printf("map_quit nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+
 	if(sd->chatID)	// チャットから出る
 		chat_leavechat(sd);
 
@@ -1005,10 +989,9 @@ int map_addnpc(int m,struct npc_data *nd)
 	if(i==map[m].npc_num){
 		map[m].npc_num++;
 	}
-	if( nd == NULL ){
-		printf("map_addnpc nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, nd);
+
 	map[m].npc[i]=nd;
 	nd->n = i;
 	numdb_insert(id_db,nd->bl.id,nd);
@@ -1099,10 +1082,9 @@ int map_calc_dir( struct block_list *src,int x,int y)
 {
 	int dir=0;
 	int dx,dy;
-	if( src == NULL ){
-		printf("map_calc_dir nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, src);
+
 	dx=x-src->x;
 	dy=y-src->y;
 	if( dx==0 && dy==0 ){	// 彼我の場所一致
@@ -1480,6 +1462,14 @@ int map_config_read(char *cfgName)
  */
 void do_final(void)
 {
+	int i;
+	for(i=0;i<=map_num;i++){
+		if(map[i].gat) free(map[i].gat);
+		if(map[i].block) free(map[i].block);
+		if(map[i].block_mob) free(map[i].block_mob);
+		if(map[i].block_count) free(map[i].block_count);
+		if(map[i].block_mob_count) free(map[i].block_mob_count);
+	}
 	do_final_script();
 	do_final_itemdb();
 	do_final_storage();

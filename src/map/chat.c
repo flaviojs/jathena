@@ -9,6 +9,7 @@
 #include "pc.h"
 #include "chat.h"
 #include "npc.h"
+#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -25,10 +26,7 @@ int chat_createchat(struct map_session_data *sd,int limit,int pub,char* pass,cha
 {
 	struct chat_data *cd;
 
-	if( sd == NULL ){
-		printf("chat_createchat nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	cd = calloc(sizeof(*cd), 1);
 	if(cd==NULL){
@@ -73,10 +71,7 @@ int chat_joinchat(struct map_session_data *sd,int chatid,char* pass)
 {
 	struct chat_data *cd;
 
-	if( sd == NULL ){
-		printf("chat_joinchat nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	cd=(struct chat_data*)map_id2bl(chatid);
 	if(cd==NULL)
@@ -115,10 +110,7 @@ int chat_leavechat(struct map_session_data *sd)
 	struct chat_data *cd;
 	int i,leavechar;
 
-	if( sd == NULL ){
-		printf("chat_leavechat nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	cd=(struct chat_data*)map_id2bl(sd->chatID);
 	if(cd==NULL)
@@ -173,10 +165,7 @@ int chat_changechatowner(struct map_session_data *sd,char *nextownername)
 	struct map_session_data *tmp_sd;
 	int i,nextowner;
 
-	if( sd == NULL ){
-		printf("chat_changechatowner nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	cd=(struct chat_data*)map_id2bl(sd->chatID);
 	if(cd==NULL || (struct block_list *)sd!=(*cd->owner))
@@ -219,10 +208,7 @@ int chat_changechatstatus(struct map_session_data *sd,int limit,int pub,char* pa
 {
 	struct chat_data *cd;
 
-	if( sd == NULL ){
-		printf("chat_changechatstatus nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	cd=(struct chat_data*)map_id2bl(sd->chatID);
 	if(cd==NULL || (struct block_list *)sd!=(*cd->owner))
@@ -250,10 +236,7 @@ int chat_kickchat(struct map_session_data *sd,char *kickusername)
 	struct chat_data *cd;
 	int i,kickuser;
 
-	if( sd == NULL ){
-		printf("chat_kickchat nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, sd);
 
 	cd=(struct chat_data*)map_id2bl(sd->chatID);
 	if(cd==NULL || (struct block_list *)sd!=(*cd->owner))
@@ -281,10 +264,7 @@ int chat_createnpcchat(struct npc_data *nd,int limit,int trigger,char* title,int
 {
 	struct chat_data *cd;
 
-	if( nd == NULL ){
-		printf("chat_createnpcchat nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, nd);
 
 	cd = calloc(sizeof(*cd), 1);
 	if(cd==NULL){
@@ -329,10 +309,8 @@ int chat_deletenpcchat(struct npc_data *nd)
 {
 	struct chat_data *cd;
 
-	if( nd == NULL || (cd=(struct chat_data*)map_id2bl(nd->chat_id)) == NULL ){
-		printf("chat_deletenpcchat nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, nd);
+	nullpo_retr(0, cd=(struct chat_data*)map_id2bl(nd->chat_id));
 
 	chat_npckickall(cd);
 	clif_clearchat(cd,0);
@@ -348,10 +326,7 @@ int chat_deletenpcchat(struct npc_data *nd)
  */
 int chat_triggerevent(struct chat_data *cd)
 {
-	if( cd == NULL ){
-		printf("chat_triggerevent nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, cd);
 
 	if(cd->users>=cd->trigger && cd->npc_event[0])
 		npc_event_do(cd->npc_event);
@@ -364,10 +339,7 @@ int chat_triggerevent(struct chat_data *cd)
  */
 int chat_enableevent(struct chat_data *cd)
 {
-	if( cd == NULL ){
-		printf("chat_enableevent nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, cd);
 
 	cd->trigger&=0x7f;
 	chat_triggerevent(cd);
@@ -379,10 +351,7 @@ int chat_enableevent(struct chat_data *cd)
  */
 int chat_disableevent(struct chat_data *cd)
 {
-	if( cd == NULL ){
-		printf("chat_disableevent nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, cd);
 
 	cd->trigger|=0x80;
 	return 0;
@@ -393,10 +362,7 @@ int chat_disableevent(struct chat_data *cd)
  */
 int chat_npckickall(struct chat_data *cd)
 {
-	if( cd == NULL ){
-		printf("chat_npckickall nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, cd);
 
 	while(cd->users>0){
 		chat_leavechat(cd->usersd[cd->users-1]);

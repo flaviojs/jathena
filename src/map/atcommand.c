@@ -6,6 +6,7 @@
 
 #include "socket.h"
 #include "timer.h"
+#include "nullpo.h"
 
 #include "clif.h"
 #include "chrif.h"
@@ -227,10 +228,7 @@ is_atcommand(const int fd, struct map_session_data* sd, const char* message)
 	AtCommandInfo info;
 	AtCommandType type;
 
-	if( sd == NULL ){
-		printf("is_atcommand nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
 
 	if (!message || !*message)
 		return AtCommand_None;
@@ -320,10 +318,8 @@ atcommand(
 static int atkillmonster_sub(struct block_list *bl,va_list ap)
 {
 	int flag = va_arg(ap,int);
-	if( bl == NULL ){
-		printf("atkillmonster_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	
 	if (flag)
 		mob_damage(NULL,(struct mob_data *)bl,((struct mob_data *)bl)->hp,2);
 	else
@@ -444,10 +440,7 @@ atcommand_rurap(
 	int x = 0, y = 0;
 	struct map_session_data *pl_sd = NULL;
 	
-	if( sd == NULL ){
-		printf("atcommand_rurap nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -487,10 +480,7 @@ atcommand_rura(
 	char map[100];
 	int x = 0, y = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_rura nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -521,10 +511,7 @@ atcommand_where(
 	char output[200];
 	struct map_session_data *pl_sd = NULL;
 
-	if( sd == NULL ){
-		printf("atcommand_where nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -556,10 +543,7 @@ atcommand_jumpto(
 	char character[100];
 	struct map_session_data *pl_sd = NULL;
 	
-	if( sd == NULL ){
-		printf("atcommand_jumpto nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -591,10 +575,7 @@ atcommand_jump(
 {
 	int x = 0, y = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_jump nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (sscanf(message, "%d %d", &x, &y) < 2)
 		return -1;
@@ -640,10 +621,7 @@ atcommand_save(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	if( sd == NULL ){
-		printf("atcommand_save nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	pc_setsavepoint(sd, sd->mapname, sd->bl.x, sd->bl.y);
 	if (sd->status.pet_id > 0 && sd->pd)
@@ -665,10 +643,7 @@ atcommand_load(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	if( sd == NULL ){
-		printf("atcommand_load nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	pc_setpos(sd, sd->status.save_point.map,
 		sd->status.save_point.x, sd->status.save_point.y, 0);
@@ -688,10 +663,7 @@ atcommand_speed(
 {
 	int speed = DEFAULT_WALK_SPEED;
 
-	if( sd == NULL ){
-		printf("atcommand_speed nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -729,10 +701,7 @@ atcommand_guildstorage(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	if( sd == NULL ){
-		printf("atcommand_guildstorage nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (sd->status.guild_id > 0)
 				storage_guild_storageopen(sd);
@@ -750,10 +719,7 @@ atcommand_option(
 {
 	int param1 = 0, param2 = 0, param3 = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_option nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -783,10 +749,7 @@ atcommand_hide(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	if( sd == NULL ){
-		printf("atcommand_hide nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (sd->status.option & OPTION_HIDE) {
 		sd->status.option &= ~OPTION_HIDE;
@@ -832,10 +795,7 @@ atcommand_die(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	if( sd == NULL ){
-		printf("atcommand_die nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	pc_damage(NULL, sd, sd->status.hp + 1);
 	clif_displaymessage(fd, msg_table[13]);
@@ -880,10 +840,7 @@ atcommand_alive(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	if( sd == NULL ){
-		printf("atcommand_alive nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	sd->status.hp = sd->status.max_hp;
 	sd->status.sp = sd->status.max_sp;
@@ -930,10 +887,7 @@ atcommand_heal(
 {
 	int hp = 0, sp = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_heal nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1105,10 +1059,7 @@ atcommand_itemreset(
 {
 	int i = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_itemreset nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	for (i = 0; i < MAX_INVENTORY; i++) {
 		if (sd->status.inventory[i].amount &&
@@ -1145,10 +1096,7 @@ atcommand_baselevelup(
 {
 	int level = 0, i = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_baselevelup nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1189,10 +1137,7 @@ atcommand_joblevelup(
 	//“]¶‚â—{Žq‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ðŽZo‚·‚é
 	struct pc_base_job s_class;
 
-	if( sd == NULL ){
-		printf("atcommand_joblevelup nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	s_class = pc_calc_base_job(sd->status.class);
 
@@ -1267,10 +1212,7 @@ atcommand_gm(
 {
 	char password[100];
 	
-	if( sd == NULL ){
-		printf("atcommand_gm nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1305,10 +1247,7 @@ atcommand_pvpoff(
 	struct map_session_data *pl_sd = NULL;
 	int i = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_pvpoff nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (map[sd->bl.m].flag.pvp) {
 				map[sd->bl.m].flag.pvp = 0;
@@ -1343,10 +1282,7 @@ atcommand_pvpon(
 	struct map_session_data *pl_sd = NULL;
 	int i = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_pvpon nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!map[sd->bl.m].flag.pvp) {
 				map[sd->bl.m].flag.pvp = 1;
@@ -1378,10 +1314,7 @@ atcommand_gvgoff(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	if( sd == NULL ){
-		printf("atcommand_gvgoff nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (map[sd->bl.m].flag.gvg) {
 				map[sd->bl.m].flag.gvg = 0;
@@ -1400,10 +1333,7 @@ atcommand_gvgon(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	if( sd == NULL ){
-		printf("atcommand_gvgon nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!map[sd->bl.m].flag.gvg) {
 				map[sd->bl.m].flag.gvg = 1;
@@ -1424,10 +1354,7 @@ atcommand_model(
 {
 	int hair_style = 0, hair_color = 0, cloth_color = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_model nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1483,10 +1410,7 @@ atcommand_go(
 				{	"louyang.gat",	217,40		},	//	14=—Œ—z
 			};
 	
-	if( sd == NULL ){
-		printf("atcommand_go nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1519,10 +1443,7 @@ atcommand_monster(
 	int count = 0;
 	int i = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_monster nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1573,10 +1494,7 @@ atcommand_killmonster_sub(
 {
 	int map_id = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_killmonster_sub nullpo\n");
-		return;
-	}
+	nullpo_retv(sd);
 
 	if (!message || !*message) {
 		map_id = sd->bl.m;
@@ -1633,10 +1551,7 @@ atcommand_refine(
 	int i = 0, position = 0, refine = 0, current_position = 0;
 	struct map_session_data* p;
 	
-	if( sd == NULL ){
-		printf("atcommand_refine nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	p = (struct map_session_data*)sd;
 
@@ -1684,10 +1599,7 @@ atcommand_produce(
 	int item_id = 0, attribute = 0, star = 0;
 	int flag = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_produce nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1761,10 +1673,7 @@ atcommand_gat(
 	char output[BUFSIZ];
 	int y = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_gat nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	for (y = 2; y >= -2; y--) {
 		snprintf(output, sizeof output,
@@ -1792,10 +1701,7 @@ atcommand_packet(
 {
 	int x = 0, y = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_packet nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1817,10 +1723,7 @@ atcommand_statuspoint(
 {
 	int point = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_statuspoint nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1846,10 +1749,7 @@ atcommand_skillpoint(
 {
 	int point = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_skillpoint nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1875,10 +1775,7 @@ atcommand_zeny(
 {
 	int zeny = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_zeny nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1953,10 +1850,7 @@ atcommand_guildlevelup(
 	int level = 0;
 	struct guild *guild_info = NULL;
 	
-	if( sd == NULL ){
-		printf("atcommand_guildlevelup nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -1992,10 +1886,7 @@ atcommand_makepet(
 {
 	int id = 0, pet_id = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_makepet nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -2029,10 +1920,7 @@ atcommand_petfriendly(
 {
 	int friendly = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_petfriendly nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -2071,10 +1959,7 @@ atcommand_pethungry(
 {
 	int hungry = 0;
 	
-	if( sd == NULL ){
-		printf("atcommand_pethungry nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -2101,10 +1986,7 @@ atcommand_petrename(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	if( sd == NULL ){
-		printf("atcommand_petrename nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (sd->status.pet_id > 0 && sd->pd) {
 				sd->pet.rename_flag = 0;
@@ -2127,10 +2009,7 @@ atcommand_recall(
 	char character[100];
 	struct map_session_data *pl_sd = NULL;
 	
-	if( sd == NULL ){
-		printf("atcommand_recall nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -2234,10 +2113,7 @@ atcommand_character_stats(
 	char character[100];
 	struct map_session_data *pl_sd = NULL;
 	
-	if( sd == NULL ){
-		printf("atcommand_character_stats nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -2427,10 +2303,7 @@ atcommand_doommap(
 	struct map_session_data *pl_sd = NULL;
 	int i = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_doommap nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	for (i = 0; i < fd_max; i++) {
 		if (session[i] && (pl_sd = session[i]->session_data) &&
@@ -2494,10 +2367,7 @@ atcommand_raisemap(
 	struct map_session_data *pl_sd = NULL;
 	int i = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_raisemap nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	for (i = 0; i < fd_max; i++) {
 		if (session[i] && (pl_sd = session[i]->session_data) &&
@@ -2643,10 +2513,7 @@ atcommand_kickall(
 	struct map_session_data *pl_sd = NULL;
 	int i = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_kickall nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	for (i = 0; i < fd_max; i++) {
 		if (session[i] &&
@@ -2705,10 +2572,7 @@ atcommand_lostskill(
 {
 	int skill_id = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_lostskill nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -2735,10 +2599,7 @@ atcommand_spiritball(
 {
 	int number = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_spiritball nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	if (!message || !*message)
 		return -1;
@@ -2843,10 +2704,7 @@ atcommand_mapexit(
 	struct map_session_data *pl_sd = NULL;
 	int i = 0;
 
-	if( sd == NULL ){
-		printf("atcommand_mapexit nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, sd);
 
 	for (i = 0; i < fd_max; i++) {
 		if (session[i] &&

@@ -17,6 +17,7 @@
 #include "battle.h"
 #include "party.h"
 #include "npc.h"
+#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -49,10 +50,6 @@ int mobdb_searchname(const char *str)
 {
 	int i;
 	
-	if( str == NULL ){
-		printf("mobdb_searchname nullpo\n");
-		return 0;
-	}
 	for(i=0;i<sizeof(mob_db)/sizeof(mob_db[0]);i++){
 		if( strcmpi(mob_db[i].name,str)==0 || strcmp(mob_db[i].jname,str)==0 ||
 			memcmp(mob_db[i].name,str,24)==0 || memcmp(mob_db[i].jname,str,24)==0)
@@ -66,10 +63,8 @@ int mobdb_searchname(const char *str)
  */
 int mob_spawn_dataset(struct mob_data *md,const char *mobname,int class)
 {
-	if( md == NULL || mobname == NULL ){
-		printf("mob_spawn_dataset nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+
 	md->bl.prev=NULL;
 	md->bl.next=NULL;
 	if(strcmp(mobname,"--en--")==0)
@@ -103,11 +98,6 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 	struct mob_data *md=NULL;
 	int m,count,lv=255,r=class;
 	
-	if( mapname == NULL || mobname == NULL ){
-		printf("mob_once_spawn nullpo\n");
-		return 0;
-	}
-
 	if( sd )
 		lv=sd->status.base_level;
 
@@ -195,11 +185,6 @@ int mob_once_spawn_area(struct map_session_data *sd,char *mapname,
 	int x,y,i,c,max,lx=-1,ly=-1,id=0;
 	int m;
 
-	if( mapname == NULL || mobname == NULL ){ //sd,eventはNULLがあるので別で
-		printf("mob_once_spawn_area nullpo\n");
-		return 0;
-	}
-
 	m=map_mapname2mapid(mapname);
 
 	max=(y1-y0+1)*(x1-x0+1)*3;
@@ -233,10 +218,8 @@ int mob_once_spawn_area(struct map_session_data *sd,char *mapname,
  */
 int mob_exclusion_add(struct mob_data *md,int type,int id)
 {
-	if( md == NULL ){
-		printf("mob_exclusion_add nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+
 	if(type==1)
 		md->exclusion_src=id;
 	if(type==2)
@@ -252,10 +235,9 @@ int mob_exclusion_add(struct mob_data *md,int type,int id)
  */
 int mob_exclusion_check(struct mob_data *md,struct map_session_data *sd)
 {
-	if( md == NULL || sd == NULL ){
-		printf("mob_exclusion_check nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, md);
+
 	if(sd->bl.type==BL_PC){
 		if(md->exclusion_src && md->exclusion_src==sd->bl.id)
 			return 1;
@@ -314,10 +296,7 @@ short mob_get_head_buttom(int class)
  */
 int mob_can_move(struct mob_data *md)
 {
-	if( md == NULL ){
-		printf("mob_can_move nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
 
 	if(md->canmove_tick > gettick() || (md->opt1 > 0 && md->opt1 != 6) || md->option&2)
 		return 0;
@@ -338,10 +317,7 @@ int mob_can_move(struct mob_data *md)
  */
 static int calc_next_walk_step(struct mob_data *md)
 {
-	if( md == NULL ){
-		printf("calc_next_walk_step nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
 
 	if(md->walkpath.path_pos>=md->walkpath.path_len)
 		return -1;
@@ -364,10 +340,7 @@ static int mob_walk(struct mob_data *md,unsigned int tick,int data)
 	static int diry[8]={1,1,0,-1,-1,-1,0,1};
 	int x,y,dx,dy;
 
-	if( md == NULL ){
-		printf("mob_walk nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
 
 	md->state.state=MS_IDLE;
 	if(md->walkpath.path_pos>=md->walkpath.path_len || md->walkpath.path_pos!=data)
@@ -447,10 +420,8 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 	struct map_session_data *sd;
 	int mode,race,range;
 
-	if( md == NULL ){
-		printf("mob_attack nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+
 	md->min_chase=13;
 	md->state.state=MS_IDLE;
 	md->state.skillstate=MSS_IDLE;
@@ -529,10 +500,8 @@ int mob_stopattacked(struct map_session_data *sd,va_list ap)
 {
 	int id;
 
-	if( sd == NULL || ap == NULL ){
-		printf("mob_stopattacked nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, ap);
 
 	id=va_arg(ap,int);
 	if(sd->attacktarget==id)
@@ -548,10 +517,7 @@ int mob_changestate(struct mob_data *md,int state,int type)
 	unsigned int tick;
 	int i;
 
-	if( md == NULL ){
-		printf("mob_changestate nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
 
 	if(md->timer != -1)
 		delete_timer(md->timer,mob_timer);
@@ -616,10 +582,8 @@ static int mob_timer(int tid,unsigned int tick,int id,int data)
 	if( (bl=map_id2bl(id)) == NULL ){ //攻撃してきた敵がもういないのは正常のようだ
 		return 1;
 	}
-	if( (md=(struct mob_data*)bl) == NULL ){
-		printf("mob_timer nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, md=(struct mob_data*)bl);
+
 	if(md->bl.type!=BL_MOB)
 		return 1;
 
@@ -660,10 +624,8 @@ static int mob_walktoxy_sub(struct mob_data *md)
 {
 	struct walkpath_data wpd;
 
-	if( md == NULL ){
-		printf("mob_walktoxy_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+
 	if(path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,md->to_x,md->to_y,md->state.walk_easy))
 		return 1;
 	memcpy(&md->walkpath,&wpd,sizeof(wpd));
@@ -683,10 +645,7 @@ int mob_walktoxy(struct mob_data *md,int x,int y,int easy)
 {
 	struct walkpath_data wpd;
 
-	if( md == NULL ){
-		printf("mob_walktoxy nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
 
 	if(md->state.state == MS_WALK && path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,x,y,easy) )
 		return 1;
@@ -723,10 +682,8 @@ int mob_setdelayspawn(int id)
 	struct mob_data *md;
 	struct block_list *bl;
 	
-	if((bl=map_id2bl(id)) == NULL || (md=(struct mob_data*)bl) == NULL){
-		printf("mob_setdelayspawn nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, bl=map_id2bl(id));
+	nullpo_retr(-1, md=(struct mob_data*)bl);
 
 	if(md->bl.type!=BL_MOB)
 		return -1;
@@ -770,10 +727,8 @@ int mob_spawn(int id)
 	struct mob_data *md;
 	struct block_list *bl;
 
-	if((bl=map_id2bl(id)) == NULL || (md=(struct mob_data*)bl) == NULL){
-		printf("mob_spawn nullpo\n");
-		return -1;
-	}
+	nullpo_retr(-1, bl=map_id2bl(id));
+	nullpo_retr(-1, md=(struct mob_data*)bl);
 
 	if(md->bl.type!=BL_MOB)
 		return -1;
@@ -896,10 +851,7 @@ int mob_stopattack(struct mob_data *md)
  */
 int mob_stop_walking(struct mob_data *md,int type)
 {
-	if( md == NULL ){
-		printf("mob_stop_walking nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
 
 	if(md->state.state == MS_WALK || md->state.state == MS_IDLE) {
 		md->walkpath.path_len=0;
@@ -929,10 +881,8 @@ int mob_can_reach(struct mob_data *md,struct block_list *bl,int range)
 	struct walkpath_data wpd;
 	int i;
 
-	if( md == NULL || bl == NULL ){
-		printf("mob_can_reach nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+	nullpo_retr(0, bl);
 
 	dx=abs(bl->x - md->bl.x);
 	dy=abs(bl->y - md->bl.y);
@@ -940,14 +890,12 @@ int mob_can_reach(struct mob_data *md,struct block_list *bl,int range)
 	//=========== guildcastle guardian no search start===========
 	//when players are the guild castle member not attack them !
 	if(md->class == 1285 || md->class == 1286 || md->class == 1287) {
-		struct map_session_data *sd;
+		struct map_session_data *sd=(struct map_session_data *)bl;
 		struct guild *g;
 		struct guild_castle *gc=guild_mapname2gc(map[bl->m].name);
 		if(bl->type == BL_PC){
-			if((sd=(struct map_session_data *)bl) == NULL || gc == NULL ){
-				printf("mob_can_reach nullpo\n");
-				return 0;
-			}
+			nullpo_retr(0, sd);
+			nullpo_retr(0, gc);
 			g=guild_search(sd->status.guild_id);
 			if(g && g->guild_id == gc->guild_id)
 				return 0;
@@ -997,10 +945,8 @@ int mob_target(struct mob_data *md,struct block_list *bl,int dist)
 	short *option;
 	int mode,race;
 
-	if( md == NULL || bl == NULL ){
-		printf("mob_target nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+	nullpo_retr(0, bl);
 
 	sc_data = battle_get_sc_data(bl);
 	option = battle_get_option(bl);
@@ -1023,10 +969,7 @@ int mob_target(struct mob_data *md,struct block_list *bl,int dist)
 		(sc_data && sc_data[SC_TRICKDEAD].timer == -1 &&
 		 ( (option && !(*option&0x06) ) || race==4 || race==6) ) ){
 		if(bl->type == BL_PC) {
-			if((sd = (struct map_session_data *)bl) == NULL ){
-				printf("mob_target nullpo\n");
-				return 0;
-			}
+			nullpo_retr(0, sd = (struct map_session_data *)bl);
 			if(sd->invincible_timer != -1 || pc_isinvisible(sd) || mob_exclusion_check(md,sd))
 				return 0;
 			if(!(mode&0x20) && race!=4 && race!=6 && sd->state.gangsterparadise)
@@ -1055,10 +998,11 @@ static int mob_ai_sub_hard_activesearch(struct block_list *bl,va_list ap)
 	struct mob_data* md;
 	int mode,race,dist,*pcc;
 
-	if( bl == NULL || ap == NULL || (sd=(struct map_session_data *)bl) == NULL || (md=va_arg(ap,struct mob_data *)) == NULL || (pcc=va_arg(ap,int *)) == NULL ){
-		printf("mob_ai_sub_hard_activesearch nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, sd=(struct map_session_data *)bl);
+	nullpo_retr(0, md=va_arg(ap,struct mob_data *));
+	nullpo_retr(0, pcc=va_arg(ap,int *));
 
 	if(!md->mode){
 		mode=mob_db[md->class].mode;
@@ -1097,11 +1041,11 @@ static int mob_ai_sub_hard_lootsearch(struct block_list *bl,va_list ap)
 	struct mob_data* md;
 	int mode,dist,*itc;
 
-	if( bl == NULL || ap == NULL || (md=va_arg(ap,struct mob_data *)) == NULL || (itc=va_arg(ap,int *)) == NULL ){
-		printf("mob_ai_sub_hard_lootsearch nullpo\n");
-		return 0;
-	}
-
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, md=va_arg(ap,struct mob_data *));
+	nullpo_retr(0, itc=va_arg(ap,int *));
+	
 	if(!md->mode){
 		mode=mob_db[md->class].mode;
 	}else{
@@ -1133,10 +1077,11 @@ static int mob_ai_sub_hard_linksearch(struct block_list *bl,va_list ap)
 	struct mob_data* md;
 	struct block_list *target;
 
-	if( bl == NULL || ap == NULL || (tmd=(struct mob_data *)bl) == NULL || (md=va_arg(ap,struct mob_data *)) == NULL || (target=va_arg(ap,struct block_list *)) == NULL ){
-		printf("mob_ai_sub_hard_linksearch nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, tmd=(struct mob_data *)bl);
+	nullpo_retr(0, md=va_arg(ap,struct mob_data *));
+	nullpo_retr(0, target=va_arg(ap,struct block_list *));
 
 	// リンクモンスターで射程内に暇な同族MOBがいるなら、ロックさせる
 /*	if( (md->target_id > 0 && md->state.targettype == ATTACKABLE) && mob_db[md->class].mode&0x08){
@@ -1170,10 +1115,7 @@ static int mob_ai_sub_hard_slavemob(struct mob_data *md,unsigned int tick)
 	struct block_list *bl;
 	int mode,race,old_dist;
 
-	if( md == NULL ){
-		printf("mob_ai_sub_hard_slavemob nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
 
 	if((bl=map_id2bl(md->master_id)) != NULL )
 		mmd=(struct mob_data *)bl;
@@ -1289,10 +1231,8 @@ static int mob_ai_sub_hard_slavemob(struct mob_data *md,unsigned int tick)
  */
 static int mob_unlocktarget(struct mob_data *md,int tick)
 {
-	if( md == NULL ){
-		printf("mob_unlocktarget nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+
 	md->target_id=0;
 	md->state.targettype = NONE_ATTACKABLE;
 	md->state.skillstate=MSS_IDLE;
@@ -1307,10 +1247,9 @@ static int mob_randomwalk(struct mob_data *md,int tick)
 {
 	const int retrycount=20;
 	int speed;
-	if( md == NULL ){
-		printf("mob_randomwalk nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, md);
+
 	speed=battle_get_speed(&md->bl);
 	if(DIFF_TICK(md->next_walktime,tick)<0){
 		int i,x,y,c,d=12-md->move_fail_count;
@@ -1361,10 +1300,10 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 	int attack_type=0;
 	int mode,race;
 
-	if( bl == NULL || ap == NULL || (md=(struct mob_data*)bl) == NULL ){
-		printf("mob_ai_sub_hard nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, md=(struct mob_data*)bl);
+
 	tick=va_arg(ap,unsigned int);
 
 
@@ -1641,10 +1580,8 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 static int mob_ai_sub_foreachclient(struct map_session_data *sd,va_list ap)
 {
 	unsigned int tick;
-	if( sd == NULL || ap == NULL ){
-		printf("mob_ai_sub_foreachclient nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, sd);
+	nullpo_retr(0, ap);
 
 	tick=va_arg(ap,unsigned int);
 	map_foreachinarea(mob_ai_sub_hard,sd->bl.m,
@@ -1676,10 +1613,9 @@ static int mob_ai_sub_lazy(void * key,void * data,va_list app)
 	unsigned int tick;
 	va_list ap;
 
-	if( md == NULL || (ap=va_arg(app,va_list)) == NULL ){
-		printf("mob_ai_sub_lazy nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+	nullpo_retr(0, app);
+	nullpo_retr(0, ap=va_arg(app,va_list));
 	
 	if(md->bl.type!=BL_MOB)
 		return 0;
@@ -1765,10 +1701,7 @@ static int mob_delay_item_drop(int tid,unsigned int tick,int id,int data)
 	struct item temp_item;
 	int flag;
 
-	if((ditem=(struct delay_item_drop *)id) == NULL){
-		printf("mob_delay_item_drop nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, ditem=(struct delay_item_drop *)id);
 
 	memset(&temp_item,0,sizeof(temp_item));
 	temp_item.nameid = ditem->nameid;
@@ -1799,10 +1732,7 @@ static int mob_delay_item_drop2(int tid,unsigned int tick,int id,int data)
 	struct delay_item_drop2 *ditem;
 	int flag;
 
-	if((ditem=(struct delay_item_drop2 *)id) == NULL){
-		printf("mob_delay_item_drop2 nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, ditem=(struct delay_item_drop2 *)id);
 
 	if(battle_config.item_auto_get){
 		if(ditem->first_sd && (flag = pc_additem(ditem->first_sd,&ditem->item_data,ditem->item_data.amount))){
@@ -1825,15 +1755,13 @@ static int mob_delay_item_drop2(int tid,unsigned int tick,int id,int data)
  */
 int mob_delete(struct mob_data *md)
 {
-	if( md == NULL ){
-		printf("mob_delete nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, md);
 
 	if(md->bl.prev == NULL)
 		return 1;
 	mob_changestate(md,MS_DEAD,0);
 	clif_clearchar_area(&md->bl,1);
+	free(md->lootitem);
 	map_delblock(&md->bl);
 	if(mob_get_viewclass(md->class) <= 1000)
 		clif_clearchar_delay(gettick()+3000,&md->bl,0);
@@ -1844,10 +1772,8 @@ int mob_delete(struct mob_data *md)
 
 int mob_catch_delete(struct mob_data *md)
 {
-	if( md == NULL ){
-		printf("mob_catch_delete nullpo\n");
-		return 1;
-	}
+	nullpo_retr(1, md);
+
 	if(md->bl.prev == NULL)
 		return 1;
 	mob_changestate(md,MS_DEAD,0);
@@ -1861,11 +1787,10 @@ int mob_timer_delete(int tid, unsigned int tick, int id, int data)
 {
 	struct block_list *bl=map_id2bl(id);
 	struct mob_data *md;
-	if( bl == NULL || (md = (struct mob_data *)bl) == NULL ){
-		printf("mob_timer_delete nullpo\n");
-		return 0;
-	}
-	
+
+	nullpo_retr(0, bl);
+
+	md = (struct mob_data *)bl;
 	mob_catch_delete(md);
 	return 0;
 }
@@ -1879,10 +1804,10 @@ int mob_deleteslave_sub(struct block_list *bl,va_list ap)
 	struct mob_data *md = (struct mob_data *)bl;
 	int id;
 
-	if( bl == NULL || ap == NULL || (md = (struct mob_data *)bl) == NULL ){
-		printf("mob_deleteslave_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, md = (struct mob_data *)bl);
+
 	id=va_arg(ap,int);
 	if(md->master_id > 0 && md->master_id == id )
 		mob_damage(NULL,md,md->hp,1);
@@ -1894,10 +1819,8 @@ int mob_deleteslave_sub(struct block_list *bl,va_list ap)
  */
 int mob_deleteslave(struct mob_data *md)
 {
-	if( md == NULL ){
-		printf("mob_deleteslave nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+
 	map_foreachinarea(mob_deleteslave_sub, md->bl.m,
 		0,0,map[md->bl.m].xs,map[md->bl.m].ys,
 		BL_MOB,md->bl.id);
@@ -1926,11 +1849,8 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	int drop_rate;
 	int skill,sp;
 
-	if( md == NULL ){ //srcはNULLで呼ばれる場合もあるので、他でチェック
-		printf("mob_damage nullpo\n");
-		return 0;
-	}
-	
+	nullpo_retr(0, md); //srcはNULLで呼ばれる場合もあるので、他でチェック
+
 	max_hp = battle_get_max_hp(&md->bl);
 
 	if(src && src->type == BL_PC) {
@@ -1995,10 +1915,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		}
 		if(src && src->type == BL_PET && battle_config.pet_attack_exp_to_master) {
 			struct pet_data *pd = (struct pet_data *)src;
-			if( pd == NULL ){
-				printf("mob_damage nullpo\n");
-				return 0;
-			}
+			nullpo_retr(0, pd);
 			for(i=0,minpos=0,mindmg=0x7fffffff;i<DAMAGELOG_SIZE;i++){
 				if(md->dmglog[i].id==pd->msd->bl.id)
 					break;
@@ -2020,10 +1937,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		}
 		if(src && src->type == BL_MOB && ((struct mob_data*)src)->state.special_mob_ai){
 			struct mob_data *md2 = (struct mob_data *)src;
-			if( md2 == NULL ){
-				printf("mob_damage nullpo\n");
-				return 0;
-			}
+			nullpo_retr(0, md2);
 			for(i=0,minpos=0,mindmg=0x7fffffff;i<DAMAGELOG_SIZE;i++){
 				if(md->dmglog[i].id==md2->master_id)
 					break;
@@ -2327,10 +2241,9 @@ int mob_class_change(struct mob_data *md,int *value)
 	unsigned int tick = gettick();
 	int i,c,hp_rate,max_hp,class,count = 0;
 
-	if( md == NULL || value == NULL ){
-		printf("mob_class_change nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+	nullpo_retr(0, value);
+
 	if(value[0]<=1000 || value[0]>2000)
 		return 0;
 	if(md->bl.prev == NULL) return 0;
@@ -2401,10 +2314,9 @@ int mob_class_change(struct mob_data *md,int *value)
 int mob_heal(struct mob_data *md,int heal)
 {
 	int max_hp = battle_get_max_hp(&md->bl);
-	if( md == NULL ){
-		printf("mob_heal nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, md);
+
 	md->hp += heal;
 	if( max_hp < md->hp )
 		md->hp = max_hp;
@@ -2418,10 +2330,11 @@ int mob_heal(struct mob_data *md,int heal)
 int mob_warp(struct mob_data *md,int m,int x,int y,int type)
 {
 	int i=0,c,xs=0,ys=0,bx=x,by=y;
-	if( md == NULL || md->bl.prev==NULL ){
-		printf("mob_deleteslave nullpo\n");
+
+	nullpo_retr(0, md);
+
+	if( md->bl.prev==NULL )
 		return 0;
-	}
 
 	if( m<0 ) m=md->bl.m;
 
@@ -2485,10 +2398,10 @@ int mob_countslave_sub(struct block_list *bl,va_list ap)
 
 	id=va_arg(ap,int);
 
-	if( bl == NULL || ap == NULL || (c=va_arg(ap,int *)) == NULL || (md = (struct mob_data *)bl) == NULL ){
-		printf("mob_countslave_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, c=va_arg(ap,int *));
+	nullpo_retr(0, md = (struct mob_data *)bl);
 
 	
 	if( md->master_id==id )
@@ -2502,10 +2415,9 @@ int mob_countslave_sub(struct block_list *bl,va_list ap)
 int mob_countslave(struct mob_data *md)
 {
 	int c=0;
-	if( md == NULL ){
-		printf("mob_deleteslave nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, md);
+
 	map_foreachinarea(mob_countslave_sub, md->bl.m,
 		0,0,map[md->bl.m].xs-1,map[md->bl.m].ys-1,
 		BL_MOB,md->bl.id,&c);
@@ -2520,10 +2432,8 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,int flag)
 	struct mob_data *md;
 	int bx,by,m,count = 0,class,k,a = amount;
 
-	if( md2 == NULL || value == NULL ){
-		printf("mob_summonslave nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md2);
+	nullpo_retr(0, value);
 
 	bx=md2->bl.x;
 	by=md2->bl.y;
@@ -2601,10 +2511,10 @@ static int mob_counttargeted_sub(struct block_list *bl,va_list ap)
 	struct block_list *src;
 
 	id=va_arg(ap,int);
-	if( bl == NULL || ap == NULL || (c=va_arg(ap,int *)) == NULL ){
-		printf("mob_counttargeted_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, c=va_arg(ap,int *));
+
 	src=va_arg(ap,struct block_list *);
 	target_lv=va_arg(ap,int);
 	if(id == bl->id || (src && id == src->id)) return 0;
@@ -2632,10 +2542,9 @@ static int mob_counttargeted_sub(struct block_list *bl,va_list ap)
 int mob_counttargeted(struct mob_data *md,struct block_list *src,int target_lv)
 {
 	int c=0;
-	if( md == NULL ){ //src=NULLで呼ばれる場合もあるので次(mob_counttargeted_sub)でチェック
-		printf("mob_counttargeted nullpo\n");
-		return 0;
-	}
+
+	nullpo_retr(0, md);
+
 	map_foreachinarea(mob_counttargeted_sub, md->bl.m,
 		md->bl.x-AREA_SIZE,md->bl.y-AREA_SIZE,
 		md->bl.x+AREA_SIZE,md->bl.y+AREA_SIZE,0,md->bl.id,&c,src,target_lv);
@@ -2761,10 +2670,10 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 	struct mob_data* md=NULL;
 	int range,maxcount;
 
-	if( (md=(struct mob_data *)map_id2bl(id))==NULL || md->bl.type!=BL_MOB || md->bl.prev==NULL ){
-		printf("mobskill_castend_pos nullpo\n");
+	nullpo_retr(0, md=(struct mob_data *)map_id2bl(id));
+	
+	if( md->bl.type!=BL_MOB || md->bl.prev==NULL )
 		return 0;
-	}
 
 	if( md->skilltimer != tid )	// タイマIDの確認
 		return 0;
@@ -2875,10 +2784,11 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	struct mob_skill *ms;
 	int skill_id, skill_lv, forcecast = 0;
 
-	if( md == NULL || (ms=&mob_db[md->class].skill[skill_idx]) == NULL || ( target==NULL && (target=map_id2bl(md->target_id))==NULL ) ){
-		printf("mobskill_use_id nullpo\n");
+	nullpo_retr(0, md);
+	nullpo_retr(0, ms=&mob_db[md->class].skill[skill_idx]);
+	
+	if( target==NULL && (target=map_id2bl(md->target_id))==NULL )
 		return 0;
-	}
 	
 	if( target->prev==NULL || md->bl.prev==NULL )
 		return 0;
@@ -2989,10 +2899,11 @@ int mobskill_use_pos( struct mob_data *md,
 	struct block_list bl;
 	int skill_id, skill_lv;
 
-	if( md == NULL || (ms=&mob_db[md->class].skill[skill_idx]) == NULL || md->bl.prev==NULL ){
-		printf("mobskill_use_pos nullpo\n");
+	nullpo_retr(0, md);
+	nullpo_retr(0, ms=&mob_db[md->class].skill[skill_idx]);
+
+	if( md->bl.prev==NULL )
 		return 0;
-	}
 
 	skill_id=ms->skill_id;
 	skill_lv=ms->skill_lv;
@@ -3073,10 +2984,10 @@ int mob_getfriendhpltmaxrate_sub(struct block_list *bl,va_list ap)
 	int rate;
 	struct mob_data **fr, *md, *mmd;
 
-	if( bl == NULL || ap == NULL || (mmd=va_arg(ap,struct mob_data *)) == NULL){
-		printf("mob_getfriendhpltmaxrate_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, mmd=va_arg(ap,struct mob_data *));
+
 	md=(struct mob_data *)bl;
 
 	if( mmd->bl.id == bl->id )
@@ -3092,10 +3003,7 @@ struct mob_data *mob_getfriendhpltmaxrate(struct mob_data *md,int rate)
 	struct mob_data *fr=NULL;
 	const int r=8;
 
-	if( md == NULL ){
-		printf("mob_getfriendhpltmaxrate nullpo\n");
-		return NULL;
-	}
+	nullpo_retr(NULL, md);
 
 	map_foreachinarea(mob_getfriendhpltmaxrate_sub, md->bl.m,
 		md->bl.x-r ,md->bl.y-r, md->bl.x+r, md->bl.y+r,
@@ -3112,10 +3020,10 @@ int mob_getfriendstatus_sub(struct block_list *bl,va_list ap)
 	struct mob_data **fr, *md, *mmd;
 	int flag=0;
 
-	if( bl == NULL || ap == NULL || (md=(struct mob_data *)bl) == NULL || (mmd=va_arg(ap,struct mob_data *)) == NULL ){
-		printf("mob_getfriendstatus_sub nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, md=(struct mob_data *)bl);
+	nullpo_retr(0, mmd=va_arg(ap,struct mob_data *));
 
 	if( mmd->bl.id == bl->id )
 		return 0;
@@ -3139,10 +3047,8 @@ struct mob_data *mob_getfriendstatus(struct mob_data *md,int cond1,int cond2)
 	struct mob_data *fr=NULL;
 	const int r=8;
 
-	if( md == NULL ){
-		printf("mob_getfriendstatus nullpo\n");
-		return NULL;
-	}
+	nullpo_retr(0, md);
+
 	map_foreachinarea(mob_getfriendstatus_sub, md->bl.m,
 		md->bl.x-r ,md->bl.y-r, md->bl.x+r, md->bl.y+r,
 		BL_MOB,md,cond1,cond2,&fr);
@@ -3159,10 +3065,8 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 //	struct block_list *target=NULL;
 	int i,max_hp;
 
-	if( md == NULL || (ms = mob_db[md->class].skill) == NULL ){
-		printf("mobskill_use nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+	nullpo_retr(0, ms = mob_db[md->class].skill);
 
 	max_hp = battle_get_max_hp(&md->bl);
 
@@ -3285,10 +3189,8 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
  */
 int mobskill_event(struct mob_data *md,int flag)
 {
-	if( md == NULL ){
-		printf("mobskill_event nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+
 	if(flag==-1 && mobskill_use(md,gettick(),MSC_CASTTARGETED))
 		return 1;
 	if( (flag&BF_SHORT) && mobskill_use(md,gettick(),MSC_CLOSEDATTACKED))
@@ -3303,10 +3205,8 @@ int mobskill_event(struct mob_data *md,int flag)
  */
 int mobskill_deltimer(struct mob_data *md )
 {
-	if( md == NULL ){
-		printf("mobskill_event nullpo\n");
-		return 0;
-	}
+	nullpo_retr(0, md);
+
 	if( md->skilltimer!=-1 ){
 		if( skill_get_inf( md->skillid )&2 )
 			delete_timer( md->skilltimer, mobskill_castend_pos );
