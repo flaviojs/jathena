@@ -13,6 +13,7 @@
 
 #include "map.h"
 #include "clif.h"
+#include "chrif.h"
 #include "itemdb.h"
 #include "pc.h"
 #include "script.h"
@@ -141,6 +142,7 @@ int buildin_birthpet(struct script_state *st);
 int buildin_resetstatus(struct script_state *st);
 int buildin_resetskill(struct script_state *st);
 int buildin_changebase(struct script_state *st);
+int buildin_changesex(struct script_state *st);
 int buildin_waitingroom(struct script_state *st);
 int buildin_warpwaitingpc(struct script_state *st);
 int buildin_setmapflagnosave(struct script_state *st);
@@ -238,6 +240,7 @@ struct {
 	{buildin_resetstatus,"resetstatus",""},
 	{buildin_resetskill,"resetskill",""},
 	{buildin_changebase,"changebase","i"},
+	{buildin_changesex,"changesex",""},
 	{buildin_waitingroom,"waitingroom","si*"},
 	{buildin_warpwaitingpc,"warpwaitingpc","sii"},
 	{buildin_setmapflag,"setmapflagnosave","ssii"},
@@ -2538,6 +2541,34 @@ int buildin_changebase(struct script_state *st)
 	
 	return 0;
 }
+
+/*==========================================
+ * «•Ê•ÏŠ·
+ *------------------------------------------
+ */
+int buildin_changesex(struct script_state *st)
+{
+	struct map_session_data *sd=NULL;
+	sd=map_id2sd(st->rid);
+
+	if(sd->status.sex==0){
+		sd->status.sex=1;
+		sd->sex=1;
+		if(sd->status.class == 20)
+			sd->status.class = 19;
+		chrif_changesex(sd->status.account_id,1);
+	}else if(sd->status.sex==1){
+		sd->status.sex=0;
+		sd->sex=0;
+		if(sd->status.class == 19)
+			sd->status.class = 20;
+		chrif_changesex(sd->status.account_id,0);
+
+	}
+	chrif_save(sd);
+	return 0;
+}
+
 
 /*==========================================
  * npcƒ`ƒƒƒbƒgì¬

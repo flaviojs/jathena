@@ -1,4 +1,32 @@
 --------------
+//0752 by ぴざまん
+
+・changesexスクリプト実装。性別を反転させることができます
+　性別反転成功後は、そのプレイヤーは強制的に接続を切断されます
+　また、ダンサー・バードの互換性はかなり怪しいです
+　ダンサー・バードがスロット内どこかに居るアカウントでの反転は、以下の点に注意して下さい
+　・必ず反転させる前にそのキャラクターをスキルリセットしてください
+　　そのまま反転させると、共通するスキル(楽器の練習等)しか残らなくなってしまいます
+　・ダンサー・バード専用武器を装備している場合は、外してから反転させてください
+　　そのまま反転させると、そのキャラクターの開始時に
+　　クライアントエラーが出ます（出るだけで、落ちることはないのですが…）
+・データベース修正 by 獅子o^.^o
+	(map/)
+	chrif.c
+		packet_len_table[]、chrif_parse()修正
+		chrif_changesex()、chrif_changedsex()追加
+	chrif.h 修正
+	(char/)
+	char.c
+		parse_frommap()、parse_tologin()修正
+	(login/)
+	login.c
+		parse_fromchar()修正
+	(db/)
+	cast_db.txt 修正
+	skill_require_db.txt 修正
+
+--------------
 //0751 by 死神
 
 ・skill_db.txtとcastdb.txtの変更とskill_require_db.txtの追加。

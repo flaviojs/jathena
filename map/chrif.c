@@ -24,7 +24,7 @@
 static const int packet_len_table[0x20]={
 	60, 3,-1, 3,14,-1, 7, 6,		// 2af8-2aff
 	 6,-1,10, 7,-1,41,40, 0,		// 2b00-2b07
-	 6,30,-1,10,					// 2b08-2b0b
+	 6,30,-1,10,9,7,					// 2b08-2b0d
 };
 
 int char_fd;
@@ -283,6 +283,20 @@ int chrif_changegm(int id,const char *pass,int len)
 	return 0;
 }
 /*==========================================
+ * 性別変化要求
+ *------------------------------------------
+ */
+int chrif_changesex(int id,int sex)
+{
+	WFIFOW(char_fd,0)=0x2b0c;
+	WFIFOW(char_fd,2)=9;
+	WFIFOL(char_fd,4)=id;
+	WFIFOB(char_fd,8)=sex;
+	printf("chrif : sended 0x2b0c\n");
+	WFIFOSET(char_fd,9);
+	return 0;
+}
+/*==========================================
  * GMに変化終了
  *------------------------------------------
  */
@@ -303,6 +317,29 @@ int chrif_changedgm(int fd)
 		struct map_session_data *sd=map_id2sd(oldacc);
 		if(sd!=NULL){
 			clif_displaymessage(sd->fd,"GM変更失敗");
+		}
+	}
+	return 0;
+}
+/*==========================================
+ * 性別変化終了
+ *------------------------------------------
+ */
+int chrif_changedsex(int fd)
+{
+	int acc;
+	acc=RFIFOL(fd,2);
+	if(battle_config.etc_log)
+		printf("chrif_changedsex %d \n",acc);
+
+	struct map_session_data *sd=map_id2sd(acc);
+	if(acc>0){
+		if(sd!=NULL){	// 変更による強制切断
+			clif_setwaitclose(sd->fd);			
+		}
+	}else{
+		if(sd!=NULL){
+			printf("chrif_changedsex failed\n");
 		}
 	}
 	return 0;
@@ -356,6 +393,7 @@ int chrif_parse(int fd)
 		case 0x2b06: chrif_changemapserverack(fd); break;
 		case 0x2b09: map_addchariddb(RFIFOL(fd,2),RFIFOP(fd,6)); break;
 		case 0x2b0b: chrif_changedgm(fd); break;
+		case 0x2b0d: chrif_changedsex(fd); break;
 
 		default:
 			if(battle_config.error_log)

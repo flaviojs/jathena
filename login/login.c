@@ -438,6 +438,26 @@ int parse_fromchar(int fd)
 	  }
 	  return 0;
 
+	case 0x2722:	// changesex
+	  {
+	  	int acc,sex,i=0,j=0;
+		acc=RFIFOL(fd,4);
+		sex=RFIFOB(fd,8);
+		for(i=0;i<auth_num;i++){
+			printf("%d,",auth_dat[i].account_id);
+			if(auth_dat[i].account_id==acc){
+				auth_dat[i].sex=sex;
+				j=1;
+			}
+		}
+		RFIFOSKIP(fd,RFIFOW(fd,2));
+		WFIFOW(fd,0)=0x2723;
+		WFIFOL(fd,2)=acc;
+		WFIFOB(fd,6)=sex;
+		WFIFOSET(fd,7);
+	  }
+	  return 0;
+
     default:
       close(fd);
       session[fd]->eof=1;
