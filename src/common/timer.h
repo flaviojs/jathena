@@ -12,7 +12,6 @@
 #define DIFF_TICK(a,b) ((int)((a)-(b)))
 
 // Struct declaration
-
 struct TimerData {
 	unsigned int tick;
 	int (*func)(int,unsigned int,int,int);

@@ -1,10 +1,15 @@
 #ifndef _CLIF_H_
 #define _CLIF_H_
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#ifndef _WIN32
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+#else
+	#include <winsock.h>
+ 	#define in_addr_t unsigned long
+#endif
 #include "map.h"
 
 #define MAX_PACKET_DB			0x220

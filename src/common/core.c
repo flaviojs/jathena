@@ -3,8 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
+#ifndef _WIN32
+	#include <unistd.h>
+	#include <signal.h>
+#endif
 
 #include "core.h"
 #include "socket.h"
@@ -32,6 +34,12 @@ void set_termfunc(void (*termfunc)(void))
  *--------------------------------------
  */
 
+#ifdef _WIN32
+void sig_proc(void) {
+	if(term_func)
+		term_func();
+}
+#else
 static void sig_proc(int sn)
 {
 	int i;
@@ -49,6 +57,7 @@ static void sig_proc(int sn)
 		break;
 	}
 }
+#endif
 
 /*======================================
  *	CORE : MAINROUTINE
@@ -60,9 +69,11 @@ int main(int argc,char **argv)
 	int next;
 
 	do_socket();
+#ifndef _WIN32
 	signal(SIGPIPE,SIG_IGN);
 	signal(SIGTERM,sig_proc);
 	signal(SIGINT,sig_proc);
+#endif
 	do_init(argc,argv);
 	if (packet_parse_time > 0) {
 		add_timer_func_list(parsepacket_timer,"parsepacket_timer");
@@ -81,3 +92,15 @@ int main(int argc,char **argv)
 	}
 	return 0;
 }
+
+#ifdef _WIN32
+int strcasecmp(const char *s1, const char *s2) {
+	while(*s1 || *s2) {
+		if((*s1 | 0x20) != (*s2 | 0x20)) {
+			return ((*s1 | 0x20) > (*s2 | 0x20) ? 1 : -1);
+		}
+		s1++; s2++;
+	}
+	return 0;
+}
+#endif

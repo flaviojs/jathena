@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <sys/time.h>
+#ifndef _WIN32
+	#include <sys/time.h>
+#endif
 #include <time.h>
 
 #include "socket.h"

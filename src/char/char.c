@@ -3,18 +3,20 @@
 #define DUMP_UNKNOWN_PACKET	1
 
 #include <sys/types.h>
-#include <sys/socket.h>
+#ifndef _WIN32
+	#include <sys/socket.h>
+	#include <sys/ioctl.h>
+	#include <unistd.h>
+	#include <signal.h>
+	#include <fcntl.h>
+	#include <arpa/inet.h>
+	#include <netdb.h>
+	#include <netinet/in.h>
+	#include <sys/time.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <netinet/in.h>
-#include <sys/time.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <signal.h>
-#include <fcntl.h>
 #include <string.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 
 #include "core.h"
 #include "socket.h"
@@ -393,8 +395,8 @@ int mmo_char_init(void)
 	if(fp==NULL)
 		return 0;
 	while(fgets(line,65535,fp)){
-		int i,j;
-		if( sscanf(line,"%d\t%%newid%%%n",&i,&j)==1 && (line[j]=='\n' || line[j]=='\r') ){
+		int i,j = -1;
+		if( sscanf(line,"%d\t%%newid%%%n",&i,&j)==1 && j > 0 && (line[j]=='\n' || line[j]=='\r') ){
 			if(char_id_count<i)
 				char_id_count=i;
 			continue;

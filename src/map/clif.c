@@ -4,13 +4,20 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <stdarg.h>
+#ifndef _WIN32
+	#include <unistd.h>
+	#include <stdarg.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+#endif
+
+#ifdef _MSC_VER
+	#define snprintf _snprintf
+#endif
+
 #include <time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include "socket.h"
 #include "timer.h"
@@ -4507,7 +4514,7 @@ int clif_displaymessage(const int fd,char* mes)
  */
 int clif_GMmessage(struct block_list *bl,char* mes,int len,int flag)
 {
-	unsigned char buf[len+16];
+	unsigned char *buf = malloc(len+16);
 	int lp=(flag&0x10)?8:4;
 	WBUFW(buf,0) = 0x9a;
 	WBUFW(buf,2) = len+lp;
@@ -4519,6 +4526,7 @@ int clif_GMmessage(struct block_list *bl,char* mes,int len,int flag)
 		(flag==2)? AREA:
 		(flag==3)? SELF:
 		ALL_CLIENT);
+	free(buf);
 	return 0;
 }
 
@@ -6475,13 +6483,14 @@ int clif_guild_explusionlist(struct map_session_data *sd)
 int clif_guild_message(struct guild *g,int account_id,const char *mes,int len)
 {
 	struct map_session_data *sd;
-	unsigned char buf[len+32];
+	unsigned char *buf = malloc(len+32);
 	WBUFW(buf, 0)=0x17f;
 	WBUFW(buf, 2)=len+4;
 	memcpy(WBUFP(buf,4),mes,len);
 
 	if( (sd=guild_getavailablesd(g))!=NULL )
 		clif_send(buf,WBUFW(buf,2),&sd->bl,GUILD);
+	free(buf);
 	return 0;
 }
 /*==========================================
@@ -6693,7 +6702,7 @@ void clif_sitting(struct map_session_data *sd)
  */
 int clif_disp_onlyself(struct map_session_data *sd,char *mes,int len)
 {
-	unsigned char buf[len+32];
+	unsigned char *buf = malloc(len+32);
 
 	nullpo_retr(0, sd);
 
@@ -6702,6 +6711,7 @@ int clif_disp_onlyself(struct map_session_data *sd,char *mes,int len)
 	memcpy(WBUFP(buf,4),mes,len+4);
 
 	clif_send(buf,WBUFW(buf,2),&sd->bl,SELF);
+	free(buf);
 	return 0;
 }
 
@@ -9016,7 +9026,11 @@ int do_init_clif(void)
 	for(i=0;i<10;i++){
 		if((map_fd=make_listen_port(map_port)))
 			break;
+#ifdef _WIN32
+		Sleep(20);
+#else
 		sleep(20);
+#endif
 	}
 	if(i==10){
 		printf("cant bind game port\n");

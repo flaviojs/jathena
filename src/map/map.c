@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <netdb.h>
+#ifndef _WIN32
+	#include <netdb.h>
+#endif
 
 #include "core.h"
 #include "timer.h"

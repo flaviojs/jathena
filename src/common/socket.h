@@ -5,8 +5,16 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#ifdef _WIN32
+	#include <winsock.h>
+#else
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+#endif
+
+#ifdef _WIN32
+	#define close(id) do{ if(session[id]) closesocket(session[id]->socket); } while(0);
+#endif
 
 // define declaration
 
@@ -14,7 +22,10 @@
 #define RFIFOB(fd,pos) (*(unsigned char*)(session[fd]->rdata+session[fd]->rdata_pos+(pos)))
 #define RFIFOW(fd,pos) (*(unsigned short*)(session[fd]->rdata+session[fd]->rdata_pos+(pos)))
 #define RFIFOL(fd,pos) (*(unsigned int*)(session[fd]->rdata+session[fd]->rdata_pos+(pos)))
-#define RFIFOSKIP(fd,len) ((session[fd]->rdata_size-session[fd]->rdata_pos-(len)<0) ? (fprintf(stderr,"too many skip\n"),exit(1)) : (session[fd]->rdata_pos+=(len)))
+
+// bcc でエラーになるのでブロックにする
+#define RFIFOSKIP(fd,len) do { if(session[fd]->rdata_size-session[fd]->rdata_pos-(len)<0) { fprintf(stderr,"too many skip\n"); exit(1); } else { session[fd]->rdata_pos+=(len); } } while(0);
+
 #define RFIFOREST(fd) (session[fd]->rdata_size-session[fd]->rdata_pos)
 #define RFIFOFLUSH(fd) (memmove(session[fd]->rdata,RFIFOP(fd,0),RFIFOREST(fd)),session[fd]->rdata_size=RFIFOREST(fd),session[fd]->rdata_pos=0)
 #define RFIFOSPACE(fd) (session[fd]->max_rdata-session[fd]->rdata_size)
@@ -52,6 +63,9 @@ struct socket_data{
 	int (*func_send)(int);
 	int (*func_parse)(int);
 	void* session_data;
+#ifdef _WIN32
+	SOCKET socket;
+#endif
 };
 
 // Data prototype declaration

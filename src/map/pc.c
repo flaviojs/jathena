@@ -30,6 +30,10 @@
 #include "memwatch.h"
 #endif
 
+#ifdef _MSC_VER
+	#define snprintf _snprintf
+#endif
+
 #define PVP_CALCRANK_INTERVAL 1000	// PVP‡ˆÊŒvZ‚ÌŠÔŠu
 
 static int max_weight_base[MAX_PC_CLASS];

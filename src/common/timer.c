@@ -5,8 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <winsock.h>
+#else
 #include <sys/socket.h>
 #include <sys/time.h>
+#endif
 
 #include "timer.h"
 #include "malloc.h"
@@ -65,14 +69,19 @@ char* search_timer_func_list(int (*func)(int,unsigned int,int,int))
 /*----------------------------
  * 	Get tick time
  *----------------------------*/
+
 static unsigned int gettick_cache;
 static int gettick_count;
 unsigned int gettick_nocache(void)
 {
+#ifdef _WIN32
+	return gettick_cache = GetTickCount();
+#else
 	struct timeval tval;
 	gettimeofday(&tval,NULL);
 	gettick_count = 256;
 	return gettick_cache = tval.tv_sec * 1000 + tval.tv_usec/1000;
+#endif
 }
 
 unsigned int gettick(void)
@@ -87,10 +96,36 @@ unsigned int gettick(void)
  * 	CORE : Timer Heap
  *--------------------------------------
  */
+
+// デバッグ用関数群
+static void dump_timer_heap(void) {
+	int j;
+	for(j = 1 ; j <= timer_heap[0] ; j++) {
+		if(j != timer_heap[0] && DIFF_TICK(
+			timer_data[timer_heap[j]].tick,
+			timer_data[timer_heap[j + 1]].tick
+		) < 0) {
+			printf("*");
+		} else {
+			printf(" ");
+		}
+		printf("%d : %d %d\n",j,timer_heap[j],timer_data[timer_heap[j]].tick);
+	}
+}
+
+static void check_timer_heap(void) {
+	int i;
+	for(i = 1 ; i < timer_heap[0] ; i++) {
+		if(DIFF_TICK(timer_data[timer_heap[i]].tick,timer_data[timer_heap[i + 1]].tick) < 0) {
+			printf("Timer Heap Sort Error\n");
+			dump_timer_heap();
+			exit(1);
+		}
+	}
+}
+
 static void push_timer_heap(int index)
 {
-	int i, h;
-
 	if (timer_heap == NULL || timer_heap[0] + 1 >= timer_heap_max) {
 		int first = timer_heap == NULL;
 
@@ -101,60 +136,112 @@ static void push_timer_heap(int index)
 			timer_heap[0] = 0;
 	}
 
-	timer_heap[0]++;
-
-	for (h = timer_heap[0]-1, i = (h - 1) / 2;
-		 h > 0 && DIFF_TICK(timer_data[index].tick,
-			timer_data[timer_heap[i + 1]].tick) < 0;
-		 i = (h - 1) / 2) {
-		timer_heap[h + 1] = timer_heap[i + 1];
-		h = i;
+	// timer_heap[0]   : タイマーヒープの数
+	// timer_heap[1..] : タイマーヒープ（大　→　小）
+	if(timer_heap[0] == 0) {
+		// データが無い : 先頭に追加
+		timer_heap[0]++;
+		timer_heap[1] = index;
+	} else if(DIFF_TICK(timer_data[timer_heap[timer_heap[0]]].tick,timer_data[index].tick) > 0) {
+		// 最後尾に追加
+		timer_heap[++timer_heap[0]] = index;
+	} else if(DIFF_TICK(timer_data[timer_heap[1]].tick,timer_data[index].tick) < 0) {
+		// 先頭に追加
+		memmove(&timer_heap[2],&timer_heap[1],timer_heap[0] * sizeof(int));
+		timer_heap[0]++;
+		timer_heap[1] = index;
+	} else {
+		int min = 1;
+		int max = timer_heap[0] + 1;
+		while(max != min + 1) {
+			int mid = (min + max)/2;
+			if(DIFF_TICK(timer_data[index].tick,timer_data[timer_heap[mid]].tick) > 0) {
+				max = mid;
+			} else {
+				min = mid;
+			}
+		}
+		memmove(&timer_heap[min+2],&timer_heap[min+1],(timer_heap[0] - min) * sizeof(int));
+		timer_heap[min+1] = index;
+		timer_heap[0]++;
 	}
-	timer_heap[h + 1] = index;
+	// check_timer_heap();
 }
 
-static inline int top_timer_heap()
+// 指定したindex を持つタイマーヒープを返す
+static int search_timer_heap(int index)
+{
+	if (timer_heap == NULL || timer_heap[0] <= 0) {
+		return -1;
+	} else {
+		int min = 1;
+		int max = timer_heap[0] + 1;
+		while(max != min + 1) {
+			int mid = (min + max)/2;
+			if(DIFF_TICK(timer_data[index].tick,timer_data[timer_heap[mid]].tick) > 0) {
+				max = mid;
+			} else {
+				min = mid;
+			}
+		}
+		if(timer_heap[min] == index) {
+			return min;
+		} else {
+			int pos = min - 1;
+			while(pos > 0 && timer_data[index].tick == timer_data[timer_heap[pos]].tick) {
+				if(timer_heap[pos] == index) {
+					return pos;
+				}
+				pos--;
+			}
+			pos = min + 1;
+			while(pos <= timer_heap[0] && timer_data[index].tick == timer_data[timer_heap[pos]].tick) {
+				if(timer_heap[pos] == index) {
+					return pos;
+				}
+				pos++;
+			}
+			printf("search_timer_heap : can't find tid:%d\n",index);
+			return -1;
+		}
+	}
+}
+
+static void delete_timer_heap(int index) {
+	int pos = search_timer_heap(index);
+	if(pos != -1) {
+		memmove(&timer_heap[pos],&timer_heap[pos+1],(timer_heap[0] - pos) * sizeof(int));
+		timer_heap[0]--;
+	}
+}
+
+#ifdef _WIN32
+int top_timer_heap(void)
+#else
+static inline int top_timer_heap(void)
+#endif
 {
 	if (timer_heap == NULL || timer_heap[0] <= 0)
 		return -1;
 
-	return timer_heap[1];
+	return timer_heap[timer_heap[0]];
 }
 
-static inline int pop_timer_heap()
+#ifdef _WIN32
+int pop_timer_heap(void)
+#else
+static inline int pop_timer_heap(void)
+#endif
 {
-	int i,h,k;
-	int ret,last;
-
 	if (timer_heap == NULL || timer_heap[0] <= 0)
 		return -1;
-	ret = timer_heap[1];
-	last = timer_heap[timer_heap[0]];
-	timer_heap[0]--;
-
-	for(h = 0,k = 2;k<timer_heap[0];k = k * 2 + 2) {
-		if (DIFF_TICK(timer_data[timer_heap[k + 1]].tick , timer_data[timer_heap[k]].tick)>0)
-			k--;
-		timer_heap[h + 1] = timer_heap[k + 1], h = k;
-	}
-	if (k == timer_heap[0])
-		timer_heap[h + 1] = timer_heap[k], h = k-1;
-
-	for(i = (h-1)/2;
-		h>0 && DIFF_TICK(timer_data[timer_heap[i + 1]].tick , timer_data[last].tick)>0;
-		i = (h-1)/2) {
-		timer_heap[h + 1] = timer_heap[i + 1],h = i;
-	}
-	timer_heap[h + 1] = last;
-
-	return ret;
+	return timer_heap[timer_heap[0]--];
 }
 
 int add_timer(unsigned int tick,int (*func)(int,unsigned int,int,int),int id,int data)
 {
 	struct TimerData* td;
 	int i;
-
 	if (free_timer_list_pos) {
 		do {
 			i = free_timer_list[--free_timer_list_pos];
@@ -217,13 +304,16 @@ int delete_timer(int id,int (*func)(int,unsigned int,int,int))
 	// そのうち消えるにまかせる
 	timer_data[id].func = NULL;
 	timer_data[id].type = TIMER_ONCE_AUTODEL;
-	timer_data[id].tick -= 60 * 60 * 1000;
+	// timer_data[id].tick -= 60 * 60 * 1000;
 	return 0;
 }
 
 int addtick_timer(int tid,unsigned int tick)
 {
-	return timer_data[tid].tick += tick;
+	delete_timer_heap(tid);
+	timer_data[tid].tick += tick;
+	push_timer_heap(tid);
+	return timer_data[tid].tick;
 }
 struct TimerData* get_timer(int tid)
 {
@@ -260,6 +350,9 @@ int do_timer(unsigned int tick)
 #endif
 
 	while((i = top_timer_heap()) >= 0) {
+		if(i == 2) {
+			i = 2;
+		}
 		if (DIFF_TICK(timer_data[i].tick , tick)>0) {
 			nextmin = DIFF_TICK(timer_data[i].tick , tick);
 			break;

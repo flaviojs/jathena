@@ -3869,13 +3869,14 @@ int skill_castend_map( struct map_session_data *sd,int skill_num, const char *ma
 
 	case AL_WARP:			/* ワープポータル */
 		{
-			const struct point *p[]={
-				&sd->status.save_point,&sd->status.memo_point[0],
-				&sd->status.memo_point[1],&sd->status.memo_point[2],
-			};
+			const struct point *p[4];
 			struct skill_unit_group *group;
 			int i;
 			int maxcount=0;
+			p[0] = &sd->status.save_point;
+			p[1] = &sd->status.memo_point[0];
+			p[2] = &sd->status.memo_point[1];
+			p[3] = &sd->status.memo_point[2];
 
 			if((maxcount = skill_get_maxcount(sd->skillid)) > 0) {
 				int c;
@@ -9021,7 +9022,10 @@ int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int
 				}
 			}
 		}else{
-			int i,j,r_flag[group->unit_count],s_flag[group->unit_count],m_flag[group->unit_count];
+			int i,j;
+			int *r_flag = malloc(sizeof(int) * group->unit_count);
+			int *s_flag = malloc(sizeof(int) * group->unit_count);
+			int *m_flag = malloc(sizeof(int) * group->unit_count);
 			struct skill_unit *unit1;
 			struct skill_unit *unit2;
 			memset(r_flag,0,sizeof(r_flag));// 残留フラグ
@@ -9094,6 +9098,9 @@ int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int
 					}
 				}
 			}
+			free(r_flag);
+			free(s_flag);
+			free(m_flag);
 		}
 	}
 	return 0;

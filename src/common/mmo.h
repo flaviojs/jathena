@@ -269,4 +269,9 @@ enum {
 #define strnicmp strncasecmp
 #endif
 
+#ifdef _WIN32
+// À‘Ì‚Í core.c ‚Ì’†‚É‚ ‚è‚Ü‚·B
+int strcasecmp(const char *s1, const char *s2);
+#endif
+
 #endif	// _MMO_H_

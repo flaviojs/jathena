@@ -299,12 +299,13 @@ int inter_mapif_init(int fd)
 // GMメッセージ送信
 int mapif_GMmessage(unsigned char *mes,int len)
 {
-	unsigned char buf[len];
+	unsigned char *buf = (unsigned char*)malloc(len);
 	WBUFW(buf,0)=0x3800;
 	WBUFW(buf,2)=len;
 	memcpy(WBUFP(buf,4),mes,len-4);
 	mapif_sendall(buf,len);
 //	printf("inter server: GM:%d %s\n",len,mes);
+	free(buf);
 	return 0;
 }
 
@@ -492,11 +493,12 @@ int mapif_parse_CharMoveReq(int fd)
 int mapif_parse_DisplayMessage(int fd)
 {
 	int len=RFIFOW(fd,2);
-	unsigned char buf[len];
+	unsigned char *buf = (unsigned char*)malloc(len);
 	
 	WBUFW(buf,0)=0x3893;
 	memcpy(WBUFP(buf,2),RFIFOP(fd,2),len-2);
 	mapif_sendall(buf,len);
+	free(buf);
 	return 0;
 }
 //--------------------------------------------------------

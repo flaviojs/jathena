@@ -25,18 +25,40 @@
 #include <ctype.h>
 #include <sys/stat.h>
 
-#include <zlib.h>
-
+#include "mmo.h"
 #include "grfio.h"
 #include "malloc.h"
+
+#ifdef _WIN32
+	#include <windows.h>
+	#include "zlib_win32.h"
+	HINSTANCE zlib_dll;
+	#define zlib_inflateInit(strm) zlib_inflateInit_((strm),ZLIB_VERSION, sizeof(z_stream))
+	int (WINAPI* zlib_inflateInit_) OF((z_streamp strm, const char *version, int stream_size));
+	int (WINAPI* zlib_inflate) OF((z_streamp strm, int flush));
+	int (WINAPI* zlib_inflateEnd) OF((z_streamp strm));
+#else
+	#include <zlib.h>
+	#define zlib_inflateInit inflateInit
+	#define zlib_inflate     inflate
+	#define zlib_inflateEnd  inflateEnd
+#endif
 
 #ifdef MEMWATCH
 #include "memwatch.h"
 #endif
 
-typedef	unsigned char	BYTE;
-typedef	unsigned short	WORD;
-typedef	unsigned long	DWORD;
+#ifndef BYTE
+	typedef	unsigned char	BYTE;
+#endif
+
+#ifndef WORD
+	typedef	unsigned short	WORD;
+#endif
+
+#ifndef DWORD
+	typedef	unsigned long	DWORD;
+#endif
 
 static char data_file[1024] = "data.grf";
 static char adata_file[1024] = "adata.grf";
@@ -262,17 +284,17 @@ static int decode_zip(Bytef* dest, uLongf* destLen, const Bytef* source, uLong s
 	stream.zalloc = (alloc_func)0;
 	stream.zfree = (free_func)0;
 
-	err = inflateInit(&stream);
+	err = zlib_inflateInit(&stream);
 	if (err != Z_OK) return err;
 
-	err = inflate(&stream, Z_FINISH);
+	err = zlib_inflate(&stream, Z_FINISH);
 	if (err != Z_STREAM_END) {
-		inflateEnd(&stream);
+		zlib_inflateEnd(&stream);
 		return err == Z_OK ? Z_BUF_ERROR : err;
 	}
 	*destLen = stream.total_out;
 
-	err = inflateEnd(&stream);
+	err = zlib_inflateEnd(&stream);
 	return err;
 }
 /***********************************************************
@@ -482,7 +504,7 @@ void* grfio_reads(char *fname, int *size)
 			}
 			len=entry->declen;
 			decode_zip(buf2,&len,buf,entry->srclen);
-			if(len!=entry->declen) {
+			if((int)len!=entry->declen) {
 				printf("decode_zip size miss match err: %d != %d\n",(int)len,entry->declen);
 				goto errret;
 			}
@@ -623,7 +645,7 @@ static int grfio_entryread(char *gfname,int gentry)
 		rSize = getlong(eheader);	// Read Size
 		eSize = getlong(eheader+4);	// Extend Size
 		
-		if (rSize > grf_size-ftell(fp)) {
+		if ((int)rSize > grf_size-ftell(fp)) {
 			fclose(fp);
 			printf("Illegal data format : grf compress entry size\n");
 			return 4;
@@ -796,6 +818,16 @@ void grfio_final(void)
 	}
 	gentry_table = NULL;
 	gentry_entrys = gentry_maxentry = 0; 
+
+#ifdef _WIN32
+	FreeLibrary(zlib_dll);
+	zlib_inflateInit_ = NULL;
+	zlib_inflate      = NULL;
+	zlib_inflateEnd   = NULL;
+#endif
+
+
+
 }
 
 /*==========================================
@@ -807,6 +839,19 @@ void grfio_init(char *fname)
 	FILE *data_conf;
 	char line[1024],w1[1024],w2[1024];
 	int result,result2,result3;
+
+#ifdef _WIN32
+	if(!zlib_dll) {
+		zlib_dll = LoadLibrary("zlib.dll");
+		(FARPROC)zlib_inflateInit_ = GetProcAddress(zlib_dll,"inflateInit_");
+		(FARPROC)zlib_inflate      = GetProcAddress(zlib_dll,"inflate");
+		(FARPROC)zlib_inflateEnd   = GetProcAddress(zlib_dll,"inflateEnd");
+		if(zlib_dll == NULL) {
+			MessageBox(NULL,"Can't load zlib.dll","grfio.c",MB_OK);
+			exit(1);
+		}
+	}
+#endif
 
 	data_conf = fopen(fname, "r");
 		

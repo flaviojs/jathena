@@ -21,7 +21,11 @@ struct tmp_path { short x,y,dist,before,cost; char dir,flag;};
  * Œo˜H’Tõ•â•heap push
  *------------------------------------------
  */
+#ifdef _WIN32
+static void push_heap_path(int *heap,struct tmp_path *tp,int index)
+#else
 static inline void push_heap_path(int *heap,struct tmp_path *tp,int index)
+#endif
 {
 	int i,h;
 
@@ -42,7 +46,11 @@ static inline void push_heap_path(int *heap,struct tmp_path *tp,int index)
  * cost‚ªŒ¸‚Á‚½‚Ì‚Åª‚Ì•û‚ÖˆÚ“®
  *------------------------------------------
  */
+#ifdef _WIN32
+static void update_heap_path(int *heap,struct tmp_path *tp,int index)
+#else
 static inline void update_heap_path(int *heap,struct tmp_path *tp,int index)
+#endif
 {
 	int i,h;
 
@@ -102,7 +110,11 @@ static int pop_heap_path(int *heap,struct tmp_path *tp)
  * Œ»İ‚Ì“_‚ÌcostŒvZ
  *------------------------------------------
  */
+#ifdef _WIN32
+static int calc_cost(struct tmp_path *p,int x1,int y1)
+#else
 static inline int calc_cost(struct tmp_path *p,int x1,int y1)
+#endif
 {
 	int xd,yd;
 
@@ -164,7 +176,11 @@ static int add_path(int *heap,struct tmp_path *tp,int x,int y,int dist,int dir,i
  * flag 0x10000 ‰“‹——£UŒ‚”»’è
  *------------------------------------------
  */
+#ifdef _WIN32
+static int can_place(struct map_data *m,int x,int y,int flag)
+#else
 static inline int can_place(struct map_data *m,int x,int y,int flag)
+#endif
 {
 	int c;
 
@@ -183,7 +199,11 @@ static inline int can_place(struct map_data *m,int x,int y,int flag)
  * (x0,y0)‚©‚ç(x1,y1)‚Ö1•à‚ÅˆÚ“®‰Â”\‚©ŒvZ
  *------------------------------------------
  */
+#ifdef _WIN32
+static int can_move(struct map_data *m,int x0,int y0,int x1,int y1,int flag)
+#else
 static inline int can_move(struct map_data *m,int x0,int y0,int x1,int y1,int flag)
+#endif
 {
 	nullpo_retr(0, m);
 

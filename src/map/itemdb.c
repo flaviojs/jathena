@@ -74,14 +74,15 @@ int itemdb_searchrandomid(int flags)
 	struct {
 		int nameid,count;
 		struct random_item_data *list;
-	} data[] ={
-		{ 0,0,NULL },
-		{ blue_box_default	,blue_box_count		,blue_box	 },
-		{ violet_box_default,violet_box_count	,violet_box	 },
-		{ card_album_default,card_album_count	,card_album	 },
-		{ gift_box_default	,gift_box_count		,gift_box	 },
-		{ scroll_default	,scroll_count		,scroll		 },
-	};
+	} data[6];
+
+	// for BCC32 compile error
+	data[0].nameid = 0;						data[0].count = 0; 					data[0].list = NULL;
+	data[1].nameid = blue_box_default;		data[1].count = blue_box_count;		data[1].list = blue_box;
+	data[2].nameid = violet_box_default;	data[2].count = violet_box_count;	data[2].list = violet_box;
+	data[3].nameid = card_album_default;	data[3].count = card_album_count;	data[3].list = card_album;
+	data[4].nameid = gift_box_default;		data[4].count = gift_box_count;		data[4].list = gift_box;
+	data[5].nameid = scroll_default;		data[5].count = scroll_count;		data[5].list = scroll;
 
 	if(flags>=1 && flags<=5){
 		nameid=data[flags].nameid;

@@ -1589,7 +1589,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
  * HP/SP‹zû‚ÌŒvZ
  *------------------------------------------
  */
-inline int battle_calc_drain(int damage, int rate, int per, int val)
+int battle_calc_drain(int damage, int rate, int per, int val)
 {
 	int diff = 0;
 

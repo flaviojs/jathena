@@ -2,19 +2,21 @@
 // original : login2.c 2003/01/28 02:29:17 Rev.1.1.1.1
 #define DUMP_UNKNOWN_PACKET	1
 
+#ifndef _WIN32
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <sys/ioctl.h>
+	#include <unistd.h>
+	#include <signal.h>
+	#include <fcntl.h>
+	#include <arpa/inet.h>
+	#include <sys/time.h>
+#endif
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <netinet/in.h>
-#include <sys/time.h>
 #include <time.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <signal.h>
-#include <fcntl.h>
 #include <string.h>
-#include <arpa/inet.h>
 
 #include "core.h"
 #include "socket.h"
@@ -225,6 +227,7 @@ int mmo_auth_init(void)
 	auth_dat=aCalloc(auth_max,sizeof(auth_dat[0]));
 	while(fgets(line,1023,fp)!=NULL){
 		p=line;
+		n=-1;
 		i=sscanf(line,"%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\t%d\t%d\t%n",
 			&account_id,userid,pass,lastlogin,&sex,&logincount,&state,&n);
 		if(i>=5){
@@ -248,15 +251,18 @@ int mmo_auth_init(void)
 			else
 				auth_dat[auth_num].state=0;
 
-			
-			for(j=0;j<ACCOUNT_REG2_NUM;j++){
-				p+=n;
-				if(sscanf(p,"%[^\t,],%d %n",str,&v,&n)!=2)
-					break;
-				strncpy(auth_dat[auth_num].account_reg2[j].str,str,32);
-				auth_dat[auth_num].account_reg2[j].value=v;
+			if(n > 0) {
+				for(j=0;j<ACCOUNT_REG2_NUM;j++){
+					p+=n;
+					if(sscanf(p,"%[^\t,],%d %n",str,&v,&n)!=2)
+						break;
+					strncpy(auth_dat[auth_num].account_reg2[j].str,str,32);
+					auth_dat[auth_num].account_reg2[j].value=v;
+				}
+				auth_dat[auth_num].account_reg2_num=j;
+			} else {
+				auth_dat[auth_num].account_reg2_num=0;
 			}
-			auth_dat[auth_num].account_reg2_num=j;
 
 			auth_num++;
 			if(account_id>=account_id_count)
@@ -339,7 +345,6 @@ int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 int mmo_auth( struct mmo_account* account, int fd )
 {
 	int i;
-	struct timeval tv;
 	char tmpstr[256];
 	int len,newaccount=0;
 	char md5str[64],md5bin[32];
@@ -365,9 +370,22 @@ int mmo_auth( struct mmo_account* account, int fd )
 		account->userid[0]=0;
 
 	}
-	gettimeofday(&tv,NULL);
-	strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&(tv.tv_sec)));
-	sprintf(tmpstr+19,".%03d",(int)tv.tv_usec/1000);
+#ifdef _WIN32
+	{
+		time_t time_;
+		time(&time_);
+		strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&time_));
+		sprintf(tmpstr+19,".%03d",0);
+	}
+#else
+	{
+		struct timeval tv;
+
+		gettimeofday(&tv,NULL);
+		strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&(tv.tv_sec)));
+		sprintf(tmpstr+19,".%03d",(int)tv.tv_usec/1000);
+	}
+#endif
 
 	for(i=0;i<auth_num;i++){
 		if(strcmp(account->userid,auth_dat[i].userid)==0)
@@ -866,11 +884,22 @@ int parse_login(int fd)
 				result = 0x03;
 
 			if( !check_ip(session[fd]->client_addr.sin_addr.s_addr) ){
-				struct timeval tv;
 				char tmpstr[256];
-				gettimeofday(&tv,NULL);
-				strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&(tv.tv_sec)));
-				sprintf(tmpstr+19,".%03d",(int)tv.tv_usec/1000);
+#ifdef _WIN32
+				{
+					time_t time_;
+					time(&time_);
+					strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&time_));
+					sprintf(tmpstr+19,".%03d",0);
+				}
+#else
+				{
+					struct timeval tv;
+					gettimeofday(&tv,NULL);
+					strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&(tv.tv_sec)));
+					sprintf(tmpstr+19,".%03d",(int)tv.tv_usec/1000);
+				}
+#endif
 				login_log("access denied %s" RETCODE, tmpstr);
 				WFIFOW(fd,0)=0x6a;
 				WFIFOB(fd,2)=0x03;

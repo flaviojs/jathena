@@ -1,15 +1,18 @@
-#include <sys/types.h>
-#include <sys/socket.h>
+
+#ifndef _WIN32
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <sys/time.h>
+	#include <sys/ioctl.h>
+	#include <unistd.h>
+	#include <signal.h>
+	#include <fcntl.h>
+	#include <arpa/inet.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <netinet/in.h>
-#include <sys/time.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <signal.h>
-#include <fcntl.h>
 #include <string.h>
-#include <arpa/inet.h>
 
 #include "socket.h"
 #include "timer.h"
@@ -28,6 +31,10 @@
 
 #ifdef MEMWATCH
 #include "memwatch.h"
+#endif
+
+#ifdef _MSC_VER
+	#define snprintf _snprintf
 #endif
 
 static const int packet_len_table[]={

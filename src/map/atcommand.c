@@ -35,6 +35,10 @@
 #include "memwatch.h"
 #endif
 
+#ifdef _MSC_VER
+	#define snprintf _snprintf
+#endif
+
 char msg_table[200][1024];	/* Server message */
 
 #define ATCOMMAND_FUNC(x) int atcommand_ ## x (const int fd, struct map_session_data* sd, const char* command, const char* message)
@@ -1971,10 +1975,13 @@ atcommand_param(
 	const char* param[] = {
 		"@str", "@agi", "@vit", "@int", "@dex", "@luk", NULL
 	};
-	short* status[] = {
-		&sd->status.str,  &sd->status.agi, &sd->status.vit,
-		&sd->status.int_, &sd->status.dex, &sd->status.luk
-	};
+	short* status[6];
+	status[0] = &sd->status.str;
+	status[1] = &sd->status.agi;
+	status[2] = &sd->status.vit;
+	status[3] = &sd->status.int_;
+	status[4] = &sd->status.dex;
+	status[5] = &sd->status.luk;
 	
 	if (!message || !*message)
 		return -1;
@@ -2444,22 +2451,23 @@ atcommand_character_stats(
 		struct {
 			const char* format;
 			int value;
-		} output_table[] = {
-			{ "Base Level - %d", pl_sd->status.base_level },
-			{ "Job Level - %d", pl_sd->status.job_level },
-			{ "Hp - %d", pl_sd->status.hp },
-			{ "MaxHp - %d", pl_sd->status.max_hp },
-			{ "Sp - %d", pl_sd->status.sp },
-			{ "MaxSp - %d", pl_sd->status.max_sp },
-			{ "Str - %d", pl_sd->status.str },
-			{ "Agi - %d", pl_sd->status.agi },
-			{ "Vit - %d", pl_sd->status.vit },
-			{ "Int - %d", pl_sd->status.int_ },
-			{ "Dex - %d", pl_sd->status.dex },
-			{ "Luk - %d", pl_sd->status.luk },
-			{ "Zeny - %d", pl_sd->status.zeny },
-			{ NULL, 0 }
-		};
+		} output_table[14];
+		
+		output_table[0].format  = "Base Level - %d";	output_table[0].value = pl_sd->status.base_level;
+		output_table[1].format  = "Job Level - %d";		output_table[1].value = pl_sd->status.job_level;
+		output_table[2].format  = "Hp - %d";			output_table[2].value = pl_sd->status.hp;
+		output_table[3].format  = "MaxHp - %d";			output_table[3].value = pl_sd->status.max_hp;
+		output_table[4].format  = "Sp - %d";			output_table[4].value = pl_sd->status.sp;
+		output_table[5].format  = "MaxSp - %d";			output_table[5].value = pl_sd->status.max_sp;
+		output_table[6].format  = "Str - %d";			output_table[6].value = pl_sd->status.str;
+		output_table[7].format  = "Agi - %d";			output_table[7].value = pl_sd->status.agi;
+		output_table[8].format  = "Vit - %d";			output_table[8].value = pl_sd->status.vit;
+		output_table[9].format  = "Int - %d";			output_table[9].value = pl_sd->status.int_;
+		output_table[10].format = "Dex - %d";			output_table[10].value = pl_sd->status.dex;
+		output_table[11].format = "Luk - %d";			output_table[11].value = pl_sd->status.luk;
+		output_table[12].format = "Zeny - %d";			output_table[12].value = pl_sd->status.zeny;
+		output_table[13].format =  NULL;				output_table[13].value = 0;
+
 		snprintf(output, sizeof output, msg_table[53], pl_sd->status.name);
 		clif_displaymessage(fd, output);
 		for (i = 0; output_table[i].format != NULL; i++) {

@@ -170,10 +170,14 @@ int nullpo_chk(const char *file, int line, const char *func, const void *target)
  *  1 NULL
  *--------------------------------------
  */
+#if __STDC_VERSION__ >= 199901L
 int nullpo_chk_f(const char *file, int line, const char *func, const void *target,
                  const char *fmt, ...)
                  __attribute__((format(printf,5,6)));
-
+#else
+int nullpo_chk_f(const char *file, int line, const char *func, const void *target,
+                 const char *fmt, ...);
+#endif
 
 /*======================================
  * nullpo_info
@@ -200,9 +204,13 @@ void nullpo_info(const char *file, int line, const char *func);
  *    ”õl‚âŠÖŒW•Ï”‚Ì‘‚«o‚µ‚È‚Ç‚É
  *--------------------------------------
  */
+#if __STDC_VERSION__ >= 199901L
 void nullpo_info_f(const char *file, int line, const char *func, 
                    const char *fmt, ...)
                    __attribute__((format(printf,4,5)));
-
+#else
+void nullpo_info_f(const char *file, int line, const char *func, 
+                   const char *fmt, ...);
+#endif
 
 #endif

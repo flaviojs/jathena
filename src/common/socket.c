@@ -4,13 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
+#ifdef _WIN32
+	#include <winsock.h>
+	#pragma comment(lib,"ws2_32.lib")
+#else
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netinet/tcp.h>
+	#include <unistd.h>
+	#include <sys/time.h>
+#endif
 #include <fcntl.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/time.h>
 
 #include "socket.h"
 #include "malloc.h"
@@ -51,14 +56,24 @@ static int recv_to_fifo(int fd)
 	//printf("recv_to_fifo : %d %d\n",fd,session[fd]->eof);
 	if(session[fd]->eof)
 		return -1;
-
+#ifdef _WIN32
+	len=recv(session[fd]->socket,session[fd]->rdata+session[fd]->rdata_size,RFIFOSPACE(fd),0);
+#else
 	len=recv(fd,session[fd]->rdata+session[fd]->rdata_size,RFIFOSPACE(fd),0);
+#endif
 	//{ int i; printf("recv %d : ",fd); for(i=0;i<len;i++){ printf("%02x ",RFIFOB(fd,session[fd]->rdata_size+i)); } printf("\n");}
 	if(len>0){
 		session[fd]->rdata_size+=len;
+#ifdef _WIN32
+	} else if(len == 0 || len == SOCKET_ERROR){
+		printf("set eof :%d\n",fd);
+		session[fd]->eof=1;
+		closesocket(session[fd]->socket);
+#else
 	} else if(len<=0){
 		printf("set eof :%d\n",fd);
 		session[fd]->eof=1;
+#endif
 	}
 	return 0;
 }
@@ -70,8 +85,11 @@ static int send_from_fifo(int fd)
 	//printf("send_from_fifo : %d\n",fd);
 	if(session[fd]->eof)
 		return -1;
-
+#ifdef _WIN32
+	len=send(session[fd]->socket,session[fd]->wdata,session[fd]->wdata_size,0);
+#else
 	len=send(fd,session[fd]->wdata,session[fd]->wdata_size,0);
+#endif
 	//{ int i; printf("send %d : ",fd);  for(i=0;i<len;i++){ printf("%02x ",session[fd]->wdata[i]); } printf("\n");}
 	if(len>0){
 		if(len<session[fd]->wdata_size){
@@ -80,9 +98,16 @@ static int send_from_fifo(int fd)
 		} else {
 			session[fd]->wdata_size=0;
 		}
+#ifdef _WIN32
+	} else if(len == 0 || len == SOCKET_ERROR) {
+		printf("set eof :%d\n",fd);
+		session[fd]->eof=1;
+		closesocket(session[fd]->socket);
+#else
 	} else {
 		printf("set eof :%d\n",fd);
 		session[fd]->eof=1;
+#endif
 	}
 	return 0;
 }
@@ -106,14 +131,22 @@ static int connect_client(int listen_fd)
 	int len;
 	int result;
 	int yes = 1; // reuse fix
-
+#ifdef _WIN32
+	SOCKET socket;
+#endif
 	//printf("connect_client : %d\n",listen_fd);
 
 	len=sizeof(client_address);
 
+#ifdef _WIN32
+	result = 1;
+	fd=accept(session[listen_fd]->socket,(struct sockaddr*)&client_address,&len);
+	ioctlsocket(fd,FIONBIO,&result);
+#else
 	fd=accept(listen_fd,(struct sockaddr*)&client_address,&len);
-	if(fd_max<=fd) fd_max=fd+1;
 	result = fcntl(fd,F_SETFL,O_NONBLOCK);
+#endif
+
 //	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
 	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(char *)&yes,sizeof yes); // reuse fix
 #ifdef SO_REUSEPORT
@@ -128,7 +161,19 @@ static int connect_client(int listen_fd)
 	} else {
 		FD_SET(fd,&readfds);
 	}
+#ifdef _WIN32
+	result = 1;
+	ioctlsocket(fd,FIONBIO,&result);
+
+	socket = fd;
+	fd=2;
+	while(session[fd] != NULL && fd<fd_max) {
+		fd++;
+	}
+#else
 	result = fcntl(fd, F_SETFL, O_NONBLOCK);
+#endif
+
 	session[fd] = (struct socket_data *)aCalloc(1,sizeof(*session[fd]));
 	session[fd]->rdata       = (unsigned char *)aCalloc(1,rfifo_size);
 	session[fd]->wdata       = (unsigned char *)aCalloc(1,wfifo_size);
@@ -138,6 +183,10 @@ static int connect_client(int listen_fd)
 	session[fd]->func_send   = send_from_fifo;
 	session[fd]->func_parse  = default_func_parse;
 	session[fd]->client_addr = client_address;
+#if _WIN32
+	session[fd]->socket      = socket;
+#endif
+	if(fd_max<=fd) fd_max=fd+1;
 
   //printf("new_session : %d %d\n",fd,session[fd]->eof);
   return fd;
@@ -149,10 +198,19 @@ int make_listen_port(int port)
 	int fd;
 	int result;
 	int yes = 1; // reuse fix
+#ifdef _WIN32
+	SOCKET sock;
+#endif
 
 	fd = socket( AF_INET, SOCK_STREAM, 0 );
-	if(fd_max<=fd) fd_max=fd+1;
+#ifdef _WIN32
+	result = 1;
+	ioctlsocket(fd,FIONBIO,&result);
+#else
 	result = fcntl(fd,F_SETFL,O_NONBLOCK);
+#endif
+
+#ifndef _WIN32
 //	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
 	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(char *)&yes,sizeof yes); // reuse fix
 #ifdef SO_REUSEPORT
@@ -161,10 +219,11 @@ int make_listen_port(int port)
 #endif
 //	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,NULL,0);
 	setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,(char *)&yes,sizeof yes); // reuse fix
+#endif
 
 	server_address.sin_family      = AF_INET;
 	server_address.sin_addr.s_addr = htonl( INADDR_ANY );
-	server_address.sin_port        = htons(port);
+	server_address.sin_port        = htons((unsigned short)port);
 
 	result = bind(fd, (struct sockaddr*)&server_address, sizeof(server_address));
 	if( result == -1 ) {
@@ -178,8 +237,21 @@ int make_listen_port(int port)
 	}
 
 	FD_SET(fd, &readfds );
+
+#ifdef _WIN32
+	sock = fd;
+	fd=2;
+	while(session[fd] != NULL && fd<fd_max) {
+		fd++;
+	}
+#endif
+
 	session[fd] = (struct socket_data *)aCalloc(1,sizeof(*session[fd]));
 	session[fd]->func_recv = connect_client;
+#ifdef _WIN32
+	session[fd]->socket = sock;
+#endif
+	if(fd_max<=fd) fd_max=fd+1;
 
 	return fd;
 }
@@ -190,10 +262,13 @@ int make_connection(long ip,int port)
 	int fd;
 	int result;
 	int yes = 1; // reuse fix
+#ifdef _WIN32
+	SOCKET sock;
+#endif
 
 	fd = socket( AF_INET, SOCK_STREAM, 0 );
-	if(fd_max<=fd) fd_max=fd+1;
-//	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
+
+	//	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,NULL,0);
 	setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(char *)&yes,sizeof yes); // reuse fix
 #ifdef SO_REUSEPORT
 //	setsockopt(fd,SOL_SOCKET,SO_REUSEPORT,NULL,0);
@@ -204,12 +279,25 @@ int make_connection(long ip,int port)
 
 	server_address.sin_family = AF_INET;
 	server_address.sin_addr.s_addr = ip;
-	server_address.sin_port = htons(port);
+	server_address.sin_port = htons((unsigned short)port);
 
+#ifdef _WIN32
+	result = 1;
+	ioctlsocket(fd,FIONBIO,&result);
+#else
 	result = fcntl(fd, F_SETFL, O_NONBLOCK);
+#endif
 	result = connect(fd, (struct sockaddr *)(&server_address),sizeof(struct sockaddr_in));
-
 	FD_SET(fd,&readfds);
+
+#ifdef _WIN32
+	sock = fd;
+	fd=2;
+	while(session[fd] != NULL && fd<fd_max) {
+		fd++;
+	}
+#endif
+
 	session[fd] = (struct socket_data *)aCalloc(1,sizeof(*session[fd]));
 
 	session[fd]->rdata      = (unsigned char *)aCalloc(1,rfifo_size);
@@ -219,6 +307,10 @@ int make_connection(long ip,int port)
 	session[fd]->func_recv  = recv_to_fifo;
 	session[fd]->func_send  = send_from_fifo;
 	session[fd]->func_parse = default_func_parse;
+#if _WIN32
+	session[fd]->socket = sock;
+#endif
+	if(fd_max<=fd) fd_max=fd+1;
 
 	return fd;
 }
@@ -227,7 +319,11 @@ int delete_session(int fd)
 {
 	if(fd<0 || fd>=FD_SETSIZE)
 		return -1;
-	FD_CLR(fd,&readfds);
+#ifdef _WIN32
+	FD_CLR(session[fd]->socket,&readfds);
+#else
+	FD_CLR((unsigned int)fd,&readfds);
+#endif
 	if(session[fd]){
 		if(session[fd]->rdata)
 			free(session[fd]->rdata);
@@ -278,30 +374,45 @@ int do_sendrecv(int next)
 	rfd=readfds;
 	FD_ZERO(&wfd);
 	for(i=0;i<fd_max;i++){
+#ifndef _WIN32
 		if(!session[i] && FD_ISSET(i,&readfds)){
 			printf("force clr fds %d\n",i);
-			FD_CLR(i,&readfds);
+			FD_CLR((unsigned int)i,&readfds);
 			continue;
 		}
+#endif
 		if(!session[i])
 			continue;
 		if(session[i]->wdata_size)
+#ifdef _WIN32
+			FD_SET(session[i]->socket,&wfd);
+#else
 			FD_SET(i,&wfd);
+#endif
 	}
 	timeout.tv_sec  = next/1000;
 	timeout.tv_usec = next%1000*1000;
 	ret = select(fd_max,&rfd,&wfd,NULL,&timeout);
-	if(ret<=0)
+	if(ret<=0) {
 		return 0;
+	}
 	for(i=0;i<fd_max;i++){
 		if(!session[i])
 			continue;
+#ifdef _WIN32
+		if(FD_ISSET(session[i]->socket,&wfd)){
+#else
 		if(FD_ISSET(i,&wfd)){
+#endif
 			//printf("write:%d\n",i);
 			if(session[i]->func_send)
 				session[i]->func_send(i);
 		}
+#ifdef _WIN32
+		if(FD_ISSET(session[i]->socket,&rfd)){
+#else
 		if(FD_ISSET(i,&rfd)){
+#endif
 			//printf("read:%d\n",i);
 			if(session[i]->func_recv)
 				session[i]->func_recv(i);
@@ -336,4 +447,13 @@ int parsepacket_timer(int tid, unsigned int tick, int id, int data) {
 void do_socket(void)
 {
 	FD_ZERO(&readfds);
+#ifdef _WIN32
+	{
+		WSADATA  Data;
+		if(WSAStartup(MAKEWORD(1,1),&Data) != 0) {
+			MessageBox(NULL,"Winsock Dll Load Error","socket.c",MB_OK);
+			exit(1);
+		}
+	}
+#endif
 }
