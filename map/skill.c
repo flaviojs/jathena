@@ -462,7 +462,7 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 	static const int diry[8]={1,1,0,-1,-1,-1,0,1};
 	int dx=0,dy=0,nx,ny;
 	int x=target->x,y=target->y;
-	int ret;
+	int ret,prev_state=MS_IDLE;
 	int moveblock;
 	struct map_session_data *sd=NULL;
 	struct mob_data *md=NULL;
@@ -504,10 +504,13 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 			md->to_y=ny;
 			if(md->state.state == MS_WALK)
 				mob_stop_walking(md,1);
+			prev_state = md->state.state;
 			md->state.state = MS_WALK;
 			clif_fixmobpos(md);
 		}
 	}
+	else
+		battle_stopwalking(target,2);
 
 	dx = nx - x;
 	dy = ny - y;
@@ -526,9 +529,6 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 	target->y=ny;
 	if(moveblock) map_addblock(target);
 
-
-	skill_unit_move(target,gettick(),(count&0xffff)+5);	/* スキルユニットの判定 */
-
 	if(sd) {	/* 画面内に入ってきたので表示 */
 		map_foreachinmovearea(clif_pcinsight,
 			target->m,nx-AREA_SIZE,ny-AREA_SIZE,
@@ -541,8 +541,10 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 			target->m,nx-AREA_SIZE,ny-AREA_SIZE,
 			nx+AREA_SIZE,ny+AREA_SIZE,-dx,-dy,BL_PC,md);
 		if(count&0x20000)
-			md->state.state = MS_IDLE;
+			md->state.state = prev_state;
 	}
+
+	skill_unit_move(target,gettick(),(count&0xffff)+5);	/* スキルユニットの判定 */
 
 	return 0;
 }
@@ -593,13 +595,12 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	if(skillid == CR_GRANDCROSS && src == bl)
 		dsrc = src;
 
-	if( dmg.blewcount ){	/* 吹き飛ばし処理とそのパケット */
-		clif_skill_damage2(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
-			damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
+	clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
+		damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
+	if( dmg.blewcount > 0) {	/* 吹き飛ばし処理とそのパケット */
 		skill_blown(dsrc,bl,dmg.blewcount);
-	} else			/* スキルのダメージパケット */
-		clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
-			damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
+		clif_fixpos(bl);
+	}
 
 	map_freeblock_lock();
 	/* 実際にダメージ処理を行う */
@@ -985,7 +986,8 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			else if(skillid==KN_BOWLINGBASH){/*ボウリングバッシュを仮実装してみる（吹き飛ばしはここでやる） */
 				int i;	/* 他人から聞いた動きなので間違ってる可能性大＆効率が悪いっす＞＜ */
 				for(i=0;i<4;i++){
-					skill_blown(src,bl,1|0x20000);
+					skill_blown(src,bl,1);
+					clif_fixpos(bl);
 					skill_area_temp[0]=0;
 					map_foreachinarea(skill_area_sub,
 						bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
@@ -4677,6 +4679,54 @@ int skill_unit_timer( int tid,unsigned int tick,int id,int data)
 	return 0;
 }
 
+/*==========================================
+ * スキルユニット移動時処理用(foreachinarea)
+ *------------------------------------------
+ */
+int skill_unit_out_all_sub( struct block_list *bl, va_list ap )
+{
+	struct skill_unit *unit=(struct skill_unit *)bl;
+	struct skill_unit_group *group;
+	struct block_list *src;
+	int range;
+	unsigned int tick;
+	src=va_arg(ap,struct block_list*);
+	tick=va_arg(ap,unsigned int);
+
+	if(!unit->alive || src->prev==NULL)
+		return 0;
+
+	group=unit->group;
+	range=(unit->range!=0)?unit->range:group->range;
+
+	if( range<0 || battle_check_target(bl,src,group->target_flag )<=0 )
+		return 0;
+
+	if( src->x >= bl->x-range && src->x <= bl->x+range &&
+		src->y >= bl->y-range && src->y <= bl->y+range )
+		skill_unit_onout( unit, src, tick );
+
+	return 0;
+}
+
+
+/*==========================================
+ * スキルユニット移動時処理
+ *------------------------------------------
+ */
+int skill_unit_out_all( struct block_list *bl,unsigned int tick,int range)
+{
+	if(bl->prev==NULL)
+		return 0;
+
+	if(range<7)
+		range=7;
+	map_foreachinarea( skill_unit_out_all_sub,
+		bl->m,bl->x-range,bl->y-range,bl->x+range,bl->y+range,BL_SKILL,
+		bl,tick );
+
+	return 0;
+}
 
 /*==========================================
  * スキルユニット移動時処理用(foreachinarea)
@@ -4720,8 +4770,8 @@ int skill_unit_move( struct block_list *bl,unsigned int tick,int range)
 	if(bl->prev==NULL)
 		return 0;
 
-	if(range<5)
-		range=5;
+	if(range<7)
+		range=7;
 	map_foreachinarea( skill_unit_move_sub,
 		bl->m,bl->x-range,bl->y-range,bl->x+range,bl->y+range,BL_SKILL,
 		bl,tick );

@@ -2422,7 +2422,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 	skill_stop_dancing(&sd->bl);// ƒ_ƒ“ƒX/‰‰‘t’†’f
 	pc_stop_walking(sd,0);		// •às’†’f
 	pc_stopattack(sd);			// UŒ‚’†’f
-	
+
 	if(sd->status.pet_id > 0 && sd->pd && sd->pet.intimate > 0) {
 		pet_stopattack(sd->pd);
 		pet_changestate(sd->pd,MS_IDLE,0);
@@ -2438,8 +2438,26 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		if(sd->mapname[0]){
 			int ip,port;
 			if(map_mapname2ipport(mapname,&ip,&port)==0){
+				skill_unit_out_all(&sd->bl,gettick(),1);
 				clif_clearchar_area(&sd->bl,clrtype&0xffff);
 				map_delblock(&sd->bl);
+				if(sd->status.pet_id > 0 && sd->pd) {
+					if(sd->pd->bl.m != m && sd->pet.intimate <= 0) {
+						pet_remove_map(sd);
+						intif_delete_petdata(sd->status.pet_id);
+						sd->status.pet_id = 0;
+						sd->pd = NULL;
+						sd->petDB = NULL;
+						if(battle_config.pet_status_support)
+							pc_calcstatus(sd,2);
+					}
+					else if(sd->pet.intimate > 0) {
+						pet_stopattack(sd->pd);
+						pet_changestate(sd->pd,MS_IDLE,0);
+						clif_clearchar_area(&sd->pd->bl,clrtype&0xffff);
+						map_delblock(&sd->pd->bl);
+					}
+				}
 				memcpy(sd->mapname,mapname,16);
 				sd->bl.x=x;
 				sd->bl.y=y;
@@ -2471,6 +2489,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 	}
 
 	if(sd->mapname[0] && sd->bl.prev != NULL){
+		skill_unit_out_all(&sd->bl,gettick(),1);
 		clif_clearchar_area(&sd->bl,clrtype&0xffff);
 		// printf("pc.c 63 clif_clearchar_area\n");
 		map_delblock(&sd->bl);

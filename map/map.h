@@ -141,14 +141,14 @@ struct map_session_data {
 	short speed,prev_speed;
 	short opt1,opt2;
 	char dir,head_dir;
-	unsigned long client_tick,server_tick;
+	unsigned int client_tick,server_tick;
 	struct walkpath_data walkpath;
 	int walktimer;
 	int npc_id,npc_shopid;
 	int npc_pos;
 	int npc_menu;
 	int npc_amount;
-	unsigned long chatID;
+	unsigned int chatID;
 
 	int attacktimer;
 	int attacktarget;
@@ -165,8 +165,8 @@ struct map_session_data {
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
 	int ghost_timer;
 
-	unsigned long canact_tick;
-	unsigned long canmove_tick;
+	unsigned int canact_tick;
+	unsigned int canmove_tick;
 	int hp_sub,sp_sub;
 	int inchealhptick,inchealsptick,inchealspirittick;
 
@@ -297,6 +297,7 @@ struct mob_data {
 	unsigned int next_walktime;
 	unsigned int attackabletime;
 	unsigned int last_deadtime,last_spawntime,last_thinktime;
+	unsigned int canmove_tick;
 	short move_fail_count;
 	struct {
 		int id;

@@ -1,4 +1,31 @@
 --------------
+//0696 by 死神
+
+・バグ修正。
+・テレポートやワープ等の時スキルユニットから抜ける処理が入って
+なかったのでSAFETYWALL等によって鯖落ちが起こったようです。(確か報告も
+あったと思いますが...) よって修正はしましたが確認はしてません。報告を
+お願いします。
+・スキルによる吹き飛ばし処理をちょっと修正とモンスターのコードを少し修正。
+多分変になったことはないと思いますが変だったら報告してください。
+・その他細かい修正。
+	(map/)
+	skill.h 修正。
+	skill.c
+		skill_blown()、skill_attack()、skill_unit_move() 修正。
+		skill_castend_nodamage_id()、skill_castend_damage_id() 修正。
+		skill_unit_out_all()、skill_unit_out_all_sub() 追加。
+	mob.c
+		mob_stop_walking()、mob_spawn()、mob_warp() 修正。
+		mob_can_move()、mob_changestate() 修正。
+	map.h 修正。
+	pc.c
+		pc_setpos() 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack() 修正。
+
+--------------
 //0695 by 死神
 
 ・少し修正。

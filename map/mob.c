@@ -590,6 +590,7 @@ int mob_spawn(int id)
 	md->last_spawntime=tick;
 	if( md->bl.prev!=NULL ){
 //		clif_clearchar_area(&md->bl,3);
+		skill_unit_out_all(&md->bl,gettick(),1);
 		map_delblock(&md->bl);
 	}
 
@@ -638,6 +639,7 @@ int mob_spawn(int id)
 	md->last_thinktime = tick;
 	md->next_walktime = tick+rand()%50+5000;
 	md->attackabletime = tick;
+	md->canmove_tick = tick;
 
 	md->skilltimer=-1;
 	for(i=0,c=tick-1000*3600*10;i<MAX_MOBSKILL;i++)
@@ -696,22 +698,23 @@ int mob_stopattack(struct mob_data *md)
  */
 int mob_stop_walking(struct mob_data *md,int type)
 {
-	int delay=mob_db[md->class].dmotion;
 	if(md->state.state == MS_WALK) {
 //	printf("stop walking\n");
 		md->walkpath.path_len=0;
 		md->to_x=md->bl.x;
 		md->to_y=md->bl.y;
+		mob_changestate(md,MS_IDLE,0);
 		if(type&0x01)
 			clif_fixpos(&md->bl);
 	}
-	if(type&0x02 && md->state.state != MS_DELAY) {
+	if(type&0x02) {
+		int delay=mob_db[md->class].dmotion;
+		unsigned int tick = gettick();
 		if(battle_config.monster_damage_delay_rate != 100)
 			delay = delay*battle_config.monster_damage_delay_rate/100;
-		mob_changestate(md,MS_DELAY,delay);
+		if(md->canmove_tick < tick)
+			md->canmove_tick = tick + delay;
 	}
-	else
-		mob_changestate(md,MS_IDLE,0);
 
 	return 0;
 }
@@ -786,9 +789,10 @@ int mob_target(struct mob_data *md,struct block_list *bl,int dist)
  */
 int mob_can_move(struct mob_data *md)
 {
-	if( md->sc_data[SC_ANKLE].timer!=-1 ){	// アンクル中で動けない
+	if(md->canmove_tick > gettick())
 		return 0;
-	}
+	if( md->sc_data[SC_ANKLE].timer!=-1 )	// アンクル中で動けない
+		return 0;
 
 	return 1;
 }
@@ -1842,6 +1846,7 @@ int mob_warp(struct mob_data *md,int x,int y,int type)
 	if( md==NULL || md->bl.prev==NULL )
 		return 0;
 
+	skill_unit_out_all(&md->bl,gettick(),1);
 	if(type>0)
 		clif_clearchar_area(&md->bl,type);
 	map_delblock(&md->bl);

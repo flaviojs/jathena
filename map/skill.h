@@ -78,6 +78,7 @@ int skill_clear_unitgroup(struct block_list *src);
 int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,
 	int damage,unsigned int tick);
 
+int skill_unit_out_all( struct block_list *bl,unsigned int tick,int range);
 int skill_unit_move( struct block_list *bl,unsigned int tick,int range);
 
 struct skill_unit_group *skill_check_dancing( struct block_list *src );
@@ -137,7 +138,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_WATERBALL			=142,
 	SC_ANKLE				=143,
 	SC_DANCING				=144,
-	
+
 	SC_TRICKDEAD			=29,
 	SC_PROVOKE				= 0,
 	SC_ENDURE				= 1,
@@ -195,7 +196,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 
 	SC_VOLCANO				=153,
 	SC_DELUGE				=154,
-	
+
 	SC_LULLABY				=160,
 	SC_RICHMANKIM			=161,
 	SC_ETERNALCHAOS			=162,
@@ -216,7 +217,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_DONTFORGETME			=177,
 	SC_FORTUNE				=178,
 	SC_SERVICE4U			=179,
-	
+
 	SC_RIDING				=27,
 	SC_FALCON				=28,
 	SC_WEIGHT50				=35,
