@@ -83,6 +83,8 @@ bonus bNoSizeFix,n;		モンスターのサイズによる攻撃補正を受けない(nは無意味)
 bonus bNoWeaponDamage,n;	物理攻撃でダメージを受けない(nは無意味)
 bonus bNoMagicDamage,n;		魔法でダメージを受けない(ヒールも含む、nは無意味)
 bonus bNoGemStone,n;		スキルを使う時ジェムストーンを消耗しない(nは無意味)
+bonus bShortWeaponDamageReturn,n;	近距離物理攻撃のn%を敵に跳ね返す(ダメージは減らない。nは+される。)
+bonus bLongWeaponDamageReturn,n;	遠距離物理攻撃のn%を敵に跳ね返す(ダメージは減らない。nは+される。)
 
 
 bonus2 bAddEff,Eff_Blind,n;	n%の確率で暗黒付与(nは万分率)

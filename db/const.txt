@@ -134,6 +134,8 @@ bSplashAddRange	1059
 bAutoSpell	1060
 bHPDrainRate	1061
 bSPDrainRate	1062
+bShortWeaponDamageReturn	1063
+bLongWeaponDamageReturn	1064
 bRestartFullRecover	2000
 bNoCastCancel	2001
 bNoSizeFix	2002

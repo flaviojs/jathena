@@ -1,4 +1,37 @@
 --------------------
+//0843 by 死神
+
+・リフレクトシールド実装。
+・アイテムスクリプトにbShortWeaponDamageReturnと
+bLongWeaponDamageReturn 追加。
+・その他スキル関係や他の所修正。
+	(db/)
+	item_db.txt 修正。
+	skill_db.txt 修正。
+	cast_db.txt 修正。
+	const.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	(map/)
+	map.h 修正。
+	battle.c
+		battle_get_def()、battle_get_def2()、battle_calc_pet_weapon_attack() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_weapon_attack()、battle_calc_magic_attack() 修正。
+	pc.c
+		pc_calcstatus()、pc_bonus()、pc_bonus2()、pc_equipitem() 修正。
+		pc_unequipitem()、pc_checkallowskill() 修正。
+	skill.c
+		skill_attack()、skill_unit_onplace()、skill_status_change_start() 修正。
+		skill_status_change_end()、skill_status_change_timer() 修正。
+		skill_castend_nodamage_id() 修正。
+	clif.c
+		clif_additem()、clif_equiplist()、clif_storageequiplist() 修正。
+		clif_tradeadditem()、clif_storageitemadded()、clif_cart_additem() 修正。
+		clif_cart_equiplist()、clif_vendinglist()、clif_openvending() 修正。
+		clif_damage()、clif_skill_damage()、clif_parse_LoadEndAck() 修正。
+
+--------------------
 //0842 by 死神
 
 ・スキル関係の修正と細かい修正。

@@ -502,7 +502,7 @@ int battle_get_def(struct block_list *bl)
 			if(sc_data[SC_POISON].timer!=-1 && bl->type != BL_PC)
 				def = def*75/100;
 			if(sc_data[SC_SIGNUMCRUCIS].timer!=-1 && bl->type != BL_PC)
-				def -= sc_data[SC_SIGNUMCRUCIS].val2;
+				def = def * (100 - sc_data[SC_SIGNUMCRUCIS].val2)/100;
 			if(sc_data[SC_ETERNALCHAOS].timer!=-1 && bl->type != BL_PC)
 				def = 0;
 			if(sc_data[SC_FREEZE].timer != -1 || (sc_data[SC_STONE].timer != -1 && sc_data[SC_STONE].val2 == 0))
@@ -557,8 +557,6 @@ int battle_get_def2(struct block_list *bl)
 			def2 = (def2*(100 - 6*sc_data[SC_PROVOKE].val1)+50)/100;
 		if(sc_data[SC_POISON].timer!=-1 && bl->type != BL_PC)
 			def2 = def2*75/100;
-		if(sc_data[SC_SIGNUMCRUCIS].timer!=-1 && bl->type != BL_PC)
-			def2 -= sc_data[SC_SIGNUMCRUCIS].val2;
 	}
 	if(def2 < 1) def2 = 1;
 	return def2;
@@ -1596,7 +1594,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 		hitrate = 1000000;
 	if(type == 0 && rand()%100 >= hitrate)
 		damage = 0;
-	if( target->type!=BL_PC && t_sc_data) {
+	if(t_sc_data) {
 		int cardfix=100;
 		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG)
 			cardfix=cardfix*(100-t_sc_data[SC_DEFENDER].val2)/100;
@@ -1637,6 +1635,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	wd.amotion=battle_get_amotion(src);
 	wd.dmotion=battle_get_dmotion(target);
 	wd.blewcount=blewcount;
+	wd.flag=flag;
 
 	return wd;
 }
@@ -2000,7 +1999,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		}
 		damage=damage*cardfix/100;
 	}
-	else if(t_sc_data) {
+	if(t_sc_data) {
 		int cardfix=100;
 		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG)
 			cardfix=cardfix*(100-t_sc_data[SC_DEFENDER].val2)/100;
@@ -2051,6 +2050,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		wd.amotion >>= 1;
 	wd.dmotion=battle_get_dmotion(target);
 	wd.blewcount=blewcount;
+	wd.flag=flag;
 
 	return wd;
 }
@@ -2803,7 +2803,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		damage=damage*cardfix/100;
 		damage2=damage2*cardfix/100;
 	}
-	else if(t_sc_data) {
+	if(t_sc_data) {
 		cardfix=100;
 		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG)
 			cardfix=cardfix*(100-t_sc_data[SC_DEFENDER].val2)/100;
@@ -2918,6 +2918,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		wd.amotion >>= 1;
 	wd.dmotion=battle_get_dmotion(target);
 	wd.blewcount=blewcount;
+	wd.flag=flag;
 
 	return wd;
 }
@@ -3061,7 +3062,7 @@ struct Damage battle_calc_magic_attack(
 			break;
 		case WZ_SIGHTRASHER:
 			MATK_FIX( 100+skill_lv*20, 100);
-			blewcount=5|0x10000;
+			blewcount=5;
 			break;
 		case WZ_METEOR:
 			break;
@@ -3322,6 +3323,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	struct map_session_data *sd=NULL;
 	struct status_change *sc_data = battle_get_sc_data(src),*t_sc_data=battle_get_sc_data(target);
 	short *opt1;
+	int damage;
 
 	if(src->type == BL_PC)
 		sd = (struct map_session_data *)src;
@@ -3362,6 +3364,39 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		else
 			wd=battle_calc_weapon_attack(src,target,0,0,0);
 
+		map_freeblock_lock();
+		if((damage = wd.damage + wd.damage2) > 0 && src != target) {
+			int rdamage;
+			if(wd.flag&BF_SHORT) {
+				if(target->type == BL_PC) {
+					struct map_session_data *tsd = (struct map_session_data *)target;
+					if(tsd->short_weapon_damage_return > 0) {
+						rdamage = damage * tsd->short_weapon_damage_return / 100;
+						if(rdamage < 1) rdamage = 1;
+						clif_damage(src,src,tick, wd.amotion,0,rdamage,1,4,0);
+						battle_damage(target,src,rdamage);
+					}
+				}
+				if(t_sc_data && t_sc_data[SC_REFLECTSHIELD].timer != -1) {
+					rdamage = damage * t_sc_data[SC_REFLECTSHIELD].val2 / 100;
+					if(rdamage < 1) rdamage = 1;
+					clif_damage(src,src,tick, wd.amotion,0,rdamage,1,4,0);
+					battle_damage(target,src,rdamage);
+				}
+			}
+			else if(wd.flag&BF_LONG) {
+				if(target->type == BL_PC) {
+					struct map_session_data *tsd = (struct map_session_data *)target;
+					if(tsd->long_weapon_damage_return > 0) {
+						rdamage = damage * tsd->long_weapon_damage_return / 100;
+						if(rdamage < 1) rdamage = 1;
+						clif_damage(src,src,tick, wd.amotion,0,rdamage,1,4,0);
+						battle_damage(target,src,rdamage);
+					}
+				}
+			}
+		}
+
 		if (wd.div_ == 255 && src->type == BL_PC)	{ //éOíiè∂
 			int delay = 300;
 			if(wd.damage+wd.damage2 < battle_get_hp(target)) {
@@ -3387,7 +3422,6 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			if(src->type == BL_PC && sd->status.weapon >= 16 && wd.damage2 == 0)
 				clif_damage(src,target,tick+10, wd.amotion, wd.dmotion,0, 1, 0, 0);
 		}
-		map_freeblock_lock();
 		if(sd && sd->splash_range > 0 && (wd.damage > 0 || wd.damage2 > 0) )
 			skill_castend_damage_id(src,target,0,-1,tick,0);
 		battle_damage(src,target,(wd.damage+wd.damage2));
@@ -3418,39 +3452,38 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 					skill_castend_damage_id(src,target,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
 			}
 		}
-		if(sd && sd->autospell_id > 0 && sd->autospell_lv > 0 && rand()%100 < sd->autospell_rate) {
-			int skilllv=sd->autospell_lv,i,f=0,sp;
-			i = rand()%100;
-			if(i >= 50) skilllv -= 2;
-			else if(i >= 15) skilllv--;
-			if(skilllv < 1) skilllv = 1;
-			sp = skill_get_sp(sd->autospell_id,skilllv)*2/3;
-			if(sd->status.sp >= sp) {
-				if((i=skill_get_inf(sd->autospell_id) == 2) || i == 32)
-					f = skill_castend_pos2(src,target->x,target->y,sd->autospell_id,skilllv,tick,flag);
-				else
-					f = skill_castend_damage_id(src,target,sd->autospell_id,skilllv,tick,flag);
-				if(!f) pc_heal(sd,0,-sp);
+		if(sd) {
+			if(sd->autospell_id > 0 && sd->autospell_lv > 0 && rand()%100 < sd->autospell_rate) {
+				int skilllv=sd->autospell_lv,i,f=0,sp;
+				i = rand()%100;
+				if(i >= 50) skilllv -= 2;
+				else if(i >= 15) skilllv--;
+				if(skilllv < 1) skilllv = 1;
+				sp = skill_get_sp(sd->autospell_id,skilllv)*2/3;
+				if(sd->status.sp >= sp) {
+					if((i=skill_get_inf(sd->autospell_id) == 2) || i == 32)
+						f = skill_castend_pos2(src,target->x,target->y,sd->autospell_id,skilllv,tick,flag);
+					else
+						f = skill_castend_damage_id(src,target,sd->autospell_id,skilllv,tick,flag);
+					if(!f) pc_heal(sd,0,-sp);
+				}
 			}
-		}
-		if(sd && sd->state.attack_type == BF_WEAPON && src != target && (wd.damage > 0 || wd.damage2 > 0)) {
-			int hp = 0,sp = 0;
-			if(sd->hp_drain_rate > 0 && sd->hp_drain_per > 0 && rand()%100 < sd->hp_drain_rate) {
-				if(wd.damage > 0)
+			if(wd.flag&BF_WEAPON && src != target && (wd.damage > 0 || wd.damage2 > 0)) {
+				int hp = 0,sp = 0;
+				if(sd->hp_drain_rate > 0 && sd->hp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate)
 					hp += (wd.damage * sd->hp_drain_per)/100;
-				if(wd.damage2 > 0)
-					hp += (wd.damage2 * sd->hp_drain_per)/100;
+				if(sd->hp_drain_rate_ > 0 && sd->hp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->hp_drain_rate_)
+					hp += (wd.damage2 * sd->hp_drain_per_)/100;
 				if(hp < 1) hp = 1;
-			}
-			if(sd->sp_drain_rate > 0 && sd->sp_drain_per > 0 && rand()%100 < sd->sp_drain_rate) {
-				if(wd.damage > 0)
+				if(sd->sp_drain_rate > 0 && sd->sp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate)
 					sp += (wd.damage * sd->sp_drain_per)/100;
-				if(wd.damage2 > 0)
-					sp += (wd.damage2 * sd->sp_drain_per)/100;
+				if(sd->sp_drain_rate_ > 0 && sd->sp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->sp_drain_rate_)
+					sp += (wd.damage2 * sd->sp_drain_per_)/100;
 				if(sp < 1) sp = 1;
+				if(hp > 0 || sp > 0) pc_heal(sd,hp,sp);
 			}
-			if(hp > 0 || sp > 0) pc_heal(sd,hp,sp);
 		}
+
 		if(t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1 && t_sc_data[SC_AUTOCOUNTER].val4 > 0) {
 			if(t_sc_data[SC_AUTOCOUNTER].val3 == src->id)
 				battle_weapon_attack(target,src,tick,0x8000|t_sc_data[SC_AUTOCOUNTER].val1);

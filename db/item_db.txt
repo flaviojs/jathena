@@ -1046,8 +1046,8 @@
 4131,Moonlight_Flower_Card,月夜花カード,6,20,,10,,,,,,,64,,,,{},{ bonus bSpeedRate,25; }
 4132,Mistress_Card,ミストレスカード,6,20,,10,,,,,,,769,,,,{},{ bonus bNoGemStone,0; bonus bUseSPrate,25; }
 4133,Daydric_Card,レイドリックカード,6,20,,10,,,,,,,4,,,,{},{ bonus2 bSubEle,0,20; }
-4134,Dracula_Card,ドラキュラカード,6,20,,10,,,,,,,2,,,,{},{ bonus2 bSpDrainRate,3,15; }
-4135,Orc_Load_Card,オークロードカード,6,20,,10,,,,,,,16,,,,{},{}
+4134,Dracula_Card,ドラキュラカード,6,20,,10,,,,,,,2,,,,{},{ bonus2 bSpDrainRate,3,5; }
+4135,Orc_Load_Card,オークロードカード,6,20,,10,,,,,,,16,,,,{},{ bonus bShortWeaponDamageReturn,30; }
 4136,Khalitzburg_Card,カーリッツバーグカード,6,20,,10,,,,,,,32,,,,{},{ bonus2 bSubRace,6,30; }
 4137,Drake_Card,ドレイクカード,6,20,,10,,,,,,,2,,,,{},{ bonus bNoSizeFix,0; }
 4138,Anubis_Card,アヌビスカード,6,20,,10,,,,,,,32,,,,{},{ bonus2 bSubRace,8,30; }

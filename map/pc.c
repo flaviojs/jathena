@@ -959,6 +959,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->splash_range = sd->splash_add_range = 0;
 	sd->autospell_id = sd->autospell_lv = sd->autospell_rate = 0;
 	sd->hp_drain_rate = sd->hp_drain_per = sd->sp_drain_rate = sd->sp_drain_per = 0;
+	sd->hp_drain_rate_ = sd->hp_drain_per_ = sd->sp_drain_rate_ = sd->sp_drain_per_ = 0;
+	sd->short_weapon_damage_return = sd->long_weapon_damage_return = 0;
 
 	for(i=0;i<10;i++) {
 		index = sd->equip_index[i];
@@ -1231,7 +1233,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if (pc_iscarton(sd) && (skill=pc_checkskill(sd,MC_PUSHCART))>0)	// カートによる速度低下
 		sd->speed += (10-skill) * (DEFAULT_WALK_SPEED * 0.1);
 	else if (pc_isriding(sd))	// ペコペコ乗りによる速度増加
-		sd->speed -= (0.2 * DEFAULT_WALK_SPEED);
+		sd->speed -= (0.25 * DEFAULT_WALK_SPEED);
 
 	if((skill=pc_checkskill(sd,CR_TRUST))>0) { // フェイス
 		sd->status.max_hp += skill*200;
@@ -1322,12 +1324,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->wlv >= 4)
 				sd->watk_ += sd->sc_data[SC_NIBELUNGEN].val2;
 		}
-		if(sd->sc_data[SC_SIGNUMCRUCIS].timer!=-1) {
-			sd->def -= sd->sc_data[SC_SIGNUMCRUCIS].val2;
-			sd->def2 -= sd->sc_data[SC_SIGNUMCRUCIS].val2;
-			if(sd->def < 0) sd->def = 0;
-			if(sd->def2 < 1) sd->def2 = 1;
-		}
+		if(sd->sc_data[SC_SIGNUMCRUCIS].timer!=-1)
+			sd->def = sd->def * (100 - sd->sc_data[SC_SIGNUMCRUCIS].val2)/100;
 		if(sd->sc_data[SC_ETERNALCHAOS].timer!=-1)	// エターナルカオス
 			sd->def=0;
 
@@ -1408,7 +1406,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->speed = (sd->speed * 125) / 100;
 		}
 		if(sd->sc_data[SC_DEFENDER].timer != -1) {
-			sd->long_attack_def_rate += sd->sc_data[SC_DEFENDER].val2;
 			sd->aspd += (550 - sd->sc_data[SC_DEFENDER].val1*50);
 			sd->speed = (sd->speed * (155 - sd->sc_data[SC_DEFENDER].val1*5)) / 100;
 		}
@@ -1849,6 +1846,14 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		if(sd->state.lr_flag != 2)
 			sd->splash_add_range += val;
 		break;
+	case SP_SHORT_WEAPON_DAMAGE_RETURN:
+		if(sd->state.lr_flag != 2)
+			sd->short_weapon_damage_return += val;
+		break;
+	case SP_LONG_WEAPON_DAMAGE_RETURN:
+		if(sd->state.lr_flag != 2)
+			sd->long_weapon_damage_return += val;
+		break;
 	default:
 		if(battle_config.error_log)
 			printf("pc_bonus: unknown type %d %d !\n",type,val);
@@ -1994,15 +1999,23 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 		}
 		break;
 	case SP_HP_DRAIN_RATE:
-		if(sd->state.lr_flag != 2) {
+		if(!sd->state.lr_flag) {
 			sd->hp_drain_rate += type2;
 			sd->hp_drain_per += val;
 		}
+		else if(sd->state.lr_flag == 1) {
+			sd->hp_drain_rate_ += type2;
+			sd->hp_drain_per_ += val;
+		}
 		break;
 	case SP_SP_DRAIN_RATE:
-		if(sd->state.lr_flag != 2) {
+		if(!sd->state.lr_flag) {
 			sd->sp_drain_rate += type2;
 			sd->sp_drain_per += val;
+		}
+		else if(sd->state.lr_flag == 1) {
+			sd->sp_drain_rate_ += type2;
+			sd->sp_drain_per_ += val;
 		}
 		break;
 	default:
@@ -3167,13 +3180,19 @@ int pc_checkallowskill(struct map_session_data *sd)
 		return -1;
 	}
 
-	if(sd->status.shield <= 0 && sd->sc_data[SC_AUTOGUARD].timer!=-1){	// オートガード
-		skill_status_change_end(&sd->bl,SC_AUTOGUARD,-1);
-		return -1;
-	}
-	if(sd->status.shield <= 0 && sd->sc_data[SC_DEFENDER].timer!=-1){	// オートガード
-		skill_status_change_end(&sd->bl,SC_DEFENDER,-1);
-		return -1;
+	if(sd->status.shield <= 0) {
+		if(sd->sc_data[SC_AUTOGUARD].timer!=-1){	// オートガード
+			skill_status_change_end(&sd->bl,SC_AUTOGUARD,-1);
+			return -1;
+		}
+		if(sd->sc_data[SC_DEFENDER].timer!=-1){	// オートガード
+			skill_status_change_end(&sd->bl,SC_DEFENDER,-1);
+			return -1;
+		}
+		if(sd->sc_data[SC_REFLECTSHIELD].timer!=-1){
+			skill_status_change_end(&sd->bl,SC_REFLECTSHIELD,-1);
+			return -1;
+		}
 	}
 
 	return 0;
@@ -4652,6 +4671,9 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 			skill_status_change_end(&sd->bl,SC_ENDURE,-1);
 	}
 
+	if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,battle_get_elem_type(&sd->bl)))
+		skill_status_change_end(&sd->bl,SC_SIGNUMCRUCIS,-1);
+
 	return 0;
 }
 
@@ -4708,6 +4730,8 @@ int pc_unequipitem(struct map_session_data *sd,int n,int type)
 		pc_calcstatus(sd,0);
 		if(!sd->special_state.infinite_endure && sd->sc_data[SC_ENDURE].timer != -1 && sd->sc_data[SC_ENDURE].val2)
 			skill_status_change_end(&sd->bl,SC_ENDURE,-1);
+		if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,battle_get_elem_type(&sd->bl)))
+			skill_status_change_end(&sd->bl,SC_SIGNUMCRUCIS,-1);
 	}
 
 	return 0;

@@ -128,9 +128,9 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,
 	SC_AUTOGUARD,
 /* 250- */
-	-1,
+	-1,-1,
 	SC_REFLECTSHIELD,
-	-1,-1,-1,
+	-1,-1,
 	SC_DEVOTION,
 	SC_PROVIDENCE,
 	SC_DEFENDER,
@@ -734,10 +734,50 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		}
 	}
 
-	clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
-		damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, (skillid==0)? 5:type );
+	map_freeblock_lock();
+	if(attack_type&BF_WEAPON && damage > 0 && src != bl && src == dsrc) {
+		int rdamage;
+		if(dmg.flag&BF_SHORT) {
+			if(bl->type == BL_PC) {
+				struct map_session_data *tsd = (struct map_session_data *)bl;
+				if(tsd->short_weapon_damage_return > 0) {
+					rdamage = damage * tsd->short_weapon_damage_return / 100;
+					if(rdamage < 1) rdamage = 1;
+					clif_damage(src,src,tick, dmg.amotion,0,rdamage,1,4,0);
+					battle_damage(bl,src,rdamage);
+				}
+			}
+			if(sc_data && sc_data[SC_REFLECTSHIELD].timer != -1) {
+				rdamage = damage * sc_data[SC_REFLECTSHIELD].val2 / 100;
+				if(rdamage < 1) rdamage = 1;
+				clif_damage(src,src,tick, dmg.amotion,0,rdamage,1,4,0);
+				battle_damage(bl,src,rdamage);
+			}
+		}
+		else if(dmg.flag&BF_LONG) {
+			if(bl->type == BL_PC) {
+				struct map_session_data *tsd = (struct map_session_data *)bl;
+				if(tsd->long_weapon_damage_return > 0) {
+					rdamage = damage * tsd->long_weapon_damage_return / 100;
+					if(rdamage < 1) rdamage = 1;
+					clif_damage(src,src,tick, dmg.amotion,0,rdamage,1,4,0);
+					battle_damage(bl,src,rdamage);
+				}
+			}
+		}
+	}
+
+	if(skillid == WZ_SIGHTRASHER)
+		clif_skill_damage(src,bl,tick,dmg.amotion,dmg.dmotion,
+			damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, 5);
+	else
+		clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
+			damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, (skillid==0)? 5:type );
 	if(dmg.blewcount > 0 && !map[src->m].flag.gvg) {	/* 吹き飛ばし処理とそのパケット */
-		skill_blown(dsrc,bl,dmg.blewcount);
+		if(skillid == WZ_SIGHTRASHER)
+			skill_blown(src,bl,dmg.blewcount);
+		else
+			skill_blown(dsrc,bl,dmg.blewcount);
 		if(bl->type == BL_MOB)
 			clif_fixmobpos((struct mob_data *)bl);
 		else if(bl->type == BL_PET)
@@ -746,7 +786,6 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 			clif_fixpos(bl);
 	}
 
-	map_freeblock_lock();
 	/* 実際にダメージ処理を行う */
 	if(skillid != KN_BOWLINGBASH || flag != 0)
 		battle_damage(src,bl,damage);
@@ -777,19 +816,19 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		}
 	}
 
-	if(src->type == BL_PC && ((struct map_session_data *)src)->state.attack_type == BF_WEAPON && src != bl && damage > 0) {
+	if(src->type == BL_PC && dmg.flag&BF_WEAPON && src != bl && src == dsrc && damage > 0) {
 		struct map_session_data *sd = (struct map_session_data *)src;
 		int hp = 0,sp = 0;
-		if(sd->hp_drain_rate > 0 && sd->hp_drain_per > 0 && rand()%100 < sd->hp_drain_rate) {
-			if(damage > 0)
-				hp += (damage * sd->hp_drain_per)/100;
-			if(hp < 1) hp = 1;
-		}
-		if(sd->sp_drain_rate > 0 && sd->sp_drain_per > 0 && rand()%100 < sd->sp_drain_rate) {
-			if(damage > 0)
-				sp += (damage * sd->sp_drain_per)/100;
-			if(sp < 1) sp = 1;
-		}
+		if(sd->hp_drain_rate > 0 && sd->hp_drain_per > 0 && dmg.damage > 0 && rand()%100 < sd->hp_drain_rate)
+			hp += (dmg.damage * sd->hp_drain_per)/100;
+		if(sd->hp_drain_rate_ > 0 && sd->hp_drain_per_ > 0 && dmg.damage2 > 0 && rand()%100 < sd->hp_drain_rate_)
+			hp += (dmg.damage2 * sd->hp_drain_per_)/100;
+		if(hp < 1) hp = 1;
+		if(sd->sp_drain_rate > 0 && sd->sp_drain_per > 0 && dmg.damage > 0 && rand()%100 < sd->sp_drain_rate)
+			sp += (dmg.damage * sd->sp_drain_per)/100;
+		if(sd->sp_drain_rate_ > 0 && sd->sp_drain_per_ > 0 && dmg.damage2 > 0 && rand()%100 < sd->sp_drain_rate_)
+			sp += (dmg.damage2 * sd->sp_drain_per_)/100;
+		if(sp < 1) sp = 1;
 		if(hp > 0 || sp > 0) pc_heal(sd,hp,sp);
 	}
 
@@ -1776,6 +1815,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case KN_AUTOCOUNTER:		/* オートカウンター */
 	case KN_TWOHANDQUICKEN:	/* ツーハンドクイッケン */
 	case CR_SPEARQUICKEN:	/* スピアクイッケン */
+	case CR_REFLECTSHIELD:
 	case AS_ENCHANTPOISON:	/* エンチャントポイズン */
 	case AS_POISONREACT:	/* ポイズンリアクト */
 	case MC_LOUD:			/* ラウドボイス */
@@ -3333,9 +3373,8 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		break;
 
 	case 0x88:	/* ファイアーピラー(発動後) */
-		if(DIFF_TICK(tick,sg->tick) < 200)
-			map_foreachinarea(skill_attack_area,src->bl.m,src->bl.x-sg->range,src->bl.y-sg->range,
-				src->bl.x+sg->range,src->bl.y+sg->range,0,BF_MAGIC,ss,&src->bl,sg->skill_id,sg->skill_lv,tick,0,BCT_ENEMY);
+		if(DIFF_TICK(tick,sg->tick) < 150)
+			skill_attack(BF_MAGIC,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
 		break;
 
 	case 0x90:	/* スキッドトラップ */
@@ -4926,31 +4965,36 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 		case SC_FREEZE:
 		case SC_STAN:
 		case SC_SLEEP:
-			*opt1=0;
-			opt_flag=1;
+			*opt1 = 0;
+			opt_flag = 1;
 			break;
 
 		case SC_POISON:
 		case SC_CURSE:
 		case SC_SILENCE:
 		case SC_BLIND:
-			*opt2&=~(1<<(type-SC_POISON));
-			opt_flag=1;
+			*opt2 &= ~(1<<(type-SC_POISON));
+			opt_flag = 1;
+			break;
+
+		case SC_SIGNUMCRUCIS:
+			*opt2 &= ~0x40;
+			opt_flag = 1;
 			break;
 
 		case SC_HIDING:
 		case SC_CLOAKING:
-			*option&=~((type==SC_HIDING)?2:4);
-			opt_flag =1 ;
+			*option &= ~((type==SC_HIDING)?2:4);
+			opt_flag = 1 ;
 			break;
 
 		case SC_SIGHT:
-			*option&=~1;
-			opt_flag=1;
+			*option &= ~1;
+			opt_flag = 1;
 			break;
 		case SC_RUWACH:
-			*option&=~8192;
-			opt_flag=1;
+			*option &= ~8192;
+			opt_flag = 1;
 			break;
 		}
 
@@ -5024,7 +5068,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	case SC_SIGHT:	/* サイト */
 	case SC_RUWACH:	/* ルアフ */
 		{
-			const int range=AREA_SIZE-5;
+			const int range=10;
 			map_foreachinarea( skill_status_change_timer_sub,
 				bl->m, bl->x-range, bl->y-range, bl->x+range,bl->y+range,0,
 				bl,type,tick);
@@ -5251,7 +5295,8 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		battle_stopwalking(bl,1);
 
 	if(sc_data[type].timer != -1){	/* すでに同じ異常になっている場合タイマ解除 */
-		if(sc_data[type].val1 > val1 && type != SC_COMBO && type != SC_DANCING && type != SC_DEVOTION)
+		if(sc_data[type].val1 > val1 && type != SC_COMBO && type != SC_DANCING && type != SC_DEVOTION &&
+			type != SC_SPEEDPOTION0 && type != SC_SPEEDPOTION1 && type != SC_SPEEDPOTION2)
 			return 0;
 //		if(type >=SC_STAN && type <= SC_BLIND && sc_data[type].val1 >= val1)
 //			return 0;/* 継ぎ足しができない状態異常である時は状態異常を行わない */
@@ -5298,7 +5343,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_SIGNUMCRUCIS:		/* シグナムクルシス */
 			calc_flag = 1;
-			val2 = 10 + val1*2;
+			val2 = 14 + val1;
 			tick = 60000;
 			clif_emotion(bl,9);
 			break;
@@ -5388,6 +5433,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_PROVIDENCE:			/* プロヴィデンス */
 			calc_flag = 1;
 			val2=val1*5;
+			break;
+		case SC_REFLECTSHIELD:
+			val2=10+val1*3;
 			break;
 		case SC_AUTOSPELL:			/* オートスペル */
 			val4 = 5 + val1*2;
@@ -5643,21 +5691,25 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			opt_flag = 1;
 			break;
 		case SC_POISON:	case SC_CURSE:	case SC_SILENCE:	case SC_BLIND:
-			*opt2|= 1<<(type-SC_POISON);
+			*opt2 |= 1<<(type-SC_POISON);
+			opt_flag = 1;
+			break;
+		case SC_SIGNUMCRUCIS:
+			*opt2 |= 0x40;
 			opt_flag = 1;
 			break;
 		case SC_HIDING:	case SC_CLOAKING:
 			battle_stopattack(bl);	/* 攻撃停止 */
-			*option|= ((type==SC_HIDING)?2:4);
+			*option |= ((type==SC_HIDING)?2:4);
 			opt_flag =1 ;
 			break;
 		case SC_SIGHT:
-			*option|=1;
-			opt_flag=1;
+			*option |= 1;
+			opt_flag = 1;
 			break;
 		case SC_RUWACH:
-			*option|=8192;
-			opt_flag=1;
+			*option |= 8192;
+			opt_flag = 1;
 			break;
 	}
 
