@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------
  *		special need library : zlib
  *********************************************************************
- *	$Id: grfio.c,v 1.2 2003/06/29 05:49:50 lemit Exp $
+ *	$Id: grfio.c,v 1.4 2003/11/10 23:32:44 jmb Exp $
  *
  *	2002/12/18 ... 原版
  *	2003/01/23 ... コード修正
@@ -15,6 +15,8 @@
  *	2003/02/05 ... grfio_init内処理の変更
  *	2003/02/23 ... ローカルファイルチェックをGRFIO_LOCALでスイッチ(デフォを機能Offに)
  *      2003/10/21 ･･･ αクライアントのデータを読むようにした。
+ *	2003/11/10 ... Ready new grf format.
+ *	2003/11/11 ... version check fix & bug fix
  */
 
 #include <stdio.h>
@@ -455,7 +457,7 @@ void* grfio_reads(char *fname, int *size)
 			fseek(in,0,0);	// SEEK_SET
 			buf2 = malloc(lentry.declen+1024);
 			if (buf2==NULL) {
-				printf("file read memory allocate error\n");
+				printf("file read memory allocate error : declen\n");
 				goto errret;
 			}
 			fread(buf2,1,lentry.declen,in);
@@ -475,7 +477,7 @@ void* grfio_reads(char *fname, int *size)
 	if (entry!=NULL && entry->gentry>0) {	// Archive[GRF] File Read
 		buf = malloc(entry->srclen_aligned+1024);
 		if (buf==NULL) {
-			printf("file read memory allocate error\n");
+			printf("file read memory allocate error : srclen_aligned\n");
 			goto errret;
 		}
 		gfname = gentry_table[entry->gentry-1];
@@ -492,9 +494,11 @@ void* grfio_reads(char *fname, int *size)
 			printf("file decode memory allocate error\n");
 			goto errret;
 		}
-		if(entry->type==1) {
+		if(entry->type==1 || entry->type==3 || entry->type==5) {
 			uLongf len;
-			decode_des_etc(buf,entry->srclen_aligned,entry->cycle==0,entry->cycle);
+			if (entry->cycle>=0) {
+				decode_des_etc(buf,entry->srclen_aligned,entry->cycle==0,entry->cycle);
+			}
 			len=entry->declen;
 			decode_zip(buf2,&len,buf,entry->srclen);
 			if(len!=entry->declen) {
@@ -550,7 +554,7 @@ static int grfio_entryread(char *gfname,int gentry)
 	FILE *fp;
 	int grf_size,list_size;
 	unsigned char grf_header[0x2e];
-	int lop,entry,ofs,num;
+	int lop,entry,entrys,ofs,grf_version;
 	unsigned char *fname;
 	unsigned char *grf_filelist;
 
@@ -570,65 +574,153 @@ static int grfio_entryread(char *gfname,int gentry)
 		return 2;	// 2:file format error
 	}
 
-	list_size = grf_size-ftell(fp);
-	grf_filelist = malloc(list_size);
-	if(grf_filelist==NULL){
+	grf_version = getlong(grf_header+0x2a) >> 8;
+
+	if (grf_version==0x01) {	//****** Grf version 01xx ******
+		list_size = grf_size-ftell(fp);
+		grf_filelist = malloc(list_size);
+		if(grf_filelist==NULL){
+			fclose(fp);
+			printf("out of memory : grf_filelist\n");
+			return 3;	// 3:memory alloc error
+		}
+		fread(grf_filelist,1,list_size,fp);
 		fclose(fp);
-		printf("out of memory : grf_filelist\n");
-		return 3;	// 3:memory alloc error
-	}
-	fread(grf_filelist,1,list_size,fp);
-	fclose(fp);
-
-	// エントリー数検索
-	for(lop=0,num=0;lop<list_size;lop+=21+getlong(grf_filelist+lop))
-		if(grf_filelist[lop+getlong(grf_filelist+lop)+16]) num++;
-
-	for(entry=0,ofs=0;entry<num;entry++,ofs+=21+getlong(grf_filelist+ofs)){
-		int ofs2,srclen,srccount;
-		char *period_ptr;
-		FILELIST aentry;
-		ofs2 = ofs+getlong(grf_filelist+ofs)+4;
-		if(grf_filelist[ofs2+12]==0){	// Directory Index ... skip
-			entry--;
-			continue;
-		}
-		fname = decode_filename(grf_filelist+ofs+6,grf_filelist[ofs]-6);
-		if(strlen(fname)>sizeof(aentry.fn)-1){
-			printf("file name too long : %s\n",fname);
-			exit(1);
-		}
-		srclen=0;
-		if((period_ptr=rindex(fname,'.'))!=NULL){
-			for(lop=0;lop<4;lop++) {
-				if(strcasecmp(period_ptr,".gnd\0.gat\0.act\0.str"+lop*5)==0)
-					break;
-			}
-			srclen=getlong(grf_filelist+ofs2)-getlong(grf_filelist+ofs2+8)-715;
-			if(lop==4) {
-				for(lop=10,srccount=1;srclen>=lop;lop=lop*10,srccount++);
-			} else {
-				srccount=0;
-			}
-		} else {
-			srccount=0;
-		}
-
-		aentry.srclen         = srclen;
-		aentry.srclen_aligned = getlong(grf_filelist+ofs2+4)-37579;
-		aentry.declen         = getlong(grf_filelist+ofs2+8);
-		aentry.srcpos         = getlong(grf_filelist+ofs2+13)+0x2e;
-		aentry.cycle          = srccount;
-		aentry.type           = grf_filelist[ofs2+12];
-		strncpy(aentry.fn,fname,sizeof(aentry.fn)-1);
+		
+		entrys = getlong(grf_header+0x26) - getlong(grf_header+0x22) - 7;
+		
+		// Get an entry
+		for(entry=0,ofs=0;entry<entrys;entry++){
+			int ofs2,srclen,srccount,type;
+			char *period_ptr;
+			FILELIST aentry;
+			
+			ofs2 = ofs+getlong(grf_filelist+ofs)+4;
+			type = grf_filelist[ofs2+12];
+			if( type!=0 ){	// Directory Index ... skip
+				fname = decode_filename(grf_filelist+ofs+6,grf_filelist[ofs]-6);
+				if(strlen(fname)>sizeof(aentry.fn)-1){
+					printf("file name too long : %s\n",fname);
+					free(grf_filelist);
+					exit(1);
+				}
+				srclen=0;
+				if((period_ptr=rindex(fname,'.'))!=NULL){
+					for(lop=0;lop<4;lop++) {
+						if(strcasecmp(period_ptr,".gnd\0.gat\0.act\0.str"+lop*5)==0)
+							break;
+					}
+					srclen=getlong(grf_filelist+ofs2)-getlong(grf_filelist+ofs2+8)-715;
+					if(lop==4) {
+						for(lop=10,srccount=1;srclen>=lop;lop=lop*10,srccount++);
+					} else {
+						srccount=0;
+					}
+				} else {
+					srccount=0;
+				}
+			
+				aentry.srclen         = srclen;
+				aentry.srclen_aligned = getlong(grf_filelist+ofs2+4)-37579;
+				aentry.declen         = getlong(grf_filelist+ofs2+8);
+				aentry.srcpos         = getlong(grf_filelist+ofs2+13)+0x2e;
+				aentry.cycle          = srccount;
+				aentry.type           = type;
+				strncpy(aentry.fn,fname,sizeof(aentry.fn)-1);
 #ifdef	GRFIO_LOCAL
-		aentry.gentry         = -(gentry+1);	// 負数にするのは初回LocalFileCheckをさせるためのFlagとして
+				aentry.gentry         = -(gentry+1);	// 負数にするのは初回LocalFileCheckをさせるためのFlagとして
 #else
-		aentry.gentry         = gentry+1;		// 初回LocalFileCheck無し
+				aentry.gentry         = gentry+1;		// 初回LocalFileCheck無し
 #endif
-		filelist_modify(&aentry);
+				filelist_modify(&aentry);
+			}
+			ofs = ofs2 + 17;
+		}
+		free(grf_filelist);
+	
+	} else if (grf_version==0x02) {	//****** Grf version 02xx ******
+		unsigned char eheader[8];
+		unsigned char *rBuf;
+		uLongf rSize,eSize;
+
+		fread(eheader,1,8,fp);
+		rSize = getlong(eheader);	// Read Size
+		eSize = getlong(eheader+4);	// Extend Size
+		
+		if (rSize > grf_size-ftell(fp)) {
+			fclose(fp);
+			printf("Illegal data format : grf compress entry size\n");
+			return 4;
+		}
+		
+		rBuf = malloc( rSize );	// Get a Read Size
+		if (rBuf==NULL) {
+			fclose(fp);
+			printf("out of memory : grf compress entry table buffer\n");
+			return 3;
+		}
+		grf_filelist = malloc( eSize );	// Get a Extend Size
+		if (grf_filelist==NULL) {
+			free(rBuf);
+			fclose(fp);
+			printf("out of memory : grf extract entry table buffer\n");
+			return 3;
+		}
+		fread(rBuf,1,rSize,fp);
+		fclose(fp);
+		decode_zip(grf_filelist,&eSize,rBuf,rSize);	// Decode function
+		list_size = eSize;
+		free(rBuf);
+		
+		entrys = getlong(grf_header+0x26) - 7;
+		
+		// Get an entry
+		for(entry=0,ofs=0;entry<entrys;entry++){
+			int ofs2,srclen,srccount,type;
+			FILELIST aentry;
+			
+			fname = grf_filelist+ofs;
+			if (strlen(fname)>sizeof(aentry.fn)-1) {
+				printf("grf : file name too long : %s\n",fname);
+				free(grf_filelist);
+				exit(1);
+			}
+			ofs2 = ofs+strlen(grf_filelist+ofs)+1;
+			type = grf_filelist[ofs2+12];
+			if(type==1 || type==3 || type==5) {
+				srclen=getlong(grf_filelist+ofs2);
+				if (grf_filelist[ofs2+12]==3) {
+					for(lop=10,srccount=1;srclen>=lop;lop=lop*10,srccount++);
+				} else if (grf_filelist[ofs2+12]==5) {
+					srccount = 0;
+				} else {	// if (grf_filelist[ofs2+12]==1) {
+					srccount = -1;
+				}
+			
+				aentry.srclen         = srclen;
+				aentry.srclen_aligned = getlong(grf_filelist+ofs2+4);
+				aentry.declen         = getlong(grf_filelist+ofs2+8);
+				aentry.srcpos         = getlong(grf_filelist+ofs2+13)+0x2e;
+				aentry.cycle          = srccount;
+				aentry.type           = type;
+				strncpy(aentry.fn,fname,sizeof(aentry.fn)-1);
+#ifdef	GRFIO_LOCAL
+				aentry.gentry         = -(gentry+1);	// 負数にするのは初回LocalFileCheckをさせるためのFlagとして
+#else
+				aentry.gentry         = gentry+1;		// 初回LocalFileCheck無し
+#endif
+				filelist_modify(&aentry);
+			}
+			ofs = ofs2 + 17;
+		}
+		free(grf_filelist);
+	
+	} else {	//****** Grf Other version ******
+		fclose(fp);
+		printf("not support grf versions : %04x\n",getlong(grf_header+0x2a));
+		return 4;
 	}
-	free(grf_filelist);
+
 	filelist_adjust();	// filelistの不要エリア解放
 
 	return 0;	// 0:no error
