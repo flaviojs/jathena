@@ -66,6 +66,7 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 int pc_cart_delitem(struct map_session_data *sd,int n,int amount,int type);
 int pc_putitemtocart(struct map_session_data *sd,int idx,int amount);
 int pc_getitemfromcart(struct map_session_data *sd,int idx,int amount);
+int pc_cartitem_amount(struct map_session_data *sd,int idx,int amount);
 
 int pc_takeitem(struct map_session_data*,struct flooritem_data*);
 int pc_dropitem(struct map_session_data*,int,int);

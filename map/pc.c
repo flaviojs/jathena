@@ -2614,11 +2614,22 @@ int pc_putitemtocart(struct map_session_data *sd,int idx,int amount)
 	return 1;
 }
 
-
+/*==========================================
+ * カート内のアイテム数確認(個数の差分を返す)
+ *------------------------------------------
+ */
+int pc_cartitem_amount(struct map_session_data *sd,int idx,int amount)
+{
+	struct item *item_data=&sd->status.cart[idx];
+	if( item_data->nameid==0 || !item_data->amount)
+		return -1;
+	return item_data->amount-amount;
+}
 /*==========================================
  * カートからアイテム移動
  *------------------------------------------
  */
+
 int pc_getitemfromcart(struct map_session_data *sd,int idx,int amount)
 {
 	struct item *item_data=&sd->status.cart[idx];

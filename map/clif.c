@@ -6132,7 +6132,7 @@ void clif_parse_NpcClicked(int fd,struct map_session_data *sd)
 		clif_clearchar_area(&sd->bl,1);
 		return;
 	}
-	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->vender_id!=0) return;
+	if(sd->npc_id!=0 || sd->vender_id != 0) return;
 	npc_click(sd,RFIFOL(fd,2));
 }
 

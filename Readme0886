@@ -1,4 +1,18 @@
 --------------------
+//0901 by ぴざまん
+
+・露店バグの修正
+
+	(map/)
+	pc.c
+		pc_cartitem_amount() 追加。
+	vending.c
+		vending_openvending() 修正。
+	clif.c
+		clif_parse_NpcClicked() 修正。
+	pc.h 修正。
+
+--------------------
 //0900 by ぴざまん
 
 ・アブラカダブラのランダムスキル発動率をabra_db.txtで設定できるように。
