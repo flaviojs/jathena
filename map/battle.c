@@ -3365,14 +3365,20 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				clif_damage(src,target,tick+10, wd.amotion, wd.dmotion,0, 1, 0, 0);
 		}
 		if(sd && sd->sc_data[SC_AUTOSPELL].val1) {	// オートスペル
-			int per=0,skilllv=rand()%sd->sc_data[SC_AUTOSPELL].val2+1;
+			int per=0,sp=0,skilllv=rand()%sd->sc_data[SC_AUTOSPELL].val2+1;
+
 			if	(skilllv==1) per=50;
 			else if (skilllv==2) per=35;
 			else if (skilllv==3) per=15;
 			else if (skilllv<11) per= 5;
-				
-			if(rand()%100 < per)
+
+			sp=skill_get_sp(sd->sc_data[SC_AUTOSPELL].val1, skilllv)*2/3;	/* 消費SP(通常の2/3) */
+
+			if(rand()%100 < per && sp > 0 && sd->status.sp >= sp){		/* SP消費 */
+				sd->status.sp-=sp;
+				clif_updatestatus(sd,SP_SP);
 				skill_castend_damage_id(src,target,sd->sc_data[SC_AUTOSPELL].val1,skilllv,tick,flag);
+			}
 		}
 		map_freeblock_lock();
 		if(sd && sd->splash_range > 0 && (wd.damage > 0 || wd.damage2 > 0) )

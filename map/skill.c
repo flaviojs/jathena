@@ -4420,6 +4420,9 @@ int skill_autospell(struct map_session_data *md,int skillid)
 					maxlv=1;
 	else return 0;
 
+	if(maxlv > pc_checkskill(md,skillid))
+		maxlv = pc_checkskill(md,skillid);
+
 	skill_status_change_start(&md->bl,SC_AUTOSPELL,skillid,maxlv,	// val1:スキルID val2:使用最大Lv
 				skill_get_time(SA_AUTOSPELL,skilllv),0);// にしてみたけどbscriptが書き易い・・・？
 	return 0;
