@@ -83,6 +83,8 @@ ATCOMMAND_FUNC(pethungry);
 ATCOMMAND_FUNC(petrename);
 ATCOMMAND_FUNC(recall);
 ATCOMMAND_FUNC(character_job);
+ATCOMMAND_FUNC(character_job2);
+ATCOMMAND_FUNC(character_job3);
 ATCOMMAND_FUNC(revive);
 ATCOMMAND_FUNC(character_stats);
 ATCOMMAND_FUNC(character_option);
@@ -105,6 +107,7 @@ ATCOMMAND_FUNC(party);
 ATCOMMAND_FUNC(guild);
 ATCOMMAND_FUNC(agitstart);
 ATCOMMAND_FUNC(agitend);
+ATCOMMAND_FUNC(mapexit);
 
 /*==========================================
  *AtCommandInfo atcommand_info[]ç\ë¢ëÃÇÃíËã`
@@ -173,6 +176,8 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_PetRename,				"@petrename",		0, atcommand_petrename },
 	{ AtCommand_Recall,					"@recall",			0, atcommand_recall },
 	{ AtCommand_CharacterJob,			"@charjob",			0, atcommand_character_job },
+	{ AtCommand_CharacterJob2,			"@charjob2",		0, atcommand_character_job2 },
+	{ AtCommand_CharacterJob3,			"@charjob3",		0, atcommand_character_job3 },
 	{ AtCommand_Revive,					"@revive",			0, atcommand_revive },
 	{ AtCommand_CharacterStats,			"@charstats",		0, atcommand_character_stats },
 	{ AtCommand_CharacterOption,		"@charoption",		0, atcommand_character_option },
@@ -195,6 +200,7 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Guild,					"@guild",			0, atcommand_guild },
 	{ AtCommand_AgitStart,				"@agitstart",		0, atcommand_agitstart },
 	{ AtCommand_AgitEnd,				"@agitend",			0, atcommand_agitend },
+	{ AtCommand_MapExit,				"@mapexit",			0, atcommand_mapexit },
 	// add here
 	{ AtCommand_MapMove,				"@mapmove",			0, NULL },
 	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
@@ -2005,6 +2011,78 @@ atcommand_character_job(
 	
 	return 0;
 }
+/*==========================================
+ * atcommand_character_job2
+ * ëŒè€ÉLÉÉÉâÇì]ê∂êEÇ…ì]êEÇ≥ÇπÇÈ
+ *------------------------------------------
+ */
+int
+atcommand_character_job2(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char character[100];
+	struct map_session_data* pl_sd = NULL;
+	int job = 0;
+	
+	if (!message || !*message)
+		return -1;
+	
+	memset(character, '\0', sizeof character);
+	if (sscanf(message, "%d %99[^\n]", &job, character) < 2)
+		return -1;
+	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
+			if ((job >= 0 && job < MAX_PC_CLASS - 2)) { //ì]ê∂êEÇ…åãç•Ç∆ÉXÉpÉmÉrÇÕñ≥Ç¢Ç¡Ç€Ç¢
+				job = job + 4001;
+				pc_jobchange(pl_sd, job);
+				clif_displaymessage(fd, msg_table[48]);
+			} else {
+				clif_displaymessage(fd, msg_table[49]);
+				}
+			}
+	} else {
+		clif_displaymessage(fd, msg_table[50]);
+		}
+	
+	return 0;
+}
+/*==========================================
+ * atcommand_character_job3
+ * ëŒè€ÉLÉÉÉâÇó{éqêEÇ…ì]êEÇ≥ÇπÇÈ
+ *------------------------------------------
+ */
+int
+atcommand_character_job3(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char character[100];
+	struct map_session_data* pl_sd = NULL;
+	int job = 0;
+	
+	if (!message || !*message)
+		return -1;
+	
+	memset(character, '\0', sizeof character);
+	if (sscanf(message, "%d %99[^\n]", &job, character) < 2)
+		return -1;
+	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
+			if ((job >= 0 && job != 22 && job < MAX_PC_CLASS)) { //ó{éqâèëgÇ…åãç•ÇÕñ≥Ç¢Ç¡Ç€Ç¢
+				job = (job==23)?job + 4022:job + 4023;
+				pc_jobchange(pl_sd, job);
+				clif_displaymessage(fd, msg_table[48]);
+			} else {
+				clif_displaymessage(fd, msg_table[49]);
+				}
+			}
+	} else {
+		clif_displaymessage(fd, msg_table[50]);
+		}
+	
+	return 0;
+}
 
 /*==========================================
  * 
@@ -2608,5 +2686,17 @@ atcommand_agitend(
 	guild_agit_end();
 	clif_displaymessage(fd, msg_table[74]);
 	return 0;
+}
+
+/*==========================================
+ * @mapexitÇ≈É}ÉbÉvÉTÅ[ÉoÅ[ÇèIóπÇ≥ÇπÇÈ
+ *------------------------------------------
+ */
+int
+atcommand_mapexit(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	exit(1);
 }
 

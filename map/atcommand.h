@@ -70,6 +70,8 @@ enum AtCommandType {
 	AtCommand_PetRename,
 	AtCommand_Recall,
 	AtCommand_CharacterJob,
+	AtCommand_CharacterJob2,
+	AtCommand_CharacterJob3,
 	AtCommand_Revive,
 	AtCommand_CharacterStats,
 	AtCommand_CharacterOption,
@@ -93,6 +95,7 @@ enum AtCommandType {
 	AtCommand_Guild,
 	AtCommand_AgitStart,
 	AtCommand_AgitEnd,
+	AtCommand_MapExit,
 	AtCommand_Unknown,
 	AtCommand_MAX
 };

@@ -1,4 +1,19 @@
 --------------------
+//0957 by (凸)
+・@charjob2と@charjob3を追加、関係としては@charjob⇔@jobchange、@charjob2⇔@jobchange2、(ry
+・@mapexitを追加、map-serverを落とすコマンドですatcommand_athena.confでは99設定にされてますので使用には十分注意してください。
+
+	(map/)
+	atcommand.c
+		atcommand_character_job2() 追加
+		atcommand_character_job3() 追加
+	atcommand.h 修正
+	(conf/)
+	atcommand_athena.conf 修正
+	(doc/)
+	help.txt 修正
+
+--------------------
 //0956 by (凸)
 ・転生職仮実装(@jobchange2)、見た目と経験値テーブルだけです
 ・養子職仮実装(@jobchange3)、見た目だけです現状では経験値は転生二次職と同じというマゾ仕様
