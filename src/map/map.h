@@ -214,6 +214,7 @@ struct map_session_data {
 	int watk_,watk_2,atkmods_[3],addele_[10],addrace_[12],addsize_[3];	//ìÒìÅó¨ÇÃÇΩÇﬂÇ…í«â¡
 	int atk_ele_,star_,overrefine_;				//ìÒìÅó¨ÇÃÇΩÇﬂÇ…í«â¡
 	int base_atk,atk_rate;
+	int weapon_atk[16],weapon_atk_rate[16];	//éwä—
 	int arrow_atk,arrow_ele,arrow_cri,arrow_hit,arrow_range;
 	int arrow_addele[10],arrow_addrace[12],arrow_addsize[3],arrow_addeff[10],arrow_addeff2[10];
 	int nhealhp,nhealsp,nshealhp,nshealsp,nsshealhp,nsshealsp;
@@ -521,6 +522,7 @@ enum {
 	SP_SHORT_WEAPON_DAMAGE_RETURN,SP_LONG_WEAPON_DAMAGE_RETURN,SP_WEAPON_COMA_ELE,SP_WEAPON_COMA_RACE, // 1063-1066
 	SP_ADDEFF2,SP_BREAK_WEAPON_RATE,SP_BREAK_ARMOR_RATE,SP_ADD_STEAL_RATE, // 1067-1070
 	SP_HP_DRAIN_VALUE,SP_SP_DRAIN_VALUE, // 1071-1072
+	SP_WEAPON_ATK,SP_WEAPON_ATK_RATE, // 1072-1073
 
 	SP_RESTART_FULL_RECORVER=2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
 	SP_NO_CASTCANCEL2,SP_INFINITE_ENDURE,SP_UNBREAKABLE_WEAPON,SP_UNBREAKABLE_ARMOR, // 2006-2009

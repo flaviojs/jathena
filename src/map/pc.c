@@ -1066,6 +1066,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(&sd->special_state,0,sizeof(sd->special_state));
 	memset(sd->weapon_coma_ele,0,sizeof(sd->weapon_coma_ele));
 	memset(sd->weapon_coma_race,0,sizeof(sd->weapon_coma_race));
+	memset(sd->weapon_atk,0,sizeof(sd->weapon_atk));
+	memset(sd->weapon_atk_rate,0,sizeof(sd->weapon_atk_rate));
 
 	sd->watk_ = 0;			//“ñ“—¬—p(‰¼)
 	sd->watk_2 = 0;
@@ -2364,6 +2366,14 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 	case SP_WEAPON_COMA_RACE:
 		if(sd->state.lr_flag != 2)
 			sd->weapon_coma_race[type2] += val;
+		break;
+	case SP_WEAPON_ATK:
+		if(sd->state.lr_flag != 2)
+			sd->weapon_atk[type2]+=val;
+		break;
+	case SP_WEAPON_ATK_RATE:
+		if(sd->state.lr_flag != 2)
+			sd->weapon_atk_rate[type2]+=val;
 		break;
 	default:
 		if(battle_config.error_log)

@@ -1,4 +1,30 @@
 --------------------
+//1075 by kag
+・弓手用の指貫の効果実装の布石
+・効果がはっきりとしないのでitem_dbの修正はいれていません。
+・1075番でいいのかなぁと思ったり。
+
+    (db)
+		const.txt
+			bWeponAtk=1073とbWeponAtkRate=1074を追加
+
+    (src/map)
+        battle.c
+			int battle_get_baseatk()修正
+			static struct Damage battle_calc_pc_weapon_attack()修正
+		map.h
+			int weapon_atk[16],weapon_atk_rate[16];
+			SP_WEPON_ATK,SP_WEPON_ATK_RATE, // 1073-1074を追加
+        pc.c
+			memset(sd->weapon_atk,0,sizeof(sd->weapon_atk));
+			memset(sd->weapon_atk_rate,0,sizeof(sd->weapon_atk_rate));を追加
+			
+			pc_bonus2() 修正
+	(doc)
+		item_bonus.txt
+			bWeponAtk,bWeponAtkRate,bHPDrainValue,bSPDrainValue　追加。
+
+--------------------
 //1073	by LP@@
 ・アコスキルの一部及びサイトスキルの修正(日本には今月末に来る筈？@2004/12/06)
 速度減少は移動速度減少量が、シグナムクルシスは成功率、DEF減少量の増加量が

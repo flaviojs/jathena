@@ -515,9 +515,10 @@ int battle_get_baseatk(struct block_list *bl)
 
 	nullpo_retr(1, bl);
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_PC && (struct map_session_data *)bl)
+	if(bl->type==BL_PC && (struct map_session_data *)bl){
 		batk = ((struct map_session_data *)bl)->base_atk; //設定されているbase_atk
-	else { //それ以外なら
+		batk += ((struct map_session_data *)bl)->weapon_atk[((struct map_session_data *)bl)->status.weapon];
+	}else { //それ以外なら
 		int str,dstr;
 		str = battle_get_str(bl); //STR
 		dstr = str/10;
@@ -2578,7 +2579,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 					if(tsd && (skill=pc_checkskill(tsd,AL_DP)) > 0 ){
 						//t_def += skill*3;
 						// tsdの内容は保証されている
-						t_def += round( ( 3 + 0.04 * tsd->status.base_level ) * skill );
+						t_def += floor( ( 3 + 0.04 * tsd->status.base_level ) * skill + 0.5);
 					}
 
 				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
@@ -2908,9 +2909,9 @@ static struct Damage battle_calc_pc_weapon_attack(
 		/* クリティカル攻撃 */
 		damage += atkmax;
 		damage2 += atkmax_;
-		if(sd->atk_rate != 100) {
-			damage = (damage * sd->atk_rate)/100;
-			damage2 = (damage2 * sd->atk_rate)/100;
+		if(sd->atk_rate != 100 || sd->weapon_atk_rate != 0) {
+			damage = (damage * (sd->atk_rate + sd->weapon_atk_rate[sd->status.weapon]))/100;
+			damage2 = (damage2 * (sd->atk_rate + sd->weapon_atk_rate[sd->status.weapon]))/100;
 		}
 		if(sd->state.arrow_atk)
 			damage += sd->arrow_atk;
@@ -2958,11 +2959,11 @@ static struct Damage battle_calc_pc_weapon_attack(
 			damage2 += atkmin_ + rand() % (atkmax_-atkmin_ + 1);
 		else
 			damage2 += atkmin_ ;
-		if(sd->atk_rate != 100) {
-			damage = (damage * sd->atk_rate)/100;
-			damage2 = (damage2 * sd->atk_rate)/100;
+		if(sd->atk_rate != 100 || sd->weapon_atk_rate != 0) {
+			damage = (damage * (sd->atk_rate + sd->weapon_atk_rate[sd->status.weapon]))/100;
+			damage2 = (damage2 * (sd->atk_rate + sd->weapon_atk_rate[sd->status.weapon]))/100;
 		}
-
+	
 		if(sd->state.arrow_atk) {
 			if(sd->arrow_atk > 0)
 				damage += rand()%(sd->arrow_atk+1);

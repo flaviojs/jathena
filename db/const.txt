@@ -159,6 +159,8 @@ bBreakArmorRate	1069
 bAddStealRate	1070
 bHPDrainValue	1071
 bSPDrainValue	1072
+bWeaponAtk 1073
+bWeaponAtkRate 1074
 
 bRestartFullRecover	2000
 bNoCastCancel	2001

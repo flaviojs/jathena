@@ -144,11 +144,16 @@ bonus2 bAddDefClass,n,x;		ƒNƒ‰ƒXn‚Ìƒ‚ƒ“ƒXƒ^[‚Éx%‚Ìƒ_ƒ[ƒWŒyŒ¸(•¨—UŒ‚‚Ì‚Ý)Aƒ
 bonus2 bAddMDefClass,n,x;		ƒNƒ‰ƒXn‚Ìƒ‚ƒ“ƒXƒ^[‚Éx%‚Ì–‚–@ƒ_ƒ[ƒWŒyŒ¸AƒvƒŒƒCƒ„[‚Ìê‡‚ÍnE‹Æ‚Éx%‚Ì–‚–@ƒ_ƒ[ƒWŒyŒ¸
 bonus2 bHPDrainRate,n,x;		“G‚É—^‚¦‚½ƒ_ƒ[ƒW‚ðn%Šm—¦‚Åx%‚ðHP‚É‹zŽûB(n‚Æx‚Í+‚³‚ê‚é)
 bonus2 bSPDrainRate,n,x;		“G‚É—^‚¦‚½ƒ_ƒ[ƒW‚ðn%Šm—¦‚Åx%‚ðSP‚É‹zŽûB(n‚Æx‚Í+‚³‚ê‚é)
+bonus2 bHPDrainValue,n,x;		“G‚É—^‚¦‚½ƒ_ƒ[ƒW‚ðn%Šm—¦‚Åx‚ðHP‚É‹zŽûB(n‚Æx‚Í+‚³‚ê‚é)
+bonus2 bSPDrainValue,n,x;		“G‚É—^‚¦‚½ƒ_ƒ[ƒW‚ðn%Šm—¦‚Åx‚ðSP‚É‹zŽûB(n‚Æx‚Í+‚³‚ê‚é)
 bonus2 bWeaponComaEle, n, x;		n‘®«‚É‘Î‚µ‚Ä x%Šm—¦‚Å‘¦Ž€UŒ‚(x‚Í–œ•ª—¦‚Å+‚³‚ê‚é)
 						0,–³@1,…@2,“y@3,‰Î@4,•—@5,“Å@6,¹@7,ˆÅ@8,”O@9,•sŽ€
 bonus2 bWeaponComaRace, n, x;		nŽí‘°‚É‘Î‚µ‚Ä x%Šm—¦‚Å‘¦Ž€UŒ‚(x‚Í–œ•ª—¦+‚³‚ê‚é)
 						0,–³Œ`@1,•sŽ€@2,“®•¨@3,A•¨@4,©’Ž@5,‹›ŠL@6,ˆ«–‚@7,lŠÔ@8,“VŽg@9,—³‘°@10,ƒ{ƒXƒ‚ƒ“ƒXƒ^[@11,ƒ{ƒXƒ‚ƒ“ƒXƒ^[ˆÈŠO(•’Ê‚Ìƒ‚ƒ“ƒXƒ^[AƒvƒŒƒCƒ„[‚àŠÜ‚Þ)
-
+bonus2 bWeaponAtk,n,x;			ƒ^ƒCƒvn‚Ì•Ší‚ð‘•”õ‚µ‚Ä‚¢‚é‚Æ‚«‚ÉUŒ‚—Í+xB
+						0,‘fŽè	1,’ZŒ•	2,•ÐŽèŒ•@3,—¼ŽèŒ•@4,•ÐŽè‘„@5,—¼Žè‘„	6,•ÐŽè•€@7,—¼Žè•€@8,“ÝŠí	9,	10,ñ	11,‹|	12,Œ	13,ŠyŠí	14,•Ú	15,–{	16,ƒJƒ^[ƒ‹
+bonus2 bWeaponAtkRate,n,x;		ƒ^ƒCƒvn‚Ì•Ší‚ð‘•”õ‚µ‚Ä‚¢‚é‚Æ‚«‚ÉUŒ‚—Í+x%B
+						0,‘fŽè	1,’ZŒ•	2,•ÐŽèŒ•@3,—¼ŽèŒ•@4,•ÐŽè‘„@5,—¼Žè‘„	6,•ÐŽè•€@7,—¼Žè•€@8,“ÝŠí	9,	10,ñ	11,‹|	12,Œ	13,ŠyŠí	14,•Ú	15,–{	16,ƒJƒ^[ƒ‹
 
 bonus3 bAddMonsterDropItem,n,x,y;	•¨—UŒ‚‚Åƒ‚ƒ“ƒXƒ^[‚ð“|‚µ‚½Žžƒ‚ƒ“ƒXƒ^[‚ÌŽí‘°‚ªx‚È‚çƒAƒCƒeƒ€n‚ð—Ž‚Æ‚·Šm—¦y%(ƒ‚ƒ“ƒXƒ^[‚ª—Ž‚Æ‚·ƒAƒCƒeƒ€‚Æ‚Í–³ŠÖŒW‚Ì•¨A‚‚¢•¨‚¾‚¯“K—p)
 					y‚Í–œ•ª—¦‚Å•¡”‚ÌŽí‘°‚ð“ü‚ê‚½‚¢Žž‚Ín‚ð“¯‚¶•¨‚É‚µ‚Äy‚ð0‚É‚·‚é‚Æx‚¾‚¯”½‰f‚·‚é‚±‚Æ‚ª‚Å‚«‚é
