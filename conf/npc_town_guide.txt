@@ -5,6 +5,7 @@
 //[案内要員 - プロンテラ]
 
 prontera.gat,154,187,4	script	案内要員	105,{
+	cutin "prt_soldier",2;
 	mes "[プロンテラ 案内要員]";
 	mes "ようこそ、ルーンミッドガッツ王国の";
 	mes "美しい首都プロンテラへ";
@@ -187,10 +188,12 @@ L_START_1:
 	L_MENU_4:
 		mes "[プロンテラ 案内要員]";
 		mes "それではよい旅を！";
+		cutin "prt_soldier",255;
 		close;
 }
 
 prontera.gat,282,208,2	script	東門-案内要員	105,{
+	cutin "prt_soldier",2;
 	mes "[プロンテラ 案内要員]";
 	mes "ようこそ、ルーンミッドガッツ王国の";
 	mes "美しい首都プロンテラへ";
@@ -373,10 +376,12 @@ L_START_1:
 	L_MENU_4:
 		mes "[プロンテラ 案内要員]";
 		mes "それではよい旅を！";
+		cutin "prt_soldier",255;
 		close;
 }
 
 prontera.gat,29,200,6	script	西門-案内要員	105,{
+	cutin "prt_soldier",2;
 	mes "[プロンテラ 案内要員]";
 	mes "ようこそ、ルーンミッドガッツ王国の";
 	mes "美しい首都プロンテラへ";
@@ -559,10 +564,12 @@ L_START_1:
 	L_MENU_4:
 		mes "[プロンテラ 案内要員]";
 		mes "それではよい旅を！";
+		cutin "prt_soldier",255;
 		close;
 }
 
 prontera.gat,160,29,0	script	南門-案内要員	105,{
+	cutin "prt_soldier",2;
 	mes "[プロンテラ 案内要員]";
 	mes "ようこそ、ルーンミッドガッツ王国の";
 	mes "美しい首都プロンテラへ";
@@ -745,10 +752,12 @@ L_START_1:
 	L_MENU_4:
 		mes "[プロンテラ 案内要員]";
 		mes "それではよい旅を！";
+		cutin "prt_soldier",255;
 		close;
 }
 
 prontera.gat,151,330,4	script	北門-案内要員	105,{
+	cutin "prt_soldier",2;
 	mes "[プロンテラ 案内要員]";
 	mes "ようこそ、ルーンミッドガッツ王国の";
 	mes "美しい首都プロンテラへ";
@@ -931,6 +940,7 @@ L_START_1:
 	L_MENU_4:
 		mes "[プロンテラ 案内要員]";
 		mes "それではよい旅を！";
+		cutin "prt_soldier",255;
 		close;
 }
 
@@ -1058,6 +1068,7 @@ L_START_1:
 //[案内要員 - ゲフェン]
 
 geffen.gat,203,116,0	script	案内要員	105,{
+	cutin "gef_soldier",2;
 	mes "[ゲフェン案内要員]";
 	mes "魔法の都市ゲフェンにようこそ。";
 	mes "私達はここ、ゲフェンにいらした";
@@ -1171,10 +1182,12 @@ L_START_1:
 	L_MENU_4:
 		mes "[ゲフェン案内要員]";
 		mes "よい旅を……";
+		cutin "gef_soldier",255;
 		close;
 }
 
 geffen.gat,118,62,0	script	案内要員	105,{
+	cutin "gef_soldier",2;
 	mes "[ゲフェン案内要員]";
 	mes "魔法の都市ゲフェンにようこそ。";
 	mes "私達はここ、ゲフェンにいらした";
@@ -1288,12 +1301,14 @@ L_START_1:
 	L_MENU_4:
 		mes "[ゲフェン案内要員]";
 		mes "よい旅を……";
+		cutin "gef_soldier",255;
 		close;
 }
 
 //[案内要員 - フェイヨン]
 
 payon.gat,82,116,4	script	案内要員	105,{
+	cutin "pay_soldier",2;
 	mes "[フェイヨン案内要員]";
 	mes "山岳都市フェイヨンにようこそ。";
 	mes "私達はここフェイヨンにいらした";
@@ -1398,10 +1413,12 @@ L_START_1:
 	L_MENU_4:
 		mes "[フェイヨン案内要員]";
 		mes "良い旅になりますように";
+		cutin "pay_soldier",255;
 		close;
 }
 
 pay_arche.gat,85,30,2	script	案内要員	105,{
+	cutin "pay_soldier",2;
 	mes "[フェイヨン案内要員]";
 	mes "山岳都市フェイヨンにようこそ。";
 	mes "私達はここフェイヨンにいらした";
@@ -1490,6 +1507,7 @@ L_START_1:
 	L_MENU_4:
 		mes "[フェイヨン案内要員]";
 		mes "良い旅になりますように";
+		cutin "pay_soldier",255;
 		close;
 }
 
@@ -1698,6 +1716,7 @@ L_START_1:
 //[案内要員 - モロク]
 
 morocc.gat,153,286,6	script	案内要員	105,{
+	cutin "moc_soldier",2;
 	mes "[モロク案内要員]";
 	mes "辺境の地モロクへようこそ。";
 	mes "私はここモロクに来た旅人のために";
@@ -1798,10 +1817,12 @@ L_START_1:
 	L_MENU_4:
 		mes "[モロク案内要員]";
 		mes "良いたびを";
+		cutin "moc_soldier",255;
 		close;
 }
 
 morocc.gat,54,97,6	script	案内要員	105,{
+	cutin "moc_soldier",2;
 	mes "[モロク案内要員]";
 	mes "辺境の地モロクへようこそ。";
 	mes "私はここモロクに来た旅人のために";
@@ -1902,6 +1923,7 @@ L_START_1:
 	L_MENU_4:
 		mes "[モロク案内要員]";
 		mes "良いたびを";
+		cutin "moc_soldier",255;
 		close;
 }
 

@@ -1,4 +1,11 @@
 --------------
+//0583 by kalen
+・script修正
+	npc_event_doll.txt	抜けていた部分の会話追加
+	npc_town_guid.txt	町の案内要員の画像を表示できるように修正
+				基本的に最新jROで問題なしです。
+
+--------------
 //0582 by PRevEv
 ・580のバグ修正。
 	(/map)
