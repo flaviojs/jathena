@@ -3583,7 +3583,7 @@ int pc_allskillup(struct map_session_data *sd)
 	while(flag) {
 		flag=0;
 		for(i=0;i<MAX_SKILL;i++) {
-			if(sd->status.skill[i].id!=0) {
+			if(sd->status.skill[i].id!=0 && !sd->status.skill[i].flag) {
 				while(sd->status.skill[i].lv < skill_get_max(i)) {
 					sd->status.skill[i].lv++;
 					pc_calcstatus(sd,0);
