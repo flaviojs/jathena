@@ -516,6 +516,7 @@ static unsigned char *skip_word(unsigned char *p)
 {
 	if(*p=='@') p++;	// like weiss
 	if(*p=='$') p++;	// MAPI“à‹¤—L•Ï”—p
+	if(*p=='#') p++;	// account•Ï”—p
 	while(isalnum(*p)||*p=='_'|| *p>=0x81)
 		if(*p>=0x81 && p[1]){
 			p+=2;
@@ -932,16 +933,19 @@ int get_val(struct script_state*st,struct script_data* data)
 {
 	struct map_session_data *sd;
 	if(data->type==C_NAME){
+		char prefix=str_buf[str_data[data->u.num].str];
 		sd=map_id2sd(st->rid);
 		data->type=C_INT;
 		if(str_data[data->u.num].type==C_INT){
 			data->u.num = str_data[data->u.num].val;
 		}else if(str_data[data->u.num].type==C_PARAM){
 			data->u.num = pc_readparam(sd,str_data[data->u.num].val);
-		}else if(str_buf[str_data[data->u.num].str]=='@' || str_buf[str_data[data->u.num].str]=='l'){
+		}else if(prefix=='@' || prefix=='l'){
 			data->u.num = pc_readreg(sd,data->u.num);
-		}else if(str_buf[str_data[data->u.num].str]=='$'){
+		}else if(prefix=='$'){
 			data->u.num = (int)strdb_search(mapval_db,str_buf+str_data[data->u.num].str);
+		}else if(prefix=='#'){
+			data->u.num = pc_readaccountreg(sd,str_buf+str_data[data->u.num].str);
 		}else{
 			data->u.num = pc_readglobalreg(sd,str_buf+str_data[data->u.num].str);
 		}
@@ -1327,10 +1331,13 @@ int buildin_input(struct script_state *st)
 		sd->state.menu_or_input=0;
 		if(st->end>st->start+2){ // ˆø”1ŒÂ
 			int num=st->stack->stack_data[st->start+2].u.num;
-			if(str_buf[str_data[num].str]=='@' || str_buf[str_data[num].str]=='l')
+			char prefix=str_buf[str_data[num].str];
+			if(prefix=='@' || prefix=='l')
 				pc_setreg(sd,num,sd->npc_amount);
-			else if(str_buf[str_data[num].str]=='$')
+			else if(prefix=='$')
 				strdb_insert(mapval_db,str_buf+str_data[num].str,sd->npc_amount);
+			else if(prefix=='#')
+				pc_setaccountreg(sd,str_buf+str_data[num].str,sd->npc_amount);
 			else
 				pc_setglobalreg(sd,str_buf+str_data[num].str,sd->npc_amount);
 		} else {
@@ -1379,16 +1386,18 @@ int buildin_set(struct script_state *st)
 	int val;
 	struct map_session_data *sd;
 	int num=st->stack->stack_data[st->start+2].u.num;
+	char prefix=str_buf[str_data[num].str];
 
 	val=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	sd=map_id2sd(st->rid);
 	if(str_data[num].type==C_PARAM){
 		pc_setparam(sd,str_data[num].val,val);
-	}else if(str_buf[str_data[num].str]=='@'
-	       ||str_buf[str_data[num].str]=='l') {
+	}else if(prefix=='@' || prefix=='l') {
 		pc_setreg(sd,num,val);
-	}else if(str_buf[str_data[num].str]=='$') {
+	}else if(prefix=='$') {
 		strdb_insert(mapval_db,str_buf+str_data[num].str,val);
+	}else if(prefix=='#') {
+		pc_setaccountreg(sd,str_buf+str_data[num].str,val);	
 	}else{
 		pc_setglobalreg(sd,str_buf+str_data[num].str,val);
 	}

@@ -1,4 +1,42 @@
 --------------------
+//0881 by 胡蝶蘭
+
+・スクリプトにアカウント共有変数機能追加
+	・変数名にプレフィックス#を付けることでアカウント共有変数になります。
+	・アカウント変数は変更した時点で全サーバーにポストされるので
+	  頻繁に書き換えるとサーバー間通信が肥大化します。
+	・アカウント変数は変更した時点（そしてそれがlogin鯖に届いた時点）で
+	  account.txtに書き出されます。
+	・グローバル変数（永続変数）の個数を96に減らし、減った32個分を
+	  アカウント変数にしていますが、mmo_charstatusのサイズが
+	  16000byteを超えない限り増やすことができます。＜0879の変更を参照
+	  変数の個数はmmo.hのACCOUNT_REG_NUMで定義されています。
+	・0878の銀行をアカウント変数を使用するように修正
+	  bank.txtのデータが使えなくなるのであらかじめ引き出しておいて下さい。
+	
+	(common/)
+	mmo.h
+		GLOBAL_REG_NUMを96に、ACCOUNT_REG_NUMを追加
+		struct mmo_charstatusにaccount_reg_num,account_regメンバ追加
+	(login/)
+	login.c
+		パケット2728処理追加
+	(char/)
+	char.c
+		パケット2729,2b10処理追加
+	(map/)
+	chrif.c
+		chrif_saveaccountreg(),chrif_accountreg()
+		(パケット2b10,2b11処理)追加。
+	pc.c/pc.h
+		pc_readaccountreg(),pc_setaccountreg()追加
+	script.c
+		buildin_set(),buildin_get_val(),buildin_input()修正
+	(conf/sample/)
+	bank_test.txt
+		アカウント変数使用版の銀行スクリプト
+
+--------------------
 //0880 by 死神
 
 ・ポーションピッチャーを正しく実装とちょっと機能拡張。

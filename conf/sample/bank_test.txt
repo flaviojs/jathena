@@ -1,7 +1,6 @@
 // カプラ銀行サービス	テストスクリプト
 prontera.gat,162,188,1	script	銀行員カプラ	112,{
 	cutin "kafra_06",2;
-	set @readbank,openbank(0);
 
 	mes"[銀行員カプラ]";
 	mes "カプラ銀行サービスです。";
@@ -20,23 +19,23 @@ BANK_IN:
 	if(@kafrabank<1000) goto B_EXIT2;
 	set @kafrabank2,@kafrabank*1/100;
 	if(@kafrabank+@kafrabank2>Zeny) goto BANK_F;
-	openbank(@kafrabank);
 	set Zeny,Zeny-@kafrabank-@kafrabank2;
+	set #kafrabank,#kafrabank+@kafrabank;
 	mes "手数料^135445" + @kafrabank2 + "z^000000頂きますね。";
 
 	goto B_EXIT;
 BANK_OUT:
-	if(@readbank==0) goto BANK_F2;
+	if(#kafrabank==0) goto BANK_F2;
 	mes"[銀行員カプラ]";
 	mes "現在あなたからお預かりしているのは";
-	mes "^135445" + @readbank + "^000000Zenyです。";
+	mes "^135445" + #kafrabank + "^000000Zenyです。";
 	mes "引き出す金額を入力してください♪";
 	next;
 	input @kafrabank;
 
 	if(@kafrabank<1) goto B_EXIT2;
-	if(@kafrabank>@readbank) goto BANK_F;
-	openbank(-@kafrabank);
+	if(@kafrabank>#kafrabank) goto BANK_F;
+	set #kafrabank,#kafrabank-@kafrabank;
 	set Zeny,Zeny+@kafrabank;
 
 	goto B_EXIT;

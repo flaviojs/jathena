@@ -527,6 +527,19 @@ int mmo_char_send006b(int fd,struct char_session_data *sd)
   return 0;
 }
 
+int set_account_reg(int acc,int num,struct global_reg *reg)
+{
+	int i,c;
+	for(i=0,c=0;i<char_num;i++){
+		if(char_dat[i].account_id==acc){
+			memcpy(char_dat[i].account_reg,reg,sizeof(char_dat[i].account_reg));
+			char_dat[i].account_reg_num=num;
+			c++;
+		}
+	}
+	return c;
+}
+
 int parse_tologin(int fd)
 {
   int i,fdc;
@@ -650,6 +663,30 @@ printf("parse_tologin 2713 : %d\n",RFIFOB(fd,6));
 		mapif_sendall(buf,7);
 //		printf("char -> map\n");
 	  }break;
+
+	// account_reg変更通知
+	case 0x2729: {
+			struct global_reg reg[ACCOUNT_REG_NUM];
+			unsigned char buf[4096];
+			int j,p,acc;
+			if(RFIFOREST(fd)<4)
+				return 0;
+			if(RFIFOREST(fd)<RFIFOW(fd,2))
+				return 0;
+			acc=RFIFOL(fd,4);
+			for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG_NUM;p+=36,j++){
+				memcpy(reg[j].str,RFIFOP(fd,p),32);
+				reg[j].value=RFIFOL(fd,p+32);
+			}
+			set_account_reg(acc,j,reg);
+			// 同垢ログインを禁止していれば送る必要は無い
+			memcpy(buf,RFIFOP(fd,0),RFIFOW(fd,2));
+			WBUFW(buf,0)=0x2b11;
+			mapif_sendall(buf,WBUFW(buf,2));
+			RFIFOSKIP(fd,RFIFOW(fd,2));
+//			printf("char: save_account_reg_reply\n");
+		} break;
+
 
     default:
       close(fd);
@@ -896,6 +933,33 @@ int parse_frommap(int fd)
 			RFIFOSKIP(fd,RFIFOW(fd,2));
 			break;
 
+		// account_reg保存要求
+		case 0x2b10: {
+			struct global_reg reg[ACCOUNT_REG_NUM];
+			int j,p,acc;
+			if(RFIFOREST(fd)<4)
+				return 0;
+			if(RFIFOREST(fd)<RFIFOW(fd,2))
+				return 0;
+			acc=RFIFOL(fd,4);
+			for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG_NUM;p+=36,j++){
+				memcpy(reg[j].str,RFIFOP(fd,p),32);
+				reg[j].value=RFIFOL(fd,p+32);
+			}
+			set_account_reg(acc,j,reg);
+			// loginサーバーへ送る
+			memcpy(WFIFOP(login_fd,0),RFIFOP(fd,0),RFIFOW(fd,2));
+			WFIFOW(login_fd,0)=0x2728;
+			WFIFOSET(login_fd,WFIFOW(login_fd,2));
+			// ワールドへの同垢ログインがなければmapサーバーに送る必要はない
+			//memcpy(buf,RFIFOP(fd,0),RFIFOW(fd,2));
+			//WBUFW(buf,0)=0x2b11;
+			//mapif_sendall(buf,WBUFW(buf,2));
+			RFIFOSKIP(fd,RFIFOW(fd,2));
+//			printf("char: save_account_reg (from map)\n");
+			break;
+		}
+
 		default:
 			// inter server処理に渡す
 			{
@@ -905,6 +969,7 @@ int parse_frommap(int fd)
 			}
 			
 			// inter server処理でもない場合は切断
+			printf("char: unknown packet %x! (from login)\n",RFIFOW(fd,0));
 			close(fd);
 			session[fd]->eof=1;	
 			return 0;

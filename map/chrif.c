@@ -25,7 +25,8 @@
 static const int packet_len_table[0x20]={
 	60, 3,-1, 3,14,-1, 7, 6,		// 2af8-2aff
 	 6,-1,10, 7,-1,41,40, 0,		// 2b00-2b07
-	 6,30,-1,10,9,7,					// 2b08-2b0d
+	 6,30,-1,10, 9, 7, 0, 0,		// 2b08-2b0f
+	-1,-1, 0, 0, 0, 0, 0, 0,		// 2b10-2b17
 };
 
 int char_fd;
@@ -349,6 +350,46 @@ int chrif_changedsex(int fd)
 	return 0;
 }
 /*==========================================
+ * アカウント変数保存要求
+ *------------------------------------------
+ */
+int chrif_saveaccountreg(struct map_session_data *sd)
+{
+	int p,j;
+	for(p=8,j=0;j<sd->status.account_reg_num;j++){
+		struct global_reg *reg=&sd->status.account_reg[j];
+		if(reg->str[0] && reg->value!=0){
+			memcpy(WFIFOP(char_fd,p),reg->str,32);
+			WFIFOW(char_fd,p+32)=reg->value;
+			p+=36;
+		}
+	}
+	WFIFOW(char_fd,0)=0x2b10;
+	WFIFOW(char_fd,2)=p;
+	WFIFOL(char_fd,4)=sd->bl.id;
+	WFIFOSET(char_fd,p);
+	return 0;
+}
+/*==========================================
+ * アカウント変数通知
+ *------------------------------------------
+ */
+int chrif_accountreg(int fd)
+{
+	int j,p;
+	struct map_session_data *sd;
+	if( (sd=map_id2sd(RFIFOL(fd,4)))==NULL )
+		return 1;
+	
+	for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG_NUM;p+=36,j++){
+		memcpy(sd->status.account_reg[j].str,RFIFOP(fd,p),32);
+		sd->status.account_reg[j].value=RFIFOW(fd,p+32);
+	}
+	printf("chrif: accountreg\n");
+	return 0;
+}
+
+/*==========================================
  *
  *------------------------------------------
  */
@@ -398,6 +439,7 @@ int chrif_parse(int fd)
 		case 0x2b09: map_addchariddb(RFIFOL(fd,2),RFIFOP(fd,6)); break;
 		case 0x2b0b: chrif_changedgm(fd); break;
 		case 0x2b0d: chrif_changedsex(fd); break;
+		case 0x2b11: chrif_accountreg(fd); break;
 
 		default:
 			if(battle_config.error_log)

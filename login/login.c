@@ -73,6 +73,8 @@ struct {
 	char userid[24],pass[24],lastlogin[24];
 	int logincount;
 	int state;
+	int account_reg_num;
+	struct global_reg account_reg[ACCOUNT_REG_NUM];
 } *auth_dat;
 
 int auth_num=0,auth_max=0;
@@ -213,16 +215,18 @@ int check_ip(unsigned int ip)
 int mmo_auth_init(void)
 {
 	FILE *fp;
-	int i,account_id,logincount,state;
-	char line[1024],userid[24],pass[24],lastlogin[24],sex;
+	int i,account_id,logincount,state,n,j,v;
+	char line[1024],*p,userid[24],pass[24],lastlogin[24],sex;
+	char str[64];
 	fp=fopen(account_filename,"r");
 	auth_dat=malloc(sizeof(auth_dat[0])*256);
 	auth_max=256;
 	if(fp==NULL)
 		return 0;
 	while(fgets(line,1023,fp)!=NULL){
-		i=sscanf(line,"%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\t%d\t%d",
-			&account_id,userid,pass,lastlogin,&sex,&logincount,&state);
+		p=line;
+		i=sscanf(line,"%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\t%d\t%d\t%n",
+			&account_id,userid,pass,lastlogin,&sex,&logincount,&state,&n);
 		if(i>=5){
 			if(auth_num>=auth_max){
 				auth_max+=256;
@@ -234,16 +238,25 @@ int mmo_auth_init(void)
 			strncpy(auth_dat[auth_num].lastlogin,lastlogin,24);
 			auth_dat[auth_num].sex = sex == 'S' ? 2 : sex=='M';
 
-//データが足りないときの補完
+			//データが足りないときの補完
 			if(i>=6)
 				auth_dat[auth_num].logincount=logincount;
 			else
 				auth_dat[auth_num].logincount=1;
-
 			if(i>=7)
 				auth_dat[auth_num].state=state;
 			else
 				auth_dat[auth_num].state=0;
+
+			
+			for(j=0;j<ACCOUNT_REG_NUM;j++){
+				p+=n;
+				if(sscanf(p,"%[^\t,],%d %n",str,&v,&n)!=2)
+					break;
+				strcpy(auth_dat[auth_num].account_reg[j].str,str);
+				auth_dat[auth_num].account_reg[j].value=v;
+			}
+			auth_dat[auth_num].account_reg_num=j;
 
 			auth_num++;
 			if(account_id>=account_id_count)
@@ -259,7 +272,7 @@ int mmo_auth_init(void)
 void mmo_auth_sync(void)
 {
 	FILE *fp;
-	int i;
+	int i,j;
 	fp=fopen(account_filename,"w");
 	if(fp==NULL)
 		return;
@@ -267,10 +280,17 @@ void mmo_auth_sync(void)
 		if(auth_dat[i].account_id<0)
 			continue;
 		
-		fprintf(fp,"%d\t%s\t%s\t%s\t%c\t%d\t%d" RETCODE,auth_dat[i].account_id,
+		fprintf(fp,"%d\t%s\t%s\t%s\t%c\t%d\t%d\t",auth_dat[i].account_id,
 			auth_dat[i].userid,auth_dat[i].pass,auth_dat[i].lastlogin,
 			auth_dat[i].sex==2 ? 'S' : (auth_dat[i].sex ? 'M' : 'F'),
 			auth_dat[i].logincount,auth_dat[i].state);
+		
+		for(j=0;j<auth_dat[i].account_reg_num;j++){
+			fprintf(fp,"%s,%d ",
+				auth_dat[i].account_reg[j].str,
+				auth_dat[i].account_reg[j].value);
+		}
+		fprintf(fp,RETCODE);
 	}
 	fclose(fp);
 }
@@ -295,6 +315,7 @@ int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 	auth_dat[i].sex= sex=='M';
 	auth_dat[i].logincount=0;
 	auth_dat[i].state = 0;
+	auth_dat[i].account_reg_num = 0;
 	auth_num++;
 	return 0;
 }
@@ -441,6 +462,21 @@ int mmo_auth( struct mmo_account* account, int fd )
 	return 100;
 }
 
+// 自分以外の全てのcharサーバーにデータ送信（送信したmap鯖の数を返す）
+int charif_sendallwos(int sfd,unsigned char *buf,unsigned int len)
+{
+	int i,c;
+	for(i=0,c=0;i<MAX_SERVERS;i++){
+		int fd;
+		if((fd=server_fd[i])>0 && fd!=sfd){
+			memcpy(WFIFOP(fd,0),buf,len);
+			WFIFOSET(fd,len);
+			c++;
+		}
+	}
+	return c;
+}
+
 int parse_fromchar(int fd)
 {
   int i,id;
@@ -474,6 +510,26 @@ int parse_fromchar(int fd)
 	  break;
 	}
       }
+	  
+	  if(i!=AUTH_FIFO_SIZE){	// account_reg送信
+		int p,j,i;
+		for(i=0;i<auth_num;i++){
+			if(auth_dat[i].account_id==RFIFOL(fd,2))
+				break;
+		}
+		if(i<auth_num){
+			WFIFOW(fd,0)=0x2729;
+			WFIFOL(fd,4)=RFIFOL(fd,2);
+			for(p=8,j=0;j<auth_dat[i].account_reg_num;p+=36,j++){
+				memcpy(WFIFOP(fd,p),auth_dat[i].account_reg[j].str,32);
+				WFIFOL(fd,p+32)=auth_dat[i].account_reg[j].value;
+			}
+			WFIFOW(fd,2)=p;
+			WFIFOSET(fd,p);
+//			printf("account_reg send : login->char (auth fifo)\n");
+		}
+	  }
+	  
       WFIFOW(fd,0)=0x2713;
       WFIFOL(fd,2)=RFIFOL(fd,2);
       if(i!=AUTH_FIFO_SIZE){
@@ -531,6 +587,10 @@ int parse_fromchar(int fd)
 	case 0x2722:	// changesex
 	  {
 	  	int acc,sex,i=0,j=0;
+		if(RFIFOREST(fd)<4)
+			return 0;
+		if(RFIFOREST(fd)<RFIFOW(fd,2))
+			return 0;
 		acc=RFIFOL(fd,4);
 		sex=RFIFOB(fd,8);
 		for(i=0;i<auth_num;i++){
@@ -548,7 +608,37 @@ int parse_fromchar(int fd)
 	  }
 	  return 0;
 
+	case 0x2728: {	// save account_reg
+			int acc,p,i,j;
+			if(RFIFOREST(fd)<4)
+				return 0;
+			if(RFIFOREST(fd)<RFIFOW(fd,2))
+				return 0;
+			acc=RFIFOL(fd,4);
+			for(i=0;i<auth_num;i++){
+				if(auth_dat[i].account_id==acc)
+					break;
+			}
+			if(i<auth_num){
+				unsigned char buf[4096];
+				for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG_NUM;p+=36,j++){
+					memcpy(auth_dat[i].account_reg[j].str,RFIFOP(fd,p),32);
+					auth_dat[i].account_reg[j].value=RFIFOL(fd,p+32);
+				}
+				auth_dat[i].account_reg_num=j;
+				// 他のサーバーへポスト（同垢ログインがなければ送らなくていい）
+				memcpy(WBUFP(buf,0),RFIFOP(fd,0),RFIFOW(fd,2));
+				WBUFW(buf,0)=0x2729;
+				charif_sendallwos(fd,buf,WBUFW(buf,2));
+				// 保存
+				mmo_auth_sync();
+			}
+			RFIFOSKIP(fd,RFIFOW(fd,2));
+//			printf("login: save account_reg (from char)\n");
+		}break;
+		
     default:
+	  printf("login: unknown packet %x! (from char).\n",RFIFOW(fd,0));
       close(fd);
       session[fd]->eof=1;
       return 0;
