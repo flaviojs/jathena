@@ -80,7 +80,7 @@ int itemdb_searchrandomid(int flags)
 		list=data[flags].list;
 
 		if(count > 0) {
-			for(i=0;i<count;i++) {
+			for(i=0;i<1000;i++) {
 				index = rand()%count;
 				if(	rand()%1000000 < list[index].per) {
 					nameid = list[index].nameid;
