@@ -1,4 +1,15 @@
 --------------
+//0579 by Aの人
+・ログインを弾く処理を仮実装
+	conf/login.c
+		auth_dat構造体にstateを追加
+		mmo_auth関数修正
+		mmo_auth_new関数修正
+		mmo_auth_sync関数修正
+		mmo_auth_init関数修正
+
+	この値を変更するツール、改善策。他力本願です（＞＜；
+--------------
 //0578 by 引退人
 ・バグ報告スレッドの修正パッチを取り込みなど（thanx to るるるさん,Athefansさん,sageさん,zupportさん）
 	help.txt	@goの説明ちょっと修正

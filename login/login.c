@@ -45,11 +45,14 @@ struct {
   int sex,delflag;
 } auth_fifo[AUTH_FIFO_SIZE];
 int auth_fifo_pos=0;
+
 struct {
-  int account_id,sex;
-  char userid[24],pass[24],lastlogin[24];
-  int logincount;
+	int account_id,sex;
+	char userid[24],pass[24],lastlogin[24];
+	int logincount;
+	int state;
 } *auth_dat;
+
 int auth_num=0,auth_max=0;
 
 char admin_pass[64]="";
@@ -59,7 +62,6 @@ const int gm_start=704554,gm_last=704583;
 static char md5key[20],md5keylen=16;
 
 static struct dbt *gm_account_db;
-
 
 int login_log(char *fmt,...)
 {
@@ -124,7 +126,7 @@ int read_gm_account()
 int mmo_auth_init(void)
 {
 	FILE *fp;
-	int i,account_id,logincount;
+	int i,account_id,logincount,state;
 	char line[1024],userid[24],pass[24],lastlogin[24],sex;
 	fp=fopen("account.txt","r");
 	auth_dat=malloc(sizeof(auth_dat[0])*256);
@@ -132,8 +134,8 @@ int mmo_auth_init(void)
 	if(fp==NULL)
 		return 0;
 	while(fgets(line,1023,fp)!=NULL){
-		i=sscanf(line,"%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\t%d",
-			&account_id,userid,pass,lastlogin,&sex,&logincount);
+		i=sscanf(line,"%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\t%d\t%d",
+			&account_id,userid,pass,lastlogin,&sex,&logincount,&state);
 		if(i>=5){
 			if(auth_num>=auth_max){
 				auth_max+=256;
@@ -144,10 +146,18 @@ int mmo_auth_init(void)
 			strncpy(auth_dat[auth_num].pass,pass,24);
 			strncpy(auth_dat[auth_num].lastlogin,lastlogin,24);
 			auth_dat[auth_num].sex = sex == 'S' ? 2 : sex=='M';
+
+//ƒf[ƒ^‚ª‘«‚è‚È‚¢‚Æ‚«‚Ì•âŠ®
 			if(i>=6)
 				auth_dat[auth_num].logincount=logincount;
 			else
 				auth_dat[auth_num].logincount=1;
+
+			if(i>=7)
+				auth_dat[auth_num].state=state;
+			else
+				auth_dat[auth_num].state=0;
+
 			auth_num++;
 			if(account_id>=account_id_count)
 			account_id_count=account_id+1;
@@ -170,10 +180,10 @@ void mmo_auth_sync(void)
 		if(auth_dat[i].account_id<0)
 			continue;
 		
-		fprintf(fp,"%d\t%s\t%s\t%s\t%c\t%d" RETCODE,auth_dat[i].account_id,
+		fprintf(fp,"%d\t%s\t%s\t%s\t%c\t%d\t%d" RETCODE,auth_dat[i].account_id,
 			auth_dat[i].userid,auth_dat[i].pass,auth_dat[i].lastlogin,
 			auth_dat[i].sex==2 ? 'S' : (auth_dat[i].sex ? 'M' : 'F'),
-			auth_dat[i].logincount);
+			auth_dat[i].logincount,auth_dat[i].state);
 	}
 	fclose(fp);
 }
@@ -197,6 +207,7 @@ int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 	memcpy(auth_dat[i].lastlogin,"-",2);
 	auth_dat[i].sex= sex=='M';
 	auth_dat[i].logincount=0;
+	auth_dat[i].state = 0;
 	auth_num++;
 	return 0;
 }
@@ -292,7 +303,7 @@ int mmo_auth( struct mmo_account* account )
 				tmpstr,account->userid,account->passwd,newaccount);
 			return 0;
 		}
-		
+
 /*		login_log("auth new %s %s %s %d" RETCODE,
 			tmpstr,account->userid,account->passwd,newaccount);
 		
@@ -308,6 +319,23 @@ int mmo_auth( struct mmo_account* account )
 		auth_num++;*/
 		mmo_auth_new(account,tmpstr,account->userid[len+1]);
 	}
+
+	if(auth_dat[i].state){
+		login_log("auth banned account %s %s %s %d\n" RETCODE,
+			tmpstr,account->userid,account->passwd,auth_dat[i].state);
+		switch(auth_dat[i].state) {
+			case 1:
+				return 2;
+				break;
+			case 2:
+				return 3;
+				break;
+			case 3:
+				return 4;
+				break;
+		}
+	}
+
 	account->account_id = auth_dat[i].account_id;
 	account->login_id1 = rand();
 	account->login_id2 = rand();
