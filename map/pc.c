@@ -1139,7 +1139,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(	sd->sc_data[i=SC_SPEEDPOTION2].timer!=-1 ||
 			sd->sc_data[i=SC_SPEEDPOTION1].timer!=-1 ||
 			sd->sc_data[i=SC_SPEEDPOTION0].timer!=-1)	// ‘ ‘¬ƒ|[ƒVƒ‡ƒ“
-			aspd_rate -= sd->sc_data[i].val2/100;
+			aspd_rate -= sd->sc_data[i].val2;
 
 		// HIT/FLEE•Ï‰»Œn
 		if(sd->sc_data[SC_WHISTLE].timer!=-1){  // Œû“J
