@@ -113,9 +113,11 @@ int battle_check_range(struct block_list *src,int x,int y,int range);
 
 // İ’è
 extern struct Battle_Config {
+	int warp_point_debug;
 	int enemy_critical;
 	int cast_rate,delay_rate,delay_dependon_dex;
 	int sdelay_attack_enable;
+	int pc_damage_delay;
 	int defnotenemy;
 	int attr_recover;
 	int flooritem_lifetime;
@@ -128,6 +130,7 @@ extern struct Battle_Config {
 	int mvp_hp_rate;
 	int atc_gmonly,gm_allskill;
 	int wp_rate;
+	int monster_active_enable;
 	int monster_loot_type;
 	int mob_skill_use;
 	int mob_count_rate;
@@ -137,6 +140,7 @@ extern struct Battle_Config {
 	int ghost_time;
 	int pet_catch_rate;
 	int pet_rename;
+	int pet_friendly_rate;
 	int pet_hungry_delay_rate;
 	int skill_min_damage;
 	int sanctuary_type;

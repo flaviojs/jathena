@@ -1873,11 +1873,13 @@ int battle_config_read(const char *cfgName)
 	char line[1024],w1[1024],w2[1024];
 	FILE *fp;
 
+	battle_config.warp_point_debug=0;
 	battle_config.enemy_critical=1;
 	battle_config.cast_rate=100;
 	battle_config.delay_rate=100;
 	battle_config.delay_dependon_dex=0;
 	battle_config.sdelay_attack_enable=0;
+	battle_config.pc_damage_delay=1;
 	battle_config.defnotenemy=1;
 	battle_config.attr_recover=1;
 	battle_config.flooritem_lifetime=LIFETIME_FLOORITEM*1000;
@@ -1895,6 +1897,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.atc_gmonly=0;
 	battle_config.gm_allskill=0;
 	battle_config.wp_rate=100;
+	battle_config.monster_active_enable=1;
 	battle_config.monster_loot_type=0;
 	battle_config.mob_skill_use=1;
 	battle_config.mob_count_rate=100;
@@ -1904,6 +1907,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.ghost_time=5000;
 	battle_config.pet_catch_rate=100;
 	battle_config.pet_rename=0;
+	battle_config.pet_friendly_rate=100;
 	battle_config.pet_hungry_delay_rate=100;
 	battle_config.skill_min_damage=0;
 	battle_config.sanctuary_type=0;
@@ -1921,11 +1925,13 @@ int battle_config_read(const char *cfgName)
 			char str[32];
 			int *val;
 		} data[] ={
+			{ "warp_point_debug", &battle_config.warp_point_debug },
 			{	"enemy_critical",		&battle_config.enemy_critical		},
 			{	"casting_rate",			&battle_config.cast_rate			},
 			{	"delay_rate",			&battle_config.delay_rate			},
 			{	"delay_dependon_dex",	&battle_config.delay_dependon_dex	},
 			{ "skill_delay_attack_enable", &battle_config.sdelay_attack_enable },
+			{ "player_damage_delay", &battle_config.pc_damage_delay },
 			{	"defunit_not_enemy",	&battle_config.defnotenemy			},
 			{	"attribute_recover",	&battle_config.attr_recover	},
 			{	"flooritem_lifetime",			&battle_config.flooritem_lifetime			},
@@ -1943,6 +1949,7 @@ int battle_config_read(const char *cfgName)
 			{	"atcommand_gm_only",	&battle_config.atc_gmonly			},
 			{	"gm_all_skill",			&battle_config.gm_allskill			},
 			{	"weapon_produce_rate",	&battle_config.wp_rate				},
+			{ "monster_active_enable", &battle_config.monster_active_enable },
 			{	"monster_loot_type",	&battle_config.monster_loot_type	},
 			{	"mob_skill_use",		&battle_config.mob_skill_use		},
 			{	"mob_count_rate",		&battle_config.mob_count_rate		},
@@ -1952,6 +1959,7 @@ int battle_config_read(const char *cfgName)
 			{	"ghost_time",		&battle_config.ghost_time		},
 			{	"pet_catch_rate",		&battle_config.pet_catch_rate		},
 			{	"pet_rename",			&battle_config.pet_rename			},
+			{ "pet_friendly_rate", &battle_config.pet_friendly_rate	},
 			{ "pet_hungry_delay_rate", &battle_config.pet_hungry_delay_rate	},
 			{ "skill_min_damage", &battle_config.skill_min_damage },
 			{ "sanctuary_type", &battle_config.sanctuary_type },

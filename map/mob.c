@@ -1060,7 +1060,8 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 						  BL_MOB,md,tick);
 
 	// アクティヴモンスターの策敵
-	if( (!md->target_id || md->state.targettype == NONE_ATTACKABLE) && mode&0x04 && !md->state.master_check){
+	if( (!md->target_id || md->state.targettype == NONE_ATTACKABLE) && mode&0x04 && !md->state.master_check &&
+		battle_config.monster_active_enable){
 		i=0;
 		map_foreachinarea(mob_ai_sub_hard_activesearch,md->bl.m,
 						  md->bl.x-AREA_SIZE*2,md->bl.y-AREA_SIZE*2,

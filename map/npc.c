@@ -514,6 +514,7 @@ void npc_addsrcfile(char *name)
  */
 // warp行読み込み
 #define WARP_CLASS 45
+#define WARP_DEBUG_CLASS 722
 static int npc_parse_warp(char *w1,char *w2,char *w3,char *w4)
 {
 	int x,y,xs,ys,to_x,to_y,m;
@@ -548,7 +549,10 @@ static int npc_parse_warp(char *w1,char *w2,char *w3,char *w4)
 	memcpy(nd->exname,w3,24);
 
 	nd->chat_id=0;
-	nd->class=WARP_CLASS;
+	if(!battle_config.warp_point_debug)
+		nd->class=WARP_CLASS;
+	else
+		nd->class=WARP_DEBUG_CLASS;
 	nd->speed=200;
 	memcpy(nd->u.warp.name,to_mapname,16);
 	xs+=2; ys+=2;
@@ -917,38 +921,44 @@ static int npc_parse_mapflag(char *w1,char *w2,char *w3,char *w4)
 		return 1;
 
 //マップフラグ
-	if( strcmp(w3,"nosave")==0 && sscanf(w4,"%[^,],%d,%d",savemap,&savex,&savey)==3){
+	if( strcmpi(w3,"nosave")==0 && sscanf(w4,"%[^,],%d,%d",savemap,&savex,&savey)==3){
 		map[m].flag.nosave=1;
 		memcpy(map[m].save.map,savemap,16);
 		map[m].save.x=savex;
 		map[m].save.y=savey;
 	}
-	else if(strcmp(w3,"nomemo")==0) {
+	else if(strcmpi(w3,"nomemo")==0) {
 		map[m].flag.nomemo=1;
 	}
-	else if(strcmp(w3,"noteleport")==0) {
+	else if(strcmpi(w3,"noteleport")==0) {
 		map[m].flag.noteleport=1;
 	}
-	else if(strcmp(w3,"nobranch")==0) {
+	else if(strcmpi(w3,"nobranch")==0) {
 		map[m].flag.nobranch=1;
 	}
-	else if(strcmp(w3,"nopenalty")==0) {
+	else if(strcmpi(w3,"nopenalty")==0) {
 		map[m].flag.nopenalty=1;
 	}
-	else if(strcmp(w3,"pvp")==0) {
+	else if(strcmpi(w3,"pvp")==0) {
 		map[m].flag.pvp=1;
 	}
-	else if(strcmp(w3,"pvp_noparty")==0) {
+	else if(strcmpi(w3,"pvp_noparty")==0) {
 		map[m].flag.pvp_noparty=1;
 	}
-	else if(strcmp(w3,"pvp_noguild")==0) {
+	else if(strcmpi(w3,"pvp_noguild")==0) {
 		map[m].flag.pvp_noguild=1;
 	}
-	else if(strcmp(w3,"gvg")==0) {
+	else if(strcmpi(w3,"gvg")==0) {
 		map[m].flag.gvg=1;
 	}
-	else if(strcmp(w3,"gvg_noparty")==0) {
+	else if(strcmpi(w3,"gvg_noparty")==0) {
 		map[m].flag.gvg_noparty=1;
+	}
+	else if(strcmpi(w3,"water")==0) {
+		map[m].flag.water_flag=1;
+	}
+	else if(strcmpi(w3,"all_water")==0) {
+		map[m].flag.water_flag=2;
 	}
 
 	return 0;
@@ -994,7 +1004,7 @@ int do_init_npc(void)
  					line[j++]=line[i];
 			}
 			// 最初はタブ区切りでチェックしてみて、ダメならスペース区切りで確認
-			if((count=sscanf(line,"%[^\t]\t%[^\t]\t%[^\t]\t%n%[^\t\r\n]",w1,w2,w3,&w4pos,w4)) < 3 &&
+			if((count=sscanf(line,"%[^\t]\t%[^\t]\t%[^\t\r\n]\t%n%[^\t\r\n]",w1,w2,w3,&w4pos,w4)) < 3 &&
 			   (count=sscanf(line,"%s%s%s%n%s",w1,w2,w3,&w4pos,w4)) < 3){
 				continue;
 			}
@@ -1004,15 +1014,15 @@ int do_init_npc(void)
 				// "mapname" is not assigned to this server
 				continue;
 			}
-			if(strcmp(w2,"warp")==0 && count > 3){
+			if(strcmpi(w2,"warp")==0 && count > 3){
 				npc_parse_warp(w1,w2,w3,w4);
-			} else if(strcmp(w2,"shop")==0 && count > 3){
+			} else if(strcmpi(w2,"shop")==0 && count > 3){
 				npc_parse_shop(w1,w2,w3,w4);
-			} else if(strcmp(w2,"script")==0 && count > 3){
+			} else if(strcmpi(w2,"script")==0 && count > 3){
 				npc_parse_script(w1,w2,w3,w4,line+w4pos,fp,&lines);
-			} else if(strcmp(w2,"monster")==0 && count > 3){
+			} else if(strcmpi(w2,"monster")==0 && count > 3){
 				npc_parse_mob(w1,w2,w3,w4);
-			} else if(strcmp(w2,"mapflag")==0 && count >= 3){
+			} else if(strcmpi(w2,"mapflag")==0 && count >= 3){
 				npc_parse_mapflag(w1,w2,w3,w4);
 			}
 		}

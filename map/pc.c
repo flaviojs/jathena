@@ -2129,7 +2129,7 @@ int pc_stop_walking(struct map_session_data *sd,int type)
 			pet_stop_walking(sd,sd->dir);
 		}
 	}
-	if(type&0x02)
+	if(type&0x02 && battle_config.pc_damage_delay)
 		sd->canmove_tick = gettick() + sd->dmotion;
 
 	return 0;
@@ -2959,6 +2959,9 @@ int pc_percentheal(struct map_session_data *sd,int hp,int sp)
 int pc_jobchange(struct map_session_data *sd,int job)
 {
 	int i;
+
+	if((sd->status.sex == 0 && job == 19) || (sd->status.sex == 1 && job == 20))
+		return 1;
 
 	sd->status.class=job;
 	clif_changelook(&sd->bl,LOOK_BASE,sd->status.class);

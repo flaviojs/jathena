@@ -17,6 +17,7 @@
 #include "mob.h"
 #include "pet.h"
 #include "battle.h"
+#include "party.h"
 #include "guild.h"
 #include "atcommand.h"
 
@@ -250,7 +251,7 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 */
 		if (strcmpi(command, "@jobchange") == 0 && gm_level >= atcommand_config.jobchange) {
 			sscanf(message, "%s%d", command, &x);
-			if ((x >= 0 && x < MAX_PC_CLASS) && ((x!=19 && sd->status.sex==0) || (x!=20 && sd->status.sex==1))) {
+			if ((x >= 0 && x < MAX_PC_CLASS)) {
 				pc_jobchange(sd,x);
 				clif_displaymessage(fd,"(MEƒÖEL)ƒVƒƒƒL[ƒ“!!");
 			}
@@ -827,7 +828,7 @@ z [0`4]•ž‚ÌF
 			sscanf(message, "%s%d %[^\n]", command, &x, temp1);
 			if ((pl_sd=map_nick2sd(temp1))!=NULL) {
 				if(gm_level > pc_isGM(pl_sd)) {
-					if ((x >= 0 && x < MAX_PC_CLASS) && ((x!=19 && pl_sd->status.sex==0) || (x!=20 && pl_sd->status.sex==1))) {
+					if ((x >= 0 && x < MAX_PC_CLASS)) {
 						pc_jobchange(pl_sd,x);
 						clif_displaymessage(fd,"JOB•ÏX !!");
 					}else{
@@ -1153,6 +1154,17 @@ z [0`4]•ž‚ÌF
 			return 1;
 		}
 
+		if(strcmpi(command, "@party") == 0 && gm_level >= atcommand_config.party){
+			if(sscanf(message, "%s %s", command, moji) >= 2) {
+				if(battle_config.basic_skill_check == 0 || pc_checkskill(sd,NV_BASIC) >= 7){
+					party_create(sd,moji);
+				}
+				else
+					clif_skill_fail(sd,1,0,4);
+			}
+			return 1;
+		}
+
 	}
 
 	return 0;
@@ -1245,6 +1257,7 @@ int atcommand_config_read(const char *cfgName)
 				{ "questskill",&atcommand_config.questskill },
 				{ "lostskill",&atcommand_config.lostskill },
 				{ "spiritball",&atcommand_config.spiritball },
+				{ "party",&atcommand_config.party },
 			};
 		
 			if(line[0] == '/' && line[1] == '/')

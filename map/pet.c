@@ -709,13 +709,22 @@ int pet_food(struct map_session_data *sd)
 	if(sd->pet.hungry > 90)
 		sd->pet.intimate -= sd->petDB->r_full;
 	else if(sd->pet.hungry > 75) {
-		k = sd->petDB->r_hungry * 25/100;
+		if(battle_config.pet_friendly_rate != 100)
+			k = (sd->petDB->r_hungry * battle_config.pet_friendly_rate)/100;
+		else
+			k = sd->petDB->r_hungry;
+		k = (k * 25)/100;
 		if(k <= 0)
 			k = 1;
 		sd->pet.intimate += k;
 	}
-	else
-		sd->pet.intimate += sd->petDB->r_hungry;
+	else {
+		if(battle_config.pet_friendly_rate != 100)
+			k = (sd->petDB->r_hungry * battle_config.pet_friendly_rate)/100;
+		else
+			k = sd->petDB->r_hungry;
+		sd->pet.intimate += k;
+	}
 	if(sd->pet.intimate < 0)
 		sd->pet.intimate = 0;
 	else if(sd->pet.intimate > 1000)

@@ -2771,7 +2771,7 @@ int skill_check_condition( struct map_session_data *sd )
 		item_id[3]={0,0,0},
 		item_amount[3]={0,0,0};
 
-	if( sd->opt1>0 || sd->sc_data[SC_DIVINA].timer!=-1 ){
+	if( sd->opt1>0) {
 		clif_skill_fail(sd,sd->skillid,0,0);
 		return 0;
 	}
@@ -2779,7 +2779,7 @@ int skill_check_condition( struct map_session_data *sd )
 	if(sd->skillitem==sd->skillid) {	/* アイテムの場合無条件成功 */
 		sd->skillitem = sd->skillitemlv = -1;
 	}else{
-		if(sd->sc_data[SC_STEELBODY].timer!=-1) {
+		if(sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_STEELBODY].timer!=-1) {
 			clif_skill_fail(sd,sd->skillid,0,0);
 			return 0;
 		}
@@ -2793,6 +2793,7 @@ int skill_check_condition( struct map_session_data *sd )
 		{
 		case SA_ABRACADABRA:
 			item_amount[0]+=1;
+			break;
 		case SA_VOLCANO:
 		case SA_DELUGE:
 		case SA_VIOLENTGALE:
@@ -2803,6 +2804,7 @@ int skill_check_condition( struct map_session_data *sd )
 		case SA_DISPELL:
 			item_id[1]=715;		//	yellow_gem = 715;
 			item_amount[1]+=1;
+			break;
 		case MG_STONECURSE:		// ストーンカース
 		case AS_VENOMDUST:		// ベナムダスト
 			item_id[0]=716;		//	red_gem = 716;
@@ -2812,6 +2814,7 @@ int skill_check_condition( struct map_session_data *sd )
 		case SA_LANDPROTECTOR:
 			item_id[1]=715;		//	yellow_gem = 715;
 			item_amount[1]+=1;
+			break;
 		case MG_SAFETYWALL:		// セイフティウォール
 		case AL_WARP:			// ワープポータル
 		case ALL_RESURRECTION:	// リザレクション
@@ -2857,23 +2860,29 @@ int skill_check_condition( struct map_session_data *sd )
 			break;
 
 		case AL_HOLYWATER:	/* アクアベネディクタ */
-			if(read_gat(sd->bl.m,sd->bl.x,sd->bl.y)!=3){	//水場判定
-				clif_skill_fail(sd,sd->skillid,0,0);
-				return 0;
+			if(map[sd->bl.m].flag.water_flag != 2) {
+				if(!map[sd->bl.m].flag.water_flag || map_getcell(sd->bl.m,sd->bl.x,sd->bl.y)!=3){	//水場判定
+					clif_skill_fail(sd,sd->skillid,0,0);
+					return 0;
+				}
 			}
 			item_id[0]=713;			//	空きビン;
 			item_amount[0]+=1;
 			break;
+
 		case PR_ASPERSIO:	/* アスペルシオ */
 			item_id[0]=523;			//	聖水;
 			item_amount[0]+=1;
 			break;
 
 		case WZ_WATERBALL:	/* ウォーターボール */
-			if(read_gat(sd->bl.m,sd->bl.x,sd->bl.y)!=3){	//水場判定
-				clif_skill_fail(sd,sd->skillid,0,0);
-				return 0;
+			if(map[sd->bl.m].flag.water_flag != 2) {
+				if(!map[sd->bl.m].flag.water_flag || map_getcell(sd->bl.m,sd->bl.x,sd->bl.y)!=3){	//水場判定
+					clif_skill_fail(sd,sd->skillid,0,0);
+					return 0;
+				}
 			}
+			break;
 
 		case MC_MAMMONITE:		/* メマーナイト */
 			zeny = sd->skilllv*100;
@@ -2895,7 +2904,7 @@ int skill_check_condition( struct map_session_data *sd )
 		case AC_CHARGEARROW:		// チャージアロー
 			if( sd->status.weapon != 11) {
 				clif_skill_fail(sd,sd->skillid,6,0);	// 弓
-			     	return 0; 
+		     	return 0; 
 			}
 			break;
 
@@ -2904,6 +2913,8 @@ int skill_check_condition( struct map_session_data *sd )
 				clif_skill_fail(sd,sd->skillid,0,0);
 				return 0;		// ,ペコペコ状態
 			}
+			break;
+
 		case KN_PIERCE:			// ピアース
 		case KN_SPEARSTAB:		// スピアスタブ
 		case KN_SPEARBOOMERANG:	// スピアブーメラン
@@ -2990,6 +3001,7 @@ int skill_check_condition( struct map_session_data *sd )
 			}
 			else sd->spiritball_old = sd->skilllv;	
 			break;
+
 		case MO_INVESTIGATE:					//発勁
 			spiritball = 1;						// 氣球
 			break;
