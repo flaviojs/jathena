@@ -1546,6 +1546,30 @@ int clif_initialstatus(struct map_session_data *sd)
 
  }
 /*==========================================
+ * 作成可能 矢リスト送信
+ *------------------------------------------
+ */
+int clif_arrow_create_list(struct map_session_data *sd)
+{
+	int i,c;
+	int fd=sd->fd;
+	
+	WFIFOW(fd,0)=0x1ad;
+
+	for(i=1,c=1;i<MAX_SKILL_ARROW_DB;i++){
+		if(pc_search_inventory(sd,skill_arrow_db[i].nameid)!=-1&&pc_search_inventory(sd,skill_arrow_db[i].nameid)!=pc_search_inventory(sd,0)){
+			WFIFOW(fd,c*2+2) = skill_arrow_db[i].nameid;
+			c++;
+		}
+	}
+	WFIFOW(fd,2)=c*2+2;
+
+	WFIFOSET(fd,WFIFOW(fd,2));
+	return 0;
+}
+
+
+/*==========================================
  *
  *------------------------------------------
  */
@@ -5365,6 +5389,33 @@ void clif_parse_ItemIdentify(int fd,struct map_session_data *sd)
 		pc_item_identify(sd,RFIFOW(fd,2)-2);
 }
 /*==========================================
+ * 矢作成
+ *------------------------------------------
+ */
+void clif_arrow_created(int fd,struct map_session_data *sd)
+{
+	int i,mate=0;
+	struct item tmp_item;
+		memset(&tmp_item,0,sizeof(tmp_item));
+		tmp_item.identify=1;
+
+	for(i=1;i<MAX_SKILL_ARROW_DB;i++){
+		if(RFIFOW(fd,2) == skill_arrow_db[i].nameid){
+			mate = i;
+			break;
+		}
+	}
+	for(i=0;i<3;i++){
+		tmp_item.nameid=skill_arrow_db[mate].cre_id[i];
+		tmp_item.amount=skill_arrow_db[mate].cre_amount[i];
+		if(!tmp_item.nameid||!tmp_item.amount)break;
+		pc_additem(sd,&tmp_item,tmp_item.amount);
+
+		printf("arrow create %d -> %d:%d\n",mate,tmp_item.nameid,tmp_item.amount);
+	}
+	pc_delitem(sd,pc_search_inventory(sd,RFIFOW(fd,2)),1,0);
+}
+/*==========================================
  * カード使用
  *------------------------------------------
  */
@@ -6026,7 +6077,8 @@ static int clif_parse(int fd)
 		NULL,
 		clif_parse_SendEmotion,
 		NULL,
-		NULL,NULL,NULL,NULL,
+		NULL,NULL,NULL,
+		clif_arrow_created,
 		clif_parse_ChangeCart,
 		// 1b0
 		NULL,NULL,

@@ -3,6 +3,7 @@
 
 #define MAX_SKILL_DB			350
 #define MAX_SKILL_PRODUCE_DB	 100
+#define MAX_SKILL_ARROW_DB	 100
 
 // スキルデータベース
 struct skill_db {
@@ -20,6 +21,13 @@ struct skill_produce_db {
 	int mat_id[5],mat_amount[5];
 };
 extern struct skill_produce_db skill_produce_db[MAX_SKILL_PRODUCE_DB];
+
+// 矢作成データベース
+struct skill_arrow_db {
+	int nameid, trigger;
+	int cre_id[5],cre_amount[5];
+};
+extern struct skill_arrow_db skill_arrow_db[MAX_SKILL_ARROW_DB];
 
 struct block_list;
 struct map_session_data;

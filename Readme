@@ -1,4 +1,29 @@
 --------------
+//0550 by huge
+
+・矢作成スキル実装
+
+	clif.c
+	clif.h
+		clif_arrow_create_list() 追加
+		clif_arrow_created() 追加
+		clif_parse() 修正
+
+	pc.c
+		pc_search_inventory() 修正
+
+	skill.c
+	skill.h
+		skill_arrow_db() 追加
+		skill_readdb() 修正
+		skill_castend_damage_id() 修正
+
+	db/create_arrow_db.txt 追加
+	db/skill_db.txt 修正
+
+	まだdbは未完成です。
+
+--------------
 //0549 by Kalen
 
 ・map_athena.conf
@@ -144,8 +169,6 @@ logを使うことで金が多くても入る経験値が多く入らないように変更しました。
 
 ・矢をまとめて持てるように修正。
 ・弓で攻撃したときに、装備している矢を消費するように修正。
-  矢の本数・equipウィンドウ・矢の装備変更時メッセージ・・・何か表示がおかしいですが、
-  自分には原因がつかめませんでした...。
 
 	itemdb.c
 		itemdb_search() 修正

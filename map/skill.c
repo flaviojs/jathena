@@ -182,6 +182,9 @@ struct skill_db skill_db[MAX_SKILL_DB];
 /* アイテム作成データベース */
 struct skill_produce_db skill_produce_db[MAX_SKILL_PRODUCE_DB];
 
+/* 矢作成スキルデータベース */
+struct skill_arrow_db skill_arrow_db[MAX_SKILL_ARROW_DB];
+
 int skill_get_range( int id ){ return skill_db[id].range; }
 int	skill_get_hit( int id ){ return skill_db[id].hit; }
 int	skill_get_inf( int id ){ return skill_db[id].inf; }
@@ -1074,6 +1077,11 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			battle_damage(src,src,1);
 			break;
 		}
+		break;
+
+	case AC_MAKINGARROW:			/* 矢作成 */
+		if(sd!=NULL)
+			clif_arrow_create_list(sd);
 		break;
 
 	/* HP吸収/HP吸収魔法 */
@@ -4506,6 +4514,7 @@ int skill_produce_mix( struct map_session_data *sd,
  * skill_db.txt スキルデータ
  * cast_db.txt スキルの詠唱時間とディレイデータ
  * produce_db.txt アイテム作成スキル用データ
+ * create_arrow_db.txt 矢作成スキル用データ
  *------------------------------------------
  */
 int skill_readdb(void)
@@ -4657,6 +4666,45 @@ int skill_readdb(void)
 	}
 	fclose(fp);
 	printf("read db/produce_db.txt done (count=%d)\n",k);
+
+	memset(skill_arrow_db,0,sizeof(skill_arrow_db));
+	fp=fopen("db/create_arrow_db.txt","r");
+	if(fp==NULL){
+		printf("can't read db/create_arrow_db.txt\n");
+		return 1;
+	}
+	k=1;
+	while(fgets(line,1020,fp)){
+		char *split[16];
+		int x,y;
+		if(line[0]=='/' && line[1]=='/')
+			continue;
+		memset(split,0,sizeof(split));
+		if(line[0]=='/' && line[1]=='/')
+			continue;
+		for(j=0,p=line;j<13 && p;j++){
+			split[j]=p;
+			p=strchr(p,',');
+			if(p) *p++=0;
+		}
+		if(split[0]==NULL)
+			continue;
+		i=atoi(split[0]);
+		if(i<=0)
+			continue;
+
+		skill_arrow_db[k].nameid=i;
+
+		for(x=1,y=0;split[x] && split[x+1] && y<5;x+=2,y++){
+			skill_arrow_db[k].cre_id[y]=atoi(split[x]);
+			skill_arrow_db[k].cre_amount[y]=atoi(split[x+1]);
+		}
+		k++;
+		if(k >= MAX_SKILL_ARROW_DB)
+			break;
+	}
+	fclose(fp);
+	printf("read db/create_arrow_db.txt done (count=%d)\n",k);
 
 	return 0;
 }

@@ -1432,7 +1432,7 @@ int pc_search_inventory(struct map_session_data *sd,int item_id)
 	int i;
 	for(i=0;i<MAX_INVENTORY;i++) {
 		if(sd->status.inventory[i].nameid == item_id &&
-		 (sd->status.inventory[i].amount > 0 || item_id == 0))
+		 (sd->status.inventory[i].amount > 0 || item_id >= 0))
 			return i;
 	}
 
