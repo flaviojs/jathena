@@ -204,6 +204,7 @@ int buildin_emotion(struct script_state *st);
 int buildin_maprespawnguildid(struct script_state *st);
 int buildin_agitstart(struct script_state *st);		// <Agit>
 int buildin_agitend(struct script_state *st);
+int buildin_agitcheck(struct script_state *st);  // <Agitcheck>
 int buildin_flagemblem(struct script_state *st);		// Flag Emblem
 int buildin_getcastlename(struct script_state *st);
 int buildin_getcastledata(struct script_state *st);
@@ -286,7 +287,8 @@ struct {
 	{buildin_bonus3,"bonus3","iiii"},
 	{buildin_skill,"skill","ii*"},
 	{buildin_getskilllv,"getskilllv","i"},
-	{buildin_getgdskilllv,"getgdskilllv","ii"},
+//	{buildin_getgdskilllv,"getgdskilllv","ii"},
+	{buildin_getgdskilllv,"getgdskilllv","i"},  // add
 	{buildin_basicskillcheck,"basicskillcheck","*"},
 	{buildin_getgmlevel,"getgmlevel","*"},
 	{buildin_end,"end",""},
@@ -352,6 +354,7 @@ struct {
 	{buildin_maprespawnguildid,"maprespawnguildid","sii"},
 	{buildin_agitstart,"agitstart",""},	// <Agit>
 	{buildin_agitend,"agitend",""},
+	{buildin_agitcheck,"agitcheck","i"},   // <Agitcheck>
 	{buildin_flagemblem,"flagemblem","i"},	// Flag Emblem
 	{buildin_getcastlename,"getcastlename","s"},
 	{buildin_getcastledata,"getcastledata","si*"},
@@ -2831,12 +2834,26 @@ int buildin_getskilllv(struct script_state *st)
  */                                                
 int buildin_getgdskilllv(struct script_state *st)  
 {                                                  
-        int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+/*      int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
         int skill_id=conv_num(st,& (st->stack->stack_data[st->start+3]));
         struct guild *g=guild_search(guild_id);
         if (g == NULL) push_val(st->stack,C_INT, 0);
         if (g != NULL) push_val(st->stack,C_INT, guild_checkskill(g,skill_id+9999) );
-        return 0;
+        return 0; 
+*/
+	struct map_session_data *sd=NULL;
+	struct guild *g=NULL;
+	int skill_id;
+
+	skill_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	sd=script_rid2sd(st);
+	if(sd && sd->status.guild_id > 0) g=guild_search(sd->status.guild_id);
+	if(sd && g) {
+		push_val(st->stack,C_INT, guild_checkskill(g,skill_id+9999) );
+	} else {
+		push_val(st->stack,C_INT,-1);
+	}
+	return 0;
 }
 /*==========================================
  *
@@ -4140,7 +4157,29 @@ int buildin_agitend(struct script_state *st)
 	guild_agit_end();
 	return 0;
 }
+/*==========================================       
+ * agitcheck 1;    // choice script            
+ * if(@agit_flag == 1) goto agit;    
+ * if(agitcheck(0) == 1) goto agit;                  
+ *------------------------------------------       
+ */       
+int buildin_agitcheck(struct script_state *st)
+{
+	struct map_session_data *sd;
+	int cond;
 
+	sd=script_rid2sd(st);
+	cond=conv_num(st,& (st->stack->stack_data[st->start+2]));
+
+	if(cond == 0) {
+		if (agit_flag==1) push_val(st->stack,C_INT,1);
+		if (agit_flag==0) push_val(st->stack,C_INT,0);
+	} else {
+		if (agit_flag==1) pc_setreg(sd,add_str("@agit_flag"),1);
+		if (agit_flag==0) pc_setreg(sd,add_str("@agit_flag"),0);
+	}
+	return 0;
+}
 int buildin_flagemblem(struct script_state *st)
 {
 	int g_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
