@@ -167,6 +167,9 @@ void mmo_auth_sync(void)
 	if(fp==NULL)
 		return;
 	for(i=0;i<auth_num;i++){
+		if(auth_dat[i].account_id<0)
+			continue;
+		
 		fprintf(fp,"%d\t%s\t%s\t%s\t%c\t%d" RETCODE,auth_dat[i].account_id,
 			auth_dat[i].userid,auth_dat[i].pass,auth_dat[i].lastlogin,
 			auth_dat[i].sex==2 ? 'S' : (auth_dat[i].sex ? 'M' : 'F'),
@@ -410,6 +413,105 @@ int parse_fromchar(int fd)
   return 0;
 }
 
+int parse_admin(int fd)
+{
+	int i;
+	if(session[fd]->eof){
+		for(i=0;i<MAX_SERVERS;i++)
+			if(server_fd[i]==fd)
+				server_fd[i]=-1;
+		close(fd);
+		delete_session(fd);
+		return 0;
+	}
+	while(RFIFOREST(fd)>=2){
+		switch(RFIFOW(fd,0)){
+		case 0x7920:	{	// アカウントリスト
+				int st,ed,len;
+				if(RFIFOREST(fd)<11)
+					return 0;
+				st=RFIFOL(fd,2);
+				ed=RFIFOL(fd,6);
+				RFIFOSKIP(fd,11);
+				WFIFOW(fd,0)=0x7921;
+				if(st<0)st=0;
+				if(ed>END_ACCOUNT_NUM || ed<st || ed<=0)ed=END_ACCOUNT_NUM;
+				for(i=0,len=4;i<auth_num && len<30000;i++){
+					int account_id=auth_dat[i].account_id;
+					if( account_id>=st && account_id<=ed ){
+						WFIFOL(fd,len   )=auth_dat[i].account_id;
+						memcpy(WFIFOP(fd,len+4),auth_dat[i].userid,24);
+						WFIFOB(fd,len+28)=auth_dat[i].sex;
+						WFIFOL(fd,len+53)=auth_dat[i].logincount;
+						len+=57;
+					}
+				}
+				WFIFOW(fd,2)=len;
+				WFIFOSET(fd,len);
+			}break;
+		case 0x7930: {	// アカウント作成
+				struct mmo_account ma;
+				if(RFIFOREST(fd)<4 || RFIFOREST(fd)<RFIFOW(fd,2))
+					return 0;
+				ma.userid=RFIFOP(fd, 4);
+				ma.passwd=RFIFOP(fd,28);
+				ma.sex=RFIFOB(fd,52);
+				memcpy(ma.lastlogin,"-",2);
+				WFIFOW(fd,0)=0x7931;
+				WFIFOW(fd,2)=0;
+				memcpy(WFIFOP(fd,4),RFIFOP(fd,4),24);
+				for(i=0;i<auth_num;i++){
+					if( strncmp(auth_dat[i].userid,ma.userid,24)==0 ){
+						WFIFOW(fd,2)=1;
+						break;
+					}
+				}
+				if(i==auth_num)
+					mmo_auth_new(&ma,"( ladmin )",ma.sex);
+				WFIFOSET(fd,28);
+				RFIFOSKIP(fd,RFIFOW(fd,2));
+			}break;
+		case 0x7932:	// アカウント削除
+			WFIFOW(fd,0)=0x7933;
+			WFIFOW(fd,2)=1;
+			memcpy(WFIFOP(fd,4),RFIFOP(fd,4),24);
+			for(i=0;i<auth_num;i++){
+				if( strncmp(auth_dat[i].userid,RFIFOP(fd,4),24)==0 ){
+					auth_dat[i].userid[0]=0;
+					auth_dat[i].account_id=-1;
+					WFIFOW(fd,2)=0;
+					break;
+				}
+			}
+			WFIFOSET(fd,28);
+			RFIFOSKIP(fd,RFIFOW(fd,2));
+			break;
+		case 0x7934:	// パスワード変更
+			WFIFOW(fd,0)=0x7935;
+			WFIFOW(fd,2)=1;
+			memcpy(WFIFOP(fd,4),RFIFOP(fd,4),24);
+			for(i=0;i<auth_num;i++){
+				if( strncmp(auth_dat[i].userid,RFIFOP(fd,4),24)==0 ){
+					memcpy(auth_dat[i].pass,RFIFOP(fd,28),24);
+					WFIFOW(fd,2)=0;
+					break;
+				}
+			}
+			WFIFOSET(fd,28);
+			RFIFOSKIP(fd,RFIFOW(fd,2));
+			break;
+			
+		default:
+			close(fd);
+			session[fd]->eof=1;
+			return 0;
+		}
+		//WFIFOW(fd,0)=0x791f;
+		//WFIFOSET(fd,2);
+	}
+	return 0;
+}
+
 int parse_login(int fd)
 {
   struct mmo_account account;
@@ -542,12 +644,25 @@ int parse_login(int fd)
 		WFIFOW(fd,8)=ATHENA_MOD_VERSION;
 		WFIFOSET(fd,10);
 		RFIFOSKIP(fd,2);
-		return 0;
+		break;
 	case 0x7532:	// 接続の切断(defaultと処理は一緒だが明示的にするため)
 		close(fd);
 		session[fd]->eof=1;
-		return 0;
-		
+		break;
+	
+	case 0x7918:	// 管理モードログイン
+		if(RFIFOREST(fd)<4 || RFIFOREST(fd)<RFIFOW(fd,2))
+			return 0;
+		WFIFOW(fd,0)=0x7919;
+		WFIFOB(fd,2)=1;
+		if(strcmp(RFIFOP(fd,6),admin_pass)==0){
+			WFIFOB(fd,2)=0;
+			session[fd]->func_parse=parse_admin;
+		}
+		WFIFOSET(fd,3);
+		RFIFOSKIP(fd,RFIFOW(fd,2));
+		break;
+
 	default:
 		close(fd);
 		session[fd]->eof=1;

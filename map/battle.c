@@ -366,13 +366,13 @@ int battle_get_attack_element2(struct block_list *bl)
 	else
 		return 0;
 	
-	if( sc_data[SC_FROSTWEAPON].timer!=-1)	// エンチャントポイズン
+	if( sc_data[SC_FROSTWEAPON].timer!=-1)	// フロストウェポン
 		ret=1;
-	if( sc_data[SC_SEISMICWEAPON].timer!=-1)	// エンチャントポイズン
+	if( sc_data[SC_SEISMICWEAPON].timer!=-1)	// サイズミックウェポン
 		ret=2;
-	if( sc_data[SC_FLAMELAUNCHER].timer!=-1)	// エンチャントポイズン
+	if( sc_data[SC_FLAMELAUNCHER].timer!=-1)	// フレームランチャー
 		ret=3;
-	if( sc_data[SC_LIGHTNINGLOADER].timer!=-1)	// エンチャントポイズン
+	if( sc_data[SC_LIGHTNINGLOADER].timer!=-1)	// ライトニングローダー
 		ret=4;
 	if( sc_data[SC_ENCPOISON].timer!=-1)	// エンチャントポイズン
 		ret=5;
@@ -507,7 +507,7 @@ int battle_delay_damage(unsigned int tick,struct block_list *src,struct block_li
 	return 0;
 }
 
-// 実 際にHPを操作
+// 実際にHPを操作
 int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 {
 	struct map_session_data *sd=NULL;
@@ -734,7 +734,7 @@ int battle_addmastery(struct map_session_data *sd,struct block_list *target,int 
 		}
 		case 0x03:	// 2HS
 		{
-			// 両 手剣修練(+4 ～ +40) 両手剣
+			// 両手剣修練(+4 ～ +40) 両手剣
 			if((skill = pc_checkskill(sd,SM_TWOHAND)) > 0) {
 				damage += (skill * 4);
 			clif_updatestatus(sd,SP_ATK1);
@@ -800,7 +800,7 @@ int battle_addmastery(struct map_session_data *sd,struct block_list *target,int 
 			break;
 		case 0x0c:	// Knuckles
 		{
-			// 鉄 拳(+3 ～ +30) 素手,ナックル
+			// 鉄拳(+3 ～ +30) 素手,ナックル
 			if((skill = pc_checkskill(sd,MO_IRONHAND)) > 0) {
 				damage += (skill * 3);
 			clif_updatestatus(sd,SP_ATK1);
@@ -810,7 +810,7 @@ int battle_addmastery(struct map_session_data *sd,struct block_list *target,int 
 		}
 		case 0x0d:	// Musical Instrument
 		{
-			// 楽 器の練習(+3 ～ +30) 楽器
+			// 楽器の練習(+3 ～ +30) 楽器
 			if((skill = pc_checkskill(sd,BA_MUSICALLESSON)) > 0) {
 				damage += (skill * 3);
 			clif_updatestatus(sd,SP_ATK1);

@@ -20,6 +20,6 @@
 // その程度の扱いなので、サーバーに問い合わせる側も、あくまで目安程度の扱いで
 // あんまり信用しないこと。
 // 鯖snapshotの時や、大きな変更があった場合は設定してほしいです。
-#define ATHENA_MOD_VERSION	520	// mod version (EoR Uploader's No.)
+#define ATHENA_MOD_VERSION	529	// mod version (EoR Uploader's No.)
 
 #endif

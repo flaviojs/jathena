@@ -1085,9 +1085,10 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			heal_get_jobexp = battle_heal(NULL,bl,heal,0);
 			
 			// JOB経験値獲得
-			if( bl->type==BL_PC)
+			if( bl->type==BL_PC){
 				heal_get_jobexp = heal_get_jobexp * battle_config.heal_exp / 100;
 				pc_gainexp((struct map_session_data *)src,0,heal_get_jobexp);
+			}
 		}
 		break;
 
@@ -2197,10 +2198,10 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0x83:	/* サンクチュアリ */
 		{
 			int *list=sg->vallist;
-			int i,ei=0;
-			
+			int i,ei=0,race=battle_get_race(bl);
+
 			if( battle_get_hp(bl)>=battle_get_max_hp(bl) &&
-				battle_get_elem_type(bl)!=9 )
+				 race!=1 && race!=6  )
 				break;
 
 			for(i=0;i<16;i++)	/* 人数制限の計算 */
@@ -2215,7 +2216,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 					return 0;
 				}
 			}
-			if( battle_get_elem_type(bl)!=9){
+			if( race!=1 && race!=6 ){
 				int heal=sg->val2;
 				if( bl->type==BL_PC &&
 					pc_check_equip_dcard((struct map_session_data *)bl,4128) )
