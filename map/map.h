@@ -284,6 +284,7 @@ struct npc_data {
 		struct {
 			char *script;
 			short xs,ys;
+			int guild_id;
 		} scr;
 		struct npc_item_list shop_item[1];
 		struct {

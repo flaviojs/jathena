@@ -179,6 +179,7 @@ int buildin_emotion(struct script_state *st);
 int buildin_maprespawnguildid(struct script_state *st);
 int buildin_agitstart(struct script_state *st);		// <Agit>
 int buildin_agitend(struct script_state *st);
+int buildin_flagemblem(struct script_state *st);		// Flag Emblem
 int buildin_getcastlename(struct script_state *st);
 int buildin_getcastledata(struct script_state *st);
 int buildin_setcastledata(struct script_state *st);
@@ -300,6 +301,7 @@ struct {
 	{buildin_maprespawnguildid,"maprespawnguildid","sii"},
 	{buildin_agitstart,"agitstart",""},	// <Agit>
 	{buildin_agitend,"agitend",""},
+	{buildin_flagemblem,"flagemblem","i"},	// Flag Emblem
 	{buildin_getcastlename,"getcastlename","s"},
 	{buildin_getcastledata,"getcastledata","si*"},
 	{buildin_setcastledata,"setcastledata","sii"},
@@ -3441,6 +3443,17 @@ int buildin_agitend(struct script_state *st)
 	agit_flag=0;
 	guild_agit_end();
 	return 0;
+}
+
+int buildin_flagemblem(struct script_state *st)
+{
+	int g_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+
+	if(g_id < 0) return 0;
+
+//	printf("Script.c: [FlagEmblem] GuildID=%d, Emblem=%d.\n", g->guild_id, g->emblem_id);
+	((struct npc_data *)map_id2bl(st->oid))->u.scr.guild_id = g_id;
+	return 1;
 }
 
 int buildin_getcastlename(struct script_state *st)

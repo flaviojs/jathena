@@ -803,12 +803,19 @@ static int clif_mob007b(struct mob_data *md,unsigned char *buf)
  */
 static int clif_npc0078(struct npc_data *nd,unsigned char *buf)
 {
+	struct guild *g;
+	
 	memset(buf,0,packet_len_table[0x78]);
 
 	WBUFW(buf,0)=0x78;
 	WBUFL(buf,2)=nd->bl.id;
 	WBUFW(buf,6)=nd->speed;
 	WBUFW(buf,14)=nd->class;
+	if((nd->class == 722) && (nd->u.scr.guild_id > 0) && ((g=guild_search(nd->u.scr.guild_id)) != NULL))
+	{
+		WBUFL(buf,22)=g->emblem_id;
+		WBUFL(buf,26)=g->guild_id;
+	}
 	WBUFPOS(buf,46,nd->bl.x,nd->bl.y);
 	WBUFB(buf,48)|=nd->dir&0x0f;
 	WBUFB(buf,49)=5;
