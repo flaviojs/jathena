@@ -3551,6 +3551,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.random_monster_checklv=1;
 	battle_config.attr_recover=1;
 	battle_config.flooritem_lifetime=LIFETIME_FLOORITEM*1000;
+	battle_config.lootitem_time=10000;
 	battle_config.item_rate=100;
 	battle_config.drop_rate0item=0;
 	battle_config.base_exp_rate=100;
@@ -3662,6 +3663,7 @@ int battle_config_read(const char *cfgName)
 			{ "random_monster_checklv",		&battle_config.random_monster_checklv	},
 			{ "attribute_recover",		&battle_config.attr_recover			},
 			{ "flooritem_lifetime",		&battle_config.flooritem_lifetime	},
+			{ "lootitem_time",		&battle_config.lootitem_time	},
 			{ "item_rate",				&battle_config.item_rate			},
 			{ "drop_rate0item",				&battle_config.drop_rate0item			},
 			{ "base_exp_rate",			&battle_config.base_exp_rate		},
@@ -3759,6 +3761,8 @@ int battle_config_read(const char *cfgName)
 
 	if(battle_config.flooritem_lifetime < 1000)
 		battle_config.flooritem_lifetime = LIFETIME_FLOORITEM*1000;
+	if(battle_config.lootitem_time < 1000)
+		battle_config.lootitem_time = 10000;
 	if(battle_config.restart_hp_rate < 0)
 		battle_config.restart_hp_rate = 0;
 	else if(battle_config.restart_hp_rate > 100)

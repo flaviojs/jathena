@@ -2036,8 +2036,6 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 
 	return 0;
 }
-
-
 /*==========================================
  * カード挿入
  *------------------------------------------
@@ -2290,6 +2288,7 @@ int pc_dropitem(struct map_session_data *sd,int n,int amount)
 	if(sd->status.inventory[n].nameid==0 ||
 	   sd->status.inventory[n].amount<amount)
 		return 1;
+	sd->status.inventory[n].first_get_id=0;
 	map_addflooritem(&sd->status.inventory[n],amount,sd->bl.m,sd->bl.x,sd->bl.y);
 	pc_delitem(sd,n,amount,0);
 
@@ -2304,17 +2303,22 @@ int pc_dropitem(struct map_session_data *sd,int n,int amount)
 int pc_takeitem(struct map_session_data *sd,struct flooritem_data *fitem)
 {
 	int flag;
-	if((flag = pc_additem(sd,&fitem->item_data,fitem->item_data.amount))){
+
+	if((fitem->item_data.first_get_id > 0 && fitem->item_data.first_get_id != sd->bl.id)&&
+		battle_config.flooritem_lifetime+gettick()-get_timer(fitem->cleartimer)->tick < battle_config.lootitem_time)
+		// ルート権限無し
+		clif_additem(sd,0,0,6);
+	else if((flag = pc_additem(sd,&fitem->item_data,fitem->item_data.amount)))
 		// 重量overで取得失敗
 		clif_additem(sd,0,0,flag);
-	} else {
+	else {
 		/* 取得成功 */
 		if(sd->attacktimer != -1)
 			pc_stopattack(sd);
+		fitem->item_data.first_get_id=0;
 		clif_takeitem(&sd->bl,&fitem->bl);
 		map_clearflooritem(fitem->bl.id);
 	}
-
 	return 0;
 }
 
@@ -3583,7 +3587,6 @@ int pc_allskillup(struct map_session_data *sd)
 
 	return 0;
 }
-
 
 /*==========================================
  * /resetstate

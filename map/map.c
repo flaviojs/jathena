@@ -655,6 +655,7 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y)
 	fitem->subx=(r&3)*3+3;
 	fitem->suby=((r>>2)&3)*3+3;
 	fitem->cleartimer=add_timer(gettick()+battle_config.flooritem_lifetime,map_clearflooritem_timer,fitem->bl.id,0);
+	fitem->item_data.first_get_id = item_data->first_get_id;
 
 	map_addblock(&fitem->bl);
 	clif_dropflooritem(fitem);

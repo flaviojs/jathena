@@ -1,4 +1,35 @@
 --------------------
+//0789 by huge
+・ドロップアイテムにルート権限を実装。
+・最初に攻撃した人以外がドロップアイテムを拾えるまでの時間を設定できるように。
+	(/conf)
+	battle_athena.conf 項目追加。
+
+	(/doc)
+	conf_doc.txt 説明追加。
+
+	(/map)
+	battle.h
+		Battle_Config{} 修正。
+	battle.c
+		battle_config_read() 修正。
+	itemdb.h
+		item_data {} 修正。
+	map.h
+		flooritem_data {} 修正。
+		mob_data {} 修正。
+	map.c
+		map_addflooritem() 修正。
+	mob.c
+		delay_item_drop{} 修正。
+		mob_spawn() 修正。
+		mob_damage() 修正。
+		mob_delay_item_drop() 修正。
+		mob_warp() 修正。
+	pc.c
+		pc_takeitem() 修正。
+
+--------------------
 //0788 by あゆみ
 
 ・cardスキルの処理？を修正。
