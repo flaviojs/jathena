@@ -55,6 +55,11 @@ int access_denynum=0;
 char *access_allow=NULL;
 char *access_deny=NULL;
 
+struct login_session_data {
+	int md5keylen;
+	char md5key[20];
+};
+
 #define AUTH_FIFO_SIZE 256
 struct {
   int account_id,login_id1,login_id2;
@@ -75,7 +80,6 @@ char admin_pass[64]="";
 char gm_pass[64]="";
 const int gm_start=704554,gm_last=704583;
 
-static char md5key[20],md5keylen=16;
 
 static struct dbt *gm_account_db;
 
@@ -271,13 +275,13 @@ int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 }
 
 // 認証
-int mmo_auth( struct mmo_account* account )
+int mmo_auth( struct mmo_account* account, int fd )
 {
 	int i;
 	struct timeval tv;
 	char tmpstr[256];
 	int len,newaccount=0;
-	char md5str[md5keylen+32],md5bin[32];
+	char md5str[64],md5bin[32];
 
 	len=strlen(account->userid)-2;
 	if(account->passwdenc==0 && account->userid[len]=='_' &&
@@ -310,17 +314,23 @@ int mmo_auth( struct mmo_account* account )
 	}
 	if(i!=auth_num){
 		int encpasswdok=0;
+		struct login_session_data *ld=session[fd]->session_data;
 #ifdef PASSWORDENC
 		if(account->passwdenc>0){
 			int j=account->passwdenc;
+			if(!ld){
+				login_log("md5key not created %s %s" RETCODE,
+					tmpstr,account->userid);
+				return 1;
+			}
 			if(j>2)j=1;
 			do{
 				if(j==1){
-					strcpy(md5str,md5key);
+					strcpy(md5str,ld->md5key);
 					strcat(md5str,auth_dat[i].pass);
 				}else if(j==2){
 					strcpy(md5str,auth_dat[i].pass);
-					strcat(md5str,md5key);
+					strcat(md5str,ld->md5key);
 				}else
 					md5str[0]=0;
 				MD5_String2binary(md5str,md5bin);
@@ -344,8 +354,8 @@ int mmo_auth( struct mmo_account* account )
 				for(j=0;j<16;j++)
 					p+=sprintf(p,"%02x",((unsigned char *)md5bin)[j]);
 				p+=sprintf(p,"] md5key[");			
-				for(j=0;j<md5keylen;j++)
-					p+=sprintf(p,"%02x",((unsigned char *)md5key)[j]);
+				for(j=0;j<ld->md5keylen;j++)
+					p+=sprintf(p,"%02x",((unsigned char *)ld->md5key)[j]);
 				p+=sprintf(p,"] %d" RETCODE,newaccount);
 				login_log(logbuf);
 			}
@@ -682,7 +692,7 @@ int parse_login(int fd)
 #else
 		account.passwdenc=0;
 #endif
-		result=mmo_auth(&account);
+		result=mmo_auth(&account,fd);
 		if(result==100){
 			server_num=0;
 			for(i=0;i<MAX_SERVERS;i++){
@@ -724,11 +734,34 @@ int parse_login(int fd)
 		break;
 	
 	case 0x01db:	// 暗号化Key送信要求
-		RFIFOSKIP(fd,2);
-		WFIFOW(fd,0)=0x01dc;
-		WFIFOW(fd,2)=4+md5keylen;
-		memcpy(WFIFOP(fd,4),md5key,md5keylen);
-		WFIFOSET(fd,WFIFOW(fd,2));
+	case 0x791a:	// 管理パケットで暗号化key要求
+		{
+			struct login_session_data *ld;
+			if(session[fd]->session_data){
+				printf("login: illeagal md5key request.");
+				close(fd);
+				session[fd]->eof=1;
+				return 0;
+			}
+			ld=session[fd]->session_data=malloc(sizeof(*ld));
+			if(!ld){
+				printf("login: md5key request: out of memory !\n");
+				close(fd);
+				session[fd]->eof=1;
+				return 0;
+			}
+			// 暗号化キー生成
+			memset(ld->md5key,0,sizeof(ld->md5key));
+			ld->md5keylen=rand()%4+12;
+			for(i=0;i<ld->md5keylen;i++)
+			ld->md5key[i]=rand()%255+1;
+	
+			RFIFOSKIP(fd,2);
+			WFIFOW(fd,0)=0x01dc;
+			WFIFOW(fd,2)=4+ld->md5keylen;
+			memcpy(WFIFOP(fd,4),ld->md5key,ld->md5keylen);
+			WFIFOSET(fd,WFIFOW(fd,2));
+		}
 		break;
 		
 	case 0x2710:	// Charサーバー接続要求
@@ -746,7 +779,8 @@ int parse_login(int fd)
 		}
 		account.userid = RFIFOP(fd,2);
 		account.passwd = RFIFOP(fd,26);
-		result = mmo_auth(&account);
+		account.passwdenc = 0;
+		result = mmo_auth(&account,fd);
 		if(result == 100 && account.sex==2 && account.account_id<MAX_SERVERS && server_fd[account.account_id]<0){
 			server[account.account_id].ip=RFIFOL(fd,54);
 			server[account.account_id].port=RFIFOW(fd,58);
@@ -785,16 +819,41 @@ int parse_login(int fd)
 		return 0;
 	
 	case 0x7918:	// 管理モードログイン
-		if(RFIFOREST(fd)<4 || RFIFOREST(fd)<RFIFOW(fd,2))
-			return 0;
-		WFIFOW(fd,0)=0x7919;
-		WFIFOB(fd,2)=1;
-		if(strcmp(RFIFOP(fd,6),admin_pass)==0){
-			WFIFOB(fd,2)=0;
-			session[fd]->func_parse=parse_admin;
+		{
+			struct login_session_data *ld=session[fd]->session_data;
+			if(RFIFOREST(fd)<4 || RFIFOREST(fd)<RFIFOW(fd,2))
+				return 0;
+
+			WFIFOW(fd,0)=0x7919;
+			WFIFOB(fd,2)=1;
+			
+			if(RFIFOW(fd,4)==0){	// プレーン
+				if(strcmp(RFIFOP(fd,6),admin_pass)==0){
+					WFIFOB(fd,2)=0;
+					session[fd]->func_parse=parse_admin;
+				}
+			}else{					// 暗号化
+				if(!ld){
+					printf("login: md5key not created for admin login\n");
+				}else{
+					char md5str[64]="",md5bin[32];
+					if(RFIFOW(fd,4)==1){
+						strcpy(md5str,ld->md5key);
+						strcat(md5str,admin_pass);
+					}else if(RFIFOW(fd,4)==2){
+						strcpy(md5str,admin_pass);
+						strcat(md5str,ld->md5key);
+					};
+					MD5_String2binary(md5str,md5bin);
+					if(memcmp(md5bin,RFIFOP(fd,6),16)==0){
+						WFIFOB(fd,2)=0;
+						session[fd]->func_parse=parse_admin;
+					}
+				}
+			}
+			WFIFOSET(fd,3);
+			RFIFOSKIP(fd,RFIFOW(fd,2));
 		}
-		WFIFOSET(fd,3);
-		RFIFOSKIP(fd,RFIFOW(fd,2));
 		break;
 
 	default:
@@ -881,12 +940,7 @@ int do_init(int argc,char **argv)
   int i;
 
   login_config_read( (argc>1)?argv[1]:LOGIN_CONF_NAME );
-
-  // 暗号化Keyの生成
-  memset(md5key,0,sizeof(md5key));
-  md5keylen=rand()%4+12;
-  for(i=0;i<md5keylen;i++)
-	md5key[i]=rand()%255+1;
+  srand(time(NULL));
 
   for(i=0;i<AUTH_FIFO_SIZE;i++){
     auth_fifo[i].delflag=1;

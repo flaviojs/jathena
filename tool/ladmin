@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########################################################################
-# Athenaのログインサーバー保守ツール Ver.1.04
+# Athenaのログインサーバー保守ツール Ver.1.05
 #
 # 　起動中のAthenaのlogin.exeに接続してアカウントの保守を行うツール.
 # 　アカウントの追加、削除、パスワードの変更、リスト表示ができます.
@@ -10,7 +10,7 @@
 #----------------------------------説明書---------------------------------
 # 設定
 #   以下の変数を正しく設定します。
-# 　（ログイン鯖のIP、ポート、管理者パスワード）
+#   （ログイン鯖のIP、ポート、管理者パスワード）
 #-------------------------------------------------------------------------
 
 my($loginserverip)="127.0.0.1";			#ログイン鯖のIP
@@ -18,6 +18,8 @@ my($loginserverport)=6900;			#ログイン鯖のポート
 my($loginserveradminpassword)="admin";		#ログイン鯖の管理者パスワード
 
 my($connecttimeout)=10;				# 接続タイムアウト(秒)
+
+my($passenc)=2;					# パスワード暗号化タイプ
 
 #-------------------------------------------------------------------------
 # プロンプトによる作業
@@ -82,11 +84,18 @@ my($connecttimeout)=10;				# 接続タイムアウト(秒)
 #	<例> ./addaccount testname Male testpass
 #
 #-------------------------------------------------------------------------
+# 暗号化について
+# 　Digest::MD5モジュールが必要です。Digest::MD5が読み込めない場合、
+#   自動的に暗号化しないモード($passenc=0)になるので、モジュールがなくても
+#   ladmin自体は動作します。（暗号化は行われませんが）
+# 　ちなみにCygwinだとDigest::MD5は最初から入っているようです。
+#
+#-------------------------------------------------------------------------
 # UNIX系OSでの使用について
 # 　コマンドとして実行するにはファイルに実行権が必要です。また改行コードを
-# 　変更する必要があります。perlを直接起動するなら必要ありません
+#   変更する必要があります。perlを直接起動するなら必要ありません。
 # 　実行には関係ありませんが、説明やコメントはシフトJISで書いているので
-# 　日本語エンコードをEUC-JPにしてください。
+#   日本語エンコードをEUC-JPにしてください。
 #   <コマンドの準備の例>
 #       $ mv ladmin ladmin_org
 #       $ nkf -eLu ladmin_org > ladmin
@@ -103,12 +112,15 @@ my($connecttimeout)=10;				# 接続タイムアウト(秒)
 
 
 
+
 use strict;
 use IO::Socket;
 use Term::ReadLine;
-eval {	use POSIX qw(:termios_h); };
+eval { use POSIX qw(:termios_h); };
+eval { use Digest::MD5 qw(md5); } if $passenc;
+$passenc=0 if($@);
 
-my($ver)="1.04";
+my($ver)="1.05";
 
 
 
@@ -167,8 +179,23 @@ if($er || $@){
 	exit(2);
 }
 
-print $so pack("v3a24",0x7918,30,0,$loginserveradminpassword);
-$so->flush();
+# ログイン要求
+if($passenc==0){
+	print $so pack("v3a24",0x7918,30,0,$loginserveradminpassword);
+	$so->flush();
+}else{
+	print $so pack("v",0x791a);
+	$so->flush();
+	my($buf)=readso(4);
+	if(unpack("v",$buf)!=0x01dc){
+		print "login error. (md5key creation failed)\n";
+	}
+	$buf=readso(unpack("x2v",$buf)-4);
+	my($md5bin)=md5( ($passenc==1)?$buf.$loginserveradminpassword:
+			$loginserveradminpassword.$buf );
+	print $so pack("v3a16",0x7918,22,$passenc,$md5bin);
+	$so->flush();
+}
 
 # 返答待ち
 my($buf)=readso(3);
