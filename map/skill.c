@@ -1077,11 +1077,17 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case AL_HEAL:				/* ヒール */
 		{
 			int heal=skill_calc_heal( src, skilllv );
+			int heal_get_jobexp;
 			if( bl->type==BL_PC &&
 				pc_check_equip_dcard((struct map_session_data *)bl,4128) )
 				heal=0;	/* 黄金蟲カード（ヒール量０） */
 			clif_skill_nodamage(src,bl,skillid,heal,1);
-			battle_heal(NULL,bl,heal,0);
+			heal_get_jobexp = battle_heal(NULL,bl,heal,0);
+			
+			// JOB経験値獲得
+			if( bl->type==BL_PC)
+				heal_get_jobexp = heal_get_jobexp * battle_config.heal_exp / 100;
+				pc_gainexp((struct map_session_data *)src,0,heal_get_jobexp);
 		}
 		break;
 

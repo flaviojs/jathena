@@ -15,6 +15,7 @@
 #include "timer.h"
 #include "pet.h"
 #include "battle.h"
+#include "skill.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -368,7 +369,8 @@ int npc_buysellsel(struct map_session_data *sd,int id,int type)
 int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 {
 	struct npc_data *nd;
-	int i,j,w,z,new=0;
+	int i,j,w,z,itemamount,new=0;
+	itemamount = 0;
 
 	if(npc_checknear(sd,sd->npc_shopid))
 		return 3;
@@ -386,6 +388,7 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 			return 3;
 
 		z+=pc_modifybuyvalue(sd,nd->u.shop_item[j].value) * item_list[i*2];
+		itemamount+=item_list[i*2];
 
 		switch(pc_checkadditem(sd,item_list[i*2+1],item_list[i*2])){
 		case ADDITEM_EXIST:
@@ -418,6 +421,12 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 		pc_additem(sd,&item_tmp,item_list[i*2]);
 	}
 
+	//商人経験値
+	if((sd->status.class == 5) || (sd->status.class == 10) || (sd->status.class == 18)){
+		z = z * pc_checkskill(sd,MC_DISCOUNT) / ((1 + 300 / itemamount) * 4000) * battle_config.shop_exp;
+		pc_gainexp(sd,0,z);
+	}
+
 	return 0;
 }
 
@@ -427,7 +436,8 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
  */
 int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 {
-	int i,z;
+	int i,z,itemamount;
+	itemamount = 0;
 
 	if(npc_checknear(sd,sd->npc_shopid))
 		return 1;
@@ -440,6 +450,7 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 		   sd->status.inventory[item_list[i*2]-2].amount < item_list[i*2+1])
 			return 1;
 		z+=pc_modifysellvalue(sd,itemdb_sellvalue(nameid)) * item_list[i*2+1];
+		itemamount+=item_list[i*2+1];
 	}
 
 	pc_getzeny(sd,z);
@@ -447,7 +458,15 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 		pc_delitem(sd,item_list[i*2]-2,item_list[i*2+1],0);
 	}
 	
+
+	//商人経験値
+	if((sd->status.class == 5) || (sd->status.class == 10) || (sd->status.class == 18)){
+		z = z * pc_checkskill(sd,MC_OVERCHARGE) / ((1 + 500 / itemamount) * 4000) * battle_config.shop_exp ;
+		pc_gainexp(sd,0,z);
+	}
+
 	return 0;
+
 }
 
 //

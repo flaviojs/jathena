@@ -2720,7 +2720,7 @@ int pc_heal(struct map_session_data *sd,int hp,int sp)
 	if(sp)
 		clif_updatestatus(sd,SP_SP);
 
-	return 0;
+	return hp + sp;
 }
 
 

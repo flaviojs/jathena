@@ -135,6 +135,7 @@ extern struct Battle_Config {
 	int pet_rename;
 	int pet_hungry_delay_rate;
 	int finger_offencive_type;
+	int heal_exp,shop_exp;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

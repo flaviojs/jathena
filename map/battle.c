@@ -1840,6 +1840,8 @@ int battle_config_read(const char *cfgName)
 	battle_config.pet_rename=0;
 	battle_config.pet_hungry_delay_rate=100;
 	battle_config.finger_offencive_type=0;
+	battle_config.heal_exp=0;
+	battle_config.shop_exp=0;
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
 		printf("file not found: %s\n",cfgName);
@@ -1879,6 +1881,9 @@ int battle_config_read(const char *cfgName)
 			{	"pet_rename",			&battle_config.pet_rename			},
 			{	"pet_hungry_delay_rate",&battle_config.pet_hungry_delay_rate	},
 			{ "finger_offencive_type",&battle_config.finger_offencive_type	},
+			{ "heal_exp",&battle_config.heal_exp	},
+			{ "shop_exp",&battle_config.shop_exp	},
+
 		};
 		
 		if(line[0] == '/' && line[1] == '/')
