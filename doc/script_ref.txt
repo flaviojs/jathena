@@ -122,7 +122,20 @@ AthenaNPCScript
 		}
 		と言った感じで書きましょう。コメントアウトは//、コメントエリアは/*,*/、
 		スクリプト語尾には;（セミコロン）を忘れずに。
+	
+		「<gatname>,<x>,<y>,<direction><tab>」の部分を、「-<tab>」とすることで、
+		マップサーバー内には存在していても、実際のマップには配置されないNPCを作成できます。
+		これは後述のデュプリケートスクリプトでコピー元として使用します。
+	
+	＊デュプリケートスクリプト：既存のNPC（のスクリプト）をコピーします。
+		<gatname>,<x>,<y>,<direction><tab>duplicate(<source>)<tab><displayname><tab><npcid>,<xs><ys>
 		
+		source以外のパラメータは通常のスクリプトと同じです。
+		sourceにはコピー元となるNPCの識別名を入力します。
+		
+		コピー元のNPCがマップ上に配置されている場合、同じマップである必要があります。
+		マップ上に配置されていない場合は、どのマップへもコピー可能です。
+	
 	＊マップフラグ：MAPのルールを管理します。
 		<gatname><tab>mapflag<tab><const>
 		
@@ -557,7 +570,8 @@ AthenaNPCScript
 			event		文字列、省略可
 			
 			<gatname>の座標<x>,<y>に<mobname>を持つ<mobid>に指定されたIDを持つモンスターを<num>体出現させます。
-			<gatname>がthisの場合スクリプト実行MAP、<x><y>が-1の場合ランダム座標、
+			<gatname>がthisの場合スクリプトを実行したプレイヤーがいるMAP、
+			<x><y>が-1の場合、スクリプトを実行したプレイヤーの座標、
 			<mobname>が--en--の場合英語名、--ja--の場合日本語名、<mobid>が-1の場合ランダム。
 			そのモンスターを倒したとき<event>を開始します。
 			
@@ -725,7 +739,23 @@ AthenaNPCScript
 			resetskill;
 			
 			スキルポイントをリセットします。
+		
+		statusup命令
+			statusup <st>;
 			
+			st	数値
+			
+			<st>で指定された基本ステータス値を、ステータスポイントを消費して1上げる。
+			<st>は bStr, bVit, bInt, bAgi, bDex, bLuk で指定する。
+		
+		statusup2命令
+			statusup2 <st>,<n>;
+			
+			st,n	数値
+			
+			<st>で指定された基本ステータス値を、ステータスポイントを消費せずに<n>上げる。
+			<st>は bStr, bVit, bInt, bAgi, bDex, bLuk で指定する。
+		
 		skill命令
 			skill <skillid>,<skilllv>,<flag>;
 			
@@ -1016,18 +1046,37 @@ AthenaNPCScript
 			
 			<n>で指定したIDを持つパーティー名を返します。
 			
-		getguildid関数
+		getguildname関数
 			getguildname(<n>)
 			
 			n		数値
 			
 			<n>で指定したIDを持つギルド名を返します。
+		
+		getguildmaster関数
+			getguildname(<n>)
 			
+			n		数値
+			
+			<n>で指定したIDを持つギルドのマスターの名前を返します。
+		
+		getguildmasterid関数
+			getguildmasterid(<n>)
+			
+			n		数値
+			
+			<n>で指定したIDを持つギルドのマスターのキャラクターIDを返します。
+		
 		basicskillcheck関数
 			basicskillcheck(0);
 			
 			battle_athena.confのbasic_skill_checkの設定値を返します。0は意味はありませんが何も入れなかった場合エラーになります。
 			basic_skill_checkとカプラの倉庫利用を合わせる為に作った物でそれ以外の機能はありません。戻った数値が0ならbasic_skill_checkがno、1ならyesです。
+
+		getgmlevel関数
+			getgmlevel(0);
+			
+			プレイヤーのGMレベルを返します。
 
 		guildopenstorage関数
 			guildopenstorage(0);

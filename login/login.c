@@ -149,9 +149,9 @@ int read_gm_account()
 // IPマスクチェック
 int check_ipmask(unsigned int ip,const unsigned char *str)
 {
-	unsigned int mask=0,i,m,ip2, a0,a1,a2,a3;
+	unsigned int mask=0,i=0,m,ip2, a0,a1,a2,a3;
 	unsigned char *p=(unsigned char *)&ip2, *p2=(unsigned char *)&mask;
-	if( sscanf(str,"%d.%d.%d.%d/%n",&a0,&a1,&a2,&a3,&i)!=4 )
+	if( sscanf(str,"%d.%d.%d.%d/%n",&a0,&a1,&a2,&a3,&i)!=4 || i==0)
 		return 0;
 	p[0]=a0; p[1]=a1; p[2]=a2; p[3]=a3;
 
