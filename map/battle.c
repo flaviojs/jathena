@@ -1127,6 +1127,28 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 			skill_status_change_end( bl,SC_AETERNA,-1 );
 		}
 
+		//属性場のダメージ増加
+		if(sc_data[SC_VOLCANO].timer!=-1){	// ボルケーノ
+			if(flag&BF_SKILL && skill_get_pl(skill_num)==3)
+				damage += damage*sc_data[SC_VOLCANO].val4/100;
+			else if(!flag&BF_SKILL && battle_get_attack_element(bl)==3)
+				damage += damage*sc_data[SC_VOLCANO].val4/100;
+		}
+
+		if(sc_data[SC_VIOLENTGALE].timer!=-1){	// バイオレントゲイル
+			if(flag&BF_SKILL && skill_get_pl(skill_num)==4)
+				damage += damage*sc_data[SC_VIOLENTGALE].val4/100;
+			else if(!flag&BF_SKILL && battle_get_attack_element(bl)==4)
+				damage += damage*sc_data[SC_VIOLENTGALE].val4/100;
+		}
+
+		if(sc_data[SC_DELUGE].timer!=-1){	// デリュージ
+			if(flag&BF_SKILL && skill_get_pl(skill_num)==1)
+				damage += damage*sc_data[SC_DELUGE].val4/100;
+			else if(!flag&BF_SKILL && battle_get_attack_element(bl)==1)
+				damage += damage*sc_data[SC_DELUGE].val4/100;
+		}
+
 		if(sc_data[SC_ENERGYCOAT].timer!=-1 && damage>0  && flag&BF_WEAPON){	// エナジーコート
 			if(sd){
 				if(sd->status.sp>0){
@@ -3199,6 +3221,7 @@ struct Damage battle_calc_magic_attack(
 		int s_class = battle_get_class(bl);
 		cardfix=100;
 		cardfix=cardfix*(100-tsd->subele[ele])/100;	// 属 性によるダメージ耐性
+		cardfix=cardfix*(100-tsd->subrace[race])/100;	// 種族によるダメージ耐性
 		cardfix=cardfix*(100-tsd->magic_subrace[race])/100;
 		if(battle_get_mode(bl) & 0x20)
 			cardfix=cardfix*(100-tsd->magic_subrace[10])/100;
@@ -3258,7 +3281,7 @@ struct Damage  battle_calc_misc_attack(
 	int int_=battle_get_int(bl);
 //	int luk=battle_get_luk(bl);
 	int dex=battle_get_dex(bl);
-	int skill,ele,cardfix;
+	int skill,ele,race,cardfix;
 	struct map_session_data *sd=NULL,*tsd=NULL;
 	int damage=0,div_=1,blewcount=skill_get_blewcount(skill_num,skill_lv);
 	struct Damage md;
@@ -3338,6 +3361,8 @@ struct Damage  battle_calc_misc_attack(
 	}
 
 	ele = skill_get_pl(skill_num);
+	race = battle_get_race(bl);
+
 	if(damagefix){
 		if(damage<1 && skill_num != NPC_DARKBREATH)
 			damage=1;
@@ -3345,6 +3370,7 @@ struct Damage  battle_calc_misc_attack(
 		if( target->type==BL_PC ){
 			cardfix=100;
 			cardfix=cardfix*(100-tsd->subele[ele])/100;	// 属性によるダメージ耐性
+			cardfix=cardfix*(100-tsd->subrace[race])/100;	// 種族によるダメージ耐性
 			cardfix=cardfix*(100-tsd->misc_def_rate)/100;
 			damage=damage*cardfix/100;
 		}
@@ -3858,6 +3884,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.random_monster_checklv=1;
 		battle_config.attr_recover=1;
 		battle_config.flooritem_lifetime=LIFETIME_FLOORITEM*1000;
+		battle_config.item_auto_get=0;
 		battle_config.item_first_get_time=3000;
 		battle_config.item_second_get_time=1000;
 		battle_config.item_third_get_time=1000;
@@ -4000,6 +4027,7 @@ int battle_config_read(const char *cfgName)
 			{ "random_monster_checklv",		&battle_config.random_monster_checklv	},
 			{ "attribute_recover",			&battle_config.attr_recover				},
 			{ "flooritem_lifetime",			&battle_config.flooritem_lifetime		},
+			{ "item_auto_get",		&battle_config.item_auto_get		},
 			{ "item_first_get_time",		&battle_config.item_first_get_time		},
 			{ "item_second_get_time",		&battle_config.item_second_get_time		},
 			{ "item_third_get_time",		&battle_config.item_third_get_time		},

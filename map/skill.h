@@ -250,6 +250,7 @@ enum {	// struct map_session_data ‚Ì status_change‚Ì”Ô†ƒe[ƒuƒ‹
 	SC_AUTOCOUNTER			=152,
 	SC_VOLCANO				=153,
 	SC_DELUGE				=154,
+	SC_VIOLENTGALE				=155,
 
 	SC_LULLABY				=160,
 	SC_RICHMANKIM			=161,

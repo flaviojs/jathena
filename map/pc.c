@@ -1365,6 +1365,11 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->wlv >= 4)
 				sd->watk_ += sd->sc_data[SC_NIBELUNGEN].val2;
 		}
+
+		if(sd->sc_data[SC_VOLCANO].timer!=-1 && sd->def_ele==3){	// ボルケーノ
+			sd->watk += sd->sc_data[SC_VIOLENTGALE].val3;
+		}
+
 		if(sd->sc_data[SC_SIGNUMCRUCIS].timer!=-1)
 			sd->def = sd->def * (100 - sd->sc_data[SC_SIGNUMCRUCIS].val2)/100;
 		if(sd->sc_data[SC_ETERNALCHAOS].timer!=-1)	// エターナルカオス
@@ -1405,6 +1410,9 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(sd->sc_data[SC_HUMMING].timer!=-1)  // ハミング
 			sd->hit += (sd->sc_data[SC_HUMMING].val1*2+sd->sc_data[SC_HUMMING].val2
 					+sd->sc_data[SC_HUMMING].val3) * sd->hit/100;
+		if(sd->sc_data[SC_VIOLENTGALE].timer!=-1 && sd->def_ele==4){	// バイオレントゲイル
+			sd->flee += sd->flee*sd->sc_data[SC_VIOLENTGALE].val3/100;
+		}
 		if(sd->sc_data[SC_BLIND].timer!=-1){	// 暗黒
 			sd->hit -= sd->hit*25/100;
 			sd->flee -= sd->flee*25/100;
@@ -1424,6 +1432,11 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(sd->sc_data[SC_APPLEIDUN].timer!=-1){	// イドゥンの林檎
 			sd->status.max_hp += ((5+sd->sc_data[SC_APPLEIDUN].val1*2+((sd->sc_data[SC_APPLEIDUN].val2+1)>>1)
 						+sd->sc_data[SC_APPLEIDUN].val3/10) * sd->status.max_hp)/100;
+			if(sd->status.max_hp < 0 || sd->status.max_hp > battle_config.max_hp)
+				sd->status.max_hp = battle_config.max_hp;
+		}
+		if(sd->sc_data[SC_DELUGE].timer!=-1 && sd->def_ele==1){	// デリュージ
+			sd->status.max_hp += sd->status.max_hp*sd->sc_data[SC_DELUGE].val3/100;
 			if(sd->status.max_hp < 0 || sd->status.max_hp > battle_config.max_hp)
 				sd->status.max_hp = battle_config.max_hp;
 		}
@@ -4930,6 +4943,8 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 
 	if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,sd->def_ele))
 		skill_status_change_end(&sd->bl,SC_SIGNUMCRUCIS,-1);
+	if(sd->sc_data[SC_DANCING].timer!=-1 && (sd->status.weapon != 13 && sd->status.weapon !=14))
+		skill_stop_dancing(&sd->bl);
 
 	return 0;
 }

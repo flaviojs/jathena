@@ -1558,6 +1558,7 @@ static int mob_delay_item_drop(int tid,unsigned int tick,int id,int data)
 {
 	struct delay_item_drop *ditem;
 	struct item temp_item;
+	int flag;
 
 	ditem=(struct delay_item_drop *)id;
 
@@ -1565,6 +1566,16 @@ static int mob_delay_item_drop(int tid,unsigned int tick,int id,int data)
 	temp_item.nameid = ditem->nameid;
 	temp_item.amount = ditem->amount;
 	temp_item.identify = !itemdb_isequip3(temp_item.nameid);
+
+	if(battle_config.item_auto_get){
+		if((flag = pc_additem(ditem->first_sd,&temp_item,ditem->amount))){
+			clif_additem(ditem->first_sd,0,0,flag);
+			map_addflooritem(&temp_item,1,ditem->m,ditem->x,ditem->y,ditem->first_sd,ditem->second_sd,ditem->third_sd,0);
+		}
+		free(ditem);
+		return 0;
+	}
+
 	map_addflooritem(&temp_item,1,ditem->m,ditem->x,ditem->y,ditem->first_sd,ditem->second_sd,ditem->third_sd,0);
 
 	free(ditem);
@@ -1578,8 +1589,18 @@ static int mob_delay_item_drop(int tid,unsigned int tick,int id,int data)
 static int mob_delay_item_drop2(int tid,unsigned int tick,int id,int data)
 {
 	struct delay_item_drop2 *ditem;
+	int flag;
 
 	ditem=(struct delay_item_drop2 *)id;
+
+	if(battle_config.item_auto_get){
+		if((flag = pc_additem(ditem->first_sd,&ditem->item_data,ditem->item_data.amount))){
+			clif_additem(ditem->first_sd,0,0,flag);
+			map_addflooritem(&ditem->item_data,ditem->item_data.amount,ditem->m,ditem->x,ditem->y,ditem->first_sd,ditem->second_sd,ditem->third_sd,0);
+		}
+		free(ditem);
+		return 0;
+	}
 
 	map_addflooritem(&ditem->item_data,ditem->item_data.amount,ditem->m,ditem->x,ditem->y,ditem->first_sd,ditem->second_sd,ditem->third_sd,0);
 

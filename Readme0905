@@ -1,5 +1,47 @@
 --------------------
-//0925 by 胡蝶蘭
+//0927 by ぴざまん
+
+・武器攻撃以外に種族補正が入っていなかったのを修正。
+・演奏中に楽器・鞭以外の武器に持ち変えると演奏が止まる様に修正。
+・演奏の効果が演奏者自身にはかからないように修正。
+・アイテム自動取得機能実装
+　敵を倒した時に、アイテムがドロップされるのではなく、その敵に一番多くのダメージを
+　与えた人(ルート権1位の人)にドロップアイテムが自動で与えられる機能です。
+　battle_athena.confのitem_auto_getで設定できます。
+　オリジナルアップデートの為、battle_athena.confでのデフォルトではnoにしています。
+・属性場(デリュージ・バイオレントゲイル・ボルケーノ・ランドプロテクター)仮実装
+　一部の機能が未実装です
+　　デリュージ：水場を用いたウォーターボール
+　　バイオレントゲイル：ファイアーウォールの持続時間補正
+　　ボルケーノ：アイスウォール禁止
+　　ランドプロテクター：オブジェクト設置系スキル禁止(つまり出るだけのLPです)
+
+	(map/)
+	battle.c
+		battle_calc_damage()、battle_calc_magic_attack() 修正。
+		battle_calc_misc_attack()、battle_config_read() 修正。
+	mob.c
+		mob_delay_item_drop()、mob_delay_item_drop2() 修正。
+	pc.c
+		pc_calcstatus()、pc_equipitem() 修正。
+	skill.c
+		ローカルプロトタイプ宣言修正。
+		SkillStatusChangeTable[] 修正。
+		skill_castend_nodamage_id()、skill_castend_pos2() 修正。
+		skill_unitsetting()、skill_unit_onplace() 修正。
+		skill_unit_onout()、skill_unit_ondelete() 修正。
+		skill_status_change_start()、skill_status_change_end() 修正。
+		skill_clear_element_field() 追加。
+	battle.h 修正。
+	skill.h 修正。
+	(conf/)
+	battle_athena.conf
+		item_auto_get項目を追加。
+	(db/)
+	cast_db.txt 修正。
+
+--------------------
+//0926 by 胡蝶蘭
 
 ・ギルド城の初期化方法変更
 	・全てのギルド城（＋占拠ギルド情報）を所得したときにOnAgitInitが

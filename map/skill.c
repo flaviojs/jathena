@@ -162,7 +162,8 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	-1,
 	SC_VOLCANO,
 	SC_DELUGE,
-	-1,-1,-1,
+	SC_VIOLENTGALE,
+	-1,-1,
 /* 290- */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 /* 300- */
@@ -242,6 +243,7 @@ int skill_status_change_timer_sub(struct block_list *bl, va_list ap );
 int skill_attack_area(struct block_list *bl,va_list ap);
 int skill_is_danceskill(int id);
 int skill_abra_dataset(int skilllv);
+int skill_clear_element_field(struct block_list *bl);
 
 static int distance(int x0,int y0,int x1,int y1)
 {
@@ -285,7 +287,10 @@ int skill_get_unit_id(int id,int flag)
 	case HT_FLASHER:		return 0x96;				/* フラッシャー */
 	case HT_FREEZINGTRAP:	return 0x97;				/* フリージングトラップ */
 	case HT_CLAYMORETRAP:	return 0x98;				/* クレイモアートラップ */
+	case SA_VOLCANO:	return 0x9a;					/* ボルケーノ */
 	case SA_DELUGE:			return 0x9b;				/* デリュージ */
+	case SA_VIOLENTGALE:	return 0x9c;					/* バイオレントゲイル */
+	case SA_LANDPROTECTOR:	return 0x9d;					/* ランドプロテクター */
 	case BD_LULLABY:		return 0x9e;				/* 子守歌 */
 	case BD_RICHMANKIM:		return 0x9f;				/* ニヨルドの宴 */
 	case BD_ETERNALCHAOS:	return 0xa0;				/* 永遠の混沌 */
@@ -1985,12 +1990,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case AL_RUWACH:			/* ルアフ */
 	case MO_EXPLOSIONSPIRITS:	// 爆裂波動
 	case MO_STEELBODY:		// 金剛
-#if 0
-	case SA_VOLCANO:		/* ボルケーノ */
-	case SA_DELUGE:			/* デリュージ */
-	case SA_VIOLENTGALE:	/* バイオレントゲイル */
-	case SA_LANDPROTECTOR:	/* ランドプロテクター */
-#endif
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
 		break;
@@ -3043,6 +3042,14 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 		skill_unitsetting(src,skillid,skilllv,x,y,0);
 		break;
 
+	case SA_VOLCANO:		/* ボルケーノ */
+	case SA_DELUGE:			/* デリュージ */
+	case SA_VIOLENTGALE:	/* バイオレントゲイル */
+	case SA_LANDPROTECTOR:	/* ランドプロテクター */
+		skill_clear_element_field(src);//既に自分が発動している属性場をクリア
+		skill_unitsetting(src,skillid,skilllv,x,y,0);
+		break;
+
 	case WZ_METEOR:				//メテオストーム
 		{
 			int flag=0;
@@ -3378,14 +3385,15 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		break;
 
 	case SA_VOLCANO:			/* ボルケーノ */
+	case SA_DELUGE:				/* デリュージ */
+	case SA_VIOLENTGALE:				/* バイオレントゲイル */
 		limit=skill_get_time(skillid,skilllv);
-		range=skilllv+4;
+		count=skilllv<=2?25:(skilllv<=4?49:81);
 		target=BCT_ALL;
 		break;
-
-	case SA_DELUGE:				/* デリュージ */
+	case SA_LANDPROTECTOR:				/* ランドプロテクター */
 		limit=skill_get_time(skillid,skilllv);
-		range=skilllv+4;
+		count=skilllv<=2?49:(skilllv<=4?81:121);
 		target=BCT_ALL;
 		break;
 
@@ -3616,6 +3624,34 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 					-4, -3, -2,-2,-2, -1,-1,-1,-1,-1, 0,0,0,0,0,0,0,0,0, 1,1,1,1,1, 2,2,2, 3, 4, };
 				ux+=dx[i];
 				uy+=dy[i];
+			}
+			break;
+		case SA_VOLCANO:			/* ボルケーノ */
+		case SA_DELUGE:				/* デリュージ */
+		case SA_VIOLENTGALE:				/* バイオレントゲイル */
+			{
+				int u_range=0;
+				if(skilllv<=2) u_range=2;
+				else if(skilllv<=4) u_range=3;
+				else if(skilllv>=5) u_range=4;
+
+				ux+=(i%(u_range*2+1)-u_range);
+				uy+=(i/(u_range*2+1)-u_range);
+
+
+			}
+			break;
+		case SA_LANDPROTECTOR:				/* ランドプロテクター */
+			{
+				int u_range=0;
+				if(skilllv<=2) u_range=3;
+				else if(skilllv<=4) u_range=4;
+				else if(skilllv>=5) u_range=5;
+
+				ux+=(i%(u_range*2+1)-u_range);
+				uy+=(i/(u_range*2+1)-u_range);
+
+
 			}
 			break;
 
@@ -3851,6 +3887,21 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 				skill_status_change_start(bl,type,src->group->skill_lv,(int)src,0,0,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
 		}
 		break;
+	case 0x9a:	/* ボルケーノ */
+	case 0x9b:	/* デリュージ */
+	case 0x9c:	/* バイオレントゲイル */
+		{
+			struct skill_unit *unit2;
+			struct status_change *sc_data=battle_get_sc_data(bl);
+			int type=SkillStatusChangeTable[sg->skill_id];
+			if(sc_data[type].timer==-1)
+				skill_status_change_start(bl,type,src->group->skill_lv,(int)src,0,0,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
+			else if((unit2=(struct skill_unit *)sc_data[type].val2)!=src){
+				if( DIFF_TICK(sg->tick,unit2->group->tick)>0 )
+					skill_status_change_start(bl,type,src->group->skill_lv,(int)src,0,0,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
+				ts->tick-=sg->interval;
+			}
+		} break;
 
 	case 0x9e:	/* 子守唄 */
 	case 0x9f:	/* ニヨルドの宴 */
@@ -3874,6 +3925,8 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 			struct skill_unit *unit2;
 			struct status_change *sc_data=battle_get_sc_data(bl);
 			int type=SkillStatusChangeTable[sg->skill_id];
+			if(sg->src_id == bl->id)
+				break;
 			if(sc_data[type].timer==-1)
 				skill_status_change_start(bl,type,src->group->skill_lv,src->group->val1,src->group->val2,
 					(int)src,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
@@ -3944,6 +3997,18 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 			sg->limit=DIFF_TICK(tick,sg->tick)+1000;
 		}
 		break;
+	case 0x9a:	/* ボルケーノ */
+	case 0x9b:	/* デリュージ */
+	case 0x9c:	/* バイオレントゲイル */
+		{
+			struct skill_unit *unit2;
+			struct status_change *sc_data=battle_get_sc_data(bl);
+			int type=SkillStatusChangeTable[sg->skill_id];
+			if(sc_data[type].timer!=-1 && (unit2=(struct skill_unit *)sc_data[type].val2)==src){
+				skill_status_change_end(bl,type,-1);
+			}
+		}
+		break;
 
 	case 0x9e:	/* 子守唄 */
 	case 0x9f:	/* ニヨルドの宴 */
@@ -3998,6 +4063,9 @@ int skill_unit_ondelete(struct skill_unit *src,struct block_list *bl,unsigned in
 	case 0x85:	/* ニューマ */
 	case 0x7e:	/* セイフティウォール */
 	case 0x8e:	/* クァグマイヤ */
+	case 0x9a:	/* ボルケーノ */
+	case 0x9b:	/* デリュージ */
+	case 0x9c:	/* バイオレントゲイル */
 	case 0x9e:	/* 子守唄 */
 	case 0x9f:	/* ニヨルドの宴 */
 	case 0xa0:	/* 永遠の混沌 */
@@ -5203,6 +5271,34 @@ int skill_attack_area(struct block_list *bl,va_list ap)
 
 	return 0;
 }
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int skill_clear_element_field(struct block_list *bl)
+{
+	struct mob_data *md=NULL;
+	struct map_session_data *sd=NULL;
+	int i,skillid;
+
+	if(bl->type==BL_MOB)
+		md=(struct mob_data *)bl;
+	if(bl->type==BL_PC)
+		sd=(struct map_session_data *)bl;
+
+	for(i=0;i<MAX_MOBSKILLUNITGROUP;i++){
+		if(sd){
+			skillid=sd->skillunit[i].skill_id;
+			if(skillid==SA_DELUGE||skillid==SA_VOLCANO||skillid==SA_VIOLENTGALE||skillid==SA_LANDPROTECTOR)
+				skill_delunitgroup(&sd->skillunit[i]);
+		}else if(md){
+			skillid=md->skillunit[i].skill_id;
+			if(skillid==SA_DELUGE||skillid==SA_VOLCANO||skillid==SA_VIOLENTGALE||skillid==SA_LANDPROTECTOR)
+				skill_delunitgroup(&md->skillunit[i]);
+		}
+	}
+	return 0;
+}
 
 /*----------------------------------------------------------------------------
  * ステータス異常
@@ -5297,6 +5393,9 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			case SC_QUAGMIRE:			/* クァグマイア */
 			case SC_PROVIDENCE:			/* プロヴィデンス */
 			case SC_SPEARSQUICKEN:		/* スピアクイッケン */
+			case SC_VOLCANO:
+			case SC_DELUGE:
+			case SC_VIOLENTGALE:
 			case SC_ETERNALCHAOS:		/* エターナルカオス */
 			case SC_DRUMBATTLE:			/* 戦太鼓の響き */
 			case SC_NIBELUNGEN:			/* ニーベルングの指輪 */
@@ -5838,7 +5937,24 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_AUTOSPELL:			/* オートスペル */
 			val4 = 5 + val1*2;
 			break;
-		case SC_SPEARSQUICKEN:		/* スピアクイッケン */
+	
+		case SC_VOLCANO:
+			calc_flag = 1;
+			val3 = val1*10;
+			val4 = val1>=5?20: (val1==4?19: (val1==3?17: ( val1==2?14:10 ) ) );
+			break;
+		case SC_DELUGE:
+			calc_flag = 1;
+			val3 = val1>=5?15: (val1==4?14: (val1==3?12: ( val1==2?9:5 ) ) );
+			val4 = val1>=5?20: (val1==4?19: (val1==3?17: ( val1==2?14:10 ) ) );
+			break;
+		case SC_VIOLENTGALE:
+			calc_flag = 1;
+			val3 = val1*3;
+			val4 = val1>=5?20: (val1==4?19: (val1==3?17: ( val1==2?14:10 ) ) );
+			break;
+
+	case SC_SPEARSQUICKEN:		/* スピアクイッケン */
 			calc_flag = 1;
 			val2 = 20+val1;
 			break;

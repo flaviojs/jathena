@@ -139,6 +139,7 @@ extern struct Battle_Config {
 	int random_monster_checklv;
 	int attr_recover;
 	int flooritem_lifetime;
+	int item_auto_get;
 	int item_first_get_time;
 	int item_second_get_time;
 	int item_third_get_time;
