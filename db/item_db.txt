@@ -448,7 +448,7 @@
 1227,Weeder_Knife,ウィーダーナイフ,4,20,,400,80,,1,0,2055918,2,2,4,36,1,{},{ bonus bIgnoreDefRace,3; bonus2 bAddRace,3,15; bonus2 bSubRace,3,15; }
 1228,Combat_Knife,コンバットナイフ,4,20,,400,80,,1,0,2055918,2,2,4,36,1,{},{ bonus bIgnoreDefRace,7; bonus2 bSubRace,7,10; bonus2 bSubRace,6,-10; }
 1229,Mama's_Knife,包丁,4,20,,500,75,,1,0,2055918,2,2,4,36,1,{},{ bonus bCritical,30; bonus2 bAddRace,7,3; bonus3 bAddMonsterDropItem,517,2,50; }
-1230,House_Auger,錐,4,20,,600,80,,1,0,2055918,2,2,4,36,1,{},{ bonus bDefRatioAtk,0; }
+1230,House_Auger,錐,4,20,,600,80,,1,0,2055918,2,2,4,36,1,{},{ bonus bDefRatioAtkRace,10; bonus bDefRatioAtkRace,11; }
 1231,Bazerald,バゼラルド,4,20,,500,70,,1,0,2055918,2,2,4,36,1,{},{ bonus bAtkEle,3; bonus bInt,5; bonus bMatkRate,10; }
 1232,Assassin_Dagger,アサシンダガー,4,20,,600,140,,1,0,4096,2,2,4,36,1,{},{ bonus bMaxHPrate,20; bonus bMaxSPrate,15; bonus bAspdAddRate,2; }
 1233,Exercise,エキサーサイズ,4,20,,700,90,,1,0,2055918,2,2,4,36,1,{},{ bonus bIgnoreDefRace,6; bonus2 bSubRace,6,5; bonus2 bSubRace,7,-10; }
@@ -893,7 +893,7 @@
 2626,Rosary_,ロザリオ,5,15000,,200,,0,,1,2088958,2,136,,90,0,{},{ bonus bMdef,3; bonus bLuk,1; }
 2627,Belt,ベルト,5,20000,,1200,,0,,1,10477567,2,136,,25,0,{},{}
 2628,Novice_Armlet,ノービスアミュレット,5,400,,200,,0,,1,8388609,2,136,,0,0,{},{ bonus bStr,1; bonus bInt,1; bonus bLuk,1; }
-2629,Magingiorde,メギンギョルド,5,20,,8000,,2,,0,10477567,2,136,,90,0,{},{ bonus bStr,40; }
+2629,Magingiorde,メギンギョルド,5,20,,8000,,2,,0,10477567,2,136,,90,0,{},{ bonus bStr,40; bonus bMdef,7; }
 2630,Brysinggamen,ブリーシンガメン,5,20,,1500,,1,,0,10477567,2,136,,95,0,{},{ bonus bStr,3; bonus bAgi,3; bonus bVit,3; bonus bInt,3; bonus bMdef,5; }
 2631,Pebble_Ring,アニバーサリーリング,5,,,10,,0,,0,10477567,2,136,,0,0,{},{ bonus bStr,2; bonus bAgi,2; bonus bVit,2; bonus bInt,2; bonus bDex,2; bonus bLuk,2; }
 4001,Poring_Card,ポリンカード,6,20,,10,,,,,,,16,,,,{},{ bonus bLuk,2; bonus bFlee2,1; }
