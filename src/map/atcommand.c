@@ -108,6 +108,9 @@ ATCOMMAND_FUNC(party);
 ATCOMMAND_FUNC(guild);
 ATCOMMAND_FUNC(agitstart);
 ATCOMMAND_FUNC(agitend);
+ATCOMMAND_FUNC(reloaditemdb);
+ATCOMMAND_FUNC(reloadmobdb);
+ATCOMMAND_FUNC(reloadskilldb);
 ATCOMMAND_FUNC(mapexit);
 ATCOMMAND_FUNC(idsearch);
 ATCOMMAND_FUNC(itemidentify);
@@ -204,6 +207,9 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Guild,					"@guild",			0, atcommand_guild },
 	{ AtCommand_AgitStart,				"@agitstart",		0, atcommand_agitstart },
 	{ AtCommand_AgitEnd,				"@agitend",			0, atcommand_agitend },
+	{ AtCommand_ReloadItemDB,	        "@reloaditemdb",    0, atcommand_reloaditemdb },
+	{ AtCommand_ReloadMobDB,			"@reloadmobdb",     0, atcommand_reloadmobdb },
+	{ AtCommand_ReloadSkillDB,			"@reloadskilldb",   0, atcommand_reloadskilldb },
 	{ AtCommand_MapExit,				"@mapexit",			0, atcommand_mapexit },
 	{ AtCommand_IDSearch,				"@idsearch",		0, atcommand_idsearch },
 	{ AtCommand_ItemIdentify,			"@itemidentify",	0, atcommand_itemidentify },
@@ -2741,6 +2747,48 @@ atcommand_agitend(
 	agit_flag = 0;
 	guild_agit_end();
 	clif_displaymessage(fd, msg_table[74]);
+	return 0;
+}
+
+/*==========================================
+ *itemDBのリロード
+ *------------------------------------------
+ */
+int atcommand_reloaditemdb(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	itemdb_reload();
+	clif_displaymessage(fd, msg_table[89]);
+
+	return 0;
+}
+
+/*==========================================
+ *MOBDBのリロード
+ *------------------------------------------
+ */
+int atcommand_reloadmobdb(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	mob_reload();
+	clif_displaymessage(fd, msg_table[90]);
+
+	return 0;
+}
+
+/*==========================================
+ *スキルDBのリロード
+ *------------------------------------------
+ */
+int atcommand_reloadskilldb(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	skill_reload();
+	clif_displaymessage(fd, msg_table[91]); //
+
 	return 0;
 }
 

@@ -135,5 +135,9 @@
 @party    ---- パーティを作る(制限なしで)
 @guild    ---- ギルドを作る(制限なしで)
 
+@reloaditemdb    ---- itemdbを再読み込みする
+@reloadmobdb    ---- mobdbを再読み込みする
+@reloadskilldb    ---- skilldbを再読み込みする
+
 @agitstart    ---- 攻城戦開始
 @agitend      ---- 攻城戦終了

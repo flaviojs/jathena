@@ -71,6 +71,7 @@ int itemdb_isdropable(int nameid);
 // ŒãÒ‚Ísessiondata‚ğl—¶‚µ‚½ˆÆ‘¤‚Å‚Ì‘•”õ‰Â”\êŠ
 // ‚·‚×‚Ä‚Ì‘g‚İ‡‚í‚¹‚ğ•Ô‚·
 
+void itemdb_reload(void);
 void do_final_itemdb(void);
 int do_init_itemdb(void);
 

@@ -156,6 +156,8 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 int skill_attack( int attack_type, struct block_list* src, struct block_list *dsrc,
 	 struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag );
 
+void skill_reload(void);
+
 enum {
 	ST_NONE,ST_HIDING,ST_CLOAKING,ST_HIDDEN,ST_RIDING,ST_FALCON,ST_CART,ST_SHIELD,ST_SIGHT,ST_EXPLOSIONSPIRITS,
 	ST_RECOV_WEIGHT_RATE,ST_MOVE_ENABLE,ST_WATER,

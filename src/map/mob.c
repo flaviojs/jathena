@@ -3687,6 +3687,19 @@ static int mob_readskilldb(void)
 	}
 	return 0;
 }
+
+void mob_reload(void)
+{
+	/*
+
+	<empty monster database>
+	mob_read();
+
+	*/
+
+	do_init_mob();
+}
+
 /*==========================================
  * mobü‚è‰Šú‰»
  *------------------------------------------

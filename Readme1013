@@ -1,4 +1,41 @@
 --------------------
+//1059 by SPDFMember
+・eAthenaを参考にリロードDB系統を追加しました。
+	(conf/)
+		atcommand_athena.conf
+			reloaditemdb
+			reloadmobdb
+			reloadskilldbを追加
+		help.txt
+			reloaditemdb
+			reloadmobdb
+			reloadskilldbの説明を追加
+		msg_athena.conf
+			89
+			90
+			91を追加		
+	(src/map)
+		atcommand.c
+			reloaditemdb
+			reloadmobdb
+			reloadskilldbを追加。
+		atcommand.h
+			AtCommand_ReloadItemDB,
+			AtCommand_ReloadMobDB,
+			AtCommand_ReloadSkillDB,を追加
+		itemdb.c
+			static int itemdb_readdb(void);追加
+		itemdb.h
+			void itemdb_reload(void);追加
+		mob.c
+			void mob_reload(void)追加
+		mob.h
+			void mob_reload(void);追加
+		skill.c
+			void skill_reload(void)追加
+		skill.h
+		 	void skill_reload(void);追加
+--------------------
 //1058 by lizorett
 ・ギルド倉庫アイテムがMAX_STORAGE個以上あると取り出せないものがある問題を修正
 	(src/map)

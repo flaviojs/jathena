@@ -1,4 +1,4 @@
-// $Id: itemdb.c,v 1.1.1.1 2004/06/24 19:30:07 running_pinata Exp $
+// $Id: itemdb.c,v 1.1 2004/11/08 13:05:55 evolution Exp $
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,6 +28,13 @@ static struct dbt* item_db;
 static struct random_item_data blue_box[MAX_RANDITEM],violet_box[MAX_RANDITEM],card_album[MAX_RANDITEM],gift_box[MAX_RANDITEM],scroll[MAX_RANDITEM];
 static int blue_box_count=0,violet_box_count=0,card_album_count=0,gift_box_count=0,scroll_count=0;
 static int blue_box_default=0,violet_box_default=0,card_album_default=0,gift_box_default=0,scroll_default=0;
+
+static int itemdb_readdb(void);
+static int itemdb_read_randomitem();
+static int itemdb_read_itemavail(void);
+static int itemdb_read_itemnametable(void);
+static int itemdb_read_noequip(void);
+void itemdb_reload(void);
 
 /*==========================================
  * ñºëOÇ≈åüçıóp
@@ -644,6 +651,22 @@ static int itemdb_final(void *key,void *data,va_list ap)
 	free(id);
 
 	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
+void itemdb_reload(void)
+{
+	/*
+
+	<empty item databases>
+	itemdb_read();
+
+	*/
+
+	do_init_itemdb();
 }
 
 /*==========================================
