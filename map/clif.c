@@ -1815,7 +1815,6 @@ int clif_arrow_create_list(struct map_session_data *sd)
 	return 0;
 }
 
-
 /*==========================================
  *
  *------------------------------------------
@@ -4182,6 +4181,24 @@ int clif_pet_food(struct map_session_data *sd,int foodid,int fail)
 	WFIFOW(fd,3)=foodid;
 	WFIFOSET(fd,packet_len_table[0x1a3]);
 
+	return 0;
+}
+/*==========================================
+ * ディボーションの青い糸
+ *------------------------------------------
+ */
+int clif_devotion(struct map_session_data *sd,int target)
+{
+	unsigned char buf[28];
+	int n;
+	/* パケットがイマイチ分からない */
+	WBUFW(buf,0)=0x1cf;
+	WBUFL(buf,4)=sd->bl.id;
+	for(n=0;n<5;n++)
+		WBUFL(buf,8+4*n) =sd->dev.val2[n];
+//	WBUFL(buf,8)=target;
+
+	clif_send(buf,packet_len_table[0x1cf],&sd->bl,AREA);
 	return 0;
 }
 

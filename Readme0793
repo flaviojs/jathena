@@ -1,4 +1,36 @@
 --------------------
+//0812 by huge
+
+・ディボーションの仮実装
+  ・パケットが全然分かりませんでしたので、
+    青い糸も出ないし、アイコンすら表示できません。
+  ・ダメ移動だけで、ノックバック・オートガードは適応されません。
+
+	(map/)
+	clif.c
+	clif.h
+		clif_devotion() 追加。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+		skill_devotion() skill_devotion2() 追加。
+		skill_devotion3() skill_devotion_end() 追加。
+		skill_status_change_end() 修正。
+		skill_status_change_start() 修正。
+		skill_brandishspear_first() 修正。
+		skill_brandishspear_dir() 修正。
+	pc.c
+		pc_authok() 修正。
+		pc_walk() 修正。
+		pc_damage() 修正。
+	battle.c
+		battle_damage() 修正。
+	map.h
+		map_session_data{}
+			 struct square dev 追加。
+	skill.h のbrandishをsquareに改名し、
+	(common/) mmo.h に移動
+
+--------------------
 //0811 by ぴざまん
 
 ・攻城中は蝶が使えるように修正

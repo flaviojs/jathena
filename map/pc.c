@@ -544,6 +544,12 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	for(i=0;i<MAX_SKILLTIMERSKILL;i++)
 		sd->skilltimerskill[i].timer = -1;
 
+	memset(&sd->dev,0,sizeof(struct square));
+	for(i=0;i<5;i++){
+		sd->dev.val1[i] = 0;
+		sd->dev.val2[i] = 0;
+	}
+
 	// アイテムチェック
 	pc_setinventorydata(sd);
 	pc_checkitem(sd);
@@ -2916,6 +2922,16 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 		}
 		if(sd->status.option&4)	// クローキングの消滅検査
 			skill_check_cloaking(&sd->bl);
+		/* ディボーション検査 */
+		for(i=0;i<5;i++)
+			if(sd->dev.val1[i]){
+				skill_devotion3(&sd->bl,i);
+				break;
+			}
+		/* 被ディボーション検査 */
+		if(sd->sc_data[SC_DEVOTION].val1){
+				skill_devotion2(&sd->bl,sd->sc_data[SC_DEVOTION].val1);
+		}
 
 		skill_unit_move(&sd->bl,tick,1);	// スキルユニットの検査
 
@@ -3702,6 +3718,8 @@ int pc_resetskill(struct map_session_data* sd)
  */
 int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 {
+	int i=0;
+
 	// 既 に死んでいたら無効
 	if(pc_isdead(sd))
 		return 0;
@@ -3754,6 +3772,12 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
 	clif_updatestatus(sd,SP_HP);
 	pc_calcstatus(sd,0);
+
+	for(i=0;i<5;i++)
+		if(sd->dev.val1[i]){
+			skill_status_change_end(&map_id2sd(sd->dev.val1[i])->bl,SC_DEVOTION,-1);
+			sd->dev.val1[i] = sd->dev.val2[i]=0;
+		}
 
 	if(battle_config.death_penalty_type&1) {
 		if(sd->status.class > 0 && !map[sd->bl.m].flag.nopenalty && !map[sd->bl.m].flag.gvg){
@@ -4695,9 +4719,9 @@ int pc_checkitem(struct map_session_data *sd)
 			sd->status.inventory[i].equip=0;
 		//装備制限チェック
 		if(sd->status.inventory[i].equip && map[sd->bl.m].flag.pvp && (it->flag.no_equip==1 || it->flag.no_equip==3)){//PvP制限
-			pc_unequipitem(sd,i,0);
+			sd->status.inventory[i].equip=0;
 		}else if(sd->status.inventory[i].equip && map[sd->bl.m].flag.gvg && (it->flag.no_equip==2 || it->flag.no_equip==3)){//GvG制限
-			pc_unequipitem(sd,i,0);
+			sd->status.inventory[i].equip=0;
 		}
 	}
 

@@ -917,6 +917,7 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 	struct map_session_data *sd=NULL;
 	struct status_change *sc_data=battle_get_sc_data(target);
 	short *sc_count;
+	int i;
 
 	if(damage==0 || target->type == BL_PET)
 		return 0;
@@ -956,6 +957,23 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 	}else if(target->type==BL_PC){	// PC
 
 		struct map_session_data *tsd=(struct map_session_data *)target;
+
+		if(tsd->sc_data[SC_DEVOTION].val1){	// ディボーションをかけられている
+			struct map_session_data *md = map_id2sd(tsd->sc_data[SC_DEVOTION].val1);
+			if(skill_devotion3(target,tsd->sc_data[SC_DEVOTION].val1)){
+				skill_devotion(md,target->id);
+			}
+			else if(md)
+				for(i=0;i<5;i++)
+					if(md->dev.val1[i] == target->id){
+						clif_damage(bl,&md->bl, gettick(), 0, 0, 
+							damage, 0 , 0, 0);
+						pc_damage(&md->bl,md,damage);
+
+						return 0;
+					}
+		}
+
 		if(tsd->skilltimer!=-1){	// 詠唱妨害
 				// フェンカードや妨害されないスキルかの検査
 			if( (!tsd->special_state.no_castcancel || map[bl->m].flag.gvg) && tsd->state.skillcastcancel &&

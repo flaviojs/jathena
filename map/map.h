@@ -104,6 +104,7 @@ struct skill_timerskill {
 struct npc_data;
 struct pet_db;
 struct item_data;
+struct square;
 
 struct map_session_data {
 	struct block_list bl;
@@ -218,6 +219,7 @@ struct map_session_data {
 
 	struct status_change sc_data[MAX_STATUSCHANGE];
 	short sc_count;
+	struct square dev;
 
 	int trade_partner;
 	int deal_item_index[10];

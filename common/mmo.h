@@ -185,6 +185,10 @@ struct guild_castle {
 	int visibleG6;
 	int visibleG7;
 };
+struct square {
+	int val1[5];
+	int val2[5];
+};
 
 enum {
 	GBI_EXP			=1,		// ƒMƒ‹ƒh‚ÌEXP

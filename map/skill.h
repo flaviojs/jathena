@@ -102,12 +102,12 @@ void skill_stop_dancing(struct block_list *src);
 int skill_castcancel(struct block_list *bl,int type);
 
 int skill_gangsterparadise(struct map_session_data *sd ,int type);
-struct brandish {
-	int tar_x[5];
-	int tar_y[5];
-};
-void skill_brandishspear_first(struct brandish *tc,int dir,int x,int y);
-void skill_brandishspear_dir(struct brandish *tc,int dir,int are);
+void skill_brandishspear_first(struct square *tc,int dir,int x,int y);
+void skill_brandishspear_dir(struct square *tc,int dir,int are);
+void skill_devotion(struct map_session_data *md,int target);
+void skill_devotion2(struct block_list *bl,int crusader);
+int skill_devotion3(struct block_list *bl,int crusader);
+void skill_devotion_end(struct map_session_data *md,struct map_session_data *sd,int target);
 
 #define skill_calc_heal(bl,skill_lv) (( battle_get_lv(bl)+battle_get_int(bl) )/8 *(4+ skill_lv*8))
 
