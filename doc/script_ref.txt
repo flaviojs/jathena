@@ -301,6 +301,28 @@ AthenaNPCScript
 		引数は半角スペースを空けて記述してください。
 
 ３．命令文及び関数及び定数ラベル
+	＊基本構文
+		if構文
+
+			if (<cond>) ....; [ [ else if(<cond>) ...; ]* else ...; ]
+
+			cond		条件(数値)
+
+			cond が真の時、.... を実行します(C 言語と同じ仕様です)。
+			複数の構文を実行させたい場合は、それぞれを { , } でくくってまとめられます。
+
+			if(<cond>) { ....; ....; } else { ....; ....; }
+
+		switch構文
+
+			C 言語と同じ仕様(fall through)です。
+
+			switch(<cond>) {
+			default aaa(); break;
+			case 0: hoge(); // FALLTHRU
+			case 1: fuga(); break;
+			}
+
 	＊命令文
 		mes命令
 			mes <string>;
@@ -457,14 +479,6 @@ AthenaNPCScript
 
 			配列<variable>から<n>個の要素を削除し、後ろの要素を前に詰める
 			<variable>は配列名を指定すると最初から、要素番号も指定すれば途中から削除できます。
-
-		if命令
-			if (<cond>) goto <label>;
-
-			cond		数値
-			label		ラベル
-
-			<cond>が0以外の場合、<label>からスクリプトを開始します。
 
 		getitem命令
 			getitem <itemid>,<num>[,<identify>,<account_id>];
@@ -1436,6 +1450,14 @@ AthenaNPCScript
 			装備、または所持品欄にあるかどうかを探します。
 			見つかった場合1を。見つからなかった場合は0を返します。
 
+		select関数
+			select(<string1>[,<string2>,<string3>...])
+
+			stringN	文字列
+
+			メニューを表示し、ユーザーが選択した番号(1から始まります)を返す(menu 命令の関数版)。
+			また、選ばれたラベルの番号は変数@menuにも代入されます。
+			(l15にも代入されますが、こちらは今後動作が保障されないのでl15は使用しないで下さい）
 
 	＊定数ラベル
 		-ラベル

@@ -1,4 +1,25 @@
 --------------------
+//1080 by End_of_exam
+
+・スクリプトを if - else if - else 構文 , switch 構文に対応させました。
+　多重ネストが可能ですので、今までより見やすいスクリプトが書けると思います。
+　if(aa) { aaa(); } else if(bb) { cc; if(dd) { ee() } else { ff(); } }
+　それに伴い、__ から始まる変数やラベルを用いると、不都合が生じる可能性があります。
+
+・スクリプトに新しい関数(select関数・menu命令の関数版)を追加しました。
+
+	(src/map/)
+		script.c : 構文を拡張
+		npc.c : npc_perse_script の修正( { , } のネストに対応 )
+
+	(script/)
+		npc/town/npc_town_alberta.txt : 一カ所 goto が抜けてたので修正
+		sample/npc_debug_pota.txt     : switch , select を使って書き直し
+		                                (デバッグに使わせて貰いました)
+
+	(doc/)
+		script_ref.txt : 上の修正に合わせて変更
+--------------------
 //1079 by Yuuki
 ・石化中にストーンカースを使うと石化解除
 ・FDでスキル追加効果を使うと氷化中ダメージ判定で先に割れてもう一度氷化判定がくるのでスキル追加効果つかわず 

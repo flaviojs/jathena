@@ -1040,6 +1040,10 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	
 	if(strcmp(w2,"script")==0){
 		// スクリプトの解析
+		// { , } の入れ子許したらこっちでも簡易解析しないといけなくなったりもする
+		int curly_count = 0;
+		int string_flag = 0;
+		int j;
 		srcbuf=(char *)aCalloc(srcsize,sizeof(char));
 		if (strchr(first_line,'{')) {
 			strcpy(srcbuf,strchr(first_line,'{'));
@@ -1047,13 +1051,39 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 		} else
 			srcbuf[0]=0;
 		while(1) {
-			for(i=strlen(srcbuf)-1;i>=0 && isspace(srcbuf[i]);i--);
-			if (i>=0 && srcbuf[i]=='}')
-				break;
 			fgets(line,1020,fp);
 			(*lines)++;
 			if (feof(fp))
 				break;
+
+			// line の中に文字列 , {} が含まれているか調査
+			i = strlen(line);
+			for(j = 0; j < i ; j++) {
+				if(string_flag) {
+					if(line[j] == '\"' && (j <= 0 || line[j-1] != '\\')) {
+						string_flag = 0;
+					}
+				} else {
+					if(line[j] == '\"') {
+						string_flag = 1;
+					} else if(line[j] == '}') {
+						if(curly_count == 0) {
+							// 抜けるのはfor だけ
+							break;
+						} else {
+							curly_count--;
+						}
+					} else if(line[j] == '{') {
+						curly_count++;
+					} else if(line[j] == '/' && line[j+1] == '/') {
+						// コメント
+						break;
+					} else if(*(unsigned char*)(line + j) >= 0x80) {
+						// 全角文字
+						j++;
+					}
+				}
+			}
 			if (strlen(srcbuf)+strlen(line)+1>=srcsize) {
 				srcsize += 65536;
 				srcbuf = (char *)aRealloc(srcbuf, srcsize);
@@ -1066,8 +1096,18 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 				}
 			} else
 				strcat(srcbuf,line);
+			if(!string_flag && line[j] == '}' && curly_count == 0) {
+				break;
+			}
 		}
-		script=parse_script(srcbuf,startline);
+		if(curly_count > 0) {
+			printf("warning: Missing right curly at line %d\n",*lines);
+			script=NULL;
+			exit(1);
+		} else {
+			// printf("Ok line %d\n",*lines);
+			script=parse_script(srcbuf,startline);
+		}
 		if (script==NULL) {
 			// script parse error?
 			free(srcbuf);
@@ -1620,6 +1660,8 @@ int do_init_npc(void)
 		if (fp==NULL) {
 			printf("file not found : %s\n",nsl->name);
 			exit(1);
+		} else {
+			printf("reading npc %s",nsl->name);
 		}
 		lines=0;
 		while(fgets(line,1020,fp)) {
@@ -1674,7 +1716,7 @@ int do_init_npc(void)
 			}
 		}
 		fclose(fp);
-		printf("read npc %s done\n",nsl->name);
+		printf("done\n");
 		if(nsl->next)
 			nsl->next->prev = nsl;
 		else{

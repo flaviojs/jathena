@@ -83,6 +83,21 @@ static struct Script_Config {
 static int parse_cmd_if=0;
 static int parse_cmd;
 
+// if , switch の実装
+enum { TYPE_NULL = 0 , TYPE_IF , TYPE_SWITCH , TYPE_WHILE };
+static struct {
+	struct {
+		int type;
+		int index;
+		int count;
+		int flag;
+	} curly[256];		// 右カッコの情報
+	int curly_count;	// 右カッコの数
+	int index;			// スクリプト内で使用した構文の数
+} syntax;
+unsigned char* parse_if(unsigned char *p);
+unsigned char* parse_switch(unsigned char *p);
+
 /*==========================================
  * ローカルプロトタイプ宣言 (必要な物のみ)
  *------------------------------------------
@@ -114,7 +129,6 @@ int buildin_copyarray(struct script_state *st);
 int buildin_getarraysize(struct script_state *st);
 int buildin_deletearray(struct script_state *st);
 int buildin_getelementofarray(struct script_state *st);
-int buildin_if(struct script_state *st);
 int buildin_getitem(struct script_state *st);
 int buildin_getitem2(struct script_state *st);
 int buildin_delitem(struct script_state *st);
@@ -251,6 +265,8 @@ int buildin_recovery(struct script_state *st);
 int buildin_getpetinfo(struct script_state *st);
 int buildin_checkequipedcard(struct script_state *st);
 
+int buildin_jump_non_zero(struct script_state *st);
+int buildin_select(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -285,7 +301,6 @@ struct {
 	{buildin_getarraysize,"getarraysize","i"},
 	{buildin_deletearray,"deletearray","ii"},
 	{buildin_getelementofarray,"getelementofarray","ii"},
-	{buildin_if,"if","i*"},
 	{buildin_getitem,"getitem","ii**"},
 	{buildin_getitem2,"getitem2","iiiiiiiii*"},
 	{buildin_delitem,"delitem","ii"},
@@ -425,6 +440,10 @@ struct {
 	{buildin_recovery,"recovery",""},
 	{buildin_getpetinfo,"getpetinfo","i"},
 	{buildin_checkequipedcard,"checkequipedcard","i"},
+
+	{buildin_jump_non_zero,"if","i"},
+	{buildin_set,"switch","ii"},
+	{buildin_select,"select","*"},
 	{NULL,NULL,NULL}
 };
 enum {
@@ -775,9 +794,6 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 		l=add_str(p);
 
 		parse_cmd=l;	// warn_*_mismatch_paramnumのために必要
-		if(l==search_str("if"))	// warn_cmd_no_commaのために必要
-			parse_cmd_if++;
-
 		// 廃止予定のl14/l15,およびプレフィックスｌの警告
 		if(	strcmp(str_buf+str_data[l].str,"l14")==0 ||
 			strcmp(str_buf+str_data[l].str,"l15")==0 ){
@@ -787,7 +803,6 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 		}
 
 		*p2=c;	p=p2;
-
 
 		if(str_data[l].type!=C_FUNC && c=='['){
 			// array(name[i] => getelementofarray(name,i) )
@@ -941,7 +956,7 @@ unsigned char* parse_expr(unsigned char *p)
  */
 unsigned char* parse_line(unsigned char *p)
 {
-	int i=0,cmd;
+	int i=0,cmd,flag = 0;
 	const char *plist[128];
 	char *p2;
 
@@ -950,6 +965,78 @@ unsigned char* parse_line(unsigned char *p)
 		return p;
 
 	parse_cmd_if=0;	// warn_cmd_no_commaのために必要
+	if(!strncmp(p,"if",2) && skip_word(p) - p == 2) {
+		*p = 'i';
+	}
+
+	p = skip_space(p);
+	if(p[0] == '{') {
+		syntax.curly[syntax.curly_count].type  = TYPE_NULL;
+		syntax.curly[syntax.curly_count].count = -1;
+		syntax.curly[syntax.curly_count].index = -1;
+		syntax.curly_count++;
+		return p + 1;
+	} else if(p[0] == '}') {
+		if(syntax.curly_count <= 0) {
+			disp_error_message("unexpected string",p);
+			return p + 1;
+		} else if(syntax.curly[syntax.curly_count-1].type == TYPE_NULL) {
+			syntax.curly_count--;
+			// if() の閉じ判定
+			p = parse_if(p + 1);
+			return p;
+		} else if(syntax.curly[syntax.curly_count-1].type == TYPE_SWITCH) {
+			// switch() 閉じ判定
+			int pos = syntax.curly_count-1;
+			char label[256];
+			int l;
+			// 無条件で終了ポインタに移動
+			sprintf(label,"goto __SW%x_FIN;",syntax.curly[pos].index);
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			parse_line(label);
+			syntax.curly_count--;
+
+			// 現在地のラベルを付ける
+			sprintf(label,"__SW%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+			l=add_str(label);
+			if(str_data[l].label!=-1){
+				disp_error_message("dup label ",p);
+				exit(1);
+			}
+			set_label(l,script_pos);
+			// strdb_insert(scriptlabel_db,label,script_pos);	// 外部用label db登録
+
+			if(syntax.curly[pos].flag) {
+				// default が存在する
+				sprintf(label,"goto __SW%x_DEF;",syntax.curly[pos].index);
+				syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+				parse_line(label);
+				syntax.curly_count--;
+			}
+
+			// 終了ラベルを付ける
+			sprintf(label,"__SW%x_FIN",syntax.curly[pos].index);
+			l=add_str(label);
+			if(str_data[l].label!=-1){
+				disp_error_message("dup label ",p);
+				exit(1);
+			}
+			set_label(l,script_pos);
+			// strdb_insert(scriptlabel_db,label,script_pos);	// 外部用label db登録
+
+			// 一時変数を消す
+			sprintf(label,"set @__SW%x_VAL,0;",syntax.curly[pos].index);
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			parse_line(label);
+			syntax.curly_count--;
+			syntax.curly_count--;
+			return p+1;
+		}
+	}
+
+	// switch 関連のまとめ
+	p2 = parse_switch(p);
+	if(p2 != NULL) { return p2; }
 
 	// 最初は関数名
 	p2=p;
@@ -961,27 +1048,64 @@ unsigned char* parse_line(unsigned char *p)
 		disp_error_message("expect command",p2);
 		exit(0);
 	}
-
-	add_scriptc(C_ARG);
-	while(p && *p && *p!=';' && i<128){
-		plist[i]=p;
-
+	if(!strncmp(p2,"if",2) && !isalpha(*(p2 + 2))) {
+		// if() の処理( if は関数として登録してある )
+		char label[256];
+		syntax.curly[syntax.curly_count].type  = TYPE_IF;
+		syntax.curly[syntax.curly_count].count = 1;
+		syntax.curly[syntax.curly_count].index = syntax.index++;
+		sprintf(label,"__IF%x_%x",syntax.curly[syntax.curly_count].index,syntax.curly[syntax.curly_count].count);
+		syntax.curly_count++;
+		add_scriptc(C_ARG);
 		p=parse_expr(p);
 		p=skip_space(p);
-		// 引数区切りの,処理
-		if(*p==',') p++;
-		else if(*p!=';' && script_config.warn_cmd_no_comma && parse_cmd_if*2<=i ){
-			disp_error_message("expect ',' or ';' at cmd params",p);
-		}
+		add_scriptl(add_str(label));
+		add_scriptc(C_FUNC);
+		flag = 1;
+		return p;
+	} else if(!strncmp(p2,"switch",6) && !isalpha(*(p2 + 6))) {
+		// switch() の処理( switch は関数として登録してある )
+		char label[256];
+		syntax.curly[syntax.curly_count].type  = TYPE_SWITCH;
+		syntax.curly[syntax.curly_count].count = 1;
+		syntax.curly[syntax.curly_count].index = syntax.index++;
+		syntax.curly[syntax.curly_count].flag  = 0;
+		sprintf(label,"@__SW%x_VAL",syntax.curly[syntax.curly_count].index);
+		syntax.curly_count++;
+		add_scriptc(C_ARG);
+		add_scriptl(add_str(label));
+		p=parse_expr(p);
 		p=skip_space(p);
-		i++;
+		if(*p != '{') {
+			disp_error_message("need '{'",p);
+		}
+		add_scriptc(C_FUNC);
+		return p + 1;
+	} else {
+		// 通常の関数
+		add_scriptc(C_ARG);
+		while(p && *p && *p!=';' && i<128){
+			plist[i]=p;
+
+			p=parse_expr(p);
+			p=skip_space(p);
+			// 引数区切りの,処理
+			if(*p==',') p++;
+			else if(*p!=';' && script_config.warn_cmd_no_comma){
+				disp_error_message("expect ',' or ';' at cmd params",p);
+			}
+			p=skip_space(p);
+			i++;
+		}
+		plist[i]=p;
+		if(!p || *(p++)!=';'){
+			disp_error_message("need ';'",p);
+			exit(1);
+		}
+		add_scriptc(C_FUNC);
+		// if() の閉じ判定
+		p = parse_if(p);
 	}
-	plist[i]=p;
-	if(!p || *(p++)!=';'){
-		disp_error_message("need ';'",p);
-		exit(1);
-	}
-	add_scriptc(C_FUNC);
 
 	if( str_data[cmd].type==C_FUNC && script_config.warn_cmd_mismatch_paramnum){
 		const char *arg=buildin_func[str_data[cmd].val].arg;
@@ -991,8 +1115,185 @@ unsigned char* parse_line(unsigned char *p)
 			disp_error_message("illeagal number of parameters",plist[(i<j)?i:j]);
 		}
 	}
+	return p;
+}
 
+// switch 関連処理
+unsigned char* parse_switch(unsigned char *p) {
+	if(!strncmp(p,"case",4) && !isalpha(*(p + 4))) {
+		// case の処理
+		if(syntax.curly_count <= 0 || syntax.curly[syntax.curly_count - 1].type != TYPE_SWITCH) {
+			disp_error_message("unexpected 'case' ",p);
+			return NULL;
+		} else {
+			char *p2;
+			char label[256];
+			int  l;
+			int pos = syntax.curly_count-1;
+			if(syntax.curly[pos].count != 1) {
+				// FAILTHRU 用のジャンプ
+				sprintf(label,"goto __SW%x_%xJ;",syntax.curly[pos].index,syntax.curly[pos].count);
+				syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+				parse_line(label);
+				syntax.curly_count--;
 
+				// 現在地のラベルを付ける
+				sprintf(label,"__SW%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+				l=add_str(label);
+				if(str_data[l].label!=-1){
+					disp_error_message("dup label ",p);
+					exit(1);
+				}
+				set_label(l,script_pos);
+				// strdb_insert(scriptlabel_db,label,script_pos);	// 外部用label db登録
+			}
+			// switch 判定文
+			p = skip_word(p);
+			p = skip_space(p);
+			p2 = p;
+			p = skip_word(p);
+			*p = 0;
+			sprintf(label,"if(%s != @__SW%x_VAL) goto __SW%x_%x;",
+				p2,syntax.curly[pos].index,syntax.curly[pos].index,syntax.curly[pos].count+1);
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			// ２回parse しないとダメ
+			p2 = parse_line(label);
+			parse_line(p2);
+			syntax.curly_count--;
+			if(syntax.curly[pos].count != 1) {
+				// FAILTHRU 終了後のラベル
+				sprintf(label,"__SW%x_%xJ",syntax.curly[pos].index,syntax.curly[pos].count);
+				l=add_str(label);
+				if(str_data[l].label!=-1){
+					disp_error_message("dup label ",p);
+					exit(1);
+				}
+				set_label(l,script_pos);
+				// strdb_insert(scriptlabel_db,label,script_pos);	// 外部用label db登録
+			}
+			syntax.curly[pos].count++;
+		}
+		return p + 1;
+	} else if(!strncmp(p,"break",5) && !isalpha(*(p + 5))) {
+		// switch - break の処理
+		if(syntax.curly_count <= 0 || syntax.curly[syntax.curly_count - 1].type != TYPE_SWITCH) {
+			disp_error_message("unexpected 'break'",p);
+			return NULL;
+		} else {
+			char label[256];
+			sprintf(label,"goto __SW%x_FIN;",syntax.curly[syntax.curly_count-1].index);
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			parse_line(label);
+			syntax.curly_count--;
+			p = skip_word(p);
+			return p + 1;
+		}
+	} else if(!strncmp(p,"default:",8) && !isalpha(*(p + 8))) {
+		// switch - default の処理
+		if(syntax.curly_count <= 0 || syntax.curly[syntax.curly_count - 1].type != TYPE_SWITCH) {
+			disp_error_message("unexpected 'delault'",p);
+		} else if(syntax.curly[syntax.curly_count - 1].flag) {
+			disp_error_message("dup 'delault'",p);
+		} else {
+			char label[256];
+			int l;
+			int pos = syntax.curly_count-1;
+			// 現在地のラベルを付ける
+			sprintf(label,"__SW%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+			l=add_str(label);
+			if(str_data[l].label!=-1){
+				disp_error_message("dup label ",p);
+				exit(1);
+			}
+			set_label(l,script_pos);
+			// strdb_insert(scriptlabel_db,label,script_pos);	// 外部用label db登録
+
+			// 無条件で次のリンクに飛ばす
+			sprintf(label,"goto __SW%x_%x;",syntax.curly[pos].index,syntax.curly[pos].count+1);
+			syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+			parse_line(label);
+			syntax.curly_count--;
+
+			// default のラベルを付ける
+			sprintf(label,"__SW%x_DEF",syntax.curly[pos].index);
+			l=add_str(label);
+			if(str_data[l].label!=-1){
+				disp_error_message("dup label ",p);
+				exit(1);
+			}
+			set_label(l,script_pos);
+			// strdb_insert(scriptlabel_db,label,script_pos);	// 外部用label db登録
+
+			syntax.curly[syntax.curly_count - 1].flag = 1;
+			syntax.curly[pos].count++;
+			p = skip_word(p);
+			return p + 1;
+		}
+	} else {
+		return NULL;
+	}
+}
+
+// if 閉じ判定
+unsigned char* parse_if(unsigned char *p) {
+	char label[256];
+	int pos = syntax.curly_count - 1;
+	int l;
+
+	if(syntax.curly_count <= 0) {
+		return p;
+	} else if(syntax.curly[pos].type != TYPE_IF) {
+		return p;
+	}
+
+	// if 最終場所へ飛ばす
+	sprintf(label,"goto __IF%x_FIN;",syntax.curly[pos].index);
+	syntax.curly[syntax.curly_count++].type = TYPE_NULL;
+	parse_line(label);
+	syntax.curly_count--;
+
+	// 現在地のラベルを付ける
+	sprintf(label,"__IF%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+	l=add_str(label);
+	if(str_data[l].label!=-1){
+		disp_error_message("dup label ",p);
+		exit(1);
+	}
+	set_label(l,script_pos);
+	// strdb_insert(scriptlabel_db,label,script_pos);	// 外部用label db登録
+
+	syntax.curly[pos].count++;
+	p = skip_space(p);
+	if(!strncmp(p,"else",4) && !isalpha(*(p + 4))) {
+		// else  or else - if
+		p = skip_word(p);
+		p = skip_space(p);
+		if(!strncmp(p,"if",2) && !isalpha(*(p + 2))) {
+			// else - if
+			p=parse_simpleexpr(p);
+			p=skip_space(p);
+			sprintf(label,"__IF%x_%x",syntax.curly[pos].index,syntax.curly[pos].count);
+			add_scriptc(C_ARG);
+			p=parse_expr(p);
+			p=skip_space(p);
+			add_scriptl(add_str(label));
+			add_scriptc(C_FUNC);
+		} else {
+			// else
+		}
+	} else {
+		// if 閉じ
+		syntax.curly_count--;
+		// 最終地のラベルを付ける
+		sprintf(label,"__IF%x_FIN",syntax.curly[pos].index);
+		l=add_str(label);
+		if(str_data[l].label!=-1){
+			disp_error_message("dup label ",p);
+			exit(1);
+		}
+		set_label(l,script_pos);
+		// strdb_insert(scriptlabel_db,label,script_pos);	// 外部用label db登録
+	}
 	return p;
 }
 
@@ -1055,6 +1356,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 	int i;
 	static int first=1;
 
+	memset(&syntax,0,sizeof(syntax));
 	if(first){
 		add_buildin_func();
 		read_constdb();
@@ -1089,11 +1391,11 @@ unsigned char* parse_script(unsigned char *src,int line)
 		disp_error_message("not found '{'",p);
 		return NULL;
 	}
-	for(p++;p && *p && *p!='}';){
+	for(p++;p && *p && (*p!='}' || syntax.curly_count != 0);) {
 		p=skip_space(p);
 		// labelだけ特殊処理
 		tmpp=skip_space(skip_word(p));
-		if(*tmpp==':'){
+		if(*tmpp==':' && !(!strncmp(p,"default:",8) && p + 7 == tmpp)){
 			int l,c;
 
 			c=*skip_word(p);
@@ -1807,33 +2109,6 @@ int buildin_input(struct script_state *st)
 	return 0;
 }
 
-
-/*==========================================
- *
- *------------------------------------------
- */
-int buildin_if(struct script_state *st)
-{
-	int sel,i;
-
-	sel=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	if(!sel)
-		return 0;
-
-	// 関数名をコピー
-	push_copy(st->stack,st->start+3);
-	// 間に引数マーカを入れて
-	push_val(st->stack,C_ARG,0);
-	// 残りの引数をコピー
-	for(i=st->start+4;i<st->end;i++){
-		push_copy(st->stack,i);
-	}
-	run_func(st);
-
-	return 0;
-}
-
-
 /*==========================================
  * 変数設定
  *------------------------------------------
@@ -1867,6 +2142,7 @@ int buildin_set(struct script_state *st)
 
 	return 0;
 }
+
 /*==========================================
  * 配列変数設定
  *------------------------------------------
@@ -5138,6 +5414,63 @@ int buildin_checkequipedcard(struct script_state *st)
 	push_val(st->stack,C_INT,0);
 	return 0;
 }
+
+int buildin_jump_non_zero(struct script_state *st) {
+	int sel;
+	sel=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if(!sel) {
+		int pos;
+		if( st->stack->stack_data[st->start+3].type!=C_POS ){
+			printf("script: jump_non_zero: not label !\n");
+			st->state=END;
+			return 0;
+		}
+
+		pos=conv_num(st,& (st->stack->stack_data[st->start+3]));
+		st->pos=pos;
+		st->state=GOTO;
+		// printf("script: jump_non_zero: jumpto : %d\n",pos);
+	} else {
+		// printf("script: jump_non_zero: fail\n");
+	}
+	return 0;
+}
+
+int buildin_select(struct script_state *st)
+{
+	char *buf;
+	int len,i;
+	struct map_session_data *sd;
+
+	sd=script_rid2sd(st);
+
+	if(sd->state.menu_or_input==0){
+		st->state=RERUNLINE;
+		sd->state.menu_or_input=1;
+		for(i=st->start+2,len=16;i<st->end;i++){
+			conv_str(st,& (st->stack->stack_data[i]));
+			len+=strlen(st->stack->stack_data[i].u.str)+1;
+		}
+		buf=(char *)aCalloc(len,sizeof(char));
+		buf[0]=0;
+		for(i=st->start+2,len=0;i<st->end;i++){
+			strcat(buf,st->stack->stack_data[i].u.str);
+			strcat(buf,":");
+		}
+		clif_scriptmenu(script_rid2sd(st),st->oid,buf);
+		free(buf);
+	} else if(sd->npc_menu==0xff){	// cansel
+		sd->state.menu_or_input=0;
+		st->state=END;
+	} else {
+		pc_setreg(sd,add_str("l15"),sd->npc_menu);
+		pc_setreg(sd,add_str("@menu"),sd->npc_menu);
+		sd->state.menu_or_input=0;
+		push_val(st->stack,C_INT,sd->npc_menu);
+	}
+	return 0;
+}
+
 
 //
 // 実行部main
