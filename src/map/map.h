@@ -29,6 +29,7 @@
 #define MAX_FLOORITEM 500000
 #define MAX_LEVEL 255
 #define MAX_WALKPATH 48
+#define MAX_DROP_PER_MAP 48
 
 #define DEFAULT_AUTOSAVE_INTERVAL 60*1000
 
@@ -422,12 +423,19 @@ struct map_data {
 		unsigned pvp : 1;
 		unsigned pvp_noparty : 1;
 		unsigned pvp_noguild : 1;
+		unsigned pvp_nightmaredrop :1;
+		unsigned pvp_nocalcrank : 1;
 		unsigned gvg : 1;
 		unsigned gvg_noparty : 1;
 		unsigned nozenypenalty : 1;
 	} flag;
 	struct point save;
 	struct npc_data *npc[MAX_NPC_PER_MAP];
+	struct {
+		int drop_id;
+		int drop_type;
+		int drop_per;
+	} drop_list[MAX_DROP_PER_MAP];
 };
 struct map_data_other_server {
 	char name[24];

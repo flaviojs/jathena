@@ -4076,7 +4076,7 @@ int pc_resetskill(struct map_session_data* sd)
  */
 int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 {
-	int i=0;
+	int i=0,j=0;
 	//転生や養子の場合の元の職業を算出する
 	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
 
@@ -4172,9 +4172,66 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 
 	// pvp
 	if( map[sd->bl.m].flag.pvp){
-		sd->pvp_point-=5;
-		if(src && src->type==BL_PC )
-			((struct map_session_data *)src)->pvp_point++;
+		//ランキング計算
+		if(!map[sd->bl.m].flag.pvp_nocalcrank){
+			sd->pvp_point-=5;
+			if(src && src->type==BL_PC )
+				((struct map_session_data *)src)->pvp_point++;
+		}
+		//ナイトメアモードアイテムドロップ
+		if(map[sd->bl.m].flag.pvp_nightmaredrop){
+			for(j=0;j<MAX_DROP_PER_MAP;j++){
+				int id = map[sd->bl.m].drop_list[j].drop_id;
+				int type = map[sd->bl.m].drop_list[j].drop_type;
+				int per = map[sd->bl.m].drop_list[j].drop_per;
+				if(id == 0)
+					continue;
+				if(id == -1){//ランダムドロップ
+					int eq_num=0,eq_n[MAX_INVENTORY];
+					memset(eq_n,0,sizeof(eq_n));
+					//先ず装備しているアイテム数をカウント
+					for(i=0;i<MAX_INVENTORY;i++){
+						int k;
+						if( (type == 1 && !sd->status.inventory[i].equip)
+							|| (type == 2 && sd->status.inventory[i].equip)
+							||  type == 3){
+							//InventoryIndexを格納
+							for(k=0;k<MAX_INVENTORY;k++){
+								if(eq_n[k] <= 0){
+									eq_n[k]=i;
+									break;
+								}
+							}
+							eq_num++;
+						}
+					}
+					if(eq_num > 0){
+						int n = eq_n[rand()%eq_num];//該当アイテムの中からランダム
+						if(rand()%10000 < per){
+							if(sd->status.inventory[n].equip)
+								pc_unequipitem(sd,n,0);
+							pc_dropitem(sd,n,1);
+						}
+					}
+				}
+				else if(id > 0){
+					for(i=0;i<MAX_INVENTORY;i++){
+						if(sd->status.inventory[i].nameid == id//ItemIDが一致していて
+							&& rand()%10000 < per//ドロップ率判定もOKで
+							&& ((type == 1 && !sd->status.inventory[i].equip)//タイプ判定もOKならドロップ
+								|| (type == 2 && sd->status.inventory[i].equip)
+								|| type == 3)
+							){
+							if(sd->status.inventory[i].equip)
+								pc_unequipitem(sd,i,0);
+							pc_dropitem(sd,i,1);
+							break;
+						}
+					}
+				}
+			}
+			pc_setdead(sd);
+		}
 		// 強制送還
 		if( sd->pvp_point < 0 ){
 			sd->pvp_point=0;

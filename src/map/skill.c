@@ -286,6 +286,7 @@ int skill_is_danceskill(int id);
 int skill_abra_dataset(int skilllv);
 int skill_clear_element_field(struct block_list *bl);
 int skill_landprotector(struct block_list *bl, va_list ap );
+int skill_trap_splash(struct block_list *bl, va_list ap );
 
 static int distance(int x0,int y0,int x1,int y1)
 {
@@ -3829,7 +3830,6 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		val2 = battle_get_luk(src)/10;
 		break;
 	case AM_DEMONSTRATION:		/* デモンストレーション */
-		count=9;
 		limit=skill_get_time(skillid,skilllv);
 		interval=1000;
 		range=1;
@@ -4021,16 +4021,6 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 
 				range=0;
 			}
-			break;
-
-		case AM_DEMONSTRATION:		/* デモンストレーション */
-			ux+=(i%3-2);
-			uy+=(i/3-2);
-			if(i==4)
-				range=1;
-			else
-				range=-1;
-
 			break;
 
 		/* ダンスなど */
@@ -4240,8 +4230,10 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0x8f:	/* ブラストマイン */
 	case 0x97:	/* フリージングトラップ */
 	case 0x98:	/* クレイモアートラップ */
-		skill_attack((sg->unit_id==0x97)?BF_WEAPON:BF_MISC,
-			ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,(sg->val2)?0x0500:0);
+		map_foreachinarea(skill_trap_splash,src->bl.m
+					,src->bl.x-src->range,src->bl.y-src->range
+					,src->bl.x+src->range,src->bl.y+src->range
+					,0,&src->bl,tick);
 		sg->unit_id = 0x8c;
 		clif_changelook(&src->bl,LOOK_BASE,sg->unit_id);
 		sg->limit=DIFF_TICK(tick,sg->tick)+1500;
@@ -4250,7 +4242,10 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0x95:	/* サンドマン */
 	case 0x96:	/* フラッシャー */
 	case 0x94:	/* ショックウェーブトラップ */
-		skill_additional_effect(ss,bl,sg->skill_id,sg->skill_lv,BF_MISC,tick);
+		map_foreachinarea(skill_trap_splash,src->bl.m
+					,src->bl.x-src->range,src->bl.y-src->range
+					,src->bl.x+src->range,src->bl.y+src->range
+					,0,&src->bl,tick);
 		sg->unit_id = 0x8c;
 		clif_changelook(&src->bl,LOOK_BASE,sg->unit_id);
 		sg->limit=DIFF_TICK(tick,sg->tick)+1500;
@@ -5901,6 +5896,37 @@ int skill_idun_heal(struct block_list *bl, va_list ap )
 	return 0;
 }
 
+/*==========================================
+ * トラップ範囲処理(foreachinarea)
+ *------------------------------------------
+ */
+int skill_trap_splash(struct block_list *bl, va_list ap )
+{
+	struct block_list *src = va_arg(ap,struct block_list *);
+	int tick = va_arg(ap,int);
+	struct skill_unit_group *sg = ((struct skill_unit *)src)->group;
+	struct block_list *ss=map_id2bl(sg->src_id);
+
+	if(src && sg && ss && battle_check_target(src,bl,BCT_ENEMY) > 0){
+		switch(sg->unit_id){
+			case 0x95:	/* サンドマン */
+			case 0x96:	/* フラッシャー */
+			case 0x94:	/* ショックウェーブトラップ */
+				skill_additional_effect(ss,bl,sg->skill_id,sg->skill_lv,BF_MISC,tick);
+				break;
+			case 0x8f:	/* ブラストマイン */
+			case 0x97:	/* フリージングトラップ */
+			case 0x98:	/* クレイモアートラップ */
+				skill_attack((sg->unit_id==0x97)?BF_WEAPON:BF_MISC,
+					ss,src,bl,sg->skill_id,sg->skill_lv,tick,(sg->val2)?0x0500:0);
+				break;
+			default:
+				break;
+		}
+	}
+
+	return 0;
+}
 /*----------------------------------------------------------------------------
  * ステータス異常
  *----------------------------------------------------------------------------

@@ -1,4 +1,29 @@
 --------------------
+//0990 by ぴざまん
+・一部のトラップを範囲攻撃に変更（巻き込みは未実装）。
+・mapflagにpvp_nocalcrankとpvp_nightmaredrop追加。
+	・<gatname><tab>mapflag<tab>pvp_nocalcrank<tab>dummy
+	　PvPによるランキング計算をしないようにします。
+	・<gatname><tab>mapflag<tab>pvp_nightmaredrop<tab><item>,<type>,<per>
+	　PvPにて死亡した場合、<per>の確率でアイテムをドロップします。
+	　<item>: ドロップするアイテムIDを指定します。randomと記述すると所持品からランダムにドロップします。
+	　<type>: ドロップするアイテムのタイプを指定します。inventory:所持品 equip:装備品 all:全部
+	　<per>: ドロップする確率です。万分率で指定します。
+	(map/)
+	skill.c
+		skill_unit_onplace() 変更
+		skill_trap_splash() 追加
+	pc.c
+		pc_damage() 変更
+	npc.c
+		npc_parse_mapflag() 変更
+	map.h
+		map_dataにメンバ追加
+	(conf/)
+	mapflag.txt
+		ナイトメアモードにドロップ設定追加
+
+--------------------
 //0989 by (凸)
 ・スプリングトラップを某所で見たSSを元に実装してみた。違ったら相違スレへ
 ・ディテクティングを某所で見た解説文を元に実装してみた。違ったら相違スレへ

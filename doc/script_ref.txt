@@ -166,6 +166,13 @@ AthenaNPCScript
 				PVPにおいて、同パーティー攻撃不可になります。
 			pvp_noguild<tab>dummy
 				PVPにおいて、同ギルド攻撃不可になります。
+			pvp_nocalcrank<tab>dummy
+				PvPによるランキング計算をしないようにします。
+			pvp_nightmaredrop<tab><item>,<type>,<per>
+				PvPにて死亡した場合、<per>の確率でアイテムをドロップします。
+				<item>: ドロップするアイテムIDを指定します。randomと記述すると所持品からランダムにドロップします。
+				<type>: ドロップするアイテムのタイプを指定します。1:所持品 2:装備品 3:全部
+				<per>: ドロップする確率です。万分率で指定します。
 			gvg<tab>dummy
 				シーズモードになります。
 			gvg_noparty<tab>dummy
