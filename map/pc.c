@@ -975,6 +975,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		clif_updatestatus(sd,SP_MATK1);
 	if(before.matk2 != sd->matk2)
 		clif_updatestatus(sd,SP_MATK2);
+	if(before.mdef != sd->mdef)
+		clif_updatestatus(sd,SP_MDEF1);
 	if(before.mdef2 != sd->mdef2)
 		clif_updatestatus(sd,SP_MDEF2);
 

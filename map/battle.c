@@ -1134,18 +1134,21 @@ struct Damage battle_calc_weapon_attack(
 				break;
 			case 266:	// 発 勁
 				damage = damage*(100+ 75*skill_lv)/100 * (battle_get_def(target) + battle_get_def2(target))/100;
-				hitrate=hitrate*(100+10*skill_lv)/100;
+				hitrate = 100;
+				s_ele = 0;
+				s_ele_ = 0;
 				break;
 			case MO_FINGEROFFENSIVE:	//指弾
 				damage = damage * (100 + 50 * skill_lv) / 100 * sd->spiritball_old;
-				printf("Spiritball = %d\n", sd->spiritball_old);
 				div_ = sd->spiritball_old;
 				break;
 			case MO_EXTREMITYFIST:	// 阿修羅覇鳳拳
 				damage = damage * (8 + ((sd->status.sp)/10)) + 250 + (skill_lv * 150);
 				sd->status.sp = 0;
 				clif_updatestatus(sd,SP_SP);
-				hitrate=hitrate*(100+10*skill_lv)/100; 
+				hitrate = 100;
+				s_ele = 0;
+				s_ele_ = 0;
 				break;
 			case 272:	// 連打掌
 				damage = damage*(150+ 50*skill_lv)/100;
@@ -1170,25 +1173,27 @@ struct Damage battle_calc_weapon_attack(
 		if( skill_num!=170 ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			t_vit = battle_get_def2(target);
-			if( src->type==BL_MOB && (s_race==1 || s_race==6) )
-				if(target->type==BL_PC && (skill=pc_checkskill(tsd,AL_DP)) > 0 )
-					t_vit+=skill*3;
+			if ( !(skill_num == 266 || skill_num == MO_EXTREMITYFIST)) {	//DEF, VIT無視
+				t_vit = battle_get_def2(target);
+				if( src->type==BL_MOB && (s_race==1 || s_race==6) )
+					if(target->type==BL_PC && (skill=pc_checkskill(tsd,AL_DP)) > 0 )
+						t_vit+=skill*3;
 			
-			vitbonusmax = (t_vit/20)*(t_vit/20)-1;
-			if (!(skill_num == 266 || skill_num == MO_EXTREMITYFIST)) {	//DEF, VIT無視
+				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
 				damage = damage * (100 - battle_get_def(target)) /100
-					 - t_vit - ((vitbonusmax < 1)?0: rand()%vitbonusmax );
+					- t_vit - ((vitbonusmax < 1)?0: rand()%vitbonusmax );
+				damage2 = damage2 * (100 - battle_get_def(target)) /100
+					- t_vit - ((vitbonusmax < 1)?0: rand()%vitbonusmax );
 			}
-			damage2 = damage2 * (100 - battle_get_def(target)) /100
-				 - t_vit - ((vitbonusmax < 1)?0: rand()%vitbonusmax );
 		}
 	}
 	// 精錬ダメージの追加
-	if( src->type==BL_PC && (item_id = pc_checkequip(sd,2)) != -1)
-		damage += battle_get_atk2(src) - sd->watk_2;
-	if( src->type==BL_PC)
-		damage2 += sd->watk_2;
+	if( !(skill_num == 266 || skill_num == MO_EXTREMITYFIST)) {			//DEF, VIT無視
+		if( src->type==BL_PC && (item_id = pc_checkequip(sd,2)) != -1)
+			damage += battle_get_atk2(src) - sd->watk_2;
+		if( src->type==BL_PC)
+			damage2 += sd->watk_2;
+	}
  	// 過剰精錬ボーナス
 	if( src->type==BL_PC){
 		if(sd->overrefine - sd->overrefine_>0 )
@@ -1202,8 +1207,10 @@ struct Damage battle_calc_weapon_attack(
 
 	// スキル修正２（修練系）
 	// 修練ダメージ(右手のみ) ソニックブロー時は別処理（1撃に付き1/8適応)
-	if( src->type==BL_PC )
-		damage = battle_addmastery(sd,target,damage);
+	if( !(skill_num == 266 || skill_num == MO_EXTREMITYFIST)) {			//修練ダメージ無視
+		if( src->type==BL_PC )
+			damage = battle_addmastery(sd,target,damage);
+	}
 
 	// 回避修正
 	if( src->type==BL_PC )
@@ -1287,9 +1294,6 @@ struct Damage battle_calc_weapon_attack(
 			type = 0x08;
 			div_ = 255;	//三段掌用に…
 			damage = damage * (100 + 20 * pc_checkskill(sd, MO_TRIPLEATTACK)) / 100;
-			clif_skill_damage3(src,target,gettick(), battle_get_amotion(src), battle_get_dmotion(target),
-				damage, 3 , MO_TRIPLEATTACK, 
-				pc_checkskill(sd,MO_TRIPLEATTACK), type );
 		}
 		item_id = pc_checkequip(sd,34);		// 両 手用か？
 		if(item_id != -1) {
@@ -1635,12 +1639,18 @@ struct Damage battle_calc_attack(	int attack_type,
 int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	 unsigned int tick,int flag)
 {
+	struct map_session_data *sd=NULL;
+	sd = (struct map_session_data *)src;
+
 	if(battle_check_target(src,target,BCT_ENEMY) &&
 		battle_check_range(src,target->x,target->y,0)){
 		// 攻撃対象となりうるので攻撃
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(src,target,0,0,0);
-		if (wd.div_ != 255)	//三段掌
+		if (wd.div_ == 255)	//三段掌
+			clif_skill_damage3(src , target , tick , wd.amotion , wd.dmotion , 
+				wd.damage , 3 , MO_TRIPLEATTACK, pc_checkskill(sd,MO_TRIPLEATTACK) , wd.type );
+		else
 			clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
 				wd.damage, wd.div_ , wd.type, wd.damage2);
 		//二刀流左手とカタール追撃のミス表示(無理やり～)
