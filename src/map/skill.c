@@ -550,7 +550,6 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			skill_status_change_start(bl,SC_FREEZE,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
 
-	case MG_FROSTDIVER:		/* フロストダイバー */
 	case WZ_FROSTNOVA:		/* フロストノヴァ */
 		rate=(skilllv*3+35)*sc_def_mdef/100-(battle_get_int(bl)+battle_get_luk(bl))/15;
 		rate=rate<=5?5:rate;
@@ -1095,7 +1094,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 
 	map_freeblock_lock();
 	/* 実際にダメージ処理を行う */
-	if(skillid != KN_BOWLINGBASH || flag)
+	if(skillid || flag)
 		battle_damage(src,bl,damage,0);
 	if(skillid == RG_INTIMIDATE && damage > 0 && !(battle_get_mode(bl)&0x20) && !map[src->m].flag.gvg ) {
 		int s_lv = battle_get_lv(src),t_lv = battle_get_lv(bl);
@@ -1177,7 +1176,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		if(hp || sp) pc_heal(sd,hp,sp);
 	}
 
-	if((skillid != KN_BOWLINGBASH || flag) && rdamage > 0)
+	if((skillid || flag) && rdamage > 0)
 		battle_damage(bl,src,rdamage,0);
 
 	if(attack_type&BF_WEAPON && sc_data && sc_data[SC_AUTOCOUNTER].timer != -1 && sc_data[SC_AUTOCOUNTER].val4 > 0) {
@@ -1829,12 +1828,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			/* 個別にダメージを与える */
 			if(bl->id!=skill_area_temp[1])
 				skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0x0500);
-		}
-		else {
-			int damage;
-			map_freeblock_lock();
-			damage = skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0);
-			if(damage > 0) {
+		} else {
 				int i,c;	/* 他人から聞いた動きなので間違ってる可能性大＆効率が悪いっす＞＜ */
 				c = skill_get_blewcount(skillid,skilllv);
 				if(map[bl->m].flag.gvg) c = 0;
@@ -1856,16 +1850,13 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				skill_area_temp[1]=bl->id;
 				skill_area_temp[2]=bl->x;
 				skill_area_temp[3]=bl->y;
+				/* まずターゲットに攻撃を加える */
+				skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0);
 				/* その後ターゲット以外の範囲内の敵全体に処理を行う */
 				map_foreachinarea(skill_area_sub,
 					bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
 					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
 					skill_castend_damage_id);
-				battle_damage(src,bl,damage,1);
-				if(rdamage > 0)
-					battle_damage(bl,src,rdamage,0);
-			}
-			map_freeblock_unlock();
 		}
 		break;
 
@@ -1888,13 +1879,32 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case WZ_EARTHSPIKE:			/* アーススパイク */
 	case AL_HEAL:				/* ヒール */
 	case AL_HOLYLIGHT:			/* ホーリーライト */
-	case MG_FROSTDIVER:			/* フロストダイバー */
 	case WZ_JUPITEL:			/* ユピテルサンダー */
 	case NPC_DARKJUPITEL:			/*闇ユピテル*/
 	case NPC_MAGICALATTACK:		/* MOB:魔法打撃攻撃 */
 	case PR_ASPERSIO:			/* アスペルシオ */
 	case HW_NAPALMVULCAN:		/* ナパームバルカン */
 		skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
+		break;
+
+	case MG_FROSTDIVER:		/* フロストダイバー */
+		{
+		struct status_change *sc_data = battle_get_sc_data(bl);
+			if(sc_data[SC_FREEZE].timer!=-1){
+				skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
+				clif_skill_fail(sd,skillid,0,0);
+			}else if(skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag) > 0){
+				int sc_def_mdef,rate;
+				sc_def_mdef=100 - (3 + battle_get_mdef(bl) + battle_get_luk(bl)/3);
+				rate=(skilllv*3+35)*sc_def_mdef/100-(battle_get_int(bl)+battle_get_luk(bl))/15;
+				rate=rate<=5?5:rate;
+					if(rand()%100 < rate){
+						skill_status_change_start(bl,SC_FREEZE,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
+					}else if(sd){
+						clif_skill_fail(sd,skillid,0,0);
+					}
+			}
+		}
 		break;
 
 	case WZ_WATERBALL:			/* ウォーターボール */
@@ -2778,13 +2788,20 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 
 	case MG_STONECURSE:			/* ストーンカース */
+		{
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		if( dstsd && dstsd->special_state.no_magic_damage )
-			break;
-		if( rand()%100 < skilllv*4+20 && !battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)))
-			skill_status_change_start(bl,SC_STONE,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
-		else if(sd)
-			clif_skill_fail(sd,skillid,0,0);
+		struct status_change *sc_data = battle_get_sc_data(bl);
+			if( dstsd && dstsd->special_state.no_magic_damage )
+				break;
+			if(sc_data[SC_STONE].timer!=-1){
+				skill_status_change_end(bl,SC_STONE,-1);
+				clif_skill_fail(sd,skillid,0,0);
+			}else if( rand()%100 < skilllv*4+20 && !battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) ){
+				skill_status_change_start(bl,SC_STONE,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
+			}else if(sd){
+				clif_skill_fail(sd,skillid,0,0);
+			}
+		}
 		break;
 
 	case NV_FIRSTAID:			/* 応急手当 */
@@ -5772,7 +5789,7 @@ int skill_delayfix( struct block_list *bl, int time )
 
 	sc_data = battle_get_sc_data(bl);
 	if(time<=0)
-		return 0;
+		return ( battle_get_adelay(bl) / 2 );
 
 	if(bl->type == BL_PC) {
 		if( battle_config.delay_dependon_dex )	/* dexの影響を計算する */
