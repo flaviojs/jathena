@@ -1,4 +1,22 @@
 --------------------
+//0874 by Kalen
+・WhiteDayイベント追加
+	conf/npc/npc_event_whiteday.txt(新規)
+	 ただ、お菓子売ってるだけみたい…GMがなにやるのかは知りませんが。
+	 sakROのほうではホワイトチョコらしきものが追加されたのに
+	 jROで追加されたのは雛壇撤去パッチのみ(*´д`;)…
+
+・Alchemistギルドで乳鉢、製造書を変えるように
+	conf/npc/npc_job_alchemist.txt(新規)
+	 転職クエストが分からなかったので温めていましたが
+	 買えないと不便と聞いたので、追加
+
+・染色NPC実装
+	conf/npc/npc_event_dye.txt(更新)
+	 髪型変更がsakROに来たらしいので
+	 なんとなーく更新
+
+--------------------
 //0873 by 死神
 
 ・@コマンドitem2とkillmonster 追加。
