@@ -141,9 +141,9 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	-1,
 /* 270- */
 	SC_EXPLOSIONSPIRITS,-1,-1,-1,-1,
-	SC_CASTCANCEL,
 	-1,
-	SC_SPELLBREAKER,
+	-1,
+	-1,
 	-1,-1,
 /* 280- */
 	SC_FLAMELAUNCHER,
@@ -1455,13 +1455,8 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 
 	case BD_ADAPTATION:			/* アドリブ */
-		{
-			struct skill_unit_group *group=skill_check_dancing(src);
-			if(group){
-				skill_delunitgroup(group);
-				pc_calcstatus(sd,0);
-			}
-		} break;
+		skill_stop_dancing(src);
+		break;
 
 	case TF_STEAL:			// スティール
 		if(pc_steal_item(sd,bl)) {
@@ -3335,9 +3330,9 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	}
 
 	/* 演奏/ダンス中 */
-	if( skill_check_dancing(&sd->bl) && skill_num!=BD_ADAPTATION &&
+	if( sd->sc_data[SC_DANCING].timer!=-1 && skill_num!=BD_ADAPTATION &&
 		skill_num!=BA_MUSICALSTRIKE && skill_num!=DC_THROWARROW ){
-		printf("dancing! %d\n",skill_num);
+		//printf("dancing! %d\n",skill_num);
 		return 0;
 	}
 
@@ -3473,7 +3468,7 @@ int skill_use_pos( struct map_session_data *sd,
 		return 0;	/* 異常や沈黙など */
 
 	/* 演奏/ダンス中かチェック */
-	if( skill_check_dancing(&sd->bl) )
+	if( sd->sc_data[SC_DANCING].timer!=-1 )
 		return 0;
 
 	/* 射程と障害物チェック */
@@ -3638,19 +3633,8 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 		sc_data[type].timer=-1;
 		(*sc_count)--;
 
-		if(bl->type==BL_PC){
-			int ii = -1;
-			if (type < 64) ii=type;
-			else if (type == SC_EXPLOSIONSPIRITS)	ii = 0x56;
-			else if (type == SC_STEELBODY)			ii = 0x57;
-			else if (type == SC_SPEARSQUICKEN)		ii = 0x44;
-			else if (type == SC_FLAMELAUNCHER)		ii = 0x5a;
-			else if (type == SC_FROSTWEAPON)		ii = 0x5b;
-			else if (type == SC_LIGHTNINGLOADER)	ii = 0x5c;
-			else if (type == SC_SEISMICWEAPON)		ii = 0x5d;
-			if (ii != -1)
-				clif_status_change(bl,ii,0);	/* アイコン消去 */
-		}
+		if(bl->type==BL_PC && type<SC_SENDMAX)
+			clif_status_change(bl,type,0);	/* アイコン消去 */
 
 		switch(type){	/* 正常に戻るときなにか処理が必要 */
 		case SC_STONE:
@@ -3798,13 +3782,17 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 
 	case SC_DISSONANCE:	/* 不協和音 */
 		if( (--sc_data[type].val2)>0){
-			struct skill_unit_group *group=
-				(struct skill_unit_group *)sc_data[type].val4;
-			if(!group)
+			struct skill_unit *unit=
+				(struct skill_unit *)sc_data[type].val4;
+			struct block_list *src;
+			
+			if(!unit || !unit->group)
 				break;
-			skill_attack(BF_MISC,(struct block_list *)&group->unit[0],
-				(struct block_list *)&group->unit[0],
-				bl,group->skill_id,sc_data[type].val1,tick,0);			
+			src=map_id2bl(unit->group->src_id);
+			if(!src)
+				break;
+			skill_attack(BF_MISC,src,&unit->bl,bl,
+				unit->group->skill_id,sc_data[type].val1,tick,0);
 			if(sc_data[type].timer==tid)
 				sc_data[type].timer=add_timer( 3000+tick,
 					skill_status_change_timer, bl->id, data );			
@@ -3812,6 +3800,10 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 		
 	case SC_LULLABY:	/* 子守唄 */
 		if( (--sc_data[type].val2)>0){
+			struct skill_unit *unit=
+				(struct skill_unit *)sc_data[type].val4;
+			if(!unit || !unit->group || unit->group->src_id==bl->id)
+				break;
 			skill_additional_effect(bl,bl,
 				BD_LULLABY,sc_data[type].val1,BF_LONG|BF_SKILL|BF_MISC,tick);
 			if(sc_data[type].timer==tid)
@@ -4077,7 +4069,6 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 		case SC_DISSONANCE:			/* 不協和音 */
 			tick = 1000 * 3;
 			val2 = 10;
-			val3 = (val1+3)*10;
 			break;
 		case SC_WHISTLE:			/* 口笛 */
 			tick = 1000 * 60;
@@ -4114,6 +4105,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			tick = 1000 * 60 * 3;
 			val2 = val1+10;
 			val3 = val1*3+10;
+			break;
+		case SC_DANCING:			/* ダンス/演奏中 */
+			tick = 1000 * 181;
 			break;
 		
 		case SC_EXPLOSIONSPIRITS:	// 爆裂波動
@@ -4202,31 +4196,15 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			return 0;
 	}
 
-	if(bl->type==BL_PC){
-		int ii = -1;
-		if (type < 64) ii=type;
-		else if (type == SC_EXPLOSIONSPIRITS)	ii = 0x56;
-		else if (type == SC_STEELBODY)			ii = 0x57;
-		else if (type == SC_SPEARSQUICKEN)		ii = 0x44;
-		else if (type == SC_FLAMELAUNCHER)		ii = 0x5a;
-		else if (type == SC_FROSTWEAPON)		ii = 0x5b;
-		else if (type == SC_LIGHTNINGLOADER)	ii = 0x5c;
-		else if (type == SC_SEISMICWEAPON)		ii = 0x5d;
-		if (ii != -1)
-			clif_status_change(bl,ii,1);	/* アイコン表示 */
-	}
+	if(bl->type==BL_PC && type<SC_SENDMAX)
+		clif_status_change(bl,type,1);	/* アイコン表示 */
 
 	/* optionの変更 */
 	switch(type){
 		case SC_STONE:	case SC_FREEZE:	case SC_STAN:	case SC_SLEEP:
 			battle_stopattack(bl);	/* 攻撃停止 */
-			if(sd){	/* 演奏/ダンスの中断 */
-				struct skill_unit_group *group=skill_check_dancing(bl);
-				if(group){
-					skill_delunitgroup(group);
-					pc_calcstatus(sd,0);
-				}
-			}
+			skill_stop_dancing(bl);	/* 演奏/ダンスの中断 */
+			
 			{	/* 同時に掛からないステータス異常を解除 */
 				int i;
 				for(i = SC_STONE; i <= SC_SLEEP; i++){
@@ -4299,19 +4277,9 @@ int skill_status_change_clear(struct block_list *bl)
 		if(sc_data[i].timer != -1){	/* 異常があるならタイマーを削除する */
 			delete_timer(sc_data[i].timer, skill_status_change_timer);
 			sc_data[i].timer = -1;
-			if(bl->type==BL_PC){
-				int ii = -1;
-				if (i < 64) ii=i;
-				else if (i == SC_EXPLOSIONSPIRITS)	ii = 0x56;
-				else if (i == SC_STEELBODY)			ii = 0x57;
-				else if (i == SC_SPEARSQUICKEN)		ii = 0x44;
-				else if (i == SC_FLAMELAUNCHER)		ii = 0x5a;
-				else if (i == SC_FROSTWEAPON)		ii = 0x5b;
-				else if (i == SC_LIGHTNINGLOADER)	ii = 0x5c;
-				else if (i == SC_SEISMICWEAPON)		ii = 0x5d;
-				if (ii != -1)
-					clif_status_change(bl,ii,0);	/* アイコン消去 */
-			}
+			
+			if(bl->type==BL_PC && i<SC_SENDMAX)
+				clif_status_change(bl,i,0);	/* アイコン消去 */
 		}
 	}
 	*sc_count = 0;
@@ -4351,35 +4319,25 @@ int skill_check_cloaking(struct block_list *bl)
  *----------------------------------------------------------------------------
  */
 
-
-/* 演奏/ダンス中かどうか（そのグループを返す） */
-struct skill_unit_group *skill_check_dancing(struct block_list *src)
+/* 演奏/ダンススキルかどうか判定 */
+int skill_is_danceskill(int id)
 {
-	int i;
-	struct skill_unit_group *list=NULL;
-	int maxsug=0;
-
-	if(src->type==BL_PC){
-		list=((struct map_session_data *)src)->skillunit;
-		maxsug=MAX_SKILLUNITGROUP;
-	}else if(src->type==BL_MOB){
-		list=((struct mob_data *)src)->skillunit;
-		maxsug=MAX_MOBSKILLUNITGROUP;
-	}
-	if(!list) return NULL;
-	
-	for(i=0;i<maxsug;i++){	/* 検索 */
-		int id;
-		if(list[i].group_id==0)
-			continue;
-		id=list[i].skill_id;
-		if( (id>=BD_LULLABY && id<=BD_RAGNAROK) ||
-			(id>=BA_DISSONANCE && id<=BA_APPLEIDUN && id!=BA_FROSTJOKE ) ||
-			(id>=DC_UGLYDANCE && id<=DC_SERVICEFORYOU && id!=DC_SCREAM) )
-			return &list[i];
-	}
-	return NULL;
+	return ( (id>=BD_LULLABY && id<=BD_RAGNAROK) ||
+		(id>=BA_DISSONANCE && id<=BA_APPLEIDUN && id!=BA_FROSTJOKE ) ||
+		(id>=DC_UGLYDANCE && id<=DC_SERVICEFORYOU && id!=DC_SCREAM) );
 }
+
+/* 演奏/ダンスをやめる */
+void skill_stop_dancing(struct block_list *src)
+{
+	struct status_change* sc_data=battle_get_sc_data(src);
+	if(sc_data[SC_DANCING].timer==-1)
+		return;
+	skill_delunitgroup((struct skill_unit_group *)sc_data[SC_DANCING].val2);
+	if(src->type==BL_PC)
+		pc_calcstatus((struct map_session_data *)src,0);
+}
+
 
 /*==========================================
  * スキルユニット初期化
@@ -4511,6 +4469,9 @@ struct skill_unit_group *skill_initunitgroup(struct block_list *src,
 	memset(group->vallist,0,sizeof(group->vallist));
 	group->valstr=NULL;
 
+	if( skill_is_danceskill(skillid) )
+		skill_status_change_start(src,SC_DANCING,skillid,(int)group);
+
 	return group;
 }
 
@@ -4527,6 +4488,12 @@ int skill_delunitgroup(struct skill_unit_group *group)
 
 /*	printf("delunitgroup %d\n",group->group_id); */
 
+	if( skill_is_danceskill(group->skill_id) ){
+		struct block_list *src=map_id2bl(group->src_id);
+		if(src)
+			skill_status_change_end(src,SC_DANCING,-1);
+	}
+
 	group->alive_count=0;
 	if(group->unit!=NULL){
 		for(i=0;i<group->unit_count;i++)
@@ -4537,7 +4504,7 @@ int skill_delunitgroup(struct skill_unit_group *group)
 		map_freeblock(group->valstr);
 		group->valstr=NULL;
 	}
-	
+
 	map_freeblock(group->unit);	/* free()の替わり */
 	group->unit=NULL;
 	group->src_id=0;

@@ -130,15 +130,15 @@ Eff_Silence	6
 Eff_Confusion	7
 Eff_Blind	8
 
-SC_Stone	64
-SC_Freeze	65
-SC_Stan		66
-SC_Sleep	67
-SC_Poison	68
-SC_Curse	69
-SC_Silence	70
-SC_Confusion	71
-SC_Blind	72
+SC_Stone	128
+SC_Freeze	129
+SC_Stan		130
+SC_Sleep	131
+SC_Poison	132
+SC_Curse	133
+SC_Silence	134
+SC_Confusion	135
+SC_Blind	136
 SC_SpeedPot0	37
 SC_SpeedPot1	38
 SC_SpeedPot2	39

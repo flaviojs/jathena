@@ -2614,6 +2614,10 @@ struct Damage  battle_calc_misc_attack(
 		damagefix=0;
 		break;
 
+	case BA_DISSONANCE:	// •s‹¦˜a‰¹
+		damage=(skill_lv+3)*10;
+		break;
+
 	case NPC_SELFDESTRUCTION:	// Ž©”š
 		damage=battle_get_hp(bl)-((bl==target)?1:0);
 		damagefix=0;

@@ -1,4 +1,49 @@
 --------------
+//0693 by 胡蝶蘭
+
+・SC_*の列挙表をリナンバリング
+	クライアントに通知するのを64未満から128未満に増やした
+	パケット情報に合うようにリナンバー
+	StatusChangeの配列を128から192に増やしたのでメモリ使用量が増えます。
+	
+	(db/)
+	const.txt
+		SC_* の数値を変更
+	(map/)
+	skill.h
+		SC_* の列挙の数値を変更
+	map.h
+		MAX_STATUSCHANGEを128から192に増やした
+	skill.c
+		skill_status_change_start(),skill_status_change_end(),
+		skill_status_change_clear()の通知処理を変更
+
+・演奏/ダンスの処理を変更
+	演奏/ダンス中かどうかをSC_DANCINGで判定するように変更
+	（判定処理が多少高速化されたはず）
+	ワープ(マップ移動や蝿など)すると演奏/ダンスを中断するように変更
+	
+	skill.h/skill.c
+		skill_check_dancing()削除、skill_stop_dancing()追加
+		skill_delunitgroup(),skill_initunitgroup()変更
+		skill_status_change_start()変更
+		skill_castend_nodamage_id()変更
+		書き損じがあるかも・・
+	pc.c
+		pc_calcstatus(),pc_setpos(),pc_damage()変更
+
+・不協和音スキルの修正
+	(db/)
+	skill_db.txt
+		不協和音スキルのHIT数修正
+	(map/)
+	skill.c
+		skill_status_change_timer()変更
+	battle.c
+		battle_calc_misc_attack()修正
+
+
+--------------
 //0692 by 胡蝶蘭
 
 ・アドリブスキルが使用できない問題修正（skill_dbの添付し忘れ）

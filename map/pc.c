@@ -1159,7 +1159,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->sc_data[i=SC_SPEEDPOTION0].timer!=-1)	// ‘ ‘¬ƒ|[ƒVƒ‡ƒ“
 			aspd_rate -= sd->sc_data[i].val2;
 		
-		if( skill_check_dancing(&sd->bl) )		// ‰‰‘t/ƒ_ƒ“ƒXŽg—p’†
+		if( sd->sc_data[SC_DANCING].timer!=-1 )		// ‰‰‘t/ƒ_ƒ“ƒXŽg—p’†
 			sd->speed*=4;
 
 
@@ -2328,7 +2328,6 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 	if(sd->trade_partner)	// Žæˆø‚ð’†’f‚·‚é
 		trade_tradecancel(sd);
 	storage_storage_quit(sd);	// ‘qŒÉ‚ðŠJ‚¢‚Ä‚é‚È‚ç•Û‘¶‚·‚é
-	skill_castcancel(&sd->bl);	// ‰r¥‚ð’†’f‚·‚é
 
 	if(sd->party_invite>0)	// ƒp[ƒeƒBŠ©—U‚ð‹‘”Û‚·‚é
 		party_reply_invite(sd,sd->party_invite_account,0);
@@ -2337,9 +2336,11 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 	if(sd->guild_alliance>0)	// ƒMƒ‹ƒh“¯–¿Š©—U‚ð‹‘”Û‚·‚é
 		guild_reply_reqalliance(sd,sd->guild_alliance_account,0);
 
-	skill_castcancel(&sd->bl);
-	pc_stop_walking(sd,0);
-	pc_stopattack(sd);
+	skill_castcancel(&sd->bl);	// ‰r¥’†’f
+	skill_stop_dancing(&sd->bl);// ƒ_ƒ“ƒX/‰‰‘t’†’f
+	pc_stop_walking(sd,0);		// •às’†’f
+	pc_stopattack(sd);			// UŒ‚’†’f
+	
 	if(sd->status.pet_id && sd->pd && sd->pet.intimate > 0) {
 		pet_stopattack(sd->pd);
 		pet_changestate(sd->pd,MS_IDLE,0);
@@ -3263,13 +3264,8 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	if(sd->sc_data[SC_ENDURE].timer == -1)
 		pc_stop_walking(sd,3);
 	// ‰‰‘t/ƒ_ƒ“ƒX‚Ì’†’f
-	if( damage*4>sd->status.max_hp ){
-		struct skill_unit_group *group=skill_check_dancing(&sd->bl);
-		if(group){
-			skill_delunitgroup(group);
-			pc_calcstatus(sd,0);
-		}
-	}
+	if( damage*4>sd->status.max_hp)
+		skill_stop_dancing(&sd->bl);
 
 	sd->status.hp-=damage;
 	if(sd->status.pet_id > 0 && sd->pd && sd->petDB)

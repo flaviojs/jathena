@@ -81,6 +81,7 @@ int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,
 int skill_unit_move( struct block_list *bl,unsigned int tick,int range);
 
 struct skill_unit_group *skill_check_dancing( struct block_list *src );
+void skill_stop_dancing(struct block_list *src);
 
 // 詠唱キャンセル
 int skill_castcancel( struct block_list *sd );
@@ -117,35 +118,42 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 
 
 enum {	// struct map_session_data の status_changeの番号テーブル
-// 64未満クライアントへの通知あり、64以上通知無し。番号の変更可能性あり
+// SC_SENDMAX未満はクライアントへの通知あり。
 // 2-2次職の値はなんかめちゃくちゃっぽいので暫定。たぶん変更されます。
+	SC_SENDMAX				=128,
 
-	SC_STONE				=64,
-	SC_FREEZE				=65,
-	SC_STAN					=66,
-	SC_SLEEP				=67,
-	SC_POISON				=68,
-	SC_CURSE				=69,
-	SC_SILENCE				=70,
-	SC_CONFUSION			=71,
-	SC_BLIND				=72,
+	SC_STONE				=128,
+	SC_FREEZE				=129,
+	SC_STAN					=130,
+	SC_SLEEP				=131,
+	SC_POISON				=132,
+	SC_CURSE				=133,
+	SC_SILENCE				=134,
+	SC_CONFUSION			=135,
+	SC_BLIND				=136,
+
+	SC_SAFETYWALL			=140,
+	SC_PNEUMA				=141,
+	SC_WATERBALL			=142,
+	SC_ANKLE				=143,
+	SC_DANCING				=144,
 	
 	SC_TRICKDEAD			=29,
 	SC_PROVOKE				= 0,
 	SC_ENDURE				= 1,
-	SC_SIGHT				=75,
+	SC_SIGHT				=150,
 	SC_ENERGYCOAT			=31,
 	SC_CONCENTRATE			= 3,
 	SC_HIDDING				= 4,
 	SC_LOUD					=30,
-	SC_RUWACH				=76,
+	SC_RUWACH				=151,
 	SC_INCREASEAGI			=12,
 	SC_DECREASEAGI			=13,
 	SC_SIGNUMCRUCIS			=11,
 	SC_ANGELUS				= 9,
 	SC_BLESSING				=10,
 	SC_TWOHANDQUICKEN		= 2,
-	SC_AUTOCOUNTER			=77,
+	SC_AUTOCOUNTER			=152,
 	SC_IMPOSITIO			=15,
 	SC_SUFFRAGIUM			=16,
 	SC_ASPERSIO				=17,
@@ -163,10 +171,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_CLOAKING				= 5,
 	SC_ENCPOISON			= 6,
 	SC_POISONREACT			= 7,
-	SC_FLAMELAUNCHER		=98,
-	SC_FROSTWEAPON			=95,
-	SC_LIGHTNINGLOADER		=96,
-	SC_SEISMICWEAPON		=97,
+
 	SC_STRIPWEAPON			=50,
 	SC_STRIPSHIELD			=51,
 	SC_STRIPARMOR			=52,
@@ -177,38 +182,40 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_CP_HELM				=57,
 	SC_AUTOGUARD			=58,
 	SC_REFLECTSHIELD		=59,
+	SC_DEVOTION				=60,
 	SC_PROVIDENCE			=61,
 	SC_DEFENDER				=62,
-	SC_DEVOTION				=60,
-	SC_SPEARSQUICKEN		=99,
-	
-	SC_LULLABY				=107,
-	SC_RICHMANKIM			=108,
-	SC_ETERNALCHAOS			=105,
-	SC_DRUMBATTLE			=78,
-	SC_NIBELUNGEN			=103,
-	SC_ROKISWEIL			=110,
-	SC_INTOABYSS			=111,
-	SC_SIEGFRIED			=79,
-	SC_DISSONANCE			=112,
-	SC_FROSTJOKE			=113,
-	SC_WHISTLE				=80,
-	SC_ASSNCROS				=100,
-	SC_POEMBRAGI			=101,
-	SC_APPLEIDUN			=81,
-	SC_UGLYDANCE			=114,
-	SC_SCREAM				=109,
-	SC_HUMMING				=104,
-	SC_DONTFORGETME			=106,
-	SC_FORTUNE				=82,
-	SC_SERVICE4U			=83,
-	
-	SC_STEELBODY			=87,
-	SC_VOLCANO				=85,
-	SC_DELUGE				=89,
-	SC_CASTCANCEL			=84,
-	SC_SPELLBREAKER			=88,
+	SC_SPEARSQUICKEN		=68,
 	SC_EXPLOSIONSPIRITS		=86,
+	SC_STEELBODY			=87,
+	SC_FLAMELAUNCHER		=90,
+	SC_FROSTWEAPON			=91,
+	SC_LIGHTNINGLOADER		=92,
+	SC_SEISMICWEAPON		=93,
+
+	SC_VOLCANO				=153,
+	SC_DELUGE				=154,
+	
+	SC_LULLABY				=160,
+	SC_RICHMANKIM			=161,
+	SC_ETERNALCHAOS			=162,
+	SC_DRUMBATTLE			=163,
+	SC_NIBELUNGEN			=164,
+	SC_ROKISWEIL			=165,
+	SC_INTOABYSS			=166,
+	SC_SIEGFRIED			=167,
+	SC_DISSONANCE			=168,
+	SC_FROSTJOKE			=169,
+	SC_WHISTLE				=170,
+	SC_ASSNCROS				=171,
+	SC_POEMBRAGI			=172,
+	SC_APPLEIDUN			=173,
+	SC_UGLYDANCE			=174,
+	SC_SCREAM				=175,
+	SC_HUMMING				=176,
+	SC_DONTFORGETME			=177,
+	SC_FORTUNE				=178,
+	SC_SERVICE4U			=179,
 	
 	SC_RIDING				=27,
 	SC_FALCON				=28,
@@ -217,11 +224,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_SPEEDPOTION0			=37,
 	SC_SPEEDPOTION1			=38,
 	SC_SPEEDPOTION2			=39,
-	
-	SC_SAFETYWALL			=90,
-	SC_PNEUMA				=91,
-	SC_WATERBALL			=92,
-	SC_ANKLE				=94,
+
 };
 extern int SkillStatusChangeTable[];
 
