@@ -1,3 +1,13 @@
+
+--------------
+//0750 by CHRIS
+
+・スキル関係のDBを調整
+	(db/)
+	skill_db.txt
+	cast_db.txt
+	skill_require_db.txt
+
 --------------
 //0749 by 死神
 
