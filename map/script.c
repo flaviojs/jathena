@@ -120,7 +120,7 @@ int buildin_setfalcon(struct script_state *st);
 int buildin_setriding(struct script_state *st);
 int buildin_savepoint(struct script_state *st);
 int buildin_openstorage(struct script_state *st);
-int buildin_guildstorage(struct script_state *st);
+int buildin_guildopenstorage(struct script_state *st);
 int buildin_itemskill(struct script_state *st);
 int buildin_produce(struct script_state *st);
 int buildin_monster(struct script_state *st);
@@ -229,7 +229,7 @@ struct {
 	{buildin_setriding,"setriding",""},
 	{buildin_savepoint,"savepoint","sii"},
 	{buildin_openstorage,"openstorage",""},
-	{buildin_guildstorage,"guildstorage",""},
+	{buildin_guildopenstorage,"guildopenstorage",""},
 	{buildin_itemskill,"itemskill","iis"},
 	{buildin_produce,"produce","i"},
 	{buildin_monster,"monster","siisii*"},
@@ -2346,12 +2346,12 @@ int buildin_openstorage(struct script_state *st)
 	return 0;
 }
 
-int buildin_guildstorage(struct script_state *st)
+int buildin_guildopenstorage(struct script_state *st)
 {
 	struct map_session_data *sd=map_id2sd(st->rid);
-	if(sd->status.guild_id <= 0)
-		return 0;
-	storage_guild_storageopen(sd);
+	int ret;
+	ret = storage_guild_storageopen(sd);
+	push_val(st->stack,C_INT,ret);
 	return 0;
 }
 

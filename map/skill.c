@@ -2720,10 +2720,8 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case NPC_SUMMONSLAVE:		/* Žè‰º¢Š« */
 	case NPC_SUMMONMONSTER:		/* MOB¢Š« */
-		if(md) {
-			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if(md)
 			mob_summonslave(md,mob_db[md->class].skill[md->skillidx].val,skilllv,(skillid==NPC_SUMMONSLAVE)?1:0);
-		}
 		break;
 
 	case NPC_TRANSFORMATION:
@@ -5522,8 +5520,6 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 
 		if(type == SC_ADRENALINE && !(skill_get_weapontype(BS_ADRENALINE)&(1<<sd->status.weapon)))
 			return 0;
-		if(type==SC_FREEZE && undead_flag && battle_config.pc_undead_nofreeze && !(flag&1))
-			return 0;
 
 		if(SC_STONE<=type && type<=SC_BLIND){	/* ƒJ[ƒh‚É‚æ‚é‘Ï« */
 			if(sd->reseff[type-SC_STONE] > 0 && rand()%10000<sd->reseff[type-SC_STONE]){
@@ -5534,14 +5530,15 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		}
 	}
 	else if(bl->type == BL_MOB) {
-		if(type==SC_FREEZE && undead_flag && !(flag&1))
-			return 0;
 	}
 	else {
 		if(battle_config.error_log)
 			printf("skill_status_change_start: neither MOB nor PC !\n");
 		return 0;
 	}
+
+	if(type==SC_FREEZE && undead_flag && !(flag&1))
+		return 0;
 
 	if((type == SC_ADRENALINE || type == SC_WEAPONPERFECTION || type == SC_OVERTHRUST) &&
 		sc_data[type].timer != -1 && sc_data[type].val2 && !val2)

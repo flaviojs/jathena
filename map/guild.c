@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "guild.h"
+#include "storage.h"
 #include "db.h"
 #include "timer.h"
 #include "battle.h"
@@ -1076,9 +1077,10 @@ int guild_broken(int guild_id,int flag)
 			clif_guild_broken(g->member[i].sd,0);
 		}
 	}
-	
+
 	numdb_foreach(guild_db,guild_broken_sub,guild_id);
 	numdb_erase(guild_db,guild_id);
+	guild_storage_delete(guild_id);
 	free(g);
 	return 0;
 }

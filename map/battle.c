@@ -3935,7 +3935,6 @@ int battle_config_read(const char *cfgName)
 	battle_config.mob_changetarget_byskill = 0;
 	battle_config.pc_attack_direction_change = 1;
 	battle_config.monster_attack_direction_change = 1;
-	battle_config.pc_undead_nofreeze = 0;
 	battle_config.pc_land_skill_limit = 1;
 	battle_config.monster_land_skill_limit = 1;
 	battle_config.party_skill_penaly = 1;
@@ -4074,7 +4073,6 @@ int battle_config_read(const char *cfgName)
 			{ "mob_changetarget_byskill" ,&battle_config.mob_changetarget_byskill },
 			{ "player_attack_direction_change" ,&battle_config.pc_attack_direction_change },
 			{ "monster_attack_direction_change" ,&battle_config.monster_attack_direction_change },
-			{ "player_undead_nofreeze" ,&battle_config.pc_undead_nofreeze },
 			{ "player_land_skill_limit" ,&battle_config.pc_land_skill_limit },
 			{ "monster_land_skill_limit" ,&battle_config.monster_land_skill_limit },
 			{ "party_skill_penaly" ,&battle_config.party_skill_penaly },

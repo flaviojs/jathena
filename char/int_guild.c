@@ -1,5 +1,6 @@
 #include "inter.h"
 #include "int_guild.h"
+#include "int_storage.h"
 #include "mmo.h"
 #include "char.h"
 #include "socket.h"
@@ -490,6 +491,7 @@ int guild_check_empty(struct guild *g)
 		// 誰もいないので解散
 	numdb_foreach(guild_db,guild_break_sub,g->guild_id);
 	numdb_erase(guild_db,g->guild_id);
+	inter_guild_storage_delete(g->guild_id);
 	mapif_guild_broken(g->guild_id,0);
 	free(g);
 	return 1;
@@ -998,11 +1000,12 @@ int mapif_parse_BreakGuild(int fd,int guild_id)
 	}
 	numdb_foreach(guild_db,guild_break_sub,guild_id);
 	numdb_erase(guild_db,guild_id);
+	inter_guild_storage_delete(guild_id);
 	mapif_guild_broken(guild_id,0);
-	
+
 	inter_log("guild %s (id=%d) broken" RETCODE,g->name,guild_id);
 	free(g);
-	
+
 	return 0;
 }
 // ギルドメッセージ送信

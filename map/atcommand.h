@@ -19,6 +19,7 @@ extern struct Atcommand_Config {
 	int load;
 	int speed;
 	int storage;
+	int gstorage;
 	int option;
 	int hide;
 	int jobchange;

@@ -1,4 +1,54 @@
 --------------------
+//0890 by 死神
+
+・ギルド倉庫を一度に一人だけが使用するように変更。(未テスト)
+・battle_athena.confからplayer_undead_nofreeze 削除。
+・@コマンド@gstorage 追加。
+・スクリプトguildstorageをguildopenstorageに変更。
+・その他細かいバグ修正。
+	(doc/)
+	conf_ref.txt 修正。
+	script_ref.txt 修正。
+	(conf/)
+	atcommand_athena.conf 修正。
+	battle_athena.conf 修正。
+	help.txt 修正。
+	(conf/sample/)
+	gstorage_test.txt 追加。
+	(char/)
+	makefile 修正。
+	int_storage.h 修正。
+	int_storage.c
+		inter_storage_delete()、inter_guild_storage_delete() 追加。
+	int_guild.c
+		guild_check_empty()、mapif_parse_BreakGuild() 修正。
+	(map/)
+	makefile 修正。
+	battle.h 修正。
+	battle.c
+		battle_config_read() 修正。
+	guild.c
+		guild_broken() 修正。
+	storage.h 修正。
+	storage.c
+		storage_guild_storageopen() 修正。
+		storage_delete()、guild_storage_delete() 追加。
+	script.c
+		buildin_guildstorage() を buildin_guildopenstorage()に変更。
+	intif.c
+		intif_parse_LoadGuildStorage() 修正。
+	mob.c
+		mob_summonslave()、mob_damage()、mob_delete() 修正。
+		mob_catch_delete()、mob_readdb() 修正。
+	skill.c
+		skill_castend_nodamage_id()、skill_status_change_start() 修正。
+	clif.c
+		clif_parse_ActionRequest() 修正。
+	atcommand.h 修正。
+	atcommand.c
+		atcommand() 修正。
+
+--------------------
 //0889 by 胡蝶蘭
 
 ・文字列型一時的キャラクター変数機能追加。

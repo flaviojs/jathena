@@ -847,11 +847,19 @@ AthenaNPCScript
 			
 			<n>で指定したIDを持つギルド名を返します。
 			
-		basicskillcheck命令
+		basicskillcheck関数
 			basicskillcheck(0);
 			
 			battle_athena.confのbasic_skill_checkの設定値を返します。0は意味はありませんが何も入れなかった場合エラーになります。
 			basic_skill_checkとカプラの倉庫利用を合わせる為に作った物でそれ以外の機能はありません。戻った数値が0ならbasic_skill_checkがno、1ならyesです。
+
+		guildopenstorage命令
+			guildopenstorage;
+
+			ギルド倉庫を開きます。
+			返た数値が2ならギルドに所属してないキャラと言う意味で
+			1なら他のギルドメンバーが倉庫を使用中の意味です。
+			0なら成功的にギルド倉庫が開いたとのことです。
 
 			
 	＊定数ラベル

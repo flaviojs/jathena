@@ -46,6 +46,16 @@ struct storage *account2storage(int account_id)
 	return stor;
 }
 
+int storage_delete(int account_id)
+{
+	struct storage *stor = numdb_search(storage_db,account_id);
+	if(stor) {
+		numdb_erase(storage_db,account_id);
+		free(stor);
+	}
+	return 0;
+}
+
 /*==========================================
  * カプラ倉庫を開く
  *------------------------------------------
@@ -279,10 +289,24 @@ struct guild_storage *guild2storage(int guild_id)
 	return gs;
 }
 
+int guild_storage_delete(int guild_id)
+{
+	struct guild_storage *gstor = numdb_search(guild_storage_db,guild_id);
+	if(gstor) {
+		numdb_erase(guild_storage_db,guild_id);
+		free(gstor);
+	}
+	return 0;
+}
+
 int storage_guild_storageopen(struct map_session_data *sd)
 {
 	struct guild_storage *gstor;
+	if(sd->status.guild_id <= 0)
+		return 2;
 	if((gstor = numdb_search(guild_storage_db,sd->status.guild_id)) != NULL) {
+		if(gstor->storage_status)
+			return 1;
 		gstor->storage_status = 1;
 		sd->state.storage_flag = 1;
 		clif_guildstorageitemlist(sd,gstor);
@@ -290,8 +314,11 @@ int storage_guild_storageopen(struct map_session_data *sd)
 		clif_updateguildstorageamount(sd,gstor);
 		return 0;
 	}
-	else
+	else {
+		gstor = guild2storage(sd->status.guild_id);
+		gstor->storage_status = 1;
 		intif_request_guild_storage(sd->status.account_id,sd->status.guild_id);
+	}
 
 	return 0;
 }

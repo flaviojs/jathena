@@ -185,6 +185,12 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			storage_storageopen(sd);
 			return 1;
 		}
+// @gstorage
+		if(strcmpi(command, "@gstorage") == 0 && gm_level >= atcommand_config.gstorage) {
+			if(sd->status.guild_id > 0)
+				storage_guild_storageopen(sd);
+			return 1;
+		}
 //状態変更
 //「@option 1 20 15」のように値を記述
 /*
@@ -1408,6 +1414,7 @@ int atcommand_config_read(const char *cfgName)
 				{ "load",&atcommand_config.load },
 				{ "speed",&atcommand_config.speed },
 				{ "storage",&atcommand_config.storage },
+				{ "gstorage",&atcommand_config.gstorage },
 				{ "option",&atcommand_config.option },
 				{ "hide",&atcommand_config.hide },
 				{ "jobchange",&atcommand_config.jobchange },

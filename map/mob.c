@@ -1580,6 +1580,8 @@ static int mob_delay_item_drop2(int tid,unsigned int tick,int id,int data)
  */
 int mob_delete(struct mob_data *md)
 {
+	if(md->bl.prev == NULL)
+		return 1;
 	mob_changestate(md,MS_DEAD,0);
 	clif_clearchar_area(&md->bl,1);
 	map_delblock(&md->bl);
@@ -1592,6 +1594,8 @@ int mob_delete(struct mob_data *md)
 
 int mob_catch_delete(struct mob_data *md)
 {
+	if(md->bl.prev == NULL)
+		return 1;
 	mob_changestate(md,MS_DEAD,0);
 	clif_clearchar_area(&md->bl,0);
 	map_delblock(&md->bl);
@@ -1648,7 +1652,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	int mvp_damage,max_hp = battle_get_max_hp(&md->bl);
 	unsigned int tick = gettick();
 	struct map_session_data *mvp_sd=sd ,*second_sd = NULL,*third_sd = NULL;
-	double dmg_rate,tdmg;
+	double dmg_rate,tdmg,temp;
 
 	if(src && src->type == BL_PC) {
 		sd = (struct map_session_data *)src;
@@ -1792,11 +1796,15 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		if(tmpsd[i]==NULL || tmpsd[i]->bl.m != md->bl.m)
 			continue;
 
-		per=((double)md->dmglog[i].dmg)*(9.+(double)((count > 6)? 6:count))/10./((double)max_hp);
-		base_exp=(int)((double)mob_db[md->class].base_exp * per * dmg_rate);
-		if(base_exp < 1) base_exp = 1;
-		job_exp=(int)((double)mob_db[md->class].job_exp * per * dmg_rate);
-		if(job_exp < 1) job_exp = 1;
+		per = ((double)md->dmglog[i].dmg)*(9.+(double)((count > 6)? 6:count))/10./((double)max_hp) * dmg_rate;
+		temp = ((double)mob_db[md->class].base_exp * (double)battle_config.base_exp_rate / 100. * per);
+		base_exp = (temp > 2147483647.)? 0x7fffffff:(int)temp;
+		if(mob_db[md->class].base_exp > 0 && base_exp < 1) base_exp = 1;
+		if(base_exp < 0) base_exp = 0;
+		temp = ((double)mob_db[md->class].job_exp * (double)battle_config.job_exp_rate / 100. * per);
+		job_exp = (temp > 2147483647.)? 0x7fffffff:(int)temp;
+		if(mob_db[md->class].job_exp > 0 && job_exp < 1) job_exp = 1;
+		if(job_exp < 0) job_exp = 0;
 
 		if((pid=tmpsd[i]->status.party_id)>0){	// パーティに入っている
 			int j=0;
@@ -1911,7 +1919,10 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	// mvp処理
 	if(mvp_sd && mob_db[md->class].mexp > 0 ){
 		int j;
-		int mexp = mob_db[md->class].mexp*(9+count)/10;
+		int mexp;
+		temp = ((double)mob_db[md->class].mexp * (double)battle_config.mvp_exp_rate * (9.+(double)count)/1000.);
+		mexp = (temp > 2147483647.)? 0x7fffffff:(int)temp;
+		if(mexp < 1) mexp = 1;
 		clif_mvp_effect(mvp_sd);					// エフェクト
 		clif_mvp_exp(mvp_sd,mexp);
 		pc_gainexp(mvp_sd,mexp,0);
@@ -2212,7 +2223,7 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,int flag)
 			md->bl.type=BL_MOB;
 			map_addiddb(&md->bl);
 			mob_spawn(md->bl.id);
-			clif_skill_nodamage(&md->bl,&md->bl,(flag)? NPC_SUMMONSLAVE:NPC_SUMMONMONSTER,-1,1);
+			clif_skill_nodamage(&md->bl,&md->bl,(flag)? NPC_SUMMONSLAVE:NPC_SUMMONMONSTER,a,1);
 
 			if(flag)
 				md->master_id=md2->bl.id;
@@ -2923,14 +2934,8 @@ static int mob_readdb(void)
 			mob_db[class].lv=atoi(str[3]);
 			mob_db[class].max_hp=atoi(str[4]);
 			mob_db[class].max_sp=atoi(str[5]);
-			mob_db[class].base_exp=atoi(str[6])*
-					battle_config.base_exp_rate/100;
-			if(mob_db[class].base_exp <= 0)
-				mob_db[class].base_exp = 1;
-			mob_db[class].job_exp=atoi(str[7])*
-					battle_config.job_exp_rate/100;
-			if(mob_db[class].job_exp <= 0)
-				mob_db[class].job_exp = 1;
+			mob_db[class].base_exp=atoi(str[6]);
+			mob_db[class].job_exp=atoi(str[7]);
 			mob_db[class].range=atoi(str[8]);
 			mob_db[class].atk1=atoi(str[9]);
 			mob_db[class].atk2=atoi(str[10]);
@@ -2958,7 +2963,7 @@ static int mob_readdb(void)
 				mob_db[class].dropitem[i].p=atoi(str[30+i*2])*battle_config.item_rate/100;
 			}
 			// Item1,Item2
-			mob_db[class].mexp=atoi(str[47])*battle_config.mvp_exp_rate/100;
+			mob_db[class].mexp=atoi(str[47]);
 			mob_db[class].mexpper=atoi(str[48]);
 			for(i=0;i<3;i++){
 				mob_db[class].mvpitem[i].nameid=atoi(str[49+i*2]);

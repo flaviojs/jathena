@@ -925,11 +925,6 @@ monster_attack_direction_change
 	モンスターが攻撃した時方向を変更するかどうかです。本鯖では動けない限り方向が変えらないのですがバグぽい仕様なのでデフォルトはyesです。
 	noにすれば動くことだけで方向が変えるようになります。
 
-player_undead_nofreeze: no
-	プレイヤーが装備等によってアンデッドとして認識されている時
-	氷化するかどうかです。これをyesにすればアンデッドと認識されると
-	氷化しなくなります。デフォルトはnoです。
-
 player_land_skill_limit
 	skill_db.txtで設定されている地面スキルの数制限をプレイヤーに
 	適用するかどうかです。これをyesにすれば設定されている数以上は
@@ -1092,7 +1087,6 @@ gvg_misc_attack_damage_rate: 100
 mob_changetarget_byskill: no
 player_attack_direction_change:yes
 monster_attack_direction_change:yes
-player_undead_nofreeze: no
 player_land_skill_limit: yes
 monster_land_skill_limit: yes
 party_skill_penaly: yes
@@ -1139,6 +1133,8 @@ speed
 	@コマンド @speed
 storage
 	@コマンド @storage
+gstorage
+	@コマンド @gstorage
 option
 	@コマンド @option
 hide
@@ -1280,6 +1276,7 @@ save: 1
 load: 1
 speed: 1
 storage: 1
+gstorage: 1
 option: 1
 hide: 1
 jobchange: 1

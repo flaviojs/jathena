@@ -589,7 +589,7 @@ int intif_parse_LoadGuildStorage(int fd)
 	struct guild_storage *gstor;
 	struct map_session_data *sd;
 	int guild_id = RFIFOL(fd,8);
-	if(guild_id) {
+	if(guild_id > 0) {
 		gstor=guild2storage(guild_id);
 		if(!gstor) {
 			if(battle_config.error_log)
@@ -597,6 +597,7 @@ int intif_parse_LoadGuildStorage(int fd)
 			return 1;
 		}
 		if( RFIFOW(fd,2)-12 != sizeof(struct guild_storage) ){
+			gstor->storage_status = 0;
 			if(battle_config.error_log)
 				printf("intif_parse_LoadGuildStorage: data size error %d %d\n",RFIFOW(fd,2)-12 , sizeof(struct guild_storage));
 			return 1;

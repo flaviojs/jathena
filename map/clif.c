@@ -5931,6 +5931,7 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 		break;
 	case 0x02:	// sitdown
 		if(battle_config.basic_skill_check == 0 || pc_checkskill(sd,NV_BASIC) >= 3) {
+			pc_stop_walking(sd,1);
 			skill_gangsterparadise(sd,1);/* ギャングスターパラダイス設定 */
 			pc_setsit(sd);
 			WFIFOW(fd,0)=0x8a;

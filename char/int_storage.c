@@ -296,6 +296,26 @@ int inter_guild_storage_save()
 	return 0;
 }
 
+int inter_storage_delete(int account_id)
+{
+	struct storage *s = numdb_search(storage_db,account_id);
+	if(s) {
+		numdb_erase(storage_db,account_id);
+		free(s);
+	}
+	return 0;
+}
+
+int inter_guild_storage_delete(int guild_id)
+{
+	struct guild_storage *gs = numdb_search(guild_storage_db,guild_id);
+	if(gs) {
+		numdb_erase(guild_storage_db,guild_id);
+		free(gs);
+	}
+	return 0;
+}
+
 //---------------------------------------------------------
 // map server�ւ̒ʐM
 

@@ -24,7 +24,7 @@ intif.o: intif.c intif.h chrif.h clif.h party.h guild.h storage.h map.h battle.h
 trade.o: trade.c trade.h clif.h itemdb.h map.h pc.h npc.h ../common/mmo.h
 party.o: party.c party.h clif.h intif.h pc.h map.h battle.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
 vending.o: vending.c vending.h clif.h itemdb.h map.h pc.h ../common/mmo.h
-guild.o: guild.c guild.h battle.h clif.h intif.h pc.h npc.h map.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
+guild.o: guild.c guild.h storage.h battle.h clif.h intif.h pc.h npc.h map.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
 pet.o:pet.c pet.h map.h clif.h chrif.h intif.h pc.h itemdb.h battle.h mob.h npc.h script.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
 
 clean:
