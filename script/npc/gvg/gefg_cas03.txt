@@ -669,6 +669,7 @@ gefg_cas03.gat,221,43,0	script	@	111,{
 	menu "ˆø‚­",-,"ˆø‚©‚È‚¢",L2;
 	getcastledata "gefg_cas03.gat",1,@GIDg3;
 	if (getcharid(2) != @GIDg3) goto L1n;
+	if (0 == @GIDg3) goto L1n;
 	warp "gld_dun04",268,251;
 	end;
 L1n:

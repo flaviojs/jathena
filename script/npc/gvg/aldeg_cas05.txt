@@ -800,6 +800,7 @@ aldeg_cas05.gat,22,205,0	script	@	111,{
 	menu "ˆø‚­",-,"ˆø‚©‚È‚¢",L2;
 	getcastledata "aldeg_cas05.gat",1,@GIDa5;
 	if (getcharid(2) != @GIDa5) goto L1n;
+	if (0 == @GIDa5) goto L1n;
 	warp "gld_dun02",103,169;
 	end;
 L1n:

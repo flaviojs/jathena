@@ -686,6 +686,7 @@ prtg_cas01.gat,94,200,0	script	@	111,{
 	menu "ˆø‚­",-,"ˆø‚©‚È‚¢",L2;
 	getcastledata "prtg_cas01.gat",1,@GIDp1;
 	if (getcharid(2) != @GIDp1) goto L1n;
+	if (0 == @GIDp1) goto L1n;
 	warp "gld_dun03",28,251;
 	end;
 L1n:

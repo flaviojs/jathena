@@ -762,6 +762,7 @@ aldeg_cas02.gat,194,136,0	script	@	111,{
 	menu "ˆø‚­",-,"ˆø‚©‚È‚¢",L2;
 	getcastledata "aldeg_cas02.gat",1,@GIDa2;
 	if (getcharid(2) != @GIDa2) goto L1n;
+	if (0 == @GIDa2) goto L1n;
 	warp "gld_dun02",79,30;
 	end;
 L1n:

@@ -534,6 +534,7 @@ payg_cas02.gat,278,247,0	script	@	111,{
 	menu "ˆø‚­",-,"ˆø‚©‚È‚¢",L2;
 	getcastledata "payg_cas02.gat",1,@GIDf2;
 	if (getcharid(2) != @GIDf2) goto L1n;
+	if (0 == @GIDf2) goto L1n;
 	warp "gld_dun01",54,165;
 	end;
 L1n:
