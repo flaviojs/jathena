@@ -4,9 +4,8 @@
 //とりあえず、TEST作成('A`)
 //prtg_cas01.txtのアブライはコメントアウトですよ～
 prtg_cas01.gat,112,181,0	script	アブライ	55,{
-//check Guild
-//debag
-//goto LStart3;
+	getcastledata "prtg_cas01.gat",1,@GID;
+	if (getcharid(2) == @GID) goto LStart3;
 // ------- アジト未占領 ----------------------------------
 LStart:
 	mes "[執事アブライ]";
@@ -41,10 +40,10 @@ L1:
 	mes "[執事アブライ]";
 	mes "ギルド基礎情報:";
 	mes " ";
-	mes "^0000ff現在の通商投資は" + $edegree + "です。";
-	mes "- 最後の期間に" + $etrigger + "回投資しました。";
-	mes "現在の防御投資は" + $ddegree + "です。";
-	mes "- 最後の期間に" + $dtrigger + "回投資しました。^000000";
+	mes "^0000ff現在の通商投資は" + GetCastleData("prtg_cas01.gat",2) + "です。";
+	mes "- 最後の期間に" + GetCastleData("prtg_cas01.gat",4) + "回投資しました。";
+	mes "現在の防御投資は" + GetCastleData("prtg_cas01.gat",3) + "です。";
+	mes "- 最後の期間に" + GetCastleData("prtg_cas01.gat",5) + "回投資しました。^000000";
 	mes " ";
 	mes "以上です。";
 	close;
@@ -53,11 +52,15 @@ L1:
 //================================================
 L2:
 	mes "[執事アブライ]";
-	mes "あなたが通商投資を増やせば、ギルドの生産的な力はより多くの品物を生産するために増加します。";
+	mes "あなたが通商投資を増やせば、";
+	mes "ギルドの生産力はより多くの品物を";
+	mes "生産するために増加します。";
 	mes " ";
 	mes "一日に一回、一期間に二回まで投資できます。";
 	next;
-//if($etrigger<2) goto L2_1;
+	set @TriggerE,GetCastleData("prtg_cas01.gat",4);
+	set @Economy,GetCastleData("prtg_cas01.gat",2);
+	if(@TriggerE < 2) goto L2_1;
 		mes "[執事アブライ]";
 		mes "^ff0000ギルド投資は現在100%です。";
 		mes "今は投資する必要がありません。^000000";
@@ -77,8 +80,8 @@ L2_1:
 	L2_1_1:
 		if(Zeny < 10000) goto L2_error;
 		set Zeny,Zeny-10000;
-//投資コマンド(商業費)
-//etriggerを+1する
+		SetCastleData "prtg_cas01.gat",4,@TriggerE+1;
+		SetCastleData "prtg_cas01.gat",2,@Economy+10000;
 		mes "[執事アブライ]";
 		mes "投資に成功しました。";
 		close;
@@ -94,10 +97,15 @@ L2_error:
 L3:
 //var defenseOK = AgitGet AGIT_D_FUNDING_OK  
 	mes "[執事アブライ]";
-	mes "あなたが防御投資し、ガーディアンやエンペリウムのHPを増加させれば、敵が攻めてきたときに大いに助けになるでしょう";
+	mes "あなたが防御投資し、";
+	mes "ガーディアン達のHPを増加させれば、";
+	mes "敵が攻めてきたときに大いに助けになるでしょう";
 	mes " ";
 	mes "一日に一回、一期間に二回まで投資できます。";
-//if($dtrigger<2) goto L3_1;
+	next;
+	set @TriggerD,GetCastleData("prtg_cas01.gat",5);
+	set @Deffence,GetCastleData("prtg_cas01.gat",3);
+	if(@TriggerD < 2) goto L3_1;
 		mes "[執事アブライ]";
 		mes "^ff0000ギルド投資は現在100%です。";
 		mes "今は投資する必要がありません。^000000";
@@ -117,8 +125,8 @@ L3_1:
 	L3_1_1:
 		if(Zeny < 10000) goto L3_error;
 		set Zeny,Zeny-10000;
-//投資コマンド(防衛費)
-//dtriggerを+1する
+		SetCastleData "prtg_cas01.gat",5,@TriggerD+1;
+		SetCastleData "prtg_cas01.gat",3,@Deffence+10000;
 		mes "[執事アブライ]";
 		mes "投資に成功しました。";
 		close;
@@ -138,14 +146,30 @@ L4:
 	mes "ガーディアンを選んでください。";
 	next;
 	menu "Soldier 1",L4_1,"Soldier 2",L4_2,"Soldier 3",L4_3,"Archer 1",L4_4,"Archer 2",L4_5,"Knight 1",L4_6,"Knight 2",L4_7,"Knight 3",L4_8;
-		L4_1: set @GDnum,1;goto L4_9;
-		L4_2: set @GDnum,2;goto L4_9;
-		L4_3: set @GDnum,3;goto L4_9;
-		L4_4: set @GDnum,4;goto L4_9;
-		L4_5: set @GDnum,5;goto L4_9;
-		L4_6: set @GDnum,6;goto L4_9;
-		L4_7: set @GDnum,7;goto L4_9;
-		L4_8: set @GDnum,8;goto L4_9;
+		L4_1:
+			if (GetCastleData("prtg_cas01.gat",10) == 1) goto L4Error2;
+			set @GDnum,10;goto L4_9;
+		L4_2:
+			if (GetCastleData("prtg_cas01.gat",11) == 1) goto L4Error2;
+			set @GDnum,11;goto L4_9;
+		L4_3:
+			if (GetCastleData("prtg_cas01.gat",12) == 1) goto L4Error2;
+			set @GDnum,12;goto L4_9;
+		L4_4:
+			if (GetCastleData("prtg_cas01.gat",13) == 1) goto L4Error2;
+			set @GDnum,13;goto L4_9;
+		L4_5:
+			if (GetCastleData("prtg_cas01.gat",14) == 1) goto L4Error2;
+			set @GDnum,14;goto L4_9;
+		L4_6:
+			if (GetCastleData("prtg_cas01.gat",15) == 1) goto L4Error2;
+			set @GDnum,15;goto L4_9;
+		L4_7:
+			if (GetCastleData("prtg_cas01.gat",16) == 1) goto L4Error2;
+			set @GDnum,16;goto L4_9;
+		L4_8:
+			if (GetCastleData("prtg_cas01.gat",17) == 1) goto L4Error2;
+			set @GDnum,17;goto L4_9;
 	L4_9:
 		mes "[執事アブライ]";
 		mes "本当に設置しますか？";
@@ -158,10 +182,9 @@ L4:
 			close;
 		L4_9_1:
 //ギルドスキルの判定→ダメならL4Error
-//@GDnumのガーディアン調査→設置済みならL4Error2
 		if (Zeny < 10000) goto L4Error3;
 		set Zeny,Zeny-10000;
-//@GDnumのガーディアンON
+		setcastledata "prtg_cas01.gat",@GDnum,1;
 		mes "[執事アブライ]";
 		mes "ガーディアンが設置されました。";
 		mes "ガーディアンは私達の城を敵から守ってくれるでしょう。";
@@ -190,7 +213,7 @@ L4Error3:
 //Phase 5:カプラとの契約・解雇
 //================================================
 L5:
-//カプラがいるかどうかチェック
+	if (GetCastleData("prtg_cas01.gat",9) == 1) goto Lkafra_dimi;
 //=========================
 //(When Karfa off) Employment
 //=========================
@@ -199,6 +222,8 @@ L5:
 	mes "契約には^ff0000 10000 ^000000Zeny 必要です";
 	next;
 	menu "契約する",-,"キャンセル",L_k_E;
+//debag
+	goto L_k_0;
 //check Kafraskill(OK -> L_k_0,NG -> -)
 		mes "[執事アブライ]";
 		mes "マスター！どうやらスキルが足りないようです。カプラと契約するには ^ff0000KAFRA SKILL^000000 が必要です。";
@@ -210,8 +235,8 @@ L5:
 		close;
 	L_k_1:
 		set Zeny,Zeny-10000;
-		enablenpc "カプラ職員";
-//set \prt01_k = 1,0;
+		enablenpc "カプラ職員#prt1";
+		setcastledata "prtg_cas01.gat",9,1;
 		mes "[執事アブライ]";
 		mes "カプラとの契約が完了しました";
 		next;
@@ -233,6 +258,7 @@ L_k_e:
 //=========================
 //(When karfa ON) Dismissal
 //=========================
+Lkafra_dimi:
 	mes "[執事アブライ]";
 	mes "カプラ職員との契約を破棄しますか？";
 	next;
@@ -245,8 +271,8 @@ L_k_e:
 				mes "[カプラ職員]";
 				mes "ああ、解雇なさるんですね、、、TT";
 				next;
-				disablenpc "カプラ職員";
-//set \prt01_k = 0,0;
+				disablenpc "カプラ職員#prt1";
+				setcastledata "prtg_cas01.gat",9,0;
 				cutin "kafra_01",255;
 				mes "[執事アブライ]";
 				mes "....";
@@ -302,8 +328,27 @@ L7:
 				mes "[執事アブライ]";
 				mes "マスター!!…";
 				mes "…い……やだ……ぁ……";
-//ギルド崩壊！
-				close;
+				next;
+		setcastledata "prtg_cas01.gat",1,0;
+		setcastledata "prtg_cas01.gat",2,0;
+		setcastledata "prtg_cas01.gat",3,0;
+		setcastledata "prtg_cas01.gat",4,0;
+		setcastledata "prtg_cas01.gat",5,0;
+		setcastledata "prtg_cas01.gat",6,0;
+		setcastledata "prtg_cas01.gat",7,0;
+		setcastledata "prtg_cas01.gat",8,0;
+		setcastledata "prtg_cas01.gat",9,0;
+		setcastledata "prtg_cas01.gat",10,0;
+		setcastledata "prtg_cas01.gat",11,0;
+		setcastledata "prtg_cas01.gat",12,0;
+		setcastledata "prtg_cas01.gat",13,0;
+		setcastledata "prtg_cas01.gat",14,0;
+		setcastledata "prtg_cas01.gat",15,0;
+		setcastledata "prtg_cas01.gat",16,0;
+		setcastledata "prtg_cas01.gat",17,0;
+		Announce "砦 [" + GetCastleName("prtg_cas01.gat") + "]を " + GetGuildName(@GID) + "が破棄しました。",0;
+		MapRespawnGuildID "prtg_cas01.gat",GetCastleData("prtg_cas01.gat",1),0;
+		end;
 		L7_2:
 			mes "[執事アブライ]";
 			mes "イエッサー！マスター^^!";

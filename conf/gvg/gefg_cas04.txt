@@ -3,7 +3,8 @@
 //===================================================================
 //----gef_fild13----
 gef_fild13.gat,190,283,3	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -25,19 +26,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 gef_fild13.gat,199,274,3	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -59,12 +61,12 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
@@ -72,7 +74,8 @@ LStartg:
 }
 //----gefg_cas04----
 gefg_cas04.gat,24,157,4	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -94,19 +97,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 gefg_cas04.gat,35,158,4	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -128,19 +132,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 gefg_cas04.gat,44,184,4	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -162,19 +167,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 gefg_cas04.gat,51,184,4	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -196,19 +202,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 gefg_cas04.gat,39,212,7	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -230,19 +237,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 gefg_cas04.gat,29,212,1	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -264,19 +272,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 gefg_cas04.gat,24,73,1	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -298,19 +307,20 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
 }
 gefg_cas04.gat,35,73,4	script	ギルドフラッグ	722,{
-//チェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (@GID != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
@@ -332,12 +342,12 @@ LStartg:
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 GUILDNAME ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 GUILDNAME ^000000 のマスターは";
+		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
 		mes "^ff0000 GUILDMASTER ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
@@ -346,10 +356,11 @@ LStartg:
 //------------------------------カプラ--------------------------------
 gefg_cas04.gat,59,70,3	script	カプラ職員	117,{
 	cutin "kafra_01",2;
-//Kafraチェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (getcharid(2) == @GID) goto LStartg;
 	mes "[カプラ職員]";
 	mes "私は、ギルド";
-	mes " ^ff0000GUILDNAME^000000";
+	mes " ^ff0000" + GetGuildName(@GID) + "^000000";
 	mes "の皆様にだけお仕えするように";
 	mes "契約されております。";
 	mes "他のカプラサービスを";
@@ -357,7 +368,7 @@ gefg_cas04.gat,59,70,3	script	カプラ職員	117,{
 	goto L_EXIT;
 LStartg:
 	mes "[カプラ職員]";
-	mes "いらっしゃいませ ^ff0000GUILDNAME^000000 の皆さん";
+	mes "いらっしゃいませ ^ff0000" + GetGuildName(@GID) + "^000000 の皆さん";
 	mes "カプラサービスは";
 	mes "いつも皆様のそばにいます。";
 	next;
@@ -448,7 +459,11 @@ L_EXIT:
 }
 //-------------------------------執事---------------------------------
 gefg_cas04.gat,73,46,3	script	ケルバーリ	55,{
-//sチェック
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (getcharid(2) == @GID) goto LStartg;
+	mes "NO MSG";
+	close;
+LStartgm:
 	mes "[執事ケルバーリ]";
 	mes "あなた方がいくら脅そうとも、";
 	mes "私は私のマスターである";
@@ -462,7 +477,7 @@ LStartg:
 	close;
 }
 //-----------------------------スイッチ-------------------------------
-gefg_cas04.gat,113,115,0	script	 	111,{
+gefg_cas04.gat,113,115,0	script	　	111,{
 	mes "小さなレバーがあります。";
 	mes "引きますか？";
 	next;
@@ -473,7 +488,7 @@ L2:
 	close;
 }
 //-----------------------------スイッチ2------------------------------
-gefg_cas04.gat,58,75,0	script	 	111,{
+gefg_cas04.gat,58,75,0	script	　	111,{
 	mes "[声]";
 	mes "試練に挑むならば先へ進むがよい";
 	next;
@@ -482,7 +497,8 @@ gefg_cas04.gat,58,75,0	script	 	111,{
 	mes "引きますか？";
 	next;
 	menu "引く",-,"引かない",L2;
-//G員↓無関係者L1n
+	getcastledata "gefg_cas04.gat",1,@GID;
+	if (getcharid(2) != @GID) goto L1n;
 	warp "gld_dun04",268,108;
 	end;
 L1n:

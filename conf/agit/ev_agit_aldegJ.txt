@@ -1,0 +1,125 @@
+aldeg_cas01.gat,216,24,0	script	Agit_A01	-1,{
+OnAgitInit:
+	GetCastleData "aldeg_cas01.gat",0;
+	End;
+OnAgitStart:
+	Monster "aldeg_cas01.gat",216,24,"エンペリウム",1288,1,"Agit_A01::OnAgitBreak";
+	GvgOn "aldeg_cas01.gat";
+	End;
+OnAgitBreak:
+	set @GID,getcharid(2);
+	if (@GID <= 0) end;
+	SetCastleData "aldeg_cas01.gat",1,@GID;
+	Announce "砦 [" + GetCastleName("aldeg_cas01.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	MapAnnounce "aldeg_cas01.gat","エンペリウムが破壊されました",17;
+	MapRespawnGuildID "aldeg_cas01.gat",GetCastleData("aldeg_cas01.gat",1),0;
+	End;
+OnAgitEliminate:
+	Monster "aldeg_cas01.gat",216,24,"エンペリウム",1288,1,"Agit_A01::OnAgitBreak";
+	End;
+OnAgitEnd:
+	KillMonster "aldeg_cas01.gat","Agit_A01::OnAgitBreak";
+	GvgOff "aldeg_cas01.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------
+aldeg_cas02.gat,214,24,0	script	Agit_A02	-1,{
+OnAgitInit:
+	GetCastleData "aldeg_cas02.gat",0;
+	End;
+OnAgitStart:
+	Monster "aldeg_cas02.gat",214,24,"エンペリウム",1288,1,"Agit_A02::OnAgitBreak";
+	GvgOn "aldeg_cas02.gat";
+	End;
+OnAgitBreak:
+	set @GID,getcharid(2);
+	if (@GID <= 0) end;
+	SetCastleData "aldeg_cas02.gat",1,@GID;
+	Announce "砦 [" + GetCastleName("aldeg_cas02.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	MapAnnounce "aldeg_cas02.gat","エンペリウムが破壊されました",17;
+	MapRespawnGuildID "aldeg_cas02.gat",GetCastleData("aldeg_cas02.gat",1),0;
+	End;
+OnAgitEliminate:
+	Monster "aldeg_cas02.gat",214,24,"エンペリウム",1288,1,"Agit_A02::OnAgitBreak";
+	End;
+OnAgitEnd:
+	KillMonster "aldeg_cas02.gat","Agit_A02::OnAgitBreak";
+	GvgOff "aldeg_cas02.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------
+aldeg_cas03.gat,206,32,0	script	Agit_A03	-1,{
+OnAgitInit:
+	GetCastleData "aldeg_cas03.gat",0;
+	End;
+OnAgitStart:
+	Monster "aldeg_cas03.gat",206,32,"エンペリウム",1288,1,"Agit_A03::OnAgitBreak";
+	GvgOn "aldeg_cas03.gat";
+	End;
+OnAgitBreak:
+	set @GID,getcharid(2);
+	if (@GID <= 0) end;
+	SetCastleData "aldeg_cas03.gat",1,@GID;
+	Announce "砦 [" + GetCastleName("aldeg_cas03.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	MapAnnounce "aldeg_cas03.gat","エンペリウムが破壊されました",17;
+	MapRespawnGuildID "aldeg_cas03.gat",GetCastleData("aldeg_cas03.gat",1),0;
+	End;
+OnAgitEliminate:
+	Monster "aldeg_cas03.gat",206,32,"エンペリウム",1288,1,"Agit_A03::OnAgitBreak";
+	End;
+OnAgitEnd:
+	KillMonster "aldeg_cas03.gat","Agit_A03::OnAgitBreak";
+	GvgOff "aldeg_cas03.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------
+aldeg_cas04.gat,36,218,0	script	Agit_A04	-1,{
+OnAgitInit:
+	GetCastleData "aldeg_cas04.gat",0;
+	End;
+OnAgitStart:
+	Monster "aldeg_cas04.gat",36,218,"エンペリウム",1288,1,"Agit_A04::OnAgitBreak";
+	GvgOn "aldeg_cas04.gat";
+	End;
+OnAgitBreak:
+	set @GID,getcharid(2);
+	if (@GID <= 0) end;
+	SetCastleData "aldeg_cas04.gat",1,@GID;
+	Announce "砦 [" + GetCastleName("aldeg_cas04.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	MapAnnounce "aldeg_cas04.gat","エンペリウムが破壊されました",17;
+	MapRespawnGuildID "aldeg_cas04.gat",GetCastleData("aldeg_cas04.gat",1),0;
+	End;
+OnAgitEliminate:
+	Monster "aldeg_cas04.gat",36,218,"エンペリウム",1288,1,"Agit_A04::OnAgitBreak";
+	End;
+OnAgitEnd:
+	KillMonster "aldeg_cas04.gat","Agit_A04::OnAgitBreak";
+	GvgOff "aldeg_cas04.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------
+aldeg_cas05.gat,28,102,0	script	Agit_A05	-1,{
+OnAgitInit:
+	GetCastleData "aldeg_cas05.gat",0;
+	End;
+OnAgitStart:
+	Monster "aldeg_cas05.gat",28,102,"エンペリウム",1288,1,"Agit_A05::OnAgitBreak";
+	GvgOn "aldeg_cas05.gat";
+	End;
+OnAgitBreak:
+	set @GID,getcharid(2);
+	if (@GID <= 0) end;
+	SetCastleData "aldeg_cas05.gat",1,@GID;
+	Announce "砦 [" + GetCastleName("aldeg_cas05.gat") + "]を " + GetGuildName(@GID) + " が占領しました",0;
+	MapAnnounce "aldeg_cas05.gat","エンペリウムが破壊されました",17;
+	MapRespawnGuildID "aldeg_cas05.gat",GetCastleData("aldeg_cas05.gat",1),0;
+	End;
+OnAgitEliminate:
+	Monster "aldeg_cas05.gat",28,102,"エンペリウム",1288,1,"Agit_A05::OnAgitBreak";
+	End;
+OnAgitEnd:
+	KillMonster "aldeg_cas05.gat","Agit_A05::OnAgitBreak";
+	GvgOff "aldeg_cas05.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------
