@@ -505,7 +505,7 @@ L2_1:
 			mes "- 舵を取り出発した -";
 			next;
 			mes "^3355ff- ドッドッドッド… -";
-			set Zeny - 10000,0;
+			set Zeny,Zeny-10000;
 			warp "tur_dun01.gat",157,39;
 			end;
 L2_e:
