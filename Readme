@@ -1,4 +1,10 @@
 --------------
+//0574 by いど
+
+・サーバーSnapshot
+・conf/shop_*.txtの内容をconf/npc_town_*.txtに統合
+
+--------------
 //0573 by Jazz
 
 ・mapの penalty, nomemo, noteleport, nobranchの optionを設定。
