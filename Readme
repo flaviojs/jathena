@@ -1,4 +1,390 @@
 --------------------
+//1092 by lizorett
+・遠距離攻撃のパス検索アルゴリズムを本鯖と同じになるよう変更
+・ストームガスト、ロードオブヴァーミリオンを重ねた場合、片方からだけダメージを
+受けるよう修正(仕様が不明なので先に見つけたユニットから攻撃するようにしています)
+・アイテムが一つしかない場合、アイテムを使用してもエフェクトが表示されない問題
+を修正
+・セーフティーウォール使用時にアドレス不正となる場合がある問題を修正
+・map_getcell/map_setcellの仕様変更
+・1085のビットマップ対応の痕跡の消去
+・1088のアイスウォールの変更を巻き戻し(本鯖に合わせる)
+・全角判断(npc.c)を修正(For English User Forum >>54)
+
+ (注意) map_athena.confのマップキャッシュ指定を行うパラメータ名を変更しています
+
+	(conf)
+		map_athena.conf	- read_map_from_bitmapをread_map_from_cache に変更
+						- map_bitmap_pathをmap_cache_fileに変更
+	(src/map)
+		map.h			- セルタイプ名称変更(CELL_CHKHIGH,CELL_CHKTYPE)、
+						削除(CELL_SET*)
+						- skill_unit_group_ticksetメンバ名変更(group_id -> id)
+						- ビットマップ関連の記述の痕跡を削除
+		map.c			- map_getcell() セルタイプ名称変更と若干のコード変更
+						- map_setcell()を1084以前の仕様に戻し、CELL_SETNPCの
+						フラグを追加
+						- map_cache関連の細かな修正
+		npc.c			- 全角判断(is_zenkaku)を正確に行うよう変更
+						- map_getcell()のセルタイプ名称変更に追従
+		pc.c			- アイテムが一つしかない場合、使用時のエフェクトが表示
+						されない問題を修正
+						- map_getcell()のセルタイプ名称変更に追従
+		skill.c			- ストームガスト、ロードオブヴァーミリオンを重ねた場合
+						片方からだけダメージを受けるよう修正
+						- セーフティーウォール使用時にアドレス不正となる場合が
+						ある問題を修正
+						- map_getcell()のセルタイプ名称変更に追従
+		skill.h			- 関数定義変更
+		path.c			- 遠距離攻撃のパス検索処理を追加(path_search_long)
+						- map_getcell()のセルタイプ名称変更に追従
+		battle.c		- 遠距離攻撃のパス検索を使用するよう変更
+
+--------------------
+//1091 by End_of_exam
+
+＊＊　注意　＊＊
+
+　今回のパッチは改造内容が複雑なので、導入は慎重に行ってください。
+　status.c / h への分離は、関数名の置き換えだけに留めたつもりですが、
+　思わぬバグが潜んでいる可能性があります。
+
+・スパゲティ対策の一環として、ステータス計算、状態異常に関わる部分を
+　status.c / h として分離。battle.c から39KB程 , skill.c から41KB程 ,
+　pc.c から38KB程移動できました。少々強引ですが、スキル使用や攻撃などの
+　処理の流れをつかみやすくするためには、battle.c / skill.c の中身を
+　減らす必要があると考えたためです。
+
+	battle_get_*          => status_get_*
+	skill_status_change_* => status_change_*
+	pc_calcstatus         => status_calc_pc
+	pc_calc_sigma         => status_calc_sigma
+	pc_getrefinebonus     => status_getrefinebonus
+	pc_percentrefinery    => status_percentrefinery
+
+・battle.c , script.c の巻き戻りを戻す
+・npc.c の怪しい変更を戻し、きちんとNUL を付け加えるようにする
+・script.c のミスを直す（jump_non_zero => jump_zero　意味が逆になってました…）
+・skill.c の武器修理 のコメントミスを修正
+・WIN32でコンパイルした時、最大接続人数が60人程に制限されていたバグを修正
+
+	(/)
+	athena.dsw , athena.dsp , bcc32_make.bat , src/login/login.dsp
+	src/char/char.dsp , src/map/map.dsp
+		コンパイル条件の変更
+
+	(src/map/)
+		上の分離に合わせてコンパイルエラーの出ないように修正
+
+--------------------
+//1090 by Sapientia
+・チャットの便利さのために叫ぶ追加 (ギルドチャットと区分するためにウェチギシの前に [叫ぶこと]が付き)
+・atcomand_athena.conf で onlymes を 0で設定して皆使うように活性化
+  オリジナルなのでデフォルトで GMだけ使うことができるように設定しました.
+・@mes [言うこと] で使用
+
+	(src/map)
+		atcommand.c	atcommand_charkami 追加
+		atcommand.h
+		clif.c		clif_onlymessage 追加
+		clif.h
+	(src/conf)
+		atcommand_athena.conf	onlymes 追加
+		help.txt	@mes 説明追加
+
+
+--------------------
+//1089 by 聖
+・VC.NET2003でコンパイルすると大量に警告が出るのを修正
+・その他バッファオーバーフロー等の細かいバグ修正
+
+	(src/char)
+		int_guild.c 警告箇所を修正
+
+	(src/map)
+		atcommand.c, battle.c, clif.c, itemdb.c, pc.c, pc.h, script.c, skill.c
+			警告箇所を修正
+		npc.c 警告箇所とバッファオーバーフロー修正
+
+--------------------
+//1088 by Sapientia
+・ウィザドスキル Icewall このキャラクターやモンスター足もとに設置されることを防止
+・ロードナイトスキル Berserk 使用の時 HPが 1/3になれば回復するバグ修正
+
+	(src/map)
+		pc.c	Berserk 修正
+		skill.c	Icewall 修正
+
+--------------------
+//1087 by End_of_exam
+
+・マップキャッシュに圧縮機能を追加(1MB程に縮まるようです)
+・npc.c の巻き戻りを修正(質問スレッド Part14 , 111)
+・map_athena.conf のコメントアウトを修正(Athena雑談スレッドPart7 , 146)
+・Windows 用の起動スクリプトを追加してみる(eAthena のを元に改造）
+
+	(/)
+		win32_start.bat		Windows 用の起動ファイル
+
+	(src/map)
+		map.c	圧縮機能の追加
+		npc.c	巻き戻りを修正
+
+	(src/common)
+		grfio.c		decode_zip , encode_zip のエクスポート
+		grfio.h		decode_zip , encode_zip のエクスポート
+
+	(conf/)
+		map_athena.conf		修正
+
+--------------------
+//1086 by End_of_exam
+
+主に1085のバグ修正だったりもします。
+「てめー、１から書き直しやがって」という突っ込みだけは勘弁してくださいませ。
+
+・データ構造の大変更(map.c)
+	マップを削除＆追加しても正しく動くように変更
+	マップキャッシュ作成中に強制終了すると再起動時に不安定になるバグを修正
+	圧縮フラグの追加（需要あるのか不明。compressを真にすると、現在のソースで
+	読めなくなります。）
+
+・なんか衝動があやしすぎるので、ビットマップ処理を撤廃する(map.c map.h)
+	npc_touch_areanpc : some bug　がたくさん出てくる -> 原因不明？
+	恐らく通行可能判定が正しく設定されていないっぽいんですが謎です。
+	＃read_map_from_bitmap の設定を省くとログイン時に落ちるバグを修正
+
+・キャッシュ内に全てのマップがあれば、grf 無しでも動作するように変更。(grfio.c map.c)
+
+	(src/map)
+		map.c	バグ修正他
+		map.h	バグ修正他
+
+	(src/common)
+		grfio.c		ファイルが見つからない時にexit を呼ばないように修正
+
+--------------------
+//1085 by zalem
+・マップデータの読み込みはビットマップファイルから行なえるような機能追加
+
+		grfファイルから一度ビットマップファイルを作成して以後はその
+	作成されたビットマップフォーマットのファイルからマップ情報を読み込む
+	という方法を採ることによって、map-serverが立ち上がる時マップ情報を読み取る
+	のに掛かる時間がほとんどなくなる、また1intに32個のセル情報が格納できるの
+	で、map情報に関するメモリ使用量も３割り近くまで減るので(そのかわりに
+	ある程度CPUの負担が大きくなる)、追加してみた。
+		conf/map_athena.confのread_map_from_bitmapオプションで利用する
+	かどうかを指定でき、その下にあるmap_bitmap_pathでファイル名を変更する
+	(デフォルトでdb/map.info)
+		まだテスト段階なので、導入はご慎重に(一応Linuxで、いろいろと
+	テストしてみたが...)
+
+・map_getcell()に4番目引数の追加とmap_setcell()の4番目引数の変更
+		
+		関数の利用意図がわかりやすいように、そしてこれからの変更を容易にする
+	ために、map_getcell()とmap_setcell()のそれぞれ4番目の引数を追加、変更してみた、
+	map_getcell()の4番目の引数はmap.hで定義されてるCELL_CHK列挙型、map_setcell()
+	の4番目の引数はmap.hで定義されてるCELL_SET列挙型をとるように変更.また、上の
+	Featureに対応するため、map_getcell()をポインタに変更した。
+		
+	主な変更点：
+
+	src/map/map.h   read_gat(),read_gatp()マクロの変更
+			列挙型 CELL_CHK,CELL_SETを追加,map_getcell(),map_setcel()用
+			map_data構造体にメンバーint* gat_fileused[MAX_CELL_TYPE+2]追加
+	src/map/map.c	map_getcell()を関数型ポインタに変更,map_getcellp()をread_gatp()
+		     のために追加,実際に下の四つの関数のどっちに指すかはmap_read_flagによる
+		     	map_getcell_gat(),map_getcell_bitmap()	追加
+		     	map_getcellp_gat(),map_getcellp_bitmap()	追加
+		     	map_setcell()	変更
+			map_createbitmap()	追加
+			map_readmapfromfile()	追加
+			map_readallmap()	変更
+			map_config_read()	変更
+			do_final()	変更
+	以下の*.cファイル内のmap_getcell(),map_setcell(),read_gat(),read_gatp()を呼出した部分をすべて変更
+	src/map/atcommand.c
+	src/map/mob.c
+	src/map/npc.c
+	src/map/path.c
+	src/map/pc.c
+	src/map/pet.c
+	src/map/skill.c
+			
+	conf/map_athena.conf	read_map_from_bitmap,map_bitmap_path	追加
+
+--------------------
+//1084 by lizorett
+・経験値獲得のバグ修正(バグ報告スレッド part7 >>134)
+	(src/map)
+		mob.c	経験値計算修正
+
+--------------------
+//1083 by End_of_exam special thanks to lizorettさん
+・ソケットのデストラクタ処理の追加
+		(common/socket.c common/socket.h login/login.c char/char.c map/clif.c map/chrif.c)
+	ソケットを閉じる時の処理の流れが変更になります。今までソケットを閉じる場合は、
+	まずsession[fd]->eof を真にした後、パーズルーチン内で後処理（メモリ解放など）
+	していました。ですが、close(fd); が２重に実行されてサーバーが落ちるなどの
+	バグが発生していたり、処理の流れがつかみにくいといった理由から、socket.c 内部で
+	全て処理するように変更しました。ソケットを閉じる時の主な流れは次の通りです。
+
+	1. ソース内からsession[fd]->eof = 1; をする
+	2. socket.c 内からsession[fd]->destruct() が呼ばれる
+	3. メモリの解放＆後処理(socket.c delete_session内部)
+
+	close(fd) は、session[fd]->eof = 1; に置き換えました(#define)。
+	また、delete_session() を明示的に呼ぶ必要はありません。
+
+・マップ鯖分配時のアイテムdupe問題修正(map/map.c map/pc.c map/chrif.c)
+	ソケット切断時に倉庫データのキャッシュを消すように変更
+	２重ログイン時にマップサーバーが違った場合にも切断できるように修正
+
+・古いバージョンでログインした時にmap鯖が落ちるバグを修正(map/clif.c)
+	clif_parse() 内部
+
+	if(packet_db[cmd].len==0) {
+	-> if(cmd<MAX_PACKET_DB && packet_db[cmd].len==0) {
+
+・gcc でコンパイルした時にtimer.c でwarning が出たのを修正(common/timer.c)
+	timer.c:116: warning: `check_timer_heap' defined but not used
+
+	(src/common/)
+		socket.c	ソケットのデストラクタ処理を追加
+		socket.h	ソケットのデストラクタ処理を追加
+		timer.c		warning 修正
+
+	(src/map/)
+		clif.c		ソケットのデストラクタ処理を追加
+		chrif.c		ソケットのデストラクタ処理を追加
+		map.c		マップ鯖分配時のアイテムdupe問題修正
+		pc.c		マップ鯖分配時のアイテムdupe問題修正
+
+	(src/char/)
+		char.c		ソケットのデストラクタ処理を追加
+
+	(src/login/)
+		login.c		ソケットのデストラクタ処理を追加
+
+--------------------
+//1082 by lizorett (2004/12/18) special thanks to 名無し様@ｇ＠ｍｅ
+・白刃取りをボスに無効に変更
+・1079の変更部分にNULLチェックを追加
+・カードの効果が乗らないスキルにエンチャントデッドリーポイズン効果が乗らないよ
+ うに変更
+・エンチャントデッドリーポイズンの効果に左手が載らないように変更
+・サクリファイスを実装
+・ストームガストのノックバックがスキル指定位置を中心とするよう変更
+・スキルの射程距離から1セル離れた場所を指定してスキルを使うと何も起こらない問題
+ を修正
+・経験値の配分を修正(ダメージを与えた人がいない場合や、毒ダメージがある場合に経
+ 験値が少なくなっていた)
+・装備していない箇所へのストリップスキルが失敗するよう変更
+・パッチアップスレッド Part 6？の>>116,>>125,>>126 のファイルを念のためマージ
+
+	(db/)
+		skill_db.txt, skill_cast_db.txt, skill_require_db.txt
+					- サクリファイスの記述を修正/追加
+	(src/map/)
+		battle.c	- エンチャントデッドリーポイズンの変更
+					- サクリファイスの実装
+					- ストームガストのノックバック方向を変更
+					- 白刃取りをボスに無効に変更
+		skill.h		- SC_SACRIFICEを追加
+		skill.c		- サクリファイスの実装
+					- skill_castend_damage_id()のMG_FROSTDIVER/MG_STONECURSEに
+					 NULLチェックを追加
+		mob.c		- 経験値の配分を修正
+		script.c	- 個別に出されていたファイルをマージ(>>125)
+		npc.c		- 個別に出されていたファイルをマージ(>>126)
+	(src/common)
+		core.c		- 個別に出されていたファイルをマージ(>>116)
+
+--------------------
+//1081 by End_of_exam
+・「ループ構文の方も実装してください」という要望を貰ったので、
+　for , while , do - while 構文を導入。個人的に余り需要は無いと思うのですが…。
+
+・elseが完全に解析できてなかったバグを修正。
+・switch のbreak; が場所によってはコンパイルエラーになるバグを修正。
+
+	(src/map/)
+		script.c : 構文を拡張。色々整理。
+
+	(doc/)
+		script_ref.txt : 上の修正に合わせて変更。
+
+--------------------
+//1080 by End_of_exam
+
+・スクリプトを if - else if - else 構文 , switch 構文に対応させました。
+　多重ネストが可能ですので、今までより見やすいスクリプトが書けると思います。
+　if(aa) { aaa(); } else if(bb) { cc; if(dd) { ee() } else { ff(); } }
+　それに伴い、__ から始まる変数やラベルを用いると、不都合が生じる可能性があります。
+
+・スクリプトに新しい関数(select関数・menu命令の関数版)を追加しました。
+
+	(src/map/)
+		script.c : 構文を拡張
+		npc.c : npc_perse_script の修正( { , } のネストに対応 )
+
+	(script/)
+		npc/town/npc_town_alberta.txt : 一カ所 goto が抜けてたので修正
+		sample/npc_debug_pota.txt     : switch , select を使って書き直し
+		                                (デバッグに使わせて貰いました)
+
+	(doc/)
+		script_ref.txt : 上の修正に合わせて変更
+--------------------
+//1079 by Yuuki
+・石化中にストーンカースを使うと石化解除
+・FDでスキル追加効果を使うと氷化中ダメージ判定で先に割れてもう一度氷化判定がくるのでスキル追加効果つかわず 
+・BBで睡眠石化氷化が割れないバグの修正(独自のダメージ判定使ってたので消して正規のダメージ判定に戻した) 
+・ディレイ0のスキルにadelay/2追加(G鯖でTS使って検証した結果最もこれが近かった通常攻撃よりはやかったので) 
+
+	(src/map)
+		skill.c
+
+--------------------
+//1078 by End_of_exam
+
+・Visual C++ 6.0 / bcc32 でコンパイル出来るように修正(別途zlib.dll が必要)
+・1074は欠番にします。色々とご迷惑をかけた事をお詫びします。
+
+＊＊　注意　＊＊
+	今回のバージョンの完全な動作確認はしていません（人柱版扱いにしてください）。
+	本格的な運用に踏み切る前には、必ず動作確認をするようにしてください。
+	場合によっては、コンパイル出来ない、不正な動作になる…等々の問題が起こるかも
+	しれませんが、そのときは、騒がず、慌てずに、ネ申の降臨を待つようお願いします。
+
+＊＊ お願い ＊＊
+	このパッチを完全版にしてくれる方、使用感レポートを投稿してくれる方を募集します。
+	パッチを公開するついでに、大量のwarning を修正してくれたら嬉しいな～、と思ってみたり。
+
+   (/)
+		bcc32_make.bat , bcc32_clean.bat
+			bcc32 でコンパイル / クリーン　を簡単にするためのバッチファイル。
+
+		athena.dsp , athena.dsw , src/login/login.dsp , src/char/char.dsp , 
+		src/map/map.dsp
+			Visual C++ 用のプロジェクトファイル & ワークスペース
+
+	(src/)
+		コンパイル出来るように色々修正。
+
+	(src/common/timer.c)
+		独自の手抜きアルゴリズム（２分ソート）を採用したバージョン。
+
+--------------------
+//1077 by sylpheed
+・サーバースナップショット
+・下記二つを取り込み
+質問スレッド Part14-41 Plalaさん
+バグ報告スレッド part7-68 ...さん
+
+1074は取り込んでいません。
+
+--------------------
 //1076 by mare
 ・韓国公知の通りアリスとジルタスのエサの変更。
 ・GMのアブラカタブラ専用スキルのフラグが消えてたので復活。
