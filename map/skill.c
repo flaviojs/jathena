@@ -3333,7 +3333,7 @@ int skill_use_pos( struct map_session_data *sd,
 	if(casttime > 0) {
 		sd->skilltimer = 1;
 		pc_calcstatus(sd,0);
-		sd->skilltimer = add_timer( tick+casttime, skill_castend_id, sd->bl.id, 0 );
+		sd->skilltimer = add_timer( tick+casttime, skill_castend_pos, sd->bl.id, 0 );
 	}
 	else {
 		sd->skilltimer = -1;
