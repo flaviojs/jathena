@@ -37,6 +37,8 @@ static int hp_sigma_val[MAX_PC_CLASS][MAX_LEVEL];
 static int sp_coefficient[MAX_PC_CLASS];
 static int aspd_base[MAX_PC_CLASS][20];
 static char job_bonus[MAX_PC_CLASS][MAX_LEVEL];
+static char job_bonus2[MAX_PC_CLASS][MAX_LEVEL];
+static char job_bonus3[MAX_PC_CLASS][MAX_LEVEL];
 static int exp_table[14][MAX_LEVEL];
 static struct {
 	int id;
@@ -1164,9 +1166,18 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->atkmods_[2] = atkmods[2][sd->weapontype2];
 
 	// jobボーナス分
-	for(i=0;i<sd->status.job_level && i<MAX_LEVEL;i++)
-		if(job_bonus[s_class][i])
-			sd->paramb[job_bonus[s_class][i]-1]++;
+	for(i=0;i<sd->status.job_level && i<MAX_LEVEL;i++){
+		if(sd->status.class < MAX_PC_CLASS){
+			if(job_bonus[s_class][i])
+				sd->paramb[job_bonus[s_class][i]-1]++;
+		}else if(sd->status.class >= 4001 && sd->status.class < 4023){
+			if(job_bonus2[s_class][i])
+				sd->paramb[job_bonus2[s_class][i]-1]++;
+		}else{
+			if(job_bonus3[s_class][i])
+				sd->paramb[job_bonus3[s_class][i]-1]++;
+		}
+	}
 
 	if( (skill=pc_checkskill(sd,AC_OWL))>0 )	// ふくろうの目
 		sd->paramb[4] += skill;
@@ -5692,6 +5703,7 @@ int pc_readdb(void)
 			if(sscanf(p,"%d",&k)==0)
 				break;
 			job_bonus[i][j]=k;
+			job_bonus3[i][j]=k; //養子職のボーナスは分からないので仮
 			p=strchr(p,',');
 			if(p) p++;
 		}
@@ -5701,6 +5713,30 @@ int pc_readdb(void)
 	}
 	fclose(fp);
 	printf("read db/job_db2.txt done\n");
+
+	// JOBボーナス2
+	fp=fopen("db/job_db2-2.txt","r");
+	if(fp==NULL){
+		printf("can't read db/job_db2-2.txt\n");
+		return 1;
+	}
+	i=0;
+	while(fgets(line,1020,fp)){
+		if(line[0]=='/' && line[1]=='/')
+			continue;
+		for(j=0,p=line;j<MAX_LEVEL && p;j++){
+			if(sscanf(p,"%d",&k)==0)
+				break;
+			job_bonus2[i][j]=k;
+			p=strchr(p,',');
+			if(p) p++;
+		}
+		i++;
+		if(i==MAX_PC_CLASS)
+			break;
+	}
+	fclose(fp);
+	printf("read db/job_db2-2.txt done\n");
 
 	// スキルツリー
 	memset(skill_tree,0,sizeof(skill_tree));

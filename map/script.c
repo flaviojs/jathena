@@ -91,6 +91,8 @@ int buildin_heal(struct script_state *st);
 int buildin_itemheal(struct script_state *st);
 int buildin_percentheal(struct script_state *st);
 int buildin_jobchange(struct script_state *st);
+int buildin_jobchange2(struct script_state *st);
+int buildin_jobchange3(struct script_state *st);
 int buildin_input(struct script_state *st);
 int buildin_setlook(struct script_state *st);
 int buildin_set(struct script_state *st);
@@ -222,6 +224,8 @@ struct {
 	{buildin_menu,"menu","*"},
 	{buildin_goto,"goto","l"},
 	{buildin_jobchange,"jobchange","i"},
+	{buildin_jobchange2,"jobchange2","i"},
+	{buildin_jobchange3,"jobchange3","i"},
 	{buildin_input,"input","*"},
 	{buildin_warp,"warp","sii"},
 	{buildin_areawarp,"areawarp","siiiisii"},
@@ -1594,7 +1598,40 @@ int buildin_jobchange(struct script_state *st)
 	int job;
 
 	job=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	pc_jobchange(script_rid2sd(st),job);
+	if ((job >= 0 && job < MAX_PC_CLASS))
+		pc_jobchange(script_rid2sd(st),job);
+
+	return 0;
+}
+/*==========================================
+ * “]¶E‚É“]E‚³‚¹‚é–½—ß
+ *------------------------------------------
+ */
+int buildin_jobchange2(struct script_state *st)
+{
+	int job;
+
+	job=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if ((job >= 0 && job < MAX_PC_CLASS - 2)) { //“]¶E‚ÉŒ‹¥‚ÆƒXƒpƒmƒr‚Í–³‚¢‚Á‚Û‚¢
+		job = job + 4001;
+		pc_jobchange(script_rid2sd(st),job);
+	}
+
+	return 0;
+}
+/*==========================================
+ * —{ŽqE‚É“]E‚³‚¹‚é–½—ß
+ *------------------------------------------
+ */
+int buildin_jobchange3(struct script_state *st)
+{
+	int job;
+
+	job=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if ((job >= 0 && job != 22 && job < MAX_PC_CLASS)) { //—{Žq‰‘g‚ÉŒ‹¥‚Í–³‚¢‚Á‚Û‚¢
+		job = (job==23)?job + 4022:job + 4023;
+		pc_jobchange(script_rid2sd(st),job);
+	}
 
 	return 0;
 }

@@ -1,4 +1,27 @@
 --------------------
+//0959 by (凸)
+・help.txtがdocじゃなくてconfのが読み出されてた＿|￣|○
+・gamejokeを参考に転生二次職のステータス加重値をjob_db2-2.txtに記述
+・スクリプトにjobchange2とjobchange3を追加それぞれ転生職と養子職へ転職させる命令です
+
+	(conf/)
+	help.txt 修正
+	(db/)
+	job_db2.txt 修正
+	job_db2-2.txt 追加
+	(doc/)
+	help.txt 修正
+	script_ref.txt 修正
+	(map/)
+	pc.c
+		pc_calcstatus() 修正
+		pc_readdb() 修正
+	script.c
+		buildin_jobchange() 修正
+		buildin_jobchange2() 追加
+		buildin_jobchange3() 追加
+
+--------------------
 //0958 by (凸)
 ・転生職方面の実装を色々
 ・重量制限は良く分からないので元の職業の値をそのまま使っています(モンク＝チャンピオン等)
