@@ -1,4 +1,25 @@
 --------------
+//0541 by huge
+
+・矢をまとめて持てるように修正。
+・弓で攻撃したときに、装備している矢を消費するように修正。
+  矢の本数・equipウィンドウ・矢の装備変更時メッセージ・・・何か表示がおかしいですが、
+  自分には原因がつかめませんでした...。
+
+	itemdb.c
+		itemdb_search() 修正
+		itemdb_isequip() 修正
+
+	battle.c
+		battle_weapon_attack() 修正
+		battle_calc_weapon_attack() 修正
+
+	clif.c
+	clif.h
+		clif_arrow_fail() 追加
+		clif_parse_EquipItem() 修正
+
+--------------
 //0540 by 死神
 
 ・バグ修正と問題ありそうな所修正。(これでWZ_FIREPILLARとブリッツに

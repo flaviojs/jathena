@@ -910,7 +910,7 @@ struct Damage battle_calc_weapon_attack(
 		 (*option&0x06 && t_race!=4 && t_race!=6)
 		) )	// ƒXƒLƒ‹‚É‚æ‚é–WŠQ
 		battle_stopattack(src);*/
-	
+
 	flag=BF_SHORT|BF_WEAPON|BF_NORMAL;	// UŒ‚‚ÌŽí—Þ‚ÌÝ’è
 	
 	// ‰ñ”ð—¦ŒvŽZA‰ñ”ð”»’è‚ÍŒã‚Å
@@ -933,17 +933,15 @@ struct Damage battle_calc_weapon_attack(
 		int item_look=0;
 		damage = damage2 = (str/10)*(str/10) + str + dex/5 + luk/5;
 		atkmin = atkmin_ = dex;
-		if((item_id = pc_checkequip(sd,2)) != -1) {
-			item_look=itemdb_look(item_id);
-			if(item_look == 11) {
-				// ‹|‚Ìê‡
-				damage = (dex/10)*(dex/10) + dex + str/5 + luk/5;
-				// –î‚Ìƒ_ƒ[ƒW‚ð’Ç‰Á
-	//			damage += rand()%–î‚ÌUŒ‚—Í;
-				atkmin = sd->watk * (dex<sd->watk)?dex:sd->watk;
-				
-				flag=(flag&~BF_RANGEMASK)|BF_LONG;
-			}
+		if((item_id = pc_checkequip(sd,2)) != -1 && (item_look=itemdb_look(item_id)==11)) {
+			// ‹|‚Ìê‡
+			damage = (dex/10)*(dex/10) + dex + str/5 + luk/5;
+			// –î‚Ìƒ_ƒ[ƒW‚ð’Ç‰Á
+	//		damage += rand()%–î‚ÌUŒ‚—Í;
+			atkmin = sd->watk * (dex<sd->watk)?dex:sd->watk;
+			flag=(flag&~BF_RANGEMASK)|BF_LONG;
+			//–î‚ðŒ¸‚ç‚·
+			pc_delitem(sd,pc_search_inventory(sd,pc_checkequip(sd,0x8000)),1,0);
 		}
 
 		// ƒTƒCƒYC³
@@ -1705,6 +1703,14 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		return 0;
 	if(target->type == BL_PC && pc_isdead((struct map_session_data *)target))
 		return 0;
+	// ‹|‚Ìê‡
+	if(itemdb_look(pc_checkequip(sd,2)) == 11) {
+//		// –î‚ª‘•”õ‚³‚ê‚Ä‚¢‚È‚¢
+		if(pc_checkequip(sd,0x8000) == -1){
+			clif_arrow_fail(sd,0);
+			return 0;
+		}
+	}
 
 	if(battle_check_target(src,target,BCT_ENEMY) > 0 &&
 		battle_check_range(src,target->x,target->y,0)){

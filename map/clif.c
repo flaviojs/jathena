@@ -1506,7 +1506,7 @@ int clif_initialstatus(struct map_session_data *sd)
 	return 0;
 }
 /*==========================================
- *‹|‘•”õ
+ *–î‘•”õ
  *------------------------------------------
  */
  int clif_arrowequip(struct map_session_data *sd,int val)
@@ -1528,7 +1528,22 @@ int clif_initialstatus(struct map_session_data *sd)
  	
  	return 0;
  }
- 
+/*==========================================
+ *
+ *------------------------------------------
+ */
+ int clif_arrow_fail(struct map_session_data *sd,int type)
+ {
+ 	int fd=sd->fd;
+
+ 	WFIFOW(fd,0)=0x013b;
+  	WFIFOW(fd,2)=type;
+
+	WFIFOSET(fd,packet_len_table[0x013b]);
+ 	
+ 	return 0;
+
+ }
 /*==========================================
  *
  *------------------------------------------
@@ -2600,6 +2615,7 @@ int clif_skillcastcancel(struct block_list* bl)
  */
 int clif_skill_fail(struct map_session_data *sd,int skill_id,int type,int btype)
 {
+
 	int fd=sd->fd;
 	WFIFOW(fd,0) = 0x110;
 	WFIFOW(fd,2) = skill_id;
@@ -4942,9 +4958,11 @@ void clif_parse_EquipItem(int fd,struct map_session_data *sd)
 		return;
 	}
 	//ƒyƒbƒg—p‘•”õ‚Å‚ ‚é‚©‚È‚¢‚©
-	if(itemdb_type(sd->status.inventory[index].nameid) != 8)
+	if(itemdb_type(sd->status.inventory[index].nameid) != 8){
+		if(itemdb_type(sd->status.inventory[index].nameid) == 10)
+			RFIFOW(fd,4)=0x8000;	// –î‚ğ–³—‚â‚è‘•”õ‚Å‚«‚é‚æ‚¤‚Éi||G
 		pc_equipitem(sd,index,RFIFOW(fd,4));
-	else
+	}else
 		pet_equipitem(sd,index);
 }
 

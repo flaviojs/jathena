@@ -162,7 +162,7 @@ struct item_data* itemdb_search(int nameid)
 	else if((nameid>700 && nameid<1100) ||
 			(nameid>7000 && nameid<8000))
 		id->type=3;   //correction
-	else if(nameid>=1750 && nameid<1760)
+	else if(nameid>=1750 && nameid<1771)
 		id->type=10;  //arrow
 	else if(nameid>1100 && nameid<2000)
 		id->type=4;   //weapon
@@ -171,6 +171,10 @@ struct item_data* itemdb_search(int nameid)
 		id->type=5;   //armor
 	else if(nameid>4000 && nameid<5000)
 		id->type=6;   //card
+	else if(nameid>9000 && nameid<10000)
+		id->type=7;   //egg
+	else if(nameid>10000)
+		id->type=8;   //petequip
 
 	return id;
 }
@@ -191,7 +195,7 @@ int itemdb_sellvalue(int nameid)
 int itemdb_isequip(int nameid)
 {
 	int type=itemdb_type(nameid);
-	if(type==0 || type==2 || type==3 || type==6)
+	if(type==0 || type==2 || type==3 || type==6 || type==10)
 		return 0;
 	return 1;
 }
@@ -400,7 +404,7 @@ static int itemdb_read_classequipdb(void)
 		if(nameid<=0 || nameid>=20000)
 			continue;
 
-		if(!itemdb_isequip(nameid))
+		if(!itemdb_isequip(nameid) || (nameid>1750 && nameid<1771))
 			continue;
 		ln++;
 
