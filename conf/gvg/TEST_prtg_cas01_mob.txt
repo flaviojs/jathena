@@ -1,0 +1,99 @@
+//==============================
+//TEST Script(Case prtg_cas01)　Ver.20040211-#test
+// by kalen
+//==============================
+//現時点での課題02/11
+//
+//monster コマンドでのランダム沸き不可
+//ギルドマスター個別識別不可
+//再起動を跨いでのデータ保存不可
+//フラグイメージ読み込み不可
+//城獲得したギルド以外のワープ不可(全員ワープ)
+
+prtg_cas01.gat,104,26,0	script	yobidashi	-1,{
+OnInit:
+//if ($prtg01==1) goto L2;
+	monster "prtg_cas01.gat",99,201,"レイドリック",1163,15;
+	monster "prtg_cas01.gat",112,182,"カーリッツバーグ",1132,10;
+	monster "prtg_cas01.gat",101,174,"深淵の騎士",1219,5;
+	monster "prtg_cas01.gat",85,193,"ブラッディナイト",1268,5;
+	monster "prtg_cas01.gat",146,100,"ストームナイト",1251,1;
+	monster "prtg_cas01.gat",156,66,"ハティー",1252,1;
+	monster "prtg_cas01.gat",75,53,"レイドリックアーチャー",1276,5;
+	monster "prtg_cas01.gat",64,53,"グリフォン",1259,4;
+	monster "prtg_cas01.gat",71,40,"アリス",1275,1;
+	monster "prtg_cas01.gat",66,28,"ジルタス",1200,1;
+//---ここまで本来ランダム沸き(monsterコマンドにて0,0を指定するとハング)
+//monster コマンドで0,0を指定すると本来話しかけたPCの座標に沸くので
+//OnInitすると沸く座標がなくてハングする
+	monster "prtg_cas01.gat",197,197,"ブラッディナイト",1268,1;
+	monster "prtg_cas01.gat",197,197,"ストームナイト",1251,1;
+	monster "prtg_cas01.gat",197,197,"ハティー",1252,1;
+	monster "prtg_cas01.gat",197,197,"深淵の騎士",1219,2;
+	monster "prtg_cas01.gat",197,197,"レイドリックアーチャー",1276,1;
+	monster "prtg_cas01.gat",197,197,"エンペリウム",1288,1,"mobdes";
+	monster "prtg_cas01.gat",107,179,"ナイトガーディアン",1286,1;
+	monster "prtg_cas01.gat",153,86,"ソルジャーガーディアン",1287,1;
+	monster "prtg_cas01.gat",182,68,"ソルジャーガーディアン",1287,1;
+	monster "prtg_cas01.gat",182,116,"ソルジャーガーディアン",1287,1;
+	monster "prtg_cas01.gat",184,183,"ナイトガーディアン",1286,1;
+	monster "prtg_cas01.gat",196,189,"ナイトガーディアン",1286,1;
+	monster "prtg_cas01.gat",50,36,"アーチャーガーディアン",1285,1;
+	monster "prtg_cas01.gat",59,28,"アーチャーガーディアン",1285,1;
+//disablenpc "カプラ職員";
+	end;
+L2:
+	monster "prtg_cas01.gat",197,197,"エンペリウム",1288,1,"mobdes";
+	set $mob_prt01,1;
+LEnd:
+	end;
+}
+prtg_cas01.gat,104,27,0	script	mobdes	-1,{
+//アジト所有状況(0=未所持1=既所持)
+	set $prtg01,1;
+//総ダメージが多いギルドの名前を代入
+	set $prtg01id,getcharid(2);
+	set $prtg01name,strcharinfo(2);
+	announce "砦 [Valkyrie Realms1]を " + strcharinfo(2) + "が占領しました",2;
+//MAP内Announce
+	mapannounce "エンペリウムが破壊されました。",20;
+	killmonster "prtg_cas01.gat";
+//ギルドメンバー以外はセーブポイントへ
+	areawarp "prtg_cas01.gat",0,0,300,300,"prontera.gat",156,191;
+	end;
+}
+
+prontera.gat,151,187,4	script	テストギルドフラッグ	722,{
+	if ($prtg01 == 1) goto LStartg;
+		mes "[ ルーンミッドガッツ王国領 ]";
+		mes " ";
+		mes "1.";
+		mes "こちらはルーンミッドガッツ王国に";
+		mes "よって";
+		mes "正式所有者がないアジトであることを";
+		mes "公表する。";
+		next;
+		mes " ";
+		mes "2.";
+		mes "こちらを守っている凄じい";
+		mes "試練に勝って、エンペリウムを";
+		mes "破壊する勇者には国王が";
+		mes "認定するアジト所有権が附与される";
+		close;
+LStartg:
+		mes "[ ルーンミッドガッツ王国領 ]";
+		mes " ";
+		mes "1.";
+		mes "こちらはルーンミッドガッツ王国に";
+		mes "よって";
+		mes "ギルド ^ff0000 " + getguildname($prtg01id) + " ^000000の";
+		mes "所有であることを認められている。";
+		next;
+		mes " ";
+		mes "2.";
+		mes "^ff0000 " + getguildname($prtg01id) + " ^000000 のマスターは";
+		mes "^ff0000 GUILDMASTER ^000000である。";
+		mes "これに異議のある者は、剣を取り";
+		mes "力を以って名誉を勝ち取りなさい。";
+		close;
+}

@@ -1,0 +1,23 @@
+um_dun02.gat,125,78,0	warp	Nif0001	2,5,yggdrasil01.gat,40,63
+yggdrasil01.gat,36,62,0	warp	Nif0002	2,7,um_dun02.gat,126,147
+yggdrasil01.gat,271,51,0	warp	Nif0003	2,7,yggdrasil01.gat,30,196
+yggdrasil01.gat,26,193,0	warp	Nif0004	2,7,yggdrasil01.gat,265,57
+yggdrasil01.gat,249,262,0	warp	Nif0005	2,7,nif_fild01.gat,314,72
+nif_fild01.gat,315,63,0	warp	Nif0006	2,7,yggdrasil01.gat,245,259
+nif_fild01.gat,345,323,0	warp	Nif0007	2,7,nif_fild02.gat,26,312
+nif_fild02.gat,21,312,0	warp	Nif0008	2,7,nif_fild01.gat,340,322
+nif_fild02.gat,379,235,0	warp	Nif0009	2,7,niflheim.gat,21,153
+niflheim.gat,18,151,0	warp	Nif0010	2,7,nif_fild02.gat,376,235
+
+//inside warps
+//wep shop
+niflheim.gat,220,169,0	warp	Nif0011	2,7,nif_in.gat,14,88
+nif_in.gat,11,88,0	warp	Nif0012	2,7,niflheim.gat,217,170
+//item shop
+niflheim.gat,219,199,0	warp	Nif0013	2,7,nif_in.gat,138,16
+nif_in.gat,134,12,0	warp	Nif0014	2,7,niflheim.gat,216,195
+//house on the hill
+niflheim.gat,255,194,0	warp	Nif0015	2,7,nif_in.gat,22,158
+nif_in.gat,18,154,0	warp	Nif0015	2,7,niflheim.gat,252,190
+nif_in.gat,65,168,0	warp	Nif0016	2,7,nif_in.gat,84,33
+nif_in.gat,88,29,0	warp	Nif0017	2,7,nif_in.gat,65,160

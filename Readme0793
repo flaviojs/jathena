@@ -1,4 +1,32 @@
 --------------------
+//0795 by Kalen
+
+・雑談341のnpc_warp_niflheim.txt追加
+	conf/warp/npc_warp_niflheim.txt
+
+・mapflag.txt修正(GVGMAP設定)
+	　nosaveはしていません
+
+・map_athena.confの修正
+	　umbala niflheim等の追加
+	　コメントアウトしてあります。
+
+・バレンタインスクリプト追加
+	conf/npc/npc_event_valentine.txt
+	　チョコ達のDropは弄っていません。お好みでどうぞ
+	　尚、手作りチョコを食べたときのエフェクトは
+	　最新クライアントにすれば見えます。
+
+・GVGScript追加
+	conf/gvg/以下
+	　Weiss時代に作成したものをAthena用にコンバート&台詞修正
+	　prtg_cas01以外は旗のみです。
+	　GVGDATAは鯖再起動で消滅します。
+	　エラーが出るようならコメントアウトしてください。
+	　MobData、執事Scriptもprtg_cas01のみです。(TestScript)
+	　あくまでテストスクリプトです。GVG実装の参考にどうぞ
+
+--------------------
 //0794 by DRG
 
 ・skillusedで指定したIW,QMなどにのってる間MOBスキルを使用するように変更
@@ -8,6 +36,7 @@
 	(map/)
 	skill.c
 		skill_unit_onplace() 修正。
+
 --------------------
 //0793 by huge
 
