@@ -24,11 +24,6 @@
 
 #define OPTION_HIDE 0x40
 #define STATE_BLIND 0x10
-#define STATE_RAIN 0x3d
-#define STATE_SNOW 0x3e
-#define STATE_CHERRY 0x3f
-#define STATE_FOG 0xe9
-#define STATE_MAPLE 0x014d
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -225,11 +220,11 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
 	{ AtCommand_LocalBroadcast,			"@local_broadcast",	0, NULL },
 	//---
-	{ AtCommand_rain,			"@rain",	0, atcommand_rain },
-	{ AtCommand_snow,			"@snow",	0, atcommand_snow },
-	{ AtCommand_cherry,			"@cherry",	0, atcommand_cherry },
-	{ AtCommand_fog,			"@fog",	0, atcommand_fog },
-	{ AtCommand_maple,			"@maple",	0, atcommand_maple },
+	{ AtCommand_Rain,			"@rain",	0, atcommand_rain },
+	{ AtCommand_Snow,			"@snow",	0, atcommand_snow },
+	{ AtCommand_Cherry,			"@cherry",	0, atcommand_cherry },
+	{ AtCommand_Fog,			"@fog",	0, atcommand_fog },
+	{ AtCommand_Maple,			"@maple",	0, atcommand_maple },
 	//--- by code
 	{ AtCommand_Unknown,				NULL,				0, NULL }
 };
@@ -2289,17 +2284,12 @@ atcommand_rain(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	struct map_session_data *pl_sd = NULL;
-	int i = 0;
-	for(i = 0; i < fd_max; i++) {
-		if (session[i] && (pl_sd = session[i]->session_data) &&
-			pl_sd->state.auth) {
-			pl_sd->opt2 |= STATE_RAIN;
-					clif_changeoption(&pl_sd->bl);
-			clif_displaymessage(pl_sd->fd, msg_table[84]);
-			}
-		}
-	
+	int effno = 0;
+	effno = 161;
+	nullpo_retr(-1, sd);
+	if (effno < 0)
+		return -1;
+	clif_misceffect2(&sd->bl,effno);
 	return 0;
 }
 /*==========================================
@@ -2311,17 +2301,12 @@ atcommand_snow(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	struct map_session_data *pl_sd = NULL;
-	int i = 0;
-	for(i = 0; i < fd_max; i++) {
-		if (session[i] && (pl_sd = session[i]->session_data) &&
-			pl_sd->state.auth) {
-			pl_sd->opt2 |= STATE_SNOW;
-					clif_changeoption(&pl_sd->bl);
-			clif_displaymessage(pl_sd->fd, msg_table[85]);
-			}
-		}
-	
+	int effno = 0;
+	effno = 162;
+	nullpo_retr(-1, sd);
+	if (effno < 0)
+		return -1;
+	clif_misceffect2(&sd->bl,effno);
 	return 0;
 }
 
@@ -2334,17 +2319,12 @@ atcommand_cherry(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	struct map_session_data *pl_sd = NULL;
-	int i = 0;
-	for(i = 0; i < fd_max; i++) {
-		if (session[i] && (pl_sd = session[i]->session_data) &&
-			pl_sd->state.auth) {
-			pl_sd->opt2 |= STATE_CHERRY;
-					clif_changeoption(&pl_sd->bl);
-			clif_displaymessage(pl_sd->fd, msg_table[86]);
-			}
-		}
-	
+	int effno = 0;
+	effno = 163;
+	nullpo_retr(-1, sd);
+	if (effno < 0)
+		return -1;
+	clif_misceffect2(&sd->bl,effno);
 	return 0;
 }
 
@@ -2357,17 +2337,12 @@ atcommand_fog(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	struct map_session_data *pl_sd = NULL;
-	int i = 0;
-	for(i = 0; i < fd_max; i++) {
-		if (session[i] && (pl_sd = session[i]->session_data) &&
-			pl_sd->state.auth) {
-			pl_sd->opt2 |= STATE_FOG;
-					clif_changeoption(&pl_sd->bl);
-			clif_displaymessage(pl_sd->fd, msg_table[87]);
-			}
-		}
-	
+	int effno = 0;
+	effno = 233;
+	nullpo_retr(-1, sd);
+	if (effno < 0)
+		return -1;
+	clif_misceffect2(&sd->bl,effno);
 	return 0;
 }
 
@@ -2380,17 +2355,12 @@ atcommand_maple(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	struct map_session_data *pl_sd = NULL;
-	int i = 0;
-	for(i = 0; i < fd_max; i++) {
-		if (session[i] && (pl_sd = session[i]->session_data) &&
-			pl_sd->state.auth) {
-			pl_sd->opt2 |= STATE_MAPLE;
-					clif_changeoption(&pl_sd->bl);
-			clif_displaymessage(pl_sd->fd, msg_table[88]);
-			}
-		}
-	
+	int effno = 0;
+	effno = 333;
+	nullpo_retr(-1, sd);
+	if (effno < 0)
+		return -1;
+	clif_misceffect2(&sd->bl,effno);
 	return 0;
 }
 

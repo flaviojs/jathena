@@ -1,4 +1,21 @@
 --------------------
+//1050 by code
+・各種天候操作コマンドの見直し
+※いちいち@misceffectで呼び出さずに簡単に天候操作を行えるように
+※クライアント依存は落ち葉ではなく雨でした、間違いました(^-^;
+
+	(src/common/)
+		version.h
+			Ver 1049->1050 変更
+	(/src/map)
+		atcommand.c
+			AtCommand_Rain{} 変更
+			AtCommand_Snow{} 変更
+			AtCommand_Cherry{} 変更
+			AtCommand_Fog{} 変更
+			AtCommand_Maple{} 変更
+
+--------------------
 //1049 by code
 ・霧、落葉の2つの天候操作コマンドを追加しました。
 ※落ち葉に関してはクライアント依存なのでjROだと落ちるかも…
