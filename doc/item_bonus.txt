@@ -69,6 +69,7 @@ bonus bNoWeaponDamage,n;		物理攻撃でダメージを受けない(nは無意味)
 bonus bNoMagicDamage,n;		魔法でダメージを受けない(ヒールも含む、nは無意味)
 bonus bNoGemStone,n;		スキルを使う時ジェムストーンを消耗しない(nは無意味)
 bonus bNoCastCancel2,n;		キャスティングをキャンセルされない(GVGでもキャンセルされない、nは無意味)
+bonus bInfiniteEndure,n;		無限インデュア(nは無意味)
 
 
 bonus2 bAddEff,Eff_Blind,n;	n%の確立で暗黒付与
@@ -120,4 +121,4 @@ bonus3 bAddMonsterDropItem,n,x,y;	物理攻撃でモンスターを倒した時モンスターの種族
 
 bAddDamageClass、bAddMagicDamageClass、bAddMonsterDropItemは10個まで設定可能です。10個を越える物は無視されます。
 
-矢で使える物はbCritical、bAtkEle、bHit、bAddEle、bAddRace、bAddSize、bAddEffのみです。その他は無視されます。
+矢で使える物はbCritical、bAtkEle、bHit、bAtkRange、bAddEle、bAddRace、bAddSize、bAddEffのみです。その他は無視されます。

@@ -117,6 +117,7 @@ bNoWeaponDamage	2004
 bNoGemStone	2005
 bDefRatioAtk	2006
 bNoCastCancel2	2007
+bInfiniteEndure	2008
 
 Eff_Stone	0
 Eff_Freeze	1

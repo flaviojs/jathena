@@ -1,4 +1,28 @@
 --------------
+//0684 by 死神
+
+・細かい修正。
+・死んだふりの時スキルとアイテムが使えないように変更。
+・bInfiniteEndure追加。機能は無限インデュア。
+・ダメージ表示の処理少し変更。
+	(db/)
+	const.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	(map/)
+	map.h 修正。
+	pc.c
+		pc_calcstatus() 修正。
+		pc_equipitem()、pc_unequipitem() 修正。
+	clif.c
+		clif_parse_UseItem()、clif_parse_UseSkillToId() 修正。
+		clif_parse_UseSkillToPos()、clif_parse_UseSkillMap() 修正。
+		clif_damage()、clif_skill_damage()、clif_skill_damage2() 修正。
+		clif_parse_LoadEndAck() 修正。
+	skill.c
+		skill_status_change_timer() 修正。
+
+--------------
 //0683 by 死神
 
 ・バグ修正とbonus追加。
@@ -7,7 +31,7 @@
 ・bonus bRestartFullRecover;n;等でnは無意味だけど消すのはちょっとまずいですので0にして入れた方がいいです。bonusは2つの数値が必要なスクリプトなので。
 ・bDefRatioAtkを防御無視に変更。
 ・0677で書き忘れ。
-・武器の属性適用優先順位を製造>カード>武器に変更。製造が最優先です。
+・武器の属性適用優先順位を製造>カード>武器に変更。製造が最優先です。(属性がある時に話です。属性がない場合属性ある物に上書きされたりはしません。)
 ・装備で適用される効果の優先順位を右手>左手>体>頭上>頭中>頭下>ローブ>靴>アクセサリー1>アクセサリー2>矢に設定。(本鯖仕様がどうなのか分かることができそうな物でもないのでアテナの仕様と言うことで。) 右手が最優先です。
 ・武器の射程を右手と左手の武器の中で長い物を適用するように変更。
 	(db/)

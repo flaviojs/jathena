@@ -3740,6 +3740,17 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 		}
 		break;
 
+	case SC_ENDURE:
+		if(sd && sd->special_state.infinite_endure) {
+			if(sc_data[type].timer==tid) {
+				sc_data[type].timer=add_timer( 1000*600+tick,
+					skill_status_change_timer, bl->id, data );
+				sc_data[type].val2=1;
+			}
+			return 0;
+		}
+		break;
+
 	/* ŠÔØ‚ê–³‚µHH */
 	case SC_AETERNA:
 	case SC_TRICKDEAD:

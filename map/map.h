@@ -129,6 +129,7 @@ struct map_session_data {
 		unsigned no_gemstone : 1;
 		unsigned def_ratio_atk : 1;
 		unsigned def_ratio_atk_ : 1;
+		unsigned infinite_endure : 1;
 	} special_state;
 	int char_id,login_id1,login_id2,sex;
 	struct mmo_charstatus status;
@@ -413,7 +414,7 @@ enum {
 	ADD_MONSTER_DROP_ITEM, // 1047-
 
 	SP_RESTART_FULL_RECORVER=2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
-	SP_DEF_RATIO_ATK,SP_NO_CASTCANCEL2, // 2006-2007
+	SP_DEF_RATIO_ATK,SP_NO_CASTCANCEL2,SP_INFINITE_ENDURE, // 2006-2008
 };
 
 enum {

@@ -2356,13 +2356,11 @@ int clif_fixpetpos(struct pet_data *pd)
 int clif_damage(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int damage,int div,int type,int damage2)
 {
 	unsigned char buf[256];
-	struct map_session_data *sd;
+	struct status_change *sc_data = battle_get_sc_data(dst);
 
-	if(dst->type==BL_PC) {
-		sd=(struct map_session_data *)dst;
-		if(sd->sc_data[SC_ENDURE].timer != -1)
-			type = 9;
-	}
+	if(sc_data && sc_data[SC_ENDURE].timer != -1)
+		type = 9;
+
 	WBUFW(buf,0)=0x8a;
 	WBUFL(buf,2)=src->id;
 	WBUFL(buf,6)=dst->id;
@@ -2773,13 +2771,10 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,
 	unsigned int tick,int sdelay,int ddelay,int damage,int div,int skill_id,int skill_lv,int type)
 {
 	unsigned char buf[64];
-	struct map_session_data *sd;
+	struct status_change *sc_data = battle_get_sc_data(dst);
 
-	if(dst->type==BL_PC) {
-		sd=(struct map_session_data *)dst;
-		if(sd->sc_data[SC_ENDURE].timer != -1)
-			type = 9;
-	}
+	if(sc_data && sc_data[SC_ENDURE].timer != -1)
+		type = 9;
 
 #if PACKETVER < 3
 	WBUFW(buf,0)=0x114;
@@ -2823,13 +2818,10 @@ int clif_skill_damage2(struct block_list *src,struct block_list *dst,
 	unsigned int tick,int sdelay,int ddelay,int damage,int div,int skill_id,int skill_lv,int type)
 {
 	unsigned char buf[64];
-	struct map_session_data *sd;
+	struct status_change *sc_data = battle_get_sc_data(dst);
 
-	if(dst->type==BL_PC) {
-		sd=(struct map_session_data *)dst;
-		if(sd->sc_data[SC_ENDURE].timer != -1)
-			type = 9;
-	}
+	if(sc_data && sc_data[SC_ENDURE].timer != -1)
+		type = 9;
 
 	WBUFW(buf,0)=0x115;
 	WBUFW(buf,2)=skill_id;
@@ -4744,6 +4736,8 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	clif_changeoption(&sd->bl);
 	if(sd->sc_data[SC_TRICKDEAD].timer != -1)
 		skill_status_change_end(&sd->bl,SC_TRICKDEAD,-1);
+	if(sd->special_state.infinite_endure && sd->sc_data[SC_ENDURE].timer == -1)
+		skill_status_change_start(&sd->bl,SC_ENDURE,10,1);
 
 	map_foreachinarea(clif_getareachar,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,0,sd);
 }
@@ -5109,7 +5103,7 @@ void clif_parse_UseItem(int fd,struct map_session_data *sd)
 		clif_clearchar_area(&sd->bl,1);
 		return;
 	}
-	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0) return;
+	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0 || sd->sc_data[SC_TRICKDEAD].timer != -1) return;
 
 	if(sd->ghost_timer != -1)
 		pc_delghosttimer(sd);
@@ -5425,6 +5419,7 @@ void clif_parse_UseSkillToId(int fd,struct map_session_data *sd)
 		pc_delghosttimer(sd);
 	skillnum = RFIFOW(fd,4);
 	skilllv = RFIFOW(fd,2);
+	if(sd->sc_data[SC_TRICKDEAD].timer != -1 && skillnum != NV_TRICKDEAD) return;
 	if(sd->skillitem == -1) {
 		if( (lv = pc_checkskill(sd,skillnum)) > 0) {
 			if(skilllv > lv)
@@ -5457,6 +5452,7 @@ void clif_parse_UseSkillToPos(int fd,struct map_session_data *sd)
 		pc_delghosttimer(sd);
 	skillnum = RFIFOW(fd,4);
 	skilllv = RFIFOW(fd,2);
+	if(sd->sc_data[SC_TRICKDEAD].timer != -1 && skillnum != NV_TRICKDEAD) return;
 	if(sd->skillitem == -1) {
 		if( (lv = pc_checkskill(sd,skillnum)) > 0) {
 			if(skilllv > lv)
@@ -5477,7 +5473,7 @@ void clif_parse_UseSkillToPos(int fd,struct map_session_data *sd)
  */
 void clif_parse_UseSkillMap(int fd,struct map_session_data *sd)
 {
-	if(sd->npc_id!=0 || sd->vender_id != 0) return;
+	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->sc_data[SC_TRICKDEAD].timer != -1) return;
 
 	if(sd->ghost_timer != -1)
 		pc_delghosttimer(sd);

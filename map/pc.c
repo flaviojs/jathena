@@ -891,7 +891,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 						sd->star_ = (sd->status.inventory[index].card[1]>>8);	// 星のかけら
 						wele_= (sd->status.inventory[index].card[1]&0x0f);	// 属 性
 					}
-					sd->attackrange += sd->inventory_data[index]->range;
+					sd->attackrange_ += sd->inventory_data[index]->range;
 					sd->state.lr_flag = 1;
 					run_script(sd->inventory_data[index]->equip_script,0,sd->bl.id,0);
 					sd->state.lr_flag = 0;
@@ -1566,6 +1566,10 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 			sd->special_state.def_ratio_atk = 1;
 		else if(!sd->state.lr_flag)
 			sd->special_state.def_ratio_atk_ = 1;
+		break;
+	case SP_INFINITE_ENDURE:
+		if(sd->state.lr_flag != 2)
+			sd->special_state.infinite_endure = 1;
 		break;
 	default:
 		printf("pc_bonus: unknown type %d %d !\n",type,val);
@@ -3994,6 +3998,15 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	pc_checkallowskill(sd,n);	// 装備品でスキルか解除されるかチェック
 	pc_calcstatus(sd,0);
 
+	if(sd->special_state.infinite_endure) {
+		if(sd->sc_data[SC_ENDURE].timer == -1)
+			skill_status_change_start(&sd->bl,SC_ENDURE,10,1);
+	}
+	else {
+		if(sd->sc_data[SC_ENDURE].timer != -1 && sd->sc_data[SC_ENDURE].val2)
+			skill_status_change_end(&sd->bl,SC_ENDURE,-1);
+	}
+
 	return 0;
 }
 
@@ -4043,8 +4056,11 @@ int pc_unequipitem(struct map_session_data *sd,int n,int type)
 	} else {
 		clif_unequipitemack(sd,n,0,0);
 	}
-	if(!type)
+	if(!type) {
 		pc_calcstatus(sd,0);
+		if(!sd->special_state.infinite_endure && sd->sc_data[SC_ENDURE].timer != -1 && sd->sc_data[SC_ENDURE].val2)
+			skill_status_change_end(&sd->bl,SC_ENDURE,-1);
+	}
 
 	return 0;
 }
