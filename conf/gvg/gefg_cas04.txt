@@ -354,7 +354,7 @@ LStartg:
 		close;
 }
 //------------------------------カプラ--------------------------------
-gefg_cas04.gat,59,70,3	script	カプラ職員	117,{
+gefg_cas04.gat,59,70,3	script	カプラ職員::kapra_gefg04	117,{
 	cutin "kafra_01",2;
 	set @GIDg4,getcastledata("gefg_cas04.gat",1);
 	if (getcharid(2) == @GIDg4) goto LStartg;
@@ -456,6 +456,13 @@ L7:
 L_EXIT:
 	cutin "kafra_01",255;
 	close;
+OnInit:
+	disablenpc "kapra_gefg04";
+	end;
+OnRecvCastleG04:
+	if (getcastledata("gefg_cas04.gat",9) != 1) end;
+	enablenpc "kapra_gefg04";
+	end;
 }
 //-------------------------------執事---------------------------------
 gefg_cas04.gat,73,46,3	script	ケルバーリ	55,{

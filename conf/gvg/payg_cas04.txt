@@ -352,7 +352,7 @@ LStartg:
 		close;
 }
 //------------------------------カプラ--------------------------------
-payg_cas04.gat,40,235,1	script	カプラ職員	117,{
+payg_cas04.gat,40,235,1	script	カプラ職員::kapra_payg04	117,{
 	cutin "kafra_01",2;
 	set @GIDf4,getcastledata("payg_cas04.gat",1);
 	if (getcharid(2) == @GIDf4) goto LStartg;
@@ -454,6 +454,13 @@ L7:
 L_EXIT:
 	cutin "kafra_01",255;
 	close;
+OnInit:
+	disablenpc "kapra_payg04";
+	end;
+OnRecvCastleF04:
+	if (getcastledata("payg_cas04.gat",9) != 1) end;
+	enablenpc "kapra_payg04";
+	end;
 }
 //-------------------------------執事---------------------------------
 payg_cas04.gat,38,284,3	script	ディージェイ	55,{

@@ -492,7 +492,7 @@ LStartg:
 		close;
 }
 //------------------------------カプラ--------------------------------
-prtg_cas04.gat,258,247,4	script	カプラ職員	117,{
+prtg_cas04.gat,258,247,4	script	カプラ職員::kapra_prtg04	117,{
 	cutin "kafra_01",2;
 	set @GIDp4,getcastledata("prtg_cas04.gat",1);
 	if (getcharid(2) == @GIDp4) goto LStartg;
@@ -594,6 +594,13 @@ L7:
 L_EXIT:
 	cutin "kafra_01",255;
 	close;
+OnInit:
+	disablenpc "kapra_prtg04";
+	end;
+OnRecvCastleP04:
+	if (getcastledata("prtg_cas04.gat",9) != 1) end;
+	enablenpc "kapra_prtg04";
+	end;
 }
 //-------------------------------執事---------------------------------
 prtg_cas04.gat,259,265,4	script	バンドレッド	55,{

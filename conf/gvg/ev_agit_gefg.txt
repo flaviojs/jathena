@@ -1,6 +1,9 @@
 gefg_cas01.gat,198,182,0	script	Agit_B01	-1,{
-OnAgitInit:
-	GetCastleData "gefg_cas01.gat",0;
+OnInterIfInit:
+	GetCastleData "gefg_cas01.gat",0,"::OnRecvCastleG01";
+	End;
+OnRecvCastleG01:
+	RequestGuildInfo GetCastleData("gefg_cas01.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "gefg_cas01.gat",GetCastleData("gefg_cas01.gat",1),2;
@@ -26,8 +29,11 @@ OnAgitEnd:
 }
 //--------------------------------------------------------------------------------------------------------------------------
 gefg_cas02.gat,176,178,0	script	Agit_B02	-1,{
-OnAgitInit:
-	GetCastleData "gefg_cas02.gat",0;
+OnInterIfInit:
+	GetCastleData "gefg_cas02.gat",0,"::OnRecvCastleG02";
+	End;
+OnRecvCastleG02:
+	RequestGuildInfo GetCastleData("gefg_cas02.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "gefg_cas02.gat",GetCastleData("gefg_cas02.gat",1),2;
@@ -53,8 +59,11 @@ OnAgitEnd:
 }
 //--------------------------------------------------------------------------------------------------------------------------
 gefg_cas03.gat,245,167,0	script	Agit_B03	-1,{
-OnAgitInit:
-	GetCastleData "gefg_cas03.gat",0;
+OnInterIfInit:
+	GetCastleData "gefg_cas03.gat",0,"::OnRecvCastleG03";
+	End;
+OnRecvCastleG03:
+	RequestGuildInfo GetCastleData("gefg_cas03.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "gefg_cas03.gat",GetCastleData("gefg_cas03.gat",1),2;
@@ -80,8 +89,11 @@ OnAgitEnd:
 }
 //--------------------------------------------------------------------------------------------------------------------------
 gefg_cas04.gat,174,178,0	script	Agit_B04	-1,{
-OnAgitInit:
-	GetCastleData "gefg_cas04.gat",0;
+OnInterIfInit:
+	GetCastleData "gefg_cas04.gat",0,"::OnRecvCastleG04";
+	End;
+OnRecvCastleG04:
+	RequestGuildInfo GetCastleData("gefg_cas04.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "gefg_cas04.gat",GetCastleData("gefg_cas04.gat",1),2;
@@ -107,8 +119,11 @@ OnAgitEnd:
 }
 //--------------------------------------------------------------------------------------------------------------------------
 gefg_cas05.gat,194,184,0	script	Agit_B05	-1,{
-OnAgitInit:
-	GetCastleData "gefg_cas05.gat",0;
+OnInterIfInit:
+	GetCastleData "gefg_cas05.gat",0,"::OnRecvCastleG05";
+	End;
+OnRecvCastleG05:
+	RequestGuildInfo GetCastleData("gefg_cas05.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "gefg_cas05.gat",GetCastleData("gefg_cas05.gat",1),2;

@@ -29,8 +29,11 @@ OnAgitEnd:
 }
 //--------------------------------------------------------------------------------------------------------------------------
 prtg_cas02.gat,158,174,0	script	Agit_D02	-1,{
-OnAgitInit:
-	GetCastleData "prtg_cas02.gat",0;
+OnInterIfInit:
+	GetCastleData "prtg_cas02.gat",0,"::OnRecvCastleP02";
+	End;
+OnRecvCastleP02:
+	RequestGuildInfo GetCastleData("prtg_cas02.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "prtg_cas02.gat",GetCastleData("prtg_cas02.gat",1),2;
@@ -56,8 +59,11 @@ OnAgitEnd:
 }
 //--------------------------------------------------------------------------------------------------------------------------
 prtg_cas03.gat,17,221,0	script	Agit_D03	-1,{
-OnAgitInit:
-	GetCastleData "prtg_cas03.gat",0;
+OnInterIfInit:
+	GetCastleData "prtg_cas03.gat",0,"::OnRecvCastleP03";
+	End;
+OnRecvCastleP03:
+	RequestGuildInfo GetCastleData("prtg_cas03.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "prtg_cas03.gat",GetCastleData("prtg_cas03.gat",1),2;
@@ -83,8 +89,11 @@ OnAgitEnd:
 }
 //--------------------------------------------------------------------------------------------------------------------------
 prtg_cas04.gat,292,14,0	script	Agit_D04	-1,{
-OnAgitInit:
-	GetCastleData "prtg_cas04.gat",0;
+OnInterIfInit:
+	GetCastleData "prtg_cas04.gat",0,"::OnRecvCastleP04";
+	End;
+OnRecvCastleP04:
+	RequestGuildInfo GetCastleData("prtg_cas04.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "prtg_cas04.gat",GetCastleData("prtg_cas04.gat",1),2;
@@ -110,8 +119,11 @@ OnAgitEnd:
 }
 //--------------------------------------------------------------------------------------------------------------------------
 prtg_cas05.gat,266,266,0	script	Agit_D05	-1,{
-OnAgitInit:
-	GetCastleData "prtg_cas05.gat",0;
+OnInterIfInit:
+	GetCastleData "prtg_cas05.gat",0,"::OnRecvCastleP05";
+	End;
+OnRecvCastleP05:
+	RequestGuildInfo GetCastleData("prtg_cas05.gat",1);
 	End;
 OnAgitStart:
 	MapRespawnGuildID "prtg_cas05.gat",GetCastleData("prtg_cas05.gat",1),2;

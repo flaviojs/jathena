@@ -352,7 +352,7 @@ LStartg:
 		close;
 }
 //------------------------------カプラ--------------------------------
-gefg_cas01.gat,83,47,3	script	カプラ職員	117,{
+gefg_cas01.gat,83,47,3	script	カプラ職員::kapra_gefg01	117,{
 	cutin "kafra_01",2;
 	set @GIDg1,getcastledata("gefg_cas01.gat",1);
 	if (getcharid(2) == @GIDg1) goto LStartg;
@@ -454,6 +454,13 @@ L7:
 L_EXIT:
 	cutin "kafra_01",255;
 	close;
+OnInit:
+	disablenpc "kapra_gefg01";
+	end;
+OnRecvCastleG01:
+	if (getcastledata("gefg_cas01.gat",9) != 1) end;
+	enablenpc "kapra_gefg01";
+	end;
 }
 //-------------------------------執事---------------------------------
 gefg_cas01.gat,40,48,5	script	グナフチョ	55,{

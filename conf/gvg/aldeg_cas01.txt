@@ -669,7 +669,7 @@ LStartg:
 		close;
 }
 //------------------------------カプラ--------------------------------
-aldeg_cas01.gat,218,170,0	script	カプラ職員#alde1	117,{
+aldeg_cas01.gat,218,170,0	script	カプラ職員::kapra_aldeg01	117,{
 	cutin "kafra_01",2;
 	set @GIDa1,getcastledata("aldeg_cas01.gat",1);
 	if (getcharid(2) == @GIDa1) goto LStartg;
@@ -772,8 +772,11 @@ L_EXIT:
 	cutin "kafra_01",255;
 	close;
 OnInit:
-	if (getcastledata("aldeg_cas01.gat",9) == 1) end;
-	disablenpc "カプラ職員#alde1";
+	disablenpc "kapra_aldeg01";
+	end;
+OnRecvCastleA01:
+	if (getcastledata("aldeg_cas01.gat",9) != 1) end;
+	enablenpc "kapra_aldeg01";
 	end;
 }
 //-------------------------------執事---------------------------------

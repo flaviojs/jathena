@@ -667,7 +667,7 @@ L2:
 		close;
 }
 //------------------------------カプラ--------------------------------
-aldeg_cas04.gat,45,88,0	script	カプラ職員	117,{
+aldeg_cas04.gat,45,88,0	script	カプラ職員::kapra_aldeg04	117,{
 	cutin "kafra_01",2;
 	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (getcharid(2) == @GIDa4) goto LStartg;
@@ -769,6 +769,13 @@ L7:
 L_EXIT:
 	cutin "kafra_01",255;
 	close;
+OnInit:
+	disablenpc "kapra_aldeg04";
+	end;
+OnRecvCastleA04:
+	if (getcastledata("aldeg_cas04.gat",9) != 1) end;
+	enablenpc "kapra_aldeg04";
+	end;
 }
 //-------------------------------執事---------------------------------
 aldeg_cas04.gat,67,116,0	script	ウィリオット	55,{

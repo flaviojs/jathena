@@ -494,7 +494,7 @@ LStartg:
 		close;
 }
 //------------------------------カプラ--------------------------------
-gefg_cas03.gat,116,89,5	script	カプラ職員	117,{
+gefg_cas03.gat,116,89,5	script	カプラ職員::kapra_gefg03	117,{
 	cutin "kafra_01",2;
 	set @GIDg3,getcastledata("gefg_cas03.gat",1);
 	if (getcharid(2) == @GIDg3) goto LStartg;
@@ -596,25 +596,13 @@ L7:
 L_EXIT:
 	cutin "kafra_01",255;
 	close;
-}
-//-------------------------------執事---------------------------------
-gefg_cas03.gat,106,23,5	script	ジャン	55,{
-	set @GIDg3,getcastledata("gefg_cas03.gat",1);
-	if (getcharid(2) == @GIDg3) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事ジャン]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDg3) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
+OnInit:
+	disablenpc "kapra_gefg03";
+	end;
+OnRecvCastleG03:
+	if (getcastledata("gefg_cas03.gat",9) != 1) end;
+	enablenpc "kapra_gefg03";
+	end;
 }
 //-----------------------------スイッチ-------------------------------
 gefg_cas03.gat,267,287,0	script	　	111,{

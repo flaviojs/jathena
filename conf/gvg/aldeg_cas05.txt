@@ -597,7 +597,7 @@ L2:
 		close;
 }
 //------------------------------カプラ--------------------------------
-aldeg_cas05.gat,31,190,0	script	カプラ職員	117,{
+aldeg_cas05.gat,31,190,0	script	カプラ職員::kapra_aldeg05	117,{
 	cutin "kafra_01",2;
 	set @GIDa5,getcastledata("aldeg_cas05.gat",1);
 	if (getcharid(2) == @GIDa5) goto LStartg;
@@ -699,6 +699,13 @@ L7:
 L_EXIT:
 	cutin "kafra_01",255;
 	close;
+OnInit:
+	disablenpc "kapra_aldeg05";
+	end;
+OnRecvCastleA05:
+	if (getcastledata("aldeg_cas05.gat",9) != 1) end;
+	enablenpc "kapra_aldeg05";
+	end;
 }
 //-------------------------------執事---------------------------------
 aldeg_cas05.gat,51,179,0	script	ブリムヘンセン	55,{

@@ -1348,7 +1348,9 @@ z [0`4]•‚ÌF
 			clif_displaymessage(fd,msg_table[74]);
 			return 1;
 		}
-
+ 		sprintf(moji,"%s is Unknown Command.",command);
+ 		clif_displaymessage(fd,moji);
+ 		return 1;
 	}
 
 	return 0;

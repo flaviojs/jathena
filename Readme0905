@@ -1,4 +1,20 @@
 --------------------
+//0906 by Selena
+・胡蝶蘭さんの修正にあわせて、バルキリーレルム１以外のスクリプトの修正。
+・@コマンド入力ミスの際にエラーメッセージを表示。
+	(conf/gvg/)
+	ev_agit_aldeg.txt
+	ev_agit_gefg.txt
+	ev_agit_payg.txt
+	ev_agit_prtg.txt
+	aldeg_cas01～05.txt
+	gefg_cas01～05.txt
+	payg_cas01～05.txt
+	prtg_cas02～05.txt
+	(map/)
+	atcommand.c
+
+--------------------
 //0905 by 管理人
 
 ・サーバーsnapshot
