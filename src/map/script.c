@@ -138,6 +138,7 @@ int buildin_bonus2(struct script_state *st);
 int buildin_bonus3(struct script_state *st);
 int buildin_skill(struct script_state *st);
 int buildin_getskilllv(struct script_state *st);
+int buildin_getgdskilllv(struct script_state *st);
 int buildin_basicskillcheck(struct script_state *st);
 int buildin_getgmlevel(struct script_state *st);
 int buildin_end(struct script_state *st);
@@ -285,6 +286,7 @@ struct {
 	{buildin_bonus3,"bonus3","iiii"},
 	{buildin_skill,"skill","ii*"},
 	{buildin_getskilllv,"getskilllv","i"},
+	{buildin_getgdskilllv,"getgdskilllv","ii"},
 	{buildin_basicskillcheck,"basicskillcheck","*"},
 	{buildin_getgmlevel,"getgmlevel","*"},
 	{buildin_end,"end",""},
@@ -2817,6 +2819,24 @@ int buildin_getskilllv(struct script_state *st)
 	int id=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	push_val(st->stack,C_INT, pc_checkskill( script_rid2sd(st) ,id) );
 	return 0;
+}
+/*==========================================       
+ * getgdskilllv(Guild_ID, Skill_ID);               
+ * skill_id = 1 : GD_APPROVAL                      
+ *            2 : GD_KAFRACONTACT                  
+ *            3 : GD_GUARDIANRESEARCH              
+ *            4 : GD_CHARISMA                      
+ *            5 : GD_EXTENSION                     
+ *------------------------------------------       
+ */                                                
+int buildin_getgdskilllv(struct script_state *st)  
+{                                                  
+        int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+        int skill_id=conv_num(st,& (st->stack->stack_data[st->start+3]));
+        struct guild *g=guild_search(guild_id);
+        if (g == NULL) push_val(st->stack,C_INT, 0);
+        if (g != NULL) push_val(st->stack,C_INT, guild_checkskill(g,skill_id+9999) );
+        return 0;
 }
 /*==========================================
  *

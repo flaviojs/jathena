@@ -1,3 +1,13 @@
+----------------------------------------
+//1033 by Michael
+E’Ç‰Á NPC Script Command - buildin_getgdskilllv()
+  getgdskilllv(Guild_ID, Skill_ID);
+  skill_id = 1:GD_APPROVAL,2:GD_KAFRACONTACT,3:GD_GUARDIANRESEARCH,4:GD_CHARISMA,5:GD_EXTENSION
+ 
+	(map/)
+	script.c
+		buildin_getgdskilllv() ’Ç‰Á
+
 --------------------
 //1032 by (“Ê)
 E1031‚Å‰½ŒÌ‚©íœ‚³‚ê‚Ä‚¢‚½buildin_getitemname()‚ğ•œŠˆ
