@@ -3304,7 +3304,6 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 {
 	int i,nameid;
 	struct item_data *id;
-
 	nameid=sd->status.inventory[n].nameid;
 	id=itemdb_search(nameid);
 	printf("equip %d %x:%x\n",n,itemdb_equip(nameid),pos);
@@ -3312,6 +3311,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	 || (id->sex!=2 && sd->sex!=id->sex)
 	 || sd->status.base_level<id->elv
 	 || ((1<<sd->status.class)&id->class)==0
+	 || (pos==0x8000 && (sd->status.weapon != 11))	//–î‚Í‹|‘•”õ‚Ì‚İ
 	  ){
 		clif_equipitemack(sd,n,0,0);	// fail
 		return 0;
@@ -3367,10 +3367,12 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
  */
 int pc_unequipitem(struct map_session_data *sd,int n)
 {
+	int arrow=pc_search_inventory(sd,pc_checkequip(sd,0x8000));
 	//printf("unequip %d %x:%x\n",n,itemdb_equippoint(sd->status.inventory[n].nameid),sd->status.inventory[n].equip);
 	if(sd->status.inventory[n].equip){
 		clif_unequipitemack(sd,n,sd->status.inventory[n].equip,1);
 		sd->status.inventory[n].equip=0;
+		clif_unequipitemack(sd,arrow,sd->status.inventory[arrow].equip,1);	// –î‚àŠO‚·
 	} else {
 		clif_unequipitemack(sd,n,0,0);
 	}

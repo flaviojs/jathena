@@ -288,7 +288,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	case 0:					/* 通常攻撃 */
 		/* 自動鷹 */
 		if( sd && pc_isfalcon(sd) && (skill=pc_checkskill(sd,HT_BLITZBEAT))>0 &&
-			rand()%1000 <= sd->paramc[5]*10/3+1 ) {
+			rand()%1000 <= sd->paramc[5]*10/3+1 && sd->status.weapon != 11) {
 			int lv=(sd->status.job_level+9)/10;
 			skill_castend_damage_id(src,bl,HT_BLITZBEAT,(skill<lv)?skill:lv,tick,0xf00000);
 		}
@@ -2749,7 +2749,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
  */
 int skill_check_condition( struct map_session_data *sd )
 {
-	int j=0,sp=0,zeny=0,spiritball=0,tick;
+	int j=0,sp=0,zeny=0,spiritball=0,tick,arrow_id=0;
 	int	i[3]={0,0,0},
 		item_id[3]={0,0,0},
 		item_amount[3]={0,0,0};
@@ -2836,12 +2836,17 @@ int skill_check_condition( struct map_session_data *sd )
 			break;
 
 
-		case AC_DOUBLE:		// ダブルストレイフィング
 		case AC_SHOWER:		// アローシャワー
+			item_amount[0] =7;
+		case AC_DOUBLE:		// ダブルストレイフィング
+			item_amount[0]+=1;
 		case AC_CHARGEARROW:		// チャージアロー
+			item_amount[0]+=1;
+			arrow_id=pc_checkequip(sd,0x8000);
+
 			if( sd->status.weapon != 11) {
 				clif_skill_fail(sd,sd->skillid,6,0);	// 弓
-			     	return 0; 
+			     	return 0;
 			}
 			break;
 
@@ -2883,7 +2888,8 @@ int skill_check_condition( struct map_session_data *sd )
 			break;
 
 		case HT_BLITZBEAT:		/* ブリッツビート */
-			if(!pc_isfalcon(sd)) {		/* 鷹がいない */
+			if(!pc_isfalcon(sd) ||	/* 鷹がいないか弓を装備していない */
+			(sd->status.weapon != 11)) {
 				clif_skill_fail(sd,sd->skillid,0,0);
 				return 0;
 			}
@@ -2996,7 +3002,6 @@ int skill_check_condition( struct map_session_data *sd )
 			}
 			break;
 
-	//		case RG_BACKSTAP:	// バックスタブ
 		case RG_RAID:		// サプライズアタック
 			if(!pc_ishiding(sd)) {		// ハイディング状態
 				clif_skill_fail(sd,sd->skillid,0,0);
@@ -3014,6 +3019,11 @@ int skill_check_condition( struct map_session_data *sd )
 		if( spiritball > 0 && sd->spiritball < spiritball) {
 			clif_skill_fail(sd,sd->skillid,0,0);		// 氣球不足
 			return 0;
+		}
+		if(arrow_id){
+			if(sd->status.inventory[(pc_search_inventory(sd,arrow_id))].amount < item_amount[0])
+				clif_arrow_fail(sd,0);
+			pc_delitem(sd,(pc_search_inventory(sd,arrow_id)),item_amount[0]-1,0);	// 矢消費
 		}
 
 		if(!pc_check_equip_dcard(sd,4132) && 
