@@ -2301,7 +2301,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 			int i,ei=0,race=battle_get_race(bl);
 			int element=battle_get_element(bl) % 10;
 
-			if(!battle_config.sanctury_type) {
+			if(!battle_config.sanctuary_type) {
 				if( battle_get_hp(bl)>=battle_get_max_hp(bl) &&
 					 race!=1 && race!=6  )
 					break;
@@ -2364,7 +2364,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		{
 			int race=battle_get_race(bl);
 			int element=battle_get_element(bl) % 10;
-			if(!battle_config.sanctury_type) {
+			if(!battle_config.sanctuary_type) {
 				if( race!=1 && race!=6 )
 					return 0;
 			}
@@ -3905,7 +3905,7 @@ int skill_status_change_clear(struct block_list *bl)
 		if(sc_data[i].timer != -1){	/* 異常があるならタイマーを削除する */
 			delete_timer(sc_data[i].timer, skill_status_change_timer);
 			sc_data[i].timer = -1;
-			if( bl->type==BL_PC && i<64 )
+			if(bl->type==BL_PC && (i<64 || i == SC_EXPLOSIONSPIRITS || i == SC_STEELBODY))	/* アイコン消去 */
 				clif_status_change(bl,i,0);
 		}
 	}
@@ -4269,7 +4269,11 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
  */
 int skill_unit_timer( int tid,unsigned int tick,int id,int data)
 {
+	map_freeblock_lock();
+
 	map_foreachobject( skill_unit_timer_sub, BL_SKILL, tick );
+
+	map_freeblock_unlock();
 	return 0;
 }
 
@@ -4671,7 +4675,7 @@ int do_init_skill(void)
 	add_timer_func_list(skill_castend_pos,"skill_castend_pos");
 	add_timer_func_list(skill_timerskill,"skill_timerskill");
 	add_timer_func_list(skill_status_change_timer,"skill_status_change_timer");
-	add_timer_interval(gettick()+1000,skill_unit_timer,0,0,SKILLUNITTIMER_INVERVAL);
+	add_timer_interval(gettick()+SKILLUNITTIMER_INVERVAL,skill_unit_timer,0,0,SKILLUNITTIMER_INVERVAL);
 
 	return 0;
 }

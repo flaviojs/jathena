@@ -1023,8 +1023,13 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	clif_updatestatus(sd,SP_SPEED);
 
-	if(first)
+	if(first) {
+		clif_updatestatus(sd,SP_MAXHP);
+		clif_updatestatus(sd,SP_MAXSP);
+		clif_updatestatus(sd,SP_HP);
+		clif_updatestatus(sd,SP_SP);
 		return 0;
+	}
 
 	if( memcmp(before.status.skill,sd->status.skill,sizeof(sd->status.skill)) )
 		clif_skillinfoblock(sd);	// ƒXƒLƒ‹‘—M

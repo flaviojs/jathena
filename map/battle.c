@@ -1906,7 +1906,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.pet_rename=0;
 	battle_config.pet_hungry_delay_rate=100;
 	battle_config.skill_min_damage=0;
-	battle_config.sanctury_type=0;
+	battle_config.sanctuary_type=0;
 	battle_config.finger_offensive_type=0;
 	battle_config.heal_exp=0;
 	battle_config.shop_exp=0;
@@ -1954,7 +1954,7 @@ int battle_config_read(const char *cfgName)
 			{	"pet_rename",			&battle_config.pet_rename			},
 			{ "pet_hungry_delay_rate", &battle_config.pet_hungry_delay_rate	},
 			{ "skill_min_damage", &battle_config.skill_min_damage },
-			{ "sanctury_type", &battle_config.sanctury_type },
+			{ "sanctuary_type", &battle_config.sanctuary_type },
 			{ "finger_offensive_type", &battle_config.finger_offensive_type	},
 			{ "heal_exp", &battle_config.heal_exp	},
 			{ "shop_exp", &battle_config.shop_exp	},

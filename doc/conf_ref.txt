@@ -427,7 +427,7 @@ skill_min_damage
 	スキルを使った時ダメージが連打数より未満の場合全てミスになるか1ダメージになるかを決定します。
 	デフォルトはnoです。
 
-sanctury_type
+sanctuary_type
 	スキルサンクチュアリとマグヌスエクソシズムの攻撃判定をどうするかを決定します。
 	0でアンデッドと悪魔種族で1で属性不死と悪魔種族に適用されます。
 	デフォルトは0です。
@@ -484,7 +484,7 @@ pet_catch_rate: 100
 pet_rename: no
 pet_hungry_delay_rate: 100
 skill_min_damage: no
-sanctury_type: 0
+sanctuary_type: 0
 finger_offensive_type: 0
 heal_exp: 0
 shop_exp: 0

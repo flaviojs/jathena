@@ -139,7 +139,7 @@ extern struct Battle_Config {
 	int pet_rename;
 	int pet_hungry_delay_rate;
 	int skill_min_damage;
-	int sanctury_type;
+	int sanctuary_type;
 	int finger_offensive_type;
 	int heal_exp,shop_exp;
 	int asuradelay;
