@@ -1,4 +1,51 @@
 --------------------
+//1083 by End_of_exam special thanks to lizorettさん
+・ソケットのデストラクタ処理の追加
+		(common/socket.c common/socket.h login/login.c char/char.c map/clif.c map/chrif.c)
+	ソケットを閉じる時の処理の流れが変更になります。今までソケットを閉じる場合は、
+	まずsession[fd]->eof を真にした後、パーズルーチン内で後処理（メモリ解放など）
+	していました。ですが、close(fd); が２重に実行されてサーバーが落ちるなどの
+	バグが発生していたり、処理の流れがつかみにくいといった理由から、socket.c 内部で
+	全て処理するように変更しました。ソケットを閉じる時の主な流れは次の通りです。
+
+	1. ソース内からsession[fd]->eof = 1; をする
+	2. socket.c 内からsession[fd]->destruct() が呼ばれる
+	3. メモリの解放＆後処理(socket.c delete_session内部)
+
+	close(fd) は、session[fd]->eof = 1; に置き換えました(#define)。
+	また、delete_session() を明示的に呼ぶ必要はありません。
+
+・マップ鯖分配時のアイテムdupe問題修正(map/map.c map/pc.c map/chrif.c)
+	ソケット切断時に倉庫データのキャッシュを消すように変更
+	２重ログイン時にマップサーバーが違った場合にも切断できるように修正
+
+・古いバージョンでログインした時にmap鯖が落ちるバグを修正(map/clif.c)
+	clif_parse() 内部
+
+	if(packet_db[cmd].len==0) {
+	-> if(cmd<MAX_PACKET_DB && packet_db[cmd].len==0) {
+
+・gcc でコンパイルした時にtimer.c でwarning が出たのを修正(common/timer.c)
+	timer.c:116: warning: `check_timer_heap' defined but not used
+
+	(src/common/)
+		socket.c	ソケットのデストラクタ処理を追加
+		socket.h	ソケットのデストラクタ処理を追加
+		timer.c		warning 修正
+
+	(src/map/)
+		clif.c		ソケットのデストラクタ処理を追加
+		chrif.c		ソケットのデストラクタ処理を追加
+		map.c		マップ鯖分配時のアイテムdupe問題修正
+		pc.c		マップ鯖分配時のアイテムdupe問題修正
+
+	(src/char/)
+		char.c		ソケットのデストラクタ処理を追加
+
+	(src/login/)
+		login.c		ソケットのデストラクタ処理を追加
+
+--------------------
 //1082 by lizorett (2004/12/18) special thanks to 名無し様@ｇ＠ｍｅ
 ・白刃取りをボスに無効に変更
 ・1079の変更部分にNULLチェックを追加

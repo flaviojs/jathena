@@ -20,6 +20,12 @@
 #include "socket.h"
 #include "malloc.h"
 
+// socket.h でdefine されたcloseを置き換え
+#undef close
+#ifdef _WIN32
+	#define close(id) do{ if(session[id]) closesocket(session[id]->socket); } while(0);
+#endif
+
 #ifdef MEMWATCH
 #include "memwatch.h"
 #endif
@@ -34,6 +40,7 @@ struct socket_data *session[FD_SETSIZE];
 
 static int null_parse(int fd);
 static int (*default_func_parse)(int) = null_parse;
+static int (*default_func_destruct)(int) = NULL;
 
 /*======================================
  *	CORE : Set function
@@ -42,6 +49,11 @@ static int (*default_func_parse)(int) = null_parse;
 void set_defaultparse(int (*defaultparse)(int))
 {
 	default_func_parse = defaultparse;
+}
+
+void set_sock_destruct(int (*func_destruct)(int))
+{
+	default_func_destruct = func_destruct;
 }
 
 /*======================================
@@ -68,7 +80,6 @@ static int recv_to_fifo(int fd)
 	} else if(len == 0 || len == SOCKET_ERROR){
 		printf("set eof :%d\n",fd);
 		session[fd]->eof=1;
-		closesocket(session[fd]->socket);
 #else
 	} else if(len<=0){
 		printf("set eof :%d\n",fd);
@@ -102,7 +113,6 @@ static int send_from_fifo(int fd)
 	} else if(len == 0 || len == SOCKET_ERROR) {
 		printf("set eof :%d\n",fd);
 		session[fd]->eof=1;
-		closesocket(session[fd]->socket);
 #else
 	} else {
 		printf("set eof :%d\n",fd);
@@ -186,6 +196,7 @@ static int connect_client(int listen_fd)
 #if _WIN32
 	session[fd]->socket      = socket;
 #endif
+	session[fd]->func_destruct = default_func_destruct;
 	if(fd_max<=fd) fd_max=fd+1;
 
   //printf("new_session : %d %d\n",fd,session[fd]->eof);
@@ -310,6 +321,7 @@ int make_connection(long ip,int port)
 #if _WIN32
 	session[fd]->socket = sock;
 #endif
+	session[fd]->func_destruct = default_func_destruct;
 	if(fd_max<=fd) fd_max=fd+1;
 
 	return fd;
@@ -325,6 +337,16 @@ int delete_session(int fd)
 	FD_CLR((unsigned int)fd,&readfds);
 #endif
 	if(session[fd]){
+		// ２重呼び出しの防止
+		if(session[fd]->flag_destruct) {
+			return 0;
+		}
+		session[fd]->flag_destruct = 1;
+		// デストラクタを呼び出す
+		if(session[fd]->func_destruct) {
+			session[fd]->func_destruct(fd);
+		}
+		close(fd);
 		if(session[fd]->rdata)
 			free(session[fd]->rdata);
 		if(session[fd]->wdata)
@@ -427,14 +449,15 @@ int do_parsepacket(void)
 	for(i=0;i<fd_max;i++){
 		if(!session[i])
 			continue;
-		if(session[i]->rdata_size==0 && session[i]->eof==0)
-			continue;
-		if(session[i]->func_parse){
-			session[i]->func_parse(i);
-			if(!session[i])
-				continue;
+		if(session[i]->eof) {
+			delete_session(i);
+		} else {
+			if(session[i]->func_parse && session[i]->rdata_size)
+				session[i]->func_parse(i);
+			if(!session[i]->eof) {
+				RFIFOFLUSH(i);
+			}
 		}
-		RFIFOFLUSH(i);
 	}
 	return 0;
 }

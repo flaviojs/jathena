@@ -730,18 +730,18 @@ int cmp_authfifo(int i,int account_id,int login_id1,int login_id2,int ip)
 	return 0;
 }
 
+// ソケットのデストラクタ
+int parse_login_disconnect(int fd) {
+	if(fd==login_fd)
+		login_fd=-1;
+	return 0;
+}
+
 int parse_tologin(int fd)
 {
 	int i,fdc;
 	struct char_session_data *sd;
 
-	if(session[fd]->eof){
-		if(fd==login_fd)
-			login_fd=-1;
-		close(fd);
-		delete_session(fd);
-		return 0;
-	}
 	printf("parse_tologin : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
 	sd=session[fd]->session_data;
 	while(RFIFOREST(fd)>=2){
@@ -950,6 +950,33 @@ int char_erasemap(int fd,int id)
 
 	return 0;
 }
+
+int parse_map_disconnect(int fd) {
+	int i,id;
+	for(id=0;id<MAX_MAP_SERVERS;id++)
+		if(server_fd[id]==fd)
+			break;
+	for(i=0;i<MAX_MAP_SERVERS;i++)
+		if(server_fd[i]==fd)
+			server_fd[i]=-1;
+	char_erasemap(fd,id);
+	//map-serverが切れたときに残っていたキャラの切断を他map-serverに通知
+	for(i=0;i<char_num;i++){
+		unsigned char buf[10];
+		
+		if(char_dat[i].mapip == server[id].ip && char_dat[i].mapport == server[id].port){
+			//printf("char: mapdisconnect %s %d %d %d %d\n",char_dat[i].name,(int)char_dat[i].mapip,(int)server[id].ip,char_dat[i].mapport,server[id].port);
+			char_dat[i].mapip=0;
+			char_dat[i].mapport=0;
+			WBUFW(buf,0)=0x2b17;
+			WBUFL(buf,2)=char_dat[i].char_id;
+			mapif_sendallwos(fd,buf,6);
+		}
+	}
+	close(fd);
+	return 0;
+}
+
 int parse_frommap(int fd)
 {
 	int i,j;
@@ -960,28 +987,6 @@ int parse_frommap(int fd)
 			break;
 	if(id==MAX_MAP_SERVERS)
 		session[fd]->eof=1;
-	if(session[fd]->eof){
-		for(i=0;i<MAX_MAP_SERVERS;i++)
-			if(server_fd[i]==fd)
-				server_fd[i]=-1;
-		char_erasemap(fd,id);
-		//map-serverが切れたときに残っていたキャラの切断を他map-serverに通知
-		for(i=0;i<char_num;i++){
-			unsigned char buf[10];
-			
-			if(char_dat[i].mapip == server[id].ip && char_dat[i].mapport == server[id].port){
-				//printf("char: mapdisconnect %s %d %d %d %d\n",char_dat[i].name,(int)char_dat[i].mapip,(int)server[id].ip,char_dat[i].mapport,server[id].port);
-				char_dat[i].mapip=0;
-				char_dat[i].mapport=0;
-				WBUFW(buf,0)=0x2b17;
-				WBUFL(buf,2)=char_dat[i].char_id;
-				mapif_sendallwos(fd,buf,6);
-			}
-		}
-		close(fd);
-		delete_session(fd);
-		return 0;
-	}
 	//printf("parse_frommap : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
 	while(RFIFOREST(fd)>=2){
 		switch(RFIFOW(fd,0)){
@@ -1359,22 +1364,20 @@ static int char_mapif_init(int fd)
 	return inter_mapif_init(fd);
 }
 
+int parse_char_disconnect(int fd) {
+	if(fd==login_fd)
+		login_fd=-1;
+	return 0;
+}
 
 int parse_char(int fd)
 {
-	int i,ch;
+	int i,ch,j;
 	unsigned short cmd;
 	struct char_session_data *sd;
 
 	if(login_fd<0)
 		session[fd]->eof=1;
-	if(session[fd]->eof){
-		if(fd==login_fd)
-			login_fd=-1;
-		close(fd);
-		delete_session(fd);
-		return 0;
-	}
 	sd=session[fd]->session_data;
 	while(RFIFOREST(fd)>=2){
 		cmd = RFIFOW(fd,0);
@@ -1467,7 +1470,6 @@ int parse_char(int fd)
 					break;
 			if(ch!=9){
 				FILE *logfp;
-
 				logfp=fopen(char_log_filename,"a");
 				if(logfp){
 					fprintf(logfp,"char select %d-%d %s" RETCODE,sd->account_id,RFIFOB(fd,2),char_dat[sd->found_char[ch]].name);
@@ -1492,6 +1494,29 @@ int parse_char(int fd)
 					RFIFOSKIP(fd,3);
 					break;
 				}
+				// ２重ログイン撃退（違うマップサーバの場合）
+				// 同じマップサーバの場合は、マップサーバー内で処理される
+				for(j = 0;j<9;j++) {
+					if(sd->found_char[j]>=0 &&
+						(char_dat[sd->found_char[j]].mapip || char_dat[sd->found_char[j]].mapport) &&
+						(char_dat[sd->found_char[j]].mapip != server[i].ip || char_dat[sd->found_char[j]].mapport != server[i].port)
+					) {
+						// ２重ログイン検出
+						// mapに切断要求
+						char buf[256];
+						WBUFW(buf,0)=0x2b1a;
+						WBUFL(buf,2)=sd->account_id;
+						mapif_sendall(buf,6);
+
+						// 接続失敗送信
+						WFIFOW(fd,0)=0x6c;
+						WFIFOW(fd,2)=0;
+						WFIFOSET(fd,3);
+						RFIFOSKIP(fd,3);
+						break;
+					}
+				}
+				if(j != 9) break;
 				
 				WFIFOW(fd,0)=0x71;
 				WFIFOL(fd,2)=char_dat[sd->found_char[ch]].char_id;
@@ -1617,6 +1642,7 @@ int parse_char(int fd)
 			} else {
 				WFIFOB(fd,2)=0;
 				session[fd]->func_parse=parse_frommap;
+				session[fd]->func_destruct = parse_map_disconnect;
 				server_fd[i]=fd;
 				server[i].ip=RFIFOL(fd,54);
 				server[i].port=RFIFOW(fd,58);
@@ -1761,6 +1787,7 @@ int check_connect_login_server(int tid,unsigned int tick,int id,int data)
 	if(login_fd<=0 || session[login_fd]==NULL){
 		login_fd=make_connection(login_ip,login_port);
 		session[login_fd]->func_parse=parse_tologin;
+		session[login_fd]->func_destruct = parse_login_disconnect;
 		realloc_fifo(login_fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
 		WFIFOW(login_fd,0)=0x2710;
 		memcpy(WFIFOP(login_fd,2),userid,24);
@@ -1934,6 +1961,7 @@ int do_init(int argc,char **argv)
 //	set_termfunc(mmo_char_sync);
 	set_termfunc(do_final);
 	set_defaultparse(parse_char);
+	set_sock_destruct(parse_char_disconnect);
 
 	char_fd = make_listen_port(char_port);
 

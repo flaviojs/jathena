@@ -6841,6 +6841,7 @@ void clif_parse_WantToConnection(int fd,struct map_session_data *sd, int cmd)
 	if((old_sd=map_id2sd(account_id)) != NULL){
 		// 2重loginなので切断用のデータを保存する
 		old_sd->new_fd=fd;
+		sd->new_fd = -1; // 新しいデータはセーブしないフラグ
 	} else {
 		map_addiddb(&sd->bl);
 	}
@@ -8820,6 +8821,20 @@ void clif_parse_debug(int fd,struct map_session_data *sd, int cmd)
  * socket.cのdo_parsepacketから呼び出される
  *------------------------------------------
  */
+
+int clif_disconnect(int fd) {
+	struct map_session_data *sd = session[fd]->session_data;
+	if(sd && sd->state.auth)
+		clif_quitsave(fd,sd);
+	close(fd);
+	if (sd) {
+		struct map_session_data *tmpsd = map_id2sd(sd->bl.id);
+		if (tmpsd == sd)
+			map_deliddb(&sd->bl);
+	}
+	return 0;
+}
+
 static int clif_parse(int fd)
 {
 	int packet_len=0,cmd;
@@ -8830,20 +8845,6 @@ static int clif_parse(int fd)
 		session[fd]->eof = 1;
 
 	sd = session[fd]->session_data;
-
-	// 接続が切れてるので後始末
-	if(session[fd]->eof){
-		if(sd && sd->state.auth)
-			clif_quitsave(fd,sd);
-		close(fd);
-		if (sd) {
-			struct map_session_data *tmpsd = map_id2sd(sd->bl.id);
-			if (tmpsd == sd)
-				map_deliddb(&sd->bl);
-		}
-		delete_session(fd);
-		return 0;
-	}
 
 	if(RFIFOREST(fd)<2)
 		return 0;
@@ -8878,7 +8879,7 @@ static int clif_parse(int fd)
 
 		close(fd);
 		session[fd]->eof = 1;
-		if(packet_db[cmd].len==0) {
+		if(cmd<MAX_PACKET_DB && packet_db[cmd].len==0) {
 			printf("clif_parse : %d %d %x\n",fd,packet_db[cmd].len,cmd);
 			printf("%x length 0 packet disconnect %d\n",cmd,fd);
 		}
@@ -9023,6 +9024,7 @@ int do_init_clif(void)
 
 	packetdb_readdb();
 	set_defaultparse(clif_parse);
+	set_sock_destruct(clif_disconnect);
 	for(i=0;i<10;i++){
 		if((map_fd=make_listen_port(map_port)))
 			break;

@@ -933,6 +933,7 @@ int map_quit(struct map_session_data *sd)
 	}
 	chrif_save(sd);
 	storage_storage_save(sd);
+	storage_delete(sd->status.account_id);
 
 	if( sd->npc_stackbuf && sd->npc_stackbuf != NULL)
 		free( sd->npc_stackbuf );

@@ -3233,6 +3233,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 					intif_save_petdata(sd->status.account_id,&sd->pet);
 				chrif_save(sd);
 				storage_storage_save(sd);
+				storage_delete(sd->status.account_id);
 				chrif_changemapserver(sd,mapname,x,y,ip,port);
 				return 0;
 			}

@@ -97,6 +97,8 @@ unsigned int gettick(void)
  *--------------------------------------
  */
 
+#if 0
+
 // デバッグ用関数群
 static void dump_timer_heap(void) {
 	int j;
@@ -123,6 +125,8 @@ static void check_timer_heap(void) {
 		}
 	}
 }
+
+#endif
 
 static void push_timer_heap(int index)
 {

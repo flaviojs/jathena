@@ -514,6 +514,16 @@ int charif_sendallwos(int sfd,unsigned char *buf,unsigned int len)
 	return c;
 }
 
+int parse_char_disconnect(int fd) {
+	int i;
+ 	for(i=0;i<MAX_SERVERS;i++)
+		if(server_fd[i]==fd)
+			server_fd[i]=-1;
+	close(fd);
+	delete_session(fd);
+	return 0;
+}
+
 int parse_fromchar(int fd)
 {
 	int i,id;
@@ -523,14 +533,6 @@ int parse_fromchar(int fd)
 			break;
 	if(id==MAX_SERVERS)
 		session[fd]->eof=1;
-	if(session[fd]->eof){
-		for(i=0;i<MAX_SERVERS;i++)
-			if(server_fd[i]==fd)
-				server_fd[i]=-1;
-		close(fd);
-		delete_session(fd);
-		return 0;
-	}
 	while(RFIFOREST(fd)>=2){
 		switch(RFIFOW(fd,0)){
 		
@@ -714,17 +716,19 @@ int parse_fromchar(int fd)
 	return 0;
 }
 
+int parse_admin_disconnect(int fd) {
+	int i;
+	for(i=0;i<MAX_SERVERS;i++)
+		if(server_fd[i]==fd)
+			server_fd[i]=-1;
+	close(fd);
+	delete_session(fd);
+	return 0;
+}
+
 int parse_admin(int fd)
 {
 	int i;
-	if(session[fd]->eof){
-		for(i=0;i<MAX_SERVERS;i++)
-			if(server_fd[i]==fd)
-				server_fd[i]=-1;
-		close(fd);
-		delete_session(fd);
-		return 0;
-	}
 	while(RFIFOREST(fd)>=2){
 		switch(RFIFOW(fd,0)){
 		case 0x7920:	{	// アカウントリスト
@@ -837,19 +841,21 @@ int parse_admin(int fd)
 	return 0;
 }
 
+int parse_login_disconnect(int fd) {
+	int i;
+	for(i=0;i<MAX_SERVERS;i++)
+		if(server_fd[i]==fd)
+	server_fd[i]=-1;
+	close(fd);
+	delete_session(fd);
+	return 0;
+}
+
 int parse_login(int fd)
 {
 	struct mmo_account account;
   int result=0,i;
 	
-	if(session[fd]->eof){
-		for(i=0;i<MAX_SERVERS;i++)
-			if(server_fd[i]==fd)
-		server_fd[i]=-1;
-		close(fd);
-		delete_session(fd);
-		return 0;
-	}
 	while(RFIFOREST(fd)>=2){
 		if(RFIFOW(fd,0)<30000) {
 			if(RFIFOW(fd,0) == 0x64 || RFIFOW(fd,0) == 0x01dd)
@@ -1010,6 +1016,7 @@ int parse_login(int fd)
 				WFIFOB(fd,2)=0;
 				WFIFOSET(fd,3);
 				session[fd]->func_parse=parse_fromchar;
+				session[fd]->func_destruct = parse_char_disconnect;
 				realloc_fifo(fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
 			} else {
 				WFIFOW(fd,0)=0x2711;
@@ -1049,6 +1056,7 @@ int parse_login(int fd)
 					if(strcmp(RFIFOP(fd,6),admin_pass)==0){
 						WFIFOB(fd,2)=0;
 						session[fd]->func_parse=parse_admin;
+						session[fd]->func_destruct = parse_admin_disconnect;
 					}
 				}else{					// 暗号化
 					if(!ld){
@@ -1066,6 +1074,7 @@ int parse_login(int fd)
 						if(memcmp(md5bin,RFIFOP(fd,6),16)==0){
 							WFIFOB(fd,2)=0;
 							session[fd]->func_parse=parse_admin;
+							session[fd]->func_destruct = parse_admin_disconnect;
 						}
 					}
 				}
@@ -1235,6 +1244,7 @@ int do_init(int argc,char **argv)
 	read_gm_account();
 	set_termfunc(mmo_auth_sync);
 	set_defaultparse(parse_login);
+	set_sock_destruct(parse_login_disconnect);
 
 	atexit(do_final);
 	return 0;

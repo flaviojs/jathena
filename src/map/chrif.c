@@ -32,7 +32,7 @@ static const int packet_len_table[0x28]={
 	 6,-1,10, 7,-1,41,40, 0,		// 2b00-2b07
 	 6,40,-1,10, 9, 7, 0, 0,		// 2b08-2b0f
 	-1,-1,10, 3, 3, 3,-1, 6,		// 2b10-2b17
-	10, 6, 0, 0, 0, 0, 0, 0,		// 2b18-2b1f
+	10, 6, 6, 0, 0, 0, 0, 0,		// 2b18-2b1f
 };
 
 int char_fd;
@@ -563,21 +563,33 @@ int chrif_parse_chardisconnectreq(int account_id)
 	
 	return 0;
 }
+
+// ‚QdƒƒOƒCƒ“Žž‚Ìˆ—
+int chrif_parse_chardisconnect_doublelogin(int account_id)
+{
+	struct map_session_data *sd=map_id2sd(account_id);
+	if(sd) {
+		clif_authfail_fd(sd->fd,2);
+		clif_setwaitclose(sd->fd);
+	}
+	return 0;
+}
+
 /*==========================================
  *
  *------------------------------------------
  */
+
+int chrif_disconnect(int fd) {
+	if(fd==char_fd)
+		char_fd=-1;
+	close(fd);
+	return 0;
+}
+
 int chrif_parse(int fd)
 {
 	int packet_len,cmd;
-
-	if(session[fd]->eof){
-		if(fd==char_fd)
-			char_fd=-1;
-		close(fd);
-		delete_session(fd);
-		return 0;
-	}
 	while(RFIFOREST(fd)>=2){
 		cmd = RFIFOW(fd,0);
 		if(cmd<0x2af8 || cmd>=0x2af8+(sizeof(packet_len_table)/sizeof(packet_len_table[0])) ||
@@ -619,6 +631,7 @@ int chrif_parse(int fd)
 		case 0x2b16: chrif_recverasemap(fd); break;
 		case 0x2b17: map_delchariddb(RFIFOL(fd,2)); break;
 		case 0x2b19: chrif_parse_chardisconnectreq(RFIFOL(fd,2)); break;
+		case 0x2b1a: chrif_parse_chardisconnect_doublelogin(RFIFOL(fd,2)); break;
 
 		default:
 			if(battle_config.error_log)
@@ -662,11 +675,11 @@ int check_connect_char_server(int tid,unsigned int tick,int id,int data)
 		chrif_state = 0;
 		char_fd=make_connection(char_ip,char_port);
 		session[char_fd]->func_parse=chrif_parse;
+		session[char_fd]->func_destruct=chrif_disconnect;
 		realloc_fifo(char_fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
 
 		chrif_connect(char_fd);
 		chrif_mapactive(1);
-
 	}
 	return 0;
 }

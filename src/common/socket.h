@@ -12,9 +12,8 @@
 	#include <netinet/in.h>
 #endif
 
-#ifdef _WIN32
-	#define close(id) do{ if(session[id]) closesocket(session[id]->socket); } while(0);
-#endif
+// ここで閉じるのではなく、socket.c で閉じる
+#define close(id) do{ if(session[id]) session[id]->eof = 1; } while(0);
 
 // define declaration
 
@@ -62,6 +61,8 @@ struct socket_data{
 	int (*func_recv)(int);
 	int (*func_send)(int);
 	int (*func_parse)(int);
+	int (*func_destruct)(int);
+	int flag_destruct; // デストラクタが再度呼ばれない為のフラグ
 	void* session_data;
 #ifdef _WIN32
 	SOCKET socket;
@@ -89,5 +90,6 @@ int parsepacket_timer(int tid, unsigned int tick, int id, int data);
 void do_socket(void);
 
 void set_defaultparse(int (*defaultparse)(int));
+void set_sock_destruct(int (*func_destruct)(int));
 
 #endif	// _SOCKET_H_
