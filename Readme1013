@@ -1,3 +1,11 @@
+ --------------------
+//1014 by (Pepermint)
+I fixed again the problem if you put minus sign(-) in front of digits, 
+the error comes up when you puchase a item.
+When you put a minus sign(-), the error sign will be changed shrotage of 
+amount as original server dose.
+
+I tested with it in ver. 1013, it was working
 --------------------
 //1013 by (凸)
 ・サーバースナップショット

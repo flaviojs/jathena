@@ -69,10 +69,23 @@ void vending_purchasereq(struct map_session_data *sd,int len,int id,unsigned cha
 	for(i=0,w=z=0;8+4*i<len;i++){
 		amount=*(short*)(p+4*i);
 		index=*(short*)(p+2+4*i)-2;
+/*
 		if(amount < 0) return;	//add
 		for(j=0;j<vsd->vend_num;j++)
 			if(0<vsd->vending[j].amount && amount<=vsd->vending[j].amount && vsd->vending[j].index==index)
 				break;
+*/
+//ADD_start
+		for(j=0;j < vsd->vend_num;j++) {
+			if(0 < vsd->vending[j].amount && vsd->vending[j].index==index) {
+				if(amount > vsd->vending[j].amount || amount <= 0) {
+					clif_buyvending(sd,index,vsd->vending[j].amount,4);
+					return;
+				}
+				if(amount <= vsd->vending[j].amount) break;
+			}
+		}
+//ADD_end
 		if(j==vsd->vend_num)
 			return;	// ”„‚èØ‚ê
 		vend_list[i]=j;
