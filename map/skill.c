@@ -517,7 +517,6 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			}
 		}
 	}
-
 	return 0;
 }
 
@@ -2064,6 +2063,30 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			pc_heal(sd,0,-sp);
 		}
 		break;
+	case SA_SPELLBREAKER:	// スペルブレイカー
+		{
+			int sp=0;
+			if(bl->type==BL_MOB){	// MOB
+				if(dstmd->skilltimer!=-1 && dstmd->state.skillcastcancel){	// 詠唱妨害
+					sp = skill_db[dstmd->skillid].sp[dstmd->skilllv-1]*(skilllv-1)*25/100;
+					skill_castcancel(bl,0);
+					pc_heal(sd,0,sp);
+				}else{
+					clif_skill_fail(sd,skillid,0,0);
+					break;
+				}
+			}else	if(bl->type==BL_PC && dstsd->skilltimer!=-1){	// PC
+					sp = skill_db[dstsd->skillid].sp[dstsd->skilllv-1]*(skilllv-1)*25/100;
+					skill_castcancel(bl,0);
+					pc_heal(sd,0,sp);
+					pc_heal(dstsd,0,-sp);
+				}else{
+					clif_skill_fail(sd,skillid,0,0);
+					break;
+			}
+		}
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		break;
 
 	/* ランダム属性変化、水属性変化、地、火、風 */
 	case NPC_ATTRICHANGE:
@@ -2103,6 +2126,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		clif_emotion(&md->bl,mob_db[md->class].skill[md->skillidx].val1);
 		break;
 	}
+
 	return 0;
 }
 

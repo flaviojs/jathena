@@ -1,4 +1,14 @@
 --------------------
+//0771 by huge
+
+・スペルブレイカー実装
+	(map/)
+	skill.c
+		skill_castend_nodamage_id() 修正。
+	(db/)
+	skill_db.txt 修正。
+
+--------------------
 //0770 by 聖
 
 ・青箱系の処理変更
