@@ -6021,6 +6021,63 @@ int pc_calc_pvprank_timer(int tid,unsigned int tick,int id,int data)
 	return 0;
 }
 
+/*==========================================
+ * sdは結婚しているか(既婚の場合は相方のchar_idを返す)
+ *------------------------------------------
+ */
+int pc_ismarried(struct map_session_data *sd){
+	if(sd == NULL)
+		return -1;
+	if(sd->status.partner_id > 0)
+		return sd->status.partner_id;
+	else
+		return 0;
+}
+/*==========================================
+ * sdがdstsdと結婚(dstsd→sdの結婚処理も同時に行う)
+ *------------------------------------------
+ */
+int pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd){
+	if(sd == NULL || dstsd == NULL || sd->status.partner_id > 0 || dstsd->status.partner_id > 0)
+		return -1;
+	sd->status.partner_id=dstsd->status.char_id;
+	dstsd->status.partner_id=sd->status.char_id;
+	return 0;
+}
+
+
+/*==========================================
+ * sdが離婚(相手はsd->status.partner_idに依る)(相手も同時に離婚・結婚指輪自動剥奪)
+ *------------------------------------------
+ */
+int pc_divorce(struct map_session_data *sd){
+	if(sd == NULL || !pc_ismarried(sd))
+		return -1;
+
+	struct map_session_data *p_sd=NULL;
+
+	if( (p_sd=map_nick2sd(map_charid2nick(sd->status.partner_id))) !=NULL){
+		if(p_sd->status.partner_id != sd->status.char_id || sd->status.partner_id != p_sd->status.char_id){
+			printf("pc_divorce: Illegal partner_id sd=%d p_sd=%d\n",sd->status.partner_id,p_sd->status.partner_id);
+			return -1;
+		}
+		int i;
+		sd->status.partner_id=0;
+		p_sd->status.partner_id=0;
+		for(i=0;i<MAX_INVENTORY;i++)
+			if(sd->status.inventory[i].nameid == WEDDING_RING_M || sd->status.inventory[i].nameid == WEDDING_RING_F)
+				pc_delitem(sd,i,1,0);
+		for(i=0;i<MAX_INVENTORY;i++)
+			if(p_sd->status.inventory[i].nameid == WEDDING_RING_M || p_sd->status.inventory[i].nameid == WEDDING_RING_F)
+				pc_delitem(p_sd,i,1,0);
+
+	}else{
+		printf("pc_divorce: p_sd nullpo\n");
+		return -1;
+	}
+	return 0;
+}
+
 //
 // 自然回復物
 //

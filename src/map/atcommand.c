@@ -624,7 +624,8 @@ atcommand_who(
 	for (i = 0; i < fd_max; i++) {
 		if (session[i] && (pl_sd = session[i]->session_data) &&
 			pl_sd->state.auth) {
-			clif_displaymessage(fd, pl_sd->status.name);
+			if( !(battle_config.hide_GM_session && pc_isGM(pl_sd)) )
+				clif_displaymessage(fd, pl_sd->status.name);
 			}
 		}
 	return 0;

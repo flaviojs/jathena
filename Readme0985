@@ -1,4 +1,31 @@
 --------------------
+//1008 by ぴざまん
+・GMセッション隠し実装(未テスト)
+　GMアカウントのキャラクターを@who等で表示するかどうか設定できます。
+　詳しくはconf_ref.txtを参照してください。
+・結婚システム仮実装
+　char-map間通信のみ実装です。まだ結婚することは出来ません。
+　尚、このパッチからathena.txtのバージョンが変わります。
+　データの互換性は保ったつもりですが、念の為バックアップを取っておく事を強く推奨します。
+
+	(map/)
+	clif.c
+		clif_countusers() 変更
+	battle.c
+		battle_config_read() 変更
+	atcommand.c
+		atcommand_who() 変更
+	pc.c
+		pc_ismarried()、pc_marriage()、pc_divorce() 追加
+	chrif.c
+		chrif_divorce() 追加
+		chrif_parse() 変更
+	(char/)
+	char.c
+		char_divorce() 追加
+		char_delete()、mmo_char_fromstr()、mmo_char_tostr() 変更
+
+--------------------
 //1007 by (凸)
 ・NULLチェックの見直し
 

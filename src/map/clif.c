@@ -171,7 +171,8 @@ int clif_countusers(void)
 	struct map_session_data *sd;
 
 	for(i=0;i<fd_max;i++){
-		if(session[i] && (sd=session[i]->session_data) && sd->state.auth)
+		if(session[i] && (sd=session[i]->session_data) && sd->state.auth
+			&& !(battle_config.hide_GM_session && pc_isGM(sd)) )
 			users++;
 	}
 	return users;

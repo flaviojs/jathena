@@ -4869,6 +4869,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.gx_dupele = 1;
 		battle_config.gx_disptype = 1;
 		battle_config.player_skill_partner_check = 1;
+		battle_config.hide_GM_session = 0;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -5033,6 +5034,7 @@ int battle_config_read(const char *cfgName)
 			{ "gx_dupele", 					&battle_config.gx_dupele				},
 			{ "gx_disptype", 				&battle_config.gx_disptype				},
 			{ "player_skill_partner_check",	&battle_config.player_skill_partner_check},
+			{ "hide_GM_session",	&battle_config.hide_GM_session},
 
 		};
 		

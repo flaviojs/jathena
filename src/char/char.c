@@ -82,7 +82,7 @@ int mmo_char_tostr(char *str,struct mmo_charstatus *p)
   char *str_p = str;
   str_p += sprintf(str_p,"%d\t%d,%d\t%s\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
 	  "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
-	  "\t%s,%d,%d\t%s,%d,%d\t",
+	  "\t%s,%d,%d\t%s,%d,%d,%d\t",
 	  p->char_id,p->account_id,p->char_num,p->name, //
 	  p->class,p->base_level,p->job_level,
 	  p->base_exp,p->job_exp,p->zeny,
@@ -94,7 +94,8 @@ int mmo_char_tostr(char *str,struct mmo_charstatus *p)
 	  p->hair,p->hair_color,p->clothes_color,
 	  p->weapon,p->shield,p->head_top,p->head_mid,p->head_bottom,
 	  p->last_point.map,p->last_point.x,p->last_point.y, //
-	  p->save_point.map,p->save_point.x,p->save_point.y
+	  p->save_point.map,p->save_point.x,p->save_point.y,
+	  p->partner_id
 	  );
   for(i=0;i<10;i++)
     if(p->memo_point[i].map[0]){
@@ -136,10 +137,10 @@ int mmo_char_fromstr(char *str,struct mmo_charstatus *p)
   int tmp_int[256];
   int set,next,len,i;
 
-	// 384以降の形式読み込み
+	// 1008以降の形式読み込み
   if( (set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
 		   "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
-		   "\t%[^,],%d,%d\t%[^,],%d,%d%n",
+		   "\t%[^,],%d,%d\t%[^,],%d,%d,%d%n",
 		   &tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
 		   &tmp_int[3],&tmp_int[4],&tmp_int[5],
 		   &tmp_int[6],&tmp_int[7],&tmp_int[8],
@@ -151,27 +152,51 @@ int mmo_char_fromstr(char *str,struct mmo_charstatus *p)
 		   &tmp_int[27],&tmp_int[28],&tmp_int[29],
 		   &tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
 		   p->last_point.map,&tmp_int[35],&tmp_int[36], //
-		   p->save_point.map,&tmp_int[37],&tmp_int[38],&next
+		   p->save_point.map,&tmp_int[37],&tmp_int[38],&tmp_int[39],&next
 		 )
-	)!=42 ){
-		 	// 384以前の形式の読み込み
-	tmp_int[26]=0;
-	set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
-		   "\t%d,%d,%d\t%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
-		   "\t%[^,],%d,%d\t%[^,],%d,%d%n",
-		   &tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
-		   &tmp_int[3],&tmp_int[4],&tmp_int[5],
-		   &tmp_int[6],&tmp_int[7],&tmp_int[8],
-		   &tmp_int[9],&tmp_int[10],&tmp_int[11],&tmp_int[12],
-		   &tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],&tmp_int[17],&tmp_int[18],
-		   &tmp_int[19],&tmp_int[20],
-		   &tmp_int[21],&tmp_int[22],&tmp_int[23], //
-		   &tmp_int[24],&tmp_int[25],//
-		   &tmp_int[27],&tmp_int[28],&tmp_int[29],
-		   &tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
-		   p->last_point.map,&tmp_int[35],&tmp_int[36], //
-		   p->save_point.map,&tmp_int[37],&tmp_int[38],&next);
-	set++;
+	)!=43 ){
+	// 384以降1008以前の形式読み込み
+		   tmp_int[39]=0;
+	   if( (set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
+			   "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
+			   "\t%[^,],%d,%d\t%[^,],%d,%d%n",
+			   &tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
+			   &tmp_int[3],&tmp_int[4],&tmp_int[5],
+			   &tmp_int[6],&tmp_int[7],&tmp_int[8],
+			   &tmp_int[9],&tmp_int[10],&tmp_int[11],&tmp_int[12],
+			   &tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],&tmp_int[17],&tmp_int[18],
+			   &tmp_int[19],&tmp_int[20],
+			   &tmp_int[21],&tmp_int[22],&tmp_int[23], //
+			   &tmp_int[24],&tmp_int[25],&tmp_int[26],
+			   &tmp_int[27],&tmp_int[28],&tmp_int[29],
+			   &tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
+			   p->last_point.map,&tmp_int[35],&tmp_int[36], //
+			   p->save_point.map,&tmp_int[37],&tmp_int[38],&next
+			 )
+		)!=42 ){
+	// 384以前の形式の読み込み
+		   tmp_int[26]=0;
+		   set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
+			   "\t%d,%d,%d\t%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
+			   "\t%[^,],%d,%d\t%[^,],%d,%d%n",
+			   &tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
+			   &tmp_int[3],&tmp_int[4],&tmp_int[5],
+			   &tmp_int[6],&tmp_int[7],&tmp_int[8],
+			   &tmp_int[9],&tmp_int[10],&tmp_int[11],&tmp_int[12],
+			   &tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],&tmp_int[17],&tmp_int[18],
+			   &tmp_int[19],&tmp_int[20],
+			   &tmp_int[21],&tmp_int[22],&tmp_int[23], //
+			   &tmp_int[24],&tmp_int[25],//
+			   &tmp_int[27],&tmp_int[28],&tmp_int[29],
+			   &tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
+			   p->last_point.map,&tmp_int[35],&tmp_int[36], //
+			   p->save_point.map,&tmp_int[37],&tmp_int[38],&next);
+			   set+=2;
+		   	   printf("char: old char data ver.1\n");
+  	  }else{// 383~1008Verでの読み込みに成功しているならsetを正常値へ
+		   set++;
+		   printf("char: old char data ver.2\n");
+	  }
   }
   p->char_id=tmp_int[0];
   p->account_id=tmp_int[1];
@@ -212,7 +237,8 @@ int mmo_char_fromstr(char *str,struct mmo_charstatus *p)
   p->last_point.y=tmp_int[36];
   p->save_point.x=tmp_int[37];
   p->save_point.y=tmp_int[38];
-  if(set!=42)
+  p->partner_id=tmp_int[39];
+  if(set!=43)
     return 0;
   if(str[next]=='\n' || str[next]=='\r')
     return 1;	// 新規データ
@@ -575,6 +601,28 @@ int set_account_reg2(int acc,int num,struct global_reg *reg)
 	return c;
 }
 
+// 離婚(char削除時に使用)
+int char_divorce(struct mmo_charstatus *cs){
+	if(cs == NULL)
+		return 0;
+
+	if(cs->partner_id > 0){
+		int i,j;
+		for(i=0;i<char_num;i++){
+			if(char_dat[i].char_id == cs->partner_id && char_dat[i].partner_id == cs->char_id){
+				cs->partner_id=0;
+				char_dat[i].partner_id=0;
+				for(j=0;i<MAX_INVENTORY;j++){
+					if(char_dat[i].inventory[j].nameid == WEDDING_RING_M || char_dat[i].inventory[j].nameid == WEDDING_RING_F){
+						memset(&char_dat[i].inventory[j],0,sizeof(char_dat[i].inventory[0]));
+					}
+				}
+				return 0;
+			}
+		}
+	}
+	return 0;
+}
 
 // キャラ削除に伴うデータ削除
 static int char_delete(struct mmo_charstatus *cs,const char *mail)
@@ -595,7 +643,17 @@ static int char_delete(struct mmo_charstatus *cs,const char *mail)
 	// パーティー脱退
 	if(cs->party_id)
 		inter_party_leave(cs->party_id,cs->account_id);
-
+	// 離婚
+	if(cs->partner_id){
+		// 離婚情報をmapに通知
+		char buf[64];
+		WBUFW(buf,0)=0x2b12;
+		WBUFL(buf,2)=cs->char_id;
+		WBUFL(buf,6)=cs->partner_id;
+		mapif_sendall(buf,10);
+		// 離婚
+		char_divorce(cs);
+	}
 	return 0;
 }
 

@@ -54,6 +54,9 @@
 
 #define MAX_STATUS_TYPE 5
 
+#define WEDDING_RING_M 2634
+#define WEDDING_RING_F 2635
+
 #define GRF_PATH_FILENAME "conf/grf-files.txt"
 
 struct item {
@@ -95,6 +98,8 @@ struct s_pet {
 struct mmo_charstatus {
 	int char_id;
 	int account_id;
+	int partner_id;
+
 	int base_exp,job_exp,zeny;
 
 	short class;

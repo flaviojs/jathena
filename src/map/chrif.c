@@ -26,7 +26,7 @@ static const int packet_len_table[0x20]={
 	60, 3,-1, 3,14,-1, 7, 6,		// 2af8-2aff
 	 6,-1,10, 7,-1,41,40, 0,		// 2b00-2b07
 	 6,30,-1,10, 9, 7, 0, 0,		// 2b08-2b0f
-	-1,-1, 0, 0, 0, 0, 0, 0,		// 2b10-2b17
+	-1,-1,10, 0, 0, 0, 0, 0,		// 2b10-2b17
 };
 
 int char_fd;
@@ -418,6 +418,29 @@ int chrif_accountreg2(int fd)
 //	printf("chrif: accountreg2\n");
 	return 0;
 }
+/*==========================================
+ * —£¥î•ñ“¯Šú—v‹
+ *------------------------------------------
+ */
+int chrif_divorce(int char_id ,int partner_id){
+	if(!char_id || !partner_id )
+		return 0;
+	struct map_session_data *sd = NULL;
+	if((sd=(map_nick2sd(map_charid2nick(partner_id)))) == NULL){
+		printf("chrif_divorce nullpo\n");
+	}
+	if(sd->status.partner_id == char_id){
+		int i;
+		//—£¥(‘Š•û‚ÍŠù‚ÉƒLƒƒƒ‰‚ªÁ‚¦‚Ä‚¢‚é”¤‚È‚Ì‚Å)
+		sd->status.partner_id = 0;
+
+		//‘Š•û‚ÌŒ‹¥w—Ö‚ğ”’D
+		for(i=0;i<MAX_INVENTORY;i++)
+			if(sd->status.inventory[i].nameid == WEDDING_RING_M || sd->status.inventory[i].nameid == WEDDING_RING_F)
+				pc_delitem(sd,i,1,0);
+	}
+	return 0;
+}
 
 /*==========================================
  *
@@ -470,6 +493,7 @@ int chrif_parse(int fd)
 		case 0x2b0b: chrif_changedgm(fd); break;
 		case 0x2b0d: chrif_changedsex(fd); break;
 		case 0x2b11: chrif_accountreg2(fd); break;
+		case 0x2b12: chrif_divorce(RFIFOL(fd,2),RFIFOL(fd,6)); break;
 
 		default:
 			if(battle_config.error_log)

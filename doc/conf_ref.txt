@@ -1095,6 +1095,10 @@ player_skill_partner_check
 	聖体降福や合奏スキルを行う際にパートナーの存在をチェックするかどうかです。
 	デフォルトはyes(チェックする)です。
 
+hide_GM_session
+	GMアカウントのキャラクターを@コマンド等で表示の対象にするかどうかです。
+	デフォルトはnoです
+
 import
 	その行を別ファイルの中身と置き換えます。
 
@@ -1241,6 +1245,8 @@ enable_upper_class: no
 pet_atack_attr_none: no
 pc_atack_attr_none: no
 mob_atack_attr_none: yes
+player_skill_partner_check: yes
+hide_GM_session: no
 
 ==========================================================================
 6. atcommand_athena.conf
