@@ -1,4 +1,887 @@
 --------------------
+//0827 by J
+
+・固定MOBのはずのメガリスと人面桃樹が歩いていたのを修正。
+・闘技場のMOBにスキルを実装。
+・パサナとファラオがスキルが設定されていなかったのを実装。
+	(db/)
+	mob_db.txt 修正。
+	mob_skill_db.txt 修正。	
+
+--------------------
+//0826 by ぴざまん
+
+・一部の演奏スキルを使うと鯖が落ちるバグ修正。
+・クローキング中にスキルを使用でき、
+　使用するとクローキングが解除されるように修正。
+・Kalenさんのmob_db.txtをまとめました。
+	(map/)
+	skill.c
+		skill_unit_onplace()、skill_unit_onout() 修正。
+		skill_status_change_start()、skill_status_change_timer() 修正。
+		skill_use_id()、skill_use_pos() 修正。
+	(db/)
+	mob_db.txt 修正。
+
+--------------------
+//0825 by 死神
+
+・細かい修正。(細かいことのわりには修正した所が多いけど...)
+・ワープポータルの中に止まった時以外はワープしないように修正。
+・battle_athena.confにplayer_skill_nofootset、monster_skill_nofootset 追加。
+・NPCをクリックした後露店をクリックして露店を閉じると動けなくなるバグ修正。
+ただ露店を閉じる時何のパケットも転送してこないので露店をクリックするとNPCの処理から抜けるようにしました。(本鯖ではNPCの処理が抜けないらしいですがそれ以外方法がなかったのっで。)
+・killmonsterのAllで召喚されたモンスターだけ消すように変更。
+・ソース最適化やスキル関係の細かい修正多数。
+	(doc/)
+	conf_ref.txt 修正。
+	db_ref.txt 修正。
+	(conf/)
+	battle_athana.conf 修正。
+	atcommnad_athena.conf 修正。
+	(db/)
+	item_db.txt 修正。
+	skill_db.txt 修正。
+	(login/)
+	parse_fromchar() 修正。
+	(map/)
+	map.h 修正。
+	clif.c
+		clif_closevendingboard()、clif_parse_VendingListReq() 修正。
+		clif_mob0078()、clif_mob007b()、clif_pet0078()、clif_pet007b() 修正。
+	skill.h 修正。
+	skill.c
+		skill_check_condition()、skill_castend_pos2() 修正。
+		skill_castend_damage_id()、skill_castend_nodamage_id() 修正。
+		skill_castend_id()、skill_status_change_start()、skill_castfix() 修正。
+		skill_delayfix()、skill_check_unit_range_sub() 修正。
+		skill_check_unit_range()、skill_castend_pos()、skill_stop_dancing() 修正。
+		skill_unit_onplace()、skill_readdb()、skill_timerskill()、skill_blown() 修正。
+		skill_check_unit_range2_sub()、skill_check_unit_range2() 追加。
+		skill_get_maxcount() 追加。
+	mob.c
+		mobskill_castend_id()、mobskill_castend_pos()、mob_deleteslave() 修正。
+		mob_stop_walking()、mob_walk()、mob_damage() 修正。
+	pc.c
+		pc_calcstatus()、pc_checkskill()、pc_stop_walking() 修正。
+		pc_walk()、pc_damage() 修正。
+	npc.c
+		npc_touch_areanpc() 修正。
+	pet.c
+		pet_stop_walking() 修正。
+	script.c
+		buildin_killmonster()、buildin_killmonster_sub() 修正。
+	battle.h
+	battle.c
+		battle_calc_magic_attack()、battle_get_flee()、battle_get_flee2() 修正。
+		battle_get_adelay()、battle_get_amotion()、battle_get_max_hp() 修正。
+		battle_get_hit()、battle_get_critical()、battle_get_atk2() 修正。
+		battle_damage()、battle_config_read() 修正。
+	atcommand.h 修正。
+	atcommand.c 修正。
+
+--------------------
+//0824 by ぴざまん
+
+・セイフティウォール・ニューマの足元置きができなかった問題修正。
+・エンペリウムにヒール等の支援スキルが効いていた問題修正。
+・闘技場でモンスターリセットができなかった問題修正。
+　killmonsterは"killmonster <mapname>,<eventname>"と記述して
+　該当eventnameを持つモンスターを削除しますが
+　eventnameにAllと入れると該当MAPの全モンスターを消去するようにしました。
+
+	(map/)
+	skill.c
+		skill_check_unit_range_sub()、skill_castend_nodamage_id() 修正。
+	script.c
+		buildin_killmonster()、buildin_killmonster_sub() 修正。
+	(conf/npc/)
+	npc_event_tougijou.txt 修正。
+
+--------------------
+//0823 by Kalen
+
+・闘技場データ揃ったので、完成
+	conf/npc/npc_event_tougijou.txt
+	ただし、こちらでチェックしたところkillmonsterがうまくいかず、
+	失敗、時間切れした場合モンスターリセットが出来ません。
+	イベントが設定されているモンスターは処理できないのかと思いましたが
+	AgitのほうのエンペのKillmonsterはちゃんと動いてますし…
+	原因分かる方お願いします<(_ _)>
+
+・gon_testのmapflag追加
+	conf/mapflag.txt
+
+・mob_db更新
+	1419～1491が既存のMobの定義ばかりなので追加しませんでしたが、
+	調べた所闘技場のMobのデータであることが分かりました(Dropを弄ったもの)
+	本鯖では闇りんごが報告されています。が、こちらはDrop空白で処理しました。
+	クライアント上では同名でしたが、区別のため接頭にG_をつけて区別してます。
+	mob_skill_dbありがとうございました↓
+
+--------------------
+//0822 by ぴざまん
+
+・演奏スキルでの補正をダンサーにも適用。
+・サンクチュアリバグ修正。
+・KalenさんのMOBスキルデータベースをまとめときました。
+
+	(map/)
+	skill.c
+		skill_status_change_start()、skill_unit_onplace() 修正。
+	battle.c
+		battle_get_critical()、battle_get_hit() 修正。
+	pc.c
+		pc_calcstatus() 修正。
+
+--------------------
+//0821 by huge
+
+・オートスペル仮実装。
+・timerで判定しようかとも思いましたが、装備の無限オートスペルの為にsc_[].val1で見てマス。
+・bonus2 bAutoSpell追加。一応どんなスキルでも指定できるようにしてますが(番号はskill_tree参照)
+  skill_castend_damage_idのタイプ以外のスキルを指定しないでください。
+  発動確率は、Lv1:50%、Lv2:35%、Lv3:15%、それ以上は 5%固定です。
+  あと、スキルレベルも指定できますが、限界を超えた数字を入れると墜ちるかもしれません。
+■書き方例：（ファイアボルトLv3の時）bonus2 bAutoSpell 19,3;
+
+	(db/)
+	const.txt 修正。
+	(map/)
+	battle.c
+		battle_weapon_attack() 修正。
+	clif.h
+	clif.c
+		packet_len_table 修正。
+		clif_autospell() 追加。
+		clif_parse_AutoSpell() 追加。
+	map.h 修正。
+	pc.c
+		pc_bonus2() 修正。
+		pc_equipitem() 修正。
+		pc_unequipitem() 修正。
+	skill.h
+	skill.c
+		skill_castend_nodamage_id() 修正。
+		skill_autospell() 追加。
+		skill_status_change_end() 修正。
+		skill_status_change_start() 修正。
+		status_changeの番号テーブル修正。
+
+--------------------
+//0820 by ぴざまん
+
+・アドリブのメッセージが入ってなかったので修正
+・バードの演奏スキルで楽器の練習や自ステータスの補正が入ってなかったのを修正。
+　struct status_changeのvalが3つ必要だったので(val4は予約されてたっぽいので)val5を追加しました
+	(map/)
+	map.h 修正。
+	skill.c
+		skill_status_change_start()、skill_castend_nodamage_id() 修正。
+		skill_castfix()、skill_delayfix() 修正。
+	battle.c
+		battle_get_flee()、battle_get_max_hp() 修正。
+		battle_get_adelay()、battle_get_amotion() 修正。
+		battle_calc_misc_attack() 修正。
+	pc.c
+		pc_calcstatus() 修正。
+
+--------------------
+//0819 by Kalen
+
+・コンロン(NPC、Warp)修正
+	conf/npc/npc_town_gonryun.txt(案内員補充)
+	conf/npc/npc_event_tougijou.txt
+	conf/warp/npc_warp_gonryun.txt(宿2FとD2Fなど)
+
+・MOB修正
+	conf/mob/npc_monster30.txt(一反木綿不足追加)
+	conf/mob/npc_monster35.txt(コンロンMob追加)
+
+・DB修正
+	db/mob_db.txt(コンロン[全て]+ウンバラ[定義]追加。Aspeed等適当です。まぁ無いよりましということで)
+	db/mob_skill_db.txt(情報を元にコンロンのMob分追加)
+	db/item_db.txt(Athena DB Project 2/19 21:10DL分)
+
+--------------------
+//0818 by あゆみ
+
+・テレポートスキルLv1で、選択ウインドウが出てこないバグを修正。
+・重量が90％以上の場合でも、一部のスキルが使用可能だったバグを修正。
+・@allskillコマンドの修正とか。
+
+	(conf/)
+	msg_athena.conf 修正。
+	(map/)
+	atcommand.c
+		atcommand() 修正。
+	pc.c
+		pc_allskillup() 修正。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+		skill_check_condition() 修正。
+
+--------------------
+//0817 by huge
+
+・ディボーションの処理修正
+  ・糸の出し方はパケを貰ったのでできましたが、アイコンの方はまだ分からないです。
+  ・あと、自分の環境で2人以上に同時に掛けれなかったので、複数人にかけた場合
+    多分0の羅列の所に2人目、3人目・・・のIDが入るんじゃないかなぁという予測でやってます。
+・ハイディング中、及びクローキング中にダメージを受けると解けるよう修正。
+
+	(map/)
+	battle.c
+		battle_damage() 修正。
+	clif.c
+		clif_devotion() 修正。
+	pc.c
+		pc_walk() 修正。
+	skill.c
+	skill.h
+		skill_castend_nodamage_id() 修正。
+		skill_devotion() skill_devotion2() 修正。
+		skill_devotion3()skill_devotion_end() 修正。
+
+--------------------
+//0816 by ぴざまん
+・ファイアーウォール3枚制限実装。
+・重ね置き禁止をプレイヤー・モンスターにも適用するように修正。
+・寒いジョーク・スクリームのPvP・GvGで、効果が自分にも及ぶバグ修正。
+　ついでにPTメンバーには低確率でかかるのも実装。
+・寒いジョーク・スクリーム・スピアブーメランのディレイ修正。
+　ミュージカルストライク・矢撃ちの詠唱時間修正。
+	(map/)
+	skill.c
+		skill_check_condition()、skill_check_unit_range_sub() 修正。
+		skill_check_unit_range()、skill_delunitgroup() 修正。
+		skill_castend_pos2()、skill_frostjoke_scream() 修正。
+	map.h 修正。
+	(db/)
+	cast_db.txt 修正。
+
+--------------------
+//0815 by 死神
+
+・0814のバグ修正と細かい修正。
+・mapflag monster_noteleport、noreturn追加とnoteleportの仕様変更。
+noteleportはプレイヤーのハエとテレポート、ワープスキルの制限をするが蝶は制限しないように変更、monster_noteleportはモンスターのテレポートを制限する物でnoreturnは蝶の使用を制限する物です。ただmapflag.txtは修正していません。(noreturnを設定する必要があります。)
+・battle_athena.confのplayer_auto_counter_typeとmonster_auto_counter_typeが説明通りに機能しなかった問題修正。
+・battle_athena.confにplayer_cloak_check_wall とmonster_cloak_check_wall 追加。
+・ボスモンスターの認識をMVP経験とmodeの0x20で行なっていた物をmodeだけにするように変更。(本鯖のイベントモンスターでMVP経験をくれるが状態異常に掛かるやつがあったらしく修正。HPが1億もあって毒じゃないと倒せなかったらしいので...) つまりMVP経験があってもボス扱いではないモンスターを作ることも可能です。
+・状態異常に掛かった状態で接続切断ができないように修正。(ただタイマーチェックではなくopt1とopt2をチェックするだけなので見た目が変わる状態異常だけに適用されます。)
+・今さらですが昔のyareCVS(2003年9月バージョン)で適用されていたラグを減らす為の処理を入れてみました。どんな効果があるかは自分でもわかりません。(ただ入れてみただけ...)
+・シーズモードとPVPで禁止装備が外されても効果が消えないバグ修正。
+・その他細かい修正。
+・未テストの物もかなりあります。
+	(common/)
+	socket.c
+		connect_client()、make_listen_port()、make_connection() 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(map/)
+	battle.h 修正。
+	battle.c
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_calc_magic_attack()、battle_config_read() 修正。
+	skill.c
+		skill_unit_onplace()、skill_status_change_timer() 修正。
+		skill_castend_nodamage_id()、skill_use_id() 修正。
+		skill_check_unit_range_sub()、skill_timerskill() 修正。
+		skill_additional_effect()、skill_attack()、skill_status_change_start() 修正。
+		skill_check_cloaking() 修正。
+	clif.c
+		clif_item_identify_list()、clif_parse_QuitGame()、clif_GM_kick() 修正。
+	pc.c
+		pc_attack_timer()、pc_isUseitem()、pc_checkitem 修正。
+	mob.c
+		mob_warp()、mob_walk()、mob_attack()、mob_target() 修正。
+		mob_ai_sub_hard_activesearch()、mob_ai_sub_hard_mastersearch() 修正。
+		mob_ai_sub_lazy()、mob_damage() 修正。
+	npc.c
+		npc_parse_mapflag() 修正。
+	map.h 修正。
+
+--------------------
+//0814 by 死神
+
+・バグ修正と細かい修正。
+・battle_athena.confのplayer_auto_counter_typeとmonster_auto_counter_typeの仕様を変更。(本鯖ではスキル反撃はできないみたいなので設定できるように変更。)
+・毒と石化によるHP減少を本鯖に合わせて修正と完全石化の前では動けるように変更。(毒は1秒に3+最大HPの1.5%(モンスターは0.5%)、石化は5秒に1%) 未テスト
+・MVP経験値は本鯖でいつも入るようになったので修正。
+・スティールの確率を少し下げ。
+・モンスターのハイディング、クローキング、マキシマイズパワーがすぐに解除される問題修正。(モンスターにはSPがないせいです。取り敢えずクローキングはハイディングの時間を適用してマキシマイズパワーはウエポンパーフェクションの時間を適用します。) 未テスト
+・サンクチュアリを人数から回数に変更。
+・PVPで自分のトラップに攻撃対象になるように変更。
+・vitペナルティの適用で乗算防御も減るように変更。(未テスト)
+・その他細かいバグ修正。
+	(conf/)
+	battle_athena.conf
+	(doc/)
+	conf_ref.txt
+	(db/)
+	skill_db.txt
+	(map/)
+	map.h 修正。
+	script.c
+		buildin_itemskill() 修正。
+	mob.c
+		mob_can_move()、mob_ai_sub_hard()、mob_damage() 修正。
+	skill.c
+		skill_unitsetting()、skill_unit_onplace()、skill_castend_nodamage_id() 修正。
+		skill_attack()、skill_status_change_start() 修正。
+		skill_status_change_timer()、skill_status_change_timer_sub() 修正。
+		skill_addtimerskill()、skill_cleartimerskill() 修正。
+		skill_check_unit_range_sub() 修正。
+	battle.c
+		battle_calc_damage()、battle_check_target() 修正。
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack() 修正。
+	pc.c
+		pc_steal_item() 修正。
+	clif.c
+		clif_parse_WalkToXY()、clif_closevendingboard() 修正。
+
+--------------------
+//0813 by Kalen
+・コンロンNPC追加
+	conf/npc/npc_town_gonryun.txt(クエストは不明
+	conf/npc/npc_town_kafra.txt
+	conf/npc/npc_town_guide.txt
+	(conf/npc/npc_event_tougijou.txt)データ不足
+
+・全GvGMAPのMobデータ追加
+	conf/mob/npc_monster_gvg.txt
+
+・TESTmobからテストギルドフラグ移動
+	conf/gvg/TEST_prtg_cas01_AbraiJ.txt
+
+--------------------
+//0812 by huge
+
+・ディボーションの仮実装
+  ・パケットが全然分かりませんでしたので、
+    青い糸も出ないし、アイコンすら表示できません。
+  ・ダメ移動だけで、ノックバック・オートガードは適応されません。
+
+	(map/)
+	clif.c
+	clif.h
+		clif_devotion() 追加。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+		skill_devotion() skill_devotion2() 追加。
+		skill_devotion3() skill_devotion_end() 追加。
+		skill_status_change_end() 修正。
+		skill_status_change_start() 修正。
+		skill_brandishspear_first() 修正。
+		skill_brandishspear_dir() 修正。
+	pc.c
+		pc_authok() 修正。
+		pc_walk() 修正。
+		pc_damage() 修正。
+	battle.c
+		battle_damage() 修正。
+	map.h
+		map_session_data{}
+			 struct square dev 追加。
+	skill.h のbrandishをsquareに改名し、
+	(common/) mmo.h に移動
+
+--------------------
+//0811 by ぴざまん
+
+・攻城中は蝶が使えるように修正
+・寒いジョーク・スクリーム実装(PTメンバーに低確率で云々は未実装です)
+・GVGスクリプトを修正(試行錯誤しすぎてどこをどうしたか覚えてません…)
+　GVGスクリプトに関してですが、既知のバグがあります
+　それは、占領ギルドマスター以外のPCが、占領ギルドマスターより先にNPCに話し掛けると
+　マップサーバが落ちるというものです。
+　これは、getguildmaster・getguildnameを使用しているスクリプトすべてに起こり得ることであり
+　先に占領ギルドマスター以外で話し掛けると、guild_searchが何故か(該当IDのギルドがあるにも関わらず)
+　NULLを返す事に起因します。
+　正直スクリプト関係はよくわかっていないので、これは私の技術では修正のしようがありません。
+　暫定的な対処としてNULLを返してMAP鯖が落ちるくらいなら文字列「null」を返すようにしました。
+
+	(map/)
+	skill.c
+		skill_frostjoke_scream() 追加。
+		skill_additional_effect()、skill_timerskill() 修正。
+		skill_castend_nodamage_id() 修正。
+	pc.c
+		pc_isUseitem() 修正。
+	script.c
+		buildin_getpartyname()、buildin_getguildname() 修正。
+		buildin_getguildmaster() 修正。
+	(db/)
+	cast_db.txt 修正。
+	(conf/gvg/)
+	ev_*.txt以外のtxt全てを修正。
+
+--------------------
+//0810 by 聖
+
+・MVPの処理を変更。(確率で10000があっても、他のアイテムも出るようにしました)
+・MVPで装備を入手した場合、鑑定済みで入手していた問題を修正。
+・スキル詠唱中にイグ葉や拡大鏡を使うとプレーヤーの使用可能な
+　全スキルのLVが1に固定されてしまう問題を修正。
+・オークアーチャー等、モンスターによる罠スキルの有効期限が切れたときに、
+　設置用トラップが出る問題を修正。
+・ログインエラー(パスワード入力ミスやBAN等)のエラーメッセージが
+　正しくクライアントに通知されない問題を修正。
+・その他細かな修正。
+	(common/)
+	version.h 修正。
+	(login/)
+	login.c
+		parse_login() 修正。
+		parse_fromchar() 修正。
+	(char/)
+	int_guild.c
+		mapif_parse_GuildLeave() 修正。
+	(map/)
+	itemdb.c
+		itemdb_read_itemnametable() 修正。
+	atcommand.c
+		atcommand() 修正。
+	skill.c
+		skill_unit_timer_sub() 修正。
+	script.c
+		buildin_itemskill() 修正。
+	mob.c
+		mob_damage() 修正。
+
+--------------------
+//0809 by Kalen
+
+・東湖城ワープポイント修正
+・アマツ寿司屋修正
+・バグスレ129の問題修正？
+
+
+--------------------
+//0808 by ぴざまん
+
+・装備制限が上手く動作していなかったのを修正。
+・モンハウギルドはGvG開始時に作られるように変更。
+・GvG開始時に該当マップにいる全PC(占領ギルド員以外)をセーブポイントに戻すように修正。
+・モンハウギルドアジトでエンペを壊すと、モンハウが消えるように修正。
+　この修正に伴ってmaprespawnguildidの引数のflagの仕様を変更しました
+　flagはビットフラグになり、
+　　1ビット目：占領ギルド員をセーブポイントに戻すか
+　　2ビット目：占領ギルド員以外をセーブポイントに戻すか
+　　3ビット目：エンペ・ガーディアン以外のMOBを消すか
+　いずれも、0=NO、1=YESになります
+
+	(conf/gvg/)
+	ev_agit_aldeg.txt 修正。
+	ev_agit_gefg.txt 修正。
+	ev_agit_payg.txt 修正。
+	ev_agit_prtg.txt 修正。
+	TEST_prtg_cas01_AbraiJ.txt 修正。
+	TEST_prtg_cas01_mob.txt 修正。
+	(map/)
+	pc.c
+		pc_checkitem() 修正。
+	script.c
+		buildin_maprespawnguildid_sub() 修正。
+		buildin_maprespawnguildid() 修正。
+
+--------------------
+//0807 by 死神
+
+・0805でFD_SETSIZEを修正する所を間違ったので修正しました。56名止まりが治ると言う保証はありませんが...
+・一度に転送するパケットの長さを32768bytesから65536bytesに変更。
+	(common/)
+	mmo.h 修正。
+	socket.h 修正。
+	socket.c 修正。
+
+--------------------
+//0806 by Kalen
+
+・agitフォルダ→gvgフォルダへ移行
+	諸意見あると思いますが、jROでは攻城戦をgvgと呼ぶことが一般的なのでこちらに統合します。
+	conf/gvg/
+	###agitフォルダを削除してください###　(Please delete the "agit" folder.)
+	getmaster対応
+
+・アマツの寿司屋バグ修正と項目追加(thx 114
+	conf/npc/npc_town_amatsu.txt
+
+・map_flag再修正
+	conf/map_flag.txt
+	[GVGMAP]確かに常にシーズモードなら問題ないですが、削除されましたので
+	常にシーズモードではありません。従って解除時(時間外)には枝、テレポが使えます
+	時間前に枝撒き、まだ実装してませんが宝箱奪取も可能になるので枝、テレポは常に使用不可で問題ないと思います。
+
+後前回書き忘れましたが、momotaroイベントですが、ちょっと不安定な可能性があります。
+原因がわからないのですが、ループしてるかもしれません。一応コメントアウトしてあります
+
+--------------------
+//0805 by 死神
+
+・文字化け修正。
+・シーズモードでのテレポート禁止や古木の枝使用禁止はソースレベルで
+処理しているのでmapflag.txtから削除。(因みにnopenaltyもソースレベルで
+処理しています。)
+・battle_athena.confのagit_eliminate_timeをgvg_eliminate_timeに変更。
+・@コマンド@GM削除。
+・FD_SETSIZEかcygwinで64に設定されていたのせいで最大接続人数が56名を
+越えるとマップ鯖が無限ループする問題修正。(ただテストができなかった物なので本当に大丈夫になったかどうかは不明です。あくまでも自分の予測にすぎない物ですが...)
+・文字化けのせいでどこをどう修正したか覚えてないので修正したファイルだけ。
+	(conf/)
+	atcommand_athena.conf
+	battle_athena.conf
+	mapflag.txt
+	(db/)
+	castle_db.txt
+	(doc/)
+	conf_ref.txt
+	(common/)
+	mmo.h
+	(login/)
+	login.c
+	(char/)
+	inter.c
+	int_guild.c
+	(map/)
+	atcommand.h
+	atcommand.c
+	battle.h
+	battle.c
+	chrif.c
+	guild.h
+	guild.c
+	intif.h
+	intif.c
+	map.h
+	map.c
+	mob.c
+	npc.c
+	npc.h
+	script.c
+	skill.c
+	pc.c
+	makefile
+
+--------------------
+//0804 by 釈尊
+
+・アルベルタのぬいぐるみイベントでうさぎのぬいぐるみをあげるとサーバーが落ちるバグ修正
+
+	(conf/npc/)
+	npc_event_doll.txt 修正。
+
+--------------------
+//0803 by ぴざまん
+
+	GvGでエンペリウム崩壊時gvg_eliminate_timeの値に関わらず即座に退去させられていたバグ修正
+	GvGのセリフを一部修正
+	inter鯖でcastle.txtがないと起こる色々なエラーを修正
+	help.txtを修正(@gvgstart→@agitstart云々)
+
+	(conf/)
+	gvg/TEST_prtg_cas01_AbraiJ.txt 修正。
+	agit/ev_agit_prtgJ.txt 修正。
+	help.txt 修正。
+	(map/)
+	int_guild.c
+		inter_guild_init() 修正。
+
+--------------------
+//0802 by Michael_Huang
+
+  Added NPC Script - 'GetGuildMaster' Command.
+	(common/)
+	version.h
+		Mod_Version 0802
+	(map/)
+	script.c
+		buildin_getguildmaster_sub() buildin_getguildmaster()
+
+--------------------
+//0801 by Kalen
+・アマツ修正
+　　実装前のデータ、抜けてるデータなどを調査し修正
+	conf/npc/npc_town_guide.txt
+	conf/npc/npc_town_amatsu.txt
+	conf/npc/npc_event_momotaro.txt
+	conf/npc/npc_event_alchemist.txt
+	conf/mob/npc_monster35.txt
+	conf/warp/npc_warp_amatsu.txt
+・map_flag修正
+	[GVGMAP]枝、テレポは常に使用不可
+・GVG関係
+	0800のコマンドに対応
+
+--------------------
+//0800 by Michael_Huang
+
+  Added Agit NPC Script & Command.
+  Fix FreeBSD GCC compatibility.
+  Attachment Agit Demo NPCs. 
+
+	(char/)
+	int_guild.c
+		mapif_guild_castle_dataload() mapif_guild_castle_datasave()
+		int mapif_parse_GuildCastleDataLoad() int mapif_parse_GuildCastleDataSave()
+		inter_guild_parse_frommap() inter_guildcastle_tostr() inter_guildcastle_fromstr()
+	inter.c
+		inter_send_packet_length[] inter_recv_packet_length[]
+	(common/)
+	mmo.h
+		GLOBAL_REG_NUM, struct global_reg {}
+	version.h
+		Mod_Version 0799.
+	(conf/)
+	atcommand_athena.conf
+		agitstart: 1,agitend: 1
+	battle_athena.conf
+		agit_eliminate_time: 7000
+	map_athena.conf
+		conf/agit/ev_agit_*.txt
+	(doc/)
+	conf_ref.txt
+		battle_athena.cnf
+	agitdb_ref.txt
+	(login/)
+	login.c
+		parse_login()
+	(map/)
+	atcommand.h
+		agitster, agitend
+
+	atcommand.c
+		@agitstart, @agitend
+	battle.h
+		battle_config.agit_eliminate_time
+	battle.c
+		battle_config_read()
+	chrif.c
+		chrif_changedsex() chrif_connectack()
+	guild.h
+		guild_agit_start() guild_agit_end() guild_agit_break()
+	guild.c
+		guild_read_castledb() do_init_guild()
+		guild_agit_start() guild_agit_end() guild_agit_eliminate_timer() guild_agit_break()
+	intif.h
+		intif_guild_castle_dataload() intif_guild_castle_datasave()
+	intif.c
+		packet_len_table[] intif_guild_castle_dataload() intif_guild_castle_datasave()
+		intif_parse_GuildCastleDataLoad() intif_parse_GuildCastleDataSave() intif_parse()
+	map.h
+		agit_flag
+	map.c
+		agit_flag
+	npc.h
+		npc_event_doall() npc_event_do()
+	npc.c
+		npc_event_do_sub() npc_event_do()
+	script.c
+		buildin_maprespawnguildid() buildin_agitstart() buildin_agitend()
+		buildin_getcastlename() buildin_getcastledata()	buildin_setcastledata()
+	skill.c
+		skill_unit_onplace()
+		skill_gangster_count()
+
+--------------------
+//0799 by ぴざまん
+
+・GvG実装の為にinter-map間の通信仕様変更
+・0798のコンパイルエラー修正(byバグ報告スレ82氏)
+	(login/)
+	login.c
+		parse_login() 修正。
+	(map/)
+	intif.c
+		packet_len_table[] 修正。
+		intif_parse_GuildCastleInfo() 修正。
+		intif_parse_GuildCastleChange()をintif_parse_GuildCastleChangeErr()に改名・修正。
+		intif_parse() 修正。
+	guild.c
+		guild_read_castledb() 修正。
+
+	(char/)
+	inter.c
+		inter_send_packet_length[] 修正。
+	int_guild.c
+		inter_guildcastle_tostr() 修正。
+		inter_guildcastle_fromstr() 修正。
+		mapif_parse_GuildChangeCastle() 修正。
+		mapif_parse_GuildCastleInfo() 修正。
+		mapif_guild_castle_info() 修正。
+		mapif_guild_change_castle()をmapif_guild_change_castle_err()に改名・修正。
+	(common/)
+	mmo.h 修正。
+	version.h 修正。
+
+--------------------
+//0798 by 胡蝶蘭
+
+・login-serverのログイン失敗パケットの長さがおかしかったのを修正
+・login-serverにアクセスコントロール機能追加
+	・login_athena.cnfにorder,allow,denyを記述することで、
+	  IP単位(前方一致)でアクセスを禁止する機能。
+	・指定方法は doc/conf_ref.txt を参照
+	
+	(doc/)
+	conf_ref.txt
+		login_athena.cnfの部分修正
+	(login/)
+	login.c
+		グローバル変数 access_* 追加
+		parse_login()修正,check_ip()追加
+
+・アカウント作成用CGIスクリプト追加
+	・自己責任＆詳細な解説無し、質問されてもスルーする可能性有り
+	・エディタで開いたら少し説明有り
+	・CGI設置の基本さえわかれば問題ないはず
+	・メッセージは英語、日本語両対応
+	  （Accept-Languageがjaなら日本語に変換します）
+	・管理者パスワードなしで動くのでセキュリティには注意(.htaccessなど推奨)
+
+	(tool/cgi/)
+	addaccount.cgi
+		アカウント作成用CGI。
+
+・その他
+	(tool/)
+	backup
+		castle.txtもバックアップするように
+
+--------------------
+//0797 by 死神
+
+・少し修正。
+・battle_athena.confの項目変更。(lootitem_time 削除、item_first_get_time、
+item_second_get_time、item_third_get_time、mvp_item_first_get_time、
+mvp_item_second_get_time、mvp_item_third_get_time 追加。)
+・アイテムルート権限を正しく実装。最初攻撃ではなく与えたダメージの
+量によって収得権限を与えるように変更。(最初収得権限のみテスト)
+パーティの場合パーティの設定に合わせる必要がありますがまだパケットが
+不明な所がある為同じパーティなら収得できるようになっています。
+・ボウリングバッシュのバグ修正。(多分修正されたはず...)
+・装備スクリプトbonusにbSplashRangeとbSplashAddRange追加。
+bSplashRangeとbSplashAddRangeは武器でダメージを与えた時のみ発動、通常の武器攻撃扱いなので避けられるが(Flee2による完全回避は不可能)クリは出ないようになっていて武器による状態異常は発生しません。本鯖仕様なんて知りません。
+・スキルの重ね置き処理を本鯖に合わせて修正。
+・mapflagのgvgはいつもなっているわけじゃないので削除。
+・その他細かい修正。
+	athena-start 修正。
+	(common/)
+	mmo.h 修正。
+	(conf/)
+	mapflag.txt 修正。
+	battle_athena.conf 修正。
+	(db/)
+	const.txt 修正。
+	item_db.txt 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	item_bonus.txt 修正。
+	(map/)
+	mob.c
+		mob_spawn()、mob_damage()、mob_class_change()、mob_warp() 修正。
+		mob_delay_item_drop()、mob_delay_item_drop2() 修正。
+		mobskill_castend_pos() 修正。
+	pc.c
+		pc_takeitem()、pc_dropitem()、pc_equipitem() 修正。
+		pc_calcstatus()、pc_bonus() 修正。
+	skill.c
+		skill_attack()、skill_additional_effect()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_produce_mix() 修正。
+		skill_arrow_create()、skill_unit_timer_sub()、skill_castend_pos() 修正。
+	map.h 修正。
+	map.c
+		map_addflooritem() 修正。
+	script.c
+		buildin_getitem() 修正。
+	pet.c
+		pet_return_egg()、pet_get_egg()、pet_unequipitem() 修正。
+	battle.h 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack() 修正。
+		battle_weapon_attack()、battle_config_read() 修正。
+
+--------------------
+//0796 by huge
+
+・細かい修正
+	(conf/npc/)
+	npc_event_valentine.txt 修正。
+
+	(map/)
+	pc.c
+		pc_takeitem() 修正。
+	skill.c
+		skill_unit_timer_sub() 修正。
+
+--------------------
+//0795 by Kalen
+
+・雑談341のnpc_warp_niflheim.txt追加
+	conf/warp/npc_warp_niflheim.txt
+
+・mapflag.txt修正(GVGMAP設定)
+	　nosaveはしていません
+
+・map_athena.confの修正
+	　umbala niflheim等の追加
+	　コメントアウトしてあります。
+
+・バレンタインスクリプト追加
+	conf/npc/npc_event_valentine.txt
+	　チョコ達のDropは弄っていません。お好みでどうぞ
+	　尚、手作りチョコを食べたときのエフェクトは
+	　最新クライアントにすれば見えます。
+
+・GVGScript追加
+	conf/gvg/以下
+	　Weiss時代に作成したものをAthena用にコンバート&台詞修正
+	　prtg_cas01以外は旗のみです。
+	　GVGDATAは鯖再起動で消滅します。
+	　エラーが出るようならコメントアウトしてください。
+	　MobData、執事Scriptもprtg_cas01のみです。(TestScript)
+	　あくまでテストスクリプトです。GVG実装の参考にどうぞ
+
+--------------------
+//0794 by DRG
+
+・skillusedで指定したIW,QMなどにのってる間MOBスキルを使用するように変更
+・アップスレ３の7のathena-startを一応含めときました
+
+	athena-start
+	(map/)
+	skill.c
+		skill_unit_onplace() 修正。
+
+--------------------
+//0793 by huge
+
+・サーバーsnapshot
+・サーバーがクラッシュするバグを修正
+・発動せずに罠が消えたら、設置用トラップが返ってくるように修正。
+・ルート権限で、同じパーティーのキャラはすぐ拾えるように修正。
+・バグ報告スレ３ >>54 のバグ修正。
+・ログイン時にサーバー側にIDを表示するようにしました。
+	(login/)
+	login.c
+		parse_login() 修正。
+	(conf/npc/)
+		npc_event_doll.txt 修正。
+	(map/)
+	skill.c
+		skill_unit_timer_sub() 修正。
+	mob.c
+		mob_spawn_dataset() 修正。
+		mob_damage() 修正。
+	pc.c
+		pc_additem() 修正。
+
+--------------------
 //0791 by 聖
 
 ・マップサーバがクラッシュするバグ修正。
