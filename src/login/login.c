@@ -734,9 +734,16 @@ int parse_admin(int fd)
 			memcpy(WFIFOP(fd,4),RFIFOP(fd,4),24);
 			for(i=0;i<auth_num;i++){
 				if( strncmp(auth_dat[i].userid,RFIFOP(fd,4),24)==0 ){
+					// キャラサーバーへ削除通知
+					unsigned char buf[16];
+					WBUFW(buf,0)=0x2730;
+					WBUFL(buf,2)=auth_dat[i].account_id;
+					charif_sendallwos(-1,buf,6);
+
 					auth_dat[i].userid[0]=0;
 					auth_dat[i].account_id=-1;
 					WFIFOW(fd,2)=0;
+					
 					break;
 				}
 			}

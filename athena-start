@@ -1,6 +1,9 @@
 #!/bin/sh
 # athena starting script by rowla
 
+# chkconfig: 345 99 01
+# description: start and stop athena service
+
 PATH=./:$PATH
 
 L_SRV=./bin/login-server
@@ -110,6 +113,14 @@ case $1 in
 		echo "Now Started Athena."
 ;;
 	'stop')
+		ps ax | grep -E "${L_SRV}|${C_SRV}|${M_SRV}" | awk '{print $1}' | xargs kill
+		while	[ "      0" != "$(ps | grep -e login | wc -l)" ] ||
+			[ "      0" != "$(ps | grep -e char | wc -l)" ] ||
+			[ "      0" != "$(ps | grep -e map  | wc -l)" ]; do
+			sleep 1
+		done
+	;;
+	'kill')
 		ps ax | grep -E "${L_SRV}|${C_SRV}|${M_SRV}" | awk '{print $1}' | xargs kill -9
 		while	[ "      0" != "$(ps | grep -e login | wc -l)" ] ||
 			[ "      0" != "$(ps | grep -e char | wc -l)" ] ||
@@ -122,6 +133,6 @@ case $1 in
 		$0 start
 	;;
 	*)
-		echo "Usage: athena-start { start | stop | restart }"
+		echo "Usage: athena-start { start | stop | kill | restart }"
 	;;
 esac

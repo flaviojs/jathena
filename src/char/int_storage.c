@@ -1,5 +1,6 @@
 #include "inter.h"
 #include "int_storage.h"
+#include "int_pet.h"
 #include "int_guild.h"
 #include "mmo.h"
 #include "char.h"
@@ -41,29 +42,6 @@ int storage_tostr(char *str,struct storage *p)
 		str[0]=0;
 	return 0;
 }
-/*
-int storage_tostr(char *str,struct storage *p)
-{
-	int i,f=1;
-	sprintf(str,"%d,%d",p->account_id,p->storage_amount);
-
-	strcat(str,"\t");
-	for(i=0;i<MAX_STORAGE;i++)
-	if( (p->storage[i].nameid) && (p->storage[i].amount) ){
-		f=0;
-		sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
-		  p->storage[i].id,p->storage[i].nameid,p->storage[i].amount,p->storage[i].equip,
-		  p->storage[i].identify,p->storage[i].refine,p->storage[i].attribute,
-		  p->storage[i].card[0],p->storage[i].card[1],p->storage[i].card[2],p->storage[i].card[3]);
-	}
-
-	strcat(str,"\t");
-
-	if(f)
-		str[0]=0;
-	return 0;
-}
-*/
 
 // 文字列を倉庫データに変換
 int storage_fromstr(char *str,struct storage *p)
@@ -326,20 +304,32 @@ int inter_guild_storage_save()
 	return 0;
 }
 
+// 倉庫データ削除
 int inter_storage_delete(int account_id)
 {
 	struct storage *s = numdb_search(storage_db,account_id);
 	if(s) {
+		int i;
+		for(i=0;i<s->storage_amount;i++){
+			if(s->storage[i].card[0] == (short)0xff00)
+				inter_pet_delete(*((long *)(&s->storage[i].card[2])));
+		}
 		numdb_erase(storage_db,account_id);
 		free(s);
 	}
 	return 0;
 }
 
+// ギルド倉庫データ削除
 int inter_guild_storage_delete(int guild_id)
 {
 	struct guild_storage *gs = numdb_search(guild_storage_db,guild_id);
 	if(gs) {
+		int i;
+		for(i=0;i<gs->storage_amount;i++){
+			if(gs->storage[i].card[0] == (short)0xff00)
+				inter_pet_delete(*((long *)(&gs->storage[i].card[2])));
+		}
 		numdb_erase(guild_storage_db,guild_id);
 		free(gs);
 	}
@@ -467,4 +457,3 @@ int inter_storage_parse_frommap(int fd)
 	}
 	return 1;
 }
-

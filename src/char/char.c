@@ -25,6 +25,9 @@
 
 #include "inter.h"
 #include "int_pet.h"
+#include "int_guild.h"
+#include "int_party.h"
+#include "int_storage.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -128,59 +131,6 @@ int mmo_char_tostr(char *str,struct mmo_charstatus *p)
   return 0;
 }
 
-/*
-int mmo_char_tostr(char *str,struct mmo_charstatus *p)
-{
-  int i;
-  sprintf(str,"%d\t%d,%d\t%s\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
-	  "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
-	  "\t%s,%d,%d\t%s,%d,%d",
-	  p->char_id,p->account_id,p->char_num,p->name, //
-	  p->class,p->base_level,p->job_level,
-	  p->base_exp,p->job_exp,p->zeny,
-	  p->hp,p->max_hp,p->sp,p->max_sp,
-	  p->str,p->agi,p->vit,p->int_,p->dex,p->luk,
-	  p->status_point,p->skill_point,
-	  p->option,p->karma,p->manner,	//
-	  p->party_id,p->guild_id,p->pet_id,
-	  p->hair,p->hair_color,p->clothes_color,
-	  p->weapon,p->shield,p->head_top,p->head_mid,p->head_bottom,
-	  p->last_point.map,p->last_point.x,p->last_point.y, //
-	  p->save_point.map,p->save_point.x,p->save_point.y
-	  );
-  strcat(str,"\t");
-  for(i=0;i<10;i++)
-    if(p->memo_point[i].map[0]){
-      sprintf(str+strlen(str),"%s,%d,%d",p->memo_point[i].map,p->memo_point[i].x,p->memo_point[i].y);
-    }      
-  strcat(str,"\t");
-  for(i=0;i<MAX_INVENTORY;i++)
-    if(p->inventory[i].nameid){
-      sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
-	      p->inventory[i].id,p->inventory[i].nameid,p->inventory[i].amount,p->inventory[i].equip,
-	      p->inventory[i].identify,p->inventory[i].refine,p->inventory[i].attribute,
-	      p->inventory[i].card[0],p->inventory[i].card[1],p->inventory[i].card[2],p->inventory[i].card[3]);
-    }      
-  strcat(str,"\t");
-  for(i=0;i<MAX_CART;i++)
-    if(p->cart[i].nameid){
-      sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
-	      p->cart[i].id,p->cart[i].nameid,p->cart[i].amount,p->cart[i].equip,
-	      p->cart[i].identify,p->cart[i].refine,p->cart[i].attribute,
-	      p->cart[i].card[0],p->cart[i].card[1],p->cart[i].card[2],p->cart[i].card[3]);
-    }      
-  strcat(str,"\t");
-  for(i=0;i<MAX_SKILL;i++)
-    if(p->skill[i].id && p->skill[i].flag!=1){
-      sprintf(str+strlen(str),"%d,%d ",p->skill[i].id,(p->skill[i].flag==0)?p->skill[i].lv:p->skill[i].flag-2);
-    }      
-  strcat(str,"\t");
-  for(i=0;i<p->global_reg_num;i++)
-    sprintf(str+strlen(str),"%s,%d ",p->global_reg[i].str,p->global_reg[i].value);
-  strcat(str,"\t");
-  return 0;
-}
-*/
 int mmo_char_fromstr(char *str,struct mmo_charstatus *p)
 {
   int tmp_int[256];
@@ -365,6 +315,13 @@ int mmo_char_init(void)
 	if(fp==NULL)
 		return 0;
 	while(fgets(line,65535,fp)){
+		int i,j;
+		if( sscanf(line,"%d\t%%newid%%%n",&i,&j)==1 && (line[j]=='\n' || line[j]=='\r') ){
+			if(char_id_count<i)
+				char_id_count=i;
+			continue;
+		}
+	
 		if(char_num>=char_max){
 			char_max+=256;
 			char_dat=realloc(char_dat,sizeof(char_dat[0])*char_max);
@@ -400,6 +357,7 @@ void mmo_char_sync(void)
     mmo_char_tostr(line,&char_dat[i]);
     fprintf(fp,"%s" RETCODE,line);
   }
+  fprintf(fp,"%d\t%%newid%%" RETCODE,char_id_count);
   lock_fclose(fp,char_txt,&lock);
 }
 int mmo_char_sync_timer(int tid,unsigned int tick,int id,int data)
@@ -617,54 +575,78 @@ int set_account_reg2(int acc,int num,struct global_reg *reg)
 	return c;
 }
 
+
+// キャラ削除に伴うデータ削除
+static int char_delete(struct mmo_charstatus *cs,const char *mail)
+{
+	int j;
+	// ペット削除
+	if(cs->pet_id)
+		inter_pet_delete(cs->pet_id);
+	for(j=0;j<MAX_INVENTORY;j++)
+		if(cs->inventory[j].card[0] == (short)0xff00)
+			inter_pet_delete(*((long *)(&cs->inventory[j].card[2])));
+	for(j=0;j<MAX_CART;j++)
+		if(cs->cart[j].card[0] == (short)0xff00)
+			inter_pet_delete(*((long *)(&cs->cart[j].card[2])));
+	// ギルド脱退
+	if(cs->guild_id)
+		inter_guild_leave(cs->guild_id,cs->account_id,cs->char_id);
+	// パーティー脱退
+	if(cs->party_id)
+		inter_party_leave(cs->party_id,cs->account_id);
+
+	return 0;
+}
+
 int parse_tologin(int fd)
 {
-  int i,fdc;
-  struct char_session_data *sd;
+	int i,fdc;
+	struct char_session_data *sd;
 
-  if(session[fd]->eof){
-    if(fd==login_fd)
-      login_fd=-1;
-    close(fd);
-    delete_session(fd);
-    return 0;
-  }
-  printf("parse_tologin : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
-  sd=session[fd]->session_data;
-  while(RFIFOREST(fd)>=2){
-    switch(RFIFOW(fd,0)){
-    case 0x2711:
-      if(RFIFOREST(fd)<3)
-	return 0;
-      if(RFIFOB(fd,2)){
-	printf("connect login server error : %d\n",RFIFOB(fd,2));
-	exit(1);
-      }
-      RFIFOSKIP(fd,3);
-      break;
-    case 0x2713:
-      if(RFIFOREST(fd)<7)
-	return 0;
-      for(i=0;i<fd_max;i++){
-	if(session[i] && (sd=session[i]->session_data)){
-	  if(sd->account_id==RFIFOL(fd,2))
-	    break;
+	if(session[fd]->eof){
+		if(fd==login_fd)
+			login_fd=-1;
+		close(fd);
+		delete_session(fd);
+		return 0;
 	}
-      }
-      fdc=i;
-      if(fdc==fd_max){
-	RFIFOSKIP(fd,7);
-	break;
-      }
-printf("parse_tologin 2713 : %d\n",RFIFOB(fd,6));
-      if(RFIFOB(fd,6)!=0){
-	WFIFOW(fdc,0)=0x6c;
-	WFIFOB(fdc,2)=0x42;
-	WFIFOSET(fdc,3);
-	RFIFOSKIP(fd,7);
-	break;
-      }
-
+	printf("parse_tologin : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
+	sd=session[fd]->session_data;
+	while(RFIFOREST(fd)>=2){
+		switch(RFIFOW(fd,0)){
+		case 0x2711:
+			if(RFIFOREST(fd)<3)
+				return 0;
+			if(RFIFOB(fd,2)){
+				printf("connect login server error : %d\n",RFIFOB(fd,2));
+				exit(1);
+			}
+			RFIFOSKIP(fd,3);
+			break;
+		case 0x2713:
+			if(RFIFOREST(fd)<7)
+				return 0;
+			for(i=0;i<fd_max;i++){
+				if(session[i] && (sd=session[i]->session_data)){
+					if(sd->account_id==RFIFOL(fd,2))
+						break;
+				}
+			}
+			fdc=i;
+			if(fdc==fd_max){
+				RFIFOSKIP(fd,7);
+				break;
+			}
+			printf("parse_tologin 2713 : %d\n",RFIFOB(fd,6));
+			if(RFIFOB(fd,6)!=0){
+				WFIFOW(fdc,0)=0x6c;
+				WFIFOB(fdc,2)=0x42;
+				WFIFOSET(fdc,3);
+				RFIFOSKIP(fd,7);
+				break;
+			}
+	
 			if(max_connect_user > 0) {
 				if(count_users() < max_connect_user)
 					mmo_char_send006b(fdc,sd);
@@ -676,103 +658,122 @@ printf("parse_tologin 2713 : %d\n",RFIFOB(fd,6));
 			}
 			else
 				mmo_char_send006b(fdc,sd);
-
-      RFIFOSKIP(fd,7);
-      break;
-	
-	case 0x2721:	// gm reply
-	  {
-	  	int oldacc,newacc;
-		unsigned char buf[64];
-	  	if(RFIFOREST(fd)<10)
-			return 0;
-		oldacc=RFIFOL(fd,2);
-		newacc=RFIFOL(fd,6);
-		RFIFOSKIP(fd,10);
-		if(newacc>0){
-			for(i=0;i<char_num;i++){
-				if(char_dat[i].account_id==oldacc)
-					char_dat[i].account_id=newacc;
-			}
-		}
-		WBUFW(buf,0)=0x2b0b;
-		WBUFL(buf,2)=oldacc;
-		WBUFL(buf,6)=newacc;
-		mapif_sendall(buf,10);
-//		printf("char -> map\n");
-	  }break;
-
-	case 0x2723:	// changesex reply
-	  {
-	  	int acc,sex,i/*,h,j*/;
-		unsigned char buf[64];
-	  	if(RFIFOREST(fd)<7)
-			return 0;
-
-		acc=RFIFOL(fd,2);
-		sex=RFIFOB(fd,6);
-		RFIFOSKIP(fd,7);
-		if(acc>0){
-			for(i=0;i<char_num;i++){
-				if(char_dat[i].account_id==acc){
-					char_dat[i].sex=sex;
-					auth_fifo[i].sex=sex;
-					if(char_dat[i].class==19 || char_dat[i].class==20){
-						char_dat[i].class=(sex)?19:20;//雷鳥は職も変更
-						/*for(h=1901;h<1964;h++){//雷鳥専用装備を装備していた場合は外す
-							if(char_dat[i].inventory[h].equip)
-								char_dat[i].inventory[h].equip=0;
-						}
-						for(j=0;j<MAX_SKILL;j++){//スキルはリセット
-							if(char_dat[i].skill[j].id>0 && !char_dat[i].skill[j].flag){
-								char_dat[i].skill_point += char_dat[i].skill[j].lv;
-								char_dat[i].skill[j].lv = 0;
-							}
-						}*/
+			
+			RFIFOSKIP(fd,7);
+			break;
+		
+		case 0x2721: 	// gm reply
+			{
+				int oldacc,newacc;
+				unsigned char buf[64];
+				if(RFIFOREST(fd)<10)
+					return 0;
+				oldacc=RFIFOL(fd,2);
+				newacc=RFIFOL(fd,6);
+				RFIFOSKIP(fd,10);
+				if(newacc>0){
+					for(i=0;i<char_num;i++){
+						if(char_dat[i].account_id==oldacc)
+							char_dat[i].account_id=newacc;
 					}
 				}
-			}
+				WBUFW(buf,0)=0x2b0b;
+				WBUFL(buf,2)=oldacc;
+				WBUFL(buf,6)=newacc;
+				mapif_sendall(buf,10);
+	//			printf("char -> map\n");
+			}break;
+	
+		case 0x2723:	// changesex reply
+			{
+				int acc,sex,i/*,h,j*/;
+				unsigned char buf[64];
+				if(RFIFOREST(fd)<7)
+					return 0;
+			
+				acc=RFIFOL(fd,2);
+				sex=RFIFOB(fd,6);
+				RFIFOSKIP(fd,7);
+				if(acc>0){
+					for(i=0;i<char_num;i++){
+						if(char_dat[i].account_id==acc){
+							char_dat[i].sex=sex;
+							auth_fifo[i].sex=sex;
+							if(char_dat[i].class==19 || char_dat[i].class==20){
+								char_dat[i].class=(sex)?19:20;//雷鳥は職も変更
+								/*for(h=1901;h<1964;h++){//雷鳥専用装備を装備していた場合は外す
+									if(char_dat[i].inventory[h].equip)
+										char_dat[i].inventory[h].equip=0;
+								}
+								for(j=0;j<MAX_SKILL;j++){//スキルはリセット
+									if(char_dat[i].skill[j].id>0 && !char_dat[i].skill[j].flag){
+										char_dat[i].skill_point += char_dat[i].skill[j].lv;
+										char_dat[i].skill[j].lv = 0;
+									}
+								}*/
+							}
+						}
+					}
+				}
+				WBUFW(buf,0)=0x2b0d;
+				WBUFL(buf,2)=acc;
+				WBUFB(buf,6)=sex;
+		
+				mapif_sendall(buf,7);
+	//			printf("char -> map\n");
+			}break;
+	
+		// account_reg2変更通知
+		case 0x2729:
+			{
+				struct global_reg reg[ACCOUNT_REG2_NUM];
+				unsigned char buf[4096];
+				int j,p,acc;
+				if(RFIFOREST(fd)<4)
+					return 0;
+				if(RFIFOREST(fd)<RFIFOW(fd,2))
+					return 0;
+				acc=RFIFOL(fd,4);
+				for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG2_NUM;p+=36,j++){
+					memcpy(reg[j].str,RFIFOP(fd,p),32);
+					reg[j].value=RFIFOL(fd,p+32);
+				}
+				set_account_reg2(acc,j,reg);
+				// 同垢ログインを禁止していれば送る必要は無い
+				memcpy(buf,RFIFOP(fd,0),RFIFOW(fd,2));
+				WBUFW(buf,0)=0x2b11;
+				mapif_sendall(buf,WBUFW(buf,2));
+				RFIFOSKIP(fd,RFIFOW(fd,2));
+	//			printf("char: save_account_reg_reply\n");
+			} break;
+	
+		// アカウント削除通知
+		case 0x2730:
+			{
+				// 該当キャラクターの削除
+				int i;
+				for(i=0;i<char_num;i++){
+					if(char_dat[i].account_id==RFIFOL(fd,2)){
+						char_delete(&char_dat[i],NULL);
+						if( i<char_num-1 )
+							memcpy(&char_dat[i],&char_dat[char_num-1],sizeof(char_dat[0]));
+						char_num--;
+						continue;
+					}
+				}
+				// 倉庫の削除
+				inter_storage_delete(RFIFOL(fd,2));
+				RFIFOSKIP(fd,6);
+			} break;
+	
+		default:
+			close(fd);
+			session[fd]->eof=1;
+			return 0;
 		}
-		WBUFW(buf,0)=0x2b0d;
-		WBUFL(buf,2)=acc;
-		WBUFB(buf,6)=sex;
-
-		mapif_sendall(buf,7);
-//		printf("char -> map\n");
-	  }break;
-
-	// account_reg2変更通知
-	case 0x2729: {
-			struct global_reg reg[ACCOUNT_REG2_NUM];
-			unsigned char buf[4096];
-			int j,p,acc;
-			if(RFIFOREST(fd)<4)
-				return 0;
-			if(RFIFOREST(fd)<RFIFOW(fd,2))
-				return 0;
-			acc=RFIFOL(fd,4);
-			for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG2_NUM;p+=36,j++){
-				memcpy(reg[j].str,RFIFOP(fd,p),32);
-				reg[j].value=RFIFOL(fd,p+32);
-			}
-			set_account_reg2(acc,j,reg);
-			// 同垢ログインを禁止していれば送る必要は無い
-			memcpy(buf,RFIFOP(fd,0),RFIFOW(fd,2));
-			WBUFW(buf,0)=0x2b11;
-			mapif_sendall(buf,WBUFW(buf,2));
-			RFIFOSKIP(fd,RFIFOW(fd,2));
-//			printf("char: save_account_reg_reply\n");
-		} break;
-
-
-    default:
-      close(fd);
-      session[fd]->eof=1;
-      return 0;
-    }
-  }
-  RFIFOFLUSH(fd);
-  return 0;
+	}
+	RFIFOFLUSH(fd);
+	return 0;
 }
 
 int parse_frommap(int fd)
@@ -1075,7 +1076,8 @@ int search_mapserver(char *map)
 	return -1;
 }
 
-int char_mapif_init(int fd)
+// char_mapifの初期化処理（現在はinter_mapif初期化のみ）
+static int char_mapif_init(int fd)
 {
 	return inter_mapif_init(fd);
 }
@@ -1252,18 +1254,11 @@ int parse_char(int fd)
 			if(RFIFOREST(fd)<46)
 				return 0;
 			for(i=0;i<9;i++){
-				if(char_dat[sd->found_char[i]].char_id==RFIFOL(fd,2)){
-					int j;
-					if(char_dat[sd->found_char[i]].pet_id)
-						inter_pet_delete(char_dat[sd->found_char[i]].pet_id);
-					for(j=0;j<MAX_INVENTORY;j++)
-						if(char_dat[sd->found_char[i]].inventory[j].card[0] == (short)0xff00)
-							inter_pet_delete(*((long *)(&char_dat[sd->found_char[i]].inventory[j].card[2])));
-					for(j=0;j<MAX_CART;j++)
-						if(char_dat[sd->found_char[i]].cart[j].card[0] == (short)0xff00)
-							inter_pet_delete(*((long *)(&char_dat[sd->found_char[i]].cart[j].card[2])));
+				struct mmo_charstatus *cs=NULL;
+				if( (cs=&char_dat[sd->found_char[i]])->char_id==RFIFOL(fd,2)){
+					char_delete(cs,NULL);	// 削除のための処理
 					if(sd->found_char[i]!=char_num-1){
-						memcpy(&char_dat[sd->found_char[i]],&char_dat[char_num-1],sizeof(char_dat[0]));
+						memcpy(cs,&char_dat[char_num-1],sizeof(char_dat[0]));
 					}
 					char_num--;
 					for(ch=i;ch<9-1;ch++)
@@ -1272,7 +1267,7 @@ int parse_char(int fd)
 					break;
 				}
 			}
-			if(i==9){
+			if( i==9 ){
 				WFIFOW(fd,0)=0x70;
 				WFIFOB(fd,2)=0;
 				WFIFOSET(fd,3);

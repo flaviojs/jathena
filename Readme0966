@@ -1,4 +1,30 @@
 --------------------
+//0968 by 胡蝶蘭
+
+・キャラクターIDが使いまわされないように修正
+・キャラクター削除時、パーティー、ギルドを脱退するように修正
+・アカウント削除時、キャラクターと倉庫を削除するように修正
+・倉庫/ギルド倉庫削除時、倉庫内のペットを削除するように修正
+	・注意：ログインしているアカウントを削除した場合の動作は不明
+
+	(char/)
+	char.c
+		パケット2730の処理、char_delete()追加、削除処理修正など
+	int_storage.c/int_party.c/int_guild.c/int_party.h/int_guild.h
+		inter_party_leave(),inter_guild_leave()追加、
+		inter_storage_delete(),inter_guild_storage_delete()修正など
+	(login/)
+	login.c
+		parse_admin()をアカウント削除時にパケット2730を送るように修正
+
+・athena-start stop で停止させた場合、データが保存されない問題を修正
+	killで送るシグナルをSIGKILLからSIGTERMに変更。
+	どうしてもSIGKILLを送りたい場合は athena-start kill を使ってください。
+	
+	athena-start
+		stop修正、kill追加
+
+--------------------
 //0967 by Asong
 ・モンスターの残影を実装。
 　通常モンスターはスキルによるフィルターがかからないので残像が出ません。
@@ -13,6 +39,7 @@
 　	mob.h 修正
 　	skill.c
 　		skill_castend_pos2() 修正
+
 --------------------
 //0966 by (凸)
 ・サーバーsnapshot

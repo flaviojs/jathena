@@ -565,3 +565,11 @@ int inter_party_parse_frommap(int fd)
 	return 1;
 }
 
+// サーバーから脱退要求（キャラ削除用）
+int inter_party_leave(int party_id,int account_id)
+{
+	return mapif_parse_PartyLeave(-1,party_id,account_id);
+}
+
+
+
