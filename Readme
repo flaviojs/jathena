@@ -1,3 +1,9 @@
+--------------
+//0560 by パイン
+
+・0559 の athena-start を Unix Like OS でも動くようにリファイン。
+
+--------------
 //0559 by rowla
 
 ・athena.shを全面的に書き直し、athena-startに。athena-start startで開始、athena-start stopでサーバー停止。cygwinでテスト、*BSD|Linuxでは未テスト(環境がないため)。
