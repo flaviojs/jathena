@@ -822,17 +822,13 @@ int skill_area_sub( struct block_list *bl,va_list ap )
 
 static int skill_check_unit_range_sub( struct block_list *bl,va_list ap )
 {
-	struct skill_unit *unit;
+	struct skill_unit *unit=NULL;
+	struct map_session_data *sd=NULL;
+	struct mob_data *md=NULL;
+
 	int *c,x,y,range,sx[4],sy[4];
-	int t_range,tx[4],ty[4];
+	int t_range=0,t_x=0,t_y=0,tx[4],ty[4];
 	int i,r_flag,skillid;
-
-	if(bl->prev == NULL || bl->type != BL_SKILL)
-		return 0;
-
-	unit = (struct skill_unit *)bl;
-
-	if(!unit->alive) return 0;
 
 	c = va_arg(ap,int *);
 	x = va_arg(ap,int);
@@ -840,28 +836,59 @@ static int skill_check_unit_range_sub( struct block_list *bl,va_list ap )
 	range = va_arg(ap,int);
 	skillid = va_arg(ap,int);
 
-	if(skillid == MG_SAFETYWALL || skillid == AL_PNEUMA) {
-		if(unit->group->unit_id != 0x7e && unit->group->unit_id != 0x85)
-			return 0;
+	if(bl->prev == NULL)
+		return 0;
+
+	if(bl->type == BL_SKILL)
+		unit = (struct skill_unit *)bl;
+	if(bl->type == BL_PC)
+		sd = (struct map_session_data *)bl;
+	if(bl->type == BL_MOB)
+		md = (struct mob_data *)bl;
+
+	if(unit){
+		if(!unit->alive) return 0;
+
+
+		if(skillid == MG_SAFETYWALL || skillid == AL_PNEUMA) {
+			if(unit->group->unit_id != 0x7e && unit->group->unit_id != 0x85)
+				return 0;
+		}
+		else if(skillid == AL_WARP) {
+			if((unit->group->unit_id < 0x8f || unit->group->unit_id > 0x99) && unit->group->unit_id != 0x92)
+				return 0;
+		}
+		else if((skillid >= HT_SKIDTRAP && skillid <= HT_CLAYMORETRAP) || skillid == HT_TALKIEBOX) {
+			if((unit->group->unit_id < 0x8f || unit->group->unit_id > 0x99) && unit->group->unit_id != 0x92)
+				return 0;
+		}
+		else if(skillid == WZ_FIREPILLAR) {
+			if(unit->group->unit_id != 0x87)
+				return 0;
+		}
+		else return 0;
 	}
-	else if(skillid == AL_WARP) {
-		if((unit->group->unit_id < 0x8f || unit->group->unit_id > 0x99) && unit->group->unit_id != 0x92)
-			return 0;
+
+	if(unit){
+		t_range=(unit->range!=0)? unit->range:unit->group->range;
+		t_x=unit->bl.x;
+		t_y=unit->bl.y;
 	}
-	else if((skillid >= HT_SKIDTRAP && skillid <= HT_CLAYMORETRAP) || skillid == HT_TALKIEBOX) {
-		if((unit->group->unit_id < 0x8f || unit->group->unit_id > 0x99) && unit->group->unit_id != 0x92)
-			return 0;
+	if(sd){
+		t_range=1;
+		t_x=sd->bl.x;
+		t_y=sd->bl.y;
 	}
-	else if(skillid == WZ_FIREPILLAR) {
-		if(unit->group->unit_id != 0x87)
-			return 0;
+	if(md){
+		t_range=1;
+		t_x=md->bl.x;
+		t_y=md->bl.y;
 	}
-	else return 0;
-	t_range=(unit->range!=0)? unit->range:unit->group->range;
-	tx[0] = tx[3] = unit->bl.x - t_range;
-	tx[1] = tx[2] = unit->bl.x + t_range;
-	ty[0] = ty[1] = unit->bl.y - t_range;
-	ty[2] = ty[3] = unit->bl.y + t_range;
+
+	tx[0] = tx[3] = t_x - t_range;
+	tx[1] = tx[2] = t_x + t_range;
+	ty[0] = ty[1] = t_y - t_range;
+	ty[2] = ty[3] = t_y + t_range;
 	sx[0] = sx[3] = x - range;
 	sx[1] = sx[2] = x + range;
 	sy[0] = sy[1] = y - range;
@@ -885,7 +912,7 @@ int skill_check_unit_range(int m,int x,int y,int range,int skillid)
 {
 	int c = 0;
 
-	map_foreachinarea(skill_check_unit_range_sub,m,x-10,y-10,x+10,y+10,BL_SKILL,&c,x,y,range,skillid);
+	map_foreachinarea(skill_check_unit_range_sub,m,x-10,y-10,x+10,y+10,BL_NUL,&c,x,y,range,skillid);
 
 	return c;
 }
@@ -2477,7 +2504,6 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 		break;
 
 	case MG_SAFETYWALL:			/* セイフティウォール */
-	case MG_FIREWALL:			/* ファイヤーウォール */
 	case AL_PNEUMA:				/* ニューマ */
 	case WZ_ICEWALL:			/* アイスウォール */
 	case WZ_FIREPILLAR:			/* ファイアピラー */
@@ -2497,6 +2523,11 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case HT_BLASTMINE:			/* ブラストマイン */
 	case HT_CLAYMORETRAP:		/* クレイモアートラップ */
 	case AS_VENOMDUST:			/* ベノムダスト */
+		skill_unitsetting(src,skillid,skilllv,x,y,0);
+		break;
+
+	case MG_FIREWALL:			/* ファイヤーウォール */
+		if(sd) sd->fw_count++;
 		skill_unitsetting(src,skillid,skilllv,x,y,0);
 		break;
 
@@ -3547,6 +3578,12 @@ int skill_check_condition(struct map_session_data *sd,int type)
 		sp=sp*sd->dsprate/100;	/* 消費SP修正 */
 
 	switch(skill) {
+	case MG_FIREWALL:
+		if(sd->fw_count == 3){
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
+		}
+		break;
 	case SA_CASTCANCEL:
 		if(sd->skilltimer == -1) {
 			clif_skill_fail(sd,skill,0,0);
@@ -4321,6 +4358,10 @@ int skill_gangsterparadise(struct map_session_data *sd ,int type)
 	}
 	return 0;
 }
+/*==========================================
+ * 寒いジョーク・スクリーム判定処理(foreachinarea)
+ *------------------------------------------
+ */
 int skill_frostjoke_scream(struct block_list *bl,va_list ap)
 {
 	struct block_list *src;
@@ -4338,8 +4379,23 @@ int skill_frostjoke_scream(struct block_list *bl,va_list ap)
 		md=(struct mob_data*)bl;
 
 	if(sd){
-		if(map[bl->m].flag.pvp || map[bl->m].flag.gvg)
+		if(src == bl)//自分には効かない
+			return 0;
+
+		if(battle_check_target(src,bl,0x10000)){
+			if(rand()%100 < 10)//PTメンバにも低確率でかかる(とりあえず10%)
+				skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
+			}
+
+		if(map[bl->m].flag.pvp || map[bl->m].flag.gvg){
+
+			if(battle_check_target(src,bl,0x10000)){
+				if(rand()%100 < 10)//PTメンバにも低確率でかかる(とりあえず10%)
+					skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
+			}
+
 			skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
+		}
 	}
 	if(md){
 		skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
@@ -5527,12 +5583,15 @@ struct skill_unit_group *skill_initunitgroup(struct block_list *src,
  */
 int skill_delunitgroup(struct skill_unit_group *group)
 {
+	struct block_list *src=map_id2bl(group->src_id);
 	int i;
 	if(group->unit_count<=0)
 		return 0;
 
+	if(src->type==BL_PC)
+		((struct map_session_data*)src)->fw_count--;
+	
 	if( skill_is_danceskill(group->skill_id) ){
-		struct block_list *src=map_id2bl(group->src_id);
 		if(src)
 			skill_status_change_end(src,SC_DANCING,-1);
 	}

@@ -1,4 +1,21 @@
 --------------------
+//0816 by ぴざまん
+・ファイアーウォール3枚制限実装。
+・重ね置き禁止をプレイヤー・モンスターにも適用するように修正。
+・寒いジョーク・スクリームのPvP・GvGで、効果が自分にも及ぶバグ修正。
+　ついでにPTメンバーには低確率でかかるのも実装。
+・寒いジョーク・スクリーム・スピアブーメランのディレイ修正。
+　ミュージカルストライク・矢撃ちの詠唱時間修正。
+	(map/)
+	skill.c
+		skill_check_condition()、skill_check_unit_range_sub() 修正。
+		skill_check_unit_range()、skill_delunitgroup() 修正。
+		skill_castend_pos2()、skill_frostjoke_scream() 修正。
+	map.h 修正。
+	(db/)
+	cast_db.txt 修正。
+
+--------------------
 //0815 by 死神
 
 ・0814のバグ修正と細かい修正。

@@ -168,7 +168,7 @@ struct map_session_data {
 	struct skill_unit_group skillunit[MAX_SKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
-	short sg_count;
+	short sg_count,fw_count;
 
 	int invincible_timer;
 	unsigned int canact_tick;
