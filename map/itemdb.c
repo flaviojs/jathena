@@ -129,6 +129,7 @@ struct item_data* itemdb_search(int nameid)
 	id->flag.available=0;
 	id->flag.value_notdc=0;  //一応・・・
 	id->flag.value_notoc=0;
+	id->flag.no_equip=0;	
 	id->view_id=0;
 
 	if(nameid>500 && nameid<600)
@@ -594,8 +595,48 @@ static int itemdb_read_itemnametable(void)
 
 	return 0;
 }
+/*==========================================
+ * 装備制限ファイル読み出し
+ *------------------------------------------
+ */
+static int itemdb_read_noequip(void)
+{
+	FILE *fp;
+	char line[1024];
+	int ln=0;
+	int nameid,j;
+	char *str[32],*p;
+	struct item_data *id;
+	
+	if( (fp=fopen("db/item_noequip.txt","r"))==NULL ){
+		printf("can't read db/item_noequip.txt\n");
+		return -1;
+	}
+	while(fgets(line,1020,fp)){
+		if(line[0]=='/' && line[1]=='/')
+			continue;
+		memset(str,0,sizeof(str));
+		for(j=0,p=line;j<2 && p;j++){
+			str[j]=p;
+			p=strchr(p,',');
+			if(p) *p++=0;
+		}
+		if(str[0]==NULL)
+			continue;
 
+		nameid=atoi(str[0]);
+		if(nameid<=0 || nameid>=20000 || !(id=itemdb_exists(nameid)))
+			continue;
 
+		id->flag.no_equip=atoi(str[1]);
+
+		ln++;
+
+	}
+	fclose(fp);
+	printf("read db/item_noequip.txt done (count=%d)\n",ln);
+	return 0;
+}
 /*==========================================
  *
  *------------------------------------------
@@ -655,6 +696,7 @@ int do_init_itemdb(void)
 	itemdb_read_itemvaluedb();
 	itemdb_read_randomitem();
 	itemdb_read_itemavail();
+	itemdb_read_noequip();
 	if(battle_config.item_name_override_grffile)
 		itemdb_read_itemnametable();
 

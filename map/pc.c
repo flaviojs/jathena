@@ -473,6 +473,10 @@ int pc_isequip(struct map_session_data *sd,int n)
 		return 0;
 	if(((1<<sd->status.class)&item->class) == 0)
 		return 0;
+	if(map[sd->bl.m].flag.pvp && (item->flag.no_equip==1 || item->flag.no_equip==3))
+		return 0;
+	if(map[sd->bl.m].flag.gvg && (item->flag.no_equip==2 || item->flag.no_equip==3))
+		return 0;
 	return 1;
 }
 
@@ -4527,6 +4531,7 @@ int pc_unequipitem(struct map_session_data *sd,int n,int type)
 int pc_checkitem(struct map_session_data *sd)
 {
 	int i,j,k,id;
+	struct item_data *it=NULL;
 
 	// 所持品空き詰め
 	for(i=j=0;i<MAX_INVENTORY;i++){
@@ -4568,11 +4573,21 @@ int pc_checkitem(struct map_session_data *sd)
 		memset(&sd->status.cart[j],0,sizeof(struct item)*(MAX_CART-j));
 
 	// 装 備位置チェック
+
 	for(i=0;i<MAX_INVENTORY;i++){
+
+		it=sd->inventory_data[i];
+
 		if(sd->status.inventory[i].nameid==0)
 			continue;
 		if(sd->status.inventory[i].equip & ~pc_equippoint(sd,i))
 			sd->status.inventory[i].equip=0;
+		//装備制限チェック
+		if(sd->status.inventory[i].equip && map[sd->bl.m].flag.pvp && (it->flag.no_equip==1 || it->flag.no_equip==3)){//PvP制限
+			sd->status.inventory[i].equip=0;
+		}else if(sd->status.inventory[i].equip && map[sd->bl.m].flag.gvg && (it->flag.no_equip==2 || it->flag.no_equip==3)){//GvG制限
+			sd->status.inventory[i].equip=0;
+		}
 	}
 
 	pc_setequipindex(sd);

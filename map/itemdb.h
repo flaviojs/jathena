@@ -26,6 +26,7 @@ struct item_data {
 		unsigned available : 1;
 		unsigned value_notdc : 1;
 		unsigned value_notoc : 1;
+		unsigned no_equip : 3;
 	} flag;
 	int view_id;
 };
