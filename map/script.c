@@ -89,6 +89,7 @@ int buildin_readparam(struct script_state *st);
 int buildin_getcharid(struct script_state *st);
 int buildin_getpartyname(struct script_state *st);
 int buildin_getguildname(struct script_state *st);
+int buildin_getguildmaster(struct script_state *st);
 int buildin_strcharinfo(struct script_state *st);
 int buildin_getequipname(struct script_state *st);
 int buildin_getequipisequiped(struct script_state *st);
@@ -194,6 +195,7 @@ struct {
 	{buildin_getcharid,"getcharid","i"},
 	{buildin_getpartyname,"getpartyname","i"},
 	{buildin_getguildname,"getguildname","i"},
+	{buildin_getguildmaster,"getguildmaster","i"},
 	{buildin_strcharinfo,"strcharinfo","i"},
 	{buildin_getequipname,"getequipname","i"},
 	{buildin_getequipisequiped,"getequipisequiped","i"},
@@ -1642,6 +1644,39 @@ int buildin_getguildname(struct script_state *st)
 	name=buildin_getguildname_sub(guild_id);
 	if(name!=0)
 		push_str(st->stack,C_STR,name);
+	return 0;
+}
+
+/*==========================================
+ *w’èID‚ÌGuildMaster–¼æ“¾
+ *------------------------------------------
+ */
+char *buildin_getguildmaster_sub(int guild_id)
+{
+	struct guild *g=NULL;
+	g=guild_search(guild_id);
+
+	if(g!=NULL){
+		char *buf;
+		buf=malloc(24);
+		if(buf==NULL){
+			if(battle_config.error_log)
+				printf("out of memory : buildin_getguildmaster_sub\n");
+			exit(1);
+		}
+		strcpy(buf,g->master);
+		return buf;
+	}
+
+	return 0;
+}
+int buildin_getguildmaster(struct script_state *st)
+{
+	char *master;
+	int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	master=buildin_getguildmaster_sub(guild_id);
+	if(master!=0)
+		push_str(st->stack,C_STR,master);
 	return 0;
 }
 
