@@ -1550,10 +1550,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->def=0;
 
 		if(sd->sc_data[SC_CONCENTRATION].timer!=-1){ //コンセントレーション
-			sd->watk = sd->watk * (100 - 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
+			sd->watk = sd->watk * (100 + 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
 			index = sd->equip_index[8];
 			if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == 4)
-				sd->watk_ = sd->watk * (100 - 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
+				sd->watk_ = sd->watk * (100 + 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
 			sd->def = sd->def * (100 - 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
 		}
 

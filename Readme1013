@@ -1,4 +1,36 @@
 --------------------
+//1017 by (凸)
+・バグ報告スレッド part6 >>46 Destさんのnullpoモジュールを追加＆voidな関数から呼ばれた時のnullpo_retv()を追加(とりあえずskill.cのNULLチェックだけ入れ替え)
+・同>>39 Selさんから報告があったコンセントレーションを修正
+・仕様について語り合うスレッド >>33 Kalenさんの情報をclient_packet.txtに反映
+・本鯖相違スレッド part3 >>24 M ＠zqcM6jBwさんの情報を↑
+・同>>30 はちさんの修正を反映
+
+	(conf/)
+	map_athena.conf nullpo_check追加
+	(db/)
+	item_db.txt 結婚指輪を武器-アクセサリに変更＆最新版
+	(doc/)
+	client_packet.txt 更新
+	conf_ref.txt nullpo_check追加
+	(common/)
+	Makefile 変更
+	nullpo.c 追加
+	nullpo.h 追加
+	(map/)
+	Makefile 変更
+	map.c
+		map_config_read() nullpo_check追加
+	map.h 同上
+	skill.c NULLチェック総入れ替え
+		skill_status_change_start() コンセントレーション修正
+		skill_castend_nodamage_id() テレポート修正
+	clif.c
+		clif_skill_setunit() コメント修正
+	pc.c
+		pc_calcstatus() コンセントレーション修正
+
+--------------------
 //1016 by な。
 ・Athena雑談スレッドPart4 42 かる氏作のウンバラNPCを追加
 

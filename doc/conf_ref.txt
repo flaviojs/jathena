@@ -328,6 +328,11 @@ autosave_time
 	データを自動的にキャラ鯖に送る時間です。単位は秒です。
 	省略可能でデフォルトは60(1分)です。
 
+nullpo_check
+	map-serverでNULLチェックをするかどうかです。
+	0 チェックしない
+	1 チェックする(デフォルト)
+
 gm_account_filename
 	GMアカウントファイルを指定します。
 	省略可能で、デフォルトはconf/GM_account.txtです。
@@ -396,6 +401,7 @@ char_port: 6121
 map_ip: 127.0.0.1
 map_port: 5121
 autosave_time: 60
+nullpo_check: 1
 gm_account_filename: conf/GM_account.txt
 water_height: conf/water_height.txt
 data_grf: ./data.grf

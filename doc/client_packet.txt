@@ -997,6 +997,10 @@ R 01d1 <monk id>.l <target monster id>.l <bool>.l
 R 01d2 <id>.l <delay>.l
 	モンクのコンボディレイ(msec)
 	三段・連打は基本ディレイ1000(+300)、猛龍は基本ディレイ700(+300)
+R 01d4 <ID>.l
+	文字列入力窓表示(IDはNPCのIDが入る)
+S 01d5 <len>.w <ID>.l <input>.?B 00
+	文字列入力内容送信(IDはNPCのIDが入る)
 R 01d7 <ID>.l <equip point>.b <item id1>.w <item id2>.w
 	装備グラフィック <equip point> は 02手と09足のみ確認。id2は左手
 R 01d8 <ID>.l <speed>.w <opt1>.w <opt2>.w <option>.w <class>.w <hair>.w <item id1>.w <item id2>.w <head option bottom>.w <head option top>.w <head option mid>.w <hair color>.w ?.w <head dir>.w <guild>.l <emblem>.l <manner>.w <karma>.B <sex>.B <X_Y_dir>.3B ?.B ?.B <sit>.B <Lv>.B ?.B
@@ -1028,33 +1032,30 @@ R 01de <skill ID>.w <src ID>.l <dst ID>.l <server tick>.l <src speed>.l <dst spe
 	type=09 ダメージモーションなしにダメージだけ表示される物(インデュア)と思ったのだがダメージモーションが出る物。(機能は謎)
 S 01df <ID>.|
 	GM右クリックによるIDのチャット禁止回数参照？
-
 R 01e1 <ID>.l <num>.w 
 	<num> : 気功の数(非Lv) 一度表示したら後どんなnumが来ても無視される。
-
+R 01e6 <partner name>.24B
+	結婚スキルあなたに逢いたい使用時の叫び声
 S 01e8 <party name>.24B <item1>B <item2>B
 	<item1>アイテム収集方法。0で個人別、1でパーティ公有
 	<item2>アイテム分配方法。0で個人別、1でパーティに均等分配
 	(00f9の上位バーション)
-
+R 01ea <ID>.l
+	結婚エフェクト(音楽、紙吹雪)
+	IDは新郎のものが入る
 R 01ee <len>.w {<index>.w <item ID>.w <type>.B <identify flag>.B <amount>.w ?.2B <card>.4w}.18B*
-所有消耗品&収集品リスト
-矢の場合は?.2Bが0x8000になる
-00a3から変更
-
+	所有消耗品&収集品リスト
+	矢の場合は?.2Bが0x8000になる
+	00a3から変更
 R 01ef <len>.w {<index>.w <item ID>.w <type>.B <identify flag>.B <amount>.w ?.2B <card>.4w}.18B*
-カート内アイテム。消耗品/収集品
-0123から変更
-
+	カート内アイテム。消耗品/収集品
+	0123から変更
 R 01f0 <len>.w {<index>.w <item ID>.w <type>.B <identify flag>.B <amount>.w ?.2B <card>.4w}.18B*
-カプラさんに預けてある消耗品&収集品リスト
-00a5から変更
-
-
+	カプラさんに預けてある消耗品&収集品リスト
+	00a5から変更
 R 01f4 <name>.24B <trade id?>.L <LV>.w
-先方から取引要請
-00e5から変更
-
+	先方から取引要請
+	00e5から変更
 R 01f5 <result>.B <trade id?>.L <LV>.w
-こちらからの取引要請に対する反応
-00e7から変更
+	こちらからの取引要請に対する反応
+	00e7から変更

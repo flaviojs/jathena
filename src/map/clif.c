@@ -4287,7 +4287,7 @@ int clif_skill_setunit(struct skill_unit *unit)
 	WBUFL(buf,15+5)=0;						//5-8調べた限り固定
 											//9-12マップごとで一定の77-80とはまた違う4バイトのかなり大きな数字
 	WBUFL(buf,15+13)=unit->bl.y - 0x12;		//13-16ユニットのY座標-18っぽい(Y:17でFF FF FF FF)
-	WBUFL(buf,15+17)=0x004f37dd;			//17-20調べた限り固定
+	WBUFL(buf,15+17)=0x004f37dd;			//17-20調べた限り固定(0x1b2で0x004fdbddだった)
 	WBUFL(buf,15+21)=0x0012f674;			//21-24調べた限り固定
 	WBUFL(buf,15+25)=0x0012f664;			//25-28調べた限り固定
 	WBUFL(buf,15+29)=0x0012f654;			//29-32調べた限り固定
@@ -4297,7 +4297,7 @@ int clif_skill_setunit(struct skill_unit *unit)
 	WBUFL(buf,15+41)=0;						//41-44調べた限り0固定
 	WBUFL(buf,15+45)=0;						//45-48調べた限り0固定
 	WBUFL(buf,15+49)=0;						//49-52調べた限り0固定
-	WBUFL(buf,15+53)=0x0048d919;			//53-56調べた限り固定
+	WBUFL(buf,15+53)=0x0048d919;			//53-56調べた限り固定(0x01b2で0x00495119だった)
 	WBUFL(buf,15+57)=0x0000003e;			//57-60調べた限り固定
 	WBUFL(buf,15+61)=0x0012f66c;			//61-64調べた限り固定
 											//65-68

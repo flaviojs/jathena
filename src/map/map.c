@@ -55,6 +55,7 @@ int map_num=0;
 
 int autosave_interval=DEFAULT_AUTOSAVE_INTERVAL;
 int agit_flag=0;
+int nullpo_check=1;
 
 struct charid2nick {
 	char nick[24];
@@ -1461,6 +1462,8 @@ int map_config_read(char *cfgName)
 				autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
 		} else if(strcmpi(w1,"motd_txt")==0){
 			strcpy(motd_txt,w2);
+		} else if(strcmpi(w1,"nullpo_check")==0){
+			nullpo_check = atoi(w2);
 		} else if(strcmpi(w1,"help_txt")==0){
 			strcpy(help_txt,w2);
 		} else if(strcmpi(w1,"mapreg_txt")==0){

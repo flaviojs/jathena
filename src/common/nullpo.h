@@ -1,0 +1,161 @@
+#ifndef _NULLPO_H_
+#define _NULLPO_H_
+
+#if __STDC_VERSION__ < 199901L
+# if __GNUC__ >= 2
+#  define __func__ __FUNCTION__
+# else
+#  define __func__ ""
+# endif
+#endif
+
+#define NLP_MARK __FILE__, __LINE__, __func__
+
+/*----------------------------------------------------------------------------
+ * Macros
+ *----------------------------------------------------------------------------
+ */
+/*======================================
+ * Nullチェック 及び 情報出力後 return
+ *--------------------------------------
+ * nullpo_ret(t)
+ *   戻り値 0固定
+ * [引数]
+ *  t       チェック対象
+ *--------------------------------------
+ * nullpo_retr(ret, t)
+ *   戻り値指定
+ * [引数]
+ *  ret     return(ret);
+ *  t       チェック対象
+ *--------------------------------------
+ * nullpo_retv(t)
+ *   戻り値 なし
+ * [引数]
+ *  t       チェック対象
+ *--------------------------------------
+ * nullpo_ret_f(t, fmt, ...)
+ *   詳細情報出力用
+ *   戻り値 0
+ * [引数]
+ *  t       チェック対象
+ *  fmt ... vprintfに渡される
+ *    備考や関係変数の書き出しなどに
+ *--------------------------------------
+ * nullpo_retr_f(ret, t, fmt, ...)
+ *   詳細情報出力用
+ *   戻り値指定
+ * [引数]
+ *  ret     return(ret);
+ *  t       チェック対象
+ *  fmt ... vprintfに渡される
+ *    備考や関係変数の書き出しなどに
+ *--------------------------------------
+ */
+ 
+#define nullpo_retr(ret, t) \
+	if (nullpo_chk(NLP_MARK, (void *)(t))) {return(ret);}
+
+#define nullpo_retv(t) \
+	if (nullpo_chk(NLP_MARK, (void *)(t))) {return;}
+
+#define nullpo_ret(t) \
+	nullpo_retr(0, (t))
+
+
+// 可変引数マクロに関する条件コンパイル
+#if __STDC_VERSION__ >= 199901L
+/* C99に対応 */
+#define nullpo_retr_f(ret, t, fmt, ...) \
+	if (nullpo_chk_f(NLP_MARK, (void *)(t), (fmt), __VA_ARGS__)) {return(ret);}
+
+#define nullpo_ret_f(t, fmt, ...) \
+	nullpo_retr_f(0, (t), (fmt), __VA_ARGS__)
+
+#elif __GNUC__ >= 2
+/* 古いGCC用 */
+#define nullpo_retr_f(ret, t, fmt, args...) \
+	if (nullpo_chk_f(NLP_MARK, (void *)(t), (fmt), ## args)) {return(ret);}
+
+#define nullpo_ret_f(t, fmt, args...) \
+	nullpo_retr_f(0, (t), (fmt), ## args)
+
+#else
+
+/* その他の場合・・・ orz */
+
+#endif
+
+/*----------------------------------------------------------------------------
+ * Functions
+ *----------------------------------------------------------------------------
+ */
+/*======================================
+ * nullpo_chk
+ *   Nullチェック 及び 情報出力
+ * [引数]
+ *  file    __FILE__
+ *  line    __LINE__
+ *  func    __func__ (関数名)
+ *    これらには NLP_MARK を使うとよい
+ *  target  チェック対象
+ * [返り値]
+ *  0 OK
+ *  1 NULL
+ *--------------------------------------
+ */
+int nullpo_chk(const char *file, int line, const char *func, const void *target);
+
+
+/*======================================
+ * nullpo_chk_f
+ *   Nullチェック 及び 詳細な情報出力
+ * [引数]
+ *  file    __FILE__
+ *  line    __LINE__
+ *  func    __func__ (関数名)
+ *    これらには NLP_MARK を使うとよい
+ *  target  チェック対象
+ *  fmt ... vprintfに渡される
+ *    備考や関係変数の書き出しなどに
+ * [返り値]
+ *  0 OK
+ *  1 NULL
+ *--------------------------------------
+ */
+int nullpo_chk_f(const char *file, int line, const char *func, const void *target,
+                 const char *fmt, ...)
+                 __attribute__((format(printf,5,6)));
+
+
+/*======================================
+ * nullpo_info
+ *   nullpo情報出力
+ * [引数]
+ *  file    __FILE__
+ *  line    __LINE__
+ *  func    __func__ (関数名)
+ *    これらには NLP_MARK を使うとよい
+ *--------------------------------------
+ */
+void nullpo_info(const char *file, int line, const char *func);
+
+
+/*======================================
+ * nullpo_info_f
+ *   nullpo詳細情報出力
+ * [引数]
+ *  file    __FILE__
+ *  line    __LINE__
+ *  func    __func__ (関数名)
+ *    これらには NLP_MARK を使うとよい
+ *  fmt ... vprintfに渡される
+ *    備考や関係変数の書き出しなどに
+ *--------------------------------------
+ */
+void nullpo_info_f(const char *file, int line, const char *func, 
+                   const char *fmt, ...)
+                   __attribute__((format(printf,4,5)));
+
+
+#endif
