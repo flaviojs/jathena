@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include "map.h"
 
+
 void clif_setip(char*);
 void clif_setport(int);
 
@@ -223,7 +224,7 @@ int clif_guild_broken(struct map_session_data *sd,int flag);
 
 
 // atcommand
-int clif_displaymessage(int fd,char* mes);
+int clif_displaymessage(const int fd,char* mes);
 int clif_GMmessage(struct block_list *bl,char* mes,int len,int flag);
 int clif_heal(int fd,int type,int val);
 int clif_resurrection(struct block_list *bl,int type);

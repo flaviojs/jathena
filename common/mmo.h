@@ -22,6 +22,8 @@
 #define ACCOUNT_REG_NUM 16
 #define ACCOUNT_REG2_NUM 16
 #define DEFAULT_WALK_SPEED 150
+#define MIN_WALK_SPEED 0
+#define MAX_WALK_SPEED 1000
 #define MAX_STORAGE 100
 #define MAX_GUILD_STORAGE 1000
 #define MAX_PARTY 12
@@ -31,6 +33,26 @@
 #define MAX_GUILDALLIANCE 16
 #define MAX_GUILDSKILL	8
 #define MAX_GUILDCASTLE 20
+#define MAX_GUILDLEVEL 50
+
+#define MIN_HAIR_STYLE 0
+#define MAX_HAIR_STYLE 20
+#define MIN_HAIR_COLOR 0
+#define MAX_HAIR_COLOR 9
+#define MIN_CLOTH_COLOR 0
+#define MAX_CLOTH_COLOR 4
+
+// for produce
+#define MIN_ATTRIBUTE 0
+#define MAX_ATTRIBUTE 4
+#define ATTRIBUTE_NORMAL 0
+#define MIN_STAR 0
+#define MAX_STAR 0
+
+#define MIN_PORTAL_MEMO 0
+#define MAX_PORTAL_MEMO 2
+
+#define MAX_STATUS_TYPE 5
 
 #define GRF_PATH_FILENAME "conf/grf-files.txt"
 

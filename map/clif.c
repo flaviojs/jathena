@@ -3,6 +3,7 @@
 #define DUMP_UNKNOWN_PACKET	1
 
 #include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -3729,7 +3730,7 @@ int clif_status_change(struct block_list *bl,int type,int flag)
  * メッセージ表示
  *------------------------------------------
  */
-int clif_displaymessage(int fd,char* mes)
+int clif_displaymessage(const int fd,char* mes)
 {
 	WFIFOW(fd,0) = 0x8e;
 	WFIFOW(fd,2) = 4+1+strlen(mes);
@@ -5832,7 +5833,8 @@ void clif_parse_GetCharNameRequest(int fd,struct map_session_data *sd)
  */
 void clif_parse_GlobalMessage(int fd,struct map_session_data *sd)
 {
-	if(atcommand(fd,sd,RFIFOP(fd,4))) return;
+	if (is_atcommand(fd, sd, RFIFOP(fd, 4)) != AtCommand_None)
+		return;
 	WFIFOW(fd,0)=0x8d;
 	WFIFOW(fd,2)=RFIFOW(fd,2)+4;
 	WFIFOL(fd,4)=sd->bl.id;
@@ -5852,7 +5854,8 @@ void clif_parse_MapMove(int fd,struct map_session_data *sd)
 {
 	char mapname[32];
 
-	if (battle_config.atc_gmonly == 0 || pc_isGM(sd) >= atcommand_config.mapmove) {
+	if (battle_config.atc_gmonly == 0 ||
+		pc_isGM(sd) >= get_atcommand_level(AtCommand_MapMove)) {
 		memcpy(mapname,RFIFOP(fd,2),16);
 		mapname[16]=0;
 		pc_setpos(sd,mapname,RFIFOW(fd,18),RFIFOW(fd,20),2);
@@ -6017,7 +6020,8 @@ void clif_parse_Wis(int fd,struct map_session_data *sd)
  */
 void clif_parse_GMmessage(int fd,struct map_session_data *sd)
 {
-	if (battle_config.atc_gmonly == 0 || pc_isGM(sd) >= atcommand_config.broadcast)
+	if (battle_config.atc_gmonly == 0 ||
+		pc_isGM(sd) >= get_atcommand_level(AtCommand_Broadcast))
 		intif_GMmessage(RFIFOP(fd,4),RFIFOW(fd,2)-4,0);
 /*	WFIFOW(fd,0)=0x9a;
 	WFIFOW(fd,2)=RFIFOW(fd,2);
@@ -6600,7 +6604,8 @@ void clif_parse_SolveCharName(int fd,struct map_session_data *sd)
  */
 void clif_parse_ResetChar(int fd,struct map_session_data *sd)
 {
-	if (battle_config.atc_gmonly == 0 || pc_isGM(sd) >= atcommand_config.resetstate) {
+	if (battle_config.atc_gmonly == 0 ||
+		pc_isGM(sd) >= get_atcommand_level(AtCommand_ResetState)) {
 		switch(RFIFOW(fd,2)){
 		case 0:
 			pc_resetstate(sd);
@@ -6618,7 +6623,8 @@ void clif_parse_ResetChar(int fd,struct map_session_data *sd)
  */
 void clif_parse_LGMmessage(int fd,struct map_session_data *sd)
 {
-	if (battle_config.atc_gmonly == 0 || pc_isGM(sd) >= atcommand_config.local_broadcast) {
+	if (battle_config.atc_gmonly == 0 ||
+		pc_isGM(sd) >= get_atcommand_level(AtCommand_LocalBroadcast)) {
 		WFIFOW(fd,0)=0x9a;
 		WFIFOW(fd,2)=RFIFOW(fd,2);
 		memcpy(WFIFOP(fd,4),RFIFOP(fd,4),RFIFOW(fd,2)-4);
@@ -6768,7 +6774,8 @@ void clif_parse_PartyChangeOption(int fd,struct map_session_data *sd)
  */
 void clif_parse_PartyMessage(int fd,struct map_session_data *sd)
 {
-	if(atcommand(fd,sd,RFIFOP(fd,4))) return;
+	if (is_atcommand(fd, sd, RFIFOP(fd, 4)) != AtCommand_None)
+		return;
 	party_send_message(sd,RFIFOP(fd,4),RFIFOW(fd,2)-4);
 }
 
@@ -6947,7 +6954,8 @@ void clif_parse_GuildExplusion(int fd,struct map_session_data *sd)
  */
 void clif_parse_GuildMessage(int fd,struct map_session_data *sd)
 {
-	if(atcommand(fd,sd,RFIFOP(fd,4))) return;
+	if (is_atcommand(fd, sd, RFIFOP(fd, 4)) != AtCommand_None)
+		return;
 	guild_send_message(sd,RFIFOP(fd,4),RFIFOW(fd,2)-4);
 }
 /*==========================================
@@ -7023,7 +7031,7 @@ void clif_parse_GMKick(int fd,struct map_session_data *sd)
 	struct block_list *target;
 	int tid = RFIFOL(fd,2);
 
-	if(pc_isGM(sd) >= atcommand_config.kick) {
+	if(pc_isGM(sd) >= get_atcommand_level(AtCommand_Kick)) {
 		target = map_id2bl(tid);
 		if(target) {
 			if(target->type == BL_PC) {
@@ -7048,7 +7056,7 @@ void clif_parse_GMKick(int fd,struct map_session_data *sd)
 
 void clif_parse_GMHide(int fd,struct map_session_data *sd)
 {
-	if(pc_isGM(sd) >= atcommand_config.hide) {
+	if(pc_isGM(sd) >= get_atcommand_level(AtCommand_Hide)) {
 		if(sd->status.option&0x40){
 			sd->status.option&=~0x40;
 			clif_displaymessage(fd,"invisible off!");
