@@ -1,4 +1,22 @@
 --------------------
+//1055 by Nameless
+・各種CPUに対するコード最適化オプションを設定(全27種) ※GCC 3.3.1 準拠
+・Pentium 3のオプションがSSE2になっていたのを訂正
+・稀枝さん、robertさんのPacket情報の取り込み(お二人に感謝)
+
+	(/)
+		makefile
+			i486/586/p54c/mmx/P3/P4/Cele
+			k6/k6-2/k6-3/athlon系
+			Via C3(Eden)
+			PowerPC/G4系
+
+	(src/map/)
+		clif.c
+			clif_parse_MoveToKafra{}
+			コード取り込み
+
+--------------------
 //1054 by Nameless
 ・Cygwinでコンパイルしたathenaが接続53～58人付近で接続不能になるバグを解消
 
