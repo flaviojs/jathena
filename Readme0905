@@ -1,4 +1,25 @@
 --------------------
+//0924 by (凸)
+
+・バグ報告スレッド part4 >>66のnpcを取り込み
+・同 >>51のguild.cを反映
+・同 >>38のatcommand_athena.confへの変更を取り込み
+・なぜかnpcフォルダにあってmap_athena.confないファイルを一覧に追加。ついでにギルドフラッグのコメントアウトを解除
+・conf/npc/npc_job_1st.txt npc_script2.txt npc_shop3.txtはスナップショットから削除してください
+
+	(map/)
+	guild.c 修正
+	(conf/)
+	map_athena.conf 修正
+	atcommand_athena.conf 修正
+	(conf/npc/)
+	npc_event_hat.txt 修正
+	npc_event_oni.txt 修正
+	npc_job_1st.txt 削除
+	npc_script2.txt 削除
+	npc_shop3.txt 削除
+
+--------------------
 //0923 by 胡蝶蘭
 
 ・スクリプトのバグ修正

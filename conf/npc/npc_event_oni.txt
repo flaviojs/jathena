@@ -609,7 +609,7 @@ Lfinal:
 	warp "payon_in01.gat",165,140;end;
 Lsucsess:
 	set event_oni,1;
-	getitem 1501;
+	getitem 1501,1;
 	mes "アムムトをこらしめた！！";
 	mes "目の前でアムムトが気絶している。";
 	mes "アムムトが装備していた";

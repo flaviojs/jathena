@@ -72,7 +72,7 @@ L7:/*ろうそく*/
 		mes "- ご利用ありがとうございました。 -";
 		close;
 L8:/*ケーキ帽*/
-	if ((countitem(529) < 10) || (countitem(530) < 5) || (countitem(538) < 15) || (countitem(539) < 20) || (countitem(999) < 10)) goto LError
+	if ((countitem(529) < 10) || (countitem(530) < 5) || (countitem(538) < 15) || (countitem(539) < 20) || (countitem(999) < 10)) goto LError;
 		delitem 529,10;
 		delitem 530,5;
 		delitem 538,15;
