@@ -128,12 +128,27 @@ struct guild *guild_search(int guild_id)
 {
 	return numdb_search(guild_db,guild_id);
 }
-
+int guild_searchname_sub(void *key,void *data,va_list ap)
+{
+	struct guild *g=(struct guild *)data,**dst;
+	char *str;
+	str=va_arg(ap,char *);
+	dst=va_arg(ap,struct guild **);
+	if(strcmpi(g->name,str)==0)
+		*dst=g;
+	return 0;
+}
 struct guild_castle *guild_castle_search(int gcid)
 {
 	return numdb_search(castle_db,gcid);
 }
-
+// ギルド名検索
+struct guild* guild_searchname(char *str)
+{
+	struct guild *g=NULL;
+	numdb_foreach(guild_db,guild_searchname_sub,str,&g);
+	return g;
+}
 // mapnameに対応したアジトのgcを返す
 struct guild_castle *guild_mapname2gc(char *mapname)
 {

@@ -71,7 +71,8 @@ int clif_statusupack(struct map_session_data *,int,int,int);	// self
 int clif_equipitemack(struct map_session_data *,int,int,int);	// self
 int clif_unequipitemack(struct map_session_data *,int,int,int);	// self
 int clif_misceffect(struct block_list*,int);	// area
-int clif_misceffect2(struct block_list *bl,int type);
+int clif_misceffect2(struct block_list *bl,int type);	// area
+int clif_misceffect3(struct block_list *bl,int type);	// self
 int clif_changeoption(struct block_list*);	// area
 int clif_useitemack(struct map_session_data*,int,int,int);	// self
 
@@ -212,6 +213,8 @@ int clif_party_message(struct party *p,int account_id,char *mes,int len);
 int clif_party_move(struct party *p,struct map_session_data *sd,int online);
 int clif_party_xy(struct party *p,struct map_session_data *sd);
 int clif_party_hp(struct party *p,struct map_session_data *sd);
+
+int clif_hpmeter(struct map_session_data *sd);
 
 // guild
 int clif_guild_created(struct map_session_data *sd,int flag);

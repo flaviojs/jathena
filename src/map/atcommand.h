@@ -63,10 +63,15 @@ enum AtCommandType {
 	AtCommand_Luck,
 	AtCommand_GuildLevelUp,
 	AtCommand_MakePet,
+	AtCommand_Hatch,
 	AtCommand_PetFriendly,
 	AtCommand_PetHungry,
 	AtCommand_PetRename,
+	AtCommand_CharPetRename,
 	AtCommand_Recall,
+	AtCommand_Recallall,
+	AtCommand_RecallGuild,
+	AtCommand_RecallParty,
 	AtCommand_CharacterJob,
 	AtCommand_Revive,
 	AtCommand_CharacterStats,
@@ -85,15 +90,14 @@ enum AtCommandType {
 	AtCommand_KickAll,
 	AtCommand_AllSkill,
 	AtCommand_QuestSkill,
+	AtCommand_CharQuestSkill,
 	AtCommand_LostSkill,
+	AtCommand_CharLostSkill,
 	AtCommand_SpiritBall,
 	AtCommand_Party,
 	AtCommand_Guild,
 	AtCommand_AgitStart,
 	AtCommand_AgitEnd,
-	AtCommand_ReloadItemDB,
-	AtCommand_ReloadMobDB,
-	AtCommand_ReloadSkillDB,
 	AtCommand_MapExit,
 	AtCommand_IDSearch,
 	AtCommand_ItemIdentify,
@@ -102,6 +106,21 @@ enum AtCommandType {
 	AtCommand_Misceffect,
 	AtCommand_Summon,
 	AtCommand_WhoP,
+	AtCommand_ReloadItemDB,
+	AtCommand_ReloadMobDB,
+	AtCommand_ReloadSkillDB,
+	AtCommand_CharSkReset,
+	AtCommand_CharStReset,
+	AtCommand_CharReset,
+	AtCommand_CharSKPoint,
+	AtCommand_CharSTPoint, 
+	AtCommand_CharZeny,
+	AtCommand_MapInfo,
+	AtCommand_MobSearch,
+	AtCommand_CleanMap,
+	AtCommand_Clock,
+	AtCommand_GiveItem,
+	AtCommand_Weather,
 	AtCommand_Unknown,
 	AtCommand_MAX
 };
@@ -117,7 +136,7 @@ typedef struct AtCommandInfo {
 } AtCommandInfo;
 
 AtCommandType
-is_atcommand(const int fd, struct map_session_data* sd, const char* message);
+is_atcommand(const int fd, struct map_session_data* sd, const char* message, int gmlvl);
 
 AtCommandType atcommand(
 	const int level, const char* message, AtCommandInfo* info);

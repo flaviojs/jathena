@@ -1,4 +1,4 @@
-// $Id: core.c,v 1.3 2003/06/29 05:49:50 lemit Exp $
+// $Id: core.c,v 1.1.1.1 2004/06/24 19:29:20 running_pinata Exp $
 // original : core.c 2003/02/26 18:03:12 Rev 1.7
 
 #include <stdio.h>
@@ -15,6 +15,8 @@
 #endif
 
 static void (*term_func)(void)=NULL;
+
+int packet_parse_time = 0;
 
 /*======================================
  *	CORE : Set function
@@ -62,10 +64,20 @@ int main(int argc,char **argv)
 	signal(SIGTERM,sig_proc);
 	signal(SIGINT,sig_proc);
 	do_init(argc,argv);
-	while(1){
-		next=do_timer(gettick_nocache());
-		do_sendrecv(next);
-		do_parsepacket();
+	if (packet_parse_time > 0) {
+		add_timer_func_list(parsepacket_timer,"parsepacket_timer");
+		add_timer_interval(gettick()+packet_parse_time,parsepacket_timer,0,0,packet_parse_time);
+
+		while(1){
+			next=do_timer(gettick_nocache());
+			do_sendrecv(next);
+		}
+	} else {
+		while(1){
+			next=do_timer(gettick_nocache());
+			do_sendrecv(next);
+			do_parsepacket();
+		}
 	}
 	return 0;
 }

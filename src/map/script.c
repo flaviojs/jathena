@@ -31,6 +31,7 @@
 #include "battle.h"
 #include "party.h"
 #include "guild.h"
+#include "atcommand.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -233,7 +234,6 @@ int buildin_wedding_effect(struct script_state *st);
 int buildin_divorce(struct script_state *st);
 int buildin_getitemname(struct script_state *st);
 int buildin_makepet(struct script_state *st);
-int buildin_getexp(struct script_state *st);
 int buildin_getinventorylist(struct script_state *st);
 int buildin_getskilllist(struct script_state *st);
 int buildin_clearitem(struct script_state *st);
@@ -242,6 +242,13 @@ int buildin_repairitem(struct script_state *st);
 int buildin_classchange(struct script_state *st);
 int buildin_misceffect(struct script_state *st);
 int buildin_soundeffect(struct script_state *st);
+int buildin_gmcommand(struct script_state *st);
+int buildin_getusersname(struct script_state *st);
+int buildin_dispbottom(struct script_state *st);
+int buildin_recovery(struct script_state *st);
+int buildin_getpetinfo(struct script_state *st);
+int buildin_checkequipedcard(struct script_state *st);
+
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -402,7 +409,6 @@ struct {
 	{buildin_divorce,"divorce",""},
 	{buildin_getitemname,"getitemname","i"},
 	{buildin_makepet,"makepet","i"},
-	{buildin_getexp,"getexp","ii"},
 	{buildin_getinventorylist,"getinventorylist",""},
 	{buildin_getskilllist,"getskilllist",""},
 	{buildin_clearitem,"clearitem",""},
@@ -411,7 +417,12 @@ struct {
 	{buildin_classchange,"classchange","ii"},
 	{buildin_misceffect,"misceffect","i"},
 	{buildin_soundeffect,"soundeffect","si"},
-
+	{buildin_gmcommand,"gmcommand","s"},
+	{buildin_dispbottom,"dispbottom","s"},
+	{buildin_getusersname,"getusersname","*"},
+	{buildin_recovery,"recovery",""},
+	{buildin_getpetinfo,"getpetinfo","i"},
+	{buildin_checkequipedcard,"checkequipedcard","i"},
 	{NULL,NULL,NULL}
 };
 enum {
@@ -2215,7 +2226,8 @@ int buildin_getitem(struct script_state *st)
 			return 0;
 		if((flag = pc_additem(sd,&item_tmp,amount))) {
 			clif_additem(sd,0,0,flag);
-			map_addflooritem(&item_tmp,amount,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+			if(!pc_candrop(sd,nameid))
+				map_addflooritem(&item_tmp,amount,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 		}
 	}
 
@@ -2679,7 +2691,7 @@ int buildin_getequipisenableref(struct script_state *st)
 //	if(i >= 0 && num<7 && sd->inventory_data[i] && (num!=1 || sd->inventory_data[i]->def > 1
 //	             || (sd->inventory_data[i]->def==1 && sd->inventory_data[i]->equip_script==NULL)
 //	             || (sd->inventory_data[i]->def<=0 && sd->inventory_data[i]->equip_script!=NULL)){
-	if(i >= 0 && num<7 && sd->inventory_data[i] && (sd->inventory_data[i]->refine != 0))
+	if(i >= 0 && sd->inventory_data[i] && (sd->inventory_data[i]->refine != 0))
 		push_val(st->stack,C_INT,1);
 	else
 		push_val(st->stack,C_INT,0);
@@ -3283,24 +3295,6 @@ int buildin_makepet(struct script_state *st)
 
 	return 0;
 }
-/*==========================================
- * NPCで経験値上げる
- *------------------------------------------
- */
-int buildin_getexp(struct script_state *st)
-{
-	struct map_session_data *sd = script_rid2sd(st);
-	int base=0,job=0;
-
-	base=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	job =conv_num(st,& (st->stack->stack_data[st->start+3]));
-	if(base<0 || job<0)
-		return 0;
-	if(sd)
-		pc_gainexp(sd,base,job);
-
-	return 0;
-}
 
 /*==========================================
  * モンスター発生
@@ -3399,7 +3393,6 @@ int buildin_killmonsterall(struct script_state *st)
 		m,0,0,map[m].xs,map[m].ys,BL_MOB);
 	return 0;
 }
-
 /*==========================================
  * イベント実行
  *------------------------------------------
@@ -3620,7 +3613,7 @@ int buildin_areaannounce(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * ユーザー数所得
+ * ユーザー数取得
  *------------------------------------------
  */
 int buildin_getusers(struct script_state *st)
@@ -3636,7 +3629,26 @@ int buildin_getusers(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * マップ指定ユーザー数所得
+ * 繋いでるユーザーの全員の名前取得(@who)
+ *------------------------------------------
+ */
+int buildin_getusersname(struct script_state *st)
+{
+	struct map_session_data *pl_sd = NULL;
+	int i=0,disp_num=1;
+	
+	for (i=0;i<fd_max;i++)
+		if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
+			if( !(battle_config.hide_GM_session && pc_isGM(pl_sd)) ){
+				if((disp_num++)%10==0)
+					clif_scriptnext(script_rid2sd(st),st->oid);
+				clif_scriptmes(script_rid2sd(st),st->oid,pl_sd->status.name);
+			}
+		}
+	return 0;
+}
+/*==========================================
+ * マップ指定ユーザー数取得
  *------------------------------------------
  */
 int buildin_getmapusers(struct script_state *st)
@@ -3749,7 +3761,6 @@ int buildin_disablenpc(struct script_state *st)
 	npc_enable(str,0);
 	return 0;
 }
-
 /*==========================================
  * 隠れているNPCの表示
  *------------------------------------------
@@ -3772,6 +3783,7 @@ int buildin_hideonnpc(struct script_state *st)
 	npc_enable(str,4);
 	return 0;
 }
+
 /*==========================================
  * 状態異常にかかる
  *------------------------------------------
@@ -3871,7 +3883,6 @@ int buildin_getscrate(struct script_state *st)
 	return 0;
 
 }
-
 /*==========================================
  *
  *------------------------------------------
@@ -4352,7 +4363,6 @@ int buildin_pvpon(struct script_state *st)
 			}
 		}
 	}
-
 	return 0;
 }
 
@@ -4824,7 +4834,6 @@ int buildin_divorce(struct script_state *st)
 	return 0;
 }
 
-
 /*==========================================
  * IDからItem名
  *------------------------------------------
@@ -4833,19 +4842,17 @@ int buildin_getitemname(struct script_state *st)
 {
 	int item_id;
 	struct item_data *i_data;
-	char *item_name;
 
 	item_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
 
 	i_data = NULL;
 	i_data = itemdb_search(item_id);
-	item_name=(char *)aCalloc(24,sizeof(char));
+//	item_name=(char *)aCalloc(24,sizeof(char));
 
-	strncpy(item_name,i_data->jname,23);
-	push_str(st->stack,C_STR,item_name);
+//	strncpy(item_name,i_data->jname,23);
+	push_str(st->stack,C_STR,i_data->jname);
 	return 0;
 }
-
 /*==========================================
  * PCの所持品情報読み取り
  *------------------------------------------
@@ -4996,6 +5003,137 @@ int buildin_soundeffect(struct script_state *st)
 			clif_soundeffect(sd,&sd->bl,name,type);
 		}
 	}
+	return 0;
+}
+/*==========================================
+ * gmcommand
+ * suggested on the forums...
+ *------------------------------------------
+ */
+
+int buildin_gmcommand(struct script_state *st)
+{
+	struct map_session_data *sd;
+//	char *cmd;
+	char cmd[100];
+
+	sd = script_rid2sd(st);
+//	cmd = conv_str(st,& (st->stack->stack_data[st->start+2]));
+
+//	printf("%s\n",cmd);
+	sprintf(cmd ,"%s : %s",sd->status.name,conv_str(st,& (st->stack->stack_data[st->start+2])));
+
+	is_atcommand(sd->fd, sd, cmd, 99);
+
+	return 0;
+}
+/*==========================================
+ * コメント欄にメッセージ表示
+ *------------------------------------------
+ */
+int buildin_dispbottom(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	char *message;
+	message=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	if(sd)
+		clif_disp_onlyself(sd,message,strlen(message));
+	return 0;
+}
+/*==========================================
+ * サーバー上の全員を全回復(蘇生+HP/SP全回復)
+ *------------------------------------------
+ */
+int buildin_recovery(struct script_state *st)
+{
+	int i = 0;
+	for (i = 0; i < fd_max; i++) {
+		if (session[i]){
+			struct map_session_data *sd = session[i]->session_data;
+			if (sd && sd->state.auth) {
+				sd->status.hp = sd->status.max_hp;
+				sd->status.sp = sd->status.max_sp;
+				clif_updatestatus(sd, SP_HP);
+				clif_updatestatus(sd, SP_SP);
+				if(pc_isdead(sd)){
+					pc_setstand(sd);
+					clif_resurrection(&sd->bl, 1);
+				}
+				clif_displaymessage(sd->fd,"完全回復しました！");
+			}
+		}
+	}
+	return 0;
+}
+/*==========================================
+ * 孵化させて連れ歩いているペットの情報取得
+ * 0:pet_id 1:pet_class 2:pet_name
+ * 3:friendly 4:hungry
+ * 連れてない時は、いずれの場合も0を返す
+ *------------------------------------------
+ */
+int buildin_getpetinfo(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	int type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+
+	if(sd && sd->status.pet_id){
+		switch(type){
+			case 0:
+				push_val(st->stack,C_INT,sd->status.pet_id);
+				break;
+			case 1:
+				if(sd->pet.class)
+					push_val(st->stack,C_INT,sd->pet.class);
+				else
+					push_val(st->stack,C_INT,0);
+				break;
+			case 2:
+				if(sd->pet.name)
+					push_str(st->stack,C_STR,sd->pet.name);
+				else
+					push_val(st->stack,C_INT,0);
+				break;
+			case 3:
+				//if(sd->pet.intimate)
+				push_val(st->stack,C_INT,sd->pet.intimate);
+				break;
+			case 4:
+				//if(sd->pet.hungry)
+				push_val(st->stack,C_INT,sd->pet.hungry);
+				break;
+			default:
+				push_val(st->stack,C_INT,0);
+				break;
+		}
+	}else{
+		push_val(st->stack,C_INT,0);
+	}
+	return 0;
+}
+/*==========================================
+ * 指定IDのカードを付けた武具がないか検査(あったら1,無ければ0を返す)
+ *------------------------------------------
+ */
+int buildin_checkequipedcard(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	int n,i,c=0;
+	c=conv_num(st,& (st->stack->stack_data[st->start+2]));
+
+	if(sd){
+		for(i=0;i<MAX_INVENTORY;i++){
+			if(sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].amount){
+				for(n=0;n<4;n++){
+					if(sd->status.inventory[i].card[n]==c){
+						push_val(st->stack,C_INT,1);
+						return 0;
+					}
+				}
+			}
+		}
+	}
+	push_val(st->stack,C_INT,0);
 	return 0;
 }
 

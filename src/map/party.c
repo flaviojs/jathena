@@ -50,7 +50,23 @@ struct party *party_search(int party_id)
 {
 	return numdb_search(party_db,party_id);
 }
-
+int party_searchname_sub(void *key,void *data,va_list ap)
+{
+	struct party *p=(struct party *)data,**dst;
+	char *str;
+	str=va_arg(ap,char *);
+	dst=va_arg(ap,struct party **);
+	if(strcmpi(p->name,str)==0)
+		*dst=p;
+	return 0;
+}
+// パーティ名検索
+struct party* party_searchname(char *str)
+{
+	struct party *p=NULL;
+	numdb_foreach(party_db,party_searchname_sub,str,&p);
+	return p;
+}
 // 作成要求
 int party_create(struct map_session_data *sd,char *name)
 {

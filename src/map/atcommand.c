@@ -3085,7 +3085,7 @@ int atcommand_reloaditemdb(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	itemdb_reload();
+	do_init_itemdb();
 	clif_displaymessage(fd, msg_table[89]);
 
 	return 0;

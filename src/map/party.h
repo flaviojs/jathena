@@ -10,6 +10,7 @@ struct block_list;
 void do_init_party(void);
 void do_final_party(void);
 struct party *party_search(int party_id);
+struct party* party_searchname(char *str);
 
 int party_create(struct map_session_data *sd,char *name);
 int party_created(int account_id,int fail,int party_id,char *name);

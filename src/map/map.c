@@ -1,4 +1,4 @@
-// $Id: map.c,v 1.11 2003/06/29 05:56:44 lemit Exp $
+// $Id: map.c,v 1.3 2004/09/15 00:20:52 running_pinata Exp $
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,6 +57,8 @@ int map_num=0;
 
 int autosave_interval=DEFAULT_AUTOSAVE_INTERVAL;
 int agit_flag=0;
+
+extern int packet_parse_time;
 
 struct charid2nick {
 	char nick[24];
@@ -1501,6 +1503,10 @@ int map_config_read(char *cfgName)
 			grfio_setsdatafile(w2);
 		} else if(strcmpi(w1,"adata_grf")==0){
 			grfio_setadatafile(w2);
+		} else if(strcmpi(w1,"packet_parse_time")==0){
+			packet_parse_time=atoi(w2);
+			if(packet_parse_time <= 0)
+				packet_parse_time = 0;
 		} else if(strcmpi(w1,"autosave_time")==0){
 			autosave_interval=atoi(w2)*1000;
 			if(autosave_interval <= 0)

@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "nullpo.h"
+// #include "logs.h" // 布石してみる
 
 static void nullpo_info_core(const char *file, int line, const char *func, 
                              const char *fmt, va_list ap);
@@ -11,7 +12,7 @@ static void nullpo_info_core(const char *file, int line, const char *func,
  *--------------------------------------
  */
 int nullpo_chk_f(const char *file, int line, const char *func, const void *target,
-               const char *fmt, ...)
+                 const char *fmt, ...)
 {
 	va_list ap;
 	
@@ -69,11 +70,11 @@ static void nullpo_info_core(const char *file, int line, const char *func,
 		func[0] == '\0' ? "unknown":
 		                  func;
 	
-	printf("--- nullpo info --------------------------------\n");
+	printf("--- nullpo info --------------------------------------------\n");
 	printf("%s:%d: in func `%s'\n", file, line, func);
 	if (fmt != NULL)
 	{
-		if (func[0] != '\0')
+		if (fmt[0] != '\0')
 		{
 			vprintf(fmt, ap);
 			
@@ -82,7 +83,7 @@ static void nullpo_info_core(const char *file, int line, const char *func,
 				printf("\n");
 		}
 	}
-	printf("--- end nullpo info ----------------------------\n");
+	printf("--- end nullpo info ----------------------------------------\n");
 	
 	// ここらでnullpoログをファイルに書き出せたら
 	// まとめて提出できるなと思っていたり。

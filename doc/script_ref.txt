@@ -508,16 +508,6 @@ AthenaNPCScript
 
 			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分失います。
 
-		getexp命令
-			getexp <base_exp>,<job_exp>;
-
-			base_exp	数値
-			job_exp		数値
-
-			<base_exp>に指定された数だけBaseに経験値が入ります。
-			<job_exp>に指定された数だけJobに経験値が入ります。
-			マイナスの数字は適応されません。
-
 		makepet命令
 			makepet <petid>;
 
@@ -1058,6 +1048,19 @@ AthenaNPCScript
 			戻り値は変数については参照返し、数値や文字列については値返しになります。
 			（つまり、変数を返す場合、 set callfunc("func"), 1; と使うことも出来ます。）
 
+		recovery命令
+			recovery
+
+			接続者全員を、蘇生＋HP・SP全回復させます。
+
+		gmcommand命令
+			gmcommand <command>
+
+			command		文字列
+
+			文字列に@コマンドを入れると、GMレベル99のキャラが実行したのと
+			同じ動作をします。
+
 	＊関数
 		rand関数
 			rand(<n1>[,<n2>])
@@ -1402,6 +1405,37 @@ AthenaNPCScript
 			数値は0からです。
 			<例> callsub L_SUB01,"hoge",500,999; と呼ばれた場合、
 			     getarg(0)="hoge", getarg(1)=500, getarg(2)=999 になります。
+
+		getusersname関数
+			getusersname
+
+			接続者の名前を、putstrで列挙します。@whoと似た関数です。
+
+		dispbottom関数
+			dispbottom(<message>)
+
+			message		文字列
+
+			NPCに話しかけた本人にのみコメント欄に文字列を表示します。
+
+		getpetinfo関数
+			getpetinfo(<num>)
+
+			num	数字
+
+			numに対応した孵化させて連れ歩いているペットの情報を取得します。
+			0:pet_id 1:pet_class 2:pet_name 3:friendly 4:hungry
+			連れてない時は、いずれの場合も0を返します。
+
+		checkequipedcard関数
+			checkequipedcard(<num>)
+
+			num	数字
+
+			numで指定したidを持つカードを挿した装備品を、
+			装備、または所持品欄にあるかどうかを探します。
+			見つかった場合1を。見つからなかった場合は0を返します。
+
 
 	＊定数ラベル
 		-ラベル
