@@ -1,4 +1,16 @@
 --------------
+//0570 by code
+天津フィールドのMOBの配置とワープポイントの設定です。
+conf/npc_monster35.txt
+     mobの配置
+
+conf/npc_warp_amatsu.txt
+　　 warp pointの設置
+
+conf/npc_town_amatsu.txt
+　　 暫定的にプロンテラ噴水前←→天津港の接続NPC
+
+--------------
 //0569 by 死神
 
 ・0561の@jobcange での♀バード＆♂ダンサーによる鞍落ち防止をpc_jobchange()でするように変更。

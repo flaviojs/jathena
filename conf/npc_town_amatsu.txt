@@ -1,0 +1,31 @@
+amatsu.gat,160,187,3	script	天津転送員	100,{
+	mes "[天津転送員]";
+	mes "こんにちは";
+	mes "㈱空間移動より特別に派遣されました。";
+	mes "ここ天津より";
+	mes "ミッドガルド首都に転送いたします。";
+	menu "はい",L_GOLV1,"やめる",L_YAME;
+L_GOLV1:
+	warp "prontera.gat",158,183;
+	end;
+L_YAME:
+	close;
+}
+
+prontera.gat,158,191,4	script	天津転送員	100,{
+	mes "天津転送員";
+	mes "こんにちは";
+	mes "㈱空間移動より特別に派遣されました。";
+	mes "ここ首都プロンテラより";
+	mes "ジャポンの街「天津」に転送いたします。";
+	next;
+	mes "天津転送員";
+	mes "さて、いかがいたしましょう？";
+	next;
+	menu "転送してもらう",L_GOLV1,"やめる",L_YAME;
+L_GOLV1:
+	warp "amatsu.gat",197,86;
+	end;
+L_YAME:
+	close;
+}
