@@ -439,13 +439,13 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		dstsd=(struct map_session_data *)bl;
 	else if(bl->type==BL_MOB){
 		dstmd=(struct mob_data *)bl; //未使用？
-		if(sc_def_mdef>50)
+		if(sc_def_mdef<50)
 			sc_def_mdef=50;
-		if(sc_def_vit>50)
+		if(sc_def_vit<50)
 			sc_def_vit=50;
-		if(sc_def_int>50)
+		if(sc_def_int<50)
 			sc_def_int=50;
-		if(sc_def_luk>50)
+		if(sc_def_luk<50)
 			sc_def_luk=50;
 	}
 	if(sc_def_mdef<0)
@@ -454,6 +454,17 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		sc_def_vit=0;
 	if(sc_def_int<0)
 		sc_def_int=0;
+
+/*コンパイラ依存のバグがあります、GCC 3.3.0/3.3.1 の人用*/
+/*コンパイラで計算が０／０の時に変数の最大値が代入されるバグ*/
+/*があるようです、正しい計算にならないですけど、ダメージ計算*/
+/*やステータス変化が予想以上に適用されない場合、以下を有効にしてください*/
+/*	if(sc_def_mdef<1)       */
+/*		sc_def_mdef=1;  */
+/*	if(sc_def_vit<1)        */
+/*		sc_def_vit=1;   */
+/*	if(sc_def_int<1)        */
+/*		sc_def_int=1;   */
 
 	switch(skillid){
 	case 0:					/* 通常攻撃 */
@@ -646,7 +657,13 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		//阿修羅を使うと5分間自然回復しないようになる
 		skill_status_change_start(src,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time2(skillid,skilllv),0 );
 		break;
+	case HW_NAPALMVULCAN:			/* ナパームバルカン */
+		// skilllv*5%の確率で呪い
+		if ((rand()%10000) < 5*skilllv*sc_def_luk) 
+			skill_status_change_start(bl,SC_CURSE,7,0,0,0,skill_get_time2(NPC_CURSEATTACK,7),0);
+		break;
 	}
+fflush(stdout);
 
 	if(sd && skillid != MC_CARTREVOLUTION && attack_type&BF_WEAPON){	/* カードによる追加効果 */
 		int i;
@@ -1837,6 +1854,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case WZ_JUPITEL:			/* ユピテルサンダー */
 	case NPC_MAGICALATTACK:		/* MOB:魔法打撃攻撃 */
 	case PR_ASPERSIO:			/* アスペルシオ */
+	case HW_NAPALMVULCAN:		/* ナパームバルカン */
 		skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 
@@ -1889,36 +1907,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				skill_castend_damage_id);
 		}
 		break;
-
-	case HW_NAPALMVULCAN:
-			if(flag&1){
-				if(bl->id!=skill_area_temp[1]){
-					skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,
-						skill_area_temp[0]);
-				}
-			}else{
-				int ar=(skillid==HW_NAPALMVULCAN)?1:2;
-				skill_area_temp[1]=bl->id;
-				if(skillid==HW_NAPALMVULCAN){
-					skill_area_temp[0]=0;
-					map_foreachinarea(skill_area_sub,
-						bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
-						src,skillid,skilllv,tick, flag|BCT_ENEMY ,
-						skill_area_sub_count);
-				}else{
-					skill_area_temp[0]=0;
-					skill_area_temp[2]=bl->x;
-					skill_area_temp[3]=bl->y;
-				}
-				skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,
-					skill_area_temp[0] );
-				map_foreachinarea(skill_area_sub,
-					bl->m,bl->x-ar,bl->y-ar,bl->x+ar,bl->y+ar,0,
-					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
-					skill_castend_damage_id);
-			}
-			break;
-
 	case WZ_FROSTNOVA:			/* フロストノヴァ */
 		skill_castend_pos2(src,bl->x,bl->y,skillid,skilllv,tick,0);
 		break;

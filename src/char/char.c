@@ -80,7 +80,7 @@ int max_connect_user=0;
 int autosave_interval=DEFAULT_AUTOSAVE_INTERVAL;
 int start_zeny = 500;
 
-// 初期位置（confファイルから再設定可能）
+// 初期位置（confファイルから再設定可能） 
 struct point start_point={"new_1-1.gat",53,111};
 
 static struct dbt *gm_account_db;
@@ -1383,8 +1383,8 @@ int parse_char(int fd)
 			cmd!=0x20b	&&	// md5通知パケット除去
 			(RFIFOREST(fd)<6 || RFIFOW(fd,4)==0x65)	){	// 次に何かパケットが来てるなら、接続でないとだめ
 			RFIFOSKIP(fd,4);
-			printf("parse_char : %d crc32 skipped\n",fd);
 			cmd = RFIFOW(fd,0);
+			printf("parse_char : %d crc32 skipped\n",fd);
 			if(RFIFOREST(fd)==0)
 				return 0;
 		}
@@ -1394,7 +1394,7 @@ int parse_char(int fd)
 
 		// 不正パケットの処理
 		if (sd == NULL && cmd != 0x65 && cmd != 0x20b && cmd != 0x187 &&
-					 cmd != 0x2af8 && cmd != 0x7530 && cmd != 7532)
+					 cmd != 0x2af8 && cmd != 0x7530 && cmd != 0x7532)
 			cmd = 0xffff;	// パケットダンプを表示させる
 		
 		switch(cmd){
@@ -1485,7 +1485,7 @@ int parse_char(int fd)
 				}
 				if(i<0 || server[i].active==0){
 					WFIFOW(fd,0)=0x6c;
-					WFIFOW(fd,2)=0x00;
+					WFIFOW(fd,2)=0;
 					WFIFOSET(fd,3);
 					RFIFOSKIP(fd,3);
 					break;
@@ -1592,7 +1592,7 @@ int parse_char(int fd)
 			}
 			if( i==9 ){
 				WFIFOW(fd,0)=0x70;
-				WFIFOB(fd,2)=0x00;
+				WFIFOB(fd,2)=0;
 				WFIFOSET(fd,3);
 			} else {
 				WFIFOW(fd,0)=0x6f;
@@ -1609,7 +1609,7 @@ int parse_char(int fd)
 					break;
 			}
 			if(i==MAX_MAP_SERVERS || strcmp(RFIFOP(fd,2),userid) || strcmp(RFIFOP(fd,26),passwd)){
-				WFIFOB(fd,2)=0x03;
+				WFIFOB(fd,2)=3;
 				WFIFOSET(fd,3);
 				RFIFOSKIP(fd,60);
 			} else {
