@@ -837,6 +837,16 @@ int mob_can_reach(struct mob_data *md,struct block_list *bl,int range)
 	struct walkpath_data wpd;
 	int i;
 
+	//=========== guildcastle guardian no search start===========
+	//when players are the guild castle member not attack them !
+	if(md->class == 1285 || md->class == 1286 || md->class == 1287) {
+		struct guild *g=guild_search(((struct map_session_data *)bl)->status.guild_id);
+		struct guild_castle *gc=guild_mapname2gc(map[bl->m].name);
+		if(g->guild_id == gc->guild_id)
+			return 0;
+	}
+	//========== guildcastle guardian no search eof==============
+
 	if( md->bl.m != bl-> m)	// ˆá‚¤ƒ}ƒbƒv
 		return 0;
 	
@@ -850,22 +860,8 @@ int mob_can_reach(struct mob_data *md,struct block_list *bl,int range)
 	wpd.path_len=0;
 	wpd.path_pos=0;
 	wpd.path_half=0;
-//	if(path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,bl->x,bl->y,0)!=-1)
-//		return 1;
-
 	if(path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,bl->x,bl->y,0)!=-1)
-	{
-		 //when players are the guild castle member not attack them !
-		if(md->class == 1285 || md->class == 1286 || md->class == 1287) {
-			struct guild *g=guild_search(((struct map_session_data *)bl)->status.guild_id);
-			struct guild_castle *gc=guild_mapname2gc(map[bl->m].name);
-			if(g == NULL)
-				return 1;
-			else if(g->guild_id == gc->guild_id)
-				return 0;
-		}else 
-			return 1;
-	}
+		return 1;
 
 	if(bl->type!=BL_PC && bl->type!=BL_MOB)
 		return 0;

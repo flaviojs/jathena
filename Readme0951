@@ -1,4 +1,27 @@
 --------------------
+//0954 by (凸)
+・object_del.batで各server.exeも削除するようにした
+・For English User Forum >>11 kingboさんの修正を取り込み
+・バグ報告スレッド part5 >>10 Sinさんの修正を取り込み
+・ついでに見かけたatcommand_character_joblevelの不具合を修正
+・@コマンドでジョブレベルを上げるときにスパノビはJob70まで対応(未確認)
+
+	(/)
+	object_del.bat 修正
+	(map/)
+	atcommand.c
+		atcommand_joblevelup() 修正
+		atcommand_character_joblevel() 修正
+		atcommand_character_baselevel() 修正
+
+	code by kingbo 2004/4/29 PM 06:15
+	base on 0953
+	now i sure it works well
+	(map/)
+	mob.c
+		mob_can_reach() fix
+
+--------------------
 //0953 by (凸)
 ・mob_skill_db.txtの条件値に0以外入っていなかったのを訂正
 ・gcc 2.95でコンパイルできるように訂正(by バグスレpart5 >>2 茜さん)

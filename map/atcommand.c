@@ -104,101 +104,104 @@ ATCOMMAND_FUNC(guild);
 ATCOMMAND_FUNC(agitstart);
 ATCOMMAND_FUNC(agitend);
 
+/*==========================================
+ *AtCommandInfo atcommand_info[]構造体の定義
+ *------------------------------------------
+ */
 static AtCommandInfo atcommand_info[] = {
-	{ AtCommand_RuraP,               "@rura+",     0, atcommand_rurap },
-	{ AtCommand_Rura,                "@rura",      0, atcommand_rura },
-	{ AtCommand_Where,               "@where",     0, atcommand_where },
-	{ AtCommand_JumpTo,              "@jumpto",    0, atcommand_jumpto },
-	{ AtCommand_Jump,                "@jump",      0, atcommand_jump },
-	{ AtCommand_Who,                 "@who",       0, atcommand_who },
-	{ AtCommand_Save,                "@save",      0, atcommand_save },
-	{ AtCommand_Load,                "@load",      0, atcommand_load },
-	{ AtCommand_Speed,               "@speed",     0, atcommand_speed },
-	{ AtCommand_Storage,             "@storage",   0, atcommand_storage },
-	{ AtCommand_GuildStorage,        "@gstorage",  0, atcommand_guildstorage },
-	{ AtCommand_Option,              "@option",    0, atcommand_option },
-	{ AtCommand_Hide,                "@hide",      0, atcommand_hide },
-	{ AtCommand_JobChange,           "@jobchange", 0, atcommand_jobchange },
-	{ AtCommand_Die,                 "@die",       0, atcommand_die },
-	{ AtCommand_Kill,                "@kill",      0, atcommand_kill },
-	{ AtCommand_Alive,               "@alive",     0, atcommand_alive },
-	{ AtCommand_Kami,                "@kami",      0, atcommand_kami },
-	{ AtCommand_KamiB,               "@kamib",     0, atcommand_kami },
-	{ AtCommand_Heal,                "@heal",      0, atcommand_heal },
-	{ AtCommand_Item,                "@item",      0, atcommand_item },
-	{ AtCommand_Item2,               "@item2",     0, atcommand_item2 },
-	{ AtCommand_ItemReset,           "@itemreset", 0, atcommand_itemreset },
-	{ AtCommand_ItemCheck,           "@itemcheck", 0, atcommand_itemcheck },
-	{ AtCommand_BaseLevelUp,         "@lvup",      0, atcommand_baselevelup },
-	{ AtCommand_JobLevelUp,          "@joblvup",   0, atcommand_joblevelup },
-	{ AtCommand_H,                   "@h",         0, atcommand_help },
-	{ AtCommand_Help,                "@help",      0, atcommand_help },
-	{ AtCommand_GM,                  "@gm",        0, atcommand_gm },
-	{ AtCommand_PvPOff,              "@pvpoff",    0, atcommand_pvpoff },
-	{ AtCommand_PvPOn,               "@pvpon",     0, atcommand_pvpon },
-	{ AtCommand_GvGOff,              "@gvgoff",    0, atcommand_gvgoff },
-	{ AtCommand_GvGOn,               "@gvgon",     0, atcommand_gvgon },
-	{ AtCommand_Model,               "@model",     0, atcommand_model },
-	{ AtCommand_Go,                  "@go",        0, atcommand_go },
-	{ AtCommand_Monster,             "@monster",   0, atcommand_monster },
-	{ AtCommand_KillMonster,         "@killmonster", 0, atcommand_killmonster },
-	{ AtCommand_KillMonster2,        "@killmonster2", 0,
-		atcommand_killmonster2 },
-	{ AtCommand_Refine,              "@refine", 0, atcommand_refine },
-	{ AtCommand_Produce,             "@produce", 0, atcommand_produce },
-	{ AtCommand_Memo,                "@memo", 0, atcommand_memo },
-	{ AtCommand_GAT,                 "@gat", 0, atcommand_gat },
-	{ AtCommand_Packet,              "@packet", 0, atcommand_packet },
-	{ AtCommand_StatusPoint,         "@stpoint", 0, atcommand_statuspoint },
-	{ AtCommand_SkillPoint,          "@skpoint", 0, atcommand_skillpoint },
-	{ AtCommand_Zeny,                "@zeny", 0, atcommand_zeny },
-//	{ AtCommand_Param,               "@param", 0, atcommand_param },
-	{ AtCommand_Strength,            "@str", 0, atcommand_param },
-	{ AtCommand_Agility,             "@agi", 0, atcommand_param },
-	{ AtCommand_Vitality,           "@vit", 0, atcommand_param },
-	{ AtCommand_Intelligence,        "@int", 0, atcommand_param },
-	{ AtCommand_Dexterity,           "@dex", 0, atcommand_param },
-	{ AtCommand_Luck,                "@luk", 0, atcommand_param },
-	{ AtCommand_GuildLevelUp,        "@guildlvup", 0, atcommand_guildlevelup },
-	{ AtCommand_MakePet,             "@makepet", 0, atcommand_makepet },
-	{ AtCommand_PetFriendly,         "@petfriendly", 0, atcommand_petfriendly },
-	{ AtCommand_PetHungry,           "@pethungry", 0, atcommand_pethungry },
-	{ AtCommand_PetRename,           "@petrename", 0, atcommand_petrename },
-	{ AtCommand_Recall,              "@recall", 0, atcommand_recall },
-	{ AtCommand_CharacterJob,        "@charjob", 0, atcommand_character_job },
-	{ AtCommand_Revive,              "@revive", 0, atcommand_revive },
-	{ AtCommand_CharacterStats,      "@charstats", 0,
-		atcommand_character_stats },
-	{ AtCommand_CharacterOption,     "@charoption", 0,
-		atcommand_character_option },
-	{ AtCommand_CharacterSave,       "@charsave", 0, atcommand_character_save },
-	{ AtCommand_Night,               "@night", 0, atcommand_night },
-	{ AtCommand_Day,                 "@day", 0, atcommand_day },
-	{ AtCommand_Doom,                "@doom", 0, atcommand_doom },
-	{ AtCommand_DoomMap,             "@doommap", 0, atcommand_doommap },
-	{ AtCommand_Raise,               "@raise", 0, atcommand_raise },
-	{ AtCommand_RaiseMap,            "@raisemap", 0, atcommand_raisemap },
-	{ AtCommand_CharacterBaseLevel,  "@charbaselvl", 0,
-		atcommand_character_baselevel },
-	{ AtCommand_CharacterJobLevel,   "@charjlvl", 0,
-		atcommand_character_joblevel },
-	{ AtCommand_Kick,                "@kick", 0, atcommand_kick },
-	{ AtCommand_KickAll,             "@kickall", 0, atcommand_kickall },
-	{ AtCommand_AllSkill,            "@allskill", 0, atcommand_allskill },
-	{ AtCommand_QuestSkill,          "@questskill", 0, atcommand_questskill },
-	{ AtCommand_LostSkill,           "@lostskill", 0, atcommand_lostskill },
-	{ AtCommand_SpiritBall,          "@spiritball", 0, atcommand_spiritball },
-	{ AtCommand_Party,               "@party", 0, atcommand_party },
-	{ AtCommand_Guild,               "@guild", 0, atcommand_guild },
-	{ AtCommand_AgitStart,           "@agitstart", 0, atcommand_agitstart },
-	{ AtCommand_AgitEnd,             "@agitend", 0, atcommand_agitend },
+	{ AtCommand_RuraP,					"@rura+",			0, atcommand_rurap },
+	{ AtCommand_Rura,					"@rura",			0, atcommand_rura },
+	{ AtCommand_Where,					"@where",			0, atcommand_where },
+	{ AtCommand_JumpTo,					"@jumpto",			0, atcommand_jumpto },
+	{ AtCommand_Jump,					"@jump",			0, atcommand_jump },
+	{ AtCommand_Who,					"@who",				0, atcommand_who },
+	{ AtCommand_Save,					"@save",			0, atcommand_save },
+	{ AtCommand_Load,					"@load",			0, atcommand_load },
+	{ AtCommand_Speed,					"@speed",			0, atcommand_speed },
+	{ AtCommand_Storage,				"@storage",			0, atcommand_storage },
+	{ AtCommand_GuildStorage,			"@gstorage",		0, atcommand_guildstorage },
+	{ AtCommand_Option,					"@option",			0, atcommand_option },
+	{ AtCommand_Hide,					"@hide",			0, atcommand_hide },
+	{ AtCommand_JobChange,				"@jobchange",		0, atcommand_jobchange },
+	{ AtCommand_Die,					"@die",				0, atcommand_die },
+	{ AtCommand_Kill,					"@kill",			0, atcommand_kill },
+	{ AtCommand_Alive,					"@alive",			0, atcommand_alive },
+	{ AtCommand_Kami,					"@kami",			0, atcommand_kami },
+	{ AtCommand_KamiB,					"@kamib",			0, atcommand_kami },
+	{ AtCommand_Heal,					"@heal",			0, atcommand_heal },
+	{ AtCommand_Item,					"@item",			0, atcommand_item },
+	{ AtCommand_Item2,					"@item2",			0, atcommand_item2 },
+	{ AtCommand_ItemReset,				"@itemreset",		0, atcommand_itemreset },
+	{ AtCommand_ItemCheck,				"@itemcheck",		0, atcommand_itemcheck },
+	{ AtCommand_BaseLevelUp,			"@lvup",			0, atcommand_baselevelup },
+	{ AtCommand_JobLevelUp,				"@joblvup",			0, atcommand_joblevelup },
+	{ AtCommand_H,						"@h",				0, atcommand_help },
+	{ AtCommand_Help,					"@help",			0, atcommand_help },
+	{ AtCommand_GM,						"@gm",				0, atcommand_gm },
+	{ AtCommand_PvPOff,					"@pvpoff",			0, atcommand_pvpoff },
+	{ AtCommand_PvPOn,					"@pvpon",			0, atcommand_pvpon },
+	{ AtCommand_GvGOff,					"@gvgoff",			0, atcommand_gvgoff },
+	{ AtCommand_GvGOn,					"@gvgon",			0, atcommand_gvgon },
+	{ AtCommand_Model,					"@model",			0, atcommand_model },
+	{ AtCommand_Go,						"@go",				0, atcommand_go },
+	{ AtCommand_Monster,				"@monster",			0, atcommand_monster },
+	{ AtCommand_KillMonster,			"@killmonster",		0, atcommand_killmonster },
+	{ AtCommand_KillMonster2,			"@killmonster2",	0, atcommand_killmonster2 },
+	{ AtCommand_Refine,					"@refine",			0, atcommand_refine },
+	{ AtCommand_Produce,				"@produce",			0, atcommand_produce },
+	{ AtCommand_Memo,					"@memo",			0, atcommand_memo },
+	{ AtCommand_GAT,					"@gat",				0, atcommand_gat },
+	{ AtCommand_Packet,					"@packet",			0, atcommand_packet },
+	{ AtCommand_StatusPoint,			"@stpoint",			0, atcommand_statuspoint },
+	{ AtCommand_SkillPoint,				"@skpoint",			0, atcommand_skillpoint },
+	{ AtCommand_Zeny,					"@zeny",			0, atcommand_zeny },
+//	{ AtCommand_Param,					"@param",			0, atcommand_param },
+	{ AtCommand_Strength,				"@str",				0, atcommand_param },
+	{ AtCommand_Agility,				"@agi",				0, atcommand_param },
+	{ AtCommand_Vitality,				"@vit",				0, atcommand_param },
+	{ AtCommand_Intelligence,			"@int",				0, atcommand_param },
+	{ AtCommand_Dexterity,				"@dex",				0, atcommand_param },
+	{ AtCommand_Luck,					"@luk",				0, atcommand_param },
+	{ AtCommand_GuildLevelUp,			"@guildlvup",		0, atcommand_guildlevelup },
+	{ AtCommand_MakePet,				"@makepet",			0, atcommand_makepet },
+	{ AtCommand_PetFriendly,			"@petfriendly",		0, atcommand_petfriendly },
+	{ AtCommand_PetHungry,				"@pethungry",		0, atcommand_pethungry },
+	{ AtCommand_PetRename,				"@petrename",		0, atcommand_petrename },
+	{ AtCommand_Recall,					"@recall",			0, atcommand_recall },
+	{ AtCommand_CharacterJob,			"@charjob",			0, atcommand_character_job },
+	{ AtCommand_Revive,					"@revive",			0, atcommand_revive },
+	{ AtCommand_CharacterStats,			"@charstats",		0, atcommand_character_stats },
+	{ AtCommand_CharacterOption,		"@charoption",		0, atcommand_character_option },
+	{ AtCommand_CharacterSave,			"@charsave",		0, atcommand_character_save },
+	{ AtCommand_Night,					"@night",			0, atcommand_night },
+	{ AtCommand_Day,					"@day",				0, atcommand_day },
+	{ AtCommand_Doom,					"@doom",			0, atcommand_doom },
+	{ AtCommand_DoomMap,				"@doommap",			0, atcommand_doommap },
+	{ AtCommand_Raise,					"@raise",			0, atcommand_raise },
+	{ AtCommand_RaiseMap,				"@raisemap",		0, atcommand_raisemap },
+	{ AtCommand_CharacterBaseLevel,		"@charbaselvl",		0, atcommand_character_baselevel },
+	{ AtCommand_CharacterJobLevel,		"@charjlvl",		0, atcommand_character_joblevel },
+	{ AtCommand_Kick,					"@kick",			0, atcommand_kick },
+	{ AtCommand_KickAll,				"@kickall",			0, atcommand_kickall },
+	{ AtCommand_AllSkill,				"@allskill",		0, atcommand_allskill },
+	{ AtCommand_QuestSkill,				"@questskill",		0, atcommand_questskill },
+	{ AtCommand_LostSkill,				"@lostskill",		0, atcommand_lostskill },
+	{ AtCommand_SpiritBall,				"@spiritball",		0, atcommand_spiritball },
+	{ AtCommand_Party,					"@party",			0, atcommand_party },
+	{ AtCommand_Guild,					"@guild",			0, atcommand_guild },
+	{ AtCommand_AgitStart,				"@agitstart",		0, atcommand_agitstart },
+	{ AtCommand_AgitEnd,				"@agitend",			0, atcommand_agitend },
 	// add here
-	{ AtCommand_MapMove,           "@mapmove", 0, NULL },
-	{ AtCommand_Broadcast,           "@broadcast", 0, NULL },
-	{ AtCommand_LocalBroadcast,      "@local_broadcast", 0, NULL },
-	{ AtCommand_Unknown,             NULL, 0, NULL }
+	{ AtCommand_MapMove,				"@mapmove",			0, NULL },
+	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
+	{ AtCommand_LocalBroadcast,			"@local_broadcast",	0, NULL },
+	{ AtCommand_Unknown,				NULL,				0, NULL }
 };
 
+/*==========================================
+ *get_atcommand_level @コマンドの必要レベルを取得
+ *------------------------------------------
+ */
 int get_atcommand_level(const AtCommandType type)
 {
 	int i = 0;
@@ -208,6 +211,10 @@ int get_atcommand_level(const AtCommandType type)
 	return 99;
 }
 
+/*==========================================
+ *is_atcommand @コマンドに存在するかどうか確認する
+ *------------------------------------------
+ */
 AtCommandType
 is_atcommand(const int fd, struct map_session_data* sd, const char* message)
 {
@@ -256,6 +263,10 @@ is_atcommand(const int fd, struct map_session_data* sd, const char* message)
 	return AtCommand_None;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 AtCommandType
 atcommand(
 	const int level, const char* message, struct AtCommandInfo* info)
@@ -293,6 +304,10 @@ atcommand(
 
 //struct Atcommand_Config atcommand_config;
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 static int atkillmonster_sub(struct block_list *bl,va_list ap)
 {
 	int flag = va_arg(ap,int);
@@ -303,6 +318,10 @@ static int atkillmonster_sub(struct block_list *bl,va_list ap)
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 /* Read Message Data */
 int msg_config_read(const char *cfgName)
 {
@@ -346,6 +365,10 @@ static AtCommandInfo* getAtCommandInfoByType(const AtCommandType type)
 }
 */
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 static AtCommandInfo*
 get_atcommandinfo_byname(const char* name)
 {
@@ -356,6 +379,10 @@ get_atcommandinfo_byname(const char* name)
 	return NULL;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int atcommand_config_read(const char *cfgName)
 {
 	int i;
@@ -390,6 +417,10 @@ int atcommand_config_read(const char *cfgName)
 // @ command 処理関数群
 
 // @rura+
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_rurap(
 	const int fd, struct map_session_data* sd,
@@ -426,6 +457,10 @@ atcommand_rurap(
 }
 
 // @rura
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_rura(
 	const int fd, struct map_session_data* sd,
@@ -450,6 +485,10 @@ atcommand_rura(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_where(
 	const int fd, struct map_session_data* sd,
@@ -476,6 +515,10 @@ atcommand_where(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_jumpto(
 	const int fd, struct map_session_data* sd,
@@ -503,6 +546,10 @@ atcommand_jumpto(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_jump(
 	const int fd, struct map_session_data* sd,
@@ -524,6 +571,10 @@ atcommand_jump(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_who(
 	const int fd, struct map_session_data* sd,
@@ -540,6 +591,10 @@ atcommand_who(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_save(
 	const int fd, struct map_session_data* sd,
@@ -556,6 +611,10 @@ atcommand_save(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_load(
 	const int fd, struct map_session_data* sd,
@@ -568,6 +627,10 @@ atcommand_load(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_speed(
 	const int fd, struct map_session_data* sd,
@@ -588,6 +651,10 @@ atcommand_speed(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_storage(
 	const int fd, struct map_session_data* sd,
@@ -597,6 +664,10 @@ atcommand_storage(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_guildstorage(
 	const int fd, struct map_session_data* sd,
@@ -607,6 +678,10 @@ atcommand_guildstorage(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_option(
 	const int fd, struct map_session_data* sd,
@@ -633,6 +708,10 @@ atcommand_option(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_hide(
 	const int fd, struct map_session_data* sd,
@@ -650,6 +729,10 @@ atcommand_hide(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_jobchange(
 	const int fd, struct map_session_data* sd,
@@ -667,6 +750,10 @@ atcommand_jobchange(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_die(
 	const int fd, struct map_session_data* sd,
@@ -678,6 +765,10 @@ atcommand_die(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_kill(
 	const int fd, struct map_session_data* sd,
@@ -702,6 +793,10 @@ atcommand_kill(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_alive(
 	const int fd, struct map_session_data* sd,
@@ -720,6 +815,10 @@ atcommand_alive(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_kami(
 	const int fd, struct map_session_data* sd,
@@ -737,6 +836,10 @@ atcommand_kami(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_heal(
 	const int fd, struct map_session_data* sd,
@@ -767,6 +870,10 @@ atcommand_heal(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_item(
 	const int fd, struct map_session_data* sd,
@@ -821,6 +928,10 @@ atcommand_item(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_item2(
 	const int fd, struct map_session_data* sd,
@@ -895,6 +1006,10 @@ atcommand_item2(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_itemreset(
 	const int fd, struct map_session_data* sd,
@@ -911,6 +1026,10 @@ atcommand_itemreset(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_itemcheck(
 	const int fd, struct map_session_data* sd,
@@ -921,6 +1040,10 @@ atcommand_itemcheck(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_baselevelup(
 	const int fd, struct map_session_data* sd,
@@ -954,6 +1077,10 @@ atcommand_baselevelup(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_joblevelup(
 	const int fd, struct map_session_data* sd,
@@ -966,6 +1093,8 @@ atcommand_joblevelup(
 	level = atoi(message);
 	if (sd->status.class == 0)
 		up_level -= 40;
+	if (sd->status.class == 23) //スパノビはJobレベルの最高が70
+		up_level += 20;
 	if (sd->status.job_level == up_level) {
 		clif_displaymessage(fd, msg_table[23]);
 	} else if (level >= 1) {
@@ -990,6 +1119,10 @@ atcommand_joblevelup(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_help(
 	const int fd, struct map_session_data* sd,
@@ -1015,6 +1148,10 @@ atcommand_help(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_gm(
 	const int fd, struct map_session_data* sd,
@@ -1043,6 +1180,10 @@ atcommand_gm(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_pvpoff(
 	const int fd, struct map_session_data* sd,
@@ -1072,6 +1213,10 @@ atcommand_pvpoff(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_pvpon(
 	const int fd, struct map_session_data* sd,
@@ -1101,6 +1246,10 @@ atcommand_pvpon(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_gvgoff(
 	const int fd, struct map_session_data* sd,
@@ -1114,6 +1263,10 @@ atcommand_gvgoff(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_gvgon(
 	const int fd, struct map_session_data* sd,
@@ -1127,6 +1280,10 @@ atcommand_gvgon(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_model(
 	const int fd, struct map_session_data* sd,
@@ -1159,6 +1316,10 @@ atcommand_model(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_go(
 	const int fd, struct map_session_data* sd,
@@ -1193,6 +1354,10 @@ atcommand_go(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_monster(
 	const int fd, struct map_session_data* sd,
@@ -1245,6 +1410,10 @@ atcommand_monster(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 void
 atcommand_killmonster_sub(
 	const int fd, struct map_session_data* sd, const char* message,
@@ -1267,6 +1436,10 @@ atcommand_killmonster_sub(
 		map[map_id].xs, map[map_id].ys, BL_MOB, drop);
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_killmonster(
 	const int fd, struct map_session_data* sd,
@@ -1277,6 +1450,10 @@ atcommand_killmonster(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_killmonster2(
 	const int fd, struct map_session_data* sd,
@@ -1287,6 +1464,10 @@ atcommand_killmonster2(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_refine(
 	const int fd, struct map_session_data* sd,
@@ -1326,6 +1507,10 @@ atcommand_refine(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_produce(
 	const int fd, struct map_session_data* sd,
@@ -1373,6 +1558,10 @@ atcommand_produce(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_memo(
 	const int fd, struct map_session_data* sd,
@@ -1390,6 +1579,10 @@ atcommand_memo(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_gat(
 	const int fd, struct map_session_data* sd,
@@ -1412,6 +1605,10 @@ atcommand_gat(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_packet(
 	const int fd, struct map_session_data* sd,
@@ -1428,6 +1625,10 @@ atcommand_packet(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_statuspoint(
 	const int fd, struct map_session_data* sd,
@@ -1448,6 +1649,10 @@ atcommand_statuspoint(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_skillpoint(
 	const int fd, struct map_session_data* sd,
@@ -1467,6 +1672,10 @@ atcommand_skillpoint(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_zeny(
 	const int fd, struct map_session_data* sd,
@@ -1488,6 +1697,10 @@ atcommand_zeny(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_param(
 	const int fd, struct map_session_data* sd,
@@ -1531,6 +1744,10 @@ atcommand_param(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_guildlevelup(
 	const int fd, struct map_session_data* sd,
@@ -1562,6 +1779,10 @@ atcommand_guildlevelup(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_makepet(
 	const int fd, struct map_session_data* sd,
@@ -1589,7 +1810,11 @@ atcommand_makepet(
 
 	return 0;
 }
-			
+
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_petfriendly(
 	const int fd, struct map_session_data* sd,
@@ -1623,6 +1848,10 @@ atcommand_petfriendly(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_pethungry(
 	const int fd, struct map_session_data* sd,
@@ -1646,6 +1875,10 @@ atcommand_pethungry(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_petrename(
 	const int fd, struct map_session_data* sd,
@@ -1660,6 +1893,10 @@ atcommand_petrename(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_recall(
 	const int fd, struct map_session_data* sd,
@@ -1688,6 +1925,10 @@ atcommand_recall(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_character_job(
 	const int fd, struct map_session_data* sd,
@@ -1719,6 +1960,10 @@ atcommand_character_job(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_revive(
 	const int fd, struct map_session_data* sd,
@@ -1747,6 +1992,10 @@ atcommand_revive(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_character_stats(
 	const int fd, struct map_session_data* sd,
@@ -1795,6 +2044,10 @@ atcommand_character_stats(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_character_option(
 	const int fd, struct map_session_data* sd,
@@ -1825,6 +2078,10 @@ atcommand_character_option(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_character_save(
 	const int fd, struct map_session_data* sd,
@@ -1852,6 +2109,10 @@ atcommand_character_save(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_night(
 	const int fd, struct map_session_data* sd,
@@ -1871,6 +2132,10 @@ atcommand_night(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_day(
 	const int fd, struct map_session_data* sd,
@@ -1890,6 +2155,10 @@ atcommand_day(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_doom(
 	const int fd, struct map_session_data* sd,
@@ -1911,6 +2180,10 @@ atcommand_doom(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_doommap(
 	const int fd, struct map_session_data* sd,
@@ -1931,6 +2204,10 @@ atcommand_doommap(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 static void
 atcommand_raise_sub(struct map_session_data* sd)
 {
@@ -1945,6 +2222,10 @@ atcommand_raise_sub(struct map_session_data* sd)
 			}
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_raise(
 	const int fd, struct map_session_data* sd,
@@ -1960,6 +2241,10 @@ atcommand_raise(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_raisemap(
 	const int fd, struct map_session_data* sd,
@@ -1977,6 +2262,10 @@ atcommand_raisemap(
 	return 0;
 }
 
+/*==========================================
+ * atcommand_character_baselevel @charbaselvlで対象キャラのレベルを上げる
+ *------------------------------------------
+*/
 int
 atcommand_character_baselevel(
 	const int fd, struct map_session_data* sd,
@@ -1986,40 +2275,40 @@ atcommand_character_baselevel(
 	char character[100];
 	int level = 0, i = 0;
 	
-	if (!message || !*message)
-		return -1;
+	if (!message || !*message) //messageが空ならエラーを返して終了
+		return -1; //エラーを返して終了
 	memset(character, '\0', sizeof character);
-	if (sscanf(message, "%d %99[^\n]", &level, character) < 2)
-		return -1;
-	if ((pl_sd = map_nick2sd(character)) != NULL) {
-		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
-			if (level >= 1) {
-				for (i = 1; i <= level; i++) {
-					if (pl_sd->status.base_level + i >= 99)
-								pl_sd->status.status_point += 22;
-							else
-						pl_sd->status.status_point += (i + 14) / 5 ;
-					}
-				pl_sd->status.base_level += level;
-				clif_updatestatus(pl_sd, SP_BASELEVEL);
-				clif_updatestatus(pl_sd, SP_NEXTBASEEXP);
-				clif_updatestatus(pl_sd, SP_STATUSPOINT);
-				pc_calcstatus(pl_sd, 0);
-				pc_heal(pl_sd, pl_sd->status.max_hp, pl_sd->status.max_sp);
-				clif_misceffect(&pl_sd->bl, 0);
-				clif_displaymessage(fd, msg_table[65]);
-			} else if (level < 0 && pl_sd->status.base_level + level > 0) {
-				pl_sd->status.base_level += level;
-				clif_updatestatus(pl_sd, SP_BASELEVEL);
-				clif_updatestatus(pl_sd, SP_NEXTBASEEXP);
-				pc_calcstatus(pl_sd, 0);
-				clif_displaymessage(fd, msg_table[66]);
-				}
+	if (sscanf(message, "%d %99[^\n]", &level, character) < 2) //messageにLevelとキャラ名が無ければ
+		return -1; //エラーを返して終了
+	if ((pl_sd = map_nick2sd(character)) != NULL) { //該当名のキャラが存在する
+		if (pc_isGM(sd) > pc_isGM(pl_sd)) { //対象キャラのGMレベルが自分より小さい
+			if (level >= 1) { //上げるレベルが１より大きい
+				for (i = 1; i <= level; i++) //入力されたレベル回ステータスポイントを追加する
+					pl_sd->status.status_point += (pl_sd->status.base_level + i + 14) / 5 ;
+				pl_sd->status.base_level += level; //対象キャラのベースレベルを上げる
+				clif_updatestatus(pl_sd, SP_BASELEVEL); //クライアントに上げたベースレベルを送る
+				clif_updatestatus(pl_sd, SP_NEXTBASEEXP); //クライアントに次のベースレベルアップまでの必要経験値を送る
+				clif_updatestatus(pl_sd, SP_STATUSPOINT); //クライアントにステータスポイントを送る
+				pc_calcstatus(pl_sd, 0); //ステータスを計算しなおす
+				pc_heal(pl_sd, pl_sd->status.max_hp, pl_sd->status.max_sp); //HPとSPを完全回復させる
+				clif_misceffect(&pl_sd->bl, 0); //ベースレベルアップエフェクトの送信
+				clif_displaymessage(fd, msg_table[65]); //レベルを上げたメッセージを表示する
+			} else if (level < 0 && pl_sd->status.base_level + level > 0) { //対象キャラのレベルがマイナスで変化結果が0以上なら
+				pl_sd->status.base_level += level; //対象キャラのレベルを下げる
+				clif_updatestatus(pl_sd, SP_BASELEVEL); //クライアントに下げたベースレベルを送る
+				clif_updatestatus(pl_sd, SP_NEXTBASEEXP); //クライアントに次のベースレベルアップまでの必要経験値を送る
+				pc_calcstatus(pl_sd, 0); //ステータスを計算しなおす
+				clif_displaymessage(fd, msg_table[66]); //レベルを下げたメッセージを表示する
 			}
-					}
-	return 0;
+		}
+	}
+	return 0; //正常終了
 }
 
+/*==========================================
+ * atcommand_character_joblevel @charjoblvlで対象キャラのJobレベルを上げる
+ *------------------------------------------
+ */
 int
 atcommand_character_joblevel(
 	const int fd, struct map_session_data* sd,
@@ -2038,6 +2327,8 @@ atcommand_character_joblevel(
 		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
 			if (pl_sd->status.class == 0)
 				max_level -= 40;
+			if (pl_sd->status.class == 23) //スパノビはJobレベルの最高が70
+				max_level += 20;
 			if (pl_sd->status.job_level == max_level) {
 				clif_displaymessage(fd, msg_table[67]);
 			} else if (level >= 1) {
@@ -2051,7 +2342,7 @@ atcommand_character_joblevel(
 				pc_calcstatus(pl_sd, 0);
 				clif_misceffect(&pl_sd->bl, 1);
 				clif_displaymessage(fd, msg_table[68]);
-			} else if (level < 0 && sd->status.job_level + max_level > 0) {
+			} else if (level < 0 && sd->status.job_level + level > 0) {
 				pl_sd->status.job_level += level;
 				clif_updatestatus(pl_sd, SP_JOBLEVEL);
 				clif_updatestatus(pl_sd, SP_NEXTJOBEXP);
@@ -2064,6 +2355,10 @@ atcommand_character_joblevel(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_kick(
 	const int fd, struct map_session_data* sd,
@@ -2086,6 +2381,10 @@ atcommand_kick(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_kickall(
 	const int fd, struct map_session_data* sd,
@@ -2105,6 +2404,10 @@ atcommand_kickall(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_allskill(
 	const int fd, struct map_session_data* sd,
@@ -2115,6 +2418,10 @@ atcommand_allskill(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_questskill(
 	const int fd, struct map_session_data* sd,
@@ -2131,6 +2438,10 @@ atcommand_questskill(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_lostskill(
 	const int fd, struct map_session_data* sd,
@@ -2151,6 +2462,10 @@ atcommand_lostskill(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_spiritball(
 	const int fd, struct map_session_data* sd,
@@ -2171,6 +2486,10 @@ atcommand_spiritball(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_party(
 	const int fd, struct map_session_data* sd,
@@ -2184,6 +2503,10 @@ atcommand_party(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_guild(
 	const int fd, struct map_session_data* sd,
@@ -2203,6 +2526,10 @@ atcommand_guild(
 	return 0;
 }
 	
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_agitstart(
 	const int fd, struct map_session_data* sd,
@@ -2218,6 +2545,10 @@ atcommand_agitstart(
 	return 0;
 }
 
+/*==========================================
+ * 
+ *------------------------------------------
+ */
 int
 atcommand_agitend(
 	const int fd, struct map_session_data* sd,
