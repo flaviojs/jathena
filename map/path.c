@@ -14,7 +14,7 @@
 
 #define MAX_HEAP 150
 struct tmp_path { short x,y,dist,before,cost; char dir,flag;};
-#define calc_index(x,y) (((x)+(y)*32) & 1023)
+#define calc_index(x,y) (((x)+(y)*MAX_WALKPATH) & (MAX_WALKPATH*MAX_WALKPATH-1))
 
 /*==========================================
  * åoòHíTçıï‚èïheap push
@@ -227,7 +227,7 @@ int path_blownpos(int m,int x0,int y0,int dx,int dy,int count)
 int path_search(struct walkpath_data *wpd,int m,int x0,int y0,int x1,int y1,int flag)
 {
 	int heap[MAX_HEAP+1];
-	struct tmp_path tp[32*32];
+	struct tmp_path tp[MAX_WALKPATH*MAX_WALKPATH];
 	int i,rp,x,y;
 	struct map_data *md;
 	int dx,dy;

@@ -1341,15 +1341,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			aspd_rate += sd->sc_data[SC_DONTFORGETME].val1*3 + sd->sc_data[SC_DONTFORGETME].val2 + (sd->sc_data[SC_DONTFORGETME].val3>>16);
 			sd->speed= sd->speed*(100+sd->sc_data[SC_DONTFORGETME].val1*2 + sd->sc_data[SC_DONTFORGETME].val2 + (sd->sc_data[SC_DONTFORGETME].val3&0xffff))/100;
 		}
-		if(sd->sc_data[SC_CURSE].timer!=-1)
-			sd->speed += 450;
 		if(	sd->sc_data[i=SC_SPEEDPOTION2].timer!=-1 ||
 			sd->sc_data[i=SC_SPEEDPOTION1].timer!=-1 ||
 			sd->sc_data[i=SC_SPEEDPOTION0].timer!=-1)	// 増 速ポーション
 			aspd_rate -= sd->sc_data[i].val2;
-
-		if( sd->sc_data[SC_DANCING].timer!=-1 )		// 演奏/ダンス使用中
-			sd->speed*=4;
 
 		// HIT/FLEE変化系
 		if(sd->sc_data[SC_WHISTLE].timer!=-1){  // 口笛
@@ -1407,11 +1402,16 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		}
 		if(sd->sc_data[SC_DEFENDER].timer != -1) {
 			sd->long_attack_def_rate += 5 + sd->sc_data[SC_DEFENDER].val1*15;
-			aspd_rate += (35 - sd->sc_data[SC_DEFENDER].val1*5);
+			sd->aspd += (550 - sd->sc_data[SC_DEFENDER].val1*50);
 			sd->speed = (sd->speed * (155 - sd->sc_data[SC_DEFENDER].val1*5)) / 100;
 		}
 		if(sd->sc_data[SC_ENCPOISON].timer != -1)
 			sd->addeff[4] += sd->sc_data[SC_ENCPOISON].val2;
+
+		if( sd->sc_data[SC_DANCING].timer!=-1 )		// 演奏/ダンス使用中
+			sd->speed*=4;
+		if(sd->sc_data[SC_CURSE].timer!=-1)
+			sd->speed += 450;
 
 /*		if(sd->sc_data[SC_VOLCANO].timer!=-1)	// エンチャントポイズン(属性はbattle.cで)
 			sd->addeff[2]+=sd->sc_data[SC_VOLCANO].val2;//% of granting
@@ -2039,9 +2039,7 @@ int pc_bonus3(struct map_session_data *sd,int type,int type2,int type3,int val)
  */
 int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 {
-	int i;
-	
-	if(level>10){
+	if(level>MAX_SKILL_LEVEL){
 		if(battle_config.error_log)
 			printf("support card skill only!\n");
 		return 0;
@@ -2051,30 +2049,19 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 		pc_calcstatus(sd,0);
 		clif_skillinfoblock(sd);
 	}
-	else {
-		if(battle_config.gm_allskill>0 && pc_isGM(sd)>=battle_config.gm_allskill) {	// GMで全てのスキルを取得するようにしているかを判断
-			if(sd->status.skill[id].lv < level) {	// 覚えられるがlvが小さいなら
-				sd->status.skill[id].flag=sd->status.skill[id].lv+2;	// lvを記憶
-				sd->status.skill[id].lv=level;	// lvを上げる
-			}
-			return 0;
+	else if(sd->status.skill[id].lv < level){	// 覚えられるがlvが小さいなら
+		if(sd->status.skill[id].id==id)
+			sd->status.skill[id].flag=sd->status.skill[id].lv+2;	// lvを記憶
+		else {
+			sd->status.skill[id].id=id;
+			sd->status.skill[id].flag=1;	// cardスキルとする
 		}
-		for(i=0;i<100;i++) {
-			if(skill_tree[sd->status.class][i].id==id && sd->status.skill[id].id==id) {	// 現在の職業で覚えられるスキルか、条件を満たしているかを判断
-				if(sd->status.skill[id].lv < level) {	// 覚えられるがlvが小さいなら
-					sd->status.skill[id].flag=sd->status.skill[id].lv+2;	// lvを記憶
-					sd->status.skill[id].lv=level;	// lvを上げる
-				}
-				return 0;
-			}
-		}
-		sd->status.skill[id].id=id;	// 現在の職業で覚えられないスキル、あるいは条件を満たしていない場合は覚えられるようにして
-		sd->status.skill[id].flag=1;	// cardスキルとする
-		sd->status.skill[id].lv=level;	// lvを上げる
+		sd->status.skill[id].lv=level;
 	}
 
 	return 0;
 }
+
 /*==========================================
  * カード挿入
  *------------------------------------------
@@ -3649,26 +3636,33 @@ int pc_skillup(struct map_session_data *sd,int skill_num)
  */
 int pc_allskillup(struct map_session_data *sd)
 {
-	int i,j,flag=1;
-	
-	while(flag) {	// 覚えられるスキルがなくなる(flag==0)まで繰り返す
-		flag=0;	// とりあえずflagを0に設定
-		for(i=0;i<MAX_SKILL;i++) {	// スキルを0番から順番に検査
-			if(sd->status.skill[i].id==i) {	// 覚えられる場合で
-				if(sd->status.skill[i].flag)	// cardスキルの場合は
-					for(j=0;j<100;j++)
-						if((battle_config.gm_allskill>0 && pc_isGM(sd)>=battle_config.gm_allskill) || skill_tree[sd->status.class][j].id==i)	// 現在の職業で覚えられるスキルかを判断
-							sd->status.skill[i].flag=0;	// cardスキルを解除し、lv上げへ
-				if(!sd->status.skill[i].flag && sd->status.skill[i].lv < skill_get_max(i)) {	// cardスキルではなく、lvが小さいなら
-					sd->status.skill[i].lv=skill_get_max(i);	// lvを最大にして
-					sd->status.skill[i].flag=0;	// 記憶させたlvを消去
-					pc_calcstatus(sd,0);	// ステータスを計算し
-					clif_skillup(sd,i);	// lvアップを通知
-					flag=1;	// このlvアップで覚えられるスキルが増えたかもしれないので、flagを1にする
-				}
-			}
+	int i,id;
+	int c = sd->status.class;
+
+	for(i=0;i<MAX_SKILL;i++){
+		sd->status.skill[i].id=0;
+		if (sd->status.skill[i].flag){	// cardスキルなら、
+			sd->status.skill[i].lv=(sd->status.skill[i].flag==1)?0:sd->status.skill[i].flag-2;	// 本当のlvに
+			sd->status.skill[i].flag=0;	// flagは0にしておく
 		}
 	}
+
+	if (battle_config.gm_allskill > 0 && pc_isGM(sd) >= battle_config.gm_allskill){
+		// 全てのスキル
+		for(i=1;i<158;i++)
+			sd->status.skill[i].lv=skill_get_max(i);
+		for(i=210;i<291;i++)
+			sd->status.skill[i].lv=skill_get_max(i);
+		for(i=304;i<MAX_SKILL;i++)
+			sd->status.skill[i].lv=skill_get_max(i);
+	}
+	else {
+		for(i=0;(id=skill_tree[c][i].id)>0;i++){
+			if(sd->status.skill[id].id==0 && !(skill_get_inf2(id)&0x01))
+				sd->status.skill[id].lv=skill_get_max(id);
+		}
+	}
+	pc_calcstatus(sd,0);
 
 	return 0;
 }

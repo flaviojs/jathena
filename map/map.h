@@ -23,8 +23,9 @@
 #define MAX_EVENTQUEUE	2
 #define MAX_EVENTTIMER	32
 #define NATURAL_HEAL_INTERVAL 500
-#define MAX_FLOORITEM 262144
+#define MAX_FLOORITEM 500000
 #define MAX_LEVEL 255
+#define MAX_WALKPATH 48
 
 #define DEFAULT_AUTOSAVE_INTERVAL 60*1000
 
@@ -42,7 +43,7 @@ struct block_list {
 
 struct walkpath_data {
 	unsigned char path_len,path_pos,path_half;
-	unsigned char path[32];
+	unsigned char path[MAX_WALKPATH];
 };
 struct script_reg {
 	int index;
@@ -450,22 +451,6 @@ struct chat_data {
 	struct block_list **owner;
 	char npc_event[50];
 };
-
-/*struct mons_data {
-	int type;
-	int max_hp;
-	int npc_num;
-	int job_exp;
-	int base_exp;
-	int atk;
-	int hit;
-	int flee;
-	int def;
-	struct {
-		int nameid,p;
-	} dropitem[16];
-};*/
-
 
 extern struct map_data map[];
 extern int map_num;

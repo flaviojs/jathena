@@ -224,7 +224,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 int skill_check_condition( struct map_session_data *sd,int type);
 int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag );
 int skill_frostjoke_scream(struct block_list *bl,va_list ap);
-
+int skill_status_change_timer_sub(struct block_list *bl, va_list ap );
 
 static int distance(int x0,int y0,int x1,int y1)
 {
@@ -246,6 +246,8 @@ int skill_get_unit_id(int id,int flag)
 	case PR_SANCTUARY:		return 0x83;				/* サンクチュアリ */
 	case PR_MAGNUS:			return 0x84;				/* マグヌスエクソシズム */
 	case AL_PNEUMA:			return 0x85;				/* ニューマ */
+	case MG_THUNDERSTORM:	return 0x86;		/* サンダーストーム */
+	case WZ_HEAVENDRIVE:	return 0x86;		/* ヘヴンズドライブ */
 	case WZ_METEOR:			return 0x86;				/* メテオストーム */
 	case WZ_VERMILION:		return 0x86;				/* ロードオブヴァーミリオン */
 	case WZ_STORMGUST:		return 0x86;				/* ストームガスト(とりあえずLoVと同じで処理) */
@@ -389,10 +391,6 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	case MG_FROSTDIVER:		/* フロストダイバー */
 	case WZ_FROSTNOVA:		/* フロストノヴァ */
 	case HT_FREEZINGTRAP:	/* フリージングトラップ */
-/*
-		rate=battle_get_lv(src)/2 +battle_get_int(src)/3+ skilllv*2 +15 -battle_get_mdef(bl);
-		if(rate>95)rate=95;
-*/
 		rate=skilllv*3+35;
 		if(!battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) && rand()%100 < rate*sc_def_mdef/100)
 			skill_status_change_start(bl,SC_FREEZE,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
@@ -464,7 +462,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			skill_status_change_start(bl,SC_BLIND,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
 	case BA_FROSTJOKE:
-		if( rand()%100 < (15+5*skilllv)*sc_def_mdef/100)
+		if(!battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) && rand()%100 < (15+5*skilllv)*sc_def_mdef/100)
 			skill_status_change_start(bl,SC_FREEZE,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
 
@@ -1026,7 +1024,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 				range=AREA_SIZE-5;		//視界全体
 				map_foreachinarea(skill_frostjoke_scream,sd->bl.m,
 					sd->bl.x-range,sd->bl.y-range,
-					sd->bl.x+range,sd->bl.y+range,BL_NUL,src,skl->skill_id,skl->skill_lv,tick);
+					sd->bl.x+range,sd->bl.y+range,0,src,skl->skill_id,skl->skill_lv,tick);
 				break;
 
 			default:
@@ -1414,9 +1412,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	/* 魔法系範囲攻撃スキル */
 	case MG_NAPALMBEAT:			/* ナパームビート */
 	case MG_FIREBALL:			/* ファイヤーボール */
-	case MG_THUNDERSTORM:		/* サンダーストーム(flag=2のみ) */
-	case WZ_HEAVENDRIVE:		/* ヘブンズドライブ(flag=2のみ) */
-		if(flag&3){
+		if(flag&1){
 			/* 個別にダメージを与える */
 			if(bl->id!=skill_area_temp[1]){
 				if(skillid==MG_FIREBALL){	/* ファイヤーボールなら中心からの距離を計算 */
@@ -1425,7 +1421,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 					skill_area_temp[0]=((dx>dy)?dx:dy);
 				}
 				skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,
-					skill_area_temp[0]| ((flag&2)?0:0x0500)  );
+					skill_area_temp[0]| 0x0500);
 			}
 		}else{
 			int ar=(skillid==MG_NAPALMBEAT)?1:2;
@@ -1735,7 +1731,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case CR_SPEARQUICKEN:	/* スピアクイッケン */
 	case AS_ENCHANTPOISON:	/* エンチャントポイズン */
 	case AS_POISONREACT:	/* ポイズンリアクト */
-	case AC_CONCENTRATION:	/* 集中力向上 */
 	case MC_LOUD:			/* ラウドボイス */
 	case MG_ENERGYCOAT:		/* エナジーコート */
 	case SM_ENDURE:			/* インデュア */
@@ -1748,10 +1743,19 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case SA_DELUGE:			/* デリュージ */
 	case SA_VIOLENTGALE:	/* バイオレントゲイル */
 	case SA_LANDPROTECTOR:	/* ランドプロテクター */
-	case BA_FROSTJOKE:		/* 寒いジョーク */
 #endif
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
+		break;
+	case AC_CONCENTRATION:	/* 集中力向上 */
+		{
+			int range = 1;
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
+			map_foreachinarea( skill_status_change_timer_sub,
+				src->m, src->x-range, src->y-range, src->x+range,src->y+range,0,
+				src,SkillStatusChangeTable[skillid],tick);
+		}
 		break;
 	case SM_PROVOKE:		/* プロボック */
 		/* MVPmobには効かない */
@@ -2540,17 +2544,6 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 
 	switch(skillid)
 	{
-	case MG_THUNDERSTORM:		/* サンダーストーム */
-	case WZ_HEAVENDRIVE:		/* ヘヴンズドライブ */
-		skill_area_temp[1]=src->id;
-		skill_area_temp[2]=x;
-		skill_area_temp[3]=y;
-		map_foreachinarea(skill_area_sub,
-			src->m,x-2,y-2,x+2,y+2,0,
-			src,skillid,skilllv,tick, flag|BCT_ENEMY|2,
-			skill_castend_damage_id);
-		break;
-
 	case PR_BENEDICTIO:			/* 聖体降福 */
 		skill_area_temp[1]=src->id;
 		map_foreachinarea(skill_area_sub,
@@ -2580,6 +2573,8 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case WZ_QUAGMIRE:			/* クァグマイア */
 	case WZ_VERMILION:			/* ロードオブヴァーミリオン */
 	case WZ_STORMGUST:			/* ストームガスト */
+	case MG_THUNDERSTORM:		/* サンダーストーム */
+	case WZ_HEAVENDRIVE:		/* ヘヴンズドライブ */
 	case PR_SANCTUARY:			/* サンクチュアリ */
 	case PR_MAGNUS:				/* マグヌスエクソシズム */
 	case CR_GRANDCROSS:			/* グランドクロス */
@@ -2757,7 +2752,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 	case AL_PNEUMA:				/* ニューマ */
 		limit=skill_get_time(skillid,skilllv);
 		target=(battle_config.defnotenemy)?BCT_NOENEMY:BCT_ALL;
-		range=1;
+		count = 9;
 		break;
 
 	case AL_WARP:				/* ワープポータル */
@@ -2792,9 +2787,13 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		val1=skilllv+2;
 		range=1;
 		break;
+	case MG_THUNDERSTORM:		/* サンダーストーム */
+		limit=100;
+		range=1;
+		break;
+	case WZ_HEAVENDRIVE:		/* ヘヴンズドライブ */
 	case WZ_METEOR:				/* メテオストーム */
-		limit=500;
-		interval=500;
+		limit=100;
 		range=2;
 		break;
 
@@ -2879,7 +2878,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 
 	case CR_GRANDCROSS:			/* グランドクロス */
 		count=29;
-		limit=1000;
+		limit=900;
 		interval=300;
 		break;
 
@@ -3013,8 +3012,16 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		int ux=x,uy=y,val1=skilllv,val2=0,limit=group->limit,alive=1;
 		int range=0;
 		switch(skillid){	/* 設定 */
+		case AL_PNEUMA:				/* ニューマ */
+			{
+				static const int dx[9]={-1, 0, 1,-1, 0, 1,-1, 0, 1};
+				static const int dy[9]={-1,-1,-1, 0, 0, 0, 1, 1, 1};
+				ux+=dx[i];
+				uy+=dy[i];
+			}
+			break;
 		case MG_FIREWALL:		/* ファイヤーウォール */
-		{
+			{
 				if(dir&1){	/* 斜め配置 */
 					static const int dx[][5]={
 						{ 1,1,0,0,-1 }, { -1,-1,0,0,1 },
@@ -4578,41 +4585,22 @@ int skill_gangsterparadise(struct map_session_data *sd ,int type)
 int skill_frostjoke_scream(struct block_list *bl,va_list ap)
 {
 	struct block_list *src;
-	struct map_session_data *sd=NULL;
-	struct mob_data *md=NULL;
 
 	src=va_arg(ap,struct block_list*);
 	int skillnum=va_arg(ap,int);
 	int skilllv=va_arg(ap,int);
 	unsigned int tick=va_arg(ap,unsigned int);
 
-	if(bl->type == BL_PC)
-		sd=(struct map_session_data*)bl;
-	if(bl->type == BL_MOB)
-		md=(struct mob_data*)bl;
+	if(src == bl)//自分には効かない
+		return 0;
 
-	if(sd){
-		if(src == bl)//自分には効かない
-			return 0;
-
-		if(battle_check_target(src,bl,0x10000)){
-			if(rand()%100 < 10)//PTメンバにも低確率でかかる(とりあえず10%)
-				skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
-			}
-
-		if(map[bl->m].flag.pvp || map[bl->m].flag.gvg){
-
-			if(battle_check_target(src,bl,0x10000)){
-				if(rand()%100 < 10)//PTメンバにも低確率でかかる(とりあえず10%)
-					skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
-			}
-
-			skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
-		}
+	if(battle_check_target(src,bl,BCT_ENEMY) > 0)
+		skill_additional_effect(src,bl,skillnum,skilllv,BF_MISC,tick);
+	else if(battle_check_target(src,bl,BCT_PARTY) > 0) {
+		if(rand()%100 < 10)//PTメンバにも低確率でかかる(とりあえず10%)
+			skill_additional_effect(src,bl,skillnum,skilllv,BF_MISC,tick);
 	}
-	if(md){
-		skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
-	}
+
 	return 0;
 }
 
@@ -4639,6 +4627,7 @@ int skill_status_change_timer_sub(struct block_list *bl, va_list ap )
 
 	switch( type ){
 	case SC_SIGHT:	/* サイト */
+	case SC_CONCENTRATE:
 		if( (*battle_get_option(bl))&6 ){
 			skill_status_change_end( bl, SC_HIDING, -1);
 			skill_status_change_end( bl, SC_CLOAKING, -1);

@@ -133,5 +133,6 @@ bonus3 bAddMonsterDropItem,n,x,y;	物理攻撃でモンスターを倒した時モンスターの種族
 bonus3 bAutoSpell,n,x,y: オートスペルでスキルnをxレベルでy%確率で使用。
 
 bAddDamageClass、bAddMagicDamageClass、bAddMonsterDropItemは10個まで設定可能です。10個を越える物は無視されます。
+bAutoSpellは一つだけ有効です。複数入れても最後の一つだけ適用されます。
 
 矢で使える物はbCritical、bAtkEle、bHit、bAtkRange、bAddEle、bAddRace、bAddSize、bAddEffのみです。その他は無視されます。

@@ -1,4 +1,31 @@
 --------------------
+//0832 by 死神
+
+・コード最適化と細かい修正。
+・オートスペルを地面魔法に対応。
+・サンダーストームとヘヴンズドライブをユニット設置式に変更。
+・ディフェンダーの攻撃速度低下を本鯖にあわせ。
+・その他細かい修正。
+	(doc/)
+	item_bonus.txt 修正。
+	(db/)
+	skill_require_db.txt 修正。
+	cast_db.txt 修正。
+	(map/)
+	map.h 修正。
+	path.c
+		calc_index()、path_search() 修正。
+	skill.c
+		skill_unitsetting()、skill_castend_pos2()、skill_get_unit_id() 修正。
+		skill_status_change_timer_sub()、skill_castend_nodamage_id() 修正。
+		skill_additional_effect()、skill_frostjoke_scream() 修正。
+	pc.c
+		pc_calcstatus()、pc_skill()、pc_allskillup() 修正。
+	battle.c
+		battle_get_speed()、battle_get_adelay()、battle_get_amotion() 修正。
+		battle_weapon_attack() 修正。
+
+--------------------
 //0831 by 死神
 
 ・少し修正。

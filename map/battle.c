@@ -595,6 +595,8 @@ int battle_get_speed(struct block_list *bl)
 				speed = speed*125/100;
 			if(sc_data[SC_DEFENDER].timer!=-1)
 				speed = (speed * (155 - sc_data[SC_DEFENDER].val1*5)) / 100;
+			if(sc_data[SC_DANCING].timer!=-1 )
+				speed*=4;
 			if(sc_data[SC_CURSE].timer!=-1)
 				speed = speed + 450;
 		}
@@ -634,7 +636,7 @@ int battle_get_adelay(struct block_list *bl)
 			if(sc_data[SC_STEELBODY].timer!=-1)	// ‹à„
 				aspd_rate += 25;
 			if(sc_data[SC_DEFENDER].timer != -1)
-				aspd_rate += (35 - sc_data[SC_DEFENDER].val1*5);
+				adelay += (1100 - sc_data[SC_DEFENDER].val1*100);
 		}
 		if(aspd_rate != 100)
 			adelay = adelay*aspd_rate/100;
@@ -673,7 +675,7 @@ int battle_get_amotion(struct block_list *bl)
 			if(sc_data[SC_STEELBODY].timer!=-1)	// ‹à„
 				aspd_rate += 25;
 			if(sc_data[SC_DEFENDER].timer != -1)
-				aspd_rate += (35 - sc_data[SC_DEFENDER].val1*5);
+				amotion += (550 - sc_data[SC_DEFENDER].val1*50);
 		}
 		if(aspd_rate != 100)
 			amotion = amotion*aspd_rate/100;
@@ -3381,11 +3383,18 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 					int sp = skill_get_sp(sc_data[SC_AUTOSPELL].val2,skilllv)*2/3;
 					if(sd->status.sp >= sp) {
 						pc_heal(sd,0,-sp);
-						skill_castend_damage_id(src,target,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+						if((i=skill_get_inf(sc_data[SC_AUTOSPELL].val2) == 2) || i == 32)
+							skill_castend_pos2(src,target->x,target->y,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+						else
+							skill_castend_damage_id(src,target,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
 					}
 				}
-				else
-					skill_castend_damage_id(src,target,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+				else {
+					if((i=skill_get_inf(sc_data[SC_AUTOSPELL].val2) == 2) || i == 32)
+						skill_castend_pos2(src,target->x,target->y,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+					else
+						skill_castend_damage_id(src,target,sc_data[SC_AUTOSPELL].val2,skilllv,tick,flag);
+				}
 			}
 			if(sd && sd->autospell_id > 0 && sd->autospell_lv > 0 && rand()%100 < sd->autospell_rate) {
 				int skilllv=sd->autospell_lv,i,sp;
@@ -3396,7 +3405,10 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				sp = skill_get_sp(sd->autospell_id,skilllv)*2/3;
 				if(sd->status.sp >= sp) {
 					pc_heal(sd,0,-sp);
-					skill_castend_damage_id(src,target,sd->autospell_id,skilllv,tick,flag);
+					if((i=skill_get_inf(sd->autospell_id) == 2) || i == 32)
+						skill_castend_pos2(src,target->x,target->y,sd->autospell_id,skilllv,tick,flag);
+					else
+						skill_castend_damage_id(src,target,sd->autospell_id,skilllv,tick,flag);
 				}
 			}
 		}
