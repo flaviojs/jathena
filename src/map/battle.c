@@ -3711,6 +3711,10 @@ struct Damage battle_calc_magic_attack(
 			damage = skill_calc_heal(bl,skill_lv)/2;
 			normalmagic_flag=0;
 			break;
+		case PR_ASPERSIO:		/* アスペルシオ */
+			damage = 40; //固定ダメージ
+			normalmagic_flag=0;
+			break;
 		case PR_SANCTUARY:	// サンクチュアリ
 			damage = (skill_lv>6)?388:skill_lv*50;
 			normalmagic_flag=0;
@@ -3755,10 +3759,16 @@ struct Damage battle_calc_magic_attack(
 			}
 			break;
 		case MG_FIREWALL:	// ファイヤーウォール
-			if( t_ele!=3 && !battle_check_undead(t_race,t_ele) )
+/*
+			if( (t_ele!=3 && !battle_check_undead(t_race,t_ele)) || target->type==BL_PC ) //PCは火属性でも飛ぶ？そもそもダメージ受ける？
 				blewcount |= 0x10000;
 			else
 				blewcount = 0;
+*/
+			if((t_ele==3 || battle_check_undead(t_race,t_ele)) && target->type!=BL_PC)
+				blewcount = 0;
+			else
+				blewcount |= 0x10000;
 			MATK_FIX( 1,2 );
 			break;
 		case MG_THUNDERSTORM:	// サンダーストーム
@@ -4667,6 +4677,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.gx_cardfix = 0;
 		battle_config.gx_dupele = 1;
 		battle_config.gx_disptype = 1;
+		battle_config.player_skill_partner_check = 1;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4830,6 +4841,7 @@ int battle_config_read(const char *cfgName)
 			{ "gx_cardfix",					&battle_config.gx_cardfix				},
 			{ "gx_dupele", 					&battle_config.gx_dupele				},
 			{ "gx_disptype", 				&battle_config.gx_disptype				},
+			{ "player_skill_partner_check",	&battle_config.player_skill_partner_check},
 
 		};
 		

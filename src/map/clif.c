@@ -3086,6 +3086,8 @@ void clif_getareachar_item(struct map_session_data* sd,struct flooritem_data* fi
 int clif_getareachar_skillunit(struct map_session_data *sd,struct skill_unit *unit)
 {
 	int fd=sd->fd;
+	struct block_list *bl;
+	bl=map_id2bl(unit->group->src_id);
 #if PACKETVER < 3
 	memset(WFIFOP(fd,0),0,packet_len_table[0x11f]);
 	WFIFOW(fd, 0)=0x11f;
@@ -3105,22 +3107,28 @@ int clif_getareachar_skillunit(struct map_session_data *sd,struct skill_unit *un
 	WFIFOW(fd,12)=unit->bl.y;
 	WFIFOB(fd,14)=unit->group->unit_id;
 	WFIFOB(fd,15)=1;
-	WFIFOL(fd,16)=0;
-	WFIFOL(fd,20)=0;
-
-	WFIFOL(fd,32)=0x004f37dd;
-	WFIFOL(fd,36)=0x0012f674;
-	WFIFOL(fd,40)=0x0012f664;
-	WFIFOL(fd,44)=0x0012f654;
-	WFIFOL(fd,48)=0x77527bbc;
-	WFIFOL(fd,56)=0;
-	WFIFOL(fd,60)=0;
-	WFIFOL(fd,64)=0;
-	WFIFOL(fd,68)=0x0048d919;
-	WFIFOL(fd,72)=0x0000003e;
-	WFIFOL(fd,76)=0x0012f66c;
-
-	WFIFOB(fd,96)=0xaa;
+	WFIFOL(fd,15+1)=0;						//1-4調べた限り固定
+	WFIFOL(fd,15+5)=0;						//5-8調べた限り固定
+											//9-12マップごとで一定の77-80とはまた違う4バイトのかなり大きな数字
+	WFIFOL(fd,15+13)=unit->bl.y - 0x12;		//13-16ユニットのY座標-18っぽい(Y:17でFF FF FF FF)
+	WFIFOL(fd,15+17)=0x004f37dd;			//17-20調べた限り固定
+	WFIFOL(fd,15+21)=0x0012f674;			//21-24調べた限り固定
+	WFIFOL(fd,15+25)=0x0012f664;			//25-28調べた限り固定
+	WFIFOL(fd,15+29)=0x0012f654;			//29-32調べた限り固定
+	WFIFOL(fd,15+33)=0x77527bbc;			//33-36調べた限り固定
+											//37-39
+	WFIFOB(fd,15+40)=0x2d;					//40調べた限り固定
+	WFIFOL(fd,15+41)=0;						//41-44調べた限り0固定
+	WFIFOL(fd,15+45)=0;						//45-48調べた限り0固定
+	WFIFOL(fd,15+49)=0;						//49-52調べた限り0固定
+	WFIFOL(fd,15+53)=0x0048d919;			//53-56調べた限り固定
+	WFIFOL(fd,15+57)=0x0000003e;			//57-60調べた限り固定
+	WFIFOL(fd,15+61)=0x0012f66c;			//61-64調べた限り固定
+											//65-68
+											//69-72
+	if(bl) WFIFOL(fd,15+73)=bl->y;			//73-76術者のY座標
+	WFIFOL(fd,15+77)=unit->bl.m;			//77-80マップIDかなぁ？かなり2バイトで足りそうな数字
+	WFIFOB(fd,15+81)=0xaa;					//81終端文字0xaa
 	WFIFOSET(fd,packet_len_table[0x1c9]);
 #endif
 	if(unit->group->skill_id == WZ_ICEWALL)
@@ -3615,6 +3623,9 @@ int clif_skill_poseffect(struct block_list *src,int skill_id,int val,int x,int y
 int clif_skill_setunit(struct skill_unit *unit)
 {
 	unsigned char buf[128];
+	struct block_list *bl;
+	bl=map_id2bl(unit->group->src_id);
+
 #if PACKETVER < 3
 	memset(WBUFP(buf, 0),0,packet_len_table[0x11f]);
 	WBUFW(buf, 0)=0x11f;
@@ -3634,22 +3645,28 @@ int clif_skill_setunit(struct skill_unit *unit)
 	WBUFW(buf,12)=unit->bl.y;
 	WBUFB(buf,14)=unit->group->unit_id;
 	WBUFB(buf,15)=1;
-	WBUFL(buf,16)=0;
-	WBUFL(buf,20)=0;
-
-	WBUFL(buf,32)=0x004f37dd;
-	WBUFL(buf,36)=0x0012f674;
-	WBUFL(buf,40)=0x0012f664;
-	WBUFL(buf,44)=0x0012f654;
-	WBUFL(buf,48)=0x77527bbc;
-	WBUFL(buf,56)=0;
-	WBUFL(buf,60)=0;
-	WBUFL(buf,64)=0;
-	WBUFL(buf,68)=0x0048d919;
-	WBUFL(buf,72)=0x0000003e;
-	WBUFL(buf,76)=0x0012f66c;
-
-	WBUFB(buf,96)=0xaa;
+	WBUFL(buf,15+1)=0;						//1-4調べた限り固定
+	WBUFL(buf,15+5)=0;						//5-8調べた限り固定
+											//9-12マップごとで一定の77-80とはまた違う4バイトのかなり大きな数字
+	WBUFL(buf,15+13)=unit->bl.y - 0x12;		//13-16ユニットのY座標-18っぽい(Y:17でFF FF FF FF)
+	WBUFL(buf,15+17)=0x004f37dd;			//17-20調べた限り固定
+	WBUFL(buf,15+21)=0x0012f674;			//21-24調べた限り固定
+	WBUFL(buf,15+25)=0x0012f664;			//25-28調べた限り固定
+	WBUFL(buf,15+29)=0x0012f654;			//29-32調べた限り固定
+	WBUFL(buf,15+33)=0x77527bbc;			//33-36調べた限り固定
+											//37-39
+	WBUFB(buf,15+40)=0x2d;					//40調べた限り固定
+	WBUFL(buf,15+41)=0;						//41-44調べた限り0固定
+	WBUFL(buf,15+45)=0;						//45-48調べた限り0固定
+	WBUFL(buf,15+49)=0;						//49-52調べた限り0固定
+	WBUFL(buf,15+53)=0x0048d919;			//53-56調べた限り固定
+	WBUFL(buf,15+57)=0x0000003e;			//57-60調べた限り固定
+	WBUFL(buf,15+61)=0x0012f66c;			//61-64調べた限り固定
+											//65-68
+											//69-72
+	if(bl) WBUFL(buf,15+73)=bl->y;			//73-76術者のY座標
+	WBUFL(buf,15+77)=unit->bl.m;			//77-80マップIDかなぁ？かなり2バイトで足りそうな数字
+	WBUFB(buf,15+81)=0xaa;					//81終端文字0xaa
 	clif_send(buf,packet_len_table[0x1c9],&unit->bl,AREA);
 #endif
 	return 0;

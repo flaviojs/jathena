@@ -811,6 +811,11 @@ int parse_login(int fd)
 	}
   while(RFIFOREST(fd)>=2){
 	switch(RFIFOW(fd,0)){
+	case 0x200:		//クライアントでaccountオプション使用時の謎パケットへの対応
+		if(RFIFOREST(fd)<26)
+			return 0;
+		RFIFOSKIP(fd,26);
+		break;
 	case 0x64:		// クライアントログイン要求
 	case 0x01dd:	// 暗号化ログイン要求
 		if(RFIFOREST(fd)< ((RFIFOW(fd,0)==0x64)?55:47))

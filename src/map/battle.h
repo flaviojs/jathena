@@ -270,6 +270,7 @@ extern struct Battle_Config {
 	int gx_cardfix;
 	int gx_dupele;
 	int gx_disptype;
+	int player_skill_partner_check;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

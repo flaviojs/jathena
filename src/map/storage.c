@@ -39,10 +39,18 @@ struct item *i2=(struct item *)_i2;
 
  
 void sortage_sortitem(struct storage* stor){
+	if( stor == NULL ){
+		printf("sortage_sortitem nullpo\n");
+		return;
+	}
 	qsort(stor->storage, MAX_STORAGE, sizeof(struct item), storage_comp_item);
 }
 
 void sortage_gsortitem(struct guild_storage* gstor){
+	if( gstor == NULL ){
+		printf("sortage_gsortitem nullpo\n");
+		return;
+	}
 	qsort(gstor->storage, MAX_GUILD_STORAGE, sizeof(struct item), storage_comp_item);
 }
 
@@ -95,6 +103,12 @@ int storage_delete(int account_id)
 int storage_storageopen(struct map_session_data *sd)
 {
 	struct storage *stor;
+
+	if( sd == NULL ){
+		printf("storage_storageopen nullpo\n");
+		return 0;
+	}
+
 	if((stor = numdb_search(storage_db,sd->status.account_id)) != NULL) {
 		stor->storage_status = 1;
 		sd->state.storage_flag = 0;
@@ -118,9 +132,17 @@ int storage_additem(struct map_session_data *sd,struct storage *stor,struct item
 	struct item_data *data;
 	int i;
 
+	if( sd == NULL || stor == NULL || item_data == NULL ){
+		printf("storage_additem nullpo\n");
+		return 1;
+	}
+
 	if(item_data->nameid <= 0 || amount <= 0)
 		return 1;
-	data = itemdb_search(item_data->nameid);
+	if((data = itemdb_search(item_data->nameid)) == NULL){
+		printf("storage_additem nullpo\n");
+		return 1;
+	}
 
 	i=MAX_STORAGE;
 	if(!itemdb_isequip2(data)){
@@ -160,6 +182,11 @@ int storage_additem(struct map_session_data *sd,struct storage *stor,struct item
  */
 int storage_delitem(struct map_session_data *sd,struct storage *stor,int n,int amount)
 {
+	if( sd == NULL || stor == NULL ){
+		printf("storage_additem nullpo\n");
+		return 1;
+	}
+
 	if(stor->storage[n].nameid==0 || stor->storage[n].amount<amount)
 		return 1;
 
@@ -181,7 +208,11 @@ int storage_storageadd(struct map_session_data *sd,int index,int amount)
 {
 	struct storage *stor;
 
-	stor=account2storage(sd->status.account_id);
+	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
+		printf("storage_storageadd nullpo\n");
+		return 0;
+	}
+
 	if( (stor->storage_amount <= MAX_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
 		if(index>=0 && index<MAX_INVENTORY) { // valid index
 			if( (amount <= sd->status.inventory[index].amount) && (amount > 0) ) { //valid amount
@@ -204,7 +235,11 @@ int storage_storageget(struct map_session_data *sd,int index,int amount)
 	struct storage *stor;
 	int flag;
 
-	stor=account2storage(sd->status.account_id);
+	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
+		printf("storage_storageget nullpo\n");
+		return 0;
+	}
+
 	if(stor->storage_status == 1) { //  storage open
 		if(index>=0 && index<MAX_STORAGE) { // valid index
 			if( (amount <= stor->storage[index].amount) && (amount > 0) ) { //valid amount
@@ -226,7 +261,11 @@ int storage_storageaddfromcart(struct map_session_data *sd,int index,int amount)
 {
 	struct storage *stor;
 
-	stor=account2storage(sd->status.account_id);
+	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
+		printf("storage_storageaddfromcart nullpo\n");
+		return 0;
+	}
+
 	if( (stor->storage_amount <= MAX_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
 		if(index>=0 && index<MAX_INVENTORY) { // valid index
 			if( (amount <= sd->status.cart[index].amount) && (amount > 0) ) { //valid amount
@@ -247,7 +286,11 @@ int storage_storagegettocart(struct map_session_data *sd,int index,int amount)
 {
 	struct storage *stor;
 
-	stor=account2storage(sd->status.account_id);
+	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
+		printf("storage_storagegettocart nullpo\n");
+		return 0;
+	}
+
 	if(stor->storage_status == 1) { //  storage open
 		if(index>=0 && index<MAX_STORAGE) { // valid index
 			if( (amount <= stor->storage[index].amount) && (amount > 0) ) { //valid amount
@@ -269,7 +312,12 @@ int storage_storagegettocart(struct map_session_data *sd,int index,int amount)
 int storage_storageclose(struct map_session_data *sd)
 {
 	struct storage *stor;
-	stor=account2storage(sd->status.account_id);
+
+	if( sd == NULL || (stor=account2storage(sd->status.account_id)) == NULL ){
+		printf("storage_storageclose nullpo\n");
+		return 0;
+	}
+
 	stor->storage_status=0;
 	sd->state.storage_flag = 0;
 	clif_storageclose(sd);
@@ -286,6 +334,11 @@ int storage_storage_quit(struct map_session_data *sd)
 {
 	struct storage *stor;
 
+	if( sd == NULL ){
+		printf("storage_storage_quit nullpo\n");
+		return 0;
+	}
+
 	stor = numdb_search(storage_db,sd->status.account_id);
 	if(stor) stor->storage_status = 0;
 
@@ -295,6 +348,11 @@ int storage_storage_quit(struct map_session_data *sd)
 int storage_storage_save(struct map_session_data *sd)
 {
 	struct storage *stor;
+
+	if( sd == NULL ){
+		printf("storage_storage_save nullpo\n");
+		return 0;
+	}
 
 	stor=numdb_search(storage_db,sd->status.account_id);
 	if(stor) intif_send_storage(stor);
@@ -333,6 +391,11 @@ int guild_storage_delete(int guild_id)
 int storage_guild_storageopen(struct map_session_data *sd)
 {
 	struct guild_storage *gstor;
+	if( sd == NULL ){
+		printf("storage_guild_storageopen nullpo\n");
+		return 0;
+	}
+
 	if(sd->status.guild_id <= 0)
 		return 2;
 	if((gstor = numdb_search(guild_storage_db,sd->status.guild_id)) != NULL) {
@@ -359,9 +422,13 @@ int guild_storage_additem(struct map_session_data *sd,struct guild_storage *stor
 	struct item_data *data;
 	int i;
 
+	if( sd == NULL || stor == NULL || item_data == NULL || (data = itemdb_search(item_data->nameid)) == NULL ){
+		printf("guild_storage_additem nullpo\n");
+		return 1;
+	}
+
 	if(item_data->nameid <= 0 || amount <= 0)
 		return 1;
-	data = itemdb_search(item_data->nameid);
 
 	i=MAX_GUILD_STORAGE;
 	if(!itemdb_isequip2(data)){
@@ -398,6 +465,10 @@ int guild_storage_additem(struct map_session_data *sd,struct guild_storage *stor
 
 int guild_storage_delitem(struct map_session_data *sd,struct guild_storage *stor,int n,int amount)
 {
+	if( sd == NULL || stor == NULL ){
+		printf("guild_storage_delitem nullpo\n");
+		return 1;
+	}
 	if(stor->storage[n].nameid==0 || stor->storage[n].amount<amount)
 		return 1;
 
@@ -415,6 +486,11 @@ int guild_storage_delitem(struct map_session_data *sd,struct guild_storage *stor
 int storage_guild_storageadd(struct map_session_data *sd,int index,int amount)
 {
 	struct guild_storage *stor;
+
+	if( sd == NULL ){
+		printf("storage_guild_storageadd nullpo\n");
+		return 0;
+	}
 
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		if( (stor->storage_amount <= MAX_GUILD_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
@@ -436,6 +512,11 @@ int storage_guild_storageget(struct map_session_data *sd,int index,int amount)
 	struct guild_storage *stor;
 	int flag;
 
+	if( sd == NULL ){
+		printf("storage_guild_storageget nullpo\n");
+		return 0;
+	}
+
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		if(stor->storage_status == 1) { //  storage open
 			if(index>=0 && index<MAX_GUILD_STORAGE) { // valid index
@@ -456,6 +537,11 @@ int storage_guild_storageaddfromcart(struct map_session_data *sd,int index,int a
 {
 	struct guild_storage *stor;
 
+	if( sd == NULL ){
+		printf("storage_guild_storageaddfromcart nullpo\n");
+		return 0;
+	}
+
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		if( (stor->storage_amount <= MAX_GUILD_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
 			if(index>=0 && index<MAX_INVENTORY) { // valid index
@@ -473,6 +559,11 @@ int storage_guild_storageaddfromcart(struct map_session_data *sd,int index,int a
 int storage_guild_storagegettocart(struct map_session_data *sd,int index,int amount)
 {
 	struct guild_storage *stor;
+
+	if( sd == NULL ){
+		printf("storage_guild_storagegettocart nullpo\n");
+		return 0;
+	}
 
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		if(stor->storage_status == 1) { //  storage open
@@ -492,6 +583,11 @@ int storage_guild_storagegettocart(struct map_session_data *sd,int index,int amo
 int storage_guild_storageclose(struct map_session_data *sd)
 {
 	struct guild_storage *stor;
+
+	if( sd == NULL ){
+		printf("storage_guild_storageclose nullpo\n");
+		return 0;
+	}
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		intif_send_guild_storage(sd->status.account_id,stor);
 		stor->storage_status = 0;
@@ -506,6 +602,11 @@ int storage_guild_storageclose(struct map_session_data *sd)
 int storage_guild_storage_quit(struct map_session_data *sd,int flag)
 {
 	struct guild_storage *stor;
+
+	if( sd == NULL ){
+		printf("storage_storage_quit nullpo\n");
+		return 0;
+	}
 
 	stor = numdb_search(guild_storage_db,sd->status.guild_id);
 	if(stor) {

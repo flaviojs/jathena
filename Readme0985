@@ -1,4 +1,56 @@
 --------------------
+//1003 by (凸)
+・jROクライアントで/account使用時に繋がらない原因の0x200パケット問題を修正
+・0x1c9パケットの穴埋めを引き続き継続中
+・一人で聖体や合奏を使用できる設定(player_skill_partner_check)を追加
+	一人で合奏を実行した場合には通常のダンスと挙動が同じになります
+・プロボックは不死に対して発動しないように変更
+・FWの吹き飛ばし判定を変更
+・デリュージに水場判定を追加、聖水を作れるのを確認
+・ハイディングの有効時間が正しく機能するように修正
+・アスペルシオを不死に使用した場合、聖属性の40ダメージを与えるように変更
+・アスペルシオを不死以外のMOBに使用しても効果が無いように変更
+・合奏、ダンス、演奏中の経過時間によるSP消費を実装
+・報告のあったガーディアンがギルド未加入PCをターゲットしたらmapが落ちる問題の修正(ガーディアン実装当時からずっと落ちてた？)
+・mob.c、storage.cのnullチェックを強化
+	エラーで落ちるべきところを無理やり通常処理に戻しているので他で問題がでるかもしれません
+	その場合、コンソールに「関数名 nullpo」と表示されるので表示された場合は報告をお願いします
+	もしかしたら正常な処理でも表示されるかもしれませんが、その際も報告をお願いします
+	本来エラー、実は正常、どちらにしてもこれが表示されるのはバグです
+
+	(conf/)
+	battle_athena.conf player_skill_partner_check追加
+	(db/)
+	skill_db.txt アスペルシオの属性を聖に変更
+	(doc/)
+	conf_ref.txt player_skill_partner_check説明追加
+	(login/)
+	login.c
+		parse_login() 0x200パケット対応
+	(map/)
+	mob.c NULLチェックでほぼ全部
+	storage.c NULLチェックでほぼ全部
+	battle.h 変更
+	battle.c
+		battle_calc_magic_attack() アスペルシオを追加、FWを変更
+		battle_config_read() 設定追加
+	clif.c
+		clif_getareachar_skillunit() 調査結果の反映
+		clif_skill_setunit() 同上
+	[1001と1002の間の変更点]
+	skill.c NULLチェックを沢山
+		skill_castend_damage_id() アスペルシオ追加
+		skill_castend_nodamage_id() アスペルシオ、プロボック処理変更
+		skill_castend_id() アスペルシオ処理変更
+		skill_check_condition_char_sub() player_skill_partner_checkに対応
+		skill_check_condition_use_sub() 同上
+		skill_use_id() 同上
+		skill_check_condition() 同上＆デリュージ対応
+		skill_status_change_timer() ハイディング修正、ダンス演奏合奏中のSP消費実装
+		skill_initunitgroup() ダンスSP消費用変更
+		skill_status_change_start() 同上＆プロボックをボスに効かないように(でもbattle.cで止めてるから通常ここまで来ない)
+
+--------------------
 //1002 by ぴざまん
 ・ポータルバグ修正
 ・スキル関係のNullチェック強化(by(凸))
