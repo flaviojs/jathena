@@ -501,7 +501,7 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 	if(battle_config.monster_attack_direction_change)
 		md->dir=map_calc_dir(&md->bl, sd->bl.x,sd->bl.y );	// 向き設定
 
-	clif_fixmobpos(md);
+	//clif_fixmobpos(md);
 
 	md->state.skillstate=MSS_ATTACK;
 	if( mobskill_use(md,tick,-2) )	// スキル使用
@@ -613,7 +613,10 @@ static int mob_timer(int tid,unsigned int tick,int id,int data)
 	struct mob_data *md;
 	struct block_list *bl;
 
-	if( (bl=map_id2bl(id)) == NULL || (md=(struct mob_data*)bl) == NULL ){
+	if( (bl=map_id2bl(id)) == NULL ){ //攻撃してきた敵がもういないのは正常のようだ
+		return 1;
+	}
+	if( (md=(struct mob_data*)bl) == NULL ){
 		printf("mob_timer nullpo\n");
 		return 1;
 	}
@@ -2669,8 +2672,10 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 	struct block_list *mbl;
 	int range;
 
-	if((mbl = map_id2bl(id)) == NULL || (md=(struct mob_data *)mbl) == NULL ){
-		printf("mobskill_castend_id nullpo\n");
+	if((mbl = map_id2bl(id)) == NULL ) //詠唱したMobがもういないというのは良くある正常処理
+		return 0;
+	if((md=(struct mob_data *)mbl) == NULL ){
+		printf("mobskill_castend_id nullpo mbl->id:%d\n",mbl->id);
 		return 0;
 	}
 	
@@ -2681,12 +2686,15 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 		return 0;
 
 	md->skilltimer=-1;
+	//沈黙や状態異常など
 	if(md->sc_data){
 		if(md->opt1>0 || md->sc_data[SC_DIVINA].timer != -1 || md->sc_data[SC_ROKISWEIL].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
 			return 0;
-		if(md->sc_data[SC_AUTOCOUNTER].timer != -1 && md->skillid != KN_AUTOCOUNTER)
+		if(md->sc_data[SC_AUTOCOUNTER].timer != -1 && md->skillid != KN_AUTOCOUNTER) //オートカウンター
 			return 0;
-		if(md->sc_data[SC_BLADESTOP].timer != -1)
+		if(md->sc_data[SC_BLADESTOP].timer != -1) //白刃取り
+			return 0;
+		if(md->sc_data[SC_BERSERK].timer != -1) //バーサーク
 			return 0;
 	}
 	if(md->skillid != NPC_EMOTION)
@@ -2762,10 +2770,16 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 		return 0;
 
 	md->skilltimer=-1;
-	if(md->sc_data && (md->opt1>0 || md->sc_data[SC_DIVINA].timer != -1 || md->sc_data[SC_ROKISWEIL].timer != -1 ||
-		md->sc_data[SC_STEELBODY].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1 ||
-		md->sc_data[SC_BLADESTOP].timer != -1))
-		return 0;
+	if(md->sc_data){
+		if(md->opt1>0 || md->sc_data[SC_DIVINA].timer != -1 || md->sc_data[SC_ROKISWEIL].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
+			return 0;
+		if(md->sc_data[SC_AUTOCOUNTER].timer != -1 && md->skillid != KN_AUTOCOUNTER) //オートカウンター
+			return 0;
+		if(md->sc_data[SC_BLADESTOP].timer != -1) //白刃取り
+			return 0;
+		if(md->sc_data[SC_BERSERK].timer != -1) //バーサーク
+			return 0;
+	}
 
 	if(battle_config.monster_skill_reiteration == 0) {
 		range = -1;
@@ -2873,10 +2887,16 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	skill_lv=ms->skill_lv;
 
 	// 沈黙や異常
-	if( md->opt1>0 || (md->sc_data && (md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
-		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1 ||
-		md->sc_data[SC_BLADESTOP].timer != -1)))
-		return 0;
+	if(md->sc_data){
+		if(md->opt1>0 || md->sc_data[SC_DIVINA].timer != -1 || md->sc_data[SC_ROKISWEIL].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
+			return 0;
+		if(md->sc_data[SC_AUTOCOUNTER].timer != -1 && md->skillid != KN_AUTOCOUNTER) //オートカウンター
+			return 0;
+		if(md->sc_data[SC_BLADESTOP].timer != -1) //白刃取り
+			return 0;
+		if(md->sc_data[SC_BERSERK].timer != -1) //バーサーク
+			return 0;
+	}
 
 	if(md->option&4 && skill_id==TF_HIDING)
 		return 0;
@@ -2977,10 +2997,17 @@ int mobskill_use_pos( struct mob_data *md,
 	skill_id=ms->skill_id;
 	skill_lv=ms->skill_lv;
 
-	if( md->opt1>0 || (md->sc_data && (md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
-		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1 || 
-		md->sc_data[SC_BLADESTOP].timer != -1)))
-		return 0;	// 異常や沈黙など
+	//沈黙や状態異常など
+	if(md->sc_data){
+		if(md->opt1>0 || md->sc_data[SC_DIVINA].timer != -1 || md->sc_data[SC_ROKISWEIL].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
+			return 0;
+		if(md->sc_data[SC_AUTOCOUNTER].timer != -1 && md->skillid != KN_AUTOCOUNTER) //オートカウンター
+			return 0;
+		if(md->sc_data[SC_BLADESTOP].timer != -1) //白刃取り
+			return 0;
+		if(md->sc_data[SC_BERSERK].timer != -1) //バーサーク
+			return 0;
+	}
 
 	if(md->option&2)
 		return 0;

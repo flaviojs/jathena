@@ -42,6 +42,11 @@ static int distance(int x0,int y0,int x1,int y1)
 
 static int calc_next_walk_step(struct pet_data *pd)
 {
+	if( pd == NULL ){
+		printf("calc_next_walk_step nullpo\n");
+		return 0;
+	}
+
 	if(pd->walkpath.path_pos>=pd->walkpath.path_len)
 		return -1;
 	if(pd->walkpath.path[pd->walkpath.path_pos]&1)
@@ -51,6 +56,10 @@ static int calc_next_walk_step(struct pet_data *pd)
 
 static int pet_performance_val(struct map_session_data *sd)
 {
+	if( sd == NULL ){
+		printf("pet_performance_val nullpo\n");
+		return 0;
+	}
 	if(sd->pet.intimate > 900)
 		return (sd->petDB->s_perfor > 0)? 4:3;
 	else if(sd->pet.intimate > 750)
@@ -61,6 +70,10 @@ static int pet_performance_val(struct map_session_data *sd)
 
 int pet_hungry_val(struct map_session_data *sd)
 {
+	if( sd == NULL ){
+		printf("pet_hungry_val nullpo\n");
+		return 0;
+	}
 	if(sd->pet.hungry > 90)
 		return 4;
 	else if(sd->pet.hungry > 75)
@@ -77,6 +90,11 @@ static int pet_can_reach(struct pet_data *pd,int x,int y)
 {
 	struct walkpath_data wpd;
 
+	if( pd == NULL ){
+		printf("pet_can_reach nullpo\n");
+		return 0;
+	}
+
 	if( pd->bl.x==x && pd->bl.y==y )	// 同じマス
 		return 1;
 
@@ -91,6 +109,11 @@ static int pet_calc_pos(struct pet_data *pd,int tx,int ty,int dir)
 {
 	int x,y,dx,dy;
 	int i,j=0,k;
+
+	if( pd == NULL ){
+		printf("pet_calc_pos nullpo\n");
+		return 0;
+	}
 
 	pd->to_x = tx;
 	pd->to_y = ty;
@@ -145,6 +168,11 @@ static int pet_attack(struct pet_data *pd,unsigned int tick,int data)
 	struct mob_data *md;
 	int mode,race,range;
 
+	if( pd == NULL ){
+		printf("pet_attack nullpo\n");
+		return 0;
+	}
+
 	pd->state.state=MS_IDLE;
 
 	md=(struct mob_data *)map_id2bl(pd->target_id);
@@ -188,6 +216,11 @@ static int pet_walk(struct pet_data *pd,unsigned int tick,int data)
 	int moveblock;
 	int i,ctype;
 	int x,y,dx,dy;
+
+	if( pd == NULL ){
+		printf("pet_walk nullpo\n");
+		return 0;
+	}
 
 	pd->state.state=MS_IDLE;
 	if(pd->walkpath.path_pos >= pd->walkpath.path_len || pd->walkpath.path_pos != data)
@@ -253,6 +286,11 @@ static int pet_walk(struct pet_data *pd,unsigned int tick,int data)
 
 int pet_stopattack(struct pet_data *pd)
 {
+	if( pd == NULL ){
+		printf("pet_stopattack nullpo\n");
+		return 0;
+	}
+
 	pd->target_id=0;
 	if(pd->state.state == MS_ATTACK)
 		pet_changestate(pd,MS_IDLE,0);
@@ -262,9 +300,16 @@ int pet_stopattack(struct pet_data *pd)
 
 int pet_target_check(struct map_session_data *sd,struct block_list *bl,int type)
 {
-	struct pet_data *pd = sd->pd;
+	struct pet_data *pd;
 	struct mob_data *md;
 	int rate,mode,race;
+
+	if( sd == NULL ){
+		printf("pet_target_check nullpo\n");
+		return 0;
+	}
+
+	pd = sd->pd;
 
 	if(bl && pd && bl->type == BL_MOB && sd->pet.intimate > 900 && sd->pet.hungry > 0 && pd->class != battle_get_class(bl)
 		&& pd->state.state != MS_DELAY) {
@@ -304,6 +349,11 @@ int pet_changestate(struct pet_data *pd,int state,int type)
 {
 	unsigned int tick;
 	int i;
+
+	if( pd == NULL ){
+		printf("pet_changestate nullpo\n");
+		return 0;
+	}
 
 	if(pd->timer != -1)
 		delete_timer(pd->timer,pet_timer);
@@ -375,6 +425,11 @@ static int pet_walktoxy_sub(struct pet_data *pd)
 {
 	struct walkpath_data wpd;
 
+	if( pd == NULL ){
+		printf("pet_walktoxy_sub nullpo\n");
+		return 0;
+	}
+
 	if(path_search(&wpd,pd->bl.m,pd->bl.x,pd->bl.y,pd->to_x,pd->to_y,0))
 		return 1;
 	memcpy(&pd->walkpath,&wpd,sizeof(wpd));
@@ -391,6 +446,11 @@ static int pet_walktoxy_sub(struct pet_data *pd)
 int pet_walktoxy(struct pet_data *pd,int x,int y)
 {
 	struct walkpath_data wpd;
+
+	if( pd == NULL ){
+		printf("pet_walktoxy nullpo\n");
+		return 0;
+	}
 
 	if(pd->state.state == MS_WALK && path_search(&wpd,pd->bl.m,pd->bl.x,pd->bl.y,x,y,0))
 		return 1;
@@ -409,6 +469,11 @@ int pet_walktoxy(struct pet_data *pd,int x,int y)
 
 int pet_stop_walking(struct pet_data *pd,int type)
 {
+	if( pd == NULL ){
+		printf("pet_stop_walking nullpo\n");
+		return 0;
+	}
+
 	if(pd->state.state == MS_WALK || pd->state.state == MS_IDLE) {
 		pd->walkpath.path_len=0;
 		pd->to_x=pd->bl.x;
@@ -510,6 +575,11 @@ int search_petDB_index(int key,int type)
 
 int pet_hungry_timer_delete(struct map_session_data *sd)
 {
+	if( sd == NULL ){
+		printf("pet_hungry_timer_delete nullpo\n");
+		return 0;
+	}
+
 	if(sd->pet_hungry_timer != -1) {
 		delete_timer(sd->pet_hungry_timer,pet_hungry);
 		sd->pet_hungry_timer = -1;
@@ -520,6 +590,11 @@ int pet_hungry_timer_delete(struct map_session_data *sd)
 
 int pet_remove_map(struct map_session_data *sd)
 {
+	if( sd == NULL ){
+		printf("pet_remove_map nullpo\n");
+		return 0;
+	}
+
 	if(sd->status.pet_id && sd->pd) {
 		pet_changestate(sd->pd,MS_IDLE,0);
 		if(sd->pet_hungry_timer != -1)
@@ -545,9 +620,15 @@ struct delay_item_drop2 {
 
 int pet_performance(struct map_session_data *sd)
 {
-	struct pet_data *pd=sd->pd;
-	pet_stop_walking(sd->pd,2000<<8);
-	clif_pet_performance(&sd->pd->bl,rand()%pet_performance_val(sd) + 1);
+	struct pet_data *pd;
+
+	if( sd == NULL || (pd=sd->pd) == NULL ){
+		printf("pet_performance nullpo\n");
+		return 0;
+	}
+
+	pet_stop_walking(pd,2000<<8);
+	clif_pet_performance(&pd->bl,rand()%pet_performance_val(sd) + 1);
 	// ルートしたItemを落とさせる
 	pet_lootitem_drop(pd,NULL);
 
@@ -558,6 +639,11 @@ int pet_return_egg(struct map_session_data *sd)
 {
 	struct item tmp_item;
 	int flag;
+
+	if( sd == NULL ){
+		printf("pet_return_egg nullpo\n");
+		return 0;
+	}
 
 	if(sd->status.pet_id && sd->pd) {
 		struct pet_data *pd=sd->pd;
@@ -602,6 +688,11 @@ int pet_data_init(struct map_session_data *sd)
 {
 	struct pet_data *pd;
 	int i,interval;
+
+	if( sd == NULL ){
+		printf("pet_data_init nullpo\n");
+		return 1;
+	}
 
 	if(sd->status.account_id != sd->pet.account_id || sd->status.char_id != sd->pet.char_id ||
 		sd->status.pet_id != sd->pet.pet_id) {
@@ -666,6 +757,11 @@ int pet_data_init(struct map_session_data *sd)
 
 int pet_birth_process(struct map_session_data *sd)
 {
+	if( sd == NULL ){
+		printf("pet_birth_process nullpo\n");
+		return 1;
+	}
+
 	if(sd->status.pet_id && sd->pet.incuvate == 1) {
 		sd->status.pet_id = 0;
 		return 1;
@@ -734,6 +830,11 @@ int pet_recv_petdata(int account_id,struct s_pet *p,int flag)
 
 int pet_select_egg(struct map_session_data *sd,short egg_index)
 {
+	if( sd == NULL ){
+		printf("pet_select_egg nullpo\n");
+		return 0;
+	}
+
 	if(sd->status.inventory[egg_index].card[0] == (short)0xff00)
 		intif_request_petdata(sd->status.account_id,sd->status.char_id,*((long *)&sd->status.inventory[egg_index].card[1]));
 	else {
@@ -747,6 +848,11 @@ int pet_select_egg(struct map_session_data *sd,short egg_index)
 
 int pet_catch_process1(struct map_session_data *sd,int target_class)
 {
+	if( sd == NULL ){
+		printf("pet_catch_process1 nullpo\n");
+		return 0;
+	}
+
 	sd->catch_target_class = target_class;
 	clif_catch_process(sd);
 
@@ -757,6 +863,11 @@ int pet_catch_process2(struct map_session_data *sd,int target_id)
 {
 	struct mob_data *md;
 	int i,pet_catch_rate;
+
+	if( sd == NULL ){
+		printf("pet_catch_process2 nullpo\n");
+		return 1;
+	}
 
 	md=(struct mob_data*)map_id2bl(target_id);
 	if(!md){
@@ -826,6 +937,10 @@ int pet_get_egg(int account_id,int pet_id,int flag)
 
 int pet_menu(struct map_session_data *sd,int menunum)
 {
+	if( sd == NULL ){
+		printf("pet_menu nullpo\n");
+		return 0;
+	}
 	switch(menunum) {
 		case 0:
 			clif_send_petstatus(sd);
@@ -850,6 +965,11 @@ int pet_change_name(struct map_session_data *sd,char *name)
 {
 	int i;
 	
+	if( sd == NULL ){
+		printf("pet_change_name nullpo\n");
+		return 1;
+	}
+
 	if(sd->pet.rename_flag == 1 && battle_config.pet_rename == 0)
 		return 1;
 
@@ -876,6 +996,11 @@ int pet_equipitem(struct map_session_data *sd,int index)
 {
 	int nameid;
 
+	if( sd == NULL ){
+		printf("pet_equipitem nullpo\n");
+		return 1;
+	}
+
 	nameid = sd->status.inventory[index].nameid;
 	if(sd->petDB == NULL)
 		return 1;
@@ -896,6 +1021,11 @@ int pet_unequipitem(struct map_session_data *sd)
 {
 	struct item tmp_item;
 	int nameid,flag;
+
+	if( sd == NULL ){
+		printf("pet_unequipitem nullpo\n");
+		return 1;
+	}
 
 	if(sd->petDB == NULL)
 		return 1;
@@ -919,6 +1049,11 @@ int pet_unequipitem(struct map_session_data *sd)
 int pet_food(struct map_session_data *sd)
 {
 	int i,k,t;
+
+	if( sd == NULL ){
+		printf("pet_food nullpo\n");
+		return 1;
+	}
 
 	if(sd->petDB == NULL)
 		return 1;
@@ -973,7 +1108,15 @@ int pet_food(struct map_session_data *sd)
 static int pet_randomwalk(struct pet_data *pd,int tick)
 {
 	const int retrycount=20;
-	int speed = battle_get_speed(&pd->bl);
+	int speed;
+
+	if( pd == NULL ){
+		printf("pet_randomwalk nullpo\n");
+		return 0;
+	}
+
+	speed = battle_get_speed(&pd->bl);
+
 	if(DIFF_TICK(pd->next_walktime,tick) < 0){
 		int i,x,y,c,d=12-pd->move_fail_count;
 		if(d<5) d=5;
@@ -1011,6 +1154,11 @@ static int pet_randomwalk(struct pet_data *pd,int tick)
 
 static int pet_unlocktarget(struct pet_data *pd)
 {
+	if( pd == NULL ){
+		printf("pet_unlocktarget nullpo\n");
+		return 0;
+	}
+
 	pd->target_id=0;
 
 	return 0;
@@ -1022,6 +1170,13 @@ static int pet_ai_sub_hard(struct pet_data *pd,unsigned int tick)
 	struct mob_data *md = NULL;
 	int dist,i=0,dx,dy,ret;
 	int mode,race;
+
+	if( pd == NULL ){
+		printf("pet_ai_sub_hard nullpo\n");
+		return 0;
+	}
+
+	sd = pd->msd;
 
 	if(pd->bl.prev == NULL || sd == NULL || sd->bl.prev == NULL)
 		return 0;
@@ -1173,6 +1328,11 @@ static int pet_ai_sub_foreachclient(struct map_session_data *sd,va_list ap)
 {
 	unsigned int tick;
 
+	if( sd == NULL || ap == NULL ){
+		printf("pet_ai_sub_foreachclient nullpo\n");
+		return 0;
+	}
+
 	tick=va_arg(ap,unsigned int);
 	if(sd->status.pet_id && sd->pd && sd->petDB)
 		pet_ai_sub_hard(sd->pd,tick);
@@ -1192,8 +1352,10 @@ int pet_ai_sub_hard_lootsearch(struct block_list *bl,va_list ap)
 	struct pet_data* pd;
 	int dist,*itc;
 
-	pd=va_arg(ap,struct pet_data *);
-	itc=va_arg(ap,int *);
+	if( bl == NULL || ap == NULL || (pd=va_arg(ap,struct pet_data *)) == NULL || (itc=va_arg(ap,int *)) == NULL ){
+		printf("pet_ai_sub_hard_lootsearch nullpo\n");
+		return 0;
+	}
 
 	if(!pd->target_id){
 		struct flooritem_data *fitem = (struct flooritem_data *)bl;

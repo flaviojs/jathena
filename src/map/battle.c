@@ -41,8 +41,10 @@ static int distance(int x0,int y0,int x1,int y1)
  */
 int battle_counttargeted(struct block_list *bl,struct block_list *src,int target_lv)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_counttargeted nullpo\n");
 		return 0;
+	}
 	if(bl->type == BL_PC)
 		return pc_counttargeted((struct map_session_data *)bl,src,target_lv);
 	else if(bl->type == BL_MOB)
@@ -56,13 +58,15 @@ int battle_counttargeted(struct block_list *bl,struct block_list *src,int target
  */
 int battle_get_class(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_class nullpo\n");
 		return 0;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return ((struct mob_data *)bl)->class;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->status.class;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		return ((struct pet_data *)bl)->class;
 	else
 		return 0;
@@ -74,13 +78,15 @@ int battle_get_class(struct block_list *bl)
  */
 int battle_get_dir(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_dir nullpo\n");
 		return 0;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return ((struct mob_data *)bl)->dir;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->dir;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		return ((struct pet_data *)bl)->dir;
 	else
 		return 0;
@@ -92,13 +98,15 @@ int battle_get_dir(struct block_list *bl)
  */
 int battle_get_lv(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_lv nullpo\n");
 		return 0;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return mob_db[((struct mob_data *)bl)->class].lv;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->status.base_level;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		return ((struct pet_data *)bl)->msd->pet.level;
 	else
 		return 0;
@@ -110,13 +118,15 @@ int battle_get_lv(struct block_list *bl)
  */
 int battle_get_range(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_range nullpo\n");
 		return 0;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return mob_db[((struct mob_data *)bl)->class].range;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->attackrange;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		return mob_db[((struct pet_data *)bl)->class].range;
 	else
 		return 0;
@@ -128,11 +138,13 @@ int battle_get_range(struct block_list *bl)
  */
 int battle_get_hp(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_hp nullpo\n");
 		return 1;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return ((struct mob_data *)bl)->hp;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->status.hp;
 	else
 		return 1;
@@ -144,14 +156,16 @@ int battle_get_hp(struct block_list *bl)
  */
 int battle_get_max_hp(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_max_hp nullpo\n");
 		return 1;
-	if(bl->type==BL_PC)
+	}
+	if(bl->type==BL_PC && ((struct map_session_data *)bl))
 		return ((struct map_session_data *)bl)->status.max_hp;
 	else {
 		struct status_change *sc_data=battle_get_sc_data(bl);
 		int max_hp=1;
-		if(bl->type==BL_MOB) {
+		if(bl->type==BL_MOB && ((struct mob_data*)bl)) {
 			max_hp = mob_db[((struct mob_data*)bl)->class].max_hp;
 			if(mob_db[((struct mob_data*)bl)->class].mexp > 0) {
 				if(battle_config.mvp_hp_rate != 100)
@@ -162,7 +176,7 @@ int battle_get_max_hp(struct block_list *bl)
 					max_hp = (max_hp * battle_config.monster_hp_rate)/100;
 			}
 		}
-		else if(bl->type==BL_PET) {
+		else if(bl->type==BL_PET && ((struct pet_data*)bl)) {
 			max_hp = mob_db[((struct pet_data*)bl)->class].max_hp;
 			if(mob_db[((struct pet_data*)bl)->class].mexp > 0) {
 				if(battle_config.mvp_hp_rate != 100)
@@ -193,14 +207,16 @@ int battle_get_str(struct block_list *bl)
 	int str=0;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_str nullpo\n");
 		return 0;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_MOB)
+	if(bl->type==BL_MOB && ((struct mob_data *)bl))
 		str = mob_db[((struct mob_data *)bl)->class].str;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && ((struct map_session_data *)bl))
 		return ((struct map_session_data *)bl)->paramc[0];
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && ((struct pet_data *)bl))
 		str = mob_db[((struct pet_data *)bl)->class].str;
 
 	if(sc_data) {
@@ -228,14 +244,16 @@ int battle_get_agi(struct block_list *bl)
 	int agi=0;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_agi nullpo\n");
 		return 0;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_MOB)
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		agi=mob_db[((struct mob_data *)bl)->class].agi;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		agi=((struct map_session_data *)bl)->paramc[1];
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		agi=mob_db[((struct pet_data *)bl)->class].agi;
 
 	if(sc_data) {
@@ -267,14 +285,16 @@ int battle_get_vit(struct block_list *bl)
 	int vit=0;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_vit nullpo\n");
 		return 0;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_MOB)
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		vit=mob_db[((struct mob_data *)bl)->class].vit;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		vit=((struct map_session_data *)bl)->paramc[2];
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		vit=mob_db[((struct pet_data *)bl)->class].vit;
 	if(sc_data) {
 		if(sc_data[SC_STRIPARMOR].timer != -1 && bl->type!=BL_PC)
@@ -296,14 +316,16 @@ int battle_get_int(struct block_list *bl)
 	int int_=0;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_int nullpo\n");
 		return 0;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_MOB)
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		int_=mob_db[((struct mob_data *)bl)->class].int_;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		int_=((struct map_session_data *)bl)->paramc[3];
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		int_=mob_db[((struct pet_data *)bl)->class].int_;
 
 	if(sc_data) {
@@ -330,14 +352,16 @@ int battle_get_dex(struct block_list *bl)
 	int dex=0;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_dex nullpo\n");
 		return 0;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_MOB)
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		dex=mob_db[((struct mob_data *)bl)->class].dex;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		dex=((struct map_session_data *)bl)->paramc[4];
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		dex=mob_db[((struct pet_data *)bl)->class].dex;
 
 	if(sc_data) {
@@ -368,14 +392,16 @@ int battle_get_luk(struct block_list *bl)
 	int luk=0;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_luk nullpo\n");
 		return 0;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_MOB)
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		luk=mob_db[((struct mob_data *)bl)->class].luk;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		luk=((struct map_session_data *)bl)->paramc[5];
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		luk=mob_db[((struct pet_data *)bl)->class].luk;
 
 	if(sc_data) {
@@ -400,10 +426,12 @@ int battle_get_flee(struct block_list *bl)
 	int flee=1;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_flee nullpo\n");
 		return 1;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_PC)
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		flee=((struct map_session_data *)bl)->flee;
 	else
 		flee=battle_get_agi(bl) + battle_get_lv(bl);
@@ -432,10 +460,12 @@ int battle_get_hit(struct block_list *bl)
 	int hit=1;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_hit nullpo\n");
 		return 1;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_PC)
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		hit=((struct map_session_data *)bl)->hit;
 	else
 		hit=battle_get_dex(bl) + battle_get_lv(bl);
@@ -464,10 +494,12 @@ int battle_get_flee2(struct block_list *bl)
 	int flee2=1;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_flee2 nullpo\n");
 		return 1;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_PC) {
+	if(bl->type==BL_PC && (struct map_session_data *)bl){
 		flee2 = battle_get_luk(bl) + 10;
 		flee2 += ((struct map_session_data *)bl)->flee2 - (((struct map_session_data *)bl)->paramc[5] + 10);
 	}
@@ -492,10 +524,12 @@ int battle_get_critical(struct block_list *bl)
 	int critical=1;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_critical nullpo\n");
 		return 1;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_PC) {
+	if(bl->type==BL_PC && (struct map_session_data *)bl){
 		critical = battle_get_luk(bl)*3 + 10;
 		critical += ((struct map_session_data *)bl)->critical - ((((struct map_session_data *)bl)->paramc[5]*3) + 10);
 	}
@@ -524,10 +558,12 @@ int battle_get_baseatk(struct block_list *bl)
 	struct status_change *sc_data;
 	int batk=1;
 
-	if(!bl)
-		return 0;
+	if( bl == NULL ){
+		printf("battle_get_baseatk nullpo\n");
+		return 1;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type == BL_PC) //PCなら
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		batk = ((struct map_session_data *)bl)->base_atk; //設定されているbase_atk
 	else { //それ以外なら
 		int str,dstr;
@@ -556,14 +592,16 @@ int battle_get_atk(struct block_list *bl)
 	struct status_change *sc_data;
 	int atk=0;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_atk nullpo\n");
 		return 0;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_PC)
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		atk = ((struct map_session_data*)bl)->watk;
-	else if(bl->type==BL_MOB)
+	else if(bl->type==BL_MOB && (struct mob_data *)bl)
 		atk = mob_db[((struct mob_data*)bl)->class].atk1;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		atk = mob_db[((struct pet_data*)bl)->class].atk1;
 
 	if(sc_data) {
@@ -584,9 +622,11 @@ int battle_get_atk(struct block_list *bl)
  */
 int battle_get_atk_(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_atk_ nullpo\n");
 		return 0;
-	if(bl->type==BL_PC){
+	}
+	if(bl->type==BL_PC && (struct map_session_data *)bl){
 		int atk=((struct map_session_data*)bl)->watk_;
 
 		if(((struct map_session_data *)bl)->sc_data[SC_CURSE].timer!=-1 )
@@ -603,16 +643,18 @@ int battle_get_atk_(struct block_list *bl)
  */
 int battle_get_atk2(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_atk2 nullpo\n");
 		return 0;
-	if(bl->type==BL_PC)
+	}
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data*)bl)->watk2;
 	else {
 		struct status_change *sc_data=battle_get_sc_data(bl);
 		int atk2=0;
-		if(bl->type==BL_MOB)
+		if(bl->type==BL_MOB && (struct mob_data *)bl)
 			atk2 = mob_db[((struct mob_data*)bl)->class].atk2;
-		else if(bl->type==BL_PET)
+		else if(bl->type==BL_PET && (struct pet_data *)bl)
 			atk2 = mob_db[((struct pet_data*)bl)->class].atk2;
 		if(sc_data) {
 			if( sc_data[SC_IMPOSITIO].timer!=-1)
@@ -642,9 +684,11 @@ int battle_get_atk2(struct block_list *bl)
  */
 int battle_get_atk_2(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_atk_2 nullpo\n");
 		return 0;
-	if(bl->type==BL_PC)
+	}
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data*)bl)->watk_2;
 	else
 		return 0;
@@ -656,14 +700,16 @@ int battle_get_atk_2(struct block_list *bl)
  */
 int battle_get_matk1(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_matk1 nullpo\n");
 		return 0;
+	}
 	if(bl->type==BL_MOB){
 		int matk,int_=battle_get_int(bl);
 		matk = int_+(int_/5)*(int_/5);
 		return matk;
 	}
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->matk1;
 	else if(bl->type==BL_PET){
 		int matk,int_=battle_get_int(bl);
@@ -680,14 +726,16 @@ int battle_get_matk1(struct block_list *bl)
  */
 int battle_get_matk2(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_matk2 nullpo\n");
 		return 0;
+	}
 	if(bl->type==BL_MOB){
 		int matk,int_=battle_get_int(bl);
 		matk = int_+(int_/7)*(int_/7);
 		return matk;
 	}
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->matk2;
 	else if(bl->type==BL_PET){
 		int matk,int_=battle_get_int(bl);
@@ -707,20 +755,22 @@ int battle_get_def(struct block_list *bl)
 	struct status_change *sc_data;
 	int def=0,skilltimer=-1,skillid=0;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_def nullpo\n");
 		return 0;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_PC) {
+	if(bl->type==BL_PC && (struct map_session_data *)bl){
 		def = ((struct map_session_data *)bl)->def;
 		skilltimer = ((struct map_session_data *)bl)->skilltimer;
 		skillid = ((struct map_session_data *)bl)->skillid;
 	}
-	else if(bl->type==BL_MOB) {
+	else if(bl->type==BL_MOB && (struct mob_data *)bl) {
 		def = mob_db[((struct mob_data *)bl)->class].def;
 		skilltimer = ((struct mob_data *)bl)->skilltimer;
 		skillid = ((struct mob_data *)bl)->skillid;
 	}
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		def = mob_db[((struct pet_data *)bl)->class].def;
 
 	if(def < 1000000) {
@@ -773,14 +823,16 @@ int battle_get_mdef(struct block_list *bl)
 	struct status_change *sc_data;
 	int mdef=0;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_mdef nullpo\n");
 		return 0;
+	}
 	sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_PC)
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		mdef = ((struct map_session_data *)bl)->mdef;
-	else if(bl->type==BL_MOB)
+	else if(bl->type==BL_MOB && (struct mob_data *)bl)
 		mdef = mob_db[((struct mob_data *)bl)->class].mdef;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		mdef = mob_db[((struct pet_data *)bl)->class].mdef;
 
 	if(mdef < 1000000) {
@@ -806,8 +858,10 @@ int battle_get_def2(struct block_list *bl)
 	struct status_change *sc_data;
 	int def2=1;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_def2 nullpo\n");
 		return 1;
+	}
 	sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_PC)
 		def2 = ((struct map_session_data *)bl)->def2;
@@ -837,13 +891,15 @@ int battle_get_def2(struct block_list *bl)
  */
 int battle_get_mdef2(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_mdef2 nullpo\n");
 		return 0;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return mob_db[((struct mob_data *)bl)->class].int_ + (mob_db[((struct mob_data *)bl)->class].vit>>1);
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->mdef2 + (((struct map_session_data *)bl)->paramc[2]>>1);
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		return mob_db[((struct pet_data *)bl)->class].int_ + (mob_db[((struct pet_data *)bl)->class].vit>>1);
 	else
 		return 0;
@@ -856,17 +912,19 @@ int battle_get_mdef2(struct block_list *bl)
  */
 int battle_get_speed(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_speed nullpo\n");
 		return 1000;
-	if(bl->type == BL_PC)
+	}
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->speed;
 	else {
 		struct status_change *sc_data=battle_get_sc_data(bl);
 		int speed = 1000;
-		if(bl->type == BL_MOB)
+		if(bl->type==BL_MOB && (struct mob_data *)bl)
 //			speed = mob_db[((struct mob_data *)bl)->class].speed;
 			speed = ((struct mob_data *)bl)->speed;
-		else if(bl->type == BL_PET)
+		else if(bl->type==BL_PET && (struct pet_data *)bl)
 			speed = ((struct pet_data *)bl)->msd->petDB->speed;
 
 		if(sc_data) {
@@ -911,16 +969,18 @@ int battle_get_speed(struct block_list *bl)
  */
 int battle_get_adelay(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_adelay nullpo\n");
 		return 4000;
-	if(bl->type == BL_PC)
+	}
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return (((struct map_session_data *)bl)->aspd<<1);
 	else {
 		struct status_change *sc_data=battle_get_sc_data(bl);
 		int adelay=4000,aspd_rate = 100,i;
-		if(bl->type == BL_MOB)
+		if(bl->type==BL_MOB && (struct mob_data *)bl)
 			adelay = mob_db[((struct mob_data *)bl)->class].adelay;
-		else if(bl->type == BL_PET)
+		else if(bl->type==BL_PET && (struct pet_data *)bl)
 			adelay = mob_db[((struct pet_data *)bl)->class].adelay;
 
 		if(sc_data) {
@@ -968,16 +1028,18 @@ int battle_get_adelay(struct block_list *bl)
 }
 int battle_get_amotion(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_amotion nullpo\n");
 		return 2000;
-	if(bl->type==BL_PC)
+	}
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->amotion;
 	else {
 		struct status_change *sc_data=battle_get_sc_data(bl);
 		int amotion=2000,aspd_rate = 100,i;
-		if(bl->type == BL_MOB)
+		if(bl->type==BL_MOB && (struct mob_data *)bl)
 			amotion = mob_db[((struct mob_data *)bl)->class].amotion;
-		else if(bl->type == BL_PET)
+		else if(bl->type==BL_PET && (struct pet_data *)bl)
 			amotion = mob_db[((struct pet_data *)bl)->class].amotion;
 
 		if(sc_data) {
@@ -1018,20 +1080,22 @@ int battle_get_dmotion(struct block_list *bl)
 	int ret;
 	struct status_change *sc_data;
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_dmotion nullpo\n");
 		return 0;
+	}
 	sc_data = battle_get_sc_data(bl);
-	if(bl->type==BL_MOB) {
+	if(bl->type==BL_MOB && (struct mob_data *)bl){
 		ret=mob_db[((struct mob_data *)bl)->class].dmotion;
 		if(battle_config.monster_damage_delay_rate != 100)
 			ret = ret*battle_config.monster_damage_delay_rate/100;
 	}
-	else if(bl->type==BL_PC) {
+	else if(bl->type==BL_PC && (struct map_session_data *)bl){
 		ret=((struct map_session_data *)bl)->dmotion;
 		if(battle_config.pc_damage_delay_rate != 100)
 			ret = ret*battle_config.pc_damage_delay_rate/100;
 	}
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		ret=mob_db[((struct pet_data *)bl)->class].dmotion;
 	else
 		return 2000;
@@ -1047,14 +1111,16 @@ int battle_get_element(struct block_list *bl)
 	int ret = 20;
 	struct status_change *sc_data;
 
-	if(!bl)
-		return 20;
+	if( bl == NULL ){
+		printf("battle_get_element nullpo\n");
+		return ret;
+	}
 	sc_data = battle_get_sc_data(bl);
-	if(bl->type==BL_MOB)	// 10の位＝Lv*2、１の位＝属性
+	if(bl->type==BL_MOB && (struct mob_data *)bl)	// 10の位＝Lv*2、１の位＝属性
 		ret=((struct mob_data *)bl)->def_ele;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		ret=20+((struct map_session_data *)bl)->def_ele;	// 防御属性Lv1
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		ret = mob_db[((struct pet_data *)bl)->class].element;
 
 	if(sc_data) {
@@ -1073,13 +1139,15 @@ int battle_get_attack_element(struct block_list *bl)
 	int ret = 0;
 	struct status_change *sc_data=battle_get_sc_data(bl);
 
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_attack_element nullpo\n");
 		return 0;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		ret=0;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		ret=((struct map_session_data *)bl)->atk_ele;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		ret=0;
 
 	if(sc_data) {
@@ -1101,9 +1169,11 @@ int battle_get_attack_element(struct block_list *bl)
 }
 int battle_get_attack_element2(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_attack_element2 nullpo\n");
 		return 0;
-	if(bl->type==BL_PC) {
+	}
+	if(bl->type==BL_PC && (struct map_session_data *)bl) {
 		int ret = ((struct map_session_data *)bl)->atk_ele_;
 		struct status_change *sc_data = ((struct map_session_data *)bl)->sc_data;
 
@@ -1127,67 +1197,77 @@ int battle_get_attack_element2(struct block_list *bl)
 }
 int battle_get_party_id(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_party_id nullpo\n");
 		return 0;
-	if( bl->type == BL_PC )
+	}
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->status.party_id;
-	else if( bl->type==BL_MOB ){
+	else if(bl->type==BL_MOB && (struct mob_data *)bl){
 		struct mob_data *md=(struct mob_data *)bl;
 		if( md->master_id>0 )
 			return -md->master_id;
 		return -md->bl.id;
 	}
-	else if( bl->type==BL_SKILL )
+	else if(bl->type==BL_SKILL && (struct skill_unit *)bl)
 		return ((struct skill_unit *)bl)->group->party_id;
 	else
 		return 0;
 }
 int battle_get_guild_id(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_guild_id nullpo\n");
 		return 0;
-	if( bl->type == BL_PC )
+	}
+	if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data *)bl)->status.guild_id;
-	else if( bl->type==BL_MOB )
+	else if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return ((struct mob_data *)bl)->class;
-	else if( bl->type==BL_SKILL )
+	else if(bl->type==BL_SKILL && (struct skill_unit *)bl)
 		return ((struct skill_unit *)bl)->group->guild_id;
 	else
 		return 0;
 }
 int battle_get_race(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_race nullpo\n");
 		return 0;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return mob_db[((struct mob_data *)bl)->class].race;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return 7;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		return mob_db[((struct pet_data *)bl)->class].race;
 	else
 		return 0;
 }
 int battle_get_size(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_luk nullpo\n");
 		return 1;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return mob_db[((struct mob_data *)bl)->class].size;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return 1;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		return mob_db[((struct pet_data *)bl)->class].size;
 	else
 		return 1;
 }
 int battle_get_mode(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_mode nullpo\n");
 		return 0x01;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return mob_db[((struct mob_data *)bl)->class].mode;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		return mob_db[((struct pet_data *)bl)->class].mode;
 	else
 		return 0x01;	// とりあえず動くということで1
@@ -1195,11 +1275,13 @@ int battle_get_mode(struct block_list *bl)
 
 int battle_get_mexp(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_mexp nullpo\n");
 		return 0;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return mob_db[((struct mob_data *)bl)->class].mexp;
-	else if(bl->type==BL_PET)
+	else if(bl->type==BL_PET && (struct pet_data *)bl)
 		return mob_db[((struct pet_data *)bl)->class].mexp;
 	else
 		return 0;
@@ -1208,53 +1290,63 @@ int battle_get_mexp(struct block_list *bl)
 // StatusChange系の所得
 struct status_change *battle_get_sc_data(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("status_change nullpo\n");
 		return NULL;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return ((struct mob_data*)bl)->sc_data;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return ((struct map_session_data*)bl)->sc_data;
 	return NULL;
 }
 short *battle_get_sc_count(struct block_list *bl)
 {
-	if(!bl)
+	if( bl == NULL ){
+		printf("battle_get_sc_count nullpo\n");
 		return NULL;
-	if(bl->type==BL_MOB)
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return &((struct mob_data*)bl)->sc_count;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return &((struct map_session_data*)bl)->sc_count;
 	return NULL;
 }
 short *battle_get_opt1(struct block_list *bl)
 {
-	if(!bl)
-		return NULL;
-	if(bl->type==BL_MOB)
+	if( bl == NULL ){
+		printf("battle_get_opt1 nullpo\n");
+		return 0;
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return &((struct mob_data*)bl)->opt1;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return &((struct map_session_data*)bl)->opt1;
-	return NULL;
+	return 0;
 }
 short *battle_get_opt2(struct block_list *bl)
 {
-	if(!bl)
-		return NULL;
-	if(bl->type==BL_MOB)
+	if( bl == NULL ){
+		printf("battle_get_opt2 nullpo\n");
+		return 0;
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return &((struct mob_data*)bl)->opt2;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return &((struct map_session_data*)bl)->opt2;
-	return NULL;
+	return 0;
 }
 short *battle_get_option(struct block_list *bl)
 {
-	if(!bl)
-		return NULL;
-	if(bl->type==BL_MOB)
+	if( bl == NULL ){
+		printf("battle_get_opt1 nullpo\n");
+		return 0;
+	}
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
 		return &((struct mob_data*)bl)->option;
-	else if(bl->type==BL_PC)
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return &((struct map_session_data*)bl)->status.option;
-	return NULL;
+	return 0;
 }
 
 //-------------------------------------------------------------------
@@ -1268,7 +1360,7 @@ struct battle_delay_damage_ {
 int battle_delay_damage_sub(int tid,unsigned int tick,int id,int data)
 {
 	struct battle_delay_damage_ *dat=(struct battle_delay_damage_ *)data;
-	if( map_id2bl(id)==dat->src && dat->target->prev!=NULL)
+	if( dat && map_id2bl(id)==dat->src && dat->target->prev!=NULL)
 		battle_damage(dat->src,dat->target,dat->damage,dat->flag);
 	free(dat);
 	return 0;
@@ -1277,6 +1369,12 @@ int battle_delay_damage(unsigned int tick,struct block_list *src,struct block_li
 {
 	struct battle_delay_damage_ *dat =
 		(struct battle_delay_damage_*)calloc(sizeof *dat, 1);
+
+	if( src == NULL || target == NULL ){
+		printf("battle_delay_damage nullpo\n");
+		return 0;
+	}
+
 	if (dat == NULL) {
 		printf("out of memory: battle_delay_damage\n");
 		exit(1);
@@ -1332,7 +1430,7 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage,int
 
 	if(target->type==BL_MOB){	// MOB
 		struct mob_data *md=(struct mob_data *)target;
-		if(md->skilltimer!=-1 && md->state.skillcastcancel)	// 詠唱妨害
+		if(md && md->skilltimer!=-1 && md->state.skillcastcancel)	// 詠唱妨害
 			skill_castcancel(target,0);
 		return mob_damage(bl,md,damage,0);
 	}
@@ -1340,7 +1438,7 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage,int
 
 		struct map_session_data *tsd=(struct map_session_data *)target;
 
-		if(tsd->sc_data[SC_DEVOTION].val1){	// ディボーションをかけられている
+		if(tsd && tsd->sc_data && tsd->sc_data[SC_DEVOTION].val1){	// ディボーションをかけられている
 			struct map_session_data *md = map_id2sd(tsd->sc_data[SC_DEVOTION].val1);
 			if(md && skill_devotion3(&md->bl,target->id)){
 				skill_devotion(md,target->id);
@@ -1356,7 +1454,7 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage,int
 					}
 		}
 
-		if(tsd->skilltimer!=-1){	// 詠唱妨害
+		if(tsd && tsd->skilltimer!=-1){	// 詠唱妨害
 				// フェンカードや妨害されないスキルかの検査
 			if( (!tsd->special_state.no_castcancel || map[bl->m].flag.gvg) && tsd->state.skillcastcancel &&
 				!tsd->special_state.no_castcancel2)
@@ -1397,6 +1495,10 @@ int battle_heal(struct block_list *bl,struct block_list *target,int hp,int sp,in
 // 攻撃停止
 int battle_stopattack(struct block_list *bl)
 {
+	if( bl == NULL ){
+		printf("battle_stopattack nullpo\n");
+		return 0;
+	}
 	if(bl->type==BL_MOB)
 		return mob_stopattack((struct mob_data*)bl);
 	else if(bl->type==BL_PC)
@@ -1408,6 +1510,10 @@ int battle_stopattack(struct block_list *bl)
 // 移動停止
 int battle_stopwalking(struct block_list *bl,int type)
 {
+	if( bl == NULL ){
+		printf("battle_stopwalking nullpo\n");
+		return 0;
+	}
 	if(bl->type==BL_MOB)
 		return mob_stop_walking((struct mob_data*)bl,type);
 	else if(bl->type==BL_PC)
@@ -1447,8 +1553,14 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 	struct mob_data *md=NULL;
 	struct status_change *sc_data,*sc;
 	short *sc_count;
-	int class = battle_get_class(bl);
+	int class;
 
+	if( bl == NULL ){
+		printf("battle_calc_damage nullpo\n");
+		return 0;
+	}
+
+	class = battle_get_class(bl);
 	if(bl->type==BL_MOB) md=(struct mob_data *)bl;
 	else sd=(struct map_session_data *)bl;
 	
@@ -1460,7 +1572,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 		if(sc_data[SC_SAFETYWALL].timer!=-1 && damage>0 && flag&BF_WEAPON && flag&BF_SHORT && skill_num != NPC_GUIDEDATTACK){
 			// セーフティウォール
 			struct skill_unit *unit=(struct skill_unit*)sc_data[SC_SAFETYWALL].val2;
-			if( unit->alive && (--unit->group->val2)<=0 )
+			if( unit && unit->alive && (--unit->group->val2)<=0 )
 				skill_delunit(unit);
 			skill_unit_move(bl,gettick(),1);	// 重ね掛けチェック
 			damage=0;
@@ -1528,10 +1640,10 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 			if(rand()%100 < sc_data[SC_AUTOGUARD].val2) {
 				damage = 0;
 				clif_skill_nodamage(bl,bl,CR_AUTOGUARD,sc_data[SC_AUTOGUARD].val1,1);
-				if(bl->type == BL_PC)
-					((struct map_session_data *)bl)->canmove_tick = gettick() + 300;
-				else if(bl->type == BL_MOB)
-					((struct mob_data *)bl)->canmove_tick = gettick() + 300;
+				if(sd)
+					sd->canmove_tick = gettick() + 300;
+				else if(md)
+					md->canmove_tick = gettick() + 300;
 			}
 		}
 		/* パリイング */
@@ -1612,6 +1724,11 @@ int battle_addmastery(struct map_session_data *sd,struct block_list *target,int 
 	int race=battle_get_race(target);
 	int weapon;
 	damage = 0;
+
+	if( sd == NULL ){
+		printf("battle_addmastery nullpo\n");
+		return 0;
+	}
 
 	// デーモンベイン(+3 ～ +30) vs 不死 or 悪魔 (死人は含めない？)
 	if((skill = pc_checkskill(sd,AL_DEMONBANE)) > 0 && (battle_check_undead(race,battle_get_elem_type(target)) || race==6) ) 
@@ -1761,6 +1878,12 @@ static struct Damage battle_calc_pet_weapon_attack(
 	int flag,dmg_lv=0;
 	int t_mode=0,t_race=0,t_size=1,s_race=0,s_ele=0;
 	struct status_change *t_sc_data;
+
+	if( target == NULL || pd == NULL ){ //srcは内容に直接触れていないのでスルーしてみる
+		printf("battle_calc_pet_weapon_attack nullpo\n");
+		memset(&wd,0,sizeof(wd));
+		return wd;
+	}
 
 	s_race=battle_get_race(src);
 	s_ele=battle_get_attack_element(src);
@@ -2170,6 +2293,12 @@ static struct Damage battle_calc_mob_weapon_attack(
 	short *sc_count;
 	short *option, *opt1, *opt2;
 
+	if( src == NULL || target == NULL || md == NULL ){
+		printf("battle_calc_mob_weapon_attack nullpo\n");
+		memset(&wd,0,sizeof(wd));
+		return wd;
+	}
+
 	s_race=battle_get_race(src);
 	s_ele=battle_get_attack_element(src);
 	sc_data=battle_get_sc_data(src);
@@ -2292,10 +2421,14 @@ static struct Damage battle_calc_mob_weapon_attack(
 		// メマーナイト,カートレボリューション
 		// ダブルストレイフィング,アローシャワー,チャージアロー,
 		// ソニックブロー
-		if( sc_data!=NULL && sc_data[SC_OVERTHRUST].timer!=-1)	// オーバートラスト
-			damage += damage*(5*sc_data[SC_OVERTHRUST].val1)/100;
-		if( sc_data!=NULL && sc_data[SC_TRUESIGHT].timer!=-1)	// トゥルーサイト
-			damage += damage*(2*sc_data[SC_TRUESIGHT].val1)/100;
+		if(sc_data){ //状態異常中のダメージ追加
+			if(sc_data[SC_OVERTHRUST].timer!=-1)	// オーバートラスト
+				damage += damage*(5*sc_data[SC_OVERTHRUST].val1)/100;
+			if(sc_data[SC_TRUESIGHT].timer!=-1)	// トゥルーサイト
+				damage += damage*(2*sc_data[SC_TRUESIGHT].val1)/100;
+			if(sc_data[SC_BERSERK].timer!=-1)	// バーサーク
+				damage += damage*50/100;
+		}
 
 		if(skill_num>0){
 			int i;
@@ -2478,10 +2611,10 @@ static struct Damage battle_calc_mob_weapon_attack(
 			case LK_SPIRALPIERCE:			/* スパイラルピアース */
 				damage = damage*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
 				div_=5;
-				if(target->type == BL_PC)
-					((struct map_session_data *)target)->canmove_tick = gettick() + 1000;
-				else if(target->type == BL_MOB)
-					((struct mob_data *)target)->canmove_tick = gettick() + 1000;
+				if(tsd)
+					tsd->canmove_tick = gettick() + 1000;
+				else if(tmd)
+					tmd->canmove_tick = gettick() + 1000;
 				break;
 			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
 				damage = damage*(100+ 20*skill_lv)/100;
@@ -2527,7 +2660,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 				}
 				t_def = def2*8/10;
 				if(battle_check_undead(s_race,battle_get_elem_type(src)) || s_race==6)
-					if(target->type==BL_PC && (skill=pc_checkskill(tsd,AL_DP)) > 0 )
+					if(tsd && (skill=pc_checkskill(tsd,AL_DP)) > 0 )
 						t_def += skill*3;
 
 				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
@@ -2559,7 +2692,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		dmg_lv = ATK_DEF;
 	}
 
-	if( target->type==BL_PC){
+	if(tsd){
 		int cardfix=100,i;
 		cardfix=cardfix*(100-tsd->subele[s_ele])/100;	// 属 性によるダメージ耐性
 		cardfix=cardfix*(100-tsd->subrace[s_race])/100;	// 種族によるダメージ耐性
@@ -2587,7 +2720,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 			damage=damage*cardfix/100;
 	}
 	if(t_sc_data && t_sc_data[SC_ASSUMPTIO].timer != -1){ //アシャンプティオ
-		if(!map[tsd->bl.m].flag.pvp)
+		if(!map[target->m].flag.pvp)
 			damage=damage/3;
 		else
 			damage=damage/2;
@@ -2599,7 +2732,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if(skill_num != 0 || s_ele != 0 || !battle_config.mob_attack_attr_none)
 		damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
 
-	if(sc_data!=NULL && sc_data[SC_AURABLADE].timer!=-1)	/* オーラブレード 必中 */
+	if(sc_data && sc_data[SC_AURABLADE].timer!=-1)	/* オーラブレード 必中 */
 		damage += sc_data[SC_AURABLADE].val1 * 10;
 	if(skill_num==PA_PRESSURE) /* プレッシャー 必中? */
 		damage = 700+100*skill_lv;
@@ -2676,6 +2809,12 @@ static struct Damage battle_calc_pc_weapon_attack(
 	int watk,watk_,cardfix,t_ele;
 	int da=0,i,t_class,ac_flag = 0;
 	int idef_flag=0,idef_flag_=0;
+
+	if( src == NULL || target == NULL || sd == NULL ){
+		printf("battle_calc_pc_weapon_attack nullpo\n");
+		memset(&wd,0,sizeof(wd));
+		return wd;
+	}
 
 	// アタッカー
 	s_race=battle_get_race(src); //種族
@@ -2945,13 +3084,19 @@ static struct Damage battle_calc_pc_weapon_attack(
 		// メマーナイト,カートレボリューション
 		// ダブルストレイフィング,アローシャワー,チャージアロー,
 		// ソニックブロー
-		if( sc_data!=NULL && sc_data[SC_OVERTHRUST].timer!=-1){	// オーバートラスト
-			damage += damage*(5*sc_data[SC_OVERTHRUST].val1)/100;
-			damage2 += damage2*(5*sc_data[SC_OVERTHRUST].val1)/100;
-		}
-		if( sc_data!=NULL && sc_data[SC_TRUESIGHT].timer!=-1){	// トゥルーサイト
-			damage += damage*(2*sc_data[SC_TRUESIGHT].val1)/100;
-			damage2 += damage2*(2*sc_data[SC_TRUESIGHT].val1)/100;
+		if(sc_data){ //状態異常中のダメージ追加
+			if(sc_data[SC_OVERTHRUST].timer!=-1){	// オーバートラスト
+				damage += damage*(5*sc_data[SC_OVERTHRUST].val1)/100;
+				damage2 += damage2*(5*sc_data[SC_OVERTHRUST].val1)/100;
+			}
+			if(sc_data[SC_TRUESIGHT].timer!=-1){	// トゥルーサイト
+				damage += damage*(2*sc_data[SC_TRUESIGHT].val1)/100;
+				damage2 += damage2*(2*sc_data[SC_TRUESIGHT].val1)/100;
+			}
+			if(sc_data[SC_BERSERK].timer!=-1){	// バーサーク
+				damage += damage*50/100;
+				damage2 += damage2*50/100;
+			}
 		}
 
 		if(skill_num>0){
@@ -3245,10 +3390,10 @@ static struct Damage battle_calc_pc_weapon_attack(
 				damage = damage*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
 				damage2 = damage2*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
 				div_=5;
-				if(target->type == BL_PC)
-					((struct map_session_data *)target)->canmove_tick = gettick() + 1000;
-				else if(target->type == BL_MOB)
-					((struct mob_data *)target)->canmove_tick = gettick() + 1000;
+				if(tsd)
+					tsd->canmove_tick = gettick() + 1000;
+				else if(tmd)
+					tmd->canmove_tick = gettick() + 1000;
 				break;
 			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
 				damage = damage*(100+ 20*skill_lv)/100;
@@ -3473,7 +3618,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 //カードによるダメージ増加処理(左手)ここまで
 
 //カードによるダメージ減衰処理ここから
-	if( target->type==BL_PC ){ //対象がPCの場合
+	if(tsd){ //対象がPCの場合
 		cardfix=100;
 		cardfix=cardfix*(100-tsd->subrace[s_race])/100;	// 種族によるダメージ耐性
 		cardfix=cardfix*(100-tsd->subele[s_ele])/100;	// 属性によるダメージ耐性
@@ -3496,8 +3641,9 @@ static struct Damage battle_calc_pc_weapon_attack(
 		damage2=damage2*cardfix/100; //カード補正による左手ダメージ減少
 	}
 //カードによるダメージ減衰処理ここまで
-//ディフェンダーによるダメージ減衰処理ここから
-	if(t_sc_data) { //ターゲットのステータスに変化がある場合sc_data
+
+//対象にステータス異常がある場合のダメージ減算処理ここから
+	if(t_sc_data) {
 		cardfix=100;
 		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG) //ディフェンダー状態で遠距離攻撃
 			cardfix=cardfix*(100-t_sc_data[SC_DEFENDER].val2)/100; //ディフェンダーによる減衰
@@ -3505,18 +3651,18 @@ static struct Damage battle_calc_pc_weapon_attack(
 			damage=damage*cardfix/100; //ディフェンダー補正によるダメージ減少
 			damage2=damage2*cardfix/100; //ディフェンダー補正による左手ダメージ減少
 		}
-	}
-//ディフェンダーによるダメージ減衰処理ここまで
-
-	if(t_sc_data && t_sc_data[SC_ASSUMPTIO].timer != -1){ //アシャンプティオ
-		if(!map[tsd->bl.m].flag.pvp){
-			damage=damage/3;
-			damage2=damage2/3;
-		}else{
-			damage=damage/2;
-			damage2=damage2/2;
+		if(t_sc_data[SC_ASSUMPTIO].timer != -1){ //アスムプティオ
+			if(!map[target->m].flag.pvp){
+				damage=damage/3;
+				damage2=damage2/3;
+			}else{
+				damage=damage/2;
+				damage2=damage2/2;
+			}
 		}
 	}
+//対象にステータス異常がある場合のダメージ減算処理ここまで
+
 	if(damage < 0) damage = 0;
 	if(damage2 < 0) damage2 = 0;
 
@@ -3530,7 +3676,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	damage += sd->spiritball*3;
 	damage2 += sd->spiritball*3;
 
-	if(sc_data!=NULL && sc_data[SC_AURABLADE].timer!=-1){	/* オーラブレード 必中 */
+	if(sc_data && sc_data[SC_AURABLADE].timer!=-1){	/* オーラブレード 必中 */
 		damage += sc_data[SC_AURABLADE].val1 * 10;
 		damage2 += sc_data[SC_AURABLADE].val1 * 10;
 	}
@@ -3653,6 +3799,12 @@ struct Damage battle_calc_weapon_attack(
 {
 	struct Damage wd;
 
+	if( src == NULL || target == NULL ){
+		printf("battle_calc_weapon_attack nullpo\n");
+		memset(&wd,0,sizeof(wd));
+		return wd;
+	}
+
 	if(target->type == BL_PET)
 		memset(&wd,0,sizeof(wd));
 	else if(src->type == BL_PC)
@@ -3684,6 +3836,12 @@ struct Damage battle_calc_magic_attack(
 	struct map_session_data *sd=NULL,*tsd=NULL;
 	struct mob_data *tmd = NULL;
 
+	if( bl == NULL || target == NULL ){
+		printf("battle_calc_magic_attack nullpo\n");
+		memset(&md,0,sizeof(md));
+		return md;
+	}
+
 	if(target->type == BL_PET) {
 		memset(&md,0,sizeof(md));
 		return md;
@@ -3699,8 +3857,7 @@ struct Damage battle_calc_magic_attack(
 
 #define MATK_FIX( a,b ) { matk1=matk1*(a)/(b); matk2=matk2*(a)/(b); }
 	
-	if( bl->type==BL_PC ){
-		sd=(struct map_session_data *)bl;
+	if( bl->type==BL_PC && (sd=(struct map_session_data *)bl) ){
 		sd->state.attack_type = BF_MAGIC;
 		if(sd->matk_rate != 100)
 			MATK_FIX(sd->matk_rate,100);
@@ -3869,7 +4026,7 @@ struct Damage battle_calc_magic_attack(
 		damage=damage*cardfix/100;
 	}
 
-	if( target->type==BL_PC ){
+	if( tsd ){
 		int s_class = battle_get_class(bl);
 		cardfix=100;
 		cardfix=cardfix*(100-tsd->subele[ele])/100;	// 属 性によるダメージ耐性
@@ -3909,7 +4066,7 @@ struct Damage battle_calc_magic_attack(
 	if(t_mode&0x40 && damage > 0)
 		damage = 1;
 
-	if( target->type==BL_PC && ((struct map_session_data *)target)->special_state.no_magic_damage)
+	if( tsd && tsd->special_state.no_magic_damage)
 		damage=0;	// 黄 金蟲カード（魔法ダメージ０）
 
 	damage=battle_calc_damage(bl,target,damage,div_,skill_num,skill_lv,aflag);	// 最終修正
@@ -3944,13 +4101,18 @@ struct Damage  battle_calc_misc_attack(
 
 	int aflag=BF_MISC|BF_LONG|BF_SKILL;
 
+	if( bl == NULL || target == NULL ){
+		printf("battle_calc_mob_weapon_attack nullpo\n");
+		memset(&md,0,sizeof(md));
+		return md;
+	}
+
 	if(target->type == BL_PET) {
 		memset(&md,0,sizeof(md));
 		return md;
 	}
 
-	if(bl->type == BL_PC) {
-		sd=(struct map_session_data *)bl;
+	if( bl->type == BL_PC && (sd=(struct map_session_data *)bl) ) {
 		sd->state.attack_type = BF_MISC;
 		sd->state.arrow_atk = 0;
 	}
@@ -4025,7 +4187,7 @@ struct Damage  battle_calc_misc_attack(
 		if(damage<1 && skill_num != NPC_DARKBREATH)
 			damage=1;
 
-		if( target->type==BL_PC ){
+		if( tsd ){
 			cardfix=100;
 			cardfix=cardfix*(100-tsd->subele[ele])/100;	// 属性によるダメージ耐性
 			cardfix=cardfix*(100-tsd->subrace[race])/100;	// 種族によるダメージ耐性
@@ -4093,6 +4255,11 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	int damage,rdamage = 0;
 	struct Damage wd;
 
+	if( src == NULL || target == NULL ){
+		printf("battle_weapon_attack nullpo\n");
+		return 0;
+	}
+
 	if(src->type == BL_PC)
 		sd = (struct map_session_data *)src;
 
@@ -4118,7 +4285,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	if(battle_check_target(src,target,BCT_ENEMY) > 0 &&
 		battle_check_range(src,target,0)){
 		// 攻撃対象となりうるので攻撃
-		if(src->type == BL_PC && sd->status.weapon == 11) {
+		if(sd && sd->status.weapon == 11) {
 			if(sd->equip_index[10] >= 0) {
 				if(battle_config.arrow_decrement)
 					pc_delitem(sd,sd->equip_index[10],1,0);
@@ -4129,7 +4296,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			}
 		}
 		if(flag&0x8000) {
-			if(src->type == BL_PC && battle_config.pc_attack_direction_change)
+			if(sd && battle_config.pc_attack_direction_change)
 				sd->dir = sd->head_dir = map_calc_dir(src, target->x,target->y );
 			else if(src->type == BL_MOB && battle_config.monster_attack_direction_change)
 				((struct mob_data *)src)->dir = map_calc_dir(src, target->x,target->y );
@@ -4141,7 +4308,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			if(wd.flag&BF_SHORT) {
 				if(target->type == BL_PC) {
 					struct map_session_data *tsd = (struct map_session_data *)target;
-					if(tsd->short_weapon_damage_return > 0) {
+					if(tsd && tsd->short_weapon_damage_return > 0) {
 						rdamage += damage * tsd->short_weapon_damage_return / 100;
 						if(rdamage < 1) rdamage = 1;
 					}
@@ -4154,7 +4321,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			else if(wd.flag&BF_LONG) {
 				if(target->type == BL_PC) {
 					struct map_session_data *tsd = (struct map_session_data *)target;
-					if(tsd->long_weapon_damage_return > 0) {
+					if(tsd && tsd->long_weapon_damage_return > 0) {
 						rdamage += damage * tsd->long_weapon_damage_return / 100;
 						if(rdamage < 1) rdamage = 1;
 					}
@@ -4164,7 +4331,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				clif_damage(src,src,tick, wd.amotion,0,rdamage,1,4,0);
 		}
 
-		if (wd.div_ == 255 && src->type == BL_PC)	{ //三段掌
+		if (wd.div_ == 255 && sd)	{ //三段掌
 			int delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
 			int skilllv;
 			if(wd.damage+wd.damage2 < battle_get_hp(target)) {
@@ -4182,7 +4349,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
 				wd.damage, wd.div_ , wd.type, wd.damage2);
 		//二刀流左手とカタール追撃のミス表示(無理やり～)
-			if(src->type == BL_PC && sd->status.weapon >= 16 && wd.damage2 == 0)
+			if(sd && sd->status.weapon >= 16 && wd.damage2 == 0)
 				clif_damage(src,target,tick+10, wd.amotion, wd.dmotion,0, 1, 0, 0);
 		}
 		if(sd && sd->splash_range > 0 && (wd.damage > 0 || wd.damage2 > 0) )
@@ -4357,6 +4524,11 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	int s_p,s_g,t_p,t_g;
 	struct block_list *ss=src;
 
+	if( src == NULL || target == NULL ){
+		printf("battle_check_target nullpo\n");
+		return 0;
+	}
+
 	if( flag&0x40000 ){	// 反転フラグ
 		int ret=battle_check_target(src,target,flag&0x30000);
 		if(ret!=-1)
@@ -4482,9 +4654,18 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 int battle_check_range(struct block_list *src,struct block_list *bl,int range)
 {
 
-	int dx=abs(bl->x-src->x),dy=abs(bl->y-src->y);
+	int dx,dy;
 	struct walkpath_data wpd;
-	int arange=((dx>dy)?dx:dy);
+	int arange;
+
+	if( src == NULL || bl == NULL ){
+		printf("battle_check_range nullpo\n");
+		return 0;
+	}
+	
+	dx=abs(bl->x-src->x);
+	dy=abs(bl->y-src->y);
+	arange=((dx>dy)?dx:dy);
 
 	if(src->m != bl->m)	// 違うマップ
 		return 0;

@@ -230,7 +230,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_PARRYING				=104, /* パリイング */
 	SC_CONCENTRATION		=105, /* コンセントレーション */
 	SC_TENSIONRELAX			=106, /* テンションリラックス */
-	SC_BERSERK				=108, /* バーサーク */
+	SC_BERSERK				=107, /* バーサーク */
 	SC_ASSUMPTIO			=110, /* アシャンプティオ */
 	SC_MAGICPOWER			=113, /* 魔法力増幅 */
 	SC_TRUESIGHT			=115, /* トゥルーサイト */

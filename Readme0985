@@ -1,4 +1,80 @@
 --------------------
+//1005 by (凸)
+・NULLチェックの見直しと追加、大量に変更したので問題が出る可能性が大です
+・ウンバラ分割パッチが配布されたので@go 12にウンバラを追加
+・ロードナイト バーサークをちょっとそれっぽく(ASPD増加などは未実装)
+・クラウン･ジプシー 月明りの泉に落ちる花びらの使用条件を合奏と同じに変更(効果等は未実装)
+・ブレッシングが本鯖ではステータスアップ→エフェクトだったのでそのように変更
+・本鯖相違スレッド part2 >>145 zzzさんの報告を反映
+・同スレ >>143 plalaさんの報告を反映
+
+	(db/)
+	skill_require_db.txt 変更
+	(conf/)
+	help.txt ウンバラ追加
+	map_athena.conf ウンバラ関連のコメントアウトを解除
+	(map/)
+	atcommand.c NULLチェック強化
+		atcommand() @mapmoveなどで落ちる問題を修正
+		atcommand_go() ウンバラ追加
+	battle.c NULLチェック強化
+		battle_calc_mob_weapon_attack() バーサーク時ダメージ150%
+		battle_calc_pc_weapon_attack() バーサーク時ダメージ150%
+	chat.c NULLチェック強化
+	chrif.c NULLチェック強化
+	clif.c NULLチェック強化
+		clif_parse_ActionRequest() ダンス時の処理を若干変更
+		clif_parse_GlobalMessage() バーサーク時は会話が出来ないように変更
+		clif_parse_Wis() バーサーク時は会話が出来ないように変更
+		clif_parse_PartyMessage() 同上
+		clif_parse_GuildMessage() 同上
+		clif_parse_TakeItem() バーサーク時はアイテムを取れないように変更
+		clif_parse_DropItem() バーサーク時はアイテムを落とせないように変更
+		clif_parse_UseItem() バーサーク時はアイテムを使えないように変更
+		clif_parse_EquipItem() バーサーク時は装備できないように変更
+		clif_parse_UnequipItem() バーサーク時は装備解除できないように変更
+		clif_parse_UseSkillToId() バーサーク時はスキル使用ができないように変更
+		clif_parse_UseSkillToPos() 同上
+		clif_parse_UseSkillMap() 同上
+	guild.c NULLチェック強化
+	intif.c NULLチェック強化
+	itemdb.c NULLチェック強化
+	map.c NULLチェック強化
+		map_quit() バーサーク時にログアウトするとHP 100/SP 0になるように変更
+	mob.c
+		mob_attack() clif_fixmobpos()を送信しないように変更
+		mob_timer() NULLチェック条件を変更
+		mobskill_castend_id() 同上、バーサーク時スキルを使えないように変更
+		mobskill_castend_pos() バーサーク時スキルを使えないように変更
+		mobskill_use_id() 同上
+		mobskill_use_pos() 同上
+	npc.c NULLチェック強化
+	party.c NULLチェック強化
+	path.c NULLチェック強化
+	pc.c NULLチェック強化
+		pc_calcstatus() バーサーク時は速度UP＆MHP3倍、メディテイティオのSP回復増加をSPRではなく通常回復にかかるようにした
+		pc_heal() バーサーク時は回復しない
+		pc_jobchange() 転職直後1歩動かないと服の色が反映されなかったのを修正
+		pc_natural_heal_sub() バーサーク中はSPが自然回復しないように変更(HPは良く分からなかったので回復するようにしてある)
+	pet.c NULLチェック強化
+	skill.c
+		skill_castend_nodamage_id() ブレッシング等のパケット順を変更、ストーンカースを不死には無効にした
+		skill_castend_map() しつこいくらいにバーサーク時にスキルを使えないように変更
+		skill_check_condition() 同上
+		skill_use_pos() 同上
+		skill_use_id() 同上＆月明りの泉に落ちる花びら追加
+		skill_status_change_end() バーサーク時にはIAアイコンを消去するように変更
+		skill_status_change_timer() NULLチェック条件を変更、月明りの泉に落ちる花びら時SP消費、バーサーク時HP100以上なら10秒あたり1%減らすように変更
+		skill_status_change_start() バーサーク時にはIAアイコンを表示するように変更
+		skill_delunit() NULLチェック条件を変更
+		skill_check_condition_char_sub() 月明りの泉に落ちる花びら追加
+		skill_check_condition_use_sub() 同上
+		skill_is_danceskill() 同上
+		skill_initunitgroup() 同上
+	trade.c NULLチェック強化
+	vending.c NULLチェック強化
+
+--------------------
 //1004 by (凸)
 ・NULLチェックでエンバグしていたところをいくつか修正と他のNULLチェック強化
 ・skill.cでもnullpoを表示するように変更

@@ -78,6 +78,10 @@ struct npc_data* npc_name2id(const char *name)
  */
 int npc_event_dequeue(struct map_session_data *sd)
 {
+	if( sd == NULL ){
+		printf("npc_event_dequeue nullpo\n");
+		return 0;
+	}
 	sd->npc_id=0;
 	if (sd->eventqueue[0][0]) {	// キューのイベント処理
 		char *name=calloc(50, 1);
@@ -115,9 +119,16 @@ int npc_event_timer(int tid,unsigned int tick,int id,int data)
 int npc_event_doall_sub(void *key,void *data,va_list ap)
 {
 	char *p=(char *)key;
-	struct event_data *ev=(struct event_data *)data;
-	int *c=va_arg(ap,int *);
-	const char *name=va_arg(ap,const char *);
+	struct event_data *ev;
+	int *c;
+	const char *name;
+
+	if( (ev=(struct event_data *)data) == NULL || (c=va_arg(ap,int *)) == NULL){
+		printf("npc_event_doall_sub nullpo\n");
+		return 0;
+	}
+
+	name=va_arg(ap,const char *);
 
 	if( (p=strchr(p,':')) && p && strcasecmp(name,p)==0 ){
 		run_script(ev->nd->u.scr.script,ev->pos,0,ev->nd->bl.id);
@@ -139,9 +150,16 @@ int npc_event_doall(const char *name)
 int npc_event_do_sub(void *key,void *data,va_list ap)
 {
 	char *p=(char *)key;
-	struct event_data *ev=(struct event_data *)data;
-	int *c=va_arg(ap,int *);
-	const char *name=va_arg(ap,const char *);
+	struct event_data *ev;
+	int *c;
+	const char *name;
+
+	if( (ev=(struct event_data *)data) == NULL || (c=va_arg(ap,int *)) == NULL){
+		printf("npc_event_do_sub nullpo\n");
+		return 0;
+	}
+
+	name=va_arg(ap,const char *);
 
 	if (p && strcasecmp(name,p)==0 ) {
 		run_script(ev->nd->u.scr.script,ev->pos,0,ev->nd->bl.id);
@@ -241,7 +259,14 @@ int npc_timerevent(int tid,unsigned int tick,int id,int data)
  */
 int npc_timerevent_start(struct npc_data *nd)
 {
-	int j,n=nd->u.scr.timeramount, next;
+	int j,n, next;
+
+	if( nd == NULL ){
+		printf("npc_timerevent_start nullpo\n");
+		return 0;
+	}
+
+	n=nd->u.scr.timeramount;
 	if( nd->u.scr.nexttimer>=0 || n==0 )
 		return 0;
 	
@@ -265,6 +290,10 @@ int npc_timerevent_start(struct npc_data *nd)
  */
 int npc_timerevent_stop(struct npc_data *nd)
 {
+	if( nd == NULL ){
+		printf("npc_timerevent_stop nullpo\n");
+		return 0;
+	}
 	if( nd->u.scr.nexttimer>=0 ){
 		nd->u.scr.nexttimer = -1;
 		nd->u.scr.timer += (int)(gettick() - nd->u.scr.timertick);
@@ -280,7 +309,15 @@ int npc_timerevent_stop(struct npc_data *nd)
  */
 int npc_gettimerevent_tick(struct npc_data *nd)
 {
-	int tick=nd->u.scr.timer;
+	int tick;
+
+	if( nd == NULL ){
+		printf("npc_gettimerevent_tick nullpo\n");
+		return 0;
+	}
+
+	tick=nd->u.scr.timer;
+
 	if( nd->u.scr.nexttimer>=0 )
 		tick += (int)(gettick() - nd->u.scr.timertick);
 	return tick;
@@ -291,7 +328,15 @@ int npc_gettimerevent_tick(struct npc_data *nd)
  */
 int npc_settimerevent_tick(struct npc_data *nd,int newtimer)
 {
-	int flag= nd->u.scr.nexttimer;
+	int flag;
+
+	if( nd == NULL ){
+		printf("npc_gettimerevent_tick nullpo\n");
+		return 0;
+	}
+
+	flag= nd->u.scr.nexttimer;
+
 	npc_timerevent_stop(nd);
 	nd->u.scr.timer=newtimer;
 	if(flag>=0)
@@ -309,7 +354,11 @@ int npc_event(struct map_session_data *sd,const char *eventname)
 	struct npc_data *nd;
 	int xs,ys;
 
-	if (sd == NULL) return 0;
+	if( sd == NULL ){
+		printf("npc_event nullpo?\n");
+		return 0;
+	}
+
 	if (ev==NULL || (nd=ev->nd)==NULL) {
 		if (battle_config.error_log)
 			printf("npc_event: event not found [%s]\n",eventname);
@@ -363,6 +412,11 @@ int npc_touch_areanpc(struct map_session_data *sd,int m,int x,int y)
 	int i,f=1;
 	int xs,ys;
 
+	if( sd == NULL ){
+		printf("npc_touch_areanpc nullpo\n");
+		return 1;
+	}
+
 	for(i=0;i<map[m].npc_num;i++) {
 		if (map[m].npc[i]->flag&1) {	// 無効化されている
 			f=0;
@@ -412,6 +466,11 @@ int npc_checknear(struct map_session_data *sd,int id)
 {
 	struct npc_data *nd;
 
+	if( sd == NULL ){
+		printf("npc_checknear nullpo\n");
+		return 0;
+	}
+
 	nd=(struct npc_data *)map_id2bl(id);
 	if (nd==NULL || nd->bl.type!=BL_NPC) {
 		if (battle_config.error_log)
@@ -438,6 +497,11 @@ int npc_checknear(struct map_session_data *sd,int id)
 int npc_click(struct map_session_data *sd,int id)
 {
 	struct npc_data *nd;
+
+	if( sd == NULL ){
+		printf("npc_checknear nullpo\n");
+		return 1;
+	}
 
 	if (sd->npc_id != 0) {
 		if (battle_config.error_log)
@@ -475,6 +539,11 @@ int npc_scriptcont(struct map_session_data *sd,int id)
 {
 	struct npc_data *nd;
 
+	if( sd == NULL ){
+		printf("npc_scriptcont nullpo\n");
+		return 1;
+	}
+
 	if (id!=sd->npc_id)
 		return 1;
 	if (npc_checknear(sd,id))
@@ -494,6 +563,11 @@ int npc_scriptcont(struct map_session_data *sd,int id)
 int npc_buysellsel(struct map_session_data *sd,int id,int type)
 {
 	struct npc_data *nd;
+
+	if( sd == NULL ){
+		printf("npc_buysellsel nullpo\n");
+		return 1;
+	}
 
 	if (npc_checknear(sd,id))
 		return 1;
@@ -526,6 +600,11 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 	struct npc_data *nd;
 	double z;
 	int i,j,w,skill,itemamount=0,new=0;
+
+	if( sd == NULL || item_list == NULL ){
+		printf("npc_buylist nullpo\n");
+		return 3;
+	}
 
 	if (npc_checknear(sd,sd->npc_shopid))
 		return 3;
@@ -605,6 +684,11 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 {
 	double z;
 	int i,skill,itemamount=0;
+
+	if( sd == NULL || item_list == NULL ){
+		printf("npc_selllist nullpo\n");
+		return 1;
+	}
 
 	if (npc_checknear(sd,sd->npc_shopid))
 		return 1;
@@ -879,11 +963,18 @@ int npc_convertlabel_db(void *key,void *data,va_list ap)
 {
 	char *lname=(char *)key;
 	int pos=(int)data;
-	struct npc_data *nd=va_arg(ap,struct npc_data *);
-	struct npc_label_list *lst=nd->u.scr.label_list;
-	int num=nd->u.scr.label_list_num;
+	struct npc_data *nd;
+	struct npc_label_list *lst;
+	int num;
 	char *p=strchr(lname,':');
-	
+
+	if( ap == NULL || (nd=va_arg(ap,struct npc_data *)) == NULL ){
+		printf("npc_convertlabel_db nullpo\n");
+		return 0;
+	}
+
+	lst=nd->u.scr.label_list;
+	num=nd->u.scr.label_list_num;
 	if(!lst){
 		lst=malloc(sizeof(struct npc_label_list));
 		num=0;

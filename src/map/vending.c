@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 
 #include "clif.h"
@@ -15,6 +16,11 @@
 */
 void vending_closevending(struct map_session_data *sd)
 {
+
+	if( sd == NULL ){
+		printf("vending_closevending nullpo\n");
+		return;
+	}
 	sd->vender_id=0;
 	clif_closevendingboard(&sd->bl,0);
 }
@@ -25,9 +31,14 @@ void vending_closevending(struct map_session_data *sd)
  */
 void vending_vendinglistreq(struct map_session_data *sd,int id)
 {
-	struct map_session_data *vsd=map_id2sd(id);
+	struct map_session_data *vsd;
 
-	if(vsd==NULL)
+	if( sd == NULL ){
+		printf("vending_vendinglistreq nullpo\n");
+		return;
+	}
+
+	if( (vsd=map_id2sd(id)) == NULL )
 		return;
 	if(vsd->vender_id==0)
 		return;
@@ -40,9 +51,16 @@ void vending_vendinglistreq(struct map_session_data *sd,int id)
  */
 void vending_purchasereq(struct map_session_data *sd,int len,int id,unsigned char *p)
 {
-	int i,j,w,z,new=0,blank=pc_inventoryblank(sd),vend_list[12];
+	int i,j,w,z,new=0,blank,vend_list[12];
 	short amount,index;
 	struct map_session_data *vsd=map_id2sd(id);
+
+	if( sd == NULL ){
+		printf("vending_purchasereq nullpo\n");
+		return;
+	}
+
+	blank=pc_inventoryblank(sd);
 
 	if(vsd==NULL)
 		return;
@@ -100,6 +118,10 @@ void vending_purchasereq(struct map_session_data *sd,int len,int id,unsigned cha
 void vending_openvending(struct map_session_data *sd,int len,char *message,int flag,unsigned char *p)
 {
 	int i;
+	if( sd == NULL ){
+		printf("vending_openvending nullpo\n");
+		return;
+	}
 	if(flag){
 		for(i=0;85+8*i<len;i++){
 			sd->vending[i].index=*(short*)(p+8*i)-2;

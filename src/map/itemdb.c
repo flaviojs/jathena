@@ -586,7 +586,10 @@ static int itemdb_final(void *key,void *data,va_list ap)
 {
 	struct item_data *id;
 
-	id=data;
+	if( (id=data) == NULL ){
+		printf("itemdb_final nullpo\n");
+		return 0;
+	}
 	if(id->use_script)
 		free(id->use_script);
 	if(id->equip_script)

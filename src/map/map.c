@@ -162,6 +162,11 @@ int map_addblock(struct block_list *bl)
 {
 	int m,x,y;
 
+	if( bl == NULL ){
+		printf("map_addblock nullpo\n");
+		return 0;
+	}
+
 	if(bl->prev != NULL){
 			if(battle_config.error_log)
 				printf("map_addblock error : bl->prev!=NULL\n");
@@ -202,6 +207,10 @@ int map_addblock(struct block_list *bl)
  */
 int map_delblock(struct block_list *bl)
 {
+	if( bl == NULL ){
+		printf("map_delblock nullpo\n");
+		return 0;
+	}
 	// 既にblocklistから抜けている
 	if(bl->prev==NULL){
 		if(bl->next!=NULL){
@@ -473,6 +482,10 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 int map_addobject(struct block_list *bl)
 {
 	int i;
+	if( bl == NULL ){
+		printf("map_addobject nullpo?\n");
+		return 0;
+	}
 	if(first_free_object_id<2 || first_free_object_id>=MAX_FLOORITEM)
 		first_free_object_id=2;
 	for(i=first_free_object_id;i<MAX_FLOORITEM;i++)
@@ -766,6 +779,10 @@ void map_addchariddb(int charid,char *name)
 int map_reqchariddb(struct map_session_data * sd,int charid)
 {
 	struct charid2nick *p;
+	if( sd == NULL ){
+		printf("map_reqchariddb nullpo\n");
+		return 0;
+	}
 	p=numdb_search(charid_db,charid);
 	if(p!=NULL)	// データベースにすでにある
 		return 0;
@@ -785,6 +802,10 @@ int map_reqchariddb(struct map_session_data * sd,int charid)
  */
 void map_addiddb(struct block_list *bl)
 {
+	if( bl == NULL ){
+		printf("map_addiddb nullpo\n");
+		return;
+	}
 	numdb_insert(id_db,bl->id,bl);
 }
 
@@ -794,6 +815,10 @@ void map_addiddb(struct block_list *bl)
  */
 void map_deliddb(struct block_list *bl)
 {
+	if( bl == NULL ){
+		printf("map_deliddb nullpo\n");
+		return;
+	}
 	numdb_erase(id_db,bl->id);
 }
 
@@ -803,6 +828,10 @@ void map_deliddb(struct block_list *bl)
  */
 void map_addnickdb(struct map_session_data *sd)
 {
+	if( sd == NULL ){
+		printf("map_addnickdb nullpo\n");
+		return;
+	}
 	strdb_insert(nick_db,sd->status.name,sd);
 }
 
@@ -814,6 +843,10 @@ void map_addnickdb(struct map_session_data *sd)
  */
 int map_quit(struct map_session_data *sd)
 {
+	if( sd == NULL ){
+		printf("map_quit nullpo\n");
+		return 0;
+	}
 	if(sd->chatID)	// チャットから出る
 		chat_leavechat(sd);
 
@@ -841,6 +874,9 @@ int map_quit(struct map_session_data *sd)
 
 	skill_castcancel(&sd->bl,0);	// 詠唱を中断する
 	skill_stop_dancing(&sd->bl,1);// ダンス/演奏中断
+
+	if(sd->sc_data && sd->sc_data[SC_BERSERK].timer!=-1) //バーサーク中の終了はHPを100に
+		sd->status.hp = 100;
 
 	skill_status_change_clear(&sd->bl,1);	// ステータス異常を解除する
 	skill_clear_unitgroup(&sd->bl);	// スキルユニットグループの削除
@@ -968,6 +1004,10 @@ int map_addnpc(int m,struct npc_data *nd)
 	if(i==map[m].npc_num){
 		map[m].npc_num++;
 	}
+	if( nd == NULL ){
+		printf("map_addnpc nullpo\n");
+		return 0;
+	}
 	map[m].npc[i]=nd;
 	nd->n = i;
 	numdb_insert(id_db,nd->bl.id,nd);
@@ -1057,7 +1097,13 @@ int map_check_dir(int s_dir,int t_dir)
 int map_calc_dir( struct block_list *src,int x,int y)
 {
 	int dir=0;
-	int dx=x-src->x,dy=y-src->y;
+	int dx,dy;
+	if( src == NULL ){
+		printf("map_calc_dir nullpo\n");
+		return 0;
+	}
+	dx=x-src->x;
+	dy=y-src->y;
 	if( dx==0 && dy==0 ){	// 彼我の場所一致
 		dir=0;	// 上
 	}else if( dx>=0 && dy>=0 ){	// 方向的に右上

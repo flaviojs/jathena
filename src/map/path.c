@@ -24,6 +24,11 @@ static inline void push_heap_path(int *heap,struct tmp_path *tp,int index)
 {
 	int i,h;
 
+	if( heap == NULL || tp == NULL ){
+		printf("push_heap_path nullpo\n");
+		return;
+	}
+
 	heap[0]++;
 
 	for(h=heap[0]-1,i=(h-1)/2;
@@ -41,6 +46,11 @@ static inline void push_heap_path(int *heap,struct tmp_path *tp,int index)
 static inline void update_heap_path(int *heap,struct tmp_path *tp,int index)
 {
 	int i,h;
+
+	if( heap == NULL || tp == NULL ){
+		printf("update_heap_path nullpo\n");
+		return;
+	}
 
 	for(h=0;h<heap[0];h++)
 		if(heap[h+1]==index)
@@ -64,6 +74,11 @@ static int pop_heap_path(int *heap,struct tmp_path *tp)
 {
 	int i,h,k;
 	int ret,last;
+
+	if( heap == NULL || tp == NULL ){
+		printf("pop_heap_path nullpo\n");
+		return -1;
+	}
 
 	if(heap[0]<=0)
 		return -1;
@@ -95,6 +110,12 @@ static int pop_heap_path(int *heap,struct tmp_path *tp)
 static inline int calc_cost(struct tmp_path *p,int x1,int y1)
 {
 	int xd,yd;
+
+	if( p == NULL ){
+		printf("calc_cost nullpo\n");
+		return 0;
+	}
+
 	xd=x1-p->x;
 	if(xd<0) xd=-xd;
 	yd=y1-p->y;
@@ -109,6 +130,11 @@ static inline int calc_cost(struct tmp_path *p,int x1,int y1)
 static int add_path(int *heap,struct tmp_path *tp,int x,int y,int dist,int dir,int before,int x1,int y1)
 {
 	int i;
+
+	if( heap == NULL || tp == NULL ){
+		printf("add_path nullpo\n");
+		return 0;
+	}
 
 	i=calc_index(x,y);
 
@@ -150,7 +176,15 @@ static int add_path(int *heap,struct tmp_path *tp,int x,int y,int dist,int dir,i
  */
 static inline int can_place(struct map_data *m,int x,int y,int flag)
 {
-	int c=read_gatp(m,x,y);
+	int c;
+
+	if( m == NULL ){
+		printf("can_place nullpo\n");
+		return 0;
+	}
+
+	c=read_gatp(m,x,y);
+
 	if(c==1)
 		return 0;
 	if(!(flag&0x10000) && c==5)
@@ -164,6 +198,11 @@ static inline int can_place(struct map_data *m,int x,int y,int flag)
  */
 static inline int can_move(struct map_data *m,int x0,int y0,int x1,int y1,int flag)
 {
+	if( m == NULL ){
+		printf("can_move nullpo\n");
+		return 0;
+	}
+
 	if(x0-x1<-1 || x0-x1>1 || y0-y1<-1 || y0-y1>1)
 		return 0;
 	if(x1<0 || y1<0 || x1>=m->xs || y1>=m->ys)
@@ -231,6 +270,11 @@ int path_search(struct walkpath_data *wpd,int m,int x0,int y0,int x1,int y1,int 
 	int i,rp,x,y;
 	struct map_data *md;
 	int dx,dy;
+
+	if( wpd == NULL ){
+		printf("path_search nullpo\n");
+		return 0;
+	}
 
 	if(!map[m].gat)
 		return -1;

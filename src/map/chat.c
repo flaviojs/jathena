@@ -25,6 +25,11 @@ int chat_createchat(struct map_session_data *sd,int limit,int pub,char* pass,cha
 {
 	struct chat_data *cd;
 
+	if( sd == NULL ){
+		printf("chat_createchat nullpo\n");
+		return 0;
+	}
+
 	cd = calloc(sizeof(*cd), 1);
 	if(cd==NULL){
 		printf("out of memory : chat_createchat\n");
@@ -68,6 +73,11 @@ int chat_joinchat(struct map_session_data *sd,int chatid,char* pass)
 {
 	struct chat_data *cd;
 
+	if( sd == NULL ){
+		printf("chat_joinchat nullpo\n");
+		return 0;
+	}
+
 	cd=(struct chat_data*)map_id2bl(chatid);
 	if(cd==NULL)
 		return 1;
@@ -104,6 +114,11 @@ int chat_leavechat(struct map_session_data *sd)
 {
 	struct chat_data *cd;
 	int i,leavechar;
+
+	if( sd == NULL ){
+		printf("chat_leavechat nullpo\n");
+		return 1;
+	}
 
 	cd=(struct chat_data*)map_id2bl(sd->chatID);
 	if(cd==NULL)
@@ -158,6 +173,11 @@ int chat_changechatowner(struct map_session_data *sd,char *nextownername)
 	struct map_session_data *tmp_sd;
 	int i,nextowner;
 
+	if( sd == NULL ){
+		printf("chat_changechatowner nullpo\n");
+		return 1;
+	}
+
 	cd=(struct chat_data*)map_id2bl(sd->chatID);
 	if(cd==NULL || (struct block_list *)sd!=(*cd->owner))
 		return 1;
@@ -176,7 +196,8 @@ int chat_changechatowner(struct map_session_data *sd,char *nextownername)
 	clif_clearchat(cd,0);
 
 	// userlist‚Ì‡”Ô•ÏX (0‚ªŠ—LÒ‚È‚Ì‚Å)
-	tmp_sd = cd->usersd[0];
+	if( (tmp_sd = cd->usersd[0]) == NULL )
+		return 1; //‚ ‚è‚¦‚é‚Ì‚©‚ÈH
 	cd->usersd[0] = cd->usersd[nextowner];
 	cd->usersd[nextowner] = tmp_sd;
 
@@ -197,6 +218,11 @@ int chat_changechatowner(struct map_session_data *sd,char *nextownername)
 int chat_changechatstatus(struct map_session_data *sd,int limit,int pub,char* pass,char* title,int titlelen)
 {
 	struct chat_data *cd;
+
+	if( sd == NULL ){
+		printf("chat_changechatstatus nullpo\n");
+		return 1;
+	}
 
 	cd=(struct chat_data*)map_id2bl(sd->chatID);
 	if(cd==NULL || (struct block_list *)sd!=(*cd->owner))
@@ -224,6 +250,11 @@ int chat_kickchat(struct map_session_data *sd,char *kickusername)
 	struct chat_data *cd;
 	int i,kickuser;
 
+	if( sd == NULL ){
+		printf("chat_kickchat nullpo\n");
+		return 1;
+	}
+
 	cd=(struct chat_data*)map_id2bl(sd->chatID);
 	if(cd==NULL || (struct block_list *)sd!=(*cd->owner))
 		return 1;
@@ -250,9 +281,14 @@ int chat_createnpcchat(struct npc_data *nd,int limit,int trigger,char* title,int
 {
 	struct chat_data *cd;
 
+	if( nd == NULL ){
+		printf("chat_createnpcchat nullpo\n");
+		return 1;
+	}
+
 	cd = calloc(sizeof(*cd), 1);
 	if(cd==NULL){
-		printf("out of memory : chat_createchat\n");
+		printf("out of memory : chat_createnpcchat\n");
 		exit(1);
 	}
 
@@ -291,8 +327,13 @@ int chat_createnpcchat(struct npc_data *nd,int limit,int trigger,char* title,int
  */
 int chat_deletenpcchat(struct npc_data *nd)
 {
-	struct chat_data *cd=(struct chat_data*)map_id2bl(nd->chat_id);
-	
+	struct chat_data *cd;
+
+	if( nd == NULL || (cd=(struct chat_data*)map_id2bl(nd->chat_id)) == NULL ){
+		printf("chat_deletenpcchat nullpo\n");
+		return 0;
+	}
+
 	chat_npckickall(cd);
 	clif_clearchat(cd,0);
 	map_delobject(cd->bl.id);	// free‚Ü‚Å‚µ‚Ä‚­‚ê‚é
@@ -307,6 +348,11 @@ int chat_deletenpcchat(struct npc_data *nd)
  */
 int chat_triggerevent(struct chat_data *cd)
 {
+	if( cd == NULL ){
+		printf("chat_triggerevent nullpo\n");
+		return 0;
+	}
+
 	if(cd->users>=cd->trigger && cd->npc_event[0])
 		npc_event_do(cd->npc_event);
 	return 0;
@@ -318,6 +364,11 @@ int chat_triggerevent(struct chat_data *cd)
  */
 int chat_enableevent(struct chat_data *cd)
 {
+	if( cd == NULL ){
+		printf("chat_enableevent nullpo\n");
+		return 0;
+	}
+
 	cd->trigger&=0x7f;
 	chat_triggerevent(cd);
 	return 0;
@@ -328,6 +379,11 @@ int chat_enableevent(struct chat_data *cd)
  */
 int chat_disableevent(struct chat_data *cd)
 {
+	if( cd == NULL ){
+		printf("chat_disableevent nullpo\n");
+		return 0;
+	}
+
 	cd->trigger|=0x80;
 	return 0;
 }
@@ -337,6 +393,11 @@ int chat_disableevent(struct chat_data *cd)
  */
 int chat_npckickall(struct chat_data *cd)
 {
+	if( cd == NULL ){
+		printf("chat_npckickall nullpo\n");
+		return 0;
+	}
+
 	while(cd->users>0){
 		chat_leavechat(cd->usersd[cd->users-1]);
 	}
