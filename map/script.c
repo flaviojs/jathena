@@ -1083,7 +1083,6 @@ struct map_session_data *script_rid2sd(struct script_state *st)
 	struct map_session_data *sd=map_id2sd(st->rid);
 	if(!sd){
 		printf("script_rid2sd: fatal error ! player not attached!\n");
-		exit(1);
 	}
 	return sd;
 }
@@ -1537,8 +1536,7 @@ int buildin_input(struct script_state *st)
 	char prefix=*name;
 	char postfix=name[strlen(name)-1];
 
-	if( prefix!='$' )
-		sd=script_rid2sd(st);
+	sd=script_rid2sd(st);
 	if(sd->state.menu_or_input){
 		sd->state.menu_or_input=0;
 		if( postfix=='$' ){
@@ -1575,8 +1573,8 @@ int buildin_input(struct script_state *st)
 		}
 	} else {
 		st->state=RERUNLINE;
-		if(postfix=='$')clif_scriptinputstr(script_rid2sd(st),st->oid);
-		else			clif_scriptinput(script_rid2sd(st),st->oid);
+		if(postfix=='$')clif_scriptinputstr(sd,st->oid);
+		else			clif_scriptinput(sd,st->oid);
 		sd->state.menu_or_input=1;
 	}
 	return 0;
@@ -2545,7 +2543,6 @@ int buildin_savepoint(struct script_state *st)
 	x=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	y=conv_num(st,& (st->stack->stack_data[st->start+4]));
 	pc_setsavepoint(script_rid2sd(st),str,x,y);
-//	pc_setsavepoint(script_rid2sd(st),st->stack->stack_data[st->start+2].u.str,x,y);
 	return 0;
 }
 
@@ -2614,7 +2611,7 @@ int buildin_monster(struct script_state *st)
 {
 	int class,amount,x,y;
 	char *str,*map,*event="";
-	struct map_session_data *sd=script_rid2sd(st);
+	struct map_session_data *sd=NULL;
 
 	map	=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	x	=conv_num(st,& (st->stack->stack_data[st->start+3]));
@@ -2624,6 +2621,9 @@ int buildin_monster(struct script_state *st)
 	amount=conv_num(st,& (st->stack->stack_data[st->start+7]));
 	if( st->end>st->start+8 )
 		event=conv_str(st,& (st->stack->stack_data[st->start+8]));
+
+	if(x<=0 || y<=0)
+		sd=script_rid2sd(st);
 
 	mob_once_spawn(sd,map,x,y,str,class,amount,event);
 	return 0;
@@ -2636,7 +2636,6 @@ int buildin_areamonster(struct script_state *st)
 {
 	int class,amount,x0,y0,x1,y1;
 	char *str,*map,*event="";
-	struct map_session_data *sd=script_rid2sd(st);
 
 	map	=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	x0	=conv_num(st,& (st->stack->stack_data[st->start+3]));
@@ -2649,7 +2648,7 @@ int buildin_areamonster(struct script_state *st)
 	if( st->end>st->start+10 )
 		event=conv_str(st,& (st->stack->stack_data[st->start+10]));
 
-	mob_once_spawn_area(sd,map,x0,y0,x1,y1,str,class,amount,event);
+	mob_once_spawn_area(NULL,map,x0,y0,x1,y1,str,class,amount,event);
 	return 0;
 }
 /*==========================================
@@ -2714,7 +2713,7 @@ int buildin_doevent(struct script_state *st)
 {
 	char *event;
 	event=conv_str(st,& (st->stack->stack_data[st->start+2]));
-	npc_event(script_rid2sd(st),event);
+	npc_event(map_id2sd(st->rid),event);	// sd‚ªNULL‚Å‚à‚¢‚¢
 	return 0;
 }
 /*==========================================
@@ -2853,7 +2852,8 @@ int buildin_announce(struct script_state *st)
 	flag=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
 	if(flag&0x0f){
-		struct block_list *bl=map_id2bl((flag&0x08)?st->oid:st->rid);
+		struct block_list *bl=(flag&0x08)? map_id2bl(st->oid) :
+			(struct block_list *)script_rid2sd(st);
 		clif_GMmessage(bl,str,strlen(str)+1,flag);
 	}else
 		intif_GMmessage(str,strlen(str)+1,flag);
