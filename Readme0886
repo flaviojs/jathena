@@ -1,4 +1,29 @@
 --------------------
+//0898 by 胡蝶蘭
+
+・eathenaからCardRemoverNPCの取り込み
+	NPCデータも日本語訳してますが、かなり適当です。
+
+	(map/)
+	script.c
+		buildin_getequipcardcnt(),buildin_successremovecards()
+		buildin_failedremovecards()追加
+	(conf/sample/)
+	npc_card_remover.txt
+		カード取り外しNPCの日本語訳
+		プロンテラの精錬所の中の左下の部屋にいます
+
+・ポータルで別マップに飛ばしたMOBがそのマップに沸き直すバグ修正
+	(map/)
+	map.h
+		struct mob_dataにmメンバ追加
+	mob.c
+		mob_spawn(),mob_once_spawn()修正
+	npc.c
+		npc_parse_mob()修正
+	
+
+--------------------
 //0897 by ぴざまん
 
 ・細かい調整

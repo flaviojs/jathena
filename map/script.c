@@ -168,6 +168,9 @@ int buildin_agitend(struct script_state *st);
 int buildin_getcastlename(struct script_state *st);
 int buildin_getcastledata(struct script_state *st);
 int buildin_setcastledata(struct script_state *st);
+int buildin_getequipcardcnt(struct script_state *st);
+int buildin_successremovecards(struct script_state *st);
+int buildin_failedremovecards(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -280,6 +283,9 @@ struct {
 	{buildin_getcastlename,"getcastlename","s"},
 	{buildin_getcastledata,"getcastledata","si"},
 	{buildin_setcastledata,"setcastledata","sii"},
+	{buildin_getequipcardcnt,"getequipcardcnt","i"},
+	{buildin_successremovecards,"successremovecards","i"},
+	{buildin_failedremovecards,"failedremovecards","ii"},
 	{NULL,NULL,NULL}
 };
 enum {
@@ -3270,6 +3276,149 @@ int buildin_setcastledata(struct script_state *st)
 	}
 	return 0;
 }
+/* =====================================================================
+ * カードの数を得る
+ * ---------------------------------------------------------------------
+ */
+int buildin_getequipcardcnt(struct script_state *st)
+{
+	int i,num;
+	struct map_session_data *sd;
+
+	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	sd=map_id2sd(st->rid);
+	i=pc_checkequip(sd,equip[num-1]);
+	if(sd->status.inventory[i].card[0] == 0x00ff){ // 製造武器はカードなし
+		push_val(st->stack,C_INT,0);
+		return 0;
+	}
+	int c=4;
+	do{
+		if( (sd->status.inventory[i].card[c-1] > 4000) &&
+			(sd->status.inventory[i].card[c-1] < 5000)){
+			
+			push_val(st->stack,C_INT,(c));
+			return 0;
+		}
+	}while(c--);
+	push_val(st->stack,C_INT,0);
+	return 0;
+}
+
+/* ================================================================
+ * カード取り外し成功
+ * ----------------------------------------------------------------
+ */
+int buildin_successremovecards(struct script_state *st)
+{
+	int i,num,cardflag=0,flag;
+	struct map_session_data *sd;
+	struct item item_tmp;
+
+	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	sd=map_id2sd(st->rid);
+	i=pc_checkequip(sd,equip[num-1]);
+	if(sd->status.inventory[i].card[0]==0x00ff){ // 製造武器は処理しない
+		return 0;
+	}
+	int c=4;
+	do{
+		if( (sd->status.inventory[i].card[c-1] > 4000) &&
+			(sd->status.inventory[i].card[c-1] < 5000)){ 
+
+			cardflag = 1;
+			item_tmp.id=0,item_tmp.nameid=sd->status.inventory[i].card[c-1];
+			item_tmp.equip=0,item_tmp.identify=1,item_tmp.refine=0;
+			item_tmp.attribute=0;
+			item_tmp.card[0]=0,item_tmp.card[1]=0,item_tmp.card[2]=0,item_tmp.card[3]=0;
+
+			if((flag=pc_additem(sd,&item_tmp,1))){	// 持てないならドロップ
+				clif_additem(sd,0,0,flag);
+				map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+			}
+		}
+	}while(c--);
+
+	if(cardflag == 1){	// カードを取り除いたアイテム所得
+		flag=0;
+		item_tmp.id=0,item_tmp.nameid=sd->status.inventory[i].nameid;
+		item_tmp.equip=0,item_tmp.identify=1,item_tmp.refine=sd->status.inventory[i].refine;
+		item_tmp.attribute=sd->status.inventory[i].attribute;
+		item_tmp.card[0]=0,item_tmp.card[1]=0,item_tmp.card[2]=0,item_tmp.card[3]=0;
+		pc_delitem(sd,i,1,0);
+		if((flag=pc_additem(sd,&item_tmp,1))){	// もてないならドロップ
+			clif_additem(sd,0,0,flag);
+			map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+		}
+		clif_misceffect(&sd->bl,3);
+		return 0;
+	}
+	return 0;
+}
+
+/* ================================================================
+ * カード取り外し失敗 slot,type
+ * type=0: 両方損失、1:カード損失、2:武具損失、3:損失無し
+ * ----------------------------------------------------------------
+ */
+int buildin_failedremovecards(struct script_state *st)
+{
+	int i,num,cardflag=0,flag,typefail;
+	struct map_session_data *sd;
+	struct item item_tmp;
+
+	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	typefail=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	sd=map_id2sd(st->rid);
+	i=pc_checkequip(sd,equip[num-1]);
+	if(sd->status.inventory[i].card[0]==0x00ff){ // 製造武器は処理しない
+		return 0;
+	}
+	int c=4;
+	do{
+		if(( sd->status.inventory[i].card[c-1] > 4000) &&
+			 (sd->status.inventory[i].card[c-1] < 5000)){
+			 
+			cardflag = 1; 
+
+			if(typefail == 2){ // 武具のみ損失なら、カードは受け取らせる
+				item_tmp.id=0,item_tmp.nameid=sd->status.inventory[i].card[c-1];
+				item_tmp.equip=0,item_tmp.identify=1,item_tmp.refine=0;
+				item_tmp.attribute=0;
+				item_tmp.card[0]=0,item_tmp.card[1]=0,item_tmp.card[2]=0,item_tmp.card[3]=0;
+				if((flag=pc_additem(sd,&item_tmp,1))){
+					clif_additem(sd,0,0,flag);
+					map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+				}
+			}
+		}
+	}while(c--);
+
+	if(cardflag == 1){
+
+		if(typefail == 0 || typefail == 2){	// 武具損失
+			pc_delitem(sd,i,1,0);
+			clif_misceffect(&sd->bl,2);
+			return 0;
+		}
+		if(typefail == 1){	// カードのみ損失（武具を返す）
+			flag=0;
+			item_tmp.id=0,item_tmp.nameid=sd->status.inventory[i].nameid;
+			item_tmp.equip=0,item_tmp.identify=1,item_tmp.refine=sd->status.inventory[i].refine;
+			item_tmp.attribute=sd->status.inventory[i].attribute;
+			item_tmp.card[0]=0,item_tmp.card[1]=0,item_tmp.card[2]=0,item_tmp.card[3]=0;
+			pc_delitem(sd,i,1,0);
+			if((flag=pc_additem(sd,&item_tmp,1))){
+				clif_additem(sd,0,0,flag);
+				map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+			}
+		}
+		clif_misceffect(&sd->bl,2);
+		return 0;
+	}
+	return 0;
+}
+
 
 //
 // 実行部main

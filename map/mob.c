@@ -143,6 +143,7 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 		md->bl.x=x;
 		md->bl.y=y;
 
+		md->m =m;
 		md->x0=x;
 		md->y0=y;
 		md->xs=0;
@@ -676,6 +677,7 @@ int mob_spawn(int id)
 	else
 		md->class = md->base_class;
 
+	md->bl.m =md->m;
 	do {
 		if(md->x0==0 && md->y0==0){
 			x=rand()%(map[md->bl.m].xs-2)+1;
