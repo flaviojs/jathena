@@ -733,8 +733,6 @@ int pc_authok(int id,struct mmo_charstatus *st)
 
 	//スパノビ用死にカウンターのスクリプト変数からの読み出しとsdへのセット
 	sd->die_counter = pc_readglobalreg(sd,"PC_DIE_COUNTER");
-	//倒したmobカウンターのスクリプト変数からの読み出しとsdへのセット
-	sd->kill_counter = pc_readglobalreg(sd,"KILL_MOB_COUNTER");
 	// ステータス初期計算など
 	pc_calcstatus(sd,1);
 
@@ -2692,6 +2690,12 @@ int pc_delitem(struct map_session_data *sd,int n,int amount,int type)
 int pc_dropitem(struct map_session_data *sd,int n,int amount)
 {
 	nullpo_retr(1, sd);
+
+	if (n < 0 || n >= MAX_INVENTORY)
+		return 1;
+
+	if (amount <= 0)
+		return 1;
 
 	if(sd->status.inventory[n].nameid <=0 || sd->status.inventory[n].amount < amount)
 		return 1;
@@ -5274,11 +5278,6 @@ int pc_setglobalreg(struct map_session_data *sd,char *reg,int val)
 	if(strcmp(reg,"PC_DIE_COUNTER") == 0 && sd->die_counter != val){
 		sd->die_counter = val;
 		pc_calcstatus(sd,0);
-	}
-	//KILL_MOB_COUNTERがスクリプトなどで変更された時の処理
-	if(strcmp(reg,"KILL_MOB_COUNTER") == 0 && sd->kill_counter != val){
-	sd->kill_counter = val;
-	pc_calcstatus(sd,0);
 	}
 	if(val==0){
 		for(i=0;i<sd->status.global_reg_num;i++){

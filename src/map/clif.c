@@ -8004,30 +8004,26 @@ void clif_parse_LGMmessage(int fd,struct map_session_data *sd, int cmd)
  * ƒJƒvƒ‰‘qŒÉ‚Ö“ü‚ê‚é
  *------------------------------------------
  */
-
 void clif_parse_MoveToKafra(int fd,struct map_session_data *sd, int cmd)
 {
-int item_index,item_amount;
+	int item_index,item_amount;
 
-nullpo_retv(sd);
+	nullpo_retv(sd);
 
-if(sd->npc_id!=0 || sd->vender_id != 0) return;
-item_index = RFIFOW(fd,packet_db[cmd].pos[0])-2;
-item_amount = RFIFOL(fd,packet_db[cmd].pos[1]);
+	if(sd->npc_id!=0 || sd->vender_id != 0) return;
+	item_index = RFIFOW(fd,packet_db[cmd].pos[0])-2;
+	item_amount = RFIFOL(fd,packet_db[cmd].pos[1]);
 
-if(item_index < 0 || item_index > MAX_INVENTORY)
-return;
+	if(item_index < 0 || item_index >= MAX_INVENTORY)
+		return;
 
-if(item_amount <=0 )
-return;
+	if(itemdb_isdropable(sd->status.inventory[item_index].nameid) == 0)
+		return;
 
-if(itemdb_isdropable(sd->status.inventory[item_index].nameid) == 0)
-return;
-
-if(sd->state.storage_flag)
-storage_guild_storageadd(sd,item_index,item_amount);
-else
-storage_storageadd(sd,item_index,item_amount);
+	if(sd->state.storage_flag)
+		storage_guild_storageadd(sd,item_index,item_amount);
+	else
+		storage_storageadd(sd,item_index,item_amount);
 }
 
 /*==========================================

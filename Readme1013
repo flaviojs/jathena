@@ -1,4 +1,17 @@
 --------------------
+//1058 by lizorett
+・ギルド倉庫アイテムがMAX_STORAGE個以上あると取り出せないものがある問題を修正
+	(src/map)
+		clif.c
+			clif_parse_DropItem item_index/item_amountの範囲チェックを削除 
+								(pc_dropitem でチェックする)
+			clif_parse_MoveToKafra item_amountのチェックを削除
+								(storage_*storageaddでチェックされている)
+			clif_parse_MoveFromKafra item_index/item_amountのチェックを削除
+								(storage_*storagegetでチェックされている)
+		pc.c
+			pc_dropitem n/amountの範囲チェックを追加
+--------------------
 //1057 by BDPQ銀
 ・ウォーターボールのダメージを本鯖告知値→実測値に修正。
   [ MATK+SkillLv*30 → MATK*(1+SkillLv*0.3) ]
