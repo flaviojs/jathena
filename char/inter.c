@@ -15,6 +15,11 @@
 #define WISDATA_TTL		(60*1000)	// Wisデータの生存時間(60秒)
 #define WISDELLIST_MAX	128			// Wisデータ削除リストの要素数
 
+char inter_log_filename[1024]="log/inter.log";
+
+int party_share_level = 10;
+
+
 // 送信パケット長リスト
 int inter_send_packet_length[]={
 	-1,-1,27, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
@@ -39,6 +44,7 @@ int inter_recv_packet_length[]={
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	48,14,-1, 6,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 };
+
 
 struct WisData {
 	int id,fd,count,len;
@@ -103,18 +109,44 @@ int inter_config_read(const char *cfgName)
 			continue;
 		if(strcmpi(w1,"storage_txt")==0){
 			strncpy(storage_txt,w2,sizeof(storage_txt));
-		} else if(strcmpi(w1,"party_txt")==0){
+		}
+		else if(strcmpi(w1,"party_txt")==0){
 			strncpy(party_txt,w2,sizeof(party_txt));
-		} else if(strcmpi(w1,"guild_txt")==0){
+		}
+		else if(strcmpi(w1,"guild_txt")==0){
 			strncpy(guild_txt,w2,sizeof(guild_txt));
-		} else if(strcmpi(w1,"pet_txt")==0){
+		}
+		else if(strcmpi(w1,"pet_txt")==0){
 			strncpy(pet_txt,w2,sizeof(pet_txt));
-		} else if(strcmpi(w1,"castle_txt")==0){
+		}
+		else if(strcmpi(w1,"castle_txt")==0){
 			strncpy(castle_txt,w2,sizeof(castle_txt));
+		}
+		else if(strcmpi(w1,"party_share_level")==0){
+			party_share_level=atoi(w2);
+			if(party_share_level < 0) party_share_level = 0;
+		}
+		else if(strcmpi(w1,"inter_log_filename")==0){
+			strcpy(inter_log_filename,w2);
 		}
 	}
 	fclose(fp);
 
+	return 0;
+}
+
+// ログ書き出し
+int inter_log(char *fmt,...)
+{
+	FILE *logfp;
+	va_list ap;
+	va_start(ap,fmt);
+	logfp=fopen(inter_log_filename,"a");
+	if(logfp){
+		vfprintf(logfp,fmt,ap);
+		fclose(logfp);
+	}
+	va_end(ap);
 	return 0;
 }
 

@@ -1,4 +1,37 @@
 --------------------
+//0875 by 胡蝶蘭
+
+・party_share_levelをinter_athena.confに移した
+  (パーティ関連の処理の管轄がinter鯖のため)
+・inter_athena.confにinter_log_file項目追加
+・ギルド作成/解散/城占領/城破棄がログに残るように
+・ギルド解散時にメモリリークしていた問題を修正
+	(char/)
+	char.c/char.h
+		party_share_level関連
+	(inter/)
+	inter.c/inter.h
+		party_share_level / inter_log_file 関連
+		ログ出力用にinter_log()追加
+	int_guild.c
+		作成/解散/城占領/城破棄をログに出力
+		メモリリーク修正
+	(doc/)
+	conf_ref.txt
+		修正
+
+・サーバー状態確認用CGIスクリプト添付など
+	・自己責任＆詳細な解説無し、質問されてもスルーする可能性有り
+	・エディタで開いたら少し説明有り
+	・CGI設置の基本さえわかれば問題ないはず
+	
+	(tool/cgi/)
+	serverstatus.cgi
+		サーバー状態確認用CGIスクリプト
+	addaccount.cgi
+		説明修正
+
+--------------------
 //0874 by Kalen
 ・WhiteDayイベント追加
 	conf/npc/npc_event_whiteday.txt(新規)

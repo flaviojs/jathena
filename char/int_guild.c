@@ -838,6 +838,9 @@ int mapif_parse_CreateGuild(int fd,int account_id,char *name,struct guild_member
 	mapif_guild_created(fd,account_id,g);
 	mapif_guild_info(fd,g);
 	
+	inter_log("guild %s (id=%d) created by master %s (id=%d)" RETCODE,
+		name, g->guild_id, master->name, master->account_id );
+	
 	return 0;
 }
 // ギルド情報要求
@@ -982,6 +985,10 @@ int mapif_parse_BreakGuild(int fd,int guild_id)
 	numdb_foreach(guild_db,guild_break_sub,guild_id);
 	numdb_erase(guild_db,guild_id);
 	mapif_guild_broken(guild_id,0);
+	
+	inter_log("guild %s (id=%d) broken" RETCODE,g->name,guild_id);
+	free(g);
+	
 	return 0;
 }
 // ギルドメッセージ送信
@@ -1182,7 +1189,15 @@ int mapif_parse_GuildCastleDataSave(int fd,int castle_id,int index,int value)
 		return mapif_guild_castle_datasave(castle_id,index,value);
 	}
 	switch(index){
-	case 1: gc->guild_id = value; break;
+	case 1:
+		if( gc->guild_id!=value ){
+			int gid=(value)?value:gc->guild_id;
+			struct guild *g=numdb_search(guild_db, gid);
+			inter_log("guild %s (id=%d) %s castle id=%d" RETCODE,
+				(g)?g->name:"??" ,gid, (value)?"occupy":"abandon", index);
+		}
+		gc->guild_id = value;
+		break;
 	case 2: gc->economy = value; break;
 	case 3: gc->defense = value; break;
 	case 4: gc->triggerE = value; break;

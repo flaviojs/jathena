@@ -181,10 +181,6 @@ start_point
 	「mapファイル名,X座標,Y座標」のように記述します。
 	省略可能で、デフォルトは new_1-1.gat,53,111 です。
 
-party_share_level
-	公平分配パーティの制限レベルを設定します。
-	省略可能で、デフォルトは10です。
-
 start_zeny
 	新しいキャラを作った時初めから持っているゼニの量を設定します。
 	省略可能で、デフォルトは500です。
@@ -212,7 +208,6 @@ autosave_time: 300
 char_maintenance: 0
 char_new: 0
 start_point: new_,150,120
-party_share_level: 10
 start_zeny: 500
 unknown_char_name: Unknown
 char_log_filename: log/char.log
@@ -251,6 +246,14 @@ castle_txt
 	ギルドの城データを格納するファイル名です。
 	省略可能で、デフォルトは save/castle.txt です。
 
+party_share_level
+	公平分配パーティの制限レベルを設定します。
+	省略可能で、デフォルトは10です。
+
+inter_log_filename
+	キャラクターサーバーのログファイルを指定します。
+	省略可能で、デフォルトはlog/inter.logです。
+
 
 < 例 >
 storage_txt: save/storage.txt
@@ -258,6 +261,8 @@ party_txt: save/party.txt
 guild_txt: save/guild.txt
 pet_txt: save/pet.txt
 castle_txt: save/castle.txt
+party_share_level: 10
+inter_log_file: log/inter.log
 
 
 ==========================================================================

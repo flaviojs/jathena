@@ -67,7 +67,6 @@ struct mmo_charstatus *char_dat;
 int char_num,char_max;
 int max_connect_user=0;
 int autosave_interval=DEFAULT_AUTOSAVE_INTERVAL;
-int party_share_level = 10;
 int start_zeny = 500;
 
 // 初期位置（confファイルから再設定可能）
@@ -1356,10 +1355,6 @@ int char_config_read(const char *cfgName)
 			memcpy(start_point.map,map,16);
 			start_point.x=x;
 			start_point.y=y;
-		}
-		else if(strcmpi(w1,"party_share_level")==0){
-			party_share_level=atoi(w2);
-			if(party_share_level < 0) party_share_level = 0;
 		}
 		else if(strcmpi(w1,"start_zeny")==0){
 			start_zeny=atoi(w2);
