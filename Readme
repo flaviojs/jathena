@@ -1,4 +1,21 @@
 --------------
+//0571 by code
+天津フィールドのMOBの配置とワープポイントの設定の修正
+天津パッチに崑崙が含まれているのを確認したので崑崙のワープとmobを配置
+
+conf/npc_monster35.txt
+     mobの配置
+
+conf/npc_warp_amatsu.txt
+　　 天津warp pointの設置
+
+conf/npc_warp_gonryun.txt
+     崑崙warp pointの設置
+
+conf/npc_town_amatsu.txt
+　　 暫定的にプロンテラ噴水前←→天津港／プロンテラ噴水前←→崑崙の接続NPC
+
+--------------
 //0570 by code
 天津フィールドのMOBの配置とワープポイントの設定です。
 conf/npc_monster35.txt
