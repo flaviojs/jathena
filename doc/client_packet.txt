@@ -902,7 +902,10 @@ R 01b9 <ID>.I
 	被ダメ等によるIDの詠唱中断
 R 01c4 <index>.w <amount>.l <itemID>.w <item data>.12B
 	カプラ倉庫アイテム 
-R 01c8 <index>.w <ID>.w <time>.l <amount left>.w <?>.B
+R 01c8 <index>.w <item ID>.w <ID>.l <amount left>.w <type>.B
+	アイテム使用応答。(00a8の上位バーション？)
+	type=00の場合使用失敗? amountもゴミの模様
+	type=01の場合成功で、amountは使用後の残り個数
 	アイテム使用
 R 01c9 <dst ID>.l <src ID>.l <X>.w <Y>.w <type>.B <fail>.B ?.81b
 	スキル効能地作成(011fの上位バーション？)

@@ -1418,11 +1418,11 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 	if(md->state.state==MS_DEAD || md->hp<=0)
 		return 0;
 
-	if(md->state.state==MS_WALK){
+//	if(md->state.state==MS_WALK){
 //		mob_changestate(md,MS_IDLE);
 //		clif_fixpos(&md->bl);
-		mob_stop_walking(md);
-	}
+	mob_stop_walking(md);
+//	}
 
 	if(md->hp>mob_db[md->class].max_hp)
 		md->hp=mob_db[md->class].max_hp;

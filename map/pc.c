@@ -272,6 +272,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	struct party *p;
 	struct guild *g;
 	int i;
+	unsigned long tick = gettick();
 
 	sd = map_id2sd(id);
 	if(sd==NULL)
@@ -310,10 +311,15 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->hp_sub = 0;
 	sd->sp_sub = 0;
 	sd->inchealspirittick = 0;
+	sd->canmove_tick = tick;
+	sd->skillcanmove_tick = tick;
 
 	sd->spiritball = 0;
 	for(i=0;i<10;i++)
 		sd->spirit_timer[i] = -1;
+	sd->skill_timer_count=0;
+	for(i=0;i<MAX_SKILLTIMERSKILL;i++)
+		sd->skilltimerskill[i].timer = -1;
 
 	// pet
 	sd->petDB = NULL;
@@ -2550,7 +2556,6 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	}else{
 		sd->status.hp = 1;
 	}
-	
 	pc_setdead(sd);
 	if(sd->status.pet_id && sd->pet_npcdata) {
 		if(sd->petDB) {
@@ -2572,7 +2577,6 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		if(sd->status.job_exp < 0)
 			sd->status.job_exp = 0;
 		clif_updatestatus(sd,SP_JOBEXP);
-
 	}
 
 	pc_stop_walking(sd);

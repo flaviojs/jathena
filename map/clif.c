@@ -1615,6 +1615,7 @@ int clif_changeoption(struct block_list* bl)
  */
 int clif_useitemack(struct map_session_data *sd,int index,int amount,int ok)
 {
+#if PACKETVER < 3
 	int fd=sd->fd;
 
 	WFIFOW(fd,0)=0xa8;
@@ -1622,6 +1623,18 @@ int clif_useitemack(struct map_session_data *sd,int index,int amount,int ok)
 	WFIFOW(fd,4)=amount;
 	WFIFOB(fd,6)=ok;
 	WFIFOSET(fd,packet_len_table[0xa8]);
+#else
+	char buf[32];
+
+	WBUFW(buf,0)=0x1c8;
+	WBUFW(buf,2)=index+2;
+	WBUFW(buf,4)=sd->status.inventory[index].nameid;
+	WBUFL(buf,6)=sd->bl.id;
+	WBUFW(buf,10)=amount;
+	WBUFB(buf,12)=ok;
+
+	clif_send(buf,packet_len_table[0x1c8],&sd->bl,AREA);
+#endif
 
 	return 0;
 }
@@ -4494,6 +4507,9 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 		return;
 
 	if(sd->chatID)
+		return;
+
+	if(sd->skillcanmove_tick > gettick())
 		return;
 
 	pc_stopattack(sd);

@@ -1142,8 +1142,9 @@ struct Damage battle_calc_weapon_attack(
 //				md->hp = mob_db[md->class].max_hp/75;
 				break;
 			case MO_FINGEROFFENSIVE:	//w’e
-				damage = damage * (100 + 50 * skill_lv) / 100 * sd->spiritball_old;
-				div_ = sd->spiritball_old;
+				damage = damage * (100 + 50 * skill_lv) / 100;// * sd->spiritball_old;
+				div_ = 1;
+//				div_ = sd->spiritball_old;
 				break;
 			case MO_INVESTIGATE:	// ”­ ™¤
 				damage = damage*(100+ 75*skill_lv)/100 * (battle_get_def(target) + battle_get_def2(target))/100;
@@ -1224,7 +1225,7 @@ struct Damage battle_calc_weapon_attack(
 	// ‰ñ”ğC³
 	if( src->type==BL_PC && hitrate < 100000)
 		hitrate = ((hitrate<5)?5:hitrate);
-	else if(hitrate < 1000)
+	else if(hitrate < 100000)
 		hitrate = ((hitrate>95)?95: ((hitrate<5)?5:hitrate) );
 	if( skill_num==NPC_GUIDEDATTACK || hitrate >= 100000 ||					// •K’†UŒ‚
 		t_sc_data[SC_SLEEP].timer!=-1 ||	// ‡–°‚Í•K’†
@@ -1876,5 +1877,3 @@ int battle_config_read(const char *cfgName)
 
 	return 0;
 }
-
-

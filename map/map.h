@@ -16,6 +16,7 @@
 #define MAX_SKILLUNITGROUP	32
 #define MAX_MOBSKILLUNITGROUP	4
 #define MAX_SKILLUNITGROUPTICKSET	128
+#define MAX_SKILLTIMERSKILL 64
 #define MAX_MOBSKILL	24
 #define MAX_EVENTQUEUE	2
 #define MAX_EVENTTIMER	32
@@ -87,6 +88,16 @@ struct skill_unit_group_tickset {
 	unsigned int tick;
 	int group_id;
 };
+struct skill_timerskill {
+	int timer;
+	int src_id;
+	int target_id;
+	int map;
+	short x,y;
+	short skill_id,skill_lv;
+	int type;
+};
+
 
 struct npc_data;
 struct pet_db;
@@ -131,10 +142,12 @@ struct map_session_data {
 	short skillcastcancel,skillitem,skillitemlv;
 	struct skill_unit_group skillunit[MAX_SKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
-//	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
+	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
+	short skill_timer_count;
 	int ghost_timer;
 
 	unsigned long canmove_tick;
+	unsigned long skillcanmove_tick;
 	int hp_sub,sp_sub;
 	int inchealhptick,inchealsptick,inchealspirittick;
 
