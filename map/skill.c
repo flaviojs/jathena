@@ -550,11 +550,14 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 			dmg.damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
 
+	map_freeblock_lock();
 	/* 実際にダメージ処理を行う */
 	battle_damage(src,bl,(dmg.damage+dmg.damage2));
 	/* ダメージがあるなら追加効果判定 */
 	if((dmg.damage+dmg.damage2)>0)
 		skill_additional_effect(src,bl,skillid,skilllv,tick);
+
+	map_freeblock_unlock();
 
 	if(bl->type==BL_MOB && src!=bl)	/* スキル使用条件のMOBスキル */
 		mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(skillid<<16));
@@ -1029,7 +1032,8 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		}else{
 			skill_area_temp[0]=0;
 			skill_area_temp[1]=bl->id;
-			map_foreachinarea(skill_area_sub,bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
+			if(flag&0xf00000)
+				map_foreachinarea(skill_area_sub,bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
 					src,skillid,skilllv,tick, flag|BCT_ENEMY ,skill_area_sub_count);
 			/* まずターゲットに攻撃を加える */
 			skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,skill_area_temp[0]|(flag&0xf00000));

@@ -1735,10 +1735,13 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				wd.damage, wd.div_ , wd.type, wd.damage2);
 		//二刀流左手とカタール追撃のミス表示(無理やり～)
 		if(wd.damage2==-1){wd.damage2=0;clif_damage(src,target,tick+200, wd.amotion, wd.dmotion,0, 1, 0, 0);}
+		map_freeblock_lock();
+
 		battle_damage(src,target,(wd.damage+wd.damage2));
 		if((wd.damage+wd.damage2)>0)
 			skill_additional_effect(src,target,0,0,tick);
 
+		map_freeblock_unlock();
 	}
 	return 0;
 }

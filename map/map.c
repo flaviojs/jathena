@@ -41,11 +41,11 @@ static int users;
 static struct block_list *object[MAX_FLOORITEM];
 static int first_free_object_id,last_object_id;
 
-#define block_free_max 16000
+#define block_free_max 32000
 static void *block_free[block_free_max];
 static int block_free_count=0,block_free_lock=0;
 
-#define block_list_max 4096
+#define block_list_max 5120
 
 struct map_data map[MAX_MAP_PER_SERVER];
 int map_num=0;
