@@ -1,4 +1,18 @@
 --------------------
+//0899 by 胡蝶蘭
+
+・取り巻きMOBの処理修正
+	・取り巻き召喚でコアを吐くバグ修正
+	・主が別マップに飛ぶと、テレポートで追いかけるように修正
+	・取り巻き処理をより軽く変更
+
+	(map/)
+	mob.c
+		mob_ai_sub_hard_mastersearch()をmob_ai_sub_hard_slavemob()
+		に名前を変えて処理修正。
+		mob_summonslave()修正
+
+--------------------
 //0898 by 胡蝶蘭
 
 ・eathenaからCardRemoverNPCの取り込み

@@ -985,23 +985,26 @@ static int mob_ai_sub_hard_linksearch(struct block_list *bl,va_list ap)
 	return 0;
 }
 /*==========================================
- * 取り巻きモンスターの主検索
+ * 取り巻きモンスターの処理
  *------------------------------------------
  */
-static int mob_ai_sub_hard_mastersearch(struct block_list *bl,va_list ap)
+static int mob_ai_sub_hard_slavemob(struct mob_data *md,unsigned int tick)
 {
-	struct mob_data *mmd=(struct mob_data *)bl;
-	struct mob_data *md;
+	struct mob_data *mmd=(struct mob_data *)map_id2bl(md->master_id);
 	int mode,race,old_dist;
-	unsigned int tick;
 
-	md=va_arg(ap,struct mob_data *);
-	tick=va_arg(ap,unsigned int);
 	mode=mob_db[md->class].mode;
 
 	// 主ではない
-	if(mmd->bl.type!=BL_MOB || mmd->bl.id!=md->master_id)
+	if(!mmd || mmd->bl.type!=BL_MOB || mmd->bl.id!=md->master_id)
 		return 0;
+
+	// 主が違うマップにいるのでテレポートして追いかける
+	if( mmd->bl.m != md->bl.m ){
+		mob_warp(md,mmd->bl.m,mmd->bl.x,mmd->bl.y,3);
+		md->state.master_check = 1;
+		return 0;
+	}
 
 	// 主との距離を測る
 	old_dist=md->master_dist;
@@ -1221,12 +1224,9 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 	}
 
 	md->state.master_check = 0;
-	// 取り巻きモンスターの主の検索
+	// 取り巻きモンスターの処理
 	if( md->master_id > 0 )
-		map_foreachinarea(mob_ai_sub_hard_mastersearch,md->bl.m,
-						  md->bl.x-AREA_SIZE*2,md->bl.y-AREA_SIZE*2,
-						  md->bl.x+AREA_SIZE*2,md->bl.y+AREA_SIZE*2,
-						  BL_MOB,md,tick);
+		mob_ai_sub_hard_slavemob(md,tick);
 
 	// アクティヴモンスターの策敵
 	if( (!md->target_id || md->state.targettype == NONE_ATTACKABLE) && mode&0x04 && !md->state.master_check &&
@@ -2217,6 +2217,7 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,int flag)
 			md->bl.x=x;
 			md->bl.y=y;
 
+			md->m =m;
 			md->x0=x;
 			md->y0=y;
 			md->xs=0;
