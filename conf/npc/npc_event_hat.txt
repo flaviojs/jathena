@@ -306,9 +306,9 @@ alberta.gat,136,79,3	script	帽子屋お嬢さん	71,{
 				next;
 				mes "[テンペストラ^ff0000(未実装)^000000]";
 				mes "気を取り直して……";
-					if (l15==1) goto L0_1_1;
-					if (l15==2) goto L0_1_2;
-					if (l15==3) goto L0_1_3;
+					if (@menu==1) goto L0_1_1;
+					if (@menu==2) goto L0_1_2;
+					if (@menu==3) goto L0_1_3;
 					L0_1_1:
 						mes "えっへん、おしゃれな帽子はね、";
 						next;
@@ -406,10 +406,10 @@ if (countitem(7013) >= 1200) goto Lok4;
 		mes "ちゃんと知ってるんじゃないですか。";
 		mes "まったく誰に聞いたのやら……。";
 		next;
-		if (l15==1) goto L1;
-		if (l15==2) goto L2;
-		if (l15==3) goto L3;
-		if (l15==4) goto L4;
+		if (@menu==1) goto L1;
+		if (@menu==2) goto L2;
+		if (@menu==3) goto L3;
+		if (@menu==4) goto L4;
 		L1:
 			mes "[ジク]";
 			mes "シニョンキャップは……";

@@ -638,7 +638,19 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 			exit(1);
 		}
 		p2=skip_word(p);
-		c=*p2;	*p2=0;	l=add_str(p);	*p2=c;	p=p2;	// –¼‘O‚ğadd_str‚·‚é
+		c=*p2;	*p2=0;	// –¼‘O‚ğadd_str‚·‚é
+		l=add_str(p);
+
+		// ”p~—\’è‚Ìl14/l15,‚¨‚æ‚ÑƒvƒŒƒtƒBƒbƒNƒX‚Œ‚ÌŒx
+		if(	strcmp(str_buf+str_data[l].str,"l14")==0 ||
+			strcmp(str_buf+str_data[l].str,"l15")==0 ){
+			disp_error_message("l14 and l15 is DEPRECATED. use @menu instead of l15.",p);
+		}else if(str_buf[str_data[l].str]=='l'){
+			disp_error_message("prefix 'l' is DEPRECATED. use prefix '@' instead.",p2);
+		}
+
+		*p2=c;	p=p2;
+		
 		
 		if(c=='['){
 			// array(name[i] => getelementofarray(name,i) )
@@ -1226,6 +1238,7 @@ int buildin_menu(struct script_state *st)
 	} else {	// goto“®ì
 		// ragemuŒİŠ·‚Ì‚½‚ß
 		pc_setreg(sd,add_str("l15"),sd->npc_menu);
+		pc_setreg(sd,add_str("@menu"),sd->npc_menu);
 		sd->state.menu_or_input=0;
 		if(sd->npc_menu>0 && sd->npc_menu<(st->end-st->start)/2){
 			int pos;
