@@ -570,7 +570,8 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->inchealsptick = 0;
 	sd->hp_sub = 0;
 	sd->sp_sub = 0;
-	sd->inchealspirittick = 0;
+	sd->inchealspirithptick = 0;
+	sd->inchealspiritsptick = 0;
 	sd->canact_tick = tick;
 	sd->canmove_tick = tick;
 	sd->attackabletime = tick;
@@ -3124,6 +3125,10 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 	if(sd->walkpath.path_pos>=sd->walkpath.path_len || sd->walkpath.path_pos!=data)
 		return 0;
 
+	//歩いたので息吹のタイマーを初期化
+	sd->inchealspirithptick = 0;
+	sd->inchealspiritsptick = 0;
+
 	sd->walkpath.path_half ^= 1;
 	if(sd->walkpath.path_half==0){ // マス目中心へ到着
 		sd->walkpath.path_pos++;
@@ -5583,53 +5588,76 @@ static int pc_natural_heal_sp(struct map_session_data *sd)
 	return 0;
 }
 
-static int pc_spirit_heal(struct map_session_data *sd,int level)
+static int pc_spirit_heal_hp(struct map_session_data *sd,int level)
 {
-	int bonus_hp,bonus_sp,flag,interval = battle_config.natural_heal_skill_interval;
+	int bonus_hp,interval = battle_config.natural_heal_skill_interval;
 
-	if(pc_checkoverhp(sd) && pc_checkoversp(sd)) {
-		sd->inchealspirittick = 0;
+	if(pc_checkoverhp(sd)) {
+		sd->inchealspirithptick = 0;
 		return 0;
 	}
 
-	sd->inchealspirittick += natural_heal_diff_tick;
+	sd->inchealspirithptick += natural_heal_diff_tick;
 
 	if(sd->weight*100/sd->max_weight >= battle_config.natural_heal_weight_rate)
 		interval += interval;
 
-	if(sd->inchealspirittick >= interval) {
+	if(sd->inchealspirithptick >= interval) {
 		bonus_hp = sd->nsshealhp;
-		bonus_sp = sd->nsshealsp;
-		flag = 0;
-		while(sd->inchealspirittick >= interval) {
-			sd->inchealspirittick -= interval;
+		while(sd->inchealspirithptick >= interval) {
 			if(pc_issit(sd)) {
+				sd->inchealspirithptick -= interval;
 				if(sd->status.hp < sd->status.max_hp) {
 					if(sd->status.hp + bonus_hp <= sd->status.max_hp)
 						sd->status.hp += bonus_hp;
 					else {
 						bonus_hp = sd->status.max_hp - sd->status.hp;
 						sd->status.hp = sd->status.max_hp;
-						flag |= 0x01;
 					}
 					clif_heal(sd->fd,SP_HP,bonus_hp);
+					sd->inchealspirithptick = 0;
 				}
-				else
-					flag |= 0x01;
+			}else{
+				sd->inchealspirithptick -= natural_heal_diff_tick;
+				break;
+			}
+		}
+	}
+
+	return 0;
+}
+static int pc_spirit_heal_sp(struct map_session_data *sd,int level)
+{
+	int bonus_sp,interval = battle_config.natural_heal_skill_interval;
+
+	if(pc_checkoversp(sd)) {
+		sd->inchealspiritsptick = 0;
+		return 0;
+	}
+
+	sd->inchealspiritsptick += natural_heal_diff_tick;
+
+	if(sd->weight*100/sd->max_weight >= battle_config.natural_heal_weight_rate)
+		interval += interval;
+
+	if(sd->inchealspiritsptick >= interval) {
+		bonus_sp = sd->nsshealsp;
+		while(sd->inchealspiritsptick >= interval) {
+			if(pc_issit(sd)) {
+				sd->inchealspiritsptick -= interval;
 				if(sd->status.sp < sd->status.max_sp) {
 					if(sd->status.sp + bonus_sp <= sd->status.max_sp)
 						sd->status.sp += bonus_sp;
 					else {
 						bonus_sp = sd->status.max_sp - sd->status.sp;
 						sd->status.sp = sd->status.max_sp;
-						flag |= 0x02;
 					}
 					clif_heal(sd->fd,SP_SP,bonus_sp);
+					sd->inchealspiritsptick = 0;
 				}
-				else
-					flag |= 0x02;
-				if(flag >= 3)
-					sd->inchealspirittick = 0;
+			}else{
+				sd->inchealspiritsptick -= natural_heal_diff_tick;
+				break;
 			}
 		}
 	}
@@ -5646,7 +5674,7 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 {
 	int skill;
 	if( (battle_config.natural_heal_weight_rate > 100 || sd->weight*100/sd->max_weight < battle_config.natural_heal_weight_rate) &&
-		!pc_isdead(sd) && !pc_ishiding(sd) && sd->sc_data[SC_POISON].timer == -1) {
+		!pc_isdead(sd) && !pc_ishiding(sd) && sd->sc_data[SC_POISON].timer == -1 && sd->sc_data[SC_EXTREMITYFIST].timer == -1) {
 		pc_natural_heal_hp(sd);
 		pc_natural_heal_sp(sd);
 	}
@@ -5654,11 +5682,14 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 		sd->hp_sub = sd->inchealhptick = 0;
 		sd->sp_sub = sd->inchealsptick = 0;
 	}
-	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0 && !pc_ishiding(sd) && sd->sc_data[SC_POISON].timer == -1)
-		pc_spirit_heal(sd,skill);
-	else
-		sd->inchealspirittick = 0;
-
+	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0 && !pc_ishiding(sd) && sd->sc_data[SC_POISON].timer == -1){
+		pc_spirit_heal_hp(sd,skill);
+		pc_spirit_heal_sp(sd,skill);
+	}
+	else {
+		sd->inchealspirithptick = 0;
+		sd->inchealspiritsptick = 0;
+	}
 	return 0;
 }
 

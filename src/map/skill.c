@@ -151,7 +151,8 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	SC_BLADESTOP_WAIT,
 /* 270- */
 	SC_EXPLOSIONSPIRITS,
-	-1,-1,-1,-1,-1,
+	SC_EXTREMITYFIST,
+	-1,-1,-1,-1,
 	SC_MAGICROD,
 	-1,-1,-1,
 /* 280- */
@@ -205,7 +206,8 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	SC_BERSERK,
 /* 360- */
 	-1,
-	SC_ASSUMPTIO,-1,-1,-1,-1,-1,-1,-1,-1,
+	SC_ASSUMPTIO,
+	-1,-1,-1,-1,-1,-1,-1,-1,
 /* 370- */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 /* 380- */
@@ -214,11 +216,13 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	SC_WINDWALK,
 	SC_MELTDOWN,
 	-1,-1,
-	SC_CARTBOOST,-1,-1,
+	SC_CARTBOOST,
+	-1,-1,
 /* 390- */
 	SC_REJECTSWORD,
 	-1,-1,-1,-1,-1,
-	SC_MARIONETTE,-1,
+	SC_MARIONETTE,
+	-1,
 	SC_HEADCRUSH,
 	SC_JOINTBEAT,
 /* 400- */
@@ -603,6 +607,10 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			skill_status_change_start(bl,SC_STAN,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		if( rand()%100 < (10+3*skilllv)*sc_def_int/100 )
 			skill_status_change_start(bl,SC_BLIND,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
+		break;
+	case MO_EXTREMITYFIST:			/* 阿修羅覇凰拳 */
+		//阿修羅を使うと5分間自然回復しないようになる
+		skill_status_change_start(src,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time2(skillid,skilllv),0 );
 		break;
 	}
 
@@ -1468,6 +1476,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case SN_SHARPSHOOTING:			/* シャープシューティング */
 	case CG_ARROWVULCAN:			/* アローバルカン */
 	case ASC_BREAKER:				/* ソウルブレーカー */
+	case HW_MAGICCRASHER:		/* マジッククラッシャー */
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case NPC_DARKBREATH:
@@ -1704,7 +1713,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case MG_FROSTDIVER:			/* フロストダイバー */
 	case WZ_JUPITEL:			/* ユピテルサンダー */
 	case NPC_MAGICALATTACK:		/* MOB:魔法打撃攻撃 */
-	case HW_MAGICCRASHER:		/* マジッククラッシャー */
 		skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 
@@ -6563,6 +6571,8 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_STEELBODY:			// 金剛
 			calc_flag = 1;
 			break;
+		case SC_EXTREMITYFIST:		/* 阿修羅覇凰拳 */
+			break;
 		case SC_AUTOCOUNTER:
 			val3 = val4 = 0;
 			break;
@@ -7151,8 +7161,9 @@ int skill_unitgrouptickset_delete(struct block_list *bl,int group_id)
 int skill_unit_timer_sub_onplace( struct block_list *bl, va_list ap )
 {
 	struct block_list *src;
+	unsigned int tick;
 	src=va_arg(ap,struct block_list*);
-	unsigned int tick=va_arg(ap,unsigned int);
+	tick=va_arg(ap,unsigned int);
 
 	if( ((struct skill_unit *)src)->alive) {
 		if(battle_check_target(src,bl,((struct skill_unit *)src)->group->target_flag )>0)

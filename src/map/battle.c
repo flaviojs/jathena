@@ -1667,8 +1667,14 @@ static struct Damage battle_calc_pet_weapon_attack(
 		damage = battle_get_baseatk(src);
 	else
 		damage = 0;
-	atkmin = battle_get_atk(src);
-	atkmax = battle_get_atk2(src);
+
+	if(skill_num==HW_MAGICCRASHER){			/* マジッククラッシャーはMATKで殴る */
+		atkmin = battle_get_matk1(src);
+		atkmax = battle_get_matk2(src);
+	}else{
+		atkmin = battle_get_atk(src);
+		atkmax = battle_get_atk2(src);
+	}
 	if(mob_db[pd->class].range>3 )
 		flag=(flag&~BF_RANGEMASK)|BF_LONG;
 
@@ -2092,8 +2098,13 @@ static struct Damage battle_calc_mob_weapon_attack(
 		damage = battle_get_baseatk(src);
 	else
 		damage = 0;
-	atkmin = battle_get_atk(src);
-	atkmax = battle_get_atk2(src);
+	if(skill_num==HW_MAGICCRASHER){			/* マジッククラッシャーはMATKで殴る */
+		atkmin = battle_get_matk1(src);
+		atkmax = battle_get_matk2(src);
+	}else{
+		atkmin = battle_get_atk(src);
+		atkmax = battle_get_atk2(src);
+	}
 	if(mob_db[md->class].range>3 )
 		flag=(flag&~BF_RANGEMASK)|BF_LONG;
 
@@ -2602,7 +2613,11 @@ static struct Damage battle_calc_pc_weapon_attack(
 	watk = battle_get_atk(src); //ATK
 	watk_ = battle_get_atk_(src); //ATK左手
 
-	damage = damage2 = battle_get_baseatk(&sd->bl); //damega,damega2初登場、base_atkの取得
+	if(skill_num==HW_MAGICCRASHER){			/* マジッククラッシャーはMATKで殴る */
+		damage = damage2 = battle_get_matk1(src); //damega,damega2初登場、base_atkの取得
+	}else{
+		damage = damage2 = battle_get_baseatk(&sd->bl); //damega,damega2初登場、base_atkの取得
+	}
 	atkmin = atkmin_ = dex; //最低ATKはDEXで初期化？
 	sd->state.arrow_atk = 0; //arrow_atk初期化
 	if(sd->equip_index[9] >= 0 && sd->inventory_data[sd->equip_index[9]])

@@ -192,7 +192,7 @@ struct map_session_data {
 	unsigned int canact_tick;
 	unsigned int canmove_tick;
 	int hp_sub,sp_sub;
-	int inchealhptick,inchealsptick,inchealspirittick;
+	int inchealhptick,inchealsptick,inchealspirithptick,inchealspiritsptick;
 
 	short view_class;
 	short weapontype1,weapontype2;
