@@ -11,7 +11,8 @@ PACKETDEF = -DPACKETVER=6 -DNEW_006b
 PLATFORM = $(shell uname)
 
 ifeq ($(findstring CYGWIN,$(PLATFORM)), CYGWIN)
-OS_TYPE = -DCYGWIN
+OS_TYPE = -DCYGWIN -DFD_SETSIZE=4096
+
 else
 OS_TYPE =
 endif
@@ -32,6 +33,18 @@ CFLAGS += -O2
 
 #change authfifo
 #CFLAGS += -DCMP_AUTHFIFO_IP -DCMP_AUTHFIFO_LOGIN2
+
+#optimize for Athlon-4(mobile Athlon)
+#CFLAGS += -march=athlon -mcpu=athlon-4 -mfpmath=sse
+
+#optimize for Athlon-mp
+#CFLAGS += -march=athlon -mcpu=athlon-mp -mfpmath=sse
+
+#optimize for Athlon-xp
+#CFLAGS += -march=athlon -mcpu=athlon-xp -mfpmath=sse
+
+#optimize for pentium3
+#CFLAGS += -march=i686 -mcpu=pentium3 -mfpmath=sse -mmmx -msse2
 
 #optimize for pentium4
 #CFLAGS += -march=pentium4 -mfpmath=sse -msse -msse2

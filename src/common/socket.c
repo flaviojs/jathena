@@ -1,4 +1,4 @@
-// $Id: socket.c,v 1.4 2003/06/29 05:49:50 lemit Exp $
+// $Id: socket.c,v 1.2 2004/09/15 00:17:17 running_pinata Exp $
 // original : core.c 2003/02/26 18:03:12 Rev 1.7
 
 #include <stdio.h>
@@ -325,6 +325,11 @@ int do_parsepacket(void)
 		}
 		RFIFOFLUSH(i);
 	}
+	return 0;
+}
+
+int parsepacket_timer(int tid, unsigned int tick, int id, int data) {
+	do_parsepacket();
 	return 0;
 }
 

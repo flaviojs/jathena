@@ -39,12 +39,6 @@
 #define FD_SETSIZE 4096
 #endif	// __INTERIX
 
-#ifdef CYGWIN
-#undef FD_SETSIZE
-#define FD_SETSIZE 4096
-#endif
-
-
 // Struct declaration
 
 struct socket_data{
@@ -77,6 +71,7 @@ int WFIFOSET(int fd,int len);
 
 int do_sendrecv(int next);
 int do_parsepacket(void);
+int parsepacket_timer(int tid, unsigned int tick, int id, int data);
 void do_socket(void);
 
 void set_defaultparse(int (*defaultparse)(int));

@@ -1,4 +1,65 @@
 --------------------
+//1054 by Nameless
+・Cygwinでコンパイルしたathenaが接続53～58人付近で接続不能になるバグを解消
+
+	(src/common/)
+		socket.h
+			#ifdef CYGWIN
+			#undef FD_SETSIZE
+			#define FD_SETSIZE 4096
+			#endif
+		以上の行を削除
+	(/)
+		makefile
+			OS_TYPE = -DCYGWIN
+				↓
+			OS_TYPE = -DCYGWIN -DFD_SETSIZE=4096
+		に修正
+
+		#optimize for Athlon-4(mobile Athlon)
+		#CFLAGS += -march=athlon -mcpu=athlon-4 -mfpmath=sse
+
+		#optimize for Athlon-mp
+		#CFLAGS += -march=athlon -mcpu=athlon-mp -mfpmath=sse
+
+		#optimize for Athlon-xp
+		#CFLAGS += -march=athlon -mcpu=athlon-xp -mfpmath=sse
+
+		#optimize for pentium3
+		#CFLAGS += -march=i686 -mcpu=pentium3 -mfpmath=sse -mmmx -msse2
+
+		各種CPUの最適化を追加gcc3.1以上を使っている場合は#を外し
+		て最適化を行うことができると思います。
+
+	※makefileでセットしておかないと、コンパイルの際に一部
+	  FD_SETSIZEが小さくなってしまうバグ(?)があるらしく、接続人数が
+	  60人弱で接続不能が発生してしまいます。
+
+--------------------
+//1053 by TEILU
+・パケットパーサーをタイマー呼出しに変更できる設定の追加
+・精錬の可否判定でＤＢにどのような設定を入れてもアクセサリは
+  精錬できなかった不具合を修正
+
+	(conf/)
+		map_athena.conf
+			packet_parse_time: 0 追加
+	(src/common/)
+		core.c
+			packet_parse_time 追加
+			main() 変更
+		socket.c
+			parsepacket_timer() 追加
+		socket.h
+			parsepacket_timer() 追加
+	(src/map/)
+		map.c
+			packet_parse_time 追加
+			map_config_read() 変更
+		script.c
+			buildin_getequipisenableref() 変更
+
+--------------------
 //1052 by
 居場所つきで検索コマンド追加。
 	GMコマンド追加
@@ -188,7 +249,7 @@ battle_athena.confで設定可能です。
 				ログインバージョンを $loginversion として変更できるように変更
 			C ladmin
 				アカウント名に「-」を使えるように変更
-			
+
 		conf/
 			D import/
 				配布物から削除(athena-start start で自動作成される)
@@ -298,7 +359,7 @@ battle_athena.confで設定可能です。
 				calloc() → aCalloc()
 				realloc() → aRealloc()
 			strcpy() を strncpy() に極力変更
-			
+
 			char/
 				C char.c
 					スペースでインデントされていたところをタブで統一
@@ -1438,7 +1499,7 @@ BREAKING IS EASY, REPAIRING IS VERY DIFFICULT !
   gettimetick(Type);		Type: 0 SystemTick, 1 TimeSecondTick(0-86399)
   gettime(Type);		Type: 1 Sec, 2 Min, 3 Hour, 4 Weekday, 5, Monthday, 6 Month, 7 Year
   gettimestr("TimeFMT", Len);	TimeFMT: Time format strinf / Len: String Length
- 
+
 	(map/)
 	script.c
 		buildin_getequipid(); 追加
@@ -1451,7 +1512,7 @@ BREAKING IS EASY, REPAIRING IS VERY DIFFICULT !
 ・追加 GVG Script NPC edit from Aegis NPC(Chinese-big5 version), Please someone translate to Japanese.
 ・修正 NPC Script Command - buildin_getgdskilllv()
   getgdskilllv(Guild_ID, Skill_ID);
- 
+
 	(map/)
 	script.c
 		buildin_getgdskilllv() 修正
@@ -1470,7 +1531,7 @@ BREAKING IS EASY, REPAIRING IS VERY DIFFICULT !
 ・追加 NPC Script Command - buildin_getgdskilllv()
   getgdskilllv(Guild_ID, Skill_ID);
   skill_id = 1:GD_APPROVAL,2:GD_KAFRACONTACT,3:GD_GUARDIANRESEARCH,4:GD_CHARISMA,5:GD_EXTENSION
- 
+
 	(map/)
 	script.c
 		buildin_getgdskilllv() 追加
@@ -1587,11 +1648,11 @@ BREAKING IS EASY, REPAIRING IS VERY DIFFICULT !
 	pc.c
 		pc_calcstatus() 変更
 	skill.c
-		
+
 		skill_status_change_end() 変更
 		skill_status_change_start() 変更とNULLチェック修正
 	skill.h 変更
-	
+
 --------------------
 //1027 by Ni+S
 ・getitemname関数追加
@@ -1879,9 +1940,9 @@ BREAKING IS EASY, REPAIRING IS VERY DIFFICULT !
 
  --------------------
 //1014 by (Pepermint)
-I fixed again the problem if you put minus sign(-) in front of digits, 
+I fixed again the problem if you put minus sign(-) in front of digits,
 the error comes up when you puchase a item.
-When you put a minus sign(-), the error sign will be changed shrotage of 
+When you put a minus sign(-), the error sign will be changed shrotage of
 amount as original server dose.
 
 I tested with it in ver. 1013, it was working
