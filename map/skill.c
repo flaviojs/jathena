@@ -4832,7 +4832,6 @@ int skill_unit_timer_sub_ondelete( struct block_list *bl, va_list ap )
 	return 0;
 }
 
-static int del_count = 0;
 /*==========================================
  * スキルユニットタイマー処理用(foreachobject)
  *------------------------------------------
@@ -4865,8 +4864,8 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 	}
 	if(group->unit_id == 0x8d) {
 		unit->val1 -= 5;
-		if(unit->val1 <= 0 && del_count == 0)
-			skill_delunit(unit);
+		if(unit->val1 <= 0 && unit->limit + group->tick > tick + 500)
+			unit->limit = DIFF_TICK(tick+500,group->tick);
 	}
 
 	return 0;
@@ -4883,8 +4882,6 @@ int skill_unit_timer( int tid,unsigned int tick,int id,int data)
 	map_foreachobject( skill_unit_timer_sub, BL_SKILL, tick );
 
 	map_freeblock_unlock();
-	del_count++;
-	del_count%=5;
 
 	return 0;
 }

@@ -42,11 +42,13 @@ static int users;
 static struct block_list *object[MAX_FLOORITEM];
 static int first_free_object_id,last_object_id;
 
-#define block_free_max 50000
+#define block_free_max 262144
 static void *block_free[block_free_max];
 static int block_free_count=0,block_free_lock=0;
 
-#define BL_LIST_MAX 5120
+#define BL_LIST_MAX 262144
+static struct block_list *bl_list[BL_LIST_MAX];
+static int bl_list_count = 0;
 
 struct map_data map[MAX_MAP_PER_SERVER];
 int map_num=0;
@@ -91,9 +93,11 @@ int map_freeblock( void *bl )
 	if(block_free_lock==0)
 		free(bl);
 	else{
-		if( block_free_count>=block_free_max )
-			printf("map_freeblock: *WARNING* too many free block! %d %d\n",
-				block_free_count,block_free_lock);
+		if( block_free_count>=block_free_max ) {
+			if(battle_config.error_log)
+				printf("map_freeblock: *WARNING* too many free block! %d %d\n",
+			block_free_count,block_free_lock);
+		}
 		else
 			block_free[block_free_count++]=bl;
 	}
@@ -117,13 +121,16 @@ int map_freeblock_unlock(void)
 {
 	if( (--block_free_lock)==0 ){
 		int i;
-//		if(block_free_count>0)
-//			printf("map_freeblock_unlock: free %d object\n",block_free_count);
+//		if(block_free_count>0) {
+//			if(battle_config.error_log)
+//				printf("map_freeblock_unlock: free %d object\n",block_free_count);
+//		}
 		for(i=0;i<block_free_count;i++)
 			free(block_free[i]);
 		block_free_count=0;
 	}else if(block_free_lock<0){
-		printf("map_freeblock_unlock: lock count < 0 !\n");
+		if(battle_config.error_log)
+			printf("map_freeblock_unlock: lock count < 0 !\n");
 	}
 	return block_free_lock;
 }
@@ -186,7 +193,8 @@ int map_delblock(struct block_list *bl)
 	if(bl->prev==NULL){
 		if(bl->next!=NULL){
 			// prevがNULLでnextがNULLでないのは有ってはならない
-			printf("map_delblock error : bl->next!=NULL\n");
+			if(battle_config.error_log)
+				printf("map_delblock error : bl->next!=NULL\n");
 		}
 		return 0;
 	}
@@ -248,9 +256,7 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 	int bx,by;
 	struct block_list *bl;
 	va_list ap;
-	const size_t block_list_max=BL_LIST_MAX;
-	struct block_list *list[block_list_max];
-	int blockcount=0,i;
+	int blockcount=bl_list_count,i;
 
 	va_start(ap,type);
 	if(x0<0) x0=0;
@@ -264,8 +270,8 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 				for(;bl;bl=bl->next){
 					if(type && bl->type!=type)
 						continue;
-					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && blockcount<block_list_max)
-						list[blockcount++]=bl;
+					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && bl_list_count<BL_LIST_MAX)
+						bl_list[bl_list_count++]=bl;
 				}
 			}
 		}
@@ -274,24 +280,27 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 			for(bx=x0/BLOCK_SIZE;bx<=x1/BLOCK_SIZE;bx++){
 				bl = map[m].block_mob[bx+by*map[m].bxs];
 				for(;bl;bl=bl->next){
-					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && blockcount<block_list_max)
-						list[blockcount++]=bl;
+					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && bl_list_count<BL_LIST_MAX)
+						bl_list[bl_list_count++]=bl;
 				}
 			}
 		}
 	
-	if(blockcount>=block_list_max)
-		printf("map_foreachinarea: *WARNING* block count too many!\n");
-	
+	if(bl_list_count>=BL_LIST_MAX) {
+		if(battle_config.error_log)
+			printf("map_foreachinarea: *WARNING* block count too many!\n");
+	}
+
 	map_freeblock_lock();	// メモリからの解放を禁止する
 		
-	for(i=0;i<blockcount;i++)
-		if(list[i]->prev)	// 有効かどうかチェック
-			func(list[i],ap);
+	for(i=blockcount;i<bl_list_count;i++)
+		if(bl_list[i]->prev)	// 有効かどうかチェック
+			func(bl_list[i],ap);
 
 	map_freeblock_unlock();	// 解放を許可する
-	
+
 	va_end(ap);
+	bl_list_count = blockcount;
 }
 
 /*==========================================
@@ -307,9 +316,7 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 	int bx,by;
 	struct block_list *bl;
 	va_list ap;
-	const size_t block_list_max=BL_LIST_MAX;
-	struct block_list *list[block_list_max];
-	int blockcount=0,i;
+	int blockcount=bl_list_count,i;
 
 	va_start(ap,type);
 	if(dx==0 || dy==0){
@@ -337,15 +344,15 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 				for(;bl;bl=bl->next){
 					if(type && bl->type!=type)
 						continue;
-					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && blockcount<block_list_max)
-						list[blockcount++]=bl;
+					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && bl_list_count<BL_LIST_MAX)
+						bl_list[bl_list_count++]=bl;
 				}
 				bl = map[m].block_mob[bx+by*map[m].bxs];
 				for(;bl;bl=bl->next){
 					if(type && bl->type!=type)
 						continue;
-					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && blockcount<block_list_max)
-						list[blockcount++]=bl;
+					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && bl_list_count<BL_LIST_MAX)
+						bl_list[bl_list_count++]=bl;
 				}
 			}
 		}
@@ -366,8 +373,8 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 						continue;
 					if(((dx>0 && bl->x<x0+dx) || (dx<0 && bl->x>x1+dx) ||
 						(dy>0 && bl->y<y0+dy) || (dy<0 && bl->y>y1+dy)) &&
-						blockcount<block_list_max)
-							list[blockcount++]=bl;
+						bl_list_count<BL_LIST_MAX)
+							bl_list[bl_list_count++]=bl;
 				}
 				bl = map[m].block_mob[bx+by*map[m].bxs];
 				for(;bl;bl=bl->next){
@@ -377,27 +384,29 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 						continue;
 					if(((dx>0 && bl->x<x0+dx) || (dx<0 && bl->x>x1+dx) ||
 						(dy>0 && bl->y<y0+dy) || (dy<0 && bl->y>y1+dy)) &&
-						blockcount<block_list_max)
-							list[blockcount++]=bl;
+						bl_list_count<BL_LIST_MAX)
+							bl_list[bl_list_count++]=bl;
 				}
 			}
 		}
 
 	}
 
-	if(blockcount>=block_list_max)
-		printf("map_foreachinarea: *WARNING* block count too many!\n");
-	
+	if(bl_list_count>=BL_LIST_MAX) {
+		if(battle_config.error_log)
+			printf("map_foreachinarea: *WARNING* block count too many!\n");
+	}
+
 	map_freeblock_lock();	// メモリからの解放を禁止する
 		
-	for(i=0;i<blockcount;i++)
-		if(list[i]->prev)	// 有効かどうかチェック
-			func(list[i],ap);
+	for(i=blockcount;i<bl_list_count;i++)
+		if(bl_list[i]->prev)	// 有効かどうかチェック
+			func(bl_list[i],ap);
 
 	map_freeblock_unlock();	// 解放を許可する
-	
 
 	va_end(ap);
+	bl_list_count = blockcount;
 }
 
 /*==========================================
@@ -416,7 +425,8 @@ int map_addobject(struct block_list *bl)
 		if(object[i]==NULL)
 			break;
 	if(i>=MAX_FLOORITEM){
-		printf("no free object id\n");
+		if(battle_config.error_log)
+			printf("no free object id\n");
 		return 0;
 	}
 	first_free_object_id=i;
@@ -480,34 +490,34 @@ int map_delobject(int id)
 void map_foreachobject(int (*func)(struct block_list*,va_list),int type,...)
 {
 	int i;
-	int block_list_count=0;
-	const size_t block_list_max=BL_LIST_MAX;
-	struct block_list *list[block_list_max];
+	int blockcount=bl_list_count;
 	va_list ap;
 
 	va_start(ap,type);
-
 
 	for(i=2;i<=last_object_id;i++){
 		if(object[i]){
 			if(type && object[i]->type!=type)
 				continue;
-			if(block_list_count>=block_list_max)
-				printf("map_foreachobject: too many block !\n");
+			if(bl_list_count>=BL_LIST_MAX) {
+				if(battle_config.error_log)
+					printf("map_foreachobject: too many block !\n");
+			}
 			else
-				list[block_list_count++]=object[i];
+				bl_list[bl_list_count++]=object[i];
 		}
 	}
-	
+
 	map_freeblock_lock();
-	
-	for(i=0;i<block_list_count;i++)
-		if( list[i]->prev || list[i]->next )
-			func(list[i],ap);
+
+	for(i=blockcount;i<bl_list_count;i++)
+		if( bl_list[i]->prev || bl_list[i]->next )
+			func(bl_list[i],ap);
 
 	map_freeblock_unlock();
 
 	va_end(ap);
+	bl_list_count = blockcount;
 }
 
 /*==========================================
@@ -526,7 +536,8 @@ int map_clearflooritem_timer(int tid,unsigned int tick,int id,int data)
 
 	fitem = (struct flooritem_data *)object[id];
 	if(fitem==NULL || fitem->bl.type!=BL_ITEM || (!data && fitem->cleartimer != tid)){
-		printf("map_clearflooritem_timer : error\n");
+		if(battle_config.error_log)
+			printf("map_clearflooritem_timer : error\n");
 		return 1;
 	}
 	if(data)
@@ -735,7 +746,7 @@ int map_quit(struct map_session_data *sd)
 
 	storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
 
-	skill_castcancel(&sd->bl);	// 詠唱を中断する
+	skill_castcancel(&sd->bl,0);	// 詠唱を中断する
 	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
 	skill_clear_unitgroup(&sd->bl);	// スキルユニットグループの削除
 	skill_cleartimerskill(&sd->bl);
@@ -760,6 +771,8 @@ int map_quit(struct map_session_data *sd)
 			intif_save_petdata(sd->status.account_id,&sd->pet);
 	}
 
+	if(pc_isdead(sd))
+		pc_setrestartvalue(sd,2);
 	pc_makesavestatus(sd);
 	chrif_save(sd);
 	storage_storage_save(sd);
@@ -848,7 +861,8 @@ int map_addnpc(int m,struct npc_data *nd)
 		if(map[m].npc[i]==NULL)
 			break;
 	if(i==MAX_NPC_PER_MAP){
-		printf("too many NPCs in one map %s\n",map[m].name);
+		if(battle_config.error_log)
+			printf("too many NPCs in one map %s\n",map[m].name);
 		return -1;
 	}
 	if(i==map[m].npc_num){
@@ -960,7 +974,7 @@ int map_setipport(char *name,unsigned long ip,int port)
 			printf("out of memory : map_setipport\n");
 			exit(1);
 		}
-		memcpy(mdos->name,name,16);
+		memcpy(mdos->name,name,24);
 		mdos->gat  = NULL;
 		mdos->ip   = ip;
 		mdos->port = port;
@@ -1135,7 +1149,7 @@ int map_addmap(char *mapname)
 		printf("too many map\n");
 		return 1;
 	}
-	memcpy(map[map_num].name,mapname,16);
+	memcpy(map[map_num].name,mapname,24);
 	map_num++;
 	return 0;
 }

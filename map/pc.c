@@ -44,7 +44,7 @@ static struct {
 	struct {
 		short id,lv;
 	} need[6];
-} skill_tree[MAX_PC_CLASS][64];
+} skill_tree[MAX_PC_CLASS][100];
 
 
 static int atkmods[3][20];	// 武器ATKサイズ修正(size_fix.txt)
@@ -243,35 +243,36 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 				sd->status.sp = sp;
 		}
 	}
-	if(!type)
+	if(type&1)
 		clif_updatestatus(sd,SP_HP);
-	if(!type)
+	if(type&1)
 		clif_updatestatus(sd,SP_SP);
 
+	if(type&2) {
+		if(!(battle_config.death_penalty_type&1) ) {
+			if(sd->status.class && !map[sd->bl.m].flag.nopenalty){
+				if(battle_config.death_penalty_type&2 && battle_config.death_penalty_base > 0)
+					sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
+				else if(battle_config.death_penalty_base > 0) {
+					if(pc_nextbaseexp(sd) > 0)
+						sd->status.base_exp -= (int)((double)sd->status.base_exp * (double)battle_config.death_penalty_base/10000.);
+				}
+				if(sd->status.base_exp < 0)
+					sd->status.base_exp = 0;
+				if(type&1)
+					clif_updatestatus(sd,SP_BASEEXP);
 
-	if(!(battle_config.death_penalty_type&1) ) {
-		if(sd->status.class && !map[sd->bl.m].flag.nopenalty){
-			if(battle_config.death_penalty_type&2 && battle_config.death_penalty_base > 0)
-				sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
-			else if(battle_config.death_penalty_base > 0) {
-				if(pc_nextbaseexp(sd) > 0)
-					sd->status.base_exp -= (int)((double)sd->status.base_exp * (double)battle_config.death_penalty_base/10000.);
+				if(battle_config.death_penalty_type&2 && battle_config.death_penalty_job > 0)
+					sd->status.job_exp -= (int)((double)pc_nextjobexp(sd) * (double)battle_config.death_penalty_job/10000.);
+				else if(battle_config.death_penalty_job > 0) {
+					if(pc_nextjobexp(sd) > 0)
+						sd->status.job_exp -= (int)((double)sd->status.job_exp * (double)battle_config.death_penalty_job/10000.);
+				}
+				if(sd->status.job_exp < 0)
+					sd->status.job_exp = 0;
+				if(type&1)
+					clif_updatestatus(sd,SP_JOBEXP);
 			}
-			if(sd->status.base_exp < 0)
-				sd->status.base_exp = 0;
-			if(!type)
-				clif_updatestatus(sd,SP_BASEEXP);
-
-			if(battle_config.death_penalty_type&2 && battle_config.death_penalty_job > 0)
-				sd->status.job_exp -= (int)((double)pc_nextjobexp(sd) * (double)battle_config.death_penalty_job/10000.);
-			else if(battle_config.death_penalty_job > 0) {
-				if(pc_nextjobexp(sd) > 0)
-					sd->status.job_exp -= (int)((double)sd->status.job_exp * (double)battle_config.death_penalty_job/10000.);
-			}
-			if(sd->status.job_exp < 0)
-				sd->status.job_exp = 0;
-			if(!type)
-				clif_updatestatus(sd,SP_JOBEXP);
 		}
 	}
 
@@ -293,12 +294,12 @@ static int pc_walktoxy_sub(struct map_session_data *);
 int pc_makesavestatus(struct map_session_data *sd)
 {
 	// 服の色は色々弊害が多いので保存対象にはしない
-	if(battle_config.save_clothcolor==0)
+	if(!battle_config.save_clothcolor)
 		sd->status.clothes_color=0;
 
 	// 死亡状態だったのでhpを1、位置をセーブ場所に変更
 	if(pc_isdead(sd)){
-		pc_setrestartvalue(sd,1);
+		pc_setrestartvalue(sd,0);
 		memcpy(&sd->status.last_point,&sd->status.save_point,sizeof(sd->status.last_point));
 	} else {
 		memcpy(sd->status.last_point.map,sd->mapname,24);
@@ -620,14 +621,35 @@ int pc_authfail(int id)
 }
 
 
+static int pc_calc_skillpoint(struct map_session_data* sd)
+{
+	int  i,skill,skill_point=0;
+	for(i=1;i<MAX_SKILL;i++){
+		if( (skill = pc_checkskill(sd,i)) > 0) {
+			if(!(skill_get_inf2(i)&0x01) || battle_config.quest_skill_learn == 1) {
+				if(!sd->status.skill[i].flag)
+					skill_point += skill;
+				else if(sd->status.skill[i].flag > 2) {
+					skill_point += (sd->status.skill[i].flag - 2);
+				}
+			}
+		}
+	}
+
+	return skill_point;
+}
+
 /*==========================================
  * 覚えられるスキルの計算
  *------------------------------------------
  */
 int pc_calc_skilltree(struct map_session_data *sd)
 {
-	int i,id=0,flag;
+	int i,id=0,flag,skill_point=0;
 	int c=sd->status.class;
+
+	if(battle_config.skillup_limit)
+		skill_point = pc_calc_skillpoint(sd);
 	for(i=0;i<MAX_SKILL;i++){
 		sd->status.skill[i].id=0;
 		if (sd->status.skill[i].flag){	// cardスキルなら、
@@ -650,7 +672,17 @@ int pc_calc_skilltree(struct map_session_data *sd)
 			flag=0;
 			for(i=0;(id=skill_tree[c][i].id)>0;i++){
 				int j,f=1;
-				if(!battle_config.pc_skillfree) {
+				if(battle_config.skillup_limit) {
+					if(skill_point < 9) {
+						if(id != NV_BASIC && id != NV_FIRSTAID && id != NV_TRICKDEAD)
+							f=0;
+					}
+					else if(skill_point < 48) {
+						if((id < NV_BASIC || id > TF_DETOXIFY) && (id < NV_FIRSTAID || id > MG_ENERGYCOAT))
+							f=0;
+					}
+				}
+				if(!battle_config.skillfree && f) {
 					for(j=0;j<5;j++) {
 						if( skill_tree[c][i].need[j].id &&
 							pc_checkskill(sd,skill_tree[c][i].need[j].id) <
@@ -4907,7 +4939,7 @@ int pc_read_gm_account()
 		c++;
 	}
 	fclose(fp);
-	printf("gm_account: %s read done (%d gm account ID)\n",GM_account_filename,c);
+	printf("read %s done (%d gm account ID)\n",GM_account_filename,c);
 
 	return 0;
 }

@@ -442,6 +442,16 @@ player_skillfree
 	これをyesにすればプレイヤーの職業で習うことができるスキル全てを
 	スキルツリーに関係なく上げることができます。デフォルトはnoです。
 
+player_skillup_limit
+	スキルリセット等をした時スキルを制限なしに上げるかどうかです。
+	これをyesにすれば始めのスキルポイント9つはノービスで習うスキルにしか
+	使えません。そしてその後の39は1次職業で習う物にだけ使えてその後の
+	ポイントは自由に使うことができます。ただこれは公式で設定されている
+	スキルツリーにだけに対応します。skill_tree.txtの修正した公式とは違う
+	スキルツリーを作った場合は動作に問題はないけどskill_tree.txtで設定した
+	通りに動作しません。
+	デフォルトはnoです。
+
 weapon_produce_rate
 	武器製造スキルでの製造成功率を百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
@@ -685,6 +695,7 @@ mvp_exp_rate: 100
 atcommand_gm_only: no
 gm_all_skill: 0
 player_skillfree: no
+player_skillup_limit: no
 weapon_produce_rate: 100
 monster_active_enable: yes
 monster_damage_delay_rate: 100

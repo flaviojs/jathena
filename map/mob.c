@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "timer.h"
+#include "socket.h"
 #include "db.h"
 #include "map.h"
 #include "clif.h"
@@ -46,7 +47,8 @@ int mobdb_searchname(const char *str)
 {
 	int i;
 	for(i=0;i<sizeof(mob_db)/sizeof(mob_db[0]);i++){
-		if(strcmpi(mob_db[i].name,str)==0 || strcmp(mob_db[i].jname,str)==0)
+		if( strcmpi(mob_db[i].name,str)==0 || strcmp(mob_db[i].jname,str)==0 ||
+			memcmp(mob_db[i].name,str,24)==0 || memcmp(mob_db[i].jname,str,24)==0)
 			return i;
 	}
 	return 0;
@@ -113,7 +115,8 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 		}else{
 			return 0;
 		}
-//		printf("mobclass=%d try=%d\n",class,i);
+//		if(battle_config.etc_log)
+//			printf("mobclass=%d try=%d\n",class,i);
 	}
 	if(x<=0) x=sd->bl.x;
 	if(y<=0) y=sd->bl.y;
@@ -122,12 +125,13 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 		md=malloc(sizeof(struct mob_data));
 		if(md==NULL){
 			printf("mob_once_spawn: out of memory !\n");
-			return 0;
+			exit(1);
 		}
 		if(mob_db[class].mode&0x02) {
 			md->lootitem=malloc(sizeof(struct item)*LOOTITEM_SIZE);
 			if(md->lootitem==NULL){
 				printf("mob_once_spawn: out of memory !\n");
+				exit(1);
 			}
 		}
 		else
@@ -192,34 +196,12 @@ int mob_once_spawn_area(struct map_session_data *sd,char *mapname,
 }
 
 /*==========================================
- * mobのadelay所得
+ * mobの見かけ所得
  *------------------------------------------
  */
-static int mob_get_adelay(struct mob_data *md)
+int mob_get_viewclass(struct mob_data *md)
 {
-	int a=mob_db[md->class].adelay;
-	if( md->sc_data[SC_ADRENALINE].timer!=-1)	// アドレナリンラッシュ
-		a = a *70/100;
-	if( md->sc_data[SC_TWOHANDQUICKEN].timer!=-1)	// 2HQ
-		a = a *70/100;
-	return a;
-}
-/*==========================================
- * mobのspeed所得
- *------------------------------------------
- */
-int mob_get_speed(struct mob_data *md)
-{
-	int a=mob_db[md->class].speed;
-
-	if(md->sc_data[SC_INCREASEAGI].timer!=-1)	// 速度増加
-		a -= a*25/100;
-	if(md->sc_data[SC_DECREASEAGI].timer!=-1)	// 速度減少
-		a = a*125/100;
-	if(md->sc_data[SC_QUAGMIRE].timer!=-1)	// クァグマイア(AGI/DEXはbattle.cで)
-		a = a*3/2;
-
-	return md->speed=a;
+	return mob_db[md->class].view_class;
 }
 
 /*==========================================
@@ -231,8 +213,8 @@ static int calc_next_walk_step(struct mob_data *md)
 	if(md->walkpath.path_pos>=md->walkpath.path_len)
 		return -1;
 	if(md->walkpath.path[md->walkpath.path_pos]&1)
-		return mob_get_speed(md)*14/10;
-	return mob_get_speed(md);
+		return battle_get_speed(&md->bl)*14/10;
+	return battle_get_speed(&md->bl);
 }
 
 static int mob_walktoxy_sub(struct mob_data *md);
@@ -358,6 +340,8 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 	}
 	md->dir=map_calc_dir(&md->bl, sd->bl.x,sd->bl.y );	// 向き設定
 
+	md->to_x = md->bl.x;
+	md->to_y = md->bl.y;
 	clif_fixmobpos(md);
 
 	if( mobskill_use(md,tick,-2) )	// スキル使用
@@ -365,7 +349,7 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 
 	battle_weapon_attack(&md->bl,&sd->bl,tick,0);
 
-	md->attackabletime = tick + mob_get_adelay(md);
+	md->attackabletime = tick + battle_get_adelay(&md->bl);
 
 	md->timer=add_timer(md->attackabletime,mob_timer,md->bl.id,0);
 	md->state.state=MS_ATTACK;
@@ -424,11 +408,13 @@ int mob_changestate(struct mob_data *md,int state,int type)
 		md->timer=add_timer(gettick()+type,mob_timer,md->bl.id,0);
 		break;
 	case MS_DEAD:
-		mobskill_deltimer(md);
+		skill_castcancel(&md->bl,0);
+//		mobskill_deltimer(md);
 		md->state.skillstate=MSS_DEAD;
 		md->last_deadtime=gettick();
 		// 死んだのでこのmobへの攻撃者全員の攻撃を止める
 		clif_foreachclient(mob_stopattacked,md->bl.id);
+		skill_unit_out_all(&md->bl,gettick(),1);
 		skill_status_change_clear(&md->bl);	// ステータス異常を解除する
 		skill_clear_unitgroup(&md->bl);	// 全てのスキルユニットグループを削除する
 		skill_cleartimerskill(&md->bl);
@@ -454,13 +440,15 @@ static int mob_timer(int tid,unsigned int tick,int id,int data)
 		return 1;
 
 	if(md->timer != tid){
-		printf("mob_timer %d != %d\n",md->timer,tid);
+		if(battle_config.error_log)
+			printf("mob_timer %d != %d\n",md->timer,tid);
 		return 0;
 	}
 	md->timer=-1;
 	if(md->bl.prev == NULL || md->state.state == MS_DEAD)
 		return 1;
 
+	map_freeblock_lock();
 	switch(md->state.state){
 	case MS_WALK:
 		mob_walk(md,tick,data);
@@ -472,9 +460,11 @@ static int mob_timer(int tid,unsigned int tick,int id,int data)
 		mob_changestate(md,MS_IDLE,0);
 		break;
 	default:
-		printf("mob_timer : %d ?\n",md->state.state);
+		if(battle_config.error_log)
+			printf("mob_timer : %d ?\n",md->state.state);
+		break;
 	}
-
+	map_freeblock_unlock();
 	return 0;
 }
 
@@ -493,8 +483,6 @@ static int mob_walktoxy_sub(struct mob_data *md)
 	md->state.change_walk_target=0;
 	mob_changestate(md,MS_WALK,0);
 	clif_movemob(md);
-
-//	printf("walkstart\n");
 
 	return 0;
 }
@@ -606,7 +594,8 @@ int mob_spawn(int id)
 	} while(((c=map_getcell(md->bl.m,x,y))==1 || c==5) && i<50);
 
 	if(i>=50){
-//		printf("MOB spawn error %d @ %s\n",id,map[md->bl.m].name);
+//		if(battle_config.error_log)
+//			printf("MOB spawn error %d @ %s\n",id,map[md->bl.m].name);
 		add_timer(tick+5000,mob_delayspawn,id,0);
 		return 1;
 	}
@@ -699,13 +688,12 @@ int mob_stopattack(struct mob_data *md)
 int mob_stop_walking(struct mob_data *md,int type)
 {
 	if(md->state.state == MS_WALK) {
-//	printf("stop walking\n");
 		md->walkpath.path_len=0;
 		md->to_x=md->bl.x;
 		md->to_y=md->bl.y;
 		mob_changestate(md,MS_IDLE,0);
 		if(type&0x01)
-			clif_fixpos(&md->bl);
+			clif_fixmobpos(md);
 	}
 	if(type&0x02) {
 		int delay=mob_db[md->class].dmotion;
@@ -727,10 +715,12 @@ int mob_can_reach(struct mob_data *md,struct block_list *bl,int range)
 {
 	int dx=abs(bl->x - md->bl.x),dy=abs(bl->y - md->bl.y);
 	struct walkpath_data wpd;
-	if( range>0 && range < ((dx>dy)?dx:dy) )	// 遠すぎる
-		return 0;
+	int i;
 
 	if( md->bl.m != bl-> m)	// 違うマップ
+		return 0;
+	
+	if( range>0 && range < ((dx>dy)?dx:dy) )	// 遠すぎる
 		return 0;
 
 	if( md->bl.x==bl->x && md->bl.y==bl->y )	// 同じマス
@@ -740,7 +730,21 @@ int mob_can_reach(struct mob_data *md,struct block_list *bl,int range)
 	wpd.path_len=0;
 	wpd.path_pos=0;
 	wpd.path_half=0;
-	return (path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,bl->x,bl->y,0)!=-1)?1:0;
+	if(path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,bl->x,bl->y,0)!=-1)
+		return 1;
+	if(bl->type!=BL_PC && bl->type!=BL_MOB)
+		return 0;
+
+	// 隣接可能かどうか判定
+	dx=(dx>0)?1:((dx<0)?-1:0);
+	dy=(dy>0)?1:((dy<0)?-1:0);
+	if(path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,bl->x-dx,bl->y-dy,0)!=-1)
+		return 1;
+	for(i=0;i<9;i++){
+		if(path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,bl->x-1+i/3,bl->y-1+i%3,0)!=-1)
+			return 1;
+	}
+	return 0;
 }
 
 /*==========================================
@@ -921,7 +925,7 @@ static int mob_ai_sub_hard_mastersearch(struct block_list *bl,va_list ap)
 	md->master_dist=distance(md->bl.x,md->bl.y,mmd->bl.x,mmd->bl.y);
 
 	// 直前まで主が近くにいたのでテレポートして追いかける
-	if( old_dist<6 && md->master_dist>15){
+	if( old_dist<10 && md->master_dist>18){
 		mob_warp(md,mmd->bl.x,mmd->bl.y,3);
 		md->state.master_check = 1;
 		return 0;
@@ -1028,7 +1032,7 @@ static int mob_unlocktarget(struct mob_data *md,int tick)
 static int mob_randomwalk(struct mob_data *md,int tick)
 {
 	const int retrycount=20;
-	int speed=mob_get_speed(md);
+	int speed=battle_get_speed(&md->bl);
 	if(DIFF_TICK(md->next_walktime,tick)<0){
 		int i,x,y,c,d=12-md->move_fail_count;
 		if(d<5) d=5;
@@ -1043,7 +1047,8 @@ static int mob_randomwalk(struct mob_data *md,int tick)
 			if(i+1>=retrycount){
 				md->move_fail_count++;
 				if(md->move_fail_count>1000){
-					printf("MOB cant move. random spawn %d, class = %d\n",md->bl.id,md->class);
+					if(battle_config.error_log)
+						printf("MOB cant move. random spawn %d, class = %d\n",md->bl.id,md->class);
 					md->move_fail_count=0;
 					mob_spawn(md->bl.id);
 				}
@@ -1175,7 +1180,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 			// スキルなどによる策敵妨害
 				mob_unlocktarget(md,tick);
 
-			} else if(!battle_check_range(&md->bl,sd->bl.x,sd->bl.y,mob_db[md->class].range)){
+			} else if(!battle_check_range(&md->bl,&sd->bl,mob_db[md->class].range)){
 
 				// 攻撃範囲外なので移動
 				if(!(mode&1)){	// 移動しないモード
@@ -1518,7 +1523,7 @@ int mob_deleteslave_sub(struct block_list *bl,va_list ap)
 	int id;
 	id=va_arg(ap,int);
 	if(md->master_id > 0 && md->master_id == id )
-		mob_damage(NULL,md,md->hp);
+		mob_damage(NULL,md,md->hp,1);
 	return 0;
 }
 /*==========================================
@@ -1537,7 +1542,7 @@ int mob_deleteslave(struct mob_data *md)
  * mdにsdからdamageのダメージ
  *------------------------------------------
  */
-int mob_damage(struct block_list *src,struct mob_data *md,int damage)
+int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 {
 	int i,sum,count,minpos,mindmg;
 	struct map_session_data *sd = NULL,*tmpsd[DAMAGELOG_SIZE];
@@ -1554,9 +1559,12 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 		mvp_sd = sd;
 	}
 
-//	printf("mob_damage %d %d %d\n",md->hp,mob_db[md->class].max_hp,damage);
+//	if(battle_config.battle_log)
+//		printf("mob_damage %d %d %d\n",md->hp,mob_db[md->class].max_hp,damage);
 	if(md->bl.prev==NULL){
-		printf("mob_damage : BlockError!!\n");return 0;
+		if(battle_config.error_log)
+			printf("mob_damage : BlockError!!\n");
+		return 0;
 	}
 
 	if(md->state.state==MS_DEAD || md->hp<=0) {
@@ -1570,11 +1578,8 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 		return 0;
 	}
 
-	if(md->state.state==MS_WALK){
-//		mob_changestate(md,MS_IDLE,0);
-//		clif_fixpos(&md->bl);
+	if(md->sc_data[SC_ENDURE].timer == -1)
 		mob_stop_walking(md,3);
-	}
 
 	if(md->hp>mob_db[md->class].max_hp)
 		md->hp=mob_db[md->class].max_hp;
@@ -1583,60 +1588,62 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 	if(damage>md->hp)
 		damage=md->hp;
 
-	if(sd!=NULL){
-		for(i=0,minpos=0,mindmg=30000;i<DAMAGELOG_SIZE;i++){
-			if(md->dmglog[i].id==sd->bl.id)
-				break;
-			if(md->dmglog[i].id==0){
-				minpos=i;
-				mindmg=0;
-			} else if(md->dmglog[i].dmg<mindmg){
-				minpos=i;
-				mindmg=md->dmglog[i].dmg;
+	if(!(type&2)) {
+		if(sd!=NULL){
+			for(i=0,minpos=0,mindmg=30000;i<DAMAGELOG_SIZE;i++){
+				if(md->dmglog[i].id==sd->bl.id)
+					break;
+				if(md->dmglog[i].id==0){
+					minpos=i;
+					mindmg=0;
+				}
+				else if(md->dmglog[i].dmg<mindmg){
+					minpos=i;
+					mindmg=md->dmglog[i].dmg;
+				}
 			}
-		}
-		if(i<DAMAGELOG_SIZE)
-			md->dmglog[i].dmg+=damage;
-		else {
-			md->dmglog[minpos].id=sd->bl.id;
-			md->dmglog[minpos].dmg=damage;
-		}
+			if(i<DAMAGELOG_SIZE)
+				md->dmglog[i].dmg+=damage;
+			else {
+				md->dmglog[minpos].id=sd->bl.id;
+				md->dmglog[minpos].dmg=damage;
+			}
 
-		if(md->attacked_id <= 0)
-			md->attacked_id = sd->bl.id;
-	}
-	if(src && src->type == BL_PET && battle_config.pet_attack_exp_to_master) {
-		struct pet_data *pd = (struct pet_data *)src;
-		for(i=0,minpos=0,mindmg=30000;i<DAMAGELOG_SIZE;i++){
-			if(md->dmglog[i].id==pd->msd->bl.id)
-				break;
-			if(md->dmglog[i].id==0){
-				minpos=i;
-				mindmg=0;
-			} else if(md->dmglog[i].dmg<mindmg){
-				minpos=i;
-				mindmg=md->dmglog[i].dmg;
-			}
+			if(md->attacked_id <= 0)
+				md->attacked_id = sd->bl.id;
 		}
-		if(i<DAMAGELOG_SIZE)
-			md->dmglog[i].dmg+=damage;
-		else {
-			md->dmglog[minpos].id=pd->msd->bl.id;
-			md->dmglog[minpos].dmg=damage;
+		if(src && src->type == BL_PET && battle_config.pet_attack_exp_to_master) {
+			struct pet_data *pd = (struct pet_data *)src;
+			for(i=0,minpos=0,mindmg=30000;i<DAMAGELOG_SIZE;i++){
+				if(md->dmglog[i].id==pd->msd->bl.id)
+					break;
+				if(md->dmglog[i].id==0){
+					minpos=i;
+					mindmg=0;
+				}
+				else if(md->dmglog[i].dmg<mindmg){
+					minpos=i;
+					mindmg=md->dmglog[i].dmg;
+				}
+			}
+			if(i<DAMAGELOG_SIZE)
+				md->dmglog[i].dmg+=damage;
+			else {
+				md->dmglog[minpos].id=pd->msd->bl.id;
+				md->dmglog[minpos].dmg=damage;
+			}
 		}
 	}
 
 	md->hp-=damage;
-	//printf("%d : %d/%d\n",md->bl.id,md->hp,mob_db[md->class].max_hp);
-
 
 	if(md->hp>0){
-
 		return 0;
 	}
 
 	// ----- ここから死亡処理 -----
 
+	map_freeblock_lock();
 	mob_changestate(md,MS_DEAD,0);
 	mobskill_use(md,gettick(),-1);	// 死亡時スキル
 
@@ -1706,74 +1713,76 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 		party_exp_share(pt[i].p,md->bl.m,pt[i].base_exp,pt[i].job_exp);
 
 	// item drop
-	for(i=0;i<8;i++){
-		struct delay_item_drop *ditem;
-		int drop_rate;
-
-		if(mob_db[md->class].dropitem[i].nameid <= 0)
-			continue;
-		drop_rate = mob_db[md->class].dropitem[i].p;
-		if(drop_rate <= 0 && battle_config.drop_rate0item)
-			drop_rate = 1;
-		if(drop_rate <= rand()%10000)
-			continue;
-
-		ditem=malloc(sizeof(*ditem));
-		if(ditem==NULL){
-			printf("out of memory : mob_damage\n");
-			exit(1);
-		}
-
-		ditem->nameid=mob_db[md->class].dropitem[i].nameid;
-		ditem->amount=1;
-		ditem->m=md->bl.m;
-		ditem->x=md->bl.x;
-		ditem->y=md->bl.y;
-		add_timer(gettick()+500+i,mob_delay_item_drop,(int)ditem,0);
-	}
-	if(sd && sd->state.attack_type == BF_WEAPON) {
-		for(i=0;i<sd->monster_drop_item_count;i++) {
+	if(!(type&1)) {
+		for(i=0;i<8;i++){
 			struct delay_item_drop *ditem;
-			int race = battle_get_race(&md->bl);
-			if(sd->monster_drop_itemid[i] <= 0)
+			int drop_rate;
+
+			if(mob_db[md->class].dropitem[i].nameid <= 0)
 				continue;
-			if(sd->monster_drop_race[i] & (1<<race) || 
-				(mob_db[md->class].mexp > 0 && sd->monster_drop_race[i] & 1<<10) ||
-				(mob_db[md->class].mexp <= 0 && sd->monster_drop_race[i] & 1<<11) ) {
-				if(sd->monster_drop_itemrate[i] <= rand()%10000)
-					continue;
-
-				ditem=malloc(sizeof(*ditem));
-				if(ditem==NULL){
-					printf("out of memory : mob_damage\n");
-					exit(1);
-				}
-
-				ditem->nameid=sd->monster_drop_itemid[i];
-				ditem->amount=1;
-				ditem->m=md->bl.m;
-				ditem->x=md->bl.x;
-				ditem->y=md->bl.y;
-				add_timer(gettick()+520+i,mob_delay_item_drop,(int)ditem,0);
-			}
-		}
-		if(sd->get_zeny_num > 0)
-			pc_getzeny(sd,mob_db[md->class].lv*10 + rand()%(sd->get_zeny_num+1));
-	}
-	if(md->lootitem) {
-		for(i=0;i<md->lootitem_count;i++) {
-			struct delay_item_drop2 *ditem;
+			drop_rate = mob_db[md->class].dropitem[i].p;
+			if(drop_rate <= 0 && battle_config.drop_rate0item)
+				drop_rate = 1;
+			if(drop_rate <= rand()%10000)
+				continue;
 
 			ditem=malloc(sizeof(*ditem));
 			if(ditem==NULL){
 				printf("out of memory : mob_damage\n");
 				exit(1);
 			}
-			memcpy(&ditem->item_data,&md->lootitem[i],sizeof(md->lootitem[0]));
+
+			ditem->nameid=mob_db[md->class].dropitem[i].nameid;
+			ditem->amount=1;
 			ditem->m=md->bl.m;
 			ditem->x=md->bl.x;
 			ditem->y=md->bl.y;
-			add_timer(gettick()+540+i,mob_delay_item_drop2,(int)ditem,0);
+			add_timer(gettick()+500+i,mob_delay_item_drop,(int)ditem,0);
+		}
+		if(sd && sd->state.attack_type == BF_WEAPON) {
+			for(i=0;i<sd->monster_drop_item_count;i++) {
+				struct delay_item_drop *ditem;
+				int race = battle_get_race(&md->bl);
+				if(sd->monster_drop_itemid[i] <= 0)
+					continue;
+				if(sd->monster_drop_race[i] & (1<<race) || 
+					(mob_db[md->class].mexp > 0 && sd->monster_drop_race[i] & 1<<10) ||
+					(mob_db[md->class].mexp <= 0 && sd->monster_drop_race[i] & 1<<11) ) {
+					if(sd->monster_drop_itemrate[i] <= rand()%10000)
+						continue;
+
+					ditem=malloc(sizeof(*ditem));
+					if(ditem==NULL){
+						printf("out of memory : mob_damage\n");
+						exit(1);
+					}
+
+					ditem->nameid=sd->monster_drop_itemid[i];
+					ditem->amount=1;
+					ditem->m=md->bl.m;
+					ditem->x=md->bl.x;
+					ditem->y=md->bl.y;
+					add_timer(gettick()+520+i,mob_delay_item_drop,(int)ditem,0);
+				}
+			}
+			if(sd->get_zeny_num > 0)
+				pc_getzeny(sd,mob_db[md->class].lv*10 + rand()%(sd->get_zeny_num+1));
+		}
+		if(md->lootitem) {
+			for(i=0;i<md->lootitem_count;i++) {
+				struct delay_item_drop2 *ditem;
+
+				ditem=malloc(sizeof(*ditem));
+				if(ditem==NULL){
+					printf("out of memory : mob_damage\n");
+					exit(1);
+				}
+				memcpy(&ditem->item_data,&md->lootitem[i],sizeof(md->lootitem[0]));
+				ditem->m=md->bl.m;
+				ditem->x=md->bl.x;
+				ditem->y=md->bl.y;
+				add_timer(gettick()+540+i,mob_delay_item_drop2,(int)ditem,0);
+			}
 		}
 	}
 
@@ -1812,14 +1821,35 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 	}
 
 	if(md->npc_event[0]){	// SCRIPT実行
-//		printf("mob_damage : run event : %s\n",md->npc_event);
-		npc_event(sd,md->npc_event);
+//		if(battle_config.battle_log)
+//			printf("mob_damage : run event : %s\n",md->npc_event);
+		if(src && src->type == BL_PET)
+			sd = ((struct pet_data *)src)->msd;
+		if(sd == NULL) {
+			if(mvp_sd != NULL)
+				sd = mvp_sd;
+			else {
+				struct map_session_data *tmpsd;
+				int i;
+				for(i=0;i<fd_max;i++){
+					if(session[i] && (tmpsd=session[i]->session_data) && tmpsd->state.auth) {
+						if(md->bl.m == tmpsd->bl.m) {
+							sd = tmpsd;
+							break;
+						}
+					}
+				}
+			}
+		}
+		if(sd)
+			npc_event(sd,md->npc_event);
 	}
 
 	clif_clearchar_area(&md->bl,1);
 	map_delblock(&md->bl);
 	mob_deleteslave(md);
 	mob_setdelayspawn(md->bl.id);
+	map_freeblock_unlock();
 
 	return 0;
 }
@@ -1869,8 +1899,10 @@ int mob_warp(struct mob_data *md,int x,int y,int type)
 	if(i<1000){
 		md->bl.x=x;
 		md->bl.y=y;
-	}else
-		printf("MOB %d warp failed, class = %d\n",md->bl.id,md->class);
+	}else {
+		if(battle_config.error_log)
+			printf("MOB %d warp failed, class = %d\n",md->bl.id,md->class);
+	}
 
 	md->target_id=0;	// タゲを解除する
 	md->state.targettype=NONE_ATTACKABLE;
@@ -1878,8 +1910,10 @@ int mob_warp(struct mob_data *md,int x,int y,int type)
 	md->state.state=MS_IDLE;
 	md->state.skillstate=MSS_IDLE;
 
-	if(type>0 && i==1000)
-		printf("MOB %d warp to (%d,%d), class = %d\n",md->bl.id,x,y,md->class);
+	if(type>0 && i==1000) {
+		if(battle_config.battle_log)
+			printf("MOB %d warp to (%d,%d), class = %d\n",md->bl.id,x,y,md->class);
+	}
 
 	map_addblock(&md->bl);
 	if(type>0)
@@ -1930,12 +1964,13 @@ int mob_summonslave(struct mob_data *md2,int class,int amount,int flag)
 		md=malloc(sizeof(struct mob_data));
 		if(md==NULL){
 			printf("mob_once_spawn: out of memory !\n");
-			return 0;
+			exit(1);
 		}
 		if(mob_db[class].mode&0x02) {
 			md->lootitem=malloc(sizeof(struct item)*LOOTITEM_SIZE);
 			if(md->lootitem==NULL){
 				printf("mob_once_spawn: out of memory !\n");
+				exit(1);
 			}
 		}
 		else
@@ -2017,7 +2052,7 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 	if( md->skilltimer != tid )	// タイマIDの確認
 		return 0;
 	md->skilltimer=-1;
-	md->last_thinktime=tick + mob_get_adelay(md);
+	md->last_thinktime=tick + battle_get_adelay(&md->bl);
 
 	bl=map_id2bl(md->skilltarget);
 	if(bl==NULL || bl->prev==NULL)
@@ -2028,7 +2063,8 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 		return 0;
 	md->skilldelay[md->skillidx]=tick;
 
-	printf("MOB skill castend skill=%d, class = %d\n",md->skillid,md->class);
+	if(battle_config.mob_skill_log)
+		printf("MOB skill castend skill=%d, class = %d\n",md->skillid,md->class);
 
 	switch( skill_get_nk(md->skillid) )
 	{
@@ -2067,7 +2103,8 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 		return 0;
 	md->skilldelay[md->skillidx]=tick;
 
-	printf("MOB skill castend skill=%d, class = %d\n",md->skillid,md->class);
+	if(battle_config.mob_skill_log)
+		printf("MOB skill castend skill=%d, class = %d\n",md->skillid,md->class);
 
 	skill_castend_pos2(&md->bl,md->skillx,md->skilly,md->skillid,md->skilllv,tick,0);
 
@@ -2096,7 +2133,7 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 		return 0;
 	
 	// 射程と障害物チェック
-	if(!battle_check_range(&md->bl,target->x,target->y,skill_get_range(skill_id)))
+	if(!battle_check_range(&md->bl,target,skill_get_range(skill_id)))
 		return 0;
 
 //	casttime=skill_castfix(&md->bl, skill_get_cast( skill_id,skill_lv) );
@@ -2107,8 +2144,8 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	md->state.skillcastcancel=ms->cancel;
 	md->skilldelay[skill_idx]=gettick();
 
-	printf("MOB skill use target_id=%d skill=%d lv=%d cast=%d, class = %d\n"
-		,target->id,skill_id,skill_lv,casttime,md->class);
+	if(battle_config.mob_skill_log)
+		printf("MOB skill use target_id=%d skill=%d lv=%d cast=%d, class = %d\n",target->id,skill_id,skill_lv,casttime,md->class);
 
 	if( casttime>0 ){ 	// 詠唱が必要
 		struct mob_data *md2;
@@ -2155,6 +2192,7 @@ int mobskill_use_pos( struct mob_data *md,
 {
 	int casttime=0;
 	struct mob_skill *ms=&mob_db[md->class].skill[skill_idx];
+	struct block_list bl;
 	int skill_num=ms->skill_id, skill_lv=ms->skill_lv;
 
 	if( md->bl.prev==NULL )
@@ -2164,7 +2202,11 @@ int mobskill_use_pos( struct mob_data *md,
 		return 0;	// 異常や沈黙など
 
 	// 射程と障害物チェック
-	if(!battle_check_range(&md->bl,skill_x,skill_y,skill_get_range(skill_num)))
+	bl.type = BL_NUL;
+	bl.m = md->bl.m;
+	bl.x = skill_x;
+	bl.y = skill_y;
+	if(!battle_check_range(&md->bl,&bl,skill_get_range(skill_num)))
 		return 0;
 
 //	casttime=skill_castfix(&sd->bl, skill_get_cast( skill_num,skill_lv) );
@@ -2173,8 +2215,9 @@ int mobskill_use_pos( struct mob_data *md,
 	md->skilldelay[skill_idx]=gettick();
 	md->state.skillcastcancel=ms->cancel;
 
-	printf("MOB skill use target_pos=(%d,%d) skill=%d lv=%d cast=%d, class = %d\n",
-		skill_x,skill_y,skill_num,skill_lv,casttime,md->class);
+	if(battle_config.mob_skill_log)
+		printf("MOB skill use target_pos=(%d,%d) skill=%d lv=%d cast=%d, class = %d\n",
+			skill_x,skill_y,skill_num,skill_lv,casttime,md->class);
 
 	if( casttime>0 )	// 詠唱が必要
 		clif_skillcasting( &md->bl,
@@ -2384,7 +2427,6 @@ static int mob_readdb(void)
 		if(fp==NULL){
 			if(i>0)
 				continue;
-			printf("can't read %s\n",filename[i]);
 			return -1;
 		}
 		while(fgets(line,1020,fp)){
@@ -2407,6 +2449,7 @@ static int mob_readdb(void)
 			if(class<=1000 || class>2000)
 				continue;
 	
+			mob_db[class].view_class=class;
 			memcpy(mob_db[class].name,str[1],24);
 			memcpy(mob_db[class].jname,str[2],24);
 			mob_db[class].lv=atoi(str[3]);
@@ -2466,6 +2509,52 @@ static int mob_readdb(void)
 	}
 	return 0;
 }
+
+/*==========================================
+ * MOB表示グラフィックの変更
+ *------------------------------------------
+ */
+static int mob_readdb_mobavail(void)
+{
+	FILE *fp;
+	char line[1024];
+	int ln=0;
+	int class,j,k;
+	char *str[10],*p;
+	
+	if( (fp=fopen("db/mob_avail.txt","r"))==NULL ){
+		printf("can't read db/mob_avail.txt\n");
+		return -1;
+	}
+	
+	while(fgets(line,1020,fp)){
+		if(line[0]=='/' && line[1]=='/')
+			continue;
+		memset(str,0,sizeof(str));
+		for(j=0,p=line;j<2 && p;j++){
+			str[j]=p;
+			p=strchr(p,',');
+			if(p) *p++=0;
+		}
+
+		if(str[0]==NULL)
+			continue;
+
+		class=atoi(str[0]);
+		
+		if(class<=1000 || class>2000)	// 値が異常なら処理しない。
+			continue;
+		k=atoi(str[1]);
+		if(k >= 0) {
+			mob_db[class].view_class=k;
+		}
+		ln++;
+	}
+	fclose(fp);
+	printf("read db/mob_avail.txt done (count=%d)\n",ln);
+	return 0;
+}
+
 /*==========================================
  * ランダムモンスターデータの読み込み
  *------------------------------------------
@@ -2543,67 +2632,80 @@ static int mob_readskilldb(void)
 		{	"skillused",		MSC_SKILLUSED			},
 		{	"casttargeted",		MSC_CASTTARGETED		},
 	};
+	int x;
+	char *filename[]={ "db/mob_skill_db.txt","db/mob_skill_db2.txt" };
 
-	fp=fopen("db/mob_skill_db.txt","r");
-	if(fp==NULL){
-		printf("can't read db/mob_skill_db.txt\n");
-		return 0;
-	}
-	while(fgets(line,1020,fp)){
-		char *sp[16],*p;
-		int mob_id;
-		struct mob_skill *ms;
-
-		if(line[0] == '/' && line[1] == '/')
-			continue;
-
-		memset(sp,0,sizeof(sp));
-		for(i=0,p=line;i<13 && p;i++){
-			sp[i]=p;
-			if((p=strchr(p,','))!=NULL)
-				*p++=0;
-		}
-		if( (mob_id=atoi(sp[0]))<=0 )
-			continue;
+	for(x=0;x<2;x++){
 	
-		for(i=0;i<MAX_MOBSKILL;i++)
-			if( (ms=&mob_db[mob_id].skill[i])->skill_id == 0)
-				break;
-		if(i==MAX_MOBSKILL){
-			printf("mob_skill: readdb: too many skill ! [%s] in %d[%s]\n",
-				sp[1],mob_id,mob_db[mob_id].jname);
+		fp=fopen(filename[x],"r");
+		if(fp==NULL){
+			if(x==0)
+				printf("can't read %s\n",filename[x]);
 			continue;
 		}
+		while(fgets(line,1020,fp)){
+			char *sp[16],*p;
+			int mob_id;
+			struct mob_skill *ms;
+			int j=0;
 	
-		ms->state=atoi(sp[2]);
-		if( strcmp(sp[2],"any")==0 ) ms->state=-1;
-		if( strcmp(sp[2],"idle")==0 ) ms->state=MSS_IDLE;
-		if( strcmp(sp[2],"walk")==0 ) ms->state=MSS_WALK;
-		if( strcmp(sp[2],"attack")==0 ) ms->state=MSS_ATTACK;
-		if( strcmp(sp[2],"dead")==0 ) ms->state=MSS_DEAD;
-		if( strcmp(sp[2],"loot")==0 ) ms->state=MSS_LOOT;
-		if( strcmp(sp[2],"chase")==0 ) ms->state=MSS_CHASE;
-		ms->skill_id=atoi(sp[3]);
-		ms->skill_lv=atoi(sp[4]);
-		ms->permillage=atoi(sp[5]);
-		ms->casttime=atoi(sp[6]);
-		ms->delay=atoi(sp[7]);
-		ms->cancel=atoi(sp[8]);
-		if( strcmp(sp[8],"yes")==0 ) ms->cancel=1;
-		ms->target=atoi(sp[9]);
-		if( strcmp(sp[9],"self")==0 )ms->target=MST_SELF;
-		if( strcmp(sp[9],"target")==0 )ms->target=MST_TARGET;
-		ms->cond1=-1;
-		for(i=0;i<sizeof(cond1)/sizeof(cond1[0]);i++){
-			if( strcmp(sp[10],cond1[i].str)==0)
-				ms->cond1=cond1[i].id;
+			if(line[0] == '/' && line[1] == '/')
+				continue;
+	
+			memset(sp,0,sizeof(sp));
+			for(i=0,p=line;i<13 && p;i++){
+				sp[i]=p;
+				if((p=strchr(p,','))!=NULL)
+					*p++=0;
+			}
+			if( (mob_id=atoi(sp[0]))<=0 )
+				continue;
+			
+			if( strcmp(sp[1],"clear")==0 ){
+				memset(mob_db[mob_id].skill,0,sizeof(mob_db[mob_id].skill));
+				mob_db[mob_id].maxskill=0;
+				continue;
+			}
+		
+			for(i=0;i<MAX_MOBSKILL;i++)
+				if( (ms=&mob_db[mob_id].skill[i])->skill_id == 0)
+					break;
+			if(i==MAX_MOBSKILL){
+				printf("mob_skill: readdb: too many skill ! [%s] in %d[%s]\n",
+					sp[1],mob_id,mob_db[mob_id].jname);
+				continue;
+			}
+		
+			ms->state=atoi(sp[2]);
+			if( strcmp(sp[2],"any")==0 ) ms->state=-1;
+			if( strcmp(sp[2],"idle")==0 ) ms->state=MSS_IDLE;
+			if( strcmp(sp[2],"walk")==0 ) ms->state=MSS_WALK;
+			if( strcmp(sp[2],"attack")==0 ) ms->state=MSS_ATTACK;
+			if( strcmp(sp[2],"dead")==0 ) ms->state=MSS_DEAD;
+			if( strcmp(sp[2],"loot")==0 ) ms->state=MSS_LOOT;
+			if( strcmp(sp[2],"chase")==0 ) ms->state=MSS_CHASE;
+			ms->skill_id=atoi(sp[3]);
+			ms->skill_lv=atoi(sp[4]);
+			ms->permillage=atoi(sp[5]);
+			ms->casttime=atoi(sp[6]);
+			ms->delay=atoi(sp[7]);
+			ms->cancel=atoi(sp[8]);
+			if( strcmp(sp[8],"yes")==0 ) ms->cancel=1;
+			ms->target=atoi(sp[9]);
+			if( strcmp(sp[9],"self")==0 )ms->target=MST_SELF;
+			if( strcmp(sp[9],"target")==0 )ms->target=MST_TARGET;
+			ms->cond1=-1;
+			for(j=0;j<sizeof(cond1)/sizeof(cond1[0]);j++){
+				if( strcmp(sp[10],cond1[j].str)==0)
+					ms->cond1=cond1[j].id;
+			}
+			ms->cond2=atoi(sp[11]);
+			ms->val1=atoi(sp[12]);
+			mob_db[mob_id].maxskill=i+1;
 		}
-		ms->cond2=atoi(sp[11]);
-		ms->val1=atoi(sp[12]);
-		mob_db[mob_id].maxskill=i+1;
+		fclose(fp);
+		printf("read %s done\n",filename[x]);
 	}
-	fclose(fp);
-	printf("read db/mob_skill_db.txt done\n");
 	return 0;
 }
 /*==========================================
@@ -2613,6 +2715,7 @@ static int mob_readskilldb(void)
 int do_init_mob(void)
 {
 	mob_readdb();
+	mob_readdb_mobavail();
 	mob_read_randommonster();
 	mob_readskilldb();
 

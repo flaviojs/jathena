@@ -1,4 +1,39 @@
 --------------
+//0733 by 死神
+
+・バグ修正と細かい修正。
+・死んだ後にすぐにセーブポイントに戻らずにしばらく放置してると、
+放置してる時間によって経験値が減少するバグ修正。(未テスト)
+・mob_availe.txtで設定したモンスターにモンスター情報を使うち鞍落ちする問題修正。
+・battle_athena.confに項目追加。
+・その他細かい修正。
+	(conf/)
+	battle_athena.conf
+	(doc/)
+	conf_ref.txt
+	(map/)
+	clif.c
+		clif_skill_estimation()
+		clif_parse_Restart()
+	pc.c
+		pc_setrestartvalue()
+		pc_makesavestatus()
+		pc_read_gm_account()
+		pc_calc_skilltree()
+		pc_calc_skillpoint() add
+	map.c
+		map_quit()
+	mob.c
+		mob_damage()
+	skill.c
+		skill_unit_timer_sub()
+		skill_unit_timer()
+	battle.h
+	battle.c
+		battle_config_read()
+
+
+--------------
 //0732 by Kalen
 
 ・npc_town_kafra.txtの全面見直し
