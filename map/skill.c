@@ -52,7 +52,7 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	-1,-1,-1,-1,-1,-1,-1,-1,
 /* 60- */
 	SC_TWOHANDQUICKEN,	/* 2HQ */
-	-1,-1,-1,-1,-1,
+	SC_AUTOCOUNTER,-1,-1,-1,-1,
 	SC_IMPOSITIO,		/* インポシティオマヌス */
 	SC_SUFFRAGIUM,		/* サフラギウム */
 	SC_ASPERSIO,		/* アスペルシオ */
@@ -1445,6 +1445,11 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		if(skillid==SM_PROVOKE && bl->type==BL_MOB)
 			mob_target((struct mob_data *)bl,src,skill_get_range(skillid));
 		break;
+	case KN_AUTOCOUNTER:	/* オートカウンター */
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		skill_status_change_start( bl,
+			SkillStatusChangeTable[skillid], skilllv, 0 );
+			break;
 	case MO_CALLSPIRITS:	// 気功
 		if(sd) {
 			clif_skill_nodamage(src,bl,skillid,skilllv,1);
@@ -4393,6 +4398,10 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 					val2 += (t < 0)? 1:t;
 				}
 			}
+			break;
+		case SC_AUTOCOUNTER:
+			//0.4秒*SkillLv
+			tick = 400*val1;
 			break;
 
 		case SC_DEFENDER:

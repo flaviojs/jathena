@@ -3042,6 +3042,7 @@ int pc_checkequip(struct map_session_data *sd,int pos)
 int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 {
 	struct map_session_data *sd;
+	struct status_change *sc_data;
 	struct block_list *bl;
 //	struct WeaponDamage wd;
 	int dist,skill,range;
@@ -3096,7 +3097,15 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 		if(sd->sc_data[SC_COMBO].timer == -1) {
 			map_freeblock_lock();
 			pc_stop_walking(sd,0);
-			battle_weapon_attack(&sd->bl,bl,tick,0);
+			sc_data = battle_get_sc_data(bl);
+			//オートカウンター
+			if(sc_data && sc_data[SC_AUTOCOUNTER].timer != -1)
+			{
+				battle_weapon_attack(bl,&sd->bl,tick,0);
+				skill_status_change_end(bl,SC_AUTOCOUNTER,-1);
+			}
+			else
+				battle_weapon_attack(&sd->bl,bl,tick,0);
 			if(sd->status.pet_id > 0 && sd->pd && sd->petDB)
 				pet_target_check(sd,bl,0);
 			map_freeblock_unlock();
@@ -3187,6 +3196,11 @@ int pc_checkbaselevelup(struct map_session_data *sd)
 		pc_heal(sd,sd->status.max_hp,sd->status.max_sp);
 
 		clif_misceffect(&sd->bl,0);
+
+		//レベルアップしたのでパーティー情報を更新する
+		//(公平範囲チェック)
+		party_send_movemap(sd);
+
 		return 1;
 	}
 

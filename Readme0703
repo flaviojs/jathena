@@ -1,4 +1,29 @@
 --------------
+//0735 by ぽぽぽ
+
+・敵を倒してレベルが上がったときPT公平範囲のチェックをするようにした。
+・オートカウンター仮実装。
+　向きや射程チェックはしていません。またタイミングがおかしいかもしれません。
+　MOBスキルとして使うときはターゲットをselfにしてください。
+	(conf/)
+	battle_athena.conf項目追加
+	(doc/)
+	conf_ref修正
+	(map/)
+	battle.h
+	battle.c
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack()
+		battle_config_read()修正
+	pc.c
+		pc_checkbaselevelup()、pc_attack_timer()修正
+	skill.c
+		skill_castend_nodamage_id()、skill_status_change_start()修正
+	clif.c
+		clif_parse_WalkToXY()修正
+	mob.c
+		mob_attack()修正
+
+--------------
 //0734 by 死神
 
 ・player_skillup_limitの処理修正と細かい修正。

@@ -4937,8 +4937,8 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 	if(sd->canmove_tick > gettick())
 		return;
 
-	// ステータス異常やハイディング中(トンネルドライブ無)で動けない
-	if(sd->opt1 > 0 || sd->sc_data[SC_ANKLE].timer!=-1)
+	// ステータス異常やハイディング中(トンネルドライブ無)・オートカウンターで動けない
+	if(sd->opt1 > 0 || sd->sc_data[SC_ANKLE].timer!=-1 || sd->sc_data[SC_AUTOCOUNTER].timer!=-1)
 		return;
 	if( (sd->status.option&2) && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0)
 		return;

@@ -1533,8 +1533,21 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if(t_sc_data != NULL && t_sc_data[SC_SLEEP].timer!=-1 )	// 睡眠中はクリティカルが倍に
 		cri <<=1;
 
+	if(sc_data != NULL && sc_data[SC_AUTOCOUNTER].timer!=-1 && battle_config.autocounter_mode==0)
+	{// オートカウンターモード0
+		hitrate+=20;
+		cri<<=1;
+		def1=0;
+	}
+
 	if(tsd && tsd->critical_def)
 		cri = cri * (100 - tsd->critical_def);
+
+	//オートカウンターモード1
+	if(sc_data != NULL && sc_data[SC_AUTOCOUNTER].timer!=-1 && battle_config.autocounter_mode==1)
+	{	
+		cri=99999;
+	}
 
 	if(skill_num==0 && battle_config.enemy_critical && (rand() % 1000) < cri) 	// 判定（スキルの場合は無視）
 			// 敵の判定
@@ -1909,7 +1922,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	}
 
 	if(sc_data != NULL && sc_data[SC_WEAPONPERFECTION].timer!=-1 ) {	// ウェポンパーフェクション
-		atkmax = watk;
+		hitrate+=20;
 		atkmax_ = watk_;
 	}
 
@@ -1955,8 +1968,19 @@ static struct Damage battle_calc_pc_weapon_attack(
 			cri <<=1;
 	}
 
+	if(sc_data != NULL && sc_data[SC_AUTOCOUNTER].timer!=-1 && battle_config.autocounter_mode==0)
+	{// オートカウンターモード0
+		hitrate+=20;
+		cri<<=1;
+		def1=0;
+	}
+
 	if(tsd && tsd->critical_def)
 		cri = cri * (100-tsd->critical_def);
+
+	//オートカウンターモード1
+	if(sc_data != NULL && sc_data[SC_AUTOCOUNTER].timer!=-1 && battle_config.autocounter_mode==1)
+		cri=99999;
 
 	if(da == 0 && skill_num==0 && //ダブルアタックが発動していない
 		(rand() % 1000) < cri) 	// 判定（スキルの場合は無視）
@@ -3236,6 +3260,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.error_log = 1;
 	battle_config.etc_log = 1;
 	battle_config.save_clothcolor = 0;
+	battle_config.autocounter_mode = 0;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -3326,6 +3351,7 @@ int battle_config_read(const char *cfgName)
 			{ "error_log", &battle_config.error_log },
 			{ "etc_log", &battle_config.etc_log },
 			{ "save_clothcolor", &battle_config.save_clothcolor },
+			{ "autocounter_mode", &battle_config.autocounter_mode },
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

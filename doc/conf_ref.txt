@@ -656,6 +656,12 @@ save_clothcolor
 	服の色を保存するかどうか、有効にすると問題があるかもしれません。
 	デフォルトはnoです。
 
+autocounter_mode
+	オートカウンター発動時のステ計算法などを変更します。
+	0でコモド後仕様(HIT+20,CRI*2,敵DEF=0)
+	1で旧仕様(100%クリティカル)です。
+	デフォルトは0です。
+
 < 例 >
 
 warp_point_debug: no
@@ -736,6 +742,8 @@ battle_log: off
 save_log: off
 error_log: on
 etc_log: on
+save_clothcolor: no
+autocounter_mode: 0
 
 
 =====================================================================ghos6. atcommand_athena.conf
