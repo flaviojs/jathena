@@ -115,11 +115,6 @@ ATCOMMAND_FUNC(shuffle);
 ATCOMMAND_FUNC(maintenance);
 ATCOMMAND_FUNC(misceffect);
 ATCOMMAND_FUNC(summon);
-ATCOMMAND_FUNC(rain);
-ATCOMMAND_FUNC(snow);
-ATCOMMAND_FUNC(cherry);
-ATCOMMAND_FUNC(fog);
-ATCOMMAND_FUNC(maple);
 ATCOMMAND_FUNC(whop);
 
 /*==========================================
@@ -221,12 +216,6 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
 	{ AtCommand_LocalBroadcast,			"@local_broadcast",	0, NULL },
 	//add
-	{ AtCommand_Rain,					"@rain",			0, atcommand_rain },
-	{ AtCommand_Snow,					"@snow",			0, atcommand_snow },
-	{ AtCommand_Cherry,					"@cherry",			0, atcommand_cherry },
-	{ AtCommand_Fog,					"@fog",				0, atcommand_fog },
-	{ AtCommand_Maple,					"@maple",			0, atcommand_maple },
-	//add by code
 	{ AtCommand_WhoP,					"@who+",			0, atcommand_whop },
 	//add 1052
 	//add here
@@ -2303,95 +2292,6 @@ atcommand_night(
 			}
 		}
 	
-	return 0;
-}
-
-/*==========================================
- * âJÇç~ÇÁÇπÇÈ
- *------------------------------------------
- */
-int
-atcommand_rain(
-	const int fd, struct map_session_data* sd,
-	const char* command, const char* message)
-{
-	int effno = 0;
-	effno = 161;
-	nullpo_retr(-1, sd);
-	if (effno < 0)
-		return -1;
-	clif_misceffect2(&sd->bl,effno);
-	return 0;
-}
-/*==========================================
- * ê·Çç~ÇÁÇπÇÈ
- *------------------------------------------
- */
-int
-atcommand_snow(
-	const int fd, struct map_session_data* sd,
-	const char* command, const char* message)
-{
-	int effno = 0;
-	effno = 162;
-	nullpo_retr(-1, sd);
-	if (effno < 0)
-		return -1;
-	clif_misceffect2(&sd->bl,effno);
-	return 0;
-}
-
-/*==========================================
- * ÉTÉNÉâêÅê·Çç~ÇÁÇπÇÈ
- *------------------------------------------
- */
-int
-atcommand_cherry(
-	const int fd, struct map_session_data* sd,
-	const char* command, const char* message)
-{
-	int effno = 0;
-	effno = 163;
-	nullpo_retr(-1, sd);
-	if (effno < 0)
-		return -1;
-	clif_misceffect2(&sd->bl,effno);
-	return 0;
-}
-
-/*==========================================
- * ñ∂Ç™óßÇøçûÇﬂÇÈ
- *------------------------------------------
- */
-int
-atcommand_fog(
-	const int fd, struct map_session_data* sd,
-	const char* command, const char* message)
-{
-	int effno = 0;
-	effno = 233;
-	nullpo_retr(-1, sd);
-	if (effno < 0)
-		return -1;
-	clif_misceffect2(&sd->bl,effno);
-	return 0;
-}
-
-/*==========================================
- * óéÇøótÇ™ç~ÇÈ
- *------------------------------------------
- */
-int
-atcommand_maple(
-	const int fd, struct map_session_data* sd,
-	const char* command, const char* message)
-{
-	int effno = 0;
-	effno = 333;
-	nullpo_retr(-1, sd);
-	if (effno < 0)
-		return -1;
-	clif_misceffect2(&sd->bl,effno);
 	return 0;
 }
 

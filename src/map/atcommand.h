@@ -98,11 +98,6 @@ enum AtCommandType {
 	AtCommand_Maintenance,
 	AtCommand_Misceffect,
 	AtCommand_Summon,
-	AtCommand_Rain,
-	AtCommand_Snow,
-	AtCommand_Cherry,
-	AtCommand_Fog,
-	AtCommand_Maple,
 	AtCommand_WhoP,
 	AtCommand_Unknown,
 	AtCommand_MAX
