@@ -433,7 +433,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			skill_status_change_start(bl,SC_BLIND,1,0);
 		break;
 
-	case CR_SHIELDCHARGE:		/* グランドクロス */
+	case CR_SHIELDCHARGE:		/* シールドチャージ */
 		if( rand()%100 < (15 + skilllv*5)*sc_def_vit/100 )
 			skill_status_change_start(bl,SC_STAN,skilllv,5000);
 		break;
@@ -461,7 +461,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 
 	case NPC_PETRIFYATTACK:
 		if(rand()%100 < sc_def_mdef)
-			skill_status_change_start(bl,sc[skillid-NPC_POISON],skilllv,sc2[skillid-NPC_POISON]*skilllv);
+			skill_status_change_start(bl,sc[skillid-NPC_POISON],0,sc2[skillid-NPC_POISON]*skilllv);
 		break;
 	case NPC_POISON:
 	case NPC_SILENCEATTACK:
@@ -1287,6 +1287,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	struct mob_data *dstmd=NULL;
 	int i;
 	int sc_def_vit=100;
+	int sc_def_mdef=100;
 
 	if(src->type==BL_PC)
 		sd=(struct map_session_data *)src;
@@ -1296,15 +1297,21 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	if(bl->type==BL_PC){
 		dstsd=(struct map_session_data *)bl; 
 		sc_def_vit=100-(dstsd->paramc[2]+dstsd->paramc[5]/3);
+		sc_def_mdef=100-dstsd->mdef;
 	}
 	else if(bl->type==BL_MOB){
 		dstmd=(struct mob_data *)bl;
 		sc_def_vit=100-(mob_db[dstmd->class].vit+mob_db[dstmd->class].luk/3);
+		sc_def_mdef=100-(mob_db[dstmd->class].mdef);
 		if(sc_def_vit<50)
 			sc_def_vit=50;
+		if(sc_def_mdef<50)
+			sc_def_mdef=50;
 	}
 	if(sc_def_vit<0)
 		sc_def_vit=0;
+	if(sc_def_mdef<0)
+		sc_def_mdef=0;
 
 	if(bl == NULL || bl->prev == NULL)
 		return 0;
@@ -1607,7 +1614,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case MG_STONECURSE:			/* ストーンカース */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		if( rand()%100 < skilllv*4+20 )
+		if( rand()%100 < (skilllv*4+20)*sc_def_mdef/100 )
 			skill_status_change_start(bl,SC_STONE,skilllv,0);
 		break;
 
@@ -4006,7 +4013,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	/* 時間切れ無し？？ */
 	case SC_AETERNA:
 	case SC_TRICKDEAD:
-	case SC_STONE:
+/*	case SC_STONE: */
 /*	case SC_BLIND: */
 	case SC_RIDING:
 	case SC_FALCON:
@@ -4057,6 +4064,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 	short *sc_count, *option, *opt1, *opt2;
 	int opt_flag = 0;
 	int val3=0,val4=val2;
+	int sc_def_mdef=100;
+	int sc_def_vit=100;
+	int sc_def_int=100;
 
 	if(bl->type == BL_SKILL)
 		return 0;
@@ -4075,9 +4085,17 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			/* ボスには効かない(ただしカードによる効果は適用される) */
 			return 0;
 		}
+		sc_def_mdef=100-mob_db[md->class].mdef;
+		sc_def_vit=100-(mob_db[md->class].vit+mob_db[md->class].luk/3);
+		sc_def_int=100-(mob_db[md->class].int_+mob_db[md->class].luk/3);
+		if(sc_def_mdef<50)
+			sc_def_mdef=50;
+		if(sc_def_vit<50)
+			sc_def_vit=50;
+		if(sc_def_int<50)
+			sc_def_int=50;
 	}else if(bl->type==BL_PC){
 		sd=(struct map_session_data *)bl;
-
 		if(SC_STONE<=type && type<=SC_BLIND){	/* カードによる耐性 */
 			if(sd->reseff[type-SC_STONE] > 0 && rand()%10000<sd->reseff[type-SC_STONE]){
 				if(battle_config.battle_log)
@@ -4085,6 +4103,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 				return 0;
 			}
 		}
+		sc_def_mdef=100-sd->mdef;
+		sc_def_vit=100-(sd->paramc[2]+sd->paramc[5]/3);
+		sc_def_int=100-(sd->paramc[3]+sd->paramc[5]/3);
 	}else{
 		if(battle_config.error_log)
 			printf("skill_status_change_start: neither MOB nor PC !\n");
@@ -4326,31 +4347,31 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 
 		case SC_STONE:				/* 石化 */
 			if( (tick=val2)<=0 )
-				tick = 1000 * 600;		/* とりあえず10分にしてみる（後はタイマ処理で延長する） */
+				tick = 17000-((sc_def_mdef/20)*1000);		/* ストーンカース */
 			break;
 		case SC_SLEEP:				/* 睡眠 */
-			tick = val2;
+			tick = val2*sc_def_int/100;
 			break;
 		case SC_FREEZE:				/* 凍結 */
-			if( (tick=val2)<=0 )
-				tick = 1000 * 3 * val1;
+			if( (tick=val2*sc_def_mdef/100)<=0 )
+				tick = 1000 * 3 * val1 * sc_def_mdef / 100;				/*SG以外の凍結*/
 			break;
 		case SC_STAN:				/* スタン（val2にミリ秒セット） */
-			tick = val2;
+			tick = val2*sc_def_vit/100;
 			break;
 
 		/* option2 */
 		case SC_POISON:				/* 毒 */
 			if( (tick=val2)<=0 )
-				tick = 1000 * (10 + rand()%50);	/* 適当な長さ */
+				tick = 1000 * (10 + rand()%50) * sc_def_vit / 100;	/* 適当な長さ */
 			break;
 		case SC_SILENCE:			/* 沈黙（レックスデビーナ） */
 			if( (tick=val2)<=0 )
-				tick = 1000 * ( (val1>6)?60: 25 + val1 * 5);
+				tick = 1000 * ( (val1>6)?60: 25 + val1 * 5) * sc_def_vit /100;
 			break;
 		case SC_BLIND:				/* 暗黒 */
 			if( (tick=val2)<=0 )
-				tick = 500*600;		/* とりあえず５分 */
+				tick = 6000*sc_def_int/100;		/* とりあえず1分 */
 			break;
 
 		/* option */

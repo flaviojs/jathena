@@ -3585,8 +3585,11 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		skill_stop_dancing(&sd->bl);
 
 	sd->status.hp-=damage;
+
+/*
 	if(sd->status.pet_id > 0 && sd->pd && sd->petDB)
 		pet_target_check(sd,src,1);
+*/
 
 	if(sd->status.hp>0){
 		// ‚Ü‚¾¶‚«‚Ä‚¢‚é‚È‚çHPXV
