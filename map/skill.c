@@ -59,7 +59,9 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	SC_ASPERSIO,		/* アスペルシオ */
 	SC_BENEDICTIO,		/* 聖体降福 */
 /* 70- */
-	-1,SC_SLOWPOISON,-1,
+	-1,
+	SC_SLOWPOISON,
+	-1,
 	SC_KYRIE,			/* キリエエレイソン */
 	SC_MAGNIFICAT,		/* マグニフィカート */
 	SC_GLORIA,			/* グロリア */
@@ -1237,6 +1239,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	if(sd && pc_isdead(sd))
 		return 1;
 
+	if(skillid == WZ_SIGHTRASHER || skillid == CR_GRANDCROSS) bl = src;
 	if(bl == NULL || bl->prev == NULL)
 		return 1;
 	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
@@ -1291,8 +1294,10 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case NPC_HOLYATTACK:
 	case NPC_DARKNESSATTACK:
 	case NPC_TELEKINESISATTACK:
-	case NPC_DARKBREATH:
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+		break;
+	case NPC_DARKBREATH:
+		skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case KN_BRANDISHSPEAR:		/* ブランディッシュスピア */
 		{
@@ -1541,8 +1546,8 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case WZ_SIGHTRASHER:
-		clif_skill_nodamage(src,src,skillid,skilllv,1);
-		skill_castend_pos2(src,src->x,src->y,skillid,skilllv,tick,0);
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		skill_castend_pos2(src,bl->x,bl->y,skillid,skilllv,tick,0);
 		skill_status_change_end(src,SC_SIGHT,-1);
 		break;
 
@@ -1570,7 +1575,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 
 	case CR_GRANDCROSS:			/* グランドクロス */
 		/* スキルユニット配置 */
-		skill_castend_pos2(src,src->x,src->y,skillid,skilllv,tick,0);
+		skill_castend_pos2(src,bl->x,bl->y,skillid,skilllv,tick,0);
 		if(sd)
 			sd->canmove_tick = tick + 900;
 		else if(src->type == BL_MOB)
@@ -2534,6 +2539,8 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case NPC_HALLUCINATION:
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
+			break;
 		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
 		break;
 
@@ -2553,9 +2560,9 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			clif_skill_nodamage(src,bl,skillid,skilllv,1);
 			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
 				break;
-			if(battle_get_elem_type(bl) == 7)
+			if(battle_get_elem_type(bl) == 7 || battle_get_race(bl) == 6)
 				break;
-			if(rand()%100 < sc_def) {
+			if(rand()%100 < sc_def*(50+skilllv*5)/100) {
 				if(dstsd) {
 					int hp = battle_get_hp(bl)-1;
 					pc_heal(dstsd,-hp,0);
@@ -2590,6 +2597,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				skilllv,(skillid==NPC_SUMMONSLAVE)?1:0);
 		break;
 
+	case NPC_TRANSFORMATION:
 	case NPC_METAMORPHOSIS:
 		if(md)
 			mob_class_change(md,mob_db[md->class].skill[md->skillidx].val1);
@@ -2598,6 +2606,10 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case NPC_EMOTION:			/* エモーション */
 		if(md)
 			clif_emotion(&md->bl,mob_db[md->class].skill[md->skillidx].val1);
+		break;
+
+	case NPC_DEFENDER:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		break;
 
 	default:
@@ -4421,7 +4433,7 @@ int skill_use_pos( struct map_session_data *sd,
 	bl.y = skill_y;
 	range = skill_get_range(skill_num,skill_lv);
 	if(range < 0)
-		range = battle_get_range(&sd->bl) - (range - 1);
+		range = battle_get_range(&sd->bl) - (range + 1);
 	if(!battle_check_range(&sd->bl,&bl,range) )
 		return 0;
 

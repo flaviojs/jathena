@@ -1078,8 +1078,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 
 	if(sc_count!=NULL && *sc_count>0){
 
-		if(sc_data[SC_SAFETYWALL].timer!=-1 && damage>0 && skill_num != NPC_DARKBREATH &&
-			flag&BF_WEAPON && flag&BF_SHORT ){
+		if(sc_data[SC_SAFETYWALL].timer!=-1 && damage>0 && flag&BF_WEAPON && flag&BF_SHORT && skill_num != NPC_GUIDEDATTACK){
 			// セーフティウォール
 			struct skill_unit *unit=(struct skill_unit*)sc_data[SC_SAFETYWALL].val2;
 			if( unit->alive && (--unit->group->val2)<=0 )
@@ -1087,8 +1086,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 			skill_unit_move(bl,gettick(),1);	// 重ね掛けチェック
 			damage=0;
 		}
-		if(sc_data[SC_PNEUMA].timer!=-1 && damage>0 &&
-			flag&BF_WEAPON && flag&BF_LONG ){
+		if(sc_data[SC_PNEUMA].timer!=-1 && damage>0 && flag&BF_WEAPON && flag&BF_LONG && skill_num != NPC_GUIDEDATTACK){
 			// ニューマ
 			damage=0;
 		}
@@ -1374,7 +1372,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 		damage = 0;
 	atkmin = battle_get_atk(src);
 	atkmax = battle_get_atk2(src);
-	if(skill_num == 0 && mob_db[pd->class].range>3 )
+	if(mob_db[pd->class].range>3 )
 		flag=(flag&~BF_RANGEMASK)|BF_LONG;
 
 	if(atkmin > atkmax) atkmin = atkmax;
@@ -1460,7 +1458,6 @@ static struct Damage battle_calc_pet_weapon_attack(
 				break;
 			case KN_BOWLINGBASH:	// ボウリングバッシュ
 				damage = damage*(100+ 50*skill_lv)/100;
-				//blewcount=4;skill.cで吹き飛ばしやってみた
 				break;
 			case AS_SONICBLOW:	// ソニックブロウ
 				damage = damage*(300+ 50*skill_lv)/100;
@@ -1501,10 +1498,6 @@ static struct Damage battle_calc_pet_weapon_attack(
 				break;
 			case NPC_RANGEATTACK:
 				flag=(flag&~BF_RANGEMASK)|BF_LONG;
-				break;
-			case NPC_DARKBREATH:
-				damage = 500 + (skill_lv-1)*1000 + rand()%1000;
-				if(damage > 9999) damage = 9999;
 				break;
 			case RG_BACKSTAP:	// バックスタブ
 				damage = damage*(300+ 40*skill_lv)/100;
@@ -1568,7 +1561,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != NPC_DARKBREATH) {	//DEF, VIT無視
+			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && def1 < 1000000 ) {	//DEF, VIT無視
 				int t_def;
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
@@ -1647,6 +1640,8 @@ static struct Damage battle_calc_pet_weapon_attack(
 	wd.type=type;
 	wd.div_=div_;
 	wd.amotion=battle_get_amotion(src);
+	if(skill_num == KN_AUTOCOUNTER)
+		wd.amotion >>= 1;
 	wd.dmotion=battle_get_dmotion(target);
 	wd.blewcount=blewcount;
 	wd.flag=flag;
@@ -1738,7 +1733,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		damage = 0;
 	atkmin = battle_get_atk(src);
 	atkmax = battle_get_atk2(src);
-	if(skill_num == 0 && mob_db[md->class].range>3 )
+	if(mob_db[md->class].range>3 )
 		flag=(flag&~BF_RANGEMASK)|BF_LONG;
 
 	if(atkmin > atkmax) atkmin = atkmax;
@@ -1843,7 +1838,6 @@ static struct Damage battle_calc_mob_weapon_attack(
 				break;
 			case KN_BOWLINGBASH:	// ボウリングバッシュ
 				damage = damage*(100+ 50*skill_lv)/100;
-				//blewcount=4;skill.cで吹き飛ばしやってみた
 				break;
 			case KN_AUTOCOUNTER:
 				if(battle_config.monster_auto_counter_type&1)
@@ -1891,10 +1885,6 @@ static struct Damage battle_calc_mob_weapon_attack(
 				break;
 			case NPC_RANGEATTACK:
 				flag=(flag&~BF_RANGEMASK)|BF_LONG;
-				break;
-			case NPC_DARKBREATH:
-				damage = 500 + (skill_lv-1)*1000 + rand()%1000;
-				if(damage > 9999) damage = 9999;
 				break;
 			case RG_BACKSTAP:	// バックスタブ
 				damage = damage*(300+ 40*skill_lv)/100;
@@ -1958,7 +1948,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && skill_num != NPC_DARKBREATH) {	//DEF, VIT無視
+			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && def1 < 1000000) {	//DEF, VIT無視
 				int t_def;
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
@@ -2003,10 +1993,10 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if(type == 0 && rand()%100 >= hitrate)
 		damage = 0;
 
-	if( target->type==BL_PC ){
+	if( target->type==BL_PC){
 		int cardfix=100,i;
-		cardfix=cardfix*(100-tsd->subrace[s_race])/100;	// 種族によるダメージ耐性
 		cardfix=cardfix*(100-tsd->subele[s_ele])/100;	// 属 性によるダメージ耐性
+		cardfix=cardfix*(100-tsd->subrace[s_race])/100;	// 種族によるダメージ耐性
 		if(flag&BF_LONG)
 			cardfix=cardfix*(100-tsd->long_attack_def_rate)/100;
 		if(flag&BF_SHORT)
@@ -2537,10 +2527,6 @@ static struct Damage battle_calc_pc_weapon_attack(
 			case NPC_RANGEATTACK:
 				flag=(flag&~BF_RANGEMASK)|BF_LONG;
 				break;
-			case NPC_DARKBREATH:
-				damage = 500 + (skill_lv-1)*1000 + rand()%1000;
-				if(damage > 9999) damage = 9999;
-				break;
 			case RG_BACKSTAP:	// バックスタブ
 				damage = damage*(300+ 40*skill_lv)/100;
 				damage2 = damage2*(300+ 40*skill_lv)/100;
@@ -2654,7 +2640,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && skill_num != NPC_DARKBREATH) {	//DEF, VIT無視
+			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && def1 < 1000000) {	//DEF, VIT無視
 				int t_def;
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
@@ -3209,6 +3195,7 @@ struct Damage battle_calc_magic_attack(
 	md.damage2=0;
 	md.type=0;
 	md.blewcount=blewcount;
+	md.flag=aflag;
 
 	return md;
 }
@@ -3285,11 +3272,26 @@ struct Damage  battle_calc_misc_attack(
 		damage=3;
 		damagefix=0;
 		break;
+
+	case NPC_DARKBREATH:
+		{
+			struct status_change *sc_data = battle_get_sc_data(target);
+			int hitrate=battle_get_hit(bl) - battle_get_flee(target) + 80;
+			hitrate = ( (hitrate>95)?95: ((hitrate<5)?5:hitrate) );
+			if(sc_data && (sc_data[SC_SLEEP].timer!=-1 || sc_data[SC_STAN].timer!=-1 ||
+				sc_data[SC_FREEZE].timer!=-1 || (sc_data[SC_STONE].timer!=-1 && sc_data[SC_STONE].val2==0) ) )
+				hitrate = 1000000;
+			if(rand()%100 < hitrate) {
+				damage = 500 + (skill_lv-1)*1000 + rand()%1000;
+				if(damage > 9999) damage = 9999;
+			}
+		}
+		break;
 	}
 
 	ele = skill_get_pl(skill_num);
 	if(damagefix){
-		if(damage<1)
+		if(damage<1 && skill_num != NPC_DARKBREATH)
 			damage=1;
 
 		if( target->type==BL_PC ){
@@ -3319,6 +3321,7 @@ struct Damage  battle_calc_misc_attack(
 	md.damage2=0;
 	md.type=0;
 	md.blewcount=blewcount;
+	md.flag=aflag;
 	return md;
 
 }

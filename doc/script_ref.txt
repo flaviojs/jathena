@@ -1,0 +1,778 @@
+AthenaNPCScript
+
+・目次
+	０．はじめに
+	１．NPCの定義
+	２．スクリプトの説明と基本的な規則
+	３．命令文及び関数及び定数ラベル
+	４．あとがき
+
+０．はじめに
+	この文章に含まれる関数や書式は最新のsnapshotに含まれるnpc_sample.txtを参考にし、記述されています。
+	この文章を表示しているエディターの都合を考え、タブ文字は<tab>、任意の値は<n>等と表記します。
+	座標系ですが下の図を参考にしてください。
+	↑Yの増加
+	(  0,200)--(200,200)
+	    |          |
+	    |          |
+	    |          |
+	    |          |
+	    |          |
+	(  0,  0)--(200,  0)→Xの増加
+
+１．NPCの定義
+	athenaディレクトリ以下ならどこでもよい（できればathena/conf以下）ので、とりあえずtxtを作成してください。
+	まずそのNPCが何を示すのか記述します（場合によってはNPCという言い方は不適切）。
+	
+	＊ワープポイント：MAP間の移動を行います。
+		<gatname>,<x>,<y><tab>warp<tab><displayname><tab><dx>,<dy>,<destination_gatname>,<destination_x>,<destination_y>
+		
+		gatname			ワープポイントの置かれるMAPファイル名を指定します。.gatは忘れないでください。
+		x			ワープポイントの置かれる横座標を指定します。
+		y			ワープポイントの置かれる縦座標を指定します。
+		displayname		ワープポイント識別子です。重複しても構いません。デバッグで使います。
+		dx			ワープポイントの横効果範囲です。
+		dy			ワープポイントの縦効果範囲です。たぶん円を書かずリージョンになっていると思います。
+			dx,dyの例（●がx,y）：
+				0,0	1,0		2,2
+				　＊	＊＊＊＊＊	＊＊＊＊＊＊＊
+				＊●＊	＊＊●＊＊	＊＊＊＊＊＊＊
+				　＊	＊＊＊＊＊	＊＊＊＊＊＊＊
+				　			＊＊＊●＊＊＊
+				　			＊＊＊＊＊＊＊
+				　			＊＊＊＊＊＊＊
+				　			＊＊＊＊＊＊＊
+				　			
+				＊及び●のセルを踏めば、ワープするということです。
+				　			
+		destination_gatname	ワープ先です。.gatはあってもなくても構いません。
+		destination_x		ワープ先横座標です。
+		destination_y		ワープ先縦座標です。
+		
+		注意事項：
+		ワープポイントが同位置に複数は位置されている場合、最後に記述されているもののみ表示します。
+		ワープ先の座標が移動禁止セルだった場合、そのMAPのどこかにワープします。
+		
+	＊モンスター：モンスターの出現を管理します。
+		<gatname>,<x>,<y>,<xs>,<ys><tab>monster<tab><displayname><tab><npcid>,<number>,<spawn_delay1>,<spawn_delay2>[,<event>]
+		
+		gatname			出現するMAPファイル名を指定します。
+		x			出現する横座標を指定します。0でランダム。
+		y			出現する縦座標を指定します。0でランダム。
+		xs			出現する横範囲を指定します。
+		ys			出現する縦範囲を指定します。
+			xs,ysの例（●がx,y）：
+				0,0	2,1
+				　●	＊＊＊＊＊
+				　	＊＊●＊＊
+				　	＊＊＊＊＊
+				　	
+				＊及び●のセルからモンスターが出現します。
+				
+		displayname		出現するモンスターの表示名です。
+		npcid			mob_db.txtを参照してください。出現させるモンスターのidを指定します。
+		number			そのMAP及び出現範囲での最大出現数です。
+		spawn_delay1		出現してから指定されたミリ秒待って再出現します。
+		spawn_delay2		死亡してから指定されたミリ秒待って再出現します。
+		event			指定したイベントを発生させます。省略可。
+		
+		注意事項：
+		spawn_delay1とspawn_delay2は、結果としてどちらを基準にした方が最も遅く再出現するかを判断し、優先します。
+		
+	＊店：アイテムの販売を行います。
+		<gatname>,<x>,<y>,<direction><tab>shop<tab><displayname><tab><npcid>,<item_id>:<price>
+		
+		gatname			配置するMAPファイル名を指定します。
+		x			配置する横座標を指定します。
+		y			配置する縦座標を指定します。
+		direction		向きを指定します。
+			directionの詳細：
+				７０１
+				６　２
+				５４３
+				
+		displayname		配置する店の表示名を指定します。
+		npcid			配置する店の表示スプライトIDを指定します。
+		item_id			配置する店に置くアイテムIDを指定します。item_dbを参照してください。
+		price			item_idで指定したアイテムの値段を設定します。
+			<item_id>:<price>は,（カンマ）区切りで複数指定できます。
+			
+	＊スクリプト：NPCを作成します。
+		<gatname>,<x>,<y>,<direction><tab>script<tab><displayname><tab><npcid>,<xs>,<ys>,{ <script> ... }
+		
+		gatname			配置するMAPファイル名を指定します。
+		x			配置する横座標を指定する。
+		y			配置する縦座標を指定する。
+		direction		向きを指定します。
+		displayname		配置するNPCの表示名を指定します。npcidが-1の場合、イベント名となります。
+					同表示名別動作イベントを作る場合、表示名::識別子と記述することができます。
+		npcid			配置するNPCの表示スプライトIDを指定します。-1を指定するとmap内イベントになります。
+		xs			スクリプトを自動実行する横範囲を指定します。
+		ys			スクリプトを自動実行する縦範囲を指定します。ワープと同じです。
+		
+		{}（中カッコ）の中についての説明。
+		一行で纏めたりするのはお勧めできません。できれば
+		gatname等,
+		{
+			//コメント
+			script;
+		label:
+			script;
+		}
+		と言った感じで書きましょう。コメントアウトは//、コメントエリアは/*,*/、
+		スクリプト語尾には;（セミコロン）を忘れずに。
+		
+	＊マップフラグ：MAPのルールを管理します。
+		<gatname><tab>mapflag<tab><const>
+		
+		gatname			ルールを設定するMAPファイル名を指定します。
+		const			ルールの内容を指定します。
+		
+		constの一覧。
+			nosave<tab><gatname>,<x>,<y>
+				リログインした際<gatname>の座標<x>,<y>に移動します。
+			nomemo<tab>dummy
+				メモを取ることを禁止します。
+			notereport<tab>dummy
+				SavePointまたはRandomを指定したwarp文、ワープポータル、テレポートを禁止します。
+			nobranch<tab>dummy
+				古木の枝の使用を禁止します。
+			pvp<tab>dummy
+				PVP可能MAPになります。
+			nopenalty<tab>dummy
+				デスペナルティ無しになります。
+			pvp_noparty<tab>dummy
+				PVPにおいて、同パーティー攻撃不可になります。
+			pvp_noguild<tab>dummy
+				PVPにおいて、同ギルド攻撃不可になります。
+			gvg<tab>dummy
+				シーズモードになります。
+			gvg_noparty<tab>dummy
+				シーズモードにおいて、同パーティー攻撃不可になります。
+		
+２．スクリプトの説明と基本的な規則
+	＊数字
+		符号付の整数と１６進数表記整数を使用することができます。
+		符合付整数は半角数字で123456等と記述します。
+		１６進数表記整数は0x12等0xを付けて記述します。
+		
+	＊文字列
+		"（ダブルクォーテーション）で囲んだ文字は文字列として評価されます。
+		"（ダブルクォーテーション）記号を扱いたい場合は\"と記述します。
+		\記号を扱いたい場合は\\と記述します。
+		なお表示関係の物に関しては^000000等の色変更を使うことができます。
+		変数 + "文字列"といった文字列結合もできます。
+		
+	＊変数
+		半角英数字のみ及び一文字目に@記号を使用することができます。
+		変数名は特に埋め込み変数や定数と混同しないためにも@hogeといった風に使用するのがよいでしょう。
+		また、$を一文字目に指定することでMAP鯖共有変数にすることができます。
+		
+	＊ラベル
+		命名規則は変数と同じです。
+		hoge:といった風に使用します。
+		if文やmenu文のジャンプ先に指定されます。
+		
+	＊定数
+		athenaはdb/const.txtに準拠した定数を提供します。
+		スクリプト内でのみ使用可能です。
+		
+	＊埋め込み変数
+		話かけたプレイヤーのステータスなどを参照できます。
+		db/const.txtに記述されています。
+		スクリプト内でのみ使用可能です。
+		なお、一部を除いて値の代入はできません。
+		
+	＊式
+		命令文の引数が数値だった場合、そこで利用することができます。
+		スペースは要らないようですがあった方が見易いです。
+		比較演算子及び論理演算子は値が真であったとき数値の1、偽であったとき0を返します。
+		
+	＊イベント
+		形を持たないスクリプトです。
+		タイムアタックなどの作成に使います。
+		イベント名を記述する部分では、イベント名::ラベル名とすることでそのイベントの指定したラベルから
+		スクリプトを開始させることができます。
+		
+	＊命令構文
+		引数は半角スペースを空けて記述してください。
+		
+３．命令文及び関数及び定数ラベル
+	＊命令文
+		mes命令
+			mes <string>;
+			
+			string		文字列
+			
+			<string>に記述された文字列をメッセージウィンドウに出力します。
+			
+		next命令
+			next;
+			
+			メッセージウィンドウにnextボタンを表示し、待機します。
+			
+		close命令
+			close;
+			
+			メッセージウィンドウにcloseボタンを表示し、スクリプトを終了します。
+			
+		menu命令
+			menu <string1>,<label1>[,<stringN>,<labelN>...];
+			
+			stringN		文字列
+			labelN		ラベル
+			
+			メニューを表示します。<stringN>に記述された文字列を選択すると<labelN>からスクリプトを開始します。
+			
+		goto命令
+			goto <label>;
+			
+			label		ラベル
+			
+			<label>からスクリプトを開始します。
+			
+		cutin命令
+			cutin <filename>,<position>;
+			
+			filename	文字列
+			position	数値
+			
+			カプラ職員などのカットインを表示します。<filename>は表示したいファイル名、<position>は表示位置を指定します。
+			position：0,左下、1,中央下、2,右下、255,カットイン消去
+			
+		jobchange命令
+			jobchange <job>;
+			
+			job		数値
+			
+			職業を変更します。<job>はdb/const.txtを参照してください。
+			jobLvは自動で１になります。
+			バードとダンサーには注意してください。
+			
+		input命令
+			input [<variable>];
+			
+			variable	変数、省略可
+			
+			数値入力ウィンドウを開き、数値を<variable>に代入します。
+			<variable>を省略した場合には実行中スクリプト内でのみ有効な変数114に代入されます。
+			
+		warp命令
+			warp <gatname>,<x>,<y>;
+			
+			gatname		文字列
+			x,y		数値
+			
+			<gatname>に指定されたMAPの座標<x>,<y>にワープします。
+			<gatname>をSavePointにした場合、セーブポイントに移動します。
+			Randomにした場合、そのMAP内のどこかに移動します。即ち<x><y>は無視。
+			
+		setlook命令
+			setlook <n1>,<n2>;
+			
+			n1,n2		数値
+			
+			外見を変更します。<n1>は部品を、<n2>は種類を指定します。
+			n1：1,髪型、2,武器、3,頭上段、4,頭中段、5,頭下段、6,髪色、7,服色、8,盾
+			装備品は変更されません。アサシン男とローグ男に関しては服の色がありません。
+			
+		
+		set命令
+			set <variable>,<n>;
+			
+			variable	変数
+			n		数値
+			
+			<variable>に<n>を代入します。
+			
+		if命令
+			if (<cond>) goto <label>;
+			
+			cond		数値
+			label		ラベル
+			
+			<cond>が0以外の場合、<label>からスクリプトを開始します。
+			
+		getitem命令
+			getitem <itemid>,<num>;
+			
+			itemid,num	数値
+			
+			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分入手します。
+			
+		delitem命令
+			delitem <itemid>,<num>;
+			
+			itemid_num	数値
+			
+			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分失います。
+			
+		viewpoint命令
+			viewpoint <type>,<x>,<y>,<id>,<color>;
+			
+			type,x,y,id	数値
+			color		不明
+			
+			資料不足なので詳しい説明はできませんが、ミニMAPに点滅する点を表示、削除します。
+			type:1,表示、2,削除
+			
+		heal命令
+			heal <hp>,<sp>;
+			
+			hp,sp		数値
+			
+			<hp>分HPを、<sp>分SPを回復します。
+			
+		end命令
+			end;
+			
+			スクリプトの実行を終了します。
+			
+		setoption命令
+			setoption <string>;
+			
+			string		文字列
+			
+			引用：
+			PCに以下で示す付属品(?)を付けます。
+			0x0000	- 付属品削除
+			0x0001	- ?
+			0x0002	- ハイド(影付き)
+			0x0004	- ??
+			0x0008	- カート
+			0x0010	- 鷹
+			0x0020	- ペコペコ(ナイト,クルセイダーの時のみ有効)
+			0x0040	- ハイド(影無し)
+			0x0080	- カート2
+			0x0100	- カート3
+			0x0200	- カート4
+			0x0400	- カート5
+			0x0800	- 頭がオーク(Sageのスキル、リバースオーキッシュがかかった状態になる)
+			
+			一端すべて消されてから付け直すので、複数指定したい場合には合計を指定してください。
+			
+		savepoint命令
+			savepoint <gatname>,<x>,<y>;
+			
+			gatname		文字列
+			x,y		数値
+			
+			<gatname>の座標<x>,<y>をセーブポイントに設定します。
+			
+		openstorage命令
+			openstorage;
+			
+			倉庫を開きます。
+			
+		setcart命令
+			setcart;
+			
+			カートを付けます。
+			
+		successrefitem命令
+			successrefitem <n>;
+			
+			n		数値
+			
+			精錬成功エフェクトを表示します。
+			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
+			
+		failedrefitem命令
+			failedrefitem <n>;
+			
+			n		数値
+			
+			精錬失敗エフェクトを表示します。
+			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
+			
+		setfalcon命令
+			setfalcon;
+			
+			鷹を付けます。
+			
+		setriding命令
+			setriding;
+			
+			ペコペコに乗ります。
+			
+		monster命令
+			monster <gatname>,<x>,<y>,<mobname>,<mobid>,<num>[,<event>];
+			
+			gatname,mobname	文字列
+			x,y,mobid,num	数値
+			event		文字列、省略可
+			
+			<gatname>の座標<x>,<y>に<mobname>を持つ<mobid>に指定されたIDを持つモンスターを<num>体出現させます。
+			<gatname>がthisの場合スクリプト実行MAP、<x><y>が-1の場合ランダム座標、
+			<mobname>が--en--の場合英語名、--ja--の場合日本語名、<mobid>が-1の場合ランダム。
+			そのモンスターを倒したとき<event>を開始します。
+			
+		announce命令
+			announce <string>,<flag>;
+			
+			string		文字列
+			flag		数値
+			
+			<string>をＧＭアナウンスで表示します。
+			<flag>は以下に示す通りです。
+			エリアフラグ
+			0x00 すべてのＭＡＰに送信
+			0x01 同じＭＡＰ
+			0x02 画面内
+			0x03 自分のみ
+			0x04 同じＭＡＰ鯖
+			色フラグ
+			0x00 黄色
+			0x10 青色
+			特殊フラグ
+			0x00 特に無し
+			0x08 イベント用
+			
+			エリアフラグと色フラグと特殊フラグの合計を指定してください。
+			
+		killmonster命令
+			killmonster <gatname>[,<event>];
+			
+			gatname		文字列
+			event		文字列、省略可
+			
+			<gatname>に存在するモンスターをすべて殺します。
+			<event>によって呼び出されたモンスターのみ殺すことも可能です。
+			
+		addtimer命令
+			addtimer <ms>,<event>;
+			
+			ms		数値
+			event		文字列
+			
+			<ms>ミリ秒経過した後、<event>を開始するタイマーを作成します。
+			
+		deltimer命令
+			deltimer <event>;
+			
+			event		文字列
+			
+			<event>を開始するタイマーを消去します。
+			
+		disablenpc命令
+			disablenpc <npcname>;
+			
+			npcname		文字列
+			
+			<npcname>を無効にします。
+			
+		enablenpc命令
+			enablenpc <npcname>;
+			
+			npcname		文字列
+			
+			<npcname>を有効にします。
+		
+		addtimercount命令
+			addtimercount <event>,<ms>;
+			
+			event		文字列
+			ms		数値
+			
+			<event>を開始するタイマーの開始までの時間を<ms>ミリ秒追加します。
+			
+		mapannounce命令
+			mapannounce <gatname>,<string>,<flag>;
+			
+			gatname,string	文字列
+			flag		数値
+			
+			<gatname>全体に<string>をＧＭアナウンスで表示します。
+			flag:0,黄色文字、16,青文字
+			
+		areaannounce命令
+			areannounce <gatname>,<x0>,<y0>,<x1>,<y1>,<string>,<flag>;
+			
+			gatname,string		文字列
+			x0,y0,x1,y1,flag	数値
+			
+			<gatname>の<x0>,<y0>から<x1>,<y1>の範囲内に対し<string>をＧＭアナウンスで表示します。
+			flag:0,黄色文字、16,青文字
+			
+		areawarp命令
+			areawarp <gatname>,<x0>,<y0>,<x1>,<y1>,<gatname2>,<x>,<y>;
+			
+			gatname,gatname2	文字列
+			x0,y0,x1,y1,x,y		数値
+			
+			<gatname>の<x0>,<y0>から<x1>,<y1>の範囲内にいるPCを<gatname2>の座標<x>,<y>に移動させます。
+			
+		areamonster命令
+			areamonster <gatname>,<x0>,<y0>,<x1>,<y1>,<mobname>,<mobid>,<num>[,<event>];
+			
+			gatname,mobname		文字列
+			x0,y0,x1,y1,mobid,num	数値
+			event			文字列、省略可
+			
+			<gatname>の<x0>,<y0>から<x1>,<y1>の範囲内に<mobname>を持つ<mobid>に指定されたIDを持つモンスターを<num>体出現させます。
+			<gatname>がthisの場合スクリプト実行MAP、<x><y>が-1の場合ランダム座標、
+			<mobname>が--en--の場合英語名、--ja--の場合日本語名、<mobid>が-1の場合ランダム。
+			そのモンスターを倒したとき<event>を開始します。
+			
+		percentheal命令
+			percentheal <hp>,<sp>;
+			
+			hp,sp		数値
+			
+			HPとSPを<hp>%、<sp>%分回復します。
+			
+		resetstatus命令
+			resetstatus;
+			
+			ステータスポイントをリセットします。
+			
+		resetskill命令
+			resetskill;
+			
+			スキルポイントをリセットします。
+			
+		skill命令
+			skill <skillid>,<skilllv>,<flag>;
+			
+			skillid,skilllv,flag	数値
+			
+			<skillid>に指定されたIDを持つLV<skilllv>スキルを習得します。
+			flag:0,恒久的なスキル取得(スキルツリーにない物は無効)、1,一時的(範囲は不明)な取得、
+			<skilllv>を0にするとこでそのスキルを忘れさせることも可能です。
+			
+		waitingroom命令
+			waitingroom <title>,<limit>[,<event>];
+			
+			title		文字列
+			limit		数値
+			event		文字列、省略可
+			
+			<title>をタイトルとしてチャットルームを表示させます。
+			<limit>を満たしたとき、<event>を動作させることが可能です。
+			
+		warpwaitingnpc命令
+			warpwaitingnpc <gatname>,<x>,<y>;
+			
+			gatname		文字列
+			x,y		数値
+			
+			waitingroom文によって作成されたチャットルームに入っているPCを<gatname>の座標<x>,<y>に移動させます。
+			
+		emotion命令
+			emotion <n>;
+			
+			n		数値
+			
+			<n>エモーションを出します。
+			
+		setmapflag命令
+			setmapflag <gatname>,<flag>;
+			
+			gatname		文字列
+			flag		数値
+			
+			<gatname>のmapflagを追加します。
+			<flag>はdb/const.txtを参照してください。
+			
+		removemapflag命令
+			removemapflag <gatname>,<flag>;
+			
+			gatname		文字列
+			flag		数値
+			
+			<gatname>のmapflagを消去します。
+			<flag>はdb/const.txtを参照してください。
+			
+		pvpon命令
+			pvpon <gatname>;
+			
+			gatname		文字列
+			
+			<gatname>をPVP可能MAPにします。
+			
+		pvpoff命令
+			pvpoff <gatname>;
+			
+			gatname		文字列
+			
+			<gatname>をPVP不可MAPにします。
+			
+		gvgon命令
+			gvgon <gatname>;
+			
+			gatname		文字列
+			
+			<gatname>をシーズモードにします。
+			
+		gvgoff命令
+			gvgoff <gatname>;
+			
+			gatname		文字列
+			
+			<gatname>を非シーズモードにします。
+			
+		setmapflagnosave命令
+			setmapflagnosave <gatname>,<savegatname>,<x>,<y>;
+			
+			gatname,nosavegat	文字列
+			x,y			数値
+			
+			<gatname>のmapflagにnosave、引数として<savegatname>,<x>,<y>を設定します。
+		
+	＊関数
+		rand関数
+			rand(<n1>[,<n2>])
+			
+			n1		数値
+			n2		数値、省略可
+			
+			<n1>のみ指定されていた場合、0から<n1>-1までの数値をランダムに選んで返します。
+			<n2>を指定した場合、<n1>から<n2>までの数チをランダムに選んで返します。
+			
+		countitem関数
+			countitem(<itemid>)
+			
+			itemid		数値
+			
+			<itemid>に指定されたIDを持つアイテムの所持数を返します。
+			
+		checkweight関数
+			checkweight(<itemid>,<num>)
+			
+			itemid,num	数値
+			
+			<itemid>に指定されたIDを持つアイテムを<num>個持つことができるのならば1を、
+			できなければ0を返します。
+			
+		strcharinfo関数
+			strcharinfo(<n>)
+			
+			n		数値
+			
+			キャラ情報を返します。
+			n:0,キャラ名、1,パーティー名、2,ギルド名
+			
+		getequipname関数
+			strcharinfo(<n>)
+			
+			n		数値
+			
+			装備品名を返します。
+			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
+			
+		getequipisequiped関数
+			getequipisequiped(<n>)
+			
+			n		数値
+			
+			装備していたら1、していなかったら0を返します。
+			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
+			
+		getequipisenableref関数
+			getequipisenableref(<n>)
+			
+			n		数値
+			
+			精錬できる場合は1、できない場合は0を返します。
+			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
+			
+		getequipisidentify関数
+			getequipisidentify(<n>)
+			
+			n		数値
+			
+			鑑定済みの場合1、未鑑定の場合0を返します。
+			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
+			
+		getequiprefinerycnt関数
+			getequiprefinerycnt(<n>)
+			
+			n		数値
+			
+			精錬の度合いを返します。
+			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
+			
+		getequipweaponlv関数
+			getequipweaponlv(<n>)
+			
+			n		数値
+			
+			武器LVを返します。防具の場合には0、あとは武器LVに対応します。
+			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
+			
+		getequippercentrefinery関数
+			getequippercentrefinery(<n>)
+			
+			n		数値
+			
+			精錬成功率を返します。
+			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
+			
+		getusers関数
+			getusers(<n>)
+			
+			n		数値
+			
+			人数を返します。
+			n:0,PCのいるMAPの総人数、1,全MAPの総人数（即ちログイン人数）、8,NPCの存在するMAPの総人数
+			
+		getmapusers関数
+			getmapusers(<gatname>)
+			
+			gatname		文字列
+			
+			<gatname>に存在する総人数を返します。
+			
+		getareausers関数
+			getareausers(<gatname>,<x0>,<y0>,<x1>,<y1>)
+			
+			gatname		文字列
+			x0,y0,x1,y1	数値
+			
+			<gatname>の<x0>,<y0>から<x1>,<y1>の範囲内にいる人数を返します。
+			
+		getskilllv関数
+			getskilllv(<skillid>)
+			
+			skillid		数値
+			
+			<skillid>で指定したIDを持つスキルのLVを返します。習得していない場合は0を返します。
+			
+		getcharid関数
+			getcharid(<n>)
+			
+			n		数値
+			
+			キャラ情報をIDで返します。
+			n:1,パーティー、2,ギルド
+			
+		getpartyname関数
+			getpartyname(<n>)
+			
+			n		数値
+			
+			<n>で指定したIDを持つパーティー名を返します。
+			
+		getguildid関数
+			getguildname(<n>)
+			
+			n		数値
+			
+			<n>で指定したIDを持つギルド名を返します。
+			
+			
+	＊定数ラベル
+		-ラベル
+			if文やmenu文で使用します。次の行からスクリプトを開始します。
+			
+		OnInitラベル
+			MAPがロードされたときスクリプトを開始します。
+			
+	＊注意事項
+		文字列と説明されている引数は""で囲ってください。
+		
+４．あとがき
+	この文章を作成するにあたり、snapshotに含まれるNPCを参考にしました。
+	NPCを作成した方々に感謝します。
+	
+text by asong(2004/3/1

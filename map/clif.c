@@ -959,7 +959,7 @@ int clif_spawnnpc(struct npc_data *nd)
 	unsigned char buf[64];
 	int len;
 
-	if(nd->class == INVISIBLE_CLASS)
+	if(nd->class < 0 || nd->flag&1 || nd->class == INVISIBLE_CLASS)
 		return 0;
 
 	memset(buf,0,packet_len_table[0x7c]);
@@ -5429,7 +5429,7 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
  */
 void clif_parse_QuitGame(int fd,struct map_session_data *sd)
 {
-	if(sd->opt1 || sd->opt2)
+	if(!pc_isdead(sd) && (sd->opt1 || sd->opt2))
 		return;
 	WFIFOW(fd,0)=0x18b;
 	WFIFOW(fd,2)=0;
@@ -5646,6 +5646,8 @@ void clif_parse_Restart(int fd,struct map_session_data *sd)
 		}
 		break;
 	case 0x01:
+		if(!pc_isdead(sd) && (sd->opt1 || sd->opt2))
+			return;
 		chrif_charselectreq(sd);
 		break;
 	}

@@ -2282,7 +2282,7 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 	}
 	range = skill_get_range(md->skillid,md->skilllv);
 	if(range < 0)
-		range = (1 - range) + battle_get_range(&md->bl);
+		range = battle_get_range(&md->bl) - (range + 1);
 	if(range + battle_config.mob_skill_add_range < distance(md->bl.x,md->bl.y,bl->x,bl->y))
 		return 0;
 	md->skilldelay[md->skillidx]=tick;
@@ -2396,7 +2396,7 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 
 	range = skill_get_range(md->skillid,md->skilllv);
 	if(range < 0)
-		range = (1 - range) + battle_get_range(&md->bl);
+		range = battle_get_range(&md->bl) - (range + 1);
 	if(range + battle_config.mob_skill_add_range < distance(md->bl.x,md->bl.y,md->skillx,md->skilly))
 		return 0;
 	md->skilldelay[md->skillidx]=tick;
@@ -2444,7 +2444,7 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	// 射程と障害物チェック
 	range = skill_get_range(skill_id,skill_lv);
 	if(range < 0)
-		range = (1 - range) + battle_get_range(&md->bl);
+		range = battle_get_range(&md->bl) - (range + 1);
 	if(!battle_check_range(&md->bl,target,range))
 		return 0;
 
@@ -2527,7 +2527,7 @@ int mobskill_use_pos( struct mob_data *md,
 	bl.y = skill_y;
 	range = skill_get_range(skill_id,skill_lv);
 	if(range < 0)
-		range = (1 - range) + battle_get_range(&md->bl);
+		range = battle_get_range(&md->bl) - (range + 1);
 	if(!battle_check_range(&md->bl,&bl,range))
 		return 0;
 
