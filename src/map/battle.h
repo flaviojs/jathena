@@ -274,6 +274,7 @@ extern struct Battle_Config {
 	int hide_GM_session;
 	int unit_movement_type;
 	int invite_request_check;
+	int skill_removetrap_type;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

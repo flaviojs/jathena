@@ -1050,3 +1050,11 @@ R 01f0 <len>.w {<index>.w <item ID>.w <type>.B <identify flag>.B <amount>.w ?.2B
 カプラさんに預けてある消耗品&収集品リスト
 00a5から変更
 
+
+R 01f4 <name>.24B <trade id?>.L <LV>.w
+先方から取引要請
+00e5から変更
+
+R 01f5 <result>.B <trade id?>.L <LV>.w
+こちらからの取引要請に対する反応
+00e7から変更

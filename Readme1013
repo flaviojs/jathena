@@ -1,3 +1,28 @@
+--------------------
+//1015 by (凸)
+・リムーブトラップを本鯖仕様とAthena仕様で選べるようにした
+・スパノビにAll+10する条件が良く分からなかったけど最初から+10じゃないのは確かなのでとりあえずBase99で一度も死んでなければという条件に変更
+・ダンス中に吹き飛ばされてもエフェクトは移動しないそうなので変更
+・@go 13微調整
+
+
+	(conf/)
+	battle_athena.conf skill_removetrap_type追加
+	(doc/)
+	client_packet.txt 本鯖相違スレッド part3 23 M ＠zqcM6jBwさんの情報を追加
+	conf_ref.txt skill_removetrap_type追加
+	(map/)
+	atcommand.c
+		atcommand_go() ウンバラの出現位置微調整
+	battle.c
+		battle_config_read() skill_removetrap_type追加
+	battle.h 同上
+	pc.c
+		pc_calcstatus() スパノビAll+10条件変更
+	skill.c
+		skill_blown() ダンス中の吹き飛ばしを元に戻した
+		skill_castend_nodamage_id() リムーブトラップ仕様変更
+
  --------------------
 //1014 by (Pepermint)
 I fixed again the problem if you put minus sign(-) in front of digits, 
@@ -6,6 +31,7 @@ When you put a minus sign(-), the error sign will be changed shrotage of
 amount as original server dose.
 
 I tested with it in ver. 1013, it was working
+
 --------------------
 //1013 by (凸)
 ・サーバースナップショット

@@ -4872,6 +4872,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.hide_GM_session = 0;
 		battle_config.unit_movement_type = 0;
 		battle_config.invite_request_check = 1;
+		battle_config.skill_removetrap_type = 0;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4903,7 +4904,7 @@ int battle_config_read(const char *cfgName)
 			{ "random_monster_checklv",		&battle_config.random_monster_checklv	},
 			{ "attribute_recover",			&battle_config.attr_recover				},
 			{ "flooritem_lifetime",			&battle_config.flooritem_lifetime		},
-			{ "item_auto_get",		&battle_config.item_auto_get		},
+			{ "item_auto_get",				&battle_config.item_auto_get			},
 			{ "item_first_get_time",		&battle_config.item_first_get_time		},
 			{ "item_second_get_time",		&battle_config.item_second_get_time		},
 			{ "item_third_get_time",		&battle_config.item_third_get_time		},
@@ -5036,9 +5037,10 @@ int battle_config_read(const char *cfgName)
 			{ "gx_dupele", 					&battle_config.gx_dupele				},
 			{ "gx_disptype", 				&battle_config.gx_disptype				},
 			{ "player_skill_partner_check",	&battle_config.player_skill_partner_check},
-			{ "hide_GM_session",	&battle_config.hide_GM_session},
-			{ "unit_movement_type",	&battle_config.unit_movement_type},
-			{ "invite_request_check",	&battle_config.invite_request_check},
+			{ "hide_GM_session",			&battle_config.hide_GM_session			},
+			{ "unit_movement_type",			&battle_config.unit_movement_type		},
+			{ "invite_request_check",		&battle_config.invite_request_check		},
+			{ "skill_removetrap_type",		&battle_config.skill_removetrap_type	},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

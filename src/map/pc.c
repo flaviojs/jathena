@@ -1316,8 +1316,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		}
 	}
 
-	//1度も死んでないスパノビに+10
-	if(s_class.job == 23 && sd->die_counter == 0){
+	//1度も死んでないJob70スパノビに+10
+	if(s_class.job == 23 && sd->die_counter == 0 && sd->status.base_level >= 99){
 		sd->paramb[0]+= 10;
 		sd->paramb[1]+= 10;
 		sd->paramb[2]+= 10;
@@ -3964,16 +3964,27 @@ int pc_checkbaselevelup(struct map_session_data *sd)
 	}
 
 	if(sd->status.base_exp >= next && next > 0){
+		struct pc_base_job 	s_class = pc_calc_base_job(sd->status.class);
+
 		// base側レベルアップ処理
 		sd->status.base_exp -= next;
 
 		sd->status.base_level ++;
-		clif_updatestatus(sd,SP_BASELEVEL);
-		clif_updatestatus(sd,SP_NEXTBASEEXP);
 		sd->status.status_point += (sd->status.base_level+14) / 5 ;
 		clif_updatestatus(sd,SP_STATUSPOINT);
+		clif_updatestatus(sd,SP_BASELEVEL);
+		clif_updatestatus(sd,SP_NEXTBASEEXP);
 		pc_calcstatus(sd,0);
 		pc_heal(sd,sd->status.max_hp,sd->status.max_sp);
+
+		//スパノビはキリエ、イムポ、マニピ、グロ、サフラLv1がかかる
+		if(s_class.job == 23){
+			skill_status_change_start(&sd->bl,SkillStatusChangeTable[PR_KYRIE],1,0,0,0,skill_get_time(PR_KYRIE,1),0 );
+			skill_status_change_start(&sd->bl,SkillStatusChangeTable[PR_IMPOSITIO],1,0,0,0,skill_get_time(PR_IMPOSITIO,1),0 );
+			skill_status_change_start(&sd->bl,SkillStatusChangeTable[PR_MAGNIFICAT],1,0,0,0,skill_get_time(PR_MAGNIFICAT,1),0 );
+			skill_status_change_start(&sd->bl,SkillStatusChangeTable[PR_GLORIA],1,0,0,0,skill_get_time(PR_GLORIA,1),0 );
+			skill_status_change_start(&sd->bl,SkillStatusChangeTable[PR_SUFFRAGIUM],1,0,0,0,skill_get_time(PR_SUFFRAGIUM,1),0 );
+		}
 
 		clif_misceffect(&sd->bl,0);
 		//レベルアップしたのでパーティー情報を更新する

@@ -1106,6 +1106,10 @@ invite_request_check
 	プレイヤーが各種要請中(PT加入、Guild加入、取引)に他の要請を受け入れるかどうかです。
 	yesで本鯖仕様、noでAthena仕様(受け入れない)
 	デフォルトはyes(受け入れる)です。
+skill_removetrap_type
+	リムーブトラップの仕様を選択します。
+	0:本鯖仕様で罠1個を取得する
+	1:Athena仕様で使ったアイテムを使った個数を取得する
 
 import
 	その行を別ファイルの中身と置き換えます。
@@ -1255,6 +1259,7 @@ pc_atack_attr_none: no
 mob_atack_attr_none: yes
 player_skill_partner_check: yes
 hide_GM_session: no
+invite_request_check: yes
 unit_movement_type: 0
 
 ==========================================================================

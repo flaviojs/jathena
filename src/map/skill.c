@@ -782,16 +782,18 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 	if(su){
 		skill_unit_move_unit_group(su->group,target->m,dx,dy);
 	}else{
-		struct status_change *sc_data=battle_get_sc_data(target);
+//		struct status_change *sc_data=battle_get_sc_data(target);
 		if(moveblock) map_delblock(target);
 		target->x=nx;
 		target->y=ny;
 		if(moveblock) map_addblock(target);
+/*ダンス中にエフェクトは移動しないらしい
 		if(sc_data && sc_data[SC_DANCING].timer!=-1){ //対象がダンス中なのでエフェクトも移動
 			struct skill_unit_group *sg=(struct skill_unit_group *)sc_data[SC_DANCING].val2;
 			if(sg)
 				skill_unit_move_unit_group(sg,target->m,dx,dy);
 		}
+*/
 	}
 
 	if(sd) {	/* 画面内に入ってきたので表示 */
@@ -3338,15 +3340,25 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			   (su->group->unit_id >= 0x8f && su->group->unit_id <= 0x99) &&
 			   (su->group->unit_id != 0x92)){ //罠を取り返す
 				if(sd){
-					for(i=0;i<10;i++) {
-						if(skill_db[su->group->skill_id].itemid[i] > 0){
-							memset(&item_tmp,0,sizeof(item_tmp));
-							item_tmp.nameid = skill_db[su->group->skill_id].itemid[i];
-							item_tmp.identify = 1;
-							if(item_tmp.nameid && (flag=pc_additem(sd,&item_tmp,skill_db[su->group->skill_id].amount[i]))){
-								clif_additem(sd,0,0,flag);
-								map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+					if(battle_config.skill_removetrap_type == 1){
+						for(i=0;i<10;i++) {
+							if(skill_db[su->group->skill_id].itemid[i] > 0){
+								memset(&item_tmp,0,sizeof(item_tmp));
+								item_tmp.nameid = skill_db[su->group->skill_id].itemid[i];
+								item_tmp.identify = 1;
+								if(item_tmp.nameid && (flag=pc_additem(sd,&item_tmp,skill_db[su->group->skill_id].amount[i]))){
+									clif_additem(sd,0,0,flag);
+									map_addflooritem(&item_tmp,skill_db[su->group->skill_id].amount[i],sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+								}
 							}
+						}
+					}else{
+						memset(&item_tmp,0,sizeof(item_tmp));
+						item_tmp.nameid = 1065;
+						item_tmp.identify = 1;
+						if(item_tmp.nameid && (flag=pc_additem(sd,&item_tmp,1))){
+							clif_additem(sd,0,0,flag);
+							map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 						}
 					}
 				}
