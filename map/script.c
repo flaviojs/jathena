@@ -96,9 +96,11 @@ int buildin_failedrefitem(struct script_state *st);
 int buildin_cutin(struct script_state *st);
 int buildin_bonus(struct script_state *st);
 int buildin_bonus2(struct script_state *st);
+int buildin_bonus3(struct script_state *st);
 int buildin_skill(struct script_state *st);
 int buildin_getskilllv(struct script_state *st);
 int buildin_basicskillcheck(struct script_state *st);
+int buildin_getgmlevel(struct script_state *st);
 int buildin_end(struct script_state *st);
 int buildin_setoption(struct script_state *st);
 int buildin_setcart(struct script_state *st);
@@ -130,6 +132,7 @@ int buildin_catchpet(struct script_state *st);
 int buildin_birthpet(struct script_state *st);
 int buildin_resetstatus(struct script_state *st);
 int buildin_resetskill(struct script_state *st);
+int buildin_changebase(struct script_state *st);
 int buildin_waitingroom(struct script_state *st);
 int buildin_warpwaitingpc(struct script_state *st);
 int buildin_setmapflagnosave(struct script_state *st);
@@ -183,9 +186,11 @@ struct {
 	{buildin_failedrefitem,"failedrefitem","i"},
 	{buildin_bonus,"bonus","ii"},
 	{buildin_bonus2,"bonus2","iii"},
+	{buildin_bonus3,"bonus3","iiii"},
 	{buildin_skill,"skill","ii*"},
 	{buildin_getskilllv,"getskilllv","i"},
 	{buildin_basicskillcheck,"basicskillcheck","*"},
+	{buildin_getgmlevel,"getgmlevel","*"},
 	{buildin_end,"end",""},
 	{buildin_setoption,"setoption","i"},
 	{buildin_setcart,"setcart",""},
@@ -217,6 +222,7 @@ struct {
 	{buildin_birthpet,"bpet",""},
 	{buildin_resetstatus,"resetstatus",""},
 	{buildin_resetskill,"resetskill",""},
+	{buildin_changebase,"changebase","i"},
 	{buildin_waitingroom,"waitingroom","si*"},
 	{buildin_warpwaitingpc,"warpwaitingpc","sii"},
 	{buildin_setmapflag,"setmapflagnosave","ssii"},
@@ -1539,7 +1545,7 @@ int buildin_strcharinfo(struct script_state *st)
 	return 0;
 }
 
-int equip[10]={0x0100,0x0010,0x0020,0x0002,0x0004,0x0040,0x0008,0x0080,0x0200,0x0001};
+unsigned int equip[10]={0x0100,0x0010,0x0020,0x0002,0x0004,0x0040,0x0008,0x0080,0x0200,0x0001};
 
 /*==========================================
  * 装備名文字列（精錬メニュー用）
@@ -1559,10 +1565,13 @@ int buildin_getequipname(struct script_state *st)
 	}
 	sd=map_id2sd(st->rid);
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	i=pc_equipitemindex(sd,equip[num-1]);
-	if(i<MAX_INVENTORY){
-		item=itemdb_search(sd->status.inventory[i].nameid);
-		sprintf(buf,"%s-[%s]",pos[num-1],item->jname);
+	i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0){
+		item=sd->inventory_data[i];
+		if(item)
+			sprintf(buf,"%s-[%s]",pos[num-1],item->jname);
+		else
+			sprintf(buf,"%s-[%s]",pos[num-1],pos[10]);
 	}else{
 		sprintf(buf,"%s-[%s]",pos[num-1],pos[10]);
 	}
@@ -1582,8 +1591,8 @@ int buildin_getequipisequiped(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=map_id2sd(st->rid);
-	i=pc_equipitemindex(sd,equip[num-1]);
-	if(i<MAX_INVENTORY){
+	i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0){
 		push_val(st->stack,C_INT,1);
 	}else{
 		push_val(st->stack,C_INT,0);
@@ -1603,10 +1612,10 @@ int buildin_getequipisenableref(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=map_id2sd(st->rid);
-	i=pc_equipitemindex(sd,equip[num-1]);
-	if(num<7 && (num!=1 || itemdb_def(sd->status.inventory[i].nameid)>1
-	             || (itemdb_def(sd->status.inventory[i].nameid)==1 && itemdb_equipscript(sd->status.inventory[i].nameid)==NULL)
-	             || (itemdb_def(sd->status.inventory[i].nameid)==0 && itemdb_equipscript(sd->status.inventory[i].nameid)!=NULL))
+	i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0 && num<7 && sd->inventory_data[i] && (num!=1 || sd->inventory_data[i]->def > 1
+	             || (sd->inventory_data[i]->def==1 && sd->inventory_data[i]->equip_script==NULL)
+	             || (sd->inventory_data[i]->def<=0 && sd->inventory_data[i]->equip_script!=NULL))
 	   ){
 		push_val(st->stack,C_INT,1);
 	}else{
@@ -1627,8 +1636,11 @@ int buildin_getequipisidentify(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=map_id2sd(st->rid);
-	i=pc_equipitemindex(sd,equip[num-1]);
-	push_val(st->stack,C_INT,sd->status.inventory[i].identify);
+	i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0)
+		push_val(st->stack,C_INT,sd->status.inventory[i].identify);
+	else
+		push_val(st->stack,C_INT,0);
 
 	return 0;
 }
@@ -1644,8 +1656,11 @@ int buildin_getequiprefinerycnt(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=map_id2sd(st->rid);
-	i=pc_equipitemindex(sd,equip[num-1]);
-	push_val(st->stack,C_INT,sd->status.inventory[i].refine);
+	i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0)
+		push_val(st->stack,C_INT,sd->status.inventory[i].refine);
+	else
+		push_val(st->stack,C_INT,0);
 
 	return 0;
 }
@@ -1661,8 +1676,11 @@ int buildin_getequipweaponlv(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=map_id2sd(st->rid);
-	i=pc_equipitemindex(sd,equip[num-1]);
-	push_val(st->stack,C_INT,itemdb_wlv(sd->status.inventory[i].nameid));
+	i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0 && sd->inventory_data[i])
+		push_val(st->stack,C_INT,sd->inventory_data[i]->wlv);
+	else
+		push_val(st->stack,C_INT,0);
 
 	return 0;
 }
@@ -1678,8 +1696,11 @@ int buildin_getequippercentrefinery(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=map_id2sd(st->rid);
-	i=pc_equipitemindex(sd,equip[num-1]);
-	push_val(st->stack,C_INT,pc_percentrefinery(sd,&sd->status.inventory[i]));
+	i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0)
+		push_val(st->stack,C_INT,pc_percentrefinery(sd,&sd->status.inventory[i]));
+	else
+		push_val(st->stack,C_INT,0);
 
 	return 0;
 }
@@ -1695,16 +1716,18 @@ int buildin_successrefitem(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=map_id2sd(st->rid);
-	i=pc_equipitemindex(sd,equip[num-1]);
-	ep=sd->status.inventory[i].equip;
+	i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0) {
+		ep=sd->status.inventory[i].equip;
 
-	sd->status.inventory[i].refine++;
-	pc_unequipitem(sd,i);
-	clif_refine(sd->fd,sd,0,i,sd->status.inventory[i].refine);
-	clif_delitem(sd,i,1);
-	clif_additem(sd,i,1,0);
-	pc_equipitem(sd,i,ep);
-	clif_misceffect(&sd->bl,3);
+		sd->status.inventory[i].refine++;
+		pc_unequipitem(sd,i,0);
+		clif_refine(sd->fd,sd,0,i,sd->status.inventory[i].refine);
+		clif_delitem(sd,i,1);
+		clif_additem(sd,i,1,0);
+		pc_equipitem(sd,i,ep);
+		clif_misceffect(&sd->bl,3);
+	}
 
 	return 0;
 }
@@ -1720,10 +1743,15 @@ int buildin_failedrefitem(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=map_id2sd(st->rid);
-	i=pc_equipitemindex(sd,equip[num-1]);
-	pc_unequipitem(sd,i);
-	clif_refine(sd->fd,sd,1,i,sd->status.inventory[i].refine);
-	pc_delitem(sd,i,1,0);
+	i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0) {
+		pc_unequipitem(sd,i,0);
+		// 精錬失敗エフェクトのパケット
+		clif_refine(sd->fd,sd,1,i,sd->status.inventory[i].refine);
+		pc_delitem(sd,i,1,0);
+		// 他の人にも失敗を通知
+		clif_misceffect(&sd->bl,2);
+	}
 
 	return 0;
 }
@@ -1762,6 +1790,24 @@ int buildin_bonus2(struct script_state *st)
 	return 0;
 }
 /*==========================================
+ * 装備品による能力値ボーナス
+ *------------------------------------------
+ */
+int buildin_bonus3(struct script_state *st)
+{
+	int type,type2,type3,val;
+	struct map_session_data *sd;
+
+	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	type2=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	type3=conv_num(st,& (st->stack->stack_data[st->start+4]));
+	val=conv_num(st,& (st->stack->stack_data[st->start+5]));
+	sd=map_id2sd(st->rid);
+	pc_bonus3(sd,type,type2,type3,val);
+
+	return 0;
+}
+/*==========================================
  * スキル所得
  *------------------------------------------
  */
@@ -1796,6 +1842,15 @@ int buildin_getskilllv(struct script_state *st)
 int buildin_basicskillcheck(struct script_state *st)
 {
 	push_val(st->stack,C_INT, battle_config.basic_skill_check);
+	return 0;
+}
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int buildin_getgmlevel(struct script_state *st)
+{
+	push_val(st->stack,C_INT, pc_isGM(map_id2sd(st->rid)));
 	return 0;
 }
 
@@ -1942,7 +1997,7 @@ int buildin_monster(struct script_state *st)
 	amount=conv_num(st,& (st->stack->stack_data[st->start+7]));
 	if( st->end>st->start+8 )
 		event=conv_str(st,& (st->stack->stack_data[st->start+8]));
-	
+
 	mob_once_spawn(sd,map,x,y,str,class,amount,event);
 	return 0;
 }
@@ -1966,7 +2021,7 @@ int buildin_areamonster(struct script_state *st)
 	amount=conv_num(st,& (st->stack->stack_data[st->start+9]));
 	if( st->end>st->start+10 )
 		event=conv_str(st,& (st->stack->stack_data[st->start+10]));
-	
+
 	mob_once_spawn_area(sd,map,x0,y0,x1,y1,str,class,amount,event);
 	return 0;
 }
@@ -2287,6 +2342,23 @@ int buildin_resetskill(struct script_state *st)
 	pc_resetskill(sd);
 	return 0;
 }
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int buildin_changebase(struct script_state *st)
+{
+	struct map_session_data *sd;
+	int vclass;
+	sd=map_id2sd(st->rid);
+	vclass = conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if(vclass == 22 && !battle_config.wedding_modifydisplay)
+		return 0;
+	sd->view_class = vclass;
+	return 0;
+}
+
 /*==========================================
  * npcチャット作成
  *------------------------------------------
@@ -2920,7 +2992,7 @@ int script_config_read(char *cfgName)
 	while(fgets(line,1020,fp)){
 		if(line[0] == '/' && line[1] == '/')
 			continue;
-		i=sscanf(line,"%[^:]:%s",w1,w2);
+		i=sscanf(line,"%[^:]: %[^\r\n]",w1,w2);
 		if(i!=2)
 			continue;
 		if(strcmpi(w1,"refine_posword")==0) {
@@ -2940,7 +3012,5 @@ int do_init_script()
 {
 	mapval_db=strdb_init(32);
 	scriptlabel_db=strdb_init(50);
-	script_config_read(SCRIPT_CONF_NAME);
 	return 0;
 }
-

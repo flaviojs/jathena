@@ -263,7 +263,7 @@ int storage_storageaddfromcart(struct map_session_data *sd,int index,int amount)
 		if(index>=0 && index<MAX_INVENTORY) { // valid index
 			if( (amount <= sd->status.cart[index].amount) && (amount > 0) ) { //valid amount
 				if(storage_additem(sd,stor,&sd->status.cart[index],amount)==0)
-					pc_cart_delitem(sd,index,amount);
+					pc_cart_delitem(sd,index,amount,0);
 			} // valid amount
 		}// valid index
 	}// storage not full & storage open
@@ -324,6 +324,16 @@ int storage_storage_quitsave(struct map_session_data *sd)
 				intif_send_storage(account_id);
 			}
 		}
+	}
+	return 0;
+}
+
+int storage_storage_save(struct map_session_data *sd)
+{
+	int i,account_id=sd->status.account_id;
+	for(i=0;i<storage_num;i++){
+		if(account_id==storage[i].account_id)
+			intif_send_storage(account_id);
 	}
 	return 0;
 }

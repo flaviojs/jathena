@@ -106,7 +106,9 @@ bGetZenyNum	1041
 bAddGetZenyNum	1042
 bAddDamageClass	1043
 bAddMagicDamageClass	1044
-bAddMonsterDropItem	1045
+bAddDefClass	1045
+bAddMDefClass	1046
+bAddMonsterDropItem	1047
 bRestartFullRecover	2000
 bNoCastCancel	2001
 bNoSizeFix	2002
@@ -114,6 +116,7 @@ bNoMagicDamage	2003
 bNoWeaponDamage	2004
 bNoGemStone	2005
 bDefRatioAtk	2006
+bNoCastCancel2	2007
 
 Eff_Stone	0
 Eff_Freeze	1

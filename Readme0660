@@ -1,4 +1,39 @@
 --------------
+//0683 by 死神
+
+・バグ修正とbonus追加。
+・倉庫バグ、属性バグ修正とその他のバグ修正。
+・スクリプトbonus3追加。今はbAddMonsterDropItemだけが対応になっています。
+・bonus bRestartFullRecover;n;等でnは無意味だけど消すのはちょっとまずいですので0にして入れた方がいいです。bonusは2つの数値が必要なスクリプトなので。
+・bDefRatioAtkを防御無視に変更。
+・0677で書き忘れ。
+・武器の属性適用優先順位を製造>カード>武器に変更。製造が最優先です。
+・装備で適用される効果の優先順位を右手>左手>体>頭上>頭中>頭下>ローブ>靴>アクセサリー1>アクセサリー2>矢に設定。(本鯖仕様がどうなのか分かることができそうな物でもないのでアテナの仕様と言うことで。) 右手が最優先です。
+・武器の射程を右手と左手の武器の中で長い物を適用するように変更。
+	(db/)
+	const.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	(map/)
+	map.h 修正。
+	battle.c
+		battle_calc_pc_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pet_weapon_attack()、battle_calc_magic_attack() 修正。
+		battle_damage() 修正。
+	pc.c
+		pc_autosave_sub()、pc_calcstatus() 修正。
+		pc_bonus()、pc_bonus2() 修正。
+		pc_bonus3() 追加。
+	script.c
+		buildin_bonus3() 追加。
+	mob.c
+		mob_once_spawn()、mob_damage() 修正。
+	storage.h 修正。
+	storage.c
+		storage_storage_save() 追加
+	atcommand.c 修正。
+
+--------------
 //0682 by 聖
 
 ・スピードアップポーション系のバグ修正

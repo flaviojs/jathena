@@ -610,7 +610,7 @@ z [0～4]服の色
 					else mx = x;
 					if(y<=0) my=sd->bl.y + (rand()%10 - 5);
 					else my = y;
-					count+=mob_once_spawn(sd,"this",mx,my,temp1,i1,1,"");
+					count+=(mob_once_spawn(sd,"this",mx,my,temp1,i1,1,"")!=0)? 1:0;
 				}
 				if(count != 0){
 					clif_displaymessage(fd,"モンスター召喚 !!");

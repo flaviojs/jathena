@@ -87,8 +87,8 @@ int mob_spawn_dataset(struct mob_data *md,const char *mobname,int class)
 int mob_once_spawn(struct map_session_data *sd,char *mapname,
 	int x,int y,const char *mobname,int class,int amount,const char *event)
 {
-	struct mob_data *md;
-	int m;
+	struct mob_data *md=NULL;
+	int m,count;
 
 	if(strcmp(mapname,"this")==0)
 		m=sd->bl.m;
@@ -118,7 +118,7 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 	if(x<=0) x=sd->bl.x;
 	if(y<=0) y=sd->bl.y;
 
-	for(;amount>0;amount--){
+	for(count=0;count<amount;count++){
 		md=malloc(sizeof(struct mob_data));
 		if(md==NULL){
 			printf("mob_once_spawn: out of memory !\n");
@@ -1727,27 +1727,28 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 	if(sd && sd->state.attack_type == BF_WEAPON) {
 		for(i=0;i<sd->monster_drop_item_count;i++) {
 			struct delay_item_drop *ditem;
-			int drop_rate;
+			int race = battle_get_race(&md->bl);
 			if(sd->monster_drop_itemid[i] <= 0)
 				continue;
-			drop_rate = sd->monster_drop_itemrate[i];
-			if(battle_config.item_rate != 100)
-				drop_rate = (drop_rate * battle_config.item_rate)/100;
-			if(drop_rate <= rand()%10000)
-				continue;
+			if(sd->monster_drop_race[i] & (1<<race) || 
+				(mob_db[md->class].mexp > 0 && sd->monster_drop_race[i] & 1<<10) ||
+				(mob_db[md->class].mexp <= 0 && sd->monster_drop_race[i] & 1<<11) ) {
+				if(sd->monster_drop_itemrate[i] <= rand()%10000)
+					continue;
 
-			ditem=malloc(sizeof(*ditem));
-			if(ditem==NULL){
-				printf("out of memory : mob_damage\n");
-				exit(1);
+				ditem=malloc(sizeof(*ditem));
+				if(ditem==NULL){
+					printf("out of memory : mob_damage\n");
+					exit(1);
+				}
+
+				ditem->nameid=sd->monster_drop_itemid[i];
+				ditem->amount=1;
+				ditem->m=md->bl.m;
+				ditem->x=md->bl.x;
+				ditem->y=md->bl.y;
+				add_timer(gettick()+520+i,mob_delay_item_drop,(int)ditem,0);
 			}
-
-			ditem->nameid=sd->monster_drop_itemid[i];
-			ditem->amount=1;
-			ditem->m=md->bl.m;
-			ditem->x=md->bl.x;
-			ditem->y=md->bl.y;
-			add_timer(gettick()+520+i,mob_delay_item_drop,(int)ditem,0);
 		}
 		if(sd->get_zeny_num > 0)
 			pc_getzeny(sd,rand()%sd->get_zeny_num + 1);

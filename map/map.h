@@ -122,11 +122,13 @@ struct map_session_data {
 	struct {
 		unsigned restart_full_recover : 1;
 		unsigned no_castcancel : 1;
+		unsigned no_castcancel2 : 1;
 		unsigned no_sizefix : 1;
 		unsigned no_magic_damage : 1;
 		unsigned no_weapon_damage : 1;
 		unsigned no_gemstone : 1;
 		unsigned def_ratio_atk : 1;
+		unsigned def_ratio_atk_ : 1;
 	} special_state;
 	int char_id,login_id1,login_id2,sex;
 	struct mmo_charstatus status;
@@ -194,9 +196,12 @@ struct map_session_data {
 	int add_damage_class_count,add_damage_class_count_,add_magic_damage_class_count;
 	short add_damage_classid[10],add_damage_classid_[10],add_magic_damage_classid[10];
 	int add_damage_classrate[10],add_damage_classrate_[10],add_magic_damage_classrate[10];
+	int add_def_class_count,add_mdef_class_count;
+	int add_def_classid[10],add_mdef_classid[10];
+	int add_def_classrate[10],add_mdef_classrate[10];
 	int monster_drop_item_count;
 	short monster_drop_itemid[10];
-	int monster_drop_itemrate[10];
+	int monster_drop_race[10],monster_drop_itemrate[10];
 	short spiritball, spiritball_old;
 	int spirit_timer[10];
 	unsigned short combo_flag, skill_old;
@@ -404,10 +409,11 @@ enum {
 	SP_IGNORE_MDEF_ELE,SP_IGNORE_MDEF_RACE, // 1033-1034
 	SP_MAGIC_ADDELE,SP_MAGIC_ADDRACE,SP_MAGIC_SUBRACE, // 1035-1037
 	SP_PERFECT_HIT_RATE,SP_PERFECT_HIT_ADD_RATE,SP_CRITICAL_RATE,SP_GET_ZENY_NUM,SP_ADD_GET_ZENY_NUM, // 1038-1042
-	SP_ADD_DAMAGE_CLASS,SP_ADD_MAGIC_DAMAGE_CLASS,ADD_MONSTER_DROP_ITEM, // 1043-1045
+	SP_ADD_DAMAGE_CLASS,SP_ADD_MAGIC_DAMAGE_CLASS,SP_ADD_DEF_CLASS,SP_ADD_MDEF_CLASS, // 1043-1046
+	ADD_MONSTER_DROP_ITEM, // 1047-
 
 	SP_RESTART_FULL_RECORVER=2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
-	SP_DEF_RATIO_ATK, // 2006-
+	SP_DEF_RATIO_ATK,SP_NO_CASTCANCEL2, // 2006-2007
 };
 
 enum {

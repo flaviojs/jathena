@@ -61,13 +61,14 @@ bonus bAtkEle,n;		武器にnの属性付与
 bonus bDefEle,n;		防具にnの属性付与
 					0,無　1,水　2,土　3,火　4,風　5,毒　6,聖　7,闇　8,念　9,不死
 
-bonus bDefRatioAtk;		相手の防御力が高ければ高いほど大きなダメージを与える(防御は無視されない)
-bonus bRestartFullRecover;	復活した時HPとSPを全て回復
-bonus bNoCastCancel;		キャスティングをキャンセルされない
-bonus bNoSizeFix;		モンスターのサイズによる攻撃補正を受けない
-bonus bNoWeaponDamage;		物理攻撃でダメージを受けない
-bonus bNoMagicDamage;		魔法でダメージを受けない(ヒールも含む)
-bonus bNoGemStone;		スキルを使う時ジェムストーンを消耗しない
+bonus bDefRatioAtk,n;	相手の防御力が高ければ高いほど大きなダメージを与える(防御無視、nは無意味)
+bonus bRestartFullRecover,n;	復活した時HPとSPを全て回復(nは無意味)
+bonus bNoCastCancel,n;		キャスティングをキャンセルされない(GVGではキャンセルされる、nは無意味)
+bonus bNoSizeFix,n;		モンスターのサイズによる攻撃補正を受けない(nは無意味)
+bonus bNoWeaponDamage,n;		物理攻撃でダメージを受けない(nは無意味)
+bonus bNoMagicDamage,n;		魔法でダメージを受けない(ヒールも含む、nは無意味)
+bonus bNoGemStone,n;		スキルを使う時ジェムストーンを消耗しない(nは無意味)
+bonus bNoCastCancel2,n;		キャスティングをキャンセルされない(GVGでもキャンセルされない、nは無意味)
 
 
 bonus2 bAddEff,Eff_Blind,n;	n%の確立で暗黒付与
@@ -101,15 +102,21 @@ bonus2 bAddEle,n,x;		n属性にx%のダメージ追加(物理攻撃のみ)
 bonus2 bSubEle,n,x;		n属性からのダメージx%軽減(魔法も軽減)
 					0,無　1,水　2,土　3,火　4,風　5,毒　6,聖　7,闇　8,念　9,不死
 
-bonus bMagicAddRace,n,x;	n種族にx%のダメージ追加(魔法攻撃のみ)
+bonus2 bMagicAddRace,n,x;	n種族にx%のダメージ追加(魔法攻撃のみ)
 					0,無形　1,不死　2,動物　3,植物　4,昆虫　5,魚貝　6,悪魔　7,人間　8,天使　9,竜族　10,ボスモンスター　11,ボスモンスター以外(普通のモンスター)
-bonus bMagicAddEle,n,x;		n属性にx%のダメージ追加(魔法攻撃のみ)
+bonus2 bMagicAddEle,n,x;		n属性にx%のダメージ追加(魔法攻撃のみ)
 					0,無　1,水　2,土　3,火　4,風　5,毒　6,聖　7,闇　8,念　9,不死
-bonus bMagicSubRace,n,x;	n種族からのダメージx%軽減(魔法攻撃のみ)
+bonus2 bMagicSubRace,n,x;	n種族からのダメージx%軽減(魔法攻撃のみ)
 					0,無形　1,不死　2,動物　3,植物　4,昆虫　5,魚貝　6,悪魔　7,人間　8,天使　9,竜族　10,ボスモンスター　11,ボスモンスター以外(普通のモンスター)
-bonus bAddDamageClass,n,x;	クラスnのモンスターにx%のダメージ追加(物理攻撃のみ)、プレイヤーの場合はn職業にx%のダメージ追加
-bonus bAddMagicDamageClass,n,x;	クラスnのモンスターにx%の魔法ダメージ追加、プレイヤーの場合はn職業にx%の魔法ダメージ追加
-bonus bAddMonsterDropItem,n,x;	物理攻撃でモンスターを倒した時アイテムnを落とす確率+x%(モンスターが落とすアイテムとは無関係の物)
+bonus2 bAddDamageClass,n,x;	クラスnのモンスターにx%のダメージ追加(物理攻撃のみ)、プレイヤーの場合はn職業にx%のダメージ追加
+bonus2 bAddMagicDamageClass,n,x;	クラスnのモンスターにx%の魔法ダメージ追加、プレイヤーの場合はn職業にx%の魔法ダメージ追加
+bonus2 bAddDefClass,n,x;	クラスnのモンスターにx%のダメージ軽減(物理攻撃のみ)、プレイヤーの場合はn職業にx%のダメージ軽減
+bonus2 bAddMDefClass,n,x;	クラスnのモンスターにx%の魔法ダメージ軽減、プレイヤーの場合はn職業にx%の魔法ダメージ軽減
+
+
+bonus3 bAddMonsterDropItem,n,x,y;	物理攻撃でモンスターを倒した時モンスターの種族がxならアイテムnを落とす確率+y%(モンスターが落とすアイテムとは無関係の物)
+					0,無形　1,不死　2,動物　3,植物　4,昆虫　5,魚貝　6,悪魔　7,人間　8,天使　9,竜族　10,ボスモンスター　11,ボスモンスター以外(普通のモンスター)
+
 
 bAddDamageClass、bAddMagicDamageClass、bAddMonsterDropItemは10個まで設定可能です。10個を越える物は無視されます。
 

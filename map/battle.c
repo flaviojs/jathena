@@ -693,8 +693,8 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 		struct map_session_data *tsd=(struct map_session_data *)target;
 		if(tsd->skilltimer!=-1){	// 詠唱妨害
 				// フェンカードや妨害されないスキルかの検査
-			if( (!tsd->special_state.no_castcancel || map[tsd->bl.m].flag.pvp || map[tsd->bl.m].flag.gvg )&&
-				tsd->state.skillcastcancel)
+			if( (!tsd->special_state.no_castcancel || map[bl->m].flag.gvg) && tsd->state.skillcastcancel &&
+				!tsd->special_state.no_castcancel2)
 				skill_castcancel(target);
 		}
 		return pc_damage(bl,tsd,damage);
@@ -1212,7 +1212,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	// 回避修正
 	if(hitrate < 1000000)
 		hitrate = ( (hitrate>95)?95: ((hitrate<5)?5:hitrate) );
-	if(	hitrate >= 1000000 ||			// 必中攻撃
+	if(	hitrate < 1000000 &&			// 必中攻撃
 		(t_sc_data != NULL && (t_sc_data[SC_SLEEP].timer!=-1 ||	// 睡眠は必中
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
 		t_sc_data[SC_FREEZE].timer!=-1 ) ) )	// 凍結は必中
@@ -1523,7 +1523,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	// 回避修正
 	if(hitrate < 1000000)
 		hitrate = ( (hitrate>95)?95: ((hitrate<5)?5:hitrate) );
-	if(	hitrate >= 1000000 ||			// 必中攻撃
+	if(	hitrate < 1000000 &&			// 必中攻撃
 		(t_sc_data != NULL && (t_sc_data[SC_SLEEP].timer!=-1 ||	// 睡眠は必中
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
 		t_sc_data[SC_FREEZE].timer!=-1 ) ) )	// 凍結は必中
@@ -1532,7 +1532,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		damage = 0;
 
 	if( target->type==BL_PC ){
-		int cardfix=100;
+		int cardfix=100,i;
 		cardfix=cardfix*(100-tsd->subrace[s_race])/100;	// 種族によるダメージ耐性
 		cardfix=cardfix*(100-tsd->subele[s_ele])/100;	// 属 性によるダメージ耐性
 		if(flag&BF_LONG)
@@ -1543,6 +1543,12 @@ static struct Damage battle_calc_mob_weapon_attack(
 			cardfix=cardfix*(100-tsd->subrace[10])/100;
 		else
 			cardfix=cardfix*(100-tsd->subrace[11])/100;
+		for(i=0;i<tsd->add_def_class_count;i++) {
+			if(tsd->add_def_classid[i] == md->class) {
+				cardfix=cardfix*(100-tsd->add_def_classrate[i])/100;
+				break;
+			}
+		}
 		damage=damage*cardfix/100;
 	}
 	if(damage < 0) damage =0;
@@ -1782,6 +1788,8 @@ static struct Damage battle_calc_pc_weapon_attack(
 
 		if(sd->special_state.def_ratio_atk)
 			damage = (damage * (def1 + def2))/100;
+		if(sd->special_state.def_ratio_atk_)
+			damage2 = (damage2 * (def1 + def2))/100;
 
 		// スキル修正１（攻撃力倍化系）
 		// オーバートラスト(+5% ～ +25%),他攻撃系スキルの場合ここで補正
@@ -1976,9 +1984,9 @@ static struct Damage battle_calc_pc_weapon_attack(
 				int idef_flag=0,idef_flag_=0;
 				t_vit = def2*8/10;
 				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
-				if(sd->ignore_def_ele & (1<<t_ele) || sd->ignore_def_race & (1<<t_race))
+				if(sd->ignore_def_ele & (1<<t_ele) || sd->ignore_def_race & (1<<t_race) || sd->special_state.def_ratio_atk)
 					idef_flag = 1;
-				if(sd->ignore_def_ele_ & (1<<t_ele) || sd->ignore_def_race_ & (1<<t_race))
+				if(sd->ignore_def_ele_ & (1<<t_ele) || sd->ignore_def_race_ & (1<<t_race) || sd->special_state.def_ratio_atk_)
 					idef_flag_ = 1;
 				if(tmd) {
 					if(mob_db[tmd->class].mexp > 0) {
@@ -2027,9 +2035,8 @@ static struct Damage battle_calc_pc_weapon_attack(
 	}
 
 	// 回避修正
-	if(hitrate < 1000000)
-		hitrate = (hitrate<5)?5:hitrate;
-	if(	hitrate >= 1000000 || // 必中攻撃
+	hitrate = (hitrate<5)?5:hitrate;
+	if(	hitrate < 1000000 && // 必中攻撃
 		(t_sc_data != NULL && (t_sc_data[SC_SLEEP].timer!=-1 ||	// 睡眠は必中
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
 		t_sc_data[SC_FREEZE].timer!=-1 ) ) )	// 凍結は必中
@@ -2095,6 +2102,12 @@ static struct Damage battle_calc_pc_weapon_attack(
 			cardfix=cardfix*(100-tsd->long_attack_def_rate)/100;
 		if(flag&BF_SHORT)
 			cardfix=cardfix*(100-tsd->near_attack_def_rate)/100;
+		for(i=0;i<tsd->add_def_class_count;i++) {
+			if(tsd->add_def_classid[i] == sd->status.class) {
+				cardfix=cardfix*(100-tsd->add_def_classrate[i])/100;
+				break;
+			}
+		}
 		damage=damage*cardfix/100;
 		damage2=damage2*cardfix/100;
 	}
@@ -2425,11 +2438,18 @@ struct Damage battle_calc_magic_attack(
 	}
 
 	if( target->type==BL_PC ){
+		int s_class = battle_get_class(bl);
 		cardfix=100;
 		cardfix=cardfix*(100-tsd->subele[ele])/100;	// 属 性によるダメージ耐性
 		cardfix=cardfix*(100-tsd->magic_subrace[race])/100;
 		cardfix=cardfix*(100-tsd->magic_def_rate)/100;
 		damage=damage*cardfix/100;
+		for(i=0;i<tsd->add_mdef_class_count;i++) {
+			if(tsd->add_mdef_classid[i] == s_class) {
+				cardfix=cardfix*(100-tsd->add_mdef_classrate[i])/100;
+				break;
+			}
+		}
 	}
 
 	if(skill_num == CR_GRANDCROSS) {	// グランドクロス

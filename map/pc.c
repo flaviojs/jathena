@@ -683,7 +683,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	int b_base_atk;
 	struct skill b_skill[MAX_SKILL];
 	int i,bl,index;
-	int skill,aspd_rate,wele=0,wele_=0;
+	int skill,aspd_rate,wele,wele_;
 	int str,dstr,dex;
 
 	b_speed = sd->speed;
@@ -813,10 +813,14 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->critical_rate = 100;
 	sd->get_zeny_num = 0;
 	sd->add_damage_class_count = sd->add_damage_class_count_ = sd->add_magic_damage_class_count = 0;
+	sd->add_def_class_count = sd->add_mdef_class_count = 0;
 	sd->monster_drop_item_count = 0;
 	memset(sd->add_damage_classrate,0,sizeof(sd->add_damage_classrate));
 	memset(sd->add_damage_classrate_,0,sizeof(sd->add_damage_classrate_));
 	memset(sd->add_magic_damage_classrate,0,sizeof(sd->add_magic_damage_classrate));
+	memset(sd->add_def_classrate,0,sizeof(sd->add_def_classrate));
+	memset(sd->add_mdef_classrate,0,sizeof(sd->add_mdef_classrate));
+	memset(sd->monster_drop_race,0,sizeof(sd->monster_drop_race));
 	memset(sd->monster_drop_itemrate,0,sizeof(sd->monster_drop_itemrate));
 
 	for(i=0;i<10;i++) {
@@ -836,7 +840,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 					for(j=0;j<sd->inventory_data[index]->slot;j++){	// カード
 						int c=sd->status.inventory[index].card[j];
 						if(c>0){
-							if(i == 2 && sd->status.inventory[index].equip == 0x20)
+							if(i == 8 && sd->status.inventory[index].equip == 0x20)
 								sd->state.lr_flag = 1;
 							run_script(itemdb_equipscript(c),0,sd->bl.id,0);
 							sd->state.lr_flag = 0;
@@ -856,7 +860,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			}
 		}
 	}
-
+	wele = sd->atk_ele;
+	wele_ = sd->atk_ele_;
 	memcpy(sd->paramcard,sd->parame,sizeof(sd->paramcard));
 
 	// 装備品によるステータス変化はここで実行
@@ -874,7 +879,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->def += sd->inventory_data[index]->def;
 			if(sd->inventory_data[index]->type == 4) {
 				int r,wlv = sd->inventory_data[index]->wlv;
-				if(i == 2 && sd->status.inventory[index].equip == 0x20) {
+				if(i == 8 && sd->status.inventory[index].equip == 0x20) {
 					//二刀流用データ入力
 					sd->watk_ += sd->inventory_data[index]->atk;
 					sd->watk_2 = (r=sd->status.inventory[index].refine)*	// 精錬攻撃力
@@ -928,9 +933,9 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if(sd->attackrange_ < 1) sd->attackrange_ = 1;
 	if(sd->attackrange < sd->attackrange_)
 		sd->attackrange = sd->attackrange_;
-	if(!wele)
+	if(wele > 0)
 		sd->atk_ele = wele;
-	if(!wele_)
+	if(wele_ > 0)
 		sd->atk_ele_ = wele_;
 
 	// 武器ATKサイズ補正 (右手)
@@ -1010,8 +1015,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if(sd->critical_rate != 100)
 		sd->critical = (sd->critical*sd->critical_rate)/100;
 
-//	sd->aspd += 10 * aspd_base[sd->status.class][weapontype] * (250 - sd->paramc[1] - sd->paramc[4]/4) /250;
-
 	// 二刀流 ASPD 修正
 	if (sd->status.weapon <= 16)
 		sd->aspd += aspd_base[sd->status.class][sd->status.weapon]-(sd->paramc[1]*4+sd->paramc[4])*aspd_base[sd->status.class][sd->status.weapon]/1000;
@@ -1041,7 +1044,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if (pc_iscarton(sd) && (skill=pc_checkskill(sd,MC_PUSHCART))>0)	// カートによる速度低下
 		sd->speed += (10-skill) * (DEFAULT_WALK_SPEED * 0.1);
 	else if (pc_isriding(sd))	// ペコペコ乗りによる速度増加
-		sd->speed -= (int)(0.2 * DEFAULT_WALK_SPEED);
+		sd->speed -= (0.2 * DEFAULT_WALK_SPEED);
 
 	if((skill=pc_checkskill(sd,CR_TRUST))>0) { // フェイス
 		sd->status.max_hp += skill*200;
@@ -1538,6 +1541,10 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		if(sd->state.lr_flag != 2)
 			sd->special_state.no_castcancel = 1;
 		break;
+	case SP_NO_CASTCANCEL2:
+		if(sd->state.lr_flag != 2)
+			sd->special_state.no_castcancel2 = 1;
+		break;
 	case SP_NO_SIZEFIX:
 		if(sd->state.lr_flag != 2)
 			sd->special_state.no_sizefix = 1;
@@ -1555,8 +1562,10 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 			sd->special_state.no_gemstone = 1;
 		break;
 	case SP_DEF_RATIO_ATK:
-		if(sd->state.lr_flag != 2)
+		if(!sd->state.lr_flag)
 			sd->special_state.def_ratio_atk = 1;
+		else if(!sd->state.lr_flag)
+			sd->special_state.def_ratio_atk_ = 1;
 		break;
 	default:
 		printf("pc_bonus: unknown type %d %d !\n",type,val);
@@ -1671,23 +1680,64 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 			}
 		}
 		break;
+	case SP_ADD_DEF_CLASS:
+		if(sd->state.lr_flag != 2) {
+			for(i=0;i<sd->add_def_class_count;i++) {
+				if(sd->add_def_classid[i] == type2) {
+					sd->add_def_classrate[i] += val;
+					break;
+				}
+			}
+			if(i >= sd->add_def_class_count && sd->add_def_class_count < 10) {
+				sd->add_def_classid[sd->add_def_class_count] = type2;
+				sd->add_def_classrate[sd->add_def_class_count] += val;
+				sd->add_def_class_count++;
+			}
+		}
+		break;
+	case SP_ADD_MDEF_CLASS:
+		if(sd->state.lr_flag != 2) {
+			for(i=0;i<sd->add_mdef_class_count;i++) {
+				if(sd->add_mdef_classid[i] == type2) {
+					sd->add_mdef_classrate[i] += val;
+					break;
+				}
+			}
+			if(i >= sd->add_mdef_class_count && sd->add_mdef_class_count < 10) {
+				sd->add_mdef_classid[sd->add_mdef_class_count] = type2;
+				sd->add_mdef_classrate[sd->add_mdef_class_count] += val;
+				sd->add_mdef_class_count++;
+			}
+		}
+		break;
+	default:
+		printf("pc_bonus2: unknown type %d %d %d!\n",type,type2,val);
+		break;
+	}
+
+	return 0;
+}
+
+int pc_bonus3(struct map_session_data *sd,int type,int type2,int type3,int val)
+{
+	int i;
+	switch(type){
 	case ADD_MONSTER_DROP_ITEM:
 		if(sd->state.lr_flag != 2) {
 			for(i=0;i<sd->monster_drop_item_count;i++) {
 				if(sd->monster_drop_itemid[i] == type2) {
+					sd->monster_drop_race[i] |= 1<<type3;
 					sd->monster_drop_itemrate[i] += val;
 					break;
 				}
 			}
 			if(i >= sd->monster_drop_item_count && sd->monster_drop_item_count < 10) {
 				sd->monster_drop_itemid[sd->monster_drop_item_count] = type2;
+				sd->monster_drop_race[sd->monster_drop_item_count] |= 1<<type3;
 				sd->monster_drop_itemrate[sd->monster_drop_item_count] += val;
 				sd->monster_drop_item_count++;
 			}
 		}
-		break;
-	default:
-		printf("pc_bonus2: unknown type %d %d %d!\n",type,type2,val);
 		break;
 	}
 
@@ -4427,7 +4477,7 @@ static int pc_autosave_sub(struct map_session_data *sd,va_list ap)
 	if(save_flag==0 && sd->fd>last_save_fd){
 		//printf("autosave %d\n",sd->fd);
 		chrif_save(sd);
-		storage_storage_quitsave(sd);
+		storage_storage_save(sd);
 		// pet
 		if(sd->status.pet_id && sd->pd)
 			intif_save_petdata(sd->status.account_id,&sd->pet);
