@@ -271,7 +271,10 @@ struct map_session_data {
 struct npc_timerevent_list {
 	int timer,pos;
 };
-
+struct npc_label_list {
+	char name[24];
+	int pos;
+};
 struct npc_item_list {
 	int nameid,value;
 };
@@ -292,6 +295,8 @@ struct npc_data {
 			int timer,timerid,timeramount,nexttimer;
 			unsigned int timertick;
 			struct npc_timerevent_list *timer_event;
+			int label_list_num;
+			struct npc_label_list *label_list;
 		} scr;
 		struct npc_item_list shop_item[1];
 		struct {

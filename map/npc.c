@@ -41,7 +41,6 @@ struct event_data {
 	struct npc_data *nd;
 	int pos;
 };
-
 static struct tm ev_tm_b;	// 時計イベント用
 
 
@@ -107,43 +106,6 @@ int npc_event_timer(int tid,unsigned int tick,int id,int data)
 	
 	npc_event(sd,(const char *)data);
 	free((void*)data);
-	return 0;
-}
-/*==========================================
- * イベント用ラベルのエクスポート
- * npc_parse_script->strdb_foreachから呼ばれる
- *------------------------------------------
- */
-int npc_event_export(void *key,void *data,va_list ap)
-{
-	char *lname=(char *)key;
-	int pos=(int)data;
-	struct npc_data *nd=va_arg(ap,struct npc_data *);
-	
-	if ((lname[0]=='O' || lname[0]=='o')&&(lname[1]=='N' || lname[1]=='n')) {
-		struct event_data *ev;
-		char *buf;
-		char *p=strchr(lname,':');
-		// エクスポートされる
-		ev=calloc(sizeof(struct event_data), 1);
-		buf=calloc(50, 1);
-		if (ev==NULL || buf==NULL) {
-			printf("npc_event_export: out of memory !\n");
-			exit(1);
-		}else if (p==NULL || (p-lname)>24) {
-			printf("npc_event_export: label name error !\n");
-			exit(1);
-		}else{
-			ev->nd=nd;
-			ev->pos=pos;
-			*p='\0';
-			sprintf(buf,"%s::%s",nd->exname,lname);
-			*p=':';
-			strdb_insert(ev_db,buf,ev);
-//			if (battle_config.etc_log)
-//				printf("npc_event_export: export [%s]\n",buf);
-		}
-	}
 	return 0;
 }
 /*==========================================
@@ -245,41 +207,7 @@ int npc_event_do_oninit(void)
 
 	return 0;
 }
-/*==========================================
- * タイマーイベント用ラベルの取り込み
- * npc_parse_script->strdb_foreachから呼ばれる
- *------------------------------------------
- */
-int npc_timerevent_import(void *key,void *data,va_list ap)
-{
-	char *lname=(char *)key;
-	int pos=(int)data;
-	struct npc_data *nd=va_arg(ap,struct npc_data *);
-	int t=0,i=0;
-	
-	if(sscanf(lname,"OnTimer%d%n",&t,&i)==1 && lname[i]==':') {
-		// タイマーイベント
-		struct npc_timerevent_list *te=nd->u.scr.timer_event;
-		int j,i=nd->u.scr.timeramount;
-		if(te==NULL) te=malloc(sizeof(struct npc_timerevent_list));
-		else te=realloc( te, sizeof(struct npc_timerevent_list) * (i+1) );
-		if(te==NULL){
-			printf("npc_timerevent_import: out of memory !\n");
-			exit(1);
-		}
-		for(j=0;j<i;j++){
-			if(te[j].timer>t){
-				memmove(te+j+1,te+j,sizeof(struct npc_timerevent_list)*(i-j));
-				break;
-			}
-		}
-		te[j].timer=t;
-		te[j].pos=pos;
-		nd->u.scr.timer_event=te;
-		nd->u.scr.timeramount=i+1;
-	}
-	return 0;
-}
+
 /*==========================================
  * タイマーイベント実行
  *------------------------------------------
@@ -943,7 +871,33 @@ static int npc_parse_shop(char *w1,char *w2,char *w3,char *w4)
 
 	return 0;
 }
+/*==========================================
+ * NPCのラベルデータコンバート
+ *------------------------------------------
+ */
+int npc_convertlabel_db(void *key,void *data,va_list ap)
+{
+	char *lname=(char *)key;
+	int pos=(int)data;
+	struct npc_data *nd=va_arg(ap,struct npc_data *);
+	struct npc_label_list *lst=nd->u.scr.label_list;
+	int num=nd->u.scr.label_list_num;
+	char *p=strchr(lname,':');
+	
+	if(!lst){
+		lst=malloc(sizeof(struct npc_label_list));
+		num=0;
+	}else
+		lst=realloc(lst,sizeof(struct npc_label_list)*(num+1));
 
+	*p='\0';
+	strcpy(lst[num].name,lname);
+	*p=':';
+	lst[num].pos=pos;
+	nd->u.scr.label_list=lst;
+	nd->u.scr.label_list_num=num+1;
+	return 0;
+}
 /*==========================================
  * script行解析
  *------------------------------------------
@@ -952,7 +906,7 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 {
 	int x,y,dir,m,xs,ys,class;
 	char mapname[24];
-	char *srcbuf,*script;
+	char *srcbuf=NULL,*script;
 	int srcsize=65536;
 	int startline=0;
 	char line[1024];
@@ -961,56 +915,83 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	int evflag=0;
 	struct dbt *label_db;
 	char *p;
+	struct npc_label_list *label_dup=NULL;
+	int label_dupnum=0;
 
-	// 引数の個数チェック
-	if (sscanf(w1,"%[^,],%d,%d,%d",mapname,&x,&y,&dir) != 4 ||
-	   strchr(w4,',')==NULL) {
-		printf("bad script line : %s\n",w3);
-		return 1;
-	}
-	m = map_mapname2mapid(mapname);
-
-	srcbuf=calloc(srcsize, 1);
-	if (srcbuf==NULL) {
-		printf("out of memory : npc_parse_script srcbuf\n");
-		exit(1);
-	}
-	if (strchr(first_line,'{')) {
-		strcpy(srcbuf,strchr(first_line,'{'));
-		startline=*lines;
-	} else
-		srcbuf[0]=0;
-	while(1) {
-		for(i=strlen(srcbuf)-1;i>=0 && isspace(srcbuf[i]);i--);
-		if (i>=0 && srcbuf[i]=='}')
-			break;
-		fgets(line,1020,fp);
-		(*lines)++;
-		if (feof(fp))
-			break;
-		if (strlen(srcbuf)+strlen(line)+1>=srcsize) {
-			srcsize += 65536;
-			srcbuf = realloc(srcbuf, srcsize);
-			if (srcbuf==NULL) {
-				printf("out of memory : npc_parse_script srcbuf realloc\n");
-				exit(1);
-			}
-			memset(srcbuf + srcsize - 65536, '\0', 65536);
+	if(strcmp(w1,"-")==0){
+		x=0;y=0;m=-1;
+	}else{
+		// 引数の個数チェック
+		if (sscanf(w1,"%[^,],%d,%d,%d",mapname,&x,&y,&dir) != 4 ||
+		   ( strcmp(w2,"script")==0 && strchr(w4,',')==NULL) ) {
+			printf("bad script line : %s\n",w3);
+			return 1;
 		}
-		if (srcbuf[0]!='{') {
-			if (strchr(line,'{')) {
-				strcpy(srcbuf,strchr(line,'{'));
-				startline=*lines;
-			}
+		m = map_mapname2mapid(mapname);
+	}
+	
+	if(strcmp(w2,"script")==0){
+		// スクリプトの解析
+		srcbuf=calloc(srcsize, 1);
+		if (srcbuf==NULL) {
+			printf("out of memory : npc_parse_script srcbuf\n");
+			exit(1);
+		}
+		if (strchr(first_line,'{')) {
+			strcpy(srcbuf,strchr(first_line,'{'));
+			startline=*lines;
 		} else
-			strcat(srcbuf,line);
-	}
-	script=parse_script(srcbuf,startline);
-	if (script==NULL) {
-		// script parse error?
-		free(srcbuf);
-		return 1;
-	}
+			srcbuf[0]=0;
+		while(1) {
+			for(i=strlen(srcbuf)-1;i>=0 && isspace(srcbuf[i]);i--);
+			if (i>=0 && srcbuf[i]=='}')
+				break;
+			fgets(line,1020,fp);
+			(*lines)++;
+			if (feof(fp))
+				break;
+			if (strlen(srcbuf)+strlen(line)+1>=srcsize) {
+				srcsize += 65536;
+				srcbuf = realloc(srcbuf, srcsize);
+				if (srcbuf==NULL) {
+					printf("out of memory : npc_parse_script srcbuf realloc\n");
+					exit(1);
+				}
+				memset(srcbuf + srcsize - 65536, '\0', 65536);
+			}
+			if (srcbuf[0]!='{') {
+				if (strchr(line,'{')) {
+					strcpy(srcbuf,strchr(line,'{'));
+					startline=*lines;
+				}
+			} else
+				strcat(srcbuf,line);
+		}
+		script=parse_script(srcbuf,startline);
+		if (script==NULL) {
+			// script parse error?
+			free(srcbuf);
+			return 1;
+		}
+		
+	}else{
+		// duplicateする
+		
+		char srcname[128];
+		struct npc_data *nd2;
+		if( sscanf(w2,"duplicate(%[^)])",srcname)!=1 ){
+			printf("bad duplicate name! : %s",w2);
+			return 0;
+		}
+		if( (nd2=npc_name2id(srcname))==NULL ){
+			printf("bad duplicate name! (not exist) : %s\n",srcname);
+			return 0;
+		}
+		script=nd2->u.scr.script;
+		label_dup=nd2->u.scr.label_list;
+		label_dupnum=nd2->u.scr.label_list_num;
+	
+	}// end of スクリプト解析
 
 	nd=calloc(sizeof(struct npc_data), 1);
 	if (nd==NULL) {
@@ -1019,13 +1000,17 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	}
 	memset(nd,0,sizeof(struct npc_data));
 
-	if (sscanf(w4,"%d,%d,%d",&class,&xs,&ys)==3) {
+	if(m==-1){
+		// スクリプトコピー用のダミーNPC
+		
+	}else if( sscanf(w4,"%d,%d,%d",&class,&xs,&ys)==3) {
+		// 接触型NPC
 		int i,j;
 		
 		if (xs>=0)xs=xs*2+1;
 		if (ys>=0)ys=ys*2+1;
 		
-		if (class>=0) {	// 接触型NPC
+		if (class>=0) {
 
 			for(i=0;i<ys;i++) {
 				for(j=0;j<xs;j++) {
@@ -1046,7 +1031,7 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 		nd->u.scr.ys=0;
 	}
 	
-	if (class<0) {	// イベント型NPC
+	if (class<0 && m>=0) {	// イベント型NPC
 		evflag=1;
 	}
 
@@ -1078,36 +1063,109 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	npc_script++;
 	nd->bl.type=BL_NPC;
 	nd->bl.subtype=SCRIPT;
-	nd->n=map_addnpc(m,nd);
-	map_addblock(&nd->bl);
+	if(m>=0){
+		nd->n=map_addnpc(m,nd);
+		map_addblock(&nd->bl);
 
-	if (evflag) {	// イベント型
-		struct event_data *ev=calloc(sizeof(struct event_data), 1);
-		if (ev==NULL) {
-			printf("npc_parse_script: out of memory !(event_data)\n");
-			exit(1);
+		if (evflag) {	// イベント型
+			struct event_data *ev=calloc(sizeof(struct event_data), 1);
+			if (ev==NULL) {
+				printf("npc_parse_script: out of memory !(event_data)\n");
+				exit(1);
+			}else{
+				ev->nd=nd;
+				ev->pos=0;
+				strdb_insert(ev_db,nd->exname,ev);
+			}
 		}else{
-			ev->nd=nd;
-			ev->pos=0;
-			strdb_insert(ev_db,nd->exname,ev);
+			clif_spawnnpc(nd);
 		}
-	}else{
-		clif_spawnnpc(nd);
 	}
 	strdb_insert(npcname_db,nd->exname,nd);
 
+
+	//-----------------------------------------
+	// ラベルデータの準備	
+	if(srcbuf){
+		// script本体がある場合の処理
+		
+		// ラベルデータのコンバート
+		label_db=script_get_label_db();
+		strdb_foreach(label_db,npc_convertlabel_db,nd);
+
+		// もう使わないのでバッファ解放
+		free(srcbuf);
+
+	}else{
+		// duplicate
+		memcpy(nd->u.scr.label_list,label_dup,
+			sizeof(struct npc_label_list)*label_dupnum);
+		nd->u.scr.label_list_num=label_dupnum;
+	}
+
+	//-----------------------------------------
 	// イベント用ラベルデータのエクスポート
-	label_db=script_get_label_db();
-	strdb_foreach(label_db,npc_event_export,nd);
+	for(i=0;i<nd->u.scr.label_list_num;i++){
+		char *lname=nd->u.scr.label_list[i].name;
+		int pos=nd->u.scr.label_list[i].pos;
 	
+		if ((lname[0]=='O' || lname[0]=='o')&&(lname[1]=='N' || lname[1]=='n')) {
+			struct event_data *ev;
+			char *buf;
+			// エクスポートされる
+			ev=calloc(sizeof(struct event_data), 1);
+			buf=calloc(50, 1);
+			if (ev==NULL || buf==NULL) {
+				printf("npc_parse_script: out of memory !\n");
+				exit(1);
+			}else if (strlen(lname)>24) {
+				printf("npc_parse_script: label name error !\n");
+				exit(1);
+			}else{
+				ev->nd=nd;
+				ev->pos=pos;
+				sprintf(buf,"%s::%s",nd->exname,lname);
+				strdb_insert(ev_db,buf,ev);
+			}
+		}
+	}
+	
+	//-----------------------------------------
 	// ラベルデータからタイマーイベント取り込み
-	strdb_foreach(label_db,npc_timerevent_import,nd);
+	for(i=0;i<nd->u.scr.label_list_num;i++){
+		int t=0,k=0;
+		char *lname=nd->u.scr.label_list[i].name;
+		int pos=nd->u.scr.label_list[i].pos;
+		if(sscanf(lname,"OnTimer%d%n",&t,&k)==1 && lname[k]=='\0') {
+			// タイマーイベント
+			struct npc_timerevent_list *te=nd->u.scr.timer_event;
+			int j,k=nd->u.scr.timeramount;
+			if(te==NULL) te=malloc(sizeof(struct npc_timerevent_list));
+			else te=realloc( te, sizeof(struct npc_timerevent_list) * (k+1) );
+			if(te==NULL){
+				printf("npc_timerevent_import: out of memory !\n");
+				exit(1);
+			}
+			for(j=0;j<k;j++){
+				if(te[j].timer>t){
+					memmove(te+j+1,te+j,sizeof(struct npc_timerevent_list)*(k-j));
+					break;
+				}
+			}
+			te[j].timer=t;
+			te[j].pos=pos;
+			nd->u.scr.timer_event=te;
+			nd->u.scr.timeramount=k+1;
+		}
+		return 0;
+	}
 	nd->u.scr.nexttimer=-1;
 	nd->u.scr.timerid=-1;
 
-	free(srcbuf);
+	
 	return 0;
 }
+
 
 /*==========================================
  * mob行解析
@@ -1316,17 +1374,22 @@ int do_init_npc(void)
 			   (count=sscanf(line,"%s%s%s%n%s",w1,w2,w3,&w4pos,w4)) < 3) {
 				continue;
 			}
-			sscanf(w1,"%[^,]",mapname);
-			m = map_mapname2mapid(mapname);
-			if (strlen(mapname)>16 || m<0) {
-				// "mapname" is not assigned to this server
-				continue;
+			// マップの存在確認
+			if( strcmp(w1,"-")!=0 ){
+				sscanf(w1,"%[^,]",mapname);
+				m = map_mapname2mapid(mapname);
+				if (strlen(mapname)>16 || m<0) {
+					// "mapname" is not assigned to this server
+					continue;
+				}
 			}
 			if (strcmpi(w2,"warp")==0 && count > 3) {
 				npc_parse_warp(w1,w2,w3,w4);
 			} else if (strcmpi(w2,"shop")==0 && count > 3) {
 				npc_parse_shop(w1,w2,w3,w4);
 			} else if (strcmpi(w2,"script")==0 && count > 3) {
+				npc_parse_script(w1,w2,w3,w4,line+w4pos,fp,&lines);
+			} else if ((i=0,sscanf(w2,"duplicate%n",&i), (i>0 && w2[i]=='(')) && count > 3) {
 				npc_parse_script(w1,w2,w3,w4,line+w4pos,fp,&lines);
 			} else if (strcmpi(w2,"monster")==0 && count > 3) {
 				npc_parse_mob(w1,w2,w3,w4);
