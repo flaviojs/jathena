@@ -1,4 +1,21 @@
 --------------------
+//1057 by BDPQ銀
+・ウォーターボールのダメージを本鯖告知値→実測値に修正。
+  [ MATK+SkillLv*30 → MATK*(1+SkillLv*0.3) ]
+
+	(src/map)
+		battle.c
+			battle_calc_magic_attack 変更 [ 3848行目あたり ]
+
+--------------------
+//1056 by robert
+順番を検査するのは不法かどうか
+	(src/map)
+		clif.c	
+			clif_parse_DropItem
+			clif_parse_MoveToKafra
+			clif_parse_MoveFromKafra
+--------------------
 //1055 by Nameless
 ・各種CPUに対するコード最適化オプションを設定(全27種) ※GCC 3.3.1 準拠
 ・Pentium 3のオプションがSSE2になっていたのを訂正

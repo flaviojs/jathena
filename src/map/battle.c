@@ -3845,8 +3845,7 @@ struct Damage battle_calc_magic_attack(
 			MATK_FIX( skill_lv*20+80, 100 );
 			break;
 		case WZ_WATERBALL:	// ウォーターボール
-			matk1+= skill_lv*30;
-			matk2+= skill_lv*30;
+			MATK_FIX( 100+skill_lv*30, 100 );
 			break;
 		case WZ_STORMGUST:	// ストームガスト
 			MATK_FIX( skill_lv*40+100 ,100 );
