@@ -1,4 +1,26 @@
 --------------------
+//0878 by huge
+
+・カプラ銀行サービス。
+	自分の鯖で実装してたんですが、意外と好感触だったので出してみます。
+	NPCscriptで、openbank(0);で預金額を返して、中に数字を入れると出し入れします。
+	詳しくはサンプルを同封したので、それを参照。
+
+	(common/)
+	mmo.h
+		struct bank 追加。
+	(map/)
+	map.c
+		do_final(),do_init() 修正。
+	script.c
+		buildin_openbank() 追加。
+	storage.c
+	storage.h
+		グローバル変数追加。
+		do_init_bank(),do_final_bank(),account2bank() 追加。
+		storage_bank(),storage_readbank() 追加。
+
+--------------------
 //0877 by 胡蝶蘭
 
 ・login鯖のアクセスコントロールがネットマスク表記に対応

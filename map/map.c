@@ -1348,6 +1348,7 @@ void do_final(void)
 {
 	do_final_itemdb();
 	do_final_storage();
+	do_final_bank();
 }
 
 /*==========================================
@@ -1385,6 +1386,7 @@ int do_init(int argc,char *argv[])
 	do_init_npc();
 	do_init_pc();
 	do_init_storage();
+	do_init_bank();
 	do_init_party();
 	do_init_guild();
 	do_init_skill();

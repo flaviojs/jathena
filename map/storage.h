@@ -21,6 +21,14 @@ int account2storage(int account_id);
 int storage_storage_quit(struct map_session_data *sd);
 int storage_storage_save(struct map_session_data *sd);
 
+int do_init_bank(void);
+void do_final_bank(void);
+int account2bank(int account_id);
+int storage_bank(struct map_session_data *sd,int amount);
+int storage_readbank(struct map_session_data *sd);
+
+
 extern struct storage *storage;
+extern struct bank *bank;
 
 #endif
