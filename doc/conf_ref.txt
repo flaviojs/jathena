@@ -65,6 +65,34 @@ gm_account_filename
 	GMアカウントファイルを指定します。
 	省略可能で、デフォルトはconf/GM_account.txtです。
 
+order
+	アクセスコントロールのallowとdenyの評価順を指定します。
+	deny,allow 、 allow,deny 、 mutual-failture の３つから１つを選びます。
+	（allowとdeny共にマッチする場合/共にマッチしない場合の動作に影響します）
+	deny,allow ではdenyを先に評価し、その後allowを評価します。
+	allow,deny ではallow → denyの順です。
+	なお、 allow 、 , 、deny の間にスペースを入れてはいけません。
+	共にマッチした場合、順序が後ろにあるほうが優先されます。
+	共にマッチしなかった場合、mutual-failture以外では許可します。
+	mutual-failture の場合は、allowに存在し、denyにないもののみ許可します。
+	アクセスコントロールの記述は.htaccessのorder,allow,denyが近いので、
+	apacheの文献などを探すと詳しい解説が見つかると思います。
+	省略可能でデフォルト deny,allow になります。
+
+allow
+	アクセスコントロールで許可するホストを指定します。
+	表記はIPアドレスの前方一致です。ホスト名の後方一致や、
+	ネットマスク付きのIPアドレスを記述することは出来ません。
+	また、IPアドレスの変わりに all と記述すると全てのホストになります。
+	複数行書くことが出来ます。省略可能です。
+	アクセスコントロールを有効にするには少なくとも１つ以上の
+	allow か denyが必要です(order指定だけでは機能しません)。
+	アクセスコントロールが無効の場合は常に接続を許可します。
+
+deny
+	アクセスコントロールで禁止するホストを指定します。
+	表記の仕方はallowと同じです。
+
 < 例 >
 
 login_port: 6900
@@ -73,7 +101,10 @@ gm_pass: gm
 new_account: 1
 account_filename: account.txt
 gm_account_filename: conf_GM_account.txt
-
+order: deny,allow
+deny: all
+allow: 192.168.
+allow: 127.0.0.1
 
 ==========================================================================
 2. conf/char_athena.conf

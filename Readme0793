@@ -1,4 +1,38 @@
 --------------------
+//0798 by 胡蝶蘭
+
+・login-serverのログイン失敗パケットの長さがおかしかったのを修正
+・login-serverにアクセスコントロール機能追加
+	・login_athena.cnfにorder,allow,denyを記述することで、
+	  IP単位(前方一致)でアクセスを禁止する機能。
+	・指定方法は doc/conf_ref.txt を参照
+	
+	(doc/)
+	conf_ref.txt
+		login_athena.cnfの部分修正
+	(login/)
+	login.c
+		グローバル変数 access_* 追加
+		parse_login()修正,check_ip()追加
+
+・アカウント作成用CGIスクリプト追加
+	・自己責任＆詳細な解説無し、質問されてもスルーする可能性有り
+	・エディタで開いたら少し説明有り
+	・CGI設置の基本さえわかれば問題ないはず
+	・メッセージは英語、日本語両対応
+	  （Accept-Languageがjaなら日本語に変換します）
+	・管理者パスワードなしで動くのでセキュリティには注意(.htaccessなど推奨)
+
+	(tool/cgi/)
+	addaccount.cgi
+		アカウント作成用CGI。
+
+・その他
+	(tool/)
+	backup
+		castle.txtもバックアップするように
+
+--------------------
 //0797 by 死神
 
 ・少し修正。
