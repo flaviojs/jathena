@@ -1,4 +1,24 @@
 --------------
+//0734 by 死神
+
+・player_skillup_limitの処理修正と細かい修正。
+・player_skillup_limitがyesの場合skill_tree.txtで設定されてるその下位職業の
+スキルツリーを使いますのでその職業では無くなるはずのスキルが出ることが
+ありますがこれは仕様でありバグではありません。バグ報告されても無視します。
+	(doc/)
+	conf_ref.txt 修正。
+	(char/)
+	char.c
+		mmo_char_sync_timer()、do_init() 修正。
+	inter.c
+		inter_init() 修正。
+		inter_save_timer() 削除。
+	(map/)
+	pc.c
+		pc_calc_skilltree() 修正。
+		pc_resetskill() 修正。
+
+--------------
 //0733 by 死神
 
 ・バグ修正と細かい修正。
@@ -8,30 +28,25 @@
 ・battle_athena.confに項目追加。
 ・その他細かい修正。
 	(conf/)
-	battle_athena.conf
+	battle_athena.conf 修正。
 	(doc/)
-	conf_ref.txt
+	conf_ref.txt 修正。
 	(map/)
 	clif.c
-		clif_skill_estimation()
-		clif_parse_Restart()
+		clif_skill_estimation()、clif_parse_Restart() 修正。
 	pc.c
-		pc_setrestartvalue()
-		pc_makesavestatus()
-		pc_read_gm_account()
-		pc_calc_skilltree()
-		pc_calc_skillpoint() add
+		pc_setrestartvalue()、pc_makesavestatus() 修正。
+		pc_read_gm_account()、pc_calc_skilltree() 修正。
+		pc_calc_skillpoint() 追加。
 	map.c
-		map_quit()
+		map_quit() 修正。
 	mob.c
-		mob_damage()
+		mob_damage() 修正。
 	skill.c
-		skill_unit_timer_sub()
-		skill_unit_timer()
-	battle.h
+		skill_unit_timer_sub()、skill_unit_timer() 修正。
+	battle.h 修正。
 	battle.c
-		battle_config_read()
-
+		battle_config_read() 修正。
 
 --------------
 //0732 by Kalen

@@ -645,11 +645,44 @@ static int pc_calc_skillpoint(struct map_session_data* sd)
  */
 int pc_calc_skilltree(struct map_session_data *sd)
 {
-	int i,id=0,flag,skill_point=0;
+	int i,id=0,flag;
 	int c=sd->status.class;
 
-	if(battle_config.skillup_limit)
-		skill_point = pc_calc_skillpoint(sd);
+	if(battle_config.skillup_limit) {
+		int skill_point = pc_calc_skillpoint(sd);
+		if(skill_point < 9)
+			c = 0;
+		else if(skill_point < 48 && c > 6) {
+			switch(c) {
+				case 7:
+				case 14:
+					c = 1;
+					break;
+				case 8:
+				case 15:
+					c = 4;
+					break;
+				case 9:
+				case 16:
+					c = 2;
+					break;
+				case 10:
+				case 18:
+					c = 5;
+					break;
+				case 11:
+				case 19:
+				case 20:
+					c = 3;
+					break;
+				case 12:
+				case 17:
+					c = 6;
+					break;
+			}
+		}
+	}
+
 	for(i=0;i<MAX_SKILL;i++){
 		sd->status.skill[i].id=0;
 		if (sd->status.skill[i].flag){	// cardƒXƒLƒ‹‚È‚çA
@@ -672,17 +705,7 @@ int pc_calc_skilltree(struct map_session_data *sd)
 			flag=0;
 			for(i=0;(id=skill_tree[c][i].id)>0;i++){
 				int j,f=1;
-				if(battle_config.skillup_limit) {
-					if(skill_point < 9) {
-						if(id != NV_BASIC && id != NV_FIRSTAID && id != NV_TRICKDEAD)
-							f=0;
-					}
-					else if(skill_point < 48) {
-						if((id < NV_BASIC || id > TF_DETOXIFY) && (id < NV_FIRSTAID || id > MG_ENERGYCOAT))
-							f=0;
-					}
-				}
-				if(!battle_config.skillfree && f) {
+				if(!battle_config.skillfree) {
 					for(j=0;j<5;j++) {
 						if( skill_tree[c][i].need[j].id &&
 							pc_checkskill(sd,skill_tree[c][i].need[j].id) <
@@ -3517,6 +3540,8 @@ int pc_resetskill(struct map_session_data* sd)
 				sd->status.skill[i].lv = 0;
 			sd->status.skill[i].flag = 0;
 		}
+		else
+			sd->status.skill[i].lv = 0;
 	}
 	clif_updatestatus(sd,SP_SKILLPOINT);
 	clif_skillinfoblock(sd);

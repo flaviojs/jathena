@@ -152,25 +152,15 @@ int inter_save()
 	return 0;
 }
 
-int inter_save_timer(int tid,unsigned int tick,int id,int data)
-{
-	inter_save();
-	return 0;
-}
-
 // ‰Šú‰»
 int inter_init(const char *file)
 {
-	int i;
-
 	inter_config_read(file);
 
 	inter_storage_init();
 	inter_party_init();
 	inter_guild_init();
 	inter_pet_init();
-
-	i=add_timer_interval(gettick()+autosave_interval,inter_save_timer,0,0,autosave_interval);
 
 	return 0;
 }

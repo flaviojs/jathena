@@ -334,8 +334,9 @@ void mmo_char_sync(void)
 }
 int mmo_char_sync_timer(int tid,unsigned int tick,int id,int data)
 {
-  mmo_char_sync();
-  return 0;
+	mmo_char_sync();
+	inter_save();
+	return 0;
 }
 
 int make_new_char(int fd,unsigned char *dat)
@@ -1318,10 +1319,12 @@ int do_init(int argc,char **argv)
 
 	make_listen_port(char_port);
 
+	add_timer_func_list(check_connect_login_server,"check_connect_login_server");
+	add_timer_func_list(send_users_tologin,"send_users_tologin");
+	add_timer_func_list(mmo_char_sync_timer,"mmo_char_sync_timer");
+
 	i=add_timer_interval(gettick()+1000,check_connect_login_server,0,0,10*1000);
-
 	i=add_timer_interval(gettick()+1000,send_users_tologin,0,0,5*1000);
-
 	i=add_timer_interval(gettick()+autosave_interval,mmo_char_sync_timer,0,0,autosave_interval);
 
 	return 0;
