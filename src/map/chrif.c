@@ -423,9 +423,9 @@ int chrif_accountreg2(int fd)
  *------------------------------------------
  */
 int chrif_divorce(int char_id ,int partner_id){
+	struct map_session_data *sd = NULL;
 	if(!char_id || !partner_id )
 		return 0;
-	struct map_session_data *sd = NULL;
 	if((sd=(map_nick2sd(map_charid2nick(partner_id)))) == NULL){
 		printf("chrif_divorce nullpo\n");
 	}

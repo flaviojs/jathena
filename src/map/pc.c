@@ -238,7 +238,7 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 	struct pc_base_job s_class;
 
 	if( sd == NULL ){
-		printf("pc_isGM nullpo\n");
+		printf("pc_setrestartvalue nullpo\n");
 		return 0;
 	}
 
@@ -664,7 +664,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 		sd->dev.val1[i] = 0;
 		sd->dev.val2[i] = 0;
 	}
-	
+
 	// アカウント変数の送信要求
 	intif_request_accountreg(sd);
 
@@ -731,6 +731,9 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	map_addnickdb(sd);
 	if( map_charid2nick(sd->status.char_id)==NULL )
 		map_addchariddb(sd->status.char_id,sd->status.name);
+
+	//スパノビ用死にカウンターのスクリプト変数からの読み出しとsdへのセット
+	sd->die_counter = pc_readglobalreg(sd,"PC_DIE_COUNTER");
 
 	// ステータス初期計算など
 	pc_calcstatus(sd,1);
@@ -1313,6 +1316,15 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		}
 	}
 
+	//1度も死んでないスパノビに+10
+	if(s_class.job == 23 && sd->die_counter == 0){
+		sd->paramb[0]+= 10;
+		sd->paramb[1]+= 10;
+		sd->paramb[2]+= 10;
+		sd->paramb[3]+= 10;
+		sd->paramb[4]+= 10;
+		sd->paramb[5]+= 10;
+	}
 	sd->paramc[0]=sd->status.str+sd->paramb[0]+sd->parame[0];
 	sd->paramc[1]=sd->status.agi+sd->paramb[1]+sd->parame[1];
 	sd->paramc[2]=sd->status.vit+sd->paramb[2]+sd->parame[2];
@@ -4504,6 +4516,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	skill_unit_out_all(&sd->bl,gettick(),1);
 	if(sd->sc_data[SC_BLADESTOP].timer!=-1)//白刃は事前に解除
 		skill_status_change_end(&sd->bl,SC_BLADESTOP,-1);
+	pc_setglobalreg(sd,"PC_DIE_COUNTER",++sd->die_counter); //死にカウンター書き込み
 	skill_status_change_clear(&sd->bl,0);	// ステータス異常を解除する
 	clif_updatestatus(sd,SP_HP);
 	pc_calcstatus(sd,0);
@@ -4629,12 +4642,14 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 int pc_readparam(struct map_session_data *sd,int type)
 {
 	int val=0;
+	struct pc_base_job s_class;
+	
+	s_class = pc_calc_base_job(sd->status.class);
 	if( sd == NULL ){
 		printf("pc_readparam nullpo\n");
 		return 0;
 	}
 
-	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
 
 	switch(type){
 	case SP_SKILLPOINT:
@@ -5023,6 +5038,8 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 	clif_updatestatus(sd,SP_JOBLEVEL);
 	clif_updatestatus(sd,SP_JOBEXP);
 	clif_updatestatus(sd,SP_NEXTJOBEXP);
+	sd->die_counter=0;
+	pc_setglobalreg(sd,"PC_DIE_COUNTER",sd->die_counter); //死にカウンター書き込み
 
 	for(i=0;i<11;i++) {
 		if(sd->equip_index[i] >= 0)
@@ -5331,7 +5348,6 @@ int pc_setglobalreg(struct map_session_data *sd,char *reg,int val)
 		printf("pc_setglobalreg nullpo\n");
 		return 0;
 	}
-
 	if(val==0){
 		for(i=0;i<sd->status.global_reg_num;i++){
 			if(strcmp(sd->status.global_reg[i].str,reg)==0){
@@ -6055,17 +6071,16 @@ int pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd)
  */
 int pc_divorce(struct map_session_data *sd)
 {
+	struct map_session_data *p_sd=NULL;
 	if(sd == NULL || !pc_ismarried(sd))
 		return -1;
 
-	struct map_session_data *p_sd=NULL;
-
 	if( (p_sd=map_nick2sd(map_charid2nick(sd->status.partner_id))) !=NULL){
+		int i;
 		if(p_sd->status.partner_id != sd->status.char_id || sd->status.partner_id != p_sd->status.char_id){
 			printf("pc_divorce: Illegal partner_id sd=%d p_sd=%d\n",sd->status.partner_id,p_sd->status.partner_id);
 			return -1;
 		}
-		int i;
 		sd->status.partner_id=0;
 		p_sd->status.partner_id=0;
 		for(i=0;i<MAX_INVENTORY;i++)
@@ -6088,11 +6103,12 @@ int pc_divorce(struct map_session_data *sd)
  */
 struct map_session_data *pc_get_partner(struct map_session_data *sd)
 {
+	struct map_session_data *p_sd = NULL;
+	char *nick;
 	if(sd == NULL || !pc_ismarried(sd))
 		return NULL;
 
-	struct map_session_data *p_sd = NULL;
-	char *nick=map_charid2nick(sd->status.partner_id);
+	nick=map_charid2nick(sd->status.partner_id);
 
 	if (nick==NULL)
 		return NULL;

@@ -1095,11 +1095,11 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 
 	if(src->type == BL_PC && dmg.flag&BF_WEAPON && src != bl && src == dsrc && damage > 0) {
 		struct map_session_data *sd;
+		int hp = 0,sp = 0;
 		if( (sd = (struct map_session_data *)src) == NULL ){
 			printf("skill_attack nullpo\n");
 			return 0;
 		}
-		int hp = 0,sp = 0;
 		if(sd->hp_drain_rate && sd->hp_drain_per > 0 && dmg.damage > 0 && rand()%100 < sd->hp_drain_rate) {
 			hp += (dmg.damage * sd->hp_drain_per)/100;
 			if(sd->hp_drain_rate > 0 && hp < 1) hp = 1;
@@ -8657,16 +8657,16 @@ int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int
 			}
 		}else{
 			int i,j,r_flag[group->unit_count],s_flag[group->unit_count],m_flag[group->unit_count];
+			struct skill_unit *unit1;
+			struct skill_unit *unit2;
 			memset(r_flag,0,sizeof(r_flag));// 残留フラグ
 			memset(m_flag,0,sizeof(m_flag));// 移動フラグ
 			memset(s_flag,0,sizeof(s_flag));// 継承フラグ
-			struct skill_unit *unit1;
-			struct skill_unit *unit2;
 
 			//先にフラグを全部決める
 			for(i=0;i<group->unit_count;i++){
-				unit1=&group->unit[i];
 				int move_check=0;// かぶりフラグ
+				unit1=&group->unit[i];
 				for(j=0;j<group->unit_count;j++){
 					unit2=&group->unit[j];
 					if(unit1->bl.m==m && unit1->bl.x+dx==unit2->bl.x && unit1->bl.y+dy==unit2->bl.y){

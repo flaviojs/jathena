@@ -239,6 +239,8 @@ struct map_session_data {
 	short spiritball, spiritball_old;
 	int spirit_timer[MAX_SKILL_LEVEL];
 
+	int die_counter;
+
 	int reg_num;
 	struct script_reg *reg;
 	int regstr_num;

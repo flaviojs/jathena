@@ -1,4 +1,30 @@
 --------------------
+//1010 by (凸)
+・gcc 2.95対策
+・スパノビの1度死ぬまでAll+10をスクリプト変数で実装してみる試み
+	PC_DIE_COUNTER 死ぬと+1、転職すると0になります
+	↑はキャラクタ永続なスクリプト変数なのでNPCで参照＆再設定とか比較的楽かも
+
+	(map/)
+	chrif.c
+		chrif_divorce() gcc2.95対策
+	skill.c
+		skill_attack() gcc2.95対策
+		skill_unit_move_unit_group() gcc2.95対策
+	map.h map_session_dataにdie_counterを追加
+	npc.c
+		npc_click() nullpoメッセージを修正
+	pc.c
+		pc_setrestartvalue() nullpoメッセージを修正
+		pc_authok() die_counter初期化の追加
+		pc_calcstatus() die_counter=0のスパノビはAll+10
+		pc_damage() PC_DIE_COUNTER設定
+		pc_jobchange() PC_DIE_COUNTER設定
+		pc_readparam() gcc2.95対策
+		pc_divorce() gcc2.95対策
+		pc_get_partner() gcc2.95対策
+
+--------------------
 //1009 by ぴざまん
 ・ダンス移動軽量化実装
 　battle_athena.confで切り替え可能です。詳しくはconf_refを

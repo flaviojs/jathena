@@ -499,7 +499,7 @@ int npc_click(struct map_session_data *sd,int id)
 	struct npc_data *nd;
 
 	if( sd == NULL ){
-		printf("npc_checknear nullpo\n");
+		printf("npc_click nullpo\n");
 		return 1;
 	}
 
