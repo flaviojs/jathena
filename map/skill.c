@@ -3283,7 +3283,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 			int type=SkillStatusChangeTable[sg->skill_id];
 			if(sc_data[type].timer==-1)
 				skill_status_change_start(bl,type,src->group->val1,(int)src,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
-			else if((unit2=(struct skill_unit *)sc_data[type].val4)!=src){
+			else if((unit2=(struct skill_unit *)sc_data[type].val5)!=src){
 				if( DIFF_TICK(sg->tick,unit2->group->tick)>0 )
 					skill_status_change_start(bl,type,0,(int)src,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
 /*				if( sg->unit_id==0x7e && sg->val1 < unit2->group->val1 )
@@ -3374,7 +3374,7 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 			struct skill_unit *unit2;
 			struct status_change *sc_data=battle_get_sc_data(bl);
 			int type=SkillStatusChangeTable[sg->skill_id];
-			if(sc_data[type].timer!=-1 && (unit2=(struct skill_unit *)sc_data[type].val4)==src){
+			if(sc_data[type].timer!=-1 && (unit2=(struct skill_unit *)sc_data[type].val5)==src){
 				skill_status_change_end(bl,type,-1);
 			}
 		}
@@ -3918,7 +3918,7 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	int casttime=0,delay=0,skill,range;
 	struct map_session_data* target_sd=NULL;
 	int forcecast=0;
-	struct block_list *bl;
+	struct block_list *bl,*sbl;
 	tick=gettick();
 
 	bl=map_id2bl(target_id);
@@ -3941,12 +3941,11 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		return 0;
 
 	if(pc_ishiding(sd)) {
-		if( (sd->status.option&4) && skill_num==AS_CLOAKING );	/* クローキング中 */
+		if(sd->status.option&4 && skill_num!=TF_HIDING);	/* クローキング中 */
 		else if( (sd->status.option&2) && (skill_num==TF_HIDING || skill_num==AS_GRIMTOOTH || skill_num==RG_BACKSTAP || skill_num==RG_RAID ));	/* ハイディング中 */
 		else
 			return 0;
 	}
-
 	/* 演奏/ダンス中 */
 	if( sd->sc_data[SC_DANCING].timer!=-1 && skill_num!=BD_ADAPTATION &&
 		skill_num!=BA_MUSICALSTRIKE && skill_num!=DC_THROWARROW ){
@@ -3961,6 +3960,10 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	sd->skillid = skill_num;
 	sd->skilllv = skill_lv;
 	if(!skill_check_condition(sd,0)) return 0;
+
+	sbl=map_id2bl(sd->bl.id);
+	if(sd->sc_data[SC_CLOAKING].timer!=-1 && skill_num != AS_CLOAKING)
+			skill_status_change_end( sbl, SC_CLOAKING, -1);
 
 	if(skill_num == SA_CASTCANCEL) {
 		sd->skillid_old = sd->skillid;
@@ -4071,16 +4074,20 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 int skill_use_pos( struct map_session_data *sd,
 	int skill_x, int skill_y, int skill_num, int skill_lv)
 {
-	struct block_list bl;
+	struct block_list bl,*sbl;
 	unsigned int tick;
 	int casttime=0,delay=0,skill,range;
 	
 	if(pc_isdead(sd))
 		return 0;
 
-	if( sd->opt1>0 || pc_ishiding(sd) || sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1 ||
+	if( sd->opt1>0 || sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1 ||
 		sd->sc_data[SC_AUTOCOUNTER].timer != -1 || sd->sc_data[SC_STEELBODY].timer != -1)
 		return 0;	/* 異常や沈黙など */
+
+	if(pc_ishiding(sd) && !sd->status.option&4)
+		return 0;
+
 	if(map[sd->bl.m].flag.gvg && (skill_num == SM_ENDURE || skill_num == AL_TELEPORT || skill_num == AL_WARP ||
 		skill_num == WZ_ICEWALL || skill_num == TF_BACKSLIDING))
 		return 0;
@@ -4105,6 +4112,10 @@ int skill_use_pos( struct map_session_data *sd,
 		range = battle_get_range(&sd->bl) - (range - 1);
 	if(!battle_check_range(&sd->bl,&bl,range) )
 		return 0;
+
+	sbl=map_id2bl(sd->bl.id);
+	if(sd->sc_data[SC_CLOAKING].timer!=-1)
+		skill_status_change_end( sbl, SC_CLOAKING, -1);
 
 	pc_stopattack(sd);
 
@@ -4892,7 +4903,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	case SC_DISSONANCE:	/* 不協和音 */
 		if( (--sc_data[type].val2)>0){
 			struct skill_unit *unit=
-				(struct skill_unit *)sc_data[type].val4;
+				(struct skill_unit *)sc_data[type].val5;
 			struct block_list *src;
 			
 			if(!unit || !unit->group)
@@ -4910,7 +4921,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	case SC_LULLABY:	/* 子守唄 */
 		if( (--sc_data[type].val2)>0){
 			struct skill_unit *unit=
-				(struct skill_unit *)sc_data[type].val4;
+				(struct skill_unit *)sc_data[type].val5;
 			if(!unit || !unit->group || unit->group->src_id==bl->id)
 				break;
 			skill_additional_effect(bl,bl,unit->group->skill_id,sc_data[type].val1,BF_LONG|BF_SKILL|BF_MISC,tick);
@@ -5017,7 +5028,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 	struct status_change* sc_data;
 	short *sc_count, *option, *opt1, *opt2;
 	int opt_flag = 0, calc_flag = 0;
-	int val3=0,val4=val2;
+	int val3=0,val4=0,val5=val2;
 
 	if(bl->type == BL_SKILL)
 		return 0;
@@ -5485,6 +5496,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 	sc_data[type].val2 = val2;
 	sc_data[type].val3 = val3;
 	sc_data[type].val4 = val4;
+	sc_data[type].val5 = val5;
 	/* タイマー設定 */
 	sc_data[type].timer = add_timer(
 		gettick() + tick, skill_status_change_timer, bl->id, type);

@@ -1,4 +1,19 @@
 --------------------
+//0826 by ぴざまん
+
+・一部の演奏スキルを使うと鯖が落ちるバグ修正。
+・クローキング中にスキルを使用でき、
+　使用するとクローキングが解除されるように修正。
+・Kalenさんのmob_db.txtをまとめました。
+	(map/)
+	skill.c
+		skill_unit_onplace()、skill_unit_onout() 修正。
+		skill_status_change_start()、skill_status_change_timer() 修正。
+		skill_use_id()、skill_use_pos() 修正。
+	(db/)
+	mob_db.txt 修正。
+
+--------------------
 //0825 by 死神
 
 ・細かい修正。(細かいことのわりには修正した所が多いけど...)
