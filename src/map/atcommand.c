@@ -125,6 +125,7 @@ ATCOMMAND_FUNC(party);
 ATCOMMAND_FUNC(guild);
 ATCOMMAND_FUNC(agitstart);
 ATCOMMAND_FUNC(agitend);
+ATCOMMAND_FUNC(onlymes);
 ATCOMMAND_FUNC(mapexit);
 ATCOMMAND_FUNC(idsearch);
 ATCOMMAND_FUNC(itemidentify);
@@ -244,6 +245,7 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Guild,					"@guild",			0, atcommand_guild },
 	{ AtCommand_AgitStart,				"@agitstart",		0, atcommand_agitstart },
 	{ AtCommand_AgitEnd,				"@agitend",			0, atcommand_agitend },
+	{ AtCommand_OnlyMes,				"@mes",				0, atcommand_onlymes },
 	{ AtCommand_MapExit,				"@mapexit",			0, atcommand_mapexit },
 	{ AtCommand_IDSearch,				"@idsearch",		0, atcommand_idsearch },
 	{ AtCommand_ItemIdentify,			"@itemidentify",	0, atcommand_itemidentify },
@@ -1035,6 +1037,27 @@ atcommand_kami(
 		strlen(output) + 1,
 		(*(command + 5) == 'b') ? 0x10 : 0);
 	
+	return 0;
+}
+
+/*==========================================
+ *‹©‚Ô
+ *------------------------------------------
+ */
+int atcommand_onlymes(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char temp0[200],temp1[200];
+
+	sscanf(message, "%199[^#\n]", temp0);
+	strcpy(temp1,"[‹©‚Ô]");
+	strcat(temp1,sd->status.name);
+	strcat(temp1," :");
+	strcat(temp1,temp0);
+	
+	clif_onlymessage(sd,temp1,strlen(temp1)+1);
+
 	return 0;
 }
 

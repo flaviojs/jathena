@@ -98,6 +98,7 @@ enum AtCommandType {
 	AtCommand_Guild,
 	AtCommand_AgitStart,
 	AtCommand_AgitEnd,
+	AtCommand_OnlyMes,
 	AtCommand_MapExit,
 	AtCommand_IDSearch,
 	AtCommand_ItemIdentify,

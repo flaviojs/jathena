@@ -1,4 +1,21 @@
 --------------------
+//1090 by Sapientia
+・チャットの便利さのために叫ぶ追加 (ギルドチャットと区分するためにウェチギシの前に [叫ぶこと]が付き)
+・atcomand_athena.conf で onlymes を 0で設定して皆使うように活性化
+  オリジナルなのでデフォルトで GMだけ使うことができるように設定しました.
+・@mes [言うこと] で使用
+
+	(src/map)
+		atcommand.c	atcommand_charkami 追加
+		atcommand.h
+		clif.c		clif_onlymessage 追加
+		clif.h
+	(src/conf)
+		atcommand_athena.conf	onlymes 追加
+		help.txt	@mes 説明追加
+
+
+--------------------
 //1089 by 聖
 ・VC.NET2003でコンパイルすると大量に警告が出るのを修正
 ・その他バッファオーバーフロー等の細かいバグ修正

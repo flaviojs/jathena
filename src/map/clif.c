@@ -6716,6 +6716,25 @@ int clif_disp_onlyself(struct map_session_data *sd,char *mes,int len)
 }
 
 /*==========================================
+ * ‹©‚Ô
+ *------------------------------------------
+ */
+int clif_onlymessage(struct map_session_data *sd,char *mes,int len)
+{
+	unsigned char *buf = malloc(len+32);
+
+	nullpo_retr(0, sd);
+
+	WBUFW(buf, 0)=0x17f;
+	WBUFW(buf, 2)=len+8;
+	memcpy(WBUFP(buf,4),mes,len+4);
+
+	clif_send(buf,WBUFW(buf,2),&sd->bl,SELF);
+	free(buf);
+	return 0;
+}
+
+/*==========================================
  *
  *------------------------------------------
  */
