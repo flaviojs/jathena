@@ -1,5 +1,14 @@
 --------------------
-//0909 by 胡蝶蘭
+//0916 by (凸)
+・npc_monsterにnpc_mob_jobを統合。npc_mob_job.txtは削除してかまいません
+
+	(conf/)
+	map_athena.conf npc_mob_jobを削除
+	(conf/mob/)
+	npc_monster.txt 更新
+
+--------------------
+//0915 by 胡蝶蘭
 
 ・NPCタイマー関係の命令追加＆修正他
 	・delwaitingroom（NPCチャット終了）引数を見てなかったので修正
