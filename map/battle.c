@@ -124,7 +124,7 @@ int battle_get_max_hp(struct block_list *bl)
 		}
 		if(sc_data) {
 			if(sc_data[SC_APPLEIDUN].timer!=-1)
-				max_hp += ((5+sc_data[SC_APPLEIDUN].val1*2+sc_data[SC_APPLEIDUN].val2
+				max_hp += ((5+sc_data[SC_APPLEIDUN].val1*2+((sc_data[SC_APPLEIDUN].val2+1)>>1)
 						+sc_data[SC_APPLEIDUN].val3/10) * max_hp)/100;
 		}
 		if(max_hp < 1) max_hp = 1;
@@ -280,8 +280,8 @@ int battle_get_flee(struct block_list *bl)
 
 	if(sc_data) {
 		if(sc_data[SC_WHISTLE].timer!=-1 && bl->type != BL_PC)
-			flee += flee*(sc_data[SC_WHISTLE].val1+sc_data[SC_WHISTLE].val2/2
-					+sc_data[SC_WHISTLE].val3/10)/100;
+			flee += flee*(sc_data[SC_WHISTLE].val1+sc_data[SC_WHISTLE].val2
+					+sc_data[SC_WHISTLE].val3)/100;
 		if(sc_data[SC_BLIND].timer!=-1 && bl->type != BL_PC)
 			flee -= flee*25/100;
 	}
@@ -301,7 +301,7 @@ int battle_get_hit(struct block_list *bl)
 	if(sc_data) {
 		if(sc_data[SC_HUMMING].timer!=-1 && bl->type != BL_PC)	// 
 			hit += hit*(sc_data[SC_HUMMING].val1*2+sc_data[SC_HUMMING].val2
-					+sc_data[SC_HUMMING].val3/10)/100;
+					+sc_data[SC_HUMMING].val3)/100;
 		if(sc_data[SC_BLIND].timer!=-1 && bl->type != BL_PC)		// 呪い
 			hit -= hit*25/100;
 	}
@@ -322,7 +322,8 @@ int battle_get_flee2(struct block_list *bl)
 
 	if(sc_data) {
 		if(sc_data[SC_WHISTLE].timer!=-1 && bl->type != BL_PC)
-			flee2 += sc_data[SC_WHISTLE].val1*10;
+			flee2 += (sc_data[SC_WHISTLE].val1+sc_data[SC_WHISTLE].val2
+					+sc_data[SC_WHISTLE].val4)*10;
 	}
 	if(flee2 < 1) flee2 = 1;
 	return flee2;
@@ -341,8 +342,8 @@ int battle_get_critical(struct block_list *bl)
 
 	if(sc_data) {
 		if(sc_data[SC_FORTUNE].timer!=-1 && bl->type != BL_PC)
-			critical += (10+sc_data[SC_FORTUNE].val1+sc_data[SC_FORTUNE].val2/2
-					+sc_data[SC_FORTUNE].val3/10)*10;
+			critical += (10+sc_data[SC_FORTUNE].val1+sc_data[SC_FORTUNE].val2
+					+sc_data[SC_FORTUNE].val3)*10;
 		if(sc_data[SC_EXPLOSIONSPIRITS].timer!=-1 && bl->type != BL_PC)
 			critical += sc_data[SC_EXPLOSIONSPIRITS].val2;
 	}
@@ -424,7 +425,7 @@ int battle_get_atk2(struct block_list *bl)
 				atk2 -= atk2*25/100;
 			if(sc_data[SC_DRUMBATTLE].timer!=-1)
 				atk2 += sc_data[SC_DRUMBATTLE].val2;
-			if(sc_data[SC_NIBELUNGEN].timer!=-1)
+			if(sc_data[SC_NIBELUNGEN].timer!=-1 && (battle_get_element(bl)/10) >= 8 )
 				atk2 += sc_data[SC_NIBELUNGEN].val2;
 		}
 		if(atk2 < 0) atk2 = 0;
@@ -625,7 +626,7 @@ int battle_get_adelay(struct block_list *bl)
 				aspd_rate -= sc_data[SC_SPEARSQUICKEN].val2;
 			if(sc_data[SC_ASSNCROS].timer!=-1 && // 夕陽のアサシンクロス
 				sc_data[SC_TWOHANDQUICKEN].timer==-1 && sc_data[SC_ADRENALINE].timer==-1 && sc_data[SC_SPEARSQUICKEN].timer==-1)
-				aspd_rate -= 5+sc_data[SC_ASSNCROS].val1+sc_data[SC_ASSNCROS].val2/2+sc_data[SC_ASSNCROS].val3/20;
+				aspd_rate -= 5+sc_data[SC_ASSNCROS].val1+sc_data[SC_ASSNCROS].val2+sc_data[SC_ASSNCROS].val3;
 			if(sc_data[SC_DONTFORGETME].timer!=-1)		// 私を忘れないで
 				aspd_rate += sc_data[SC_DONTFORGETME].val2;
 			if(sc_data[SC_STEELBODY].timer!=-1)	// 金剛
@@ -663,7 +664,7 @@ int battle_get_amotion(struct block_list *bl)
 				aspd_rate -= sc_data[SC_SPEARSQUICKEN].val2;
 			if(sc_data[SC_ASSNCROS].timer!=-1 && // 夕陽のアサシンクロス
 				sc_data[SC_TWOHANDQUICKEN].timer==-1 && sc_data[SC_ADRENALINE].timer==-1 && sc_data[SC_SPEARSQUICKEN].timer==-1)
-				aspd_rate -= 5+sc_data[SC_ASSNCROS].val1+sc_data[SC_ASSNCROS].val2/2+sc_data[SC_ASSNCROS].val3/20;
+				aspd_rate -= 5+sc_data[SC_ASSNCROS].val1+sc_data[SC_ASSNCROS].val2+sc_data[SC_ASSNCROS].val3;
 			if(sc_data[SC_DONTFORGETME].timer!=-1)		// 私を忘れないで
 				aspd_rate += sc_data[SC_DONTFORGETME].val2;
 			if(sc_data[SC_STEELBODY].timer!=-1)	// 金剛
@@ -2985,7 +2986,7 @@ struct Damage battle_calc_magic_attack(
 			break;
 		case ALL_RESURRECTION:
 		case PR_TURNUNDEAD:	// 攻撃リザレクションとターンアンデッド
-			if(battle_check_undead(t_race,t_ele)){
+			if(target->type != BL_PC && battle_check_undead(t_race,t_ele)){
 				int hp = 0, mhp = 0, thres = 0;
 				hp = battle_get_hp(target);
 				mhp = battle_get_max_hp(target);
@@ -3607,9 +3608,9 @@ int battle_config_read(const char *cfgName)
 	battle_config.random_monster_checklv=1;
 	battle_config.attr_recover=1;
 	battle_config.flooritem_lifetime=LIFETIME_FLOORITEM*1000;
-	battle_config.item_first_get_time=10000;
-	battle_config.item_second_get_time=7000;
-	battle_config.item_third_get_time=5000;
+	battle_config.item_first_get_time=3000;
+	battle_config.item_second_get_time=1000;
+	battle_config.item_third_get_time=1000;
 	battle_config.mvp_item_first_get_time=10000;
 	battle_config.mvp_item_second_get_time=10000;
 	battle_config.mvp_item_third_get_time=2000;
@@ -3689,6 +3690,8 @@ int battle_config_read(const char *cfgName)
 	battle_config.vit_penaly_num = 0;
 	battle_config.pc_skill_reiteration = 0;
 	battle_config.monster_skill_reiteration = 0;
+	battle_config.pc_skill_nofootset = 0;
+	battle_config.monster_skill_nofootset = 0;
 	battle_config.pc_cloak_check_wall = 1;
 	battle_config.monster_cloak_check_wall = 1;
 	battle_config.gvg_short_damage_rate = 100;
@@ -3808,6 +3811,8 @@ int battle_config_read(const char *cfgName)
 			{ "vit_penaly_num", &battle_config.vit_penaly_num },
 			{ "player_skill_reiteration", &battle_config.pc_skill_reiteration },
 			{ "monster_skill_reiteration", &battle_config.monster_skill_reiteration },
+			{ "player_skill_nofootset", &battle_config.pc_skill_nofootset },
+			{ "monster_skill_nofootset", &battle_config.monster_skill_nofootset },
 			{ "player_cloak_check_wall", &battle_config.pc_cloak_check_wall },
 			{ "monster_cloak_check_wall", &battle_config.monster_cloak_check_wall },
 			{ "gvg_short_attack_damage_rate" ,&battle_config.gvg_short_damage_rate },

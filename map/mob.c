@@ -244,7 +244,7 @@ static int mob_walk(struct mob_data *md,unsigned int tick,int data)
 	int i,ctype;
 	static int dirx[8]={0,-1,-1,-1,0,1,1,1};
 	static int diry[8]={1,1,0,-1,-1,-1,0,1};
-	int x,y,dx,dy,flag = 0;
+	int x,y,dx,dy;
 
 	md->state.state=MS_IDLE;
 	if(md->walkpath.path_pos>=md->walkpath.path_len || md->walkpath.path_pos!=data)
@@ -301,11 +301,8 @@ static int mob_walk(struct mob_data *md,unsigned int tick,int data)
 			skill_check_cloaking(&md->bl);
 
 		skill_unit_move(&md->bl,tick,1);	// スキルユニットの検査
-
-		if(md->sc_data[SC_ANKLE].timer != -1 || md->canmove_tick > tick)
-			flag = 1;
 	}
-	if((i=calc_next_walk_step(md))>0 && !flag){
+	if((i=calc_next_walk_step(md))>0){
 		i = i>>1;
 		if(i < 1 && md->walkpath.path_half == 0)
 			i = 1;
@@ -721,7 +718,7 @@ int mob_stopattack(struct mob_data *md)
  */
 int mob_stop_walking(struct mob_data *md,int type)
 {
-	if(md->state.state == MS_WALK) {
+	if(md->state.state == MS_WALK || md->state.state == MS_IDLE) {
 		md->walkpath.path_len=0;
 		md->to_x=md->bl.x;
 		md->to_y=md->bl.y;
@@ -1556,7 +1553,7 @@ int mob_deleteslave_sub(struct block_list *bl,va_list ap)
 int mob_deleteslave(struct mob_data *md)
 {
 	map_foreachinarea(mob_deleteslave_sub, md->bl.m,
-		0,0,map[md->bl.m].xs-1,map[md->bl.m].ys-1,
+		0,0,map[md->bl.m].xs,map[md->bl.m].ys,
 		BL_MOB,md->bl.id);
 	return 0;
 }
@@ -1659,6 +1656,11 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	}
 
 	md->hp-=damage;
+
+	if(md->option&6 ){
+		skill_status_change_end(&md->bl, SC_HIDING, -1);
+		skill_status_change_end(&md->bl, SC_CLOAKING, -1);
+	}
 
 	if(md->hp>0){
 		return 0;
@@ -2189,6 +2191,12 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 		return 0;
 	if(md->bl.m != bl->m)
 		return 0;
+
+	if(md->skillid == PR_LEXAETERNA) {
+		struct status_change *sc_data = battle_get_sc_data(bl);
+		if(sc_data && (sc_data[SC_STONE].timer != -1 || sc_data[SC_FREEZE].timer != -1))
+			return 0;
+	}
 	range = skill_get_range(md->skillid,md->skilllv);
 	if(range < 0)
 		range = (1 - range) + battle_get_range(&md->bl);
@@ -2225,7 +2233,7 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 {
 	struct mob_data* md=NULL;
-	int range;
+	int range,maxcount;
 
 	if( (md=(struct mob_data *)map_id2bl(id))==NULL ||
 		md->bl.type!=BL_MOB || md->bl.prev==NULL )
@@ -2265,6 +2273,42 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 			if(skill_check_unit_range(md->bl.m,md->skillx,md->skilly,range,md->skillid) > 0)
 				return 0;
 		}
+	}
+	if(battle_config.monster_skill_nofootset) {
+		range = -1;
+		switch(md->skillid) {
+			case WZ_FIREPILLAR:
+			case HT_SKIDTRAP:
+			case HT_LANDMINE:
+			case HT_ANKLESNARE:
+			case HT_SHOCKWAVE:
+			case HT_SANDMAN:
+			case HT_FLASHER:
+			case HT_FREEZINGTRAP:
+			case HT_BLASTMINE:
+			case HT_CLAYMORETRAP:
+			case HT_TALKIEBOX:
+				range = 1;
+				break;
+			case AL_WARP:
+				range = 0;
+				break;
+		}
+		if(range >= 0) {
+			if(skill_check_unit_range2(md->bl.m,md->skillx,md->skilly,range) > 0)
+				return 0;
+		}
+	}
+
+	maxcount = skill_get_maxcount(md->skillid);
+	if(maxcount > 0) {
+		int i,c;
+		for(i=c=0;i<MAX_MOBSKILLUNITGROUP;i++) {
+			if(md->skillunit[i].alive_count > 0 && md->skillunit[i].skill_id == md->skillid)
+				c++;
+		}
+		if(c >= maxcount)
+			return 0;
 	}
 
 	range = skill_get_range(md->skillid,md->skilllv);

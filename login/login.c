@@ -456,7 +456,7 @@ int parse_fromchar(int fd)
       break;
 	
 	case 0x2720:	// GM
-/*	  {
+	  {
 	  	int newacc=0,oldacc,i=0,j;
 		if(RFIFOREST(fd)<4)
 			return 0;
@@ -490,7 +490,7 @@ int parse_fromchar(int fd)
 		WFIFOL(fd,2)=oldacc;
 		WFIFOL(fd,6)=newacc;
 		WFIFOSET(fd,10);
-	  }*/
+	  }
 	  return 0;
 
 	case 0x2722:	// changesex

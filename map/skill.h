@@ -15,6 +15,7 @@ struct skill_db {
 	int upkeep_time[MAX_SKILL_LEVEL],upkeep_time2[MAX_SKILL_LEVEL];
 	int castcancel,cast_def_rate;
 	int inf2;
+	int maxcount;
 	int hp[MAX_SKILL_LEVEL],sp[MAX_SKILL_LEVEL],hp_rate[MAX_SKILL_LEVEL],sp_rate[MAX_SKILL_LEVEL],zeny[MAX_SKILL_LEVEL];
 	int weapon,state,spiritball[MAX_SKILL_LEVEL];
 	int itemid[5],amount[5];
@@ -62,6 +63,7 @@ int	skill_get_castdef( int id );
 int	skill_get_weapontype( int id );
 int skill_get_unit_id(int id,int flag);
 int	skill_get_inf2( int id );
+int	skill_get_maxcount( int id );
 
 // スキルの使用
 int skill_use_id( struct map_session_data *sd, int target_id,
@@ -92,6 +94,7 @@ int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,
 	int damage,unsigned int tick);
 
 int skill_check_unit_range(int m,int x,int y,int range,int skillid);
+int skill_check_unit_range2(int m,int x,int y,int range);
 int skill_unit_out_all( struct block_list *bl,unsigned int tick,int range);
 int skill_unit_move( struct block_list *bl,unsigned int tick,int range);
 

@@ -788,6 +788,18 @@ monster_skill_reiteration
 	これをyesにするとSWやニューマ、トラップを重ねて置くことができます。
 	デフォルトはnoです。
 
+player_skill_nofootset
+	プレイヤーが使う一部の地面スキルをプレイヤーやモンスターの足元に
+	置くのを禁止するかどうかです。これをyesにするとスキルを設置する時その
+	効果範囲にプレイヤーやモンスターがいるとスキルを置くことができません。
+	デフォルトはnoです。
+
+monster_skill_nofootset
+	モンスターが使う一部の地面スキルをプレイヤーやモンスターの足元に
+	置くのを禁止するかどうかです。これをyesにするとスキルを設置する時その
+	効果範囲にプレイヤーやモンスターがいるとスキルを置くことができません。
+	デフォルトはnoです。
+
 player_cloak_check_wall
 	プレイヤーがクローキングした時壁をチェックするかどうかです。
 	これをnoにすると壁がなくてもクローキングできます。デフォルトはyesです。
@@ -913,6 +925,8 @@ vit_penaly_count: 3
 vit_penaly_num: 0
 player_skill_reiteration: no
 monster_skill_reiteration: no
+player_skill_nofootset: no
+monster_skill_nofootset: no
 player_cloak_check_wall: yes
 monster_cloak_check_wall: yes
 gvg_short_attack_damage_rate: 100

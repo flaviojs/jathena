@@ -700,6 +700,8 @@ int clif_mob_class_change(struct mob_data *md,int class)
  */
 static int clif_mob0078(struct mob_data *md,unsigned char *buf)
 {
+	int level;
+
 	memset(buf,0,packet_len_table[0x78]);
 
 	WBUFW(buf,0)=0x78;
@@ -713,6 +715,7 @@ static int clif_mob0078(struct mob_data *md,unsigned char *buf)
 	WBUFB(buf,48)|=md->dir&0x0f;
 	WBUFB(buf,49)=5;
 	WBUFB(buf,50)=5;
+	WBUFW(buf,52)=((level = battle_get_lv(&md->bl))>99)? 99:level;
 
 	return packet_len_table[0x78];
 }
@@ -723,6 +726,8 @@ static int clif_mob0078(struct mob_data *md,unsigned char *buf)
  */
 static int clif_mob007b(struct mob_data *md,unsigned char *buf)
 {
+	int level;
+
 	memset(buf,0,packet_len_table[0x7b]);
 
 	WBUFW(buf,0)=0x7b;
@@ -736,6 +741,7 @@ static int clif_mob007b(struct mob_data *md,unsigned char *buf)
 	WBUFPOS2(buf,50,md->bl.x,md->bl.y,md->to_x,md->to_y);
 	WBUFB(buf,56)=5;
 	WBUFB(buf,57)=5;
+	WBUFW(buf,58)=((level = battle_get_lv(&md->bl))>99)? 99:level;
 
 	return packet_len_table[0x7b];
 }
@@ -766,7 +772,7 @@ static int clif_npc0078(struct npc_data *nd,unsigned char *buf)
  */
 static int clif_pet0078(struct pet_data *pd,unsigned char *buf)
 {
-	int view;
+	int view,level;
 
 	memset(buf,0,packet_len_table[0x78]);
 
@@ -783,6 +789,7 @@ static int clif_pet0078(struct pet_data *pd,unsigned char *buf)
 	WBUFB(buf,48)|=pd->dir&0x0f;
 	WBUFB(buf,49)=0;
 	WBUFB(buf,50)=0;
+	WBUFW(buf,52)=((level = battle_get_lv(&pd->bl))>99)? 99:level;
 
 	return packet_len_table[0x78];
 }
@@ -793,7 +800,7 @@ static int clif_pet0078(struct pet_data *pd,unsigned char *buf)
  */
 static int clif_pet007b(struct pet_data *pd,unsigned char *buf)
 {
-	int view;
+	int view,level;
 
 	memset(buf,0,packet_len_table[0x7b]);
 
@@ -810,6 +817,7 @@ static int clif_pet007b(struct pet_data *pd,unsigned char *buf)
 	WBUFPOS2(buf,50,pd->bl.x,pd->bl.y,pd->to_x,pd->to_y);
 	WBUFB(buf,56)=0;
 	WBUFB(buf,57)=0;
+	WBUFW(buf,58)=((level = battle_get_lv(&pd->bl))>99)? 99:level;
 
 	return packet_len_table[0x7b];
 }
@@ -3666,8 +3674,6 @@ int clif_closevendingboard(struct block_list* bl,int fd)
 	}else{
 		clif_send(buf,packet_len_table[0x132],bl,AREA_WOS);
 	}
-	if(bl->type == BL_PC && ((struct map_session_data *)bl)->npc_id != 0)
-		npc_event_dequeue((struct map_session_data *)bl);
 
 	return 0;
 }
@@ -6070,6 +6076,8 @@ void clif_parse_CloseVending(int fd,struct map_session_data *sd)
 void clif_parse_VendingListReq(int fd,struct map_session_data *sd)
 {
 	vending_vendinglistreq(sd,RFIFOL(fd,2));
+	if(sd->npc_id)
+		npc_event_dequeue(sd);
 }
 
 /*==========================================

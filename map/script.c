@@ -2275,7 +2275,8 @@ int buildin_killmonster_sub(struct block_list *bl,va_list ap)
 			mob_delete((struct mob_data *)bl);
 		return 0;
 	}else if(allflag){
-		mob_delete((struct mob_data *)bl);
+		if(((struct mob_data *)bl)->spawndelay1==-1 && ((struct mob_data *)bl)->spawndelay2==-1)
+			mob_delete((struct mob_data *)bl);
 		return 0;
 	}
 	return 0;
@@ -2287,7 +2288,7 @@ int buildin_killmonster(struct script_state *st)
 	mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	event=conv_str(st,& (st->stack->stack_data[st->start+3]));
 	if(strcmp(event,"All")==0)
-		allflag++;
+		allflag = 1;
 
 	if( (m=map_mapname2mapid(mapname))<0 )
 		return 0;

@@ -33,7 +33,7 @@ extern struct Atcommand_Config {
 	int lvup;
 	int joblvup;
 	int help;
-//	int gm;
+	int gm;
 	int pvpoff;
 	int pvpon;
 	int gvgoff;

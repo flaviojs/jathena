@@ -465,7 +465,7 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 		}
 //GMになる！ 同垢の全キャラはPTから抜け、倉庫は空にして下さい。
 //「@GM」と入力
-/*		if (strcmpi(command, "@GM") == 0 && gm_level >= atcommand_config.gm) {
+		if (strcmpi(command, "@GM") == 0 && gm_level >= atcommand_config.gm) {
 			moji[0]=0;
 			sscanf(message, "%s %[^\n]", command,moji);
 			if(sd->status.party_id)
@@ -482,7 +482,7 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 				chrif_changegm(sd->status.account_id,moji,strlen(moji)+1);
 			}
 			return 1;
-		}*/
+		}
 
 //PVP解除　　ただ、マップ移動しないと解除されません。
 //「@pvpoff」と入力
@@ -1331,7 +1331,7 @@ int atcommand_config_read(const char *cfgName)
 				{ "lvup",&atcommand_config.lvup },
 				{ "joblvup",&atcommand_config.joblvup },
 				{ "help",&atcommand_config.help },
-//				{ "GM",&atcommand_config.gm },
+				{ "GM",&atcommand_config.gm },
 				{ "pvpoff",&atcommand_config.pvpoff },
 				{ "pvpon",&atcommand_config.pvpon },
 				{ "gvgoff",&atcommand_config.gvgoff },

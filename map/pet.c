@@ -412,7 +412,7 @@ int pet_walktoxy(struct pet_data *pd,int x,int y)
 
 int pet_stop_walking(struct pet_data *pd,int type)
 {
-	if(pd->state.state == MS_WALK) {
+	if(pd->state.state == MS_WALK || pd->state.state == MS_IDLE) {
 		pd->walkpath.path_len=0;
 		pd->to_x=pd->bl.x;
 		pd->to_y=pd->bl.y;

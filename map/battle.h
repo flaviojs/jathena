@@ -213,6 +213,8 @@ extern struct Battle_Config {
 	int vit_penaly_num;
 	int pc_skill_reiteration;
 	int monster_skill_reiteration;
+	int pc_skill_nofootset;
+	int monster_skill_nofootset;
 	int pc_cloak_check_wall;
 	int monster_cloak_check_wall;
 	int gvg_short_damage_rate;

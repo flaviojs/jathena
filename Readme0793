@@ -1,5 +1,63 @@
 --------------------
+//0825 by €_
+
+E×‚©‚¢C³B(×‚©‚¢‚±‚Æ‚Ì‚í‚è‚É‚ÍC³‚µ‚½Š‚ª‘½‚¢‚¯‚Ç...)
+Eƒ[ƒvƒ|[ƒ^ƒ‹‚Ì’†‚É~‚Ü‚Á‚½ˆÈŠO‚Íƒ[ƒv‚µ‚È‚¢‚æ‚¤‚ÉC³B
+Ebattle_athena.conf‚Éplayer_skill_nofootsetAmonster_skill_nofootset ’Ç‰ÁB
+ENPC‚ğƒNƒŠƒbƒN‚µ‚½Œã˜I“X‚ğƒNƒŠƒbƒN‚µ‚Ä˜I“X‚ğ•Â‚¶‚é‚Æ“®‚¯‚È‚­‚È‚éƒoƒOC³B
+‚½‚¾˜I“X‚ğ•Â‚¶‚é‰½‚ÌƒpƒPƒbƒg‚à“]‘—‚µ‚Ä‚±‚È‚¢‚Ì‚Å˜I“X‚ğƒNƒŠƒbƒN‚·‚é‚ÆNPC‚Ìˆ—‚©‚ç”²‚¯‚é‚æ‚¤‚É‚µ‚Ü‚µ‚½B(–{I‚Å‚ÍNPC‚Ìˆ—‚ª”²‚¯‚È‚¢‚ç‚µ‚¢‚Å‚·‚ª‚»‚êˆÈŠO•û–@‚ª‚È‚©‚Á‚½‚Ì‚Á‚ÅB)
+Ekillmonster‚ÌAll‚Å¢Š«‚³‚ê‚½ƒ‚ƒ“ƒXƒ^[‚¾‚¯Á‚·‚æ‚¤‚É•ÏXB
+Eƒ\[ƒXÅ“K‰»‚âƒXƒLƒ‹ŠÖŒW‚Ì×‚©‚¢C³‘½”B
+	(doc/)
+	conf_ref.txt C³B
+	db_ref.txt C³B
+	(conf/)
+	battle_athana.conf C³B
+	atcommnad_athena.conf C³B
+	(db/)
+	item_db.txt C³B
+	skill_db.txt C³B
+	(login/)
+	parse_fromchar() C³B
+	(map/)
+	map.h C³B
+	clif.c
+		clif_closevendingboard()Aclif_parse_VendingListReq() C³B
+		clif_mob0078()Aclif_mob007b()Aclif_pet0078()Aclif_pet007b() C³B
+	skill.h C³B
+	skill.c
+		skill_check_condition()Askill_castend_pos2() C³B
+		skill_castend_damage_id()Askill_castend_nodamage_id() C³B
+		skill_castend_id()Askill_status_change_start()Askill_castfix() C³B
+		skill_delayfix()Askill_check_unit_range_sub() C³B
+		skill_check_unit_range()Askill_castend_pos()Askill_stop_dancing() C³B
+		skill_unit_onplace()Askill_readdb()Askill_timerskill()Askill_blown() C³B
+		skill_check_unit_range2_sub()Askill_check_unit_range2() ’Ç‰ÁB
+		skill_get_maxcount() ’Ç‰ÁB
+	mob.c
+		mobskill_castend_id()Amobskill_castend_pos()Amob_deleteslave() C³B
+		mob_stop_walking()Amob_walk()Amob_damage() C³B
+	pc.c
+		pc_calcstatus()Apc_checkskill()Apc_stop_walking() C³B
+		pc_walk()Apc_damage() C³B
+	npc.c
+		npc_touch_areanpc() C³B
+	pet.c
+		pet_stop_walking() C³B
+	script.c
+		buildin_killmonster()Abuildin_killmonster_sub() C³B
+	battle.h
+	battle.c
+		battle_calc_magic_attack()Abattle_get_flee()Abattle_get_flee2() C³B
+		battle_get_adelay()Abattle_get_amotion()Abattle_get_max_hp() C³B
+		battle_get_hit()Abattle_get_critical()Abattle_get_atk2() C³B
+		battle_damage()Abattle_config_read() C³B
+	atcommand.h C³B
+	atcommand.c C³B
+
+--------------------
 //0824 by ‚Ò‚´‚Ü‚ñ
+
 EƒZƒCƒtƒeƒBƒEƒH[ƒ‹Eƒjƒ…[ƒ}‚Ì‘«Œ³’u‚«‚ª‚Å‚«‚È‚©‚Á‚½–â‘èC³B
 EƒGƒ“ƒyƒŠƒEƒ€‚Éƒq[ƒ‹“™‚Ìx‰‡ƒXƒLƒ‹‚ªŒø‚¢‚Ä‚¢‚½–â‘èC³B
 E“¬‹Zê‚Åƒ‚ƒ“ƒXƒ^[ƒŠƒZƒbƒg‚ª‚Å‚«‚È‚©‚Á‚½–â‘èC³B
@@ -14,8 +72,10 @@
 		buildin_killmonster()Abuildin_killmonster_sub() C³B
 	(conf/npc/)
 	npc_event_tougijou.txt C³B
+
 --------------------
 //0823 by Kalen
+
 E“¬‹Zêƒf[ƒ^‘µ‚Á‚½‚Ì‚ÅAŠ®¬
 	conf/npc/npc_event_tougijou.txt
 	‚½‚¾‚µA‚±‚¿‚ç‚Åƒ`ƒFƒbƒN‚µ‚½‚Æ‚±‚ëkillmonster‚ª‚¤‚Ü‚­‚¢‚©‚¸A
@@ -36,6 +96,7 @@
 
 --------------------
 //0822 by ‚Ò‚´‚Ü‚ñ
+
 E‰‰‘tƒXƒLƒ‹‚Å‚Ì•â³‚ğƒ_ƒ“ƒT[‚É‚à“K—pB
 EƒTƒ“ƒNƒ`ƒ…ƒAƒŠƒoƒOC³B
 EKalen‚³‚ñ‚ÌMOBƒXƒLƒ‹ƒf[ƒ^ƒx[ƒX‚ğ‚Ü‚Æ‚ß‚Æ‚«‚Ü‚µ‚½B
@@ -50,6 +111,7 @@
 
 --------------------
 //0821 by huge
+
 EƒI[ƒgƒXƒyƒ‹‰¼À‘•B
 Etimer‚Å”»’è‚µ‚æ‚¤‚©‚Æ‚àv‚¢‚Ü‚µ‚½‚ªA‘•”õ‚Ì–³ŒÀƒI[ƒgƒXƒyƒ‹‚Ìˆ×‚Ésc_[].val1‚ÅŒ©‚Äƒ}ƒXB
 Ebonus2 bAutoSpell’Ç‰ÁBˆê‰‚Ç‚ñ‚ÈƒXƒLƒ‹‚Å‚àw’è‚Å‚«‚é‚æ‚¤‚É‚µ‚Ä‚Ü‚·‚ª(”Ô†‚Ískill_treeQÆ)
@@ -83,6 +145,7 @@
 
 --------------------
 //0820 by ‚Ò‚´‚Ü‚ñ
+
 EƒAƒhƒŠƒu‚ÌƒƒbƒZ[ƒW‚ª“ü‚Á‚Ä‚È‚©‚Á‚½‚Ì‚ÅC³
 Eƒo[ƒh‚Ì‰‰‘tƒXƒLƒ‹‚ÅŠyŠí‚Ì—ûK‚â©ƒXƒe[ƒ^ƒX‚Ì•â³‚ª“ü‚Á‚Ä‚È‚©‚Á‚½‚Ì‚ğC³B
 @struct status_change‚Ìval‚ª3‚Â•K—v‚¾‚Á‚½‚Ì‚Å(val4‚Í—\–ñ‚³‚ê‚Ä‚½‚Á‚Û‚¢‚Ì‚Å)val5‚ğ’Ç‰Á‚µ‚Ü‚µ‚½
@@ -100,6 +163,7 @@
 
 --------------------
 //0819 by Kalen
+
 EƒRƒ“ƒƒ“(NPCAWarp)C³
 	conf/npc/npc_town_gonryun.txt(ˆÄ“àˆõ•â[)
 	conf/npc/npc_event_tougijou.txt
@@ -138,7 +202,7 @@
 EƒfƒBƒ{[ƒVƒ‡ƒ“‚Ìˆ—C³
   E…‚Ìo‚µ•û‚ÍƒpƒP‚ğ–á‚Á‚½‚Ì‚Å‚Å‚«‚Ü‚µ‚½‚ªAƒAƒCƒRƒ“‚Ì•û‚Í‚Ü‚¾•ª‚©‚ç‚È‚¢‚Å‚·B
   E‚ ‚ÆA©•ª‚ÌŠÂ‹«‚Å2lˆÈã‚É“¯‚ÉŠ|‚¯‚ê‚È‚©‚Á‚½‚Ì‚ÅA•¡”l‚É‚©‚¯‚½ê‡
-    ‘½•ª0‚Ì—…—ñ‚ÌŠ‚É2l–ÚA3l–Ú¥¥¥‚ÌID‚ª“ü‚é‚ñ‚¶‚á‚È‚¢‚©‚È‚Ÿ‚Æ‚¢‚¤—\‘ª‚Å‚â‚Á‚Ä‚Ü‚·B
+    ‘½•ª0‚Ì—…—ñ‚ÌŠ‚É2l–ÚA3l–ÚEEE‚ÌID‚ª“ü‚é‚ñ‚¶‚á‚È‚¢‚©‚È‚Ÿ‚Æ‚¢‚¤—\‘ª‚Å‚â‚Á‚Ä‚Ü‚·B
 EƒnƒCƒfƒBƒ“ƒO’†A‹y‚ÑƒNƒ[ƒLƒ“ƒO’†‚Éƒ_ƒ[ƒW‚ğó‚¯‚é‚Æ‰ğ‚¯‚é‚æ‚¤C³B
 
 	(map/)
@@ -932,4 +996,4 @@ bSplashRange‚ÆbSplashAddRange‚Í•Ší‚Åƒ_ƒ[ƒW‚ğ—^‚¦‚½‚Ì‚İ”­“®A’Êí‚Ì•ŠíUŒ‚ˆ
      This release is just fixed some bugs in timer.c, script.c and map_athena1.conf.
 
 
-(c) 2003 Athena Project.
+(c) 2003 Athena Project
