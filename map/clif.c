@@ -6168,7 +6168,8 @@ void clif_parse_SelectEgg(int fd,struct map_session_data *sd)
 
 void clif_parse_SendEmotion(int fd,struct map_session_data *sd)
 {
-	clif_pet_emotion(sd->pd,RFIFOL(fd,2));
+	if(sd->pd)
+		clif_pet_emotion(sd->pd,RFIFOL(fd,2));
 }
 
 void clif_parse_ChangePetName(int fd,struct map_session_data *sd)

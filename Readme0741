@@ -1,4 +1,10 @@
 --------------
+//0747 by 聖
+・ペットがエモを出すとmap-serverが落ちることがあった問題を修正。
+	(map/)
+		clif_parse_SendEmotion() 修正。
+
+--------------
 //0746 by Michael
 	(map/)
 	script.c 
