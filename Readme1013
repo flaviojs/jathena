@@ -1,4 +1,14 @@
 --------------------
+//1016 by な。
+・Athena雑談スレッドPart4 42 かる氏作のウンバラNPCを追加
+
+	(script/npc/town/)
+		npc_town_umbala.txt追加
+			イベントデバッグ様(230～256行目)はコメントアウト
+	(conf/)
+		map_athena.conf town に npc: script/npc/town/npc_town_umbala.txt 追加
+
+--------------------
 //1015 by (凸)
 ・リムーブトラップを本鯖仕様とAthena仕様で選べるようにした
 ・スパノビにAll+10する条件が良く分からなかったけど最初から+10じゃないのは確かなのでとりあえずBase99で一度も死んでなければという条件に変更
