@@ -29,7 +29,6 @@ struct item_data {
 		unsigned no_equip : 3;
 	} flag;
 	int view_id;
-	int first_get_id;
 };
 
 struct random_item_data {

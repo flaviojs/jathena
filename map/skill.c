@@ -3090,7 +3090,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		if(bl->type==BL_PC){
 			if((sg->val1--)>0){
 				pc_setpos((struct map_session_data *)bl,
-					sg->valstr,sg->val2>>16,sg->val2&0xffff,0);
+					sg->valstr,sg->val2>>16,sg->val2&0xffff,3);
 			}else
 				skill_delunitgroup(sg);
 		}
@@ -3442,7 +3442,7 @@ int skill_check_condition(struct map_session_data *sd,int type)
 		return 0;
 	}
 
-	if(sd->skillitem==sd->skillid) {	/* アイテムの場合無条件成功 */
+	if(sd->skillitem==sd->skillid && type&1) {	/* アイテムの場合無条件成功 */
 		sd->skillitem = sd->skillitemlv = -1;
 	}
 	else{
@@ -3639,7 +3639,7 @@ int skill_check_condition(struct map_session_data *sd,int type)
 			}
 		}
 
-		if(!type) return 1;
+		if(!(type&1)) return 1;
 
 		if(sp > 0) {					// SP消費
 			sd->status.sp-=sp;
@@ -3762,8 +3762,8 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	if(skill_get_inf2(skill_num)&0x200 && sd->bl.id == target_id)
 		return 0;
 
-	sd->skillid		= skill_num;
-	sd->skilllv		= skill_lv;
+	sd->skillid = skill_num;
+	sd->skilllv = skill_lv;
 	if(!skill_check_condition(sd,0)) return 0;
 
 	if(skill_num == SA_CASTCANCEL) {
@@ -3789,7 +3789,6 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 
 	casttime=skill_castfix(&sd->bl, skill_get_cast( skill_num,skill_lv) );
 	delay=skill_delayfix(&sd->bl, skill_get_delay( skill_num,skill_lv) );
-
 	sd->state.skillcastcancel = skill_db[skill_num].castcancel;
 
 	switch(skill_num){	/* 何か特殊な処理が必要 */
@@ -3896,6 +3895,8 @@ int skill_use_pos( struct map_session_data *sd,
 
 	sd->skillid = skill_num;
 	sd->skilllv = skill_lv;
+	sd->skillx = skill_x;
+	sd->skilly = skill_y;
 	if(!skill_check_condition(sd,0)) return 0;
 
 	/* 射程と障害物チェック */
@@ -3913,7 +3914,6 @@ int skill_use_pos( struct map_session_data *sd,
 
 	casttime=skill_castfix(&sd->bl, skill_get_cast( skill_num,skill_lv) );
 	delay=skill_delayfix(&sd->bl, skill_get_delay( skill_num,skill_lv) );
-
 	sd->state.skillcastcancel = skill_db[skill_num].castcancel;
 
 	if(battle_config.pc_skill_log)
@@ -3929,8 +3929,6 @@ int skill_use_pos( struct map_session_data *sd,
 	if( casttime<=0 )	/* 詠唱の無いものはキャンセルされない */
 		sd->state.skillcastcancel=0;
 
-	sd->skillx			= skill_x;
-	sd->skilly			= skill_y;
 	sd->skilltarget	= 0;
 /*	sd->cast_target_bl	= NULL; */
 	tick=gettick();

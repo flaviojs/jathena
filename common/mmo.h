@@ -38,6 +38,7 @@ struct item {
 	char refine;
 	char attribute;
 	short card[4];
+	int first_get_id;
 };
 struct point{
 	char map[24];
