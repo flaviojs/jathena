@@ -4016,6 +4016,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.chat_warpportal = 0;
 		battle_config.mob_warpportal = 0;
 		battle_config.dead_branch_active = 0;
+		battle_config.vending_max_value = 10000000;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4160,7 +4161,8 @@ int battle_config_read(const char *cfgName)
 			{ "display_delay_skill_fail",	&battle_config.display_delay_skill_fail	},
 			{ "chat_warpportal", 			&battle_config.chat_warpportal			},
 			{ "mob_warpportal", 			&battle_config.mob_warpportal			},
-			{ "dead_branch_active", 			&battle_config.dead_branch_active			},
+			{ "dead_branch_active", 		&battle_config.dead_branch_active		},
+			{ "vending_max_value", 			&battle_config.vending_max_value		},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

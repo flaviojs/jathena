@@ -2872,8 +2872,9 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case NPC_SUMMONSLAVE:		/* Žè‰º¢Š« */
 	case NPC_SUMMONMONSTER:		/* MOB¢Š« */
-		if(md)
+		if(md && !md->master_id){
 			mob_summonslave(md,mob_db[md->class].skill[md->skillidx].val,skilllv,(skillid==NPC_SUMMONSLAVE)?1:0);
+		}
 		break;
 
 	case NPC_TRANSFORMATION:

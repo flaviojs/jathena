@@ -1,4 +1,23 @@
 --------------------
+//0947 by (“Ê)
+Eæ‚èŠª‚«‚Íæ‚èŠª‚«‚ğ¢Š«‚µ‚È‚¢‚æ‚¤‚ÉC³
+E˜I“V‚Ì”Ì”„‰¿Ši‚ÌãŒÀ‚ğbattle_athena.conf‚Åİ’è‚Å‚«‚é‚æ‚¤‚ÉC³
+
+	(conf/)
+	battle_athena.conf
+		vending_max_value’Ç‰Á
+	(doc/)
+	conf_ref.txt C³
+	(map/)
+	skill.c
+		skill_castend_nodamage_id() C³
+	battle.c
+		battle_config_read() C³
+	battle.h C³B
+	vending.c
+		vending_openvending() C³B
+
+--------------------
 //0946 by Kalen
 Eƒvƒ–kWarpŒ©’¼‚µ
 QlF–{I(1F,2F)‚ç‚®‚È‚Ì‰½‚©(3F)

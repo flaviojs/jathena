@@ -1038,6 +1038,10 @@ dead_branch_active
 	古木の枝などmonster命令でmobidを負数に指定した場合に召喚されるモンスターをアクティブにするかどうかです。
 	デフォルトはnoです。
 
+vending_max_value
+	露店で置けるアイテム価格の最高値です。
+	デフォルトは10000000です。
+
 import
 	その行を別ファイルの中身と置き換えます。
 
@@ -1171,7 +1175,7 @@ display_delay_skill_fail: yes
 chat_warpportal: no
 mob_warpportal: no
 dead_branch_active: no
-
+vending_max_value: 10000000
 
 ==========================================================================
 6. atcommand_athena.conf
