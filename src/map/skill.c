@@ -4375,6 +4375,8 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 //			pc_break_weapon((struct map_session_data *)bl);
 		break;
 	case 0x99:				/* トーキーボックス */
+		if(sg->src_id == bl->id) //自分が踏んでも発動しない
+			break;
 		if(sg->val2==0){
 			clif_talkiebox(&src->bl,sg->valstr);
 			sg->unit_id = 0x8c;
