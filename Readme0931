@@ -1,4 +1,25 @@
 --------------------
+//0937 by netwarrior
+
+- Fix Japanese remarks problem in 0936
+- Fix minor problem in battle_heal()
+
+--------------------
+//0936 by Pepermint
+
+Retouch about problem of increase in quantity at the CART,
+when enter the an minus quantity in the CLIENT.
+
+Retouch about problem of not recovery,use POTIONPITCHER skill.
+
+	(map/)
+	battle.c
+		battle_heal()
+
+	vending.c
+		vending_purchasereq()
+
+--------------------
 //0935 by 胡蝶蘭
 
 ・内容の同じスクリプトNPCを何度も記述しなくても言いように修正
