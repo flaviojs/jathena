@@ -884,7 +884,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 				continue;
 			sd->weight += sd->inventory_data[i]->weight*sd->status.inventory[i].amount;
 		}
-		sd->cart_max_weight=battle_config.max_cart_weight;
+		sd->cart_max_weight=battle_config.max_cart_weight*10;
 		sd->cart_weight=0;
 		sd->cart_max_num=MAX_CART;
 		sd->cart_num=0;

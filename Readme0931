@@ -1,4 +1,28 @@
 --------------------
+//0944 by huge
+・ギルドの上納経験値の上限を、confで制限できるように。
+・露店の販売価格を10Mまでに制限。
+・カートの重量制限が一桁下がってたんですが、ウチだけですか？修正してみましたが。
+
+	(conf/)
+	battle_athena.conf
+		guild_exp_limit追加
+	(doc/)
+	conf_ref.txt 修正
+	(map/)
+	atcommand.c
+		蘇生時のSP回復で、細かい修正。
+	battle.c
+		battle_config_read() 修正
+	battle.h 修正。
+	guild.c
+		guild_change_position() 修正。
+	pc.c
+		pc_calcstatus() 修正。
+	vending.c
+		vending_openvending() 修正。
+
+--------------------
 //0943 by (凸)
 ・battle_athena.confでdead_branch_activeをyesにすると古木の枝で召喚されるモンスターがアクティブになるように変更
 ・微妙に変更したclient_packet.txtを同梱

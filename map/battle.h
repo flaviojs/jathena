@@ -174,6 +174,7 @@ extern struct Battle_Config {
 	int quest_skill_reset;
 	int basic_skill_check;
 	int guild_emperium_check;
+	int guild_exp_limit;
 	int pc_invincible_time;
 	int pet_catch_rate;
 	int pet_rename;

@@ -736,7 +736,8 @@ int guild_change_position(struct map_session_data *sd,int idx,
 	int mode,int exp_mode,const char *name)
 {
 	struct guild_position p;
-	if(exp_mode>100)exp_mode=100;
+	if(exp_mode>battle_config.guild_exp_limit)
+		exp_mode=battle_config.guild_exp_limit;
 	if(exp_mode<0)exp_mode=0;
 	p.mode=mode;
 	p.exp_mode=exp_mode;

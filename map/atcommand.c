@@ -155,12 +155,12 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_SkillPoint,          "@skpoint", 0, atcommand_skillpoint },
 	{ AtCommand_Zeny,                "@zeny", 0, atcommand_zeny },
 	{ AtCommand_Param,               "@param", 0, atcommand_param },
-	{ AtCommand_Strength,            "@str", 0, atcommand_param },
-	{ AtCommand_Agility,             "@agi", 0, atcommand_param },
-	{ AtCommand_Vitality,           "@vit", 0, atcommand_param },
-	{ AtCommand_Intelligence,        "@int", 0, atcommand_param },
-	{ AtCommand_Dexterity,           "@dex", 0, atcommand_param },
-	{ AtCommand_Luck,                "@luk", 0, atcommand_param },
+	{ AtCommand_Strength,            "@str", 1, atcommand_param },
+	{ AtCommand_Agility,             "@agi", 1, atcommand_param },
+	{ AtCommand_Vitality,           "@vit", 1, atcommand_param },
+	{ AtCommand_Intelligence,        "@int", 1, atcommand_param },
+	{ AtCommand_Dexterity,           "@dex", 1, atcommand_param },
+	{ AtCommand_Luck,                "@luk", 1, atcommand_param },
 	{ AtCommand_GuildLevelUp,        "@guildlvup", 0, atcommand_guildlevelup },
 	{ AtCommand_MakePet,             "@makepet", 0, atcommand_makepet },
 	{ AtCommand_PetFriendly,         "@petfriendly", 0, atcommand_petfriendly },
@@ -713,6 +713,7 @@ atcommand_alive(
 	if (battle_config.pc_invincible_time > 0)
 		pc_setinvincibletimer(sd, battle_config.pc_invincible_time);
 	clif_updatestatus(sd, SP_HP);
+	clif_updatestatus(sd, SP_SP);
 	clif_resurrection(&sd->bl, 1);
 	clif_displaymessage(fd, msg_table[16]);
 	
@@ -1736,6 +1737,7 @@ atcommand_revive(
 		if (battle_config.pc_invincible_time > 0)
 			pc_setinvincibletimer(sd, battle_config.pc_invincible_time);
 		clif_updatestatus(pl_sd, SP_HP);
+		clif_updatestatus(pl_sd, SP_SP);
 		clif_resurrection(&pl_sd->bl, 1);
 		clif_displaymessage(fd, msg_table[51]);
 	} else {
@@ -1937,6 +1939,7 @@ atcommand_raise_sub(struct map_session_data* sd)
 		sd->status.sp = sd->status.max_sp;
 		pc_setstand(sd);
 		clif_updatestatus(sd, SP_HP);
+		clif_updatestatus(sd, SP_SP);
 		clif_resurrection(&sd->bl, 1);
 		clif_displaymessage(sd->fd, msg_table[63]);
 			}

@@ -3941,6 +3941,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.quest_skill_reset=1;
 		battle_config.basic_skill_check=1;
 		battle_config.guild_emperium_check=1;
+		battle_config.guild_exp_limit=50;
 		battle_config.pc_invincible_time = 5000;
 		battle_config.pet_catch_rate=100;
 		battle_config.pet_rename=0;
@@ -4085,6 +4086,7 @@ int battle_config_read(const char *cfgName)
 			{ "quest_skill_reset",			&battle_config.quest_skill_reset		},
 			{ "basic_skill_check",			&battle_config.basic_skill_check		},
 			{ "guild_emperium_check",		&battle_config.guild_emperium_check		},
+			{ "guild_exp_limit",			&battle_config.guild_exp_limit			},
 			{ "player_invincible_time" ,	&battle_config.pc_invincible_time		},
 			{ "pet_catch_rate",				&battle_config.pet_catch_rate			},
 			{ "pet_rename",					&battle_config.pet_rename				},
@@ -4228,6 +4230,11 @@ int battle_config_read(const char *cfgName)
 			battle_config.agi_penaly_count = 2;
 		if(battle_config.vit_penaly_count < 2)
 			battle_config.vit_penaly_count = 2;
+
+		if(battle_config.guild_exp_limit > 99)
+			battle_config.guild_exp_limit = 99;
+		if(battle_config.guild_exp_limit < 0)
+			battle_config.guild_exp_limit = 0;
 
 		add_timer_func_list(battle_delay_damage_sub,"battle_delay_damage_sub");
 	}
