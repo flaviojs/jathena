@@ -122,9 +122,9 @@ S 3034 <guild_id>.l <account_id>.l <charactor_id>.l <flag>.B <mes>.40B
 	flag=0 脱退 / 1 追放
 R 3834 <guild_id>.l <account_id>.l <charactor_id>.l <flag>.B <mes>.40B <nick>.24B
 	ギルド脱退/追放通知
-S 3035 <guild_id>.l <account_id>.l <charactor_id>.l <online>.B <lv>.w
+S 3035 <guild_id>.l <account_id>.l <charactor_id>.l <online>.B <lv>.w <class>.w
 	ギルドメンバ情報更新要求
-R 3835 <guild_id>.l <account_id>.l <charactor_id>.l <online>.B <lv>.w
+R 3835 <guild_id>.l <account_id>.l <charactor_id>.l <online>.B <lv>.w <class>.w
 	ギルドメンバ情報更新通知
 S 3036 <guild_id>.l
 	ギルド解散要求

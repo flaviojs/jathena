@@ -1,4 +1,24 @@
 --------------
+//0728 by ぽぽぽ
+
+・職が変わってもギルドの職業欄が更新されない不具合の修正。
+
+	(char/)
+	inter.c
+		パケット長リスト修正。
+	int_guild.c
+		mapif_guild_memberinfoshort()、mapif_parse_GuildChangeMemberInfoShort()、
+		inter_guild_parse_frommap()修正
+	(map/)
+	intif.h
+	intif.c
+		intif_guild_memberinfoshort()、intif_parse_GuildMemberInfoShort()
+		intif_parse()修正
+	guild.h
+		guild_send_memberinfoshort()、guild_recv_memberinfoshort()修正
+	
+
+--------------
 //0727 by 聖
 
 ・武器研究スキルによってホルグレンなどの精錬NPCが

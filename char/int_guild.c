@@ -524,7 +524,7 @@ int mapif_guild_memberadded(int fd,int guild_id,int account_id,int char_id,int f
 int mapif_guild_leaved(int guild_id,int account_id,int char_id,int flag,
 	const char *name,const char *mes)
 {
-	unsigned char buf[64];
+	unsigned char buf[128];
 	WBUFW(buf, 0)=0x3834;
 	WBUFL(buf, 2)=guild_id;
 	WBUFL(buf, 6)=account_id;
@@ -546,7 +546,8 @@ int mapif_guild_memberinfoshort(struct guild *g,int idx)
 	WBUFL(buf,10)=g->member[idx].char_id;
 	WBUFB(buf,14)=g->member[idx].online;
 	WBUFW(buf,15)=g->member[idx].lv;
-	mapif_sendall(buf,17);
+	WBUFW(buf,17)=g->member[idx].class;
+	mapif_sendall(buf,19);
 	return 0;
 }
 // 解散通知
@@ -758,6 +759,8 @@ int mapif_parse_GuildLeave(int fd,int guild_id,int account_id,int char_id,int fl
 		for(i=0;i<MAX_GUILD;i++){
 			if( g->member[i].account_id==account_id &&
 				g->member[i].char_id==char_id){
+				printf("%d %d\n",i, (int)(&g->member[i]));
+				printf("%d %s\n",i, g->member[i].name);
 				
 				if(flag){	// 追放の場合追放リストに入れる
 					int j;
@@ -777,6 +780,8 @@ int mapif_parse_GuildLeave(int fd,int guild_id,int account_id,int char_id,int fl
 				}
 				
 				mapif_guild_leaved(guild_id,account_id,char_id,flag,g->member[i].name,mes);
+				printf("%d %d\n",i, (int)(&g->member[i]));
+				printf("%d %s\n",i, (&g->member[i])->name);
 				memset(&g->member[i],0,sizeof(struct guild_member));
 				
 				if( guild_check_empty(g)==0 )
@@ -791,7 +796,7 @@ int mapif_parse_GuildLeave(int fd,int guild_id,int account_id,int char_id,int fl
 }
 // オンライン/Lv更新
 int mapif_parse_GuildChangeMemberInfoShort(int fd,int guild_id,
-	int account_id,int char_id,int online,int lv)
+	int account_id,int char_id,int online,int lv,int class)
 {
 	struct guild *g;
 	int i,alv,c;
@@ -808,6 +813,7 @@ int mapif_parse_GuildChangeMemberInfoShort(int fd,int guild_id,
 			
 			g->member[i].online=online;
 			g->member[i].lv=lv;
+			g->member[i].class=class;
 			mapif_guild_memberinfoshort(g,i);
 		}
 		if( g->member[i].account_id>0 ){
@@ -1028,7 +1034,7 @@ int inter_guild_parse_frommap(int fd)
 	case 0x3031: mapif_parse_GuildInfo(fd,RFIFOL(fd,2)); break;
 	case 0x3032: mapif_parse_GuildAddMember(fd,RFIFOL(fd,4),(struct guild_member *)RFIFOP(fd,8)); break;
 	case 0x3034: mapif_parse_GuildLeave(fd,RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10),RFIFOB(fd,14),RFIFOP(fd,15)); break;
-	case 0x3035: mapif_parse_GuildChangeMemberInfoShort(fd,RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10),RFIFOB(fd,14),RFIFOW(fd,15)); break;
+	case 0x3035: mapif_parse_GuildChangeMemberInfoShort(fd,RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10),RFIFOB(fd,14),RFIFOW(fd,15),RFIFOW(fd,17)); break;
 	case 0x3036: mapif_parse_BreakGuild(fd,RFIFOL(fd,2)); break;
 	case 0x3037: mapif_parse_GuildMessage(fd,RFIFOL(fd,4),RFIFOL(fd,8),RFIFOP(fd,12),RFIFOW(fd,2)-12); break;
 	case 0x3038: mapif_parse_GuildCheck(fd,RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10)); break;
