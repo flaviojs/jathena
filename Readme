@@ -1,4 +1,20 @@
 --------------
+//0552 by 死神
+
+・安定性を上げる為の修正ですが本当に安定性上がったか
+どうかは不明です。
+・PVPによりクライアントが落ちる問題修正。
+	atcommand.c
+		@pvpoff、@pvpon、@gvgon、@gvgoff 修正。
+	script.c
+		buildin_pvpon()、buildin_pvpoff()、buildin_gvgon()、buildin_gvgoff() 修正。
+	clif.c
+		clif_pvpset() 修正。
+	skill.c
+		skill_attack()、skill_unit_onplace()、skill_unit_onout() 修正。
+		skill_unit_ondelete() 修正。
+
+--------------
 //0551 by Kalen
 ・DB修正
 	db/create_arrow_db.txt 完成

@@ -2448,7 +2448,7 @@ int buildin_pvpon(struct script_state *st)
 
 	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	m = map_mapname2mapid(str);
-	if(m >= 0) {
+	if(m >= 0 && !map[m].flag.pvp) {
 		map[m].flag.pvp = 1;
 		clif_send0199(m,1);
 		for(i=0;i<fd_max;i++){	//人数分ループ
@@ -2474,18 +2474,17 @@ int buildin_pvpoff(struct script_state *st)
 
 	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	m = map_mapname2mapid(str);
-	if(m >= 0) {
-		struct block_list bl;
-		bl.m = m;
-		bl.id = 0;
+	if(m >= 0 && map[m].flag.pvp) {
 		map[m].flag.pvp = 0;
 		clif_send0199(m,0);
-		clif_pvpset((struct map_session_data *)&bl,0,0,1);
 		for(i=0;i<fd_max;i++){	//人数分ループ
 			if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
-				if(m == pl_sd->bl.m && pl_sd->pvp_timer != -1) {
-					delete_timer(pl_sd->pvp_timer,pc_calc_pvprank_timer);
-					pl_sd->pvp_timer = -1;
+				if(m == pl_sd->bl.m) {
+					clif_pvpset(pl_sd,0,0,2);
+					if(pl_sd->pvp_timer != -1) {
+						delete_timer(pl_sd->pvp_timer,pc_calc_pvprank_timer);
+						pl_sd->pvp_timer = -1;
+					}
 				}
 			}
 		}
@@ -2501,7 +2500,7 @@ int buildin_gvgon(struct script_state *st)
 
 	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	m = map_mapname2mapid(str);
-	if(m >= 0) {
+	if(m >= 0 && !map[m].flag.gvg) {
 		map[m].flag.gvg = 1;
 		clif_send0199(m,3);
 	}
@@ -2515,7 +2514,7 @@ int buildin_gvgoff(struct script_state *st)
 
 	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	m = map_mapname2mapid(str);
-	if(m >= 0) {
+	if(m >= 0 && map[m].flag.gvg) {
 		map[m].flag.gvg = 0;
 		clif_send0199(m,0);
 	}

@@ -451,56 +451,63 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 //PVP‰ðœ@@‚½‚¾Aƒ}ƒbƒvˆÚ“®‚µ‚È‚¢‚Æ‰ðœ‚³‚ê‚Ü‚¹‚ñB
 //u@pvpoffv‚Æ“ü—Í
 		if (strcmpi(command, "@pvpoff") == 0 && gm_level >= atcommand_config.pvpoff) {
-			struct block_list bl;
-			bl.m = sd->bl.m;
-			bl.id = 0;
-			map[sd->bl.m].flag.pvp = 0;
-			clif_send0199(sd->bl.m,0);
-			clif_pvpset((struct map_session_data *)&bl,0,0,1);
-			for(i=0;i<fd_max;i++){	//l”•ªƒ‹[ƒv
-				if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
-					if(sd->bl.m == pl_sd->bl.m && pl_sd->pvp_timer != -1) {
-						delete_timer(pl_sd->pvp_timer,pc_calc_pvprank_timer);
-						pl_sd->pvp_timer = -1;
+			if(map[sd->bl.m].flag.pvp) {
+				map[sd->bl.m].flag.pvp = 0;
+				clif_send0199(sd->bl.m,0);
+				for(i=0;i<fd_max;i++){	//l”•ªƒ‹[ƒv
+					if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
+						if(sd->bl.m == pl_sd->bl.m) {
+							clif_pvpset(pl_sd,0,0,2);
+							if(pl_sd->pvp_timer != -1) {
+								delete_timer(pl_sd->pvp_timer,pc_calc_pvprank_timer);
+								pl_sd->pvp_timer = -1;
+							}
+						}
 					}
 				}
+				clif_displaymessage(fd,"(L[`)‚Ü‚Á‚½[‚èô’‡—Ç‚­‚Ë");
 			}
-			clif_displaymessage(fd,"(L[`)‚Ü‚Á‚½[‚èô’‡—Ç‚­‚Ë");
 			return 1;
 		}
 
 //PVPŽÀ‘•i‰¼j
 //u@pvpv‚Æ“ü—Í
 		if (strcmpi(command, "@pvpon") == 0 && gm_level >= atcommand_config.pvpon) {
-			map[sd->bl.m].flag.pvp = 1;
-			clif_send0199(sd->bl.m,1);
-			for(i=0;i<fd_max;i++){	//l”•ªƒ‹[ƒv
-				if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
-					if(sd->bl.m == pl_sd->bl.m && pl_sd->pvp_timer == -1) {
-						pl_sd->pvp_timer=add_timer(gettick()+200,pc_calc_pvprank_timer,pl_sd->bl.id,0);
-						pl_sd->pvp_rank=0;
-						pl_sd->pvp_lastusers=0;
-						pl_sd->pvp_point=5;
+			if(!map[sd->bl.m].flag.pvp) {
+				map[sd->bl.m].flag.pvp = 1;
+				clif_send0199(sd->bl.m,1);
+				for(i=0;i<fd_max;i++){	//l”•ªƒ‹[ƒv
+					if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
+						if(sd->bl.m == pl_sd->bl.m && pl_sd->pvp_timer == -1) {
+							pl_sd->pvp_timer=add_timer(gettick()+200,pc_calc_pvprank_timer,pl_sd->bl.id,0);
+							pl_sd->pvp_rank=0;
+							pl_sd->pvp_lastusers=0;
+							pl_sd->pvp_point=5;
+						}
 					}
 				}
+				clif_displaymessage(fd,"Kill Kill Kill Kill Kill Kill````````(K„DK#)");
 			}
-			clif_displaymessage(fd,"Kill Kill Kill Kill Kill Kill````````(K„DK#)");
 			return 1;
 		}
 
 //@gvgoff
 		if (strcmpi(command, "@gvgoff") == 0 && gm_level >= atcommand_config.gvgoff) {
-			map[sd->bl.m].flag.gvg = 0;
-			clif_send0199(sd->bl.m,0);
-			clif_displaymessage(fd,"guild vg guild off");
+			if(map[sd->bl.m].flag.gvg) {
+				map[sd->bl.m].flag.gvg = 0;
+				clif_send0199(sd->bl.m,0);
+				clif_displaymessage(fd,"guild vg guild off");
+			}
 			return 1;
 		}
 
 //@gvgon
 		if (strcmpi(command, "@gvgon") == 0 && gm_level >= atcommand_config.gvgon) {
-			map[sd->bl.m].flag.gvg = 1;
-			clif_send0199(sd->bl.m,3);
-			clif_displaymessage(fd,"guild vg guild on");
+			if(!map[sd->bl.m].flag.gvg) {
+				map[sd->bl.m].flag.gvg = 1;
+				clif_send0199(sd->bl.m,3);
+				clif_displaymessage(fd,"guild vg guild on");
+			}
 			return 1;
 		}
 

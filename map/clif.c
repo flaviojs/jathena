@@ -1553,7 +1553,7 @@ int clif_arrow_create_list(struct map_session_data *sd)
 {
 	int i,c;
 	int fd=sd->fd;
-	
+
 	WFIFOW(fd,0)=0x1ad;
 
 	for(i=1,c=1;i<MAX_SKILL_ARROW_DB;i++){
@@ -2998,16 +2998,25 @@ int clif_set0199(int fd,int type)
  */
 int clif_pvpset(struct map_session_data *sd,int pvprank,int pvpnum,int type)
 {
-	char buf[32];
+	if(type == 2) {
+		WFIFOW(sd->fd,0) = 0x19a;
+		WFIFOL(sd->fd,2) = sd->bl.id;
+		WFIFOL(sd->fd,6) = pvprank;
+		WFIFOL(sd->fd,10) = pvpnum;
+		WFIFOSET(sd->fd,packet_len_table[0x19a]);
+	}
+	else {
+		char buf[32];
 
-	WBUFW(buf,0)=0x19a;
-	WBUFL(buf,2)=sd->bl.id;
-	WBUFL(buf,6)=pvprank;
-	WBUFL(buf,10)=pvpnum;
-	if(!type)
-		clif_send(buf,packet_len_table[0x19a],&sd->bl,AREA);
-	else
-		clif_send(buf,packet_len_table[0x19a],&sd->bl,ALL_SAMEMAP);
+		WBUFW(buf,0) = 0x19a;
+		WBUFL(buf,2) = sd->bl.id;
+		WBUFL(buf,6) = pvprank;
+		WBUFL(buf,10) = pvpnum;
+		if(!type)
+			clif_send(buf,packet_len_table[0x19a],&sd->bl,AREA);
+		else
+			clif_send(buf,packet_len_table[0x19a],&sd->bl,ALL_SAMEMAP);
+	}
 
 	return 0;
 }

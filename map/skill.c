@@ -524,6 +524,8 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	struct Damage dmg;
 	int type,lv;
 
+	if(src == NULL || dsrc == NULL || bl == NULL)
+		return 0;
 	if(src->prev == NULL || dsrc->prev == NULL || bl->prev == NULL)
 		return 0;
 	if(src->type == BL_PC && pc_isdead((struct map_session_data *)src))
@@ -2286,7 +2288,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	int diff,goflag;
 	
 	
-	if( bl->prev==NULL || !src->alive)
+	if(bl == NULL ||  bl->prev==NULL || !src->alive)
 		return 0;
 	if( bl->type!=BL_PC && bl->type!=BL_MOB )
 		return 0;
@@ -2528,7 +2530,7 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 {
 	struct skill_unit_group *sg= src->group;
 
-	if( bl->prev==NULL || !src->alive)
+	if(bl == NULL || bl->prev==NULL || !src->alive)
 		return 0;
 	if( bl->type!=BL_PC && bl->type!=BL_MOB )
 		return 0;
@@ -2622,7 +2624,7 @@ int skill_unit_ondelete(struct skill_unit *src,struct block_list *bl,unsigned in
 {
 	struct skill_unit_group *sg= src->group;
 	
-	if( bl->prev==NULL || !src->alive)
+	if(bl == NULL || bl->prev==NULL || !src->alive)
 		return 0;
 	if( bl->type!=BL_PC && bl->type!=BL_MOB )
 		return 0;
