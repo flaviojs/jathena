@@ -1427,6 +1427,31 @@ int mob_catch_delete(struct mob_data *md)
 }
 
 /*==========================================
+ *
+ *------------------------------------------
+ */
+int mob_deleteslave_sub(struct block_list *bl,va_list ap)
+{
+	struct mob_data *md = (struct mob_data *)bl;
+	int id;
+	id=va_arg(ap,int);
+	if(md->master_id > 0 && md->master_id == id )
+		mob_damage(NULL,md,md->hp);
+	return 0;
+}
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int mob_deleteslave(struct mob_data *md)
+{
+	map_foreachinarea(mob_deleteslave_sub, md->bl.m,
+		0,0,map[md->bl.m].xs-1,map[md->bl.m].ys-1,
+		BL_MOB,md->bl.id);
+	return 0;
+}
+
+/*==========================================
  * mdにsdからdamageのダメージ
  *------------------------------------------
  */
@@ -1639,8 +1664,10 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 				break;
 			}
 		}
-		if(!flag)
+		if(!flag) {
 			clif_mvp_exp(mvp_sd,mob_db[md->class].mexp);	// 無条件で経験値
+			pc_gainexp(mvp_sd,mob_db[md->class].mexp,0);
+		}
 	}
 
 	if(md->npc_event[0]){	// SCRIPT実行
@@ -1648,11 +1675,10 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 		npc_event(sd,md->npc_event);
 	}
 
-
 	clif_clearchar_area(&md->bl,1);
 	map_delblock(&md->bl);
+	mob_deleteslave(md);
 	mob_setdelayspawn(md->bl.id);
-
 
 	return 0;
 }

@@ -189,6 +189,8 @@ int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 		auth_max+=256;
 		auth_dat=realloc(auth_dat,sizeof(auth_dat[0])*auth_max);
 	}
+	while(isGM(account_id_count) > 0)
+		account_id_count++;
 	auth_dat[i].account_id=account_id_count++;
 	strncpy(auth_dat[i].userid,account->userid,24);
 	strncpy(auth_dat[i].pass,account->passwd,24);

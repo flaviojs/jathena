@@ -1619,6 +1619,8 @@ struct Damage  battle_calc_misc_attack(
 		if( sd==NULL || (skill = pc_checkskill(sd,HT_STEELCROW)) <= 0)
 			skill=0;
 		damage=(dex/10+int_/2+skill*3+40)*2;
+		if(flag > 1)
+			damage /= flag;
 		break;
 
 	case TF_THROWSTONE:	// Î“Š‚°
@@ -1651,14 +1653,10 @@ struct Damage  battle_calc_misc_attack(
 	
 	damage=battle_calc_damage(target,damage,aflag);	// ÅIC³
 
-	if(battle_get_def(target) >= 10000 && battle_get_mdef(target) >= 10000 && damage > 0) {
+	if((damage > 0 && damage < div_) || (battle_get_def(target) >= 10000 && battle_get_mdef(target) >= 10000 && damage > 0)) {
 		damage = div_;
 	}
-	if(battle_config.skill_min_damage) {
-		if(damage > 0 && damage < div_)
-			damage = div_;
-	}
-	
+
 	md.damage=damage;
 	md.div_=div_;
 	md.amotion=battle_get_amotion(bl);

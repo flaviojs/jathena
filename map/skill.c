@@ -601,7 +601,8 @@ int skill_area_sub( struct block_list *bl,va_list ap )
 /* 対象の数をカウントする。（skill_area_temp[0]を初期化しておくこと） */
 int skill_area_sub_count(struct block_list *src,struct block_list *target,int skillid,int skilllv,unsigned int tick,int flag)
 {
-	skill_area_temp[0]++;
+	if(skill_area_temp[0] < 0xff)
+		skill_area_temp[0]++;
 	return 0;
 }
 
@@ -1005,11 +1006,14 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		if(flag&1){
 			/* 個別にダメージを与える */
 			if(bl->id!=skill_area_temp[1])
-				skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag&0xf00000 );
+				skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,skill_area_temp[0]|(flag&0xf00000));
 		}else{
+			skill_area_temp[0]=0;
 			skill_area_temp[1]=bl->id;
+			map_foreachinarea(skill_area_sub,bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
+					src,skillid,skilllv,tick, flag|BCT_ENEMY ,skill_area_sub_count);
 			/* まずターゲットに攻撃を加える */
-			skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag&0xf00000 );
+			skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,skill_area_temp[0]|(flag&0xf00000));
 			/* その後ターゲット以外の範囲内の敵全体に処理を行う */
 			map_foreachinarea(skill_area_sub,
 				bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
