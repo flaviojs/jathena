@@ -1037,7 +1037,7 @@ int battle_heal(struct block_list *bl,struct block_list *target,int hp,int sp,in
 		return 0;
 	if( target->type ==BL_PC && pc_isdead((struct map_session_data *)target) )
 		return 0;
-	if(hp==0 && sp==0);
+	if(hp==0 && sp==0)
 		return 0;
 
 	if(hp<0)

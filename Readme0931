@@ -1,4 +1,17 @@
 --------------------
+//0940 by End_of_exam
+
+・ヒールやポーションピッチャーを使用しても回復しないバグを修正(0938～)。
+
+　Thanks for Pepermint, reporting the bug that using PotionPitcher with
+　BluePotion was no effective.
+　（＝ポーションピッチャー＋青Ｐで効果がない事を報告してくれたPepermint氏に感謝）
+
+	(map/)
+	battle.c
+		battle_heal() 修正
+
+--------------------
 //0939 by (凸)
 ・cutinパケットを0x145(ファイル名16文字)から0x1b3(64文字)に変更
 ・ついでに雑談スレに上げたathena-startを同梱
