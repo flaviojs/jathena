@@ -1,4 +1,40 @@
 --------------------
+//1021 by Kalen
+・プロンテラ冠婚品NPCにてタキシード販売
+・Umbalaのワープ見直し
+	D2Fのワープを本鯖使用に変更。重複ポイント修正
+・UmbalaNPC修正
+	ラベルを使用しなくいい場所は極力削除(-)
+	セーブポイント修正
+	バンジージャンプ台追加
+	骸骨門追加
+	分解、合成処理追加
+	カプラ、案内要員をあるべき場所へ移動。
+	 ※一部Emoについて、癌呆自身が逆に取り違えているみたいなので独自で変えました。
+	 見てもらえば分かりますが18と28を逆にするとNPCの会話内容に合うEmoが出たので
+	クエストフラグの条件追加
+	　これによりすでに終えている場合でも途中になる可能性があります。
+・スパノビ転職NPC追加
+	凸さんのログを基に作成しました。
+・アルケミストギルドのノビの場合の対応修正(凸さんからのログより)
+・結婚NPC追加
+	ただし、まだテスト段階です。問題点があるため結婚不可能です。
+	(/script)
+	 (/warp)
+	  npc_warp_umbala.txt
+	 (/npc)
+	  (/town)
+	   npc_town_umbala.txt
+	   npc_town_kafra.txt
+	   npc_town_guide.txt
+	   npc_town_prontera.txt
+	  (/quest)
+	   npc_event_marriage.txt(新・テスト)
+	  (/job)
+	   npc_job_alchemist.txt
+	   npc_job_supernovice.txt(新)
+
+--------------------
 //1020 by (凸)
 ・nullpoの変更に対応してmap_athena.confの設定削除＆skill.c書き換え
 ・座っているとHPRとSPRが通常の半分で発動したのを修正
