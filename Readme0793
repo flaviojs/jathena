@@ -1,4 +1,37 @@
 --------------------
+//0821 by huge
+・オートスペル仮実装。
+・timerで判定しようかとも思いましたが、装備の無限オートスペルの為にsc_[].val1で見てマス。
+・bonus2 bAutoSpell追加。一応どんなスキルでも指定できるようにしてますが(番号はskill_tree参照)
+  skill_castend_damage_idのタイプ以外のスキルを指定しないでください。
+  発動確率は、Lv1:50%、Lv2:35%、Lv3:15%、それ以上は 5%固定です。
+  あと、スキルレベルも指定できますが、限界を超えた数字を入れると墜ちるかもしれません。
+■書き方例：（ファイアボルトLv3の時）bonus2 bAutoSpell 19,3;
+
+	(db/)
+	const.txt 修正。
+	(map/)
+	battle.c
+		battle_weapon_attack() 修正。
+	clif.h
+	clif.c
+		packet_len_table 修正。
+		clif_autospell() 追加。
+		clif_parse_AutoSpell() 追加。
+	map.h 修正。
+	pc.c
+		pc_bonus2() 修正。
+		pc_equipitem() 修正。
+		pc_unequipitem() 修正。
+	skill.h
+	skill.c
+		skill_castend_nodamage_id() 修正。
+		skill_autospell() 追加。
+		skill_status_change_end() 修正。
+		skill_status_change_start() 修正。
+		status_changeの番号テーブル修正。
+
+--------------------
 //0820 by ぴざまん
 ・アドリブのメッセージが入ってなかったので修正
 ・バードの演奏スキルで楽器の練習や自ステータスの補正が入ってなかったのを修正。

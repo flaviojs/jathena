@@ -1963,6 +1963,13 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 			}
 		}
 		break;
+	case SP_AUTOSPELL:
+		if(sd->state.lr_flag != 2){
+			sd->sc_data[SC_AUTOSPELL].val1 = type2;
+			sd->sc_data[SC_AUTOSPELL].val2 = val;
+			clif_status_change(&sd->bl,SC_AUTOSPELL,1);
+		}
+		break;
 	default:
 		if(battle_config.error_log)
 			printf("pc_bonus2: unknown type %d %d %d!\n",type,type2,val);
@@ -4648,7 +4655,11 @@ int pc_unequipitem(struct map_session_data *sd,int n,int type)
 		if(!sd->special_state.infinite_endure && sd->sc_data[SC_ENDURE].timer != -1 && sd->sc_data[SC_ENDURE].val2)
 			skill_status_change_end(&sd->bl,SC_ENDURE,-1);
 	}
-
+	if(sd->sc_data[SC_AUTOSPELL].timer==-1 && sd->sc_data[SC_AUTOSPELL].val1){
+		sd->sc_data[SC_AUTOSPELL].val1 = 0;
+		sd->sc_data[SC_AUTOSPELL].val2 = 0;
+		clif_status_change(&sd->bl,SC_AUTOSPELL,0);
+	}
 	return 0;
 }
 

@@ -133,6 +133,7 @@ int clif_skill_delunit(struct skill_unit *unit);
 
 int clif_01ac(struct block_list *bl);
 
+int clif_autospell(struct map_session_data *sd,int skilllv);
 int clif_devotion(struct map_session_data *sd,int target);
 int clif_spiritball(struct map_session_data *sd);
 int clif_combo_delay(struct block_list *src,int wait);

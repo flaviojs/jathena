@@ -3361,6 +3361,16 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			if(src->type == BL_PC && sd->status.weapon >= 16 && wd.damage2 == 0)
 				clif_damage(src,target,tick+10, wd.amotion, wd.dmotion,0, 1, 0, 0);
 		}
+		if(sd && sd->sc_data[SC_AUTOSPELL].val1) {	// オートスペル
+			int per=0,skilllv=rand()%sd->sc_data[SC_AUTOSPELL].val2+1;
+			if	(skilllv==1) per=50;
+			else if (skilllv==2) per=35;
+			else if (skilllv==3) per=15;
+			else if (skilllv<11) per= 5;
+				
+			if(rand()%100 < per)
+				skill_castend_damage_id(src,target,sd->sc_data[SC_AUTOSPELL].val1,skilllv,tick,flag);
+		}
 		map_freeblock_lock();
 		if(sd && sd->splash_range > 0 && (wd.damage > 0 || wd.damage2 > 0) )
 			skill_castend_damage_id(src,target,0,-1,tick,0);

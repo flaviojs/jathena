@@ -2330,6 +2330,12 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		}
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		break;
+	case SA_AUTOSPELL:			/* オートスペル */
+		if(sd) {
+			clif_autospell(sd,skilllv);
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		}
+		break;
 
 	/* ランダム属性変化、水属性変化、地、火、風 */
 	case NPC_ATTRICHANGE:
@@ -4301,6 +4307,35 @@ void skill_devotion_end(struct map_session_data *md,struct map_session_data *sd,
 		clif_devotion(md,sd->bl.id);
 	}
 }
+/*==========================================
+ * オートスペル
+ *------------------------------------------
+ */
+int skill_autospell(struct map_session_data *md,int skillid)
+{
+	int skilllv = pc_checkskill(md,SA_AUTOSPELL);
+	int maxlv=1;
+
+	if(skillid==MG_NAPALMBEAT)	maxlv=3;
+	else if(skillid==MG_COLDBOLT || skillid==MG_FIREBOLT || skillid==MG_LIGHTNINGBOLT){
+		if(skilllv==2)		maxlv=1;
+		else if(skilllv==3)	maxlv=2;
+		else if(skilllv>=4)	maxlv=3;
+	}else if(skillid==MG_SOULSTRIKE){
+		if(skilllv==5)		maxlv=1;
+		else if(skilllv==6)	maxlv=2;
+		else if(skilllv>=7)	maxlv=3;
+	}else if(skillid==MG_FIREBALL){
+		if(skilllv==8)		maxlv=1;
+		else if(skilllv>=9)	maxlv=2;
+	}else if(skillid==MG_FROSTDIVER)
+					maxlv=1;
+	else return 0;
+
+	skill_status_change_start(&md->bl,SC_AUTOSPELL,skillid,maxlv,	// val1:スキルID val2:使用最大Lv
+				skill_get_time(SA_AUTOSPELL,skilllv),0);// にしてみたけどbscriptが書き易い・・・？
+	return 0;
+}
 
 /*==========================================
  * ギャングスターパラダイス判定処理(foreachinarea)
@@ -4528,6 +4563,10 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 				calc_flag = 1;
 				break;
 			case SC_QUAGMIRE:			/* クァグマイア */
+				calc_flag = 1;
+				break;
+			case SC_AUTOSPELL:			/* オートスペル */
+				sc_data[type].val1=sc_data[type].val2=0;
 				calc_flag = 1;
 				break;
 			case SC_PROVIDENCE:			/* プロヴィデンス */
@@ -4901,7 +4940,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 	struct status_change* sc_data;
 	short *sc_count, *option, *opt1, *opt2;
 	int opt_flag = 0, calc_flag = 0;
-	int val5=0,val3=0,val4=val2;
+	int val3=0,val4=val2;
 
 	if(bl->type == BL_SKILL)
 		return 0;
@@ -5079,6 +5118,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			calc_flag = 1;
 			val2=val1*5;
 			break;
+		case SC_AUTOSPELL:			/* オートスペル */
+			calc_flag = 1;
+			break;
 		case SC_SPEARSQUICKEN:		/* スピアクイッケン */
 			calc_flag = 1;
 			val2 = 20+val1;
@@ -5113,23 +5155,17 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_WHISTLE:			/* 口笛 */
 			calc_flag = 1;
-			val2 = pc_checkskill(sd,BA_MUSICALLESSON);
-			val3 = battle_get_agi(bl);
 			break;
 		case SC_ASSNCROS:			/* 夕陽のアサシンクロス */
 			calc_flag = 1;
-			val2 = pc_checkskill(sd,BA_MUSICALLESSON);
-			val3 = battle_get_agi(bl);
+			val2 = 10+val1;
 			break;
 		case SC_POEMBRAGI:			/* ブラギの詩 */
-			val2 = pc_checkskill(sd,BA_MUSICALLESSON);
-			val3 = battle_get_dex(bl);
-			val5 = battle_get_int(bl);
+			val2 = val1 * 3;
 			break;
 		case SC_APPLEIDUN:			/* イドゥンの林檎 */
 			calc_flag = 1;
-			val2 = pc_checkskill(sd,BA_MUSICALLESSON);
-			val3 = battle_get_vit(bl);
+			val2 = val1*2+5;
 			break;
 		case SC_UGLYDANCE:			/* 自分勝手なダンス */
 			val2 = 10;
@@ -5362,8 +5398,6 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 	sc_data[type].val2 = val2;
 	sc_data[type].val3 = val3;
 	sc_data[type].val4 = val4;
-	sc_data[type].val5 = val5;
-
 	/* タイマー設定 */
 	sc_data[type].timer = add_timer(
 		gettick() + tick, skill_status_change_timer, bl->id, type);

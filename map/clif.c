@@ -85,7 +85,7 @@ static const int packet_len_table[0x200]={
     3,  3, 35,  5, 11, 26, -1,  4,   4,  6, 10, 12,  6, -1,  4,  4,
    11,  7, -1, 67, 12, 18,114,  6,   3,  6, 26, 26, 26, 26,  2,  3,
 //#0x01C0
-    2, 14, 10, -1, 22, 22,  4,  2,  13, 97,  0,  9,  9, 29,  6, 28,
+    2, 14, 10, -1, 22, 22,  4,  2,  13, 97,  0,  9,  9, 30,  6, 28,
     8, 14, 10, 35,  6,  8,  4, 11,  54, 53, 60,  2, -1, 47, 33,  6,
     0,  8,  0,  0,  0,  0,  0,  0,  28,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  7,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
@@ -4188,6 +4188,41 @@ int clif_pet_food(struct map_session_data *sd,int foodid,int fail)
 	return 0;
 }
 /*==========================================
+ * オートスペル リスト送信
+ *------------------------------------------
+ */
+int clif_autospell(struct map_session_data *sd,int skilllv)
+{
+	int fd=sd->fd;
+	WFIFOW(fd, 0)=0x1cd;
+	
+	if(skilllv>0 && pc_checkskill(sd,MG_NAPALMBEAT))
+			WFIFOL(fd,2)= MG_NAPALMBEAT;
+	else		WFIFOL(fd,2)= 0x00000000;
+	if(skilllv>1 && pc_checkskill(sd,MG_COLDBOLT))
+			WFIFOL(fd,6)= MG_COLDBOLT;
+	else		WFIFOL(fd,6)= 0x00000000;
+	if(skilllv>1 && pc_checkskill(sd,MG_FIREBOLT))
+			WFIFOL(fd,10)= MG_FIREBOLT;
+	else		WFIFOL(fd,10)= 0x00000000;
+	if(skilllv>1 && pc_checkskill(sd,MG_LIGHTNINGBOLT))
+			WFIFOL(fd,14)= MG_LIGHTNINGBOLT;
+	else		WFIFOL(fd,14)= 0x00000000;
+	if(skilllv>4 && pc_checkskill(sd,MG_SOULSTRIKE))
+			WFIFOL(fd,18)= MG_SOULSTRIKE;
+	else		WFIFOL(fd,18)= 0x00000000;
+	if(skilllv>7 && pc_checkskill(sd,MG_FIREBALL))
+			WFIFOL(fd,22)= MG_FIREBALL;
+	else		WFIFOL(fd,22)= 0x00000000;
+	if(skilllv>9 && pc_checkskill(sd,MG_FROSTDIVER))
+			WFIFOL(fd,26)= MG_FROSTDIVER;
+	else		WFIFOL(fd,26)= 0x00000000;
+
+	WFIFOSET(fd,packet_len_table[0x1cd]);
+	return 0;
+}
+
+/*==========================================
  * ディボーションの青い糸
  *------------------------------------------
  */
@@ -5822,6 +5857,14 @@ void clif_parse_SelectArrow(int fd,struct map_session_data *sd)
 	skill_arrow_create(sd,RFIFOW(fd,2));
 }
 /*==========================================
+ * オートスペル受信
+ *------------------------------------------
+ */
+void clif_parse_AutoSpell(int fd,struct map_session_data *sd)
+{
+	skill_autospell(sd,RFIFOW(fd,2));
+}
+/*==========================================
  * カード使用
  *------------------------------------------
  */
@@ -6549,7 +6592,9 @@ static int clif_parse(int fd)
 		NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 
 		// 1c0
-		NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+		NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,
+		clif_parse_AutoSpell,
+		NULL,
 		// 1d0
 		NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 		clif_parse_GMReqNoChatCount,
