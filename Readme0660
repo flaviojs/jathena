@@ -1,4 +1,15 @@
 --------------
+//0679 by 波浪
+
+・0676で新しいアイテム効果が実装されたので、item_db.txtを修正(bonus bAddMonsterDropItem,n,x; は、種族判定ができないのでとりあえず保留しました。)
+・他色々修正
+	(db/)
+	item_db.txt
+	job_db1.txt
+	(doc/)
+	item_bonus.txt
+
+--------------
 //0678 by 聖
 
 ・召還関連の細かい修正。
