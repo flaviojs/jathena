@@ -14,6 +14,7 @@ geffen_in.gat,110,169,2	script	ギルド員	731,{
 	next;
 	if (change_blacksmith == 1) goto LStart2;
 	if (Class == 5) goto Lmarchant;
+	if (Class == 8) goto LPriest;
 	if (Class == 10) goto LBlacksmith;
 //一般Mes
 	mes "調査中";
@@ -112,6 +113,13 @@ LUpper:/*脳内*/
 	mes "おっと君は転生しているね";
 	mes "ここでは転職案内できないんだ";
 	mes "すまないな。";
+	close;
+LPriest:
+	mes "[アルトアイゼン]";
+	mes "おや、神様の御使いですか！";
+	mes "よく来てくれました！";
+	mes "ぜひこの私に祝福のお祈りを";
+	mes "お願いします。";
 	close;
 LBlacksmith:
 	mes "[アルトアイゼン]";

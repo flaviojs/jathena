@@ -30,6 +30,8 @@
 #define MOB_LAZYWARPPERC 20		// 手抜きモードMOBのワープ確率（千分率）
 
 struct mob_db mob_db[2001];
+/*	簡易設定	*/
+#define CLASSCHANGE_BOSS_NUM 21
 
 /*==========================================
  * ローカルプロトタイプ宣言 (必要な物のみ)
@@ -2274,7 +2276,7 @@ int mob_class_change(struct mob_data *md,int *value)
 		return 0;
 	if(md->bl.prev == NULL) return 0;
 
-	while(count < 5 && value[count] > 1000 && value[count] <= 2000) count++;
+	while(count < 21 && value[count] > 1000 && value[count] <= 2000) count++;
 	if(count < 1) return 0;
 
 	class = value[rand()%count];
