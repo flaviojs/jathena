@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-// スクリプト : Town_Guide v1.1
+// スクリプト : Town_Guide v1.2
 //----------------------------------------------------------------------
 
 //[案内要員 - プロンテラ]
@@ -1067,7 +1067,7 @@ L_START_1:
 
 //[案内要員 - ゲフェン]
 
-geffen.gat,203,116,0	script	案内要員	105,{
+geffen.gat,203,116,0	script	案内要員	705,{
 	cutin "gef_soldier",2;
 	mes "[ゲフェン案内要員]";
 	mes "魔法の都市ゲフェンにようこそ。";
@@ -1186,7 +1186,7 @@ L_START_1:
 		close;
 }
 
-geffen.gat,118,62,0	script	案内要員	105,{
+geffen.gat,118,62,0	script	案内要員	705,{
 	cutin "gef_soldier",2;
 	mes "[ゲフェン案内要員]";
 	mes "魔法の都市ゲフェンにようこそ。";
@@ -1307,7 +1307,7 @@ L_START_1:
 
 //[案内要員 - フェイヨン]
 
-payon.gat,82,116,4	script	案内要員	105,{
+payon.gat,82,116,4	script	案内要員	708,{
 	cutin "pay_soldier",2;
 	mes "[フェイヨン案内要員]";
 	mes "山岳都市フェイヨンにようこそ。";
@@ -1417,7 +1417,7 @@ L_START_1:
 		close;
 }
 
-pay_arche.gat,85,30,2	script	案内要員	105,{
+pay_arche.gat,85,30,2	script	案内要員	708,{
 	cutin "pay_soldier",2;
 	mes "[フェイヨン案内要員]";
 	mes "山岳都市フェイヨンにようこそ。";
@@ -1715,7 +1715,7 @@ L_START_1:
 
 //[案内要員 - モロク]
 
-morocc.gat,153,286,6	script	案内要員	105,{
+morocc.gat,153,286,6	script	案内要員	707,{
 	cutin "moc_soldier",2;
 	mes "[モロク案内要員]";
 	mes "辺境の地モロクへようこそ。";
@@ -1821,7 +1821,7 @@ L_START_1:
 		close;
 }
 
-morocc.gat,54,97,6	script	案内要員	105,{
+morocc.gat,54,97,6	script	案内要員	707,{
 	cutin "moc_soldier",2;
 	mes "[モロク案内要員]";
 	mes "辺境の地モロクへようこそ。";
