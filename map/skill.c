@@ -417,7 +417,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		break;
 	}
 
-	if(sd && attack_type&BF_WEAPON){	/* カードによる追加効果 */
+	if(sd && skillid != MC_CARTREVOLUTION && attack_type&BF_WEAPON){	/* カードによる追加効果 */
 		int i;
 		for(i=SC_STONE;i<=SC_BLIND;i++){
 			if(!sd->state.arrow_atk) {
@@ -579,9 +579,9 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		dsrc = src;
 
 	if( dmg.blewcount ){	/* 吹き飛ばし処理とそのパケット */
-		skill_blown(dsrc,bl,dmg.blewcount);
 		clif_skill_damage2(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 			damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
+		skill_blown(dsrc,bl,dmg.blewcount);
 	} else			/* スキルのダメージパケット */
 		clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 			damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
@@ -2063,7 +2063,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		if(dir&1) count=5;
 		else count=3;
 		limit=1000*(val2=(4+skilllv));
-		interval=250;
+		interval=100;
 		break;
 
 	case AL_PNEUMA:				/* ニューマ */

@@ -705,8 +705,11 @@ int mob_stop_walking(struct mob_data *md,int type)
 		if(type&0x01)
 			clif_fixpos(&md->bl);
 	}
-	if(type&0x02 && md->state.state != MS_DELAY)
+	if(type&0x02 && md->state.state != MS_DELAY) {
+		if(battle_config.monster_damage_delay_rate != 100)
+			delay = delay*battle_config.monster_damage_delay_rate/100;
 		mob_changestate(md,MS_DELAY,delay);
+	}
 	else
 		mob_changestate(md,MS_IDLE,0);
 
@@ -1751,7 +1754,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage)
 			}
 		}
 		if(sd->get_zeny_num > 0)
-			pc_getzeny(sd,rand()%sd->get_zeny_num + 1);
+			pc_getzeny(sd,mob_db[md->class].lv*10 + rand()%(sd->get_zeny_num+1));
 	}
 	if(md->lootitem) {
 		for(i=0;i<md->lootitem_count;i++) {

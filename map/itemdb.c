@@ -6,6 +6,7 @@
 #include "db.h"
 #include "grfio.h"
 #include "map.h"
+#include "battle.h"
 #include "itemdb.h"
 #include "script.h"
 #include "pc.h"
@@ -16,16 +17,9 @@
 
 #define MAX_RANDITEM	2000
 
-// ** ITEMDB_OVERRIDE_NAME **
-//   定義するとアイテムの名前をdata.grf(idnum2displaynametable.txt)から読みます
-//   オーバーライドされたら困る場合はコメント化してください
-//   override item name from data.grf(idnum2displaynametable.txt) if defined.
-#define ITEMDB_OVERRIDE_NAME			1
-
 // ** ITEMDB_OVERRIDE_NAME_VERBOSE **
 //   定義すると、itemdb.txtとgrfで名前が異なる場合、表示します.
 //#define ITEMDB_OVERRIDE_NAME_VERBOSE	1
-
 
 static struct dbt* item_db;
 
@@ -64,76 +58,50 @@ struct item_data* itemdb_searchname(const char *str)
  */
 int itemdb_searchrandomid(int flags)
 {
-	int nameid,i,index;
+	int nameid=0,i,index,count;
+	struct random_item_data *list=NULL;
 
-	if(flags == 1) {
-		nameid = blue_box_default;
-		if(blue_box_count > 0) {
-			for(i=0;i<1000;i++) {
-				index = rand()%blue_box_count;
-				if(rand()%1000000 < blue_box[index].per) {
-					nameid = blue_box[index].nameid;
+	struct {
+		int nameid,count;
+		struct random_item_data *list;
+	} data[] ={
+		{ 0,0,NULL },
+		{ blue_box_default	,blue_box_count		,blue_box	 },
+		{ violet_box_default,violet_box_count	,violet_box	 },
+		{ card_album_default,card_album_count	,card_album	 },
+		{ gift_box_default	,gift_box_count		,gift_box	 },
+		{ scroll_default	,scroll_count		,scroll		 },
+	};
+
+	if(flags>=1 && flags<=5){
+		nameid=data[flags].nameid;
+		count=data[flags].count;
+		list=data[flags].list;
+
+		if(count > 0) {
+			for(i=0;i<MAX_RANDITEM;i++) {
+				index = rand()%count;
+				if(	rand()%1000000 < list[index].per) {
+					nameid = list[index].nameid;
 					break;
 				}
 			}
 		}
 	}
-	else if(flags == 2) {
-		nameid = violet_box_default;
-		if(violet_box_count > 0) {
-			for(i=0;i<1000;i++) {
-				index = rand()%violet_box_count;
-				if(rand()%1000000 < violet_box[index].per) {
-					nameid = violet_box[index].nameid;
-					break;
-				}
-			}
-		}
-	}
-	else if(flags == 3) {
-		nameid = card_album_default;
-		if(card_album_count > 0) {
-			for(i=0;i<1000;i++) {
-				index = rand()%card_album_count;
-				if(rand()%1000000 < card_album[index].per) {
-					nameid = card_album[index].nameid;
-					break;
-				}
-			}
-		}
-	}
-	else if(flags == 4) {
-		nameid = gift_box_default;
-		if(gift_box_count > 0) {
-			for(i=0;i<1000;i++) {
-				index = rand()%gift_box_count;
-				if(rand()%1000000 < gift_box[index].per) {
-					nameid = gift_box[index].nameid;
-					break;
-				}
-			}
-		}
-	}
-	else if(flags == 5) {
-		nameid = scroll_default;
-		if(scroll_count > 0) {
-			for(i=0;i<1000;i++) {
-				index = rand()%scroll_count;
-				if(rand()%1000000 < scroll[index].per) {
-					nameid = scroll[index].nameid;
-					break;
-				}
-			}
-		}
-	}
-	else
-		nameid = 0;
 //	printf("get %d\n",nameid);
 	return nameid;
 }
 
 /*==========================================
- *
+ * DBの存在確認
+ *------------------------------------------
+ */
+struct item_data* itemdb_exists(int nameid)
+{
+	return numdb_search(item_db,nameid);
+}
+/*==========================================
+ * DBの検索
  *------------------------------------------
  */
 struct item_data* itemdb_search(int nameid)
@@ -152,8 +120,16 @@ struct item_data* itemdb_search(int nameid)
 	numdb_insert(item_db,nameid,id);
 
 	id->nameid=nameid;
-	id->value=10;
+	id->value_buy=10;
+	id->value_sell=id->value_buy/2;
 	id->weight=10;
+	id->sex=2;
+	id->elv=0;
+	id->class=0xffffffff;
+	id->flag.available=0;
+	id->flag.value_notdc=0;  //一応・・・
+	id->flag.value_notoc=0;
+	id->view_id=0;
 
 	if(nameid>500 && nameid<600)
 		id->type=0;   //heal item
@@ -183,15 +159,6 @@ struct item_data* itemdb_search(int nameid)
  *
  *------------------------------------------
  */
-int itemdb_sellvalue(int nameid)
-{
-	return itemdb_search(nameid)->value/2;
-}
-
-/*==========================================
- *
- *------------------------------------------
- */
 int itemdb_isequip(int nameid)
 {
 	int type=itemdb_type(nameid);
@@ -199,19 +166,20 @@ int itemdb_isequip(int nameid)
 		return 0;
 	return 1;
 }
-
 /*==========================================
- * 装備可能なすべての箇所の組み合わせを返す
+ *
  *------------------------------------------
  */
-int itemdb_equippoint(struct map_session_data *sd,int nameid)
+int itemdb_isequip2(struct item_data *data)
 {
-	struct item_data *id=itemdb_search(nameid);
-	if(sd){
-		if((id->equip==2)&&(sd->status.class == 12)&&(pc_checkskill(sd, 133)!=-1))
-			return 34;
+	if(data) {
+		int type=data->type;
+		if(type==0 || type==2 || type==3 || type==6 || type==10)
+			return 0;
+		else
+			return 1;
 	}
-	return id->equip;
+	return 0;
 }
 
 //
@@ -263,7 +231,7 @@ static int itemdb_readdb(void)
 	fp=fopen("db/item_db.txt","r");
 	if(fp==NULL){
 		printf("can't read db/item_db.txt\n");
-		return 0;
+		exit(1);
 	}
 	while(fgets(line,1020,fp)){
 		if(line[0]=='/' && line[1]=='/')
@@ -287,11 +255,14 @@ static int itemdb_readdb(void)
 		memcpy(id->name,str[1],24);
 		memcpy(id->jname,str[2],24);
 		id->type=atoi(str[3]);
-		//Sellの項目をお店での売値にした。byれあ
-		if(atoi(str[5]))
-			id->value=atoi(str[5])*2;
-		else
-			id->value=atoi(str[4]);
+		// buy≠sell*2 は item_value_db.txt で指定してください。
+		if (atoi(str[5])) {		// sell値を優先とする
+			id->value_buy=atoi(str[5])*2;
+			id->value_sell=atoi(str[5]);
+		} else {
+			id->value_buy=atoi(str[4]);
+			id->value_sell=atoi(str[4])/2;
+		}
 		id->weight=atoi(str[6]);
 		id->atk=atoi(str[7]);
 		id->def=atoi(str[8]);
@@ -306,6 +277,10 @@ static int itemdb_readdb(void)
 		id->wlv=atoi(str[14]);
 		id->elv=atoi(str[15]);
 		id->look=atoi(str[16]);
+		id->flag.available=1;
+		id->flag.value_notdc=0;
+		id->flag.value_notoc=0;
+		id->view_id=0;
 
 		id->use_script=NULL;
 		id->equip_script=NULL;
@@ -339,13 +314,12 @@ static int itemdb_read_itemvaluedb(void)
 		printf("can't read db/item_value_db.txt\n");
 		return -1;
 	}
-	
-	while(fgets(line,1020,fp)){
 
+	while(fgets(line,1020,fp)){
 		if(line[0]=='/' && line[1]=='/')
 			continue;
 		memset(str,0,sizeof(str));
-		for(j=0,p=line;j<5 && p;j++){
+		for(j=0,p=line;j<7 && p;j++){
 			str[j]=p;
 			p=strchr(p,',');
 			if(p) *p++=0;
@@ -357,13 +331,22 @@ static int itemdb_read_itemvaluedb(void)
 		if(nameid<=0 || nameid>=20000)
 			continue;
 
-		id=itemdb_search(nameid);
+		if( !(id=itemdb_exists(nameid)) )
+			continue;
+
 		ln++;
-		if(str[3]!=NULL){
-			if(str[4]!=NULL && *str[4] && atoi(str[4]))
-				id->value=atoi(str[4])*2;
-			else if( *str[3] )
-				id->value=atoi(str[3]);
+		// それぞれ記述した個所のみオーバーライト
+		if(str[3]!=NULL && *str[3]){
+			id->value_buy=atoi(str[3]);
+		}
+		if(str[4]!=NULL && *str[4]){
+			id->value_sell=atoi(str[4]);
+		}
+		if(str[5]!=NULL && *str[5]){
+			id->flag.value_notdc=(atoi(str[5])==0)? 0:1;
+		}
+		if(str[6]!=NULL && *str[6]){
+			id->flag.value_notoc=(atoi(str[6])==0)? 0:1;
 		}
 	}
 	fclose(fp);
@@ -392,7 +375,7 @@ static int itemdb_read_classequipdb(void)
 		if(line[0]=='/' && line[1]=='/')
 			continue;
 		memset(str,0,sizeof(str));
-		for(j=0,p=line;j<MAX_PC_CLASS+2 && p;j++){
+		for(j=0,p=line;j<MAX_PC_CLASS+4 && p;j++){
 			str[j]=p;
 			p=strchr(p,',');
 			if(p) *p++=0;
@@ -404,14 +387,22 @@ static int itemdb_read_classequipdb(void)
 		if(nameid<=0 || nameid>=20000)
 			continue;
 
-		if(!itemdb_isequip(nameid) || (nameid>1750 && nameid<1771))
-			continue;
 		ln++;
 
 		//ID,Name,class1,class2,class3, ...... ,class22
-		id=itemdb_search(nameid);
+		if( !(id=itemdb_exists(nameid)) )
+			continue;
+			
 		id->class = 0;
-		for(i=2;i<MAX_PC_CLASS+2;i++) {
+		if(str[2] && str[2][0]) {
+			j = atoi(str[2]);
+			id->sex = j;
+		}
+		if(str[3] && str[3][0]) {
+			j = atoi(str[3]);
+			id->elv = j;
+		}
+		for(i=4;i<MAX_PC_CLASS+4;i++) {
 			if(str[i]!=NULL && str[i][0]) {
 				j = atoi(str[i]);
 				if(j == 99) {
@@ -419,6 +410,8 @@ static int itemdb_read_classequipdb(void)
 						id->class |= 1<<j;
 					break;
 				}
+				else if(j == 9999)
+					break;
 				else if(j >= 0 && j < MAX_PC_CLASS) {
 					id->class |= 1<<j;
 					if(j == 7)
@@ -457,14 +450,14 @@ static int itemdb_read_randomitem()
 		{"db/item_giftbox.txt",	gift_box,	&gift_box_count, &gift_box_default	},
 		{"db/item_scroll.txt",	scroll,	&scroll_count, &scroll_default	},
 	};
-	
-	
+
 	for(i=0;i<sizeof(data)/sizeof(data[0]);i++){
 		struct random_item_data *pd=data[i].pdata;
 		int *pc=data[i].pcount;
 		int *pdefault=data[i].pdefault;
 		char *fn=data[i].filename;
-	
+
+		*pdefault = 0;
 		if( (fp=fopen(fn,"r"))==NULL ){
 			printf("can't read %s\n",fn);
 			continue;
@@ -482,7 +475,7 @@ static int itemdb_read_randomitem()
 
 			if(str[0]==NULL)
 				continue;
-	
+
 			nameid=atoi(str[0]);
 			if(nameid<0 || nameid>=20000)
 				continue;
@@ -507,6 +500,53 @@ static int itemdb_read_randomitem()
 
 	return 0;
 }
+/*==========================================
+ * アイテム使用可能フラグのオーバーライド
+ *------------------------------------------
+ */
+static int itemdb_read_itemavail(void)
+{
+	FILE *fp;
+	char line[1024];
+	int ln=0;
+	int nameid,j,k;
+	char *str[10],*p;
+	
+	if( (fp=fopen("db/item_avail.txt","r"))==NULL ){
+		printf("can't read db/item_avail.txt\n");
+		return -1;
+	}
+	
+	while(fgets(line,1020,fp)){
+		struct item_data *id;
+		if(line[0]=='/' && line[1]=='/')
+			continue;
+		memset(str,0,sizeof(str));
+		for(j=0,p=line;j<2 && p;j++){
+			str[j]=p;
+			p=strchr(p,',');
+			if(p) *p++=0;
+		}
+
+		if(str[0]==NULL)
+			continue;
+
+		nameid=atoi(str[0]);
+		if(nameid<0 || nameid>=20000 || !(id=itemdb_exists(nameid)) )
+			continue;
+		k=atoi(str[1]);
+		if(k > 0) {
+			id->flag.available = 1;
+			id->view_id = k;
+		}
+		else
+			id->flag.available = 0;
+		ln++;
+	}
+	fclose(fp);
+	printf("read db/item_avail.txt done (count=%d)\n",ln);
+	return 0;
+}
 
 /*==========================================
  * アイテムの名前テーブルを読み込む
@@ -529,7 +569,8 @@ static int itemdb_read_itemnametable(void)
 
 		if(	sscanf(p,"%d#%[^#]#",&nameid,buf2)==2 ){
 
-			if( strncmp(itemdb_search(nameid)->jname,buf2,24)!=0 )
+			if( itemdb_exists(nameid) &&
+				strncmp(itemdb_search(nameid)->jname,buf2,24)!=0 )
 #ifdef ITEMDB_OVERRIDE_NAME_VERBOSE
 				printf("[override] %d %s => %s\n",nameid
 					,itemdb_search(nameid)->jname,buf2);
@@ -578,6 +619,21 @@ void do_final_itemdb(void)
 	}
 }
 
+/*
+static FILE *dfp;
+static int itemdebug(void *key,void *data,va_list ap){
+//	struct item_data *id=(struct item_data *)data;
+	fprintf(dfp,"%6d",(int)key);
+	return 0;
+}
+void itemdebugtxt()
+{
+	dfp=fopen("itemdebug.txt","wt");
+	numdb_foreach(item_db,itemdebug);
+	fclose(dfp);
+}
+*/
+
 /*==========================================
  *
  *------------------------------------------
@@ -591,9 +647,9 @@ int do_init_itemdb(void)
 	itemdb_read_classequipdb();
 	itemdb_read_itemvaluedb();
 	itemdb_read_randomitem();
-#ifdef ITEMDB_OVERRIDE_NAME
-	itemdb_read_itemnametable();
-#endif
-	
+	itemdb_read_itemavail();
+	if(battle_config.item_name_override_grffile)
+		itemdb_read_itemnametable();
+
 	return 0;
 }

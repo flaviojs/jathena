@@ -8,6 +8,7 @@
 #include "map.h"
 #include "intif.h"
 #include "clif.h"
+#include "chrif.h"
 #include "socket.h"
 #include "pet.h"
 #include "itemdb.h"
@@ -533,11 +534,9 @@ int pet_return_egg(struct map_session_data *sd)
 		sd->status.pet_id = 0;
 		sd->pd = NULL;
 
-		sd->pet.incuvate = 1;
-		intif_save_petdata(sd->status.account_id,&sd->pet);
-
 		if(sd->petDB == NULL)
 			return 1;
+		sd->pet.incuvate = 1;
 		memset(&tmp_item,0,sizeof(tmp_item));
 		tmp_item.nameid = sd->petDB->EggID;
 		tmp_item.identify = 1;
@@ -548,6 +547,10 @@ int pet_return_egg(struct map_session_data *sd)
 			clif_additem(sd,0,0,flag);
 			map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
 		}
+		intif_save_petdata(sd->status.account_id,&sd->pet);
+		pc_makesavestatus(sd);
+		chrif_save(sd);
+		storage_storage_save(sd);
 
 		sd->petDB = NULL;
 	}
@@ -627,13 +630,19 @@ int pet_birth_process(struct map_session_data *sd)
 	sd->pet.incuvate = 0;
 	sd->pet.account_id = sd->status.account_id;
 	sd->pet.char_id = sd->status.char_id;
-	intif_save_petdata(sd->status.account_id,&sd->pet);
 	sd->status.pet_id = sd->pet.pet_id;
 	if(pet_data_init(sd)) {
 		sd->status.pet_id = 0;
+		sd->pet.incuvate = 1;
+		sd->pet.account_id = 0;
+		sd->pet.char_id = 0;
 		return 1;
 	}
 
+	intif_save_petdata(sd->status.account_id,&sd->pet);
+	pc_makesavestatus(sd);
+	chrif_save(sd);
+	storage_storage_save(sd);
 	map_addblock(&sd->pd->bl);
 	clif_spawnpet(sd->pd);
 	clif_send_petdata(sd,0,0);
@@ -794,7 +803,6 @@ int pet_change_name(struct map_session_data *sd,char *name)
 	clif_send_petdata(sd,0,0);
 	clif_send_petdata(sd,5,0x14);
 	sd->pet.rename_flag = 1;
-	intif_save_petdata(sd->status.account_id,&sd->pet);
 	clif_pet_equip(sd->pd,sd->pet.equip);
 	clif_send_petstatus(sd);
 
@@ -816,7 +824,6 @@ int pet_equipitem(struct map_session_data *sd,int index)
 		pc_delitem(sd,index,1,0);
 		sd->pet.equip = sd->pd->equip = nameid;
 		clif_pet_equip(sd->pd,nameid);
-		intif_save_petdata(sd->status.account_id,&sd->pet);
 	}
 
 	return 0;
@@ -835,7 +842,6 @@ int pet_unequipitem(struct map_session_data *sd)
 	nameid = sd->pet.equip;
 	sd->pet.equip = sd->pd->equip = 0;
 	clif_pet_equip(sd->pd,0);
-	intif_save_petdata(sd->status.account_id,&sd->pet);
 	memset(&tmp_item,0,sizeof(tmp_item));
 	tmp_item.nameid = nameid;
 	tmp_item.identify = 1;

@@ -109,15 +109,16 @@ bAddMagicDamageClass	1044
 bAddDefClass	1045
 bAddMDefClass	1046
 bAddMonsterDropItem	1047
+bDefRatioAtkEle	1048
+bDefRatioAtkRace	1049
 bRestartFullRecover	2000
 bNoCastCancel	2001
 bNoSizeFix	2002
 bNoMagicDamage	2003
 bNoWeaponDamage	2004
 bNoGemStone	2005
-bDefRatioAtk	2006
-bNoCastCancel2	2007
-bInfiniteEndure	2008
+bNoCastCancel2	2006
+bInfiniteEndure	2007
 
 Eff_Stone	0
 Eff_Freeze	1

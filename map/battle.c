@@ -412,10 +412,16 @@ int battle_get_dmotion(struct block_list *bl)
 {
 	int ret;
 	struct status_change *sc_data=battle_get_sc_data(bl);
-	if(bl->type==BL_MOB)
+	if(bl->type==BL_MOB) {
 		ret=mob_db[((struct mob_data *)bl)->class].dmotion;
-	else if(bl->type==BL_PC)
+		if(battle_config.monster_damage_delay_rate != 100)
+			ret = ret*battle_config.monster_damage_delay_rate/100;
+	}
+	else if(bl->type==BL_PC) {
 		ret=((struct map_session_data *)bl)->dmotion;
+		if(battle_config.pc_damage_delay_rate != 100)
+			ret = ret*battle_config.pc_damage_delay_rate/100;
+	}
 	else if(bl->type==BL_PET)
 		ret=mob_db[((struct pet_data *)bl)->class].dmotion;
 	else
@@ -986,7 +992,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	struct Damage wd;
 	int damage,type,div_,blewcount=0;
 	int flag;
-	int t_mode=0,t_race=7,t_size=1,s_race=7,s_ele=0;
+	int t_mode=0,t_race=0,t_size=1,s_race=0,s_ele=0;
 	struct status_change *t_sc_data;
 
 	s_race=battle_get_race(src);
@@ -1279,7 +1285,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	struct Damage wd;
 	int damage,type,div_,blewcount=0;
 	int flag,skill;
-	int t_mode=0,t_race=7,t_size=1,s_race=7,s_ele=0;
+	int t_mode=0,t_race=0,t_size=1,s_race=0,s_ele=0;
 	struct status_change *sc_data,*t_sc_data;
 	short *sc_count;
 	short *option, *opt1, *opt2;
@@ -1620,13 +1626,14 @@ static struct Damage battle_calc_pc_weapon_attack(
 	struct Damage wd;
 	int damage,damage2,type,div_,blewcount=0;
 	int flag,skill;
-	int t_mode=0,t_race=7,t_size=1,s_race=7,s_ele=0;
+	int t_mode=0,t_race=0,t_size=1,s_race=7,s_ele=0;
 	struct status_change *sc_data,*t_sc_data;
 	short *sc_count;
 	short *option, *opt1, *opt2;
 	int atkmax_=0, atkmin_=0, s_ele_;	//二刀流用
 	int watk,watk_,cardfix,t_ele;
 	int da=0,i,t_class;
+	int idef_flag=0,idef_flag_=0;
 
 	// アタッカー
 	s_race=battle_get_race(src);
@@ -1638,7 +1645,8 @@ static struct Damage battle_calc_pc_weapon_attack(
 	opt1=battle_get_opt1(src);
 	opt2=battle_get_opt2(src);
 
-	sd->state.attack_type = BF_WEAPON;
+	if(skill_num != CR_GRANDCROSS)
+		sd->state.attack_type = BF_WEAPON;
 
 	// ターゲット
 	if(target->type==BL_PC)
@@ -1669,15 +1677,17 @@ static struct Damage battle_calc_pc_weapon_attack(
 	atkmin = atkmin_ = dex;
 	sd->state.arrow_atk = 0;
 	if(sd->weapontype1 == 11) {
-		atkmin = watk * (dex<watk)?dex:watk;
+		atkmin = watk * ((dex<watk)? dex:watk);
 		flag=(flag&~BF_RANGEMASK)|BF_LONG;
 		s_ele = sd->arrow_ele;
 		sd->state.arrow_atk = 1;
 	}
-	if(sd->equip_index[3] >= 0 && sd->inventory_data[sd->equip_index[3]] && sd->inventory_data[sd->equip_index[3]]->wlv > 1)
-		atkmin = atkmin*(100+(sd->inventory_data[sd->equip_index[3]]->wlv-1)*20)/100;
-	if(sd->equip_index[2] >= 0 && sd->inventory_data[sd->equip_index[2]] && sd->inventory_data[sd->equip_index[2]]->wlv > 1)
-		atkmin_ = atkmin_*(100+(sd->inventory_data[sd->equip_index[2]]->wlv-1)*20)/100;
+	if(sd->equip_index[9] >= 0 && sd->inventory_data[sd->equip_index[9]])
+		atkmin = atkmin*(80 + sd->inventory_data[sd->equip_index[9]]->wlv*20)/100;
+	if(sd->equip_index[8] >= 0 && sd->inventory_data[sd->equip_index[8]])
+		atkmin_ = atkmin_*(80 + sd->inventory_data[sd->equip_index[8]]->wlv*20)/100;
+	if(sd->state.arrow_atk)
+		atkmin/=100;
 
 		// サイズ修正
 		// ペコ騎乗していて、槍で攻撃した場合は中型のサイズ修正を100にする
@@ -1766,6 +1776,37 @@ static struct Damage battle_calc_pc_weapon_attack(
 		if(sd->state.arrow_atk)
 			damage += sd->arrow_atk;
 		type = 0x0a;
+
+		if(sd->def_ratio_atk_ele & (1<<t_ele) || sd->def_ratio_atk_race & (1<<t_race)) {
+			damage = (damage * (def1 + def2))/100;
+			idef_flag = 1;
+		}
+		if(sd->def_ratio_atk_ele_ & (1<<t_ele) || sd->def_ratio_atk_race_ & (1<<t_race)) {
+			damage2 = (damage2 * (def1 + def2))/100;
+			idef_flag_ = 1;
+		}
+		if(tmd) {
+			if(mob_db[tmd->class].mexp > 0) {
+				if(!idef_flag && sd->def_ratio_atk_race & (1<<10)) {
+					damage = (damage * (def1 + def2))/100;
+					idef_flag = 1;
+				}
+				if(!idef_flag_ && sd->def_ratio_atk_race_ & (1<<10)) {
+					damage2 = (damage2 * (def1 + def2))/100;
+					idef_flag_ = 1;
+				}
+			}
+			else {
+				if(!idef_flag && sd->def_ratio_atk_race & (1<<11)) {
+					damage = (damage * (def1 + def2))/100;
+					idef_flag = 1;
+				}
+				if(!idef_flag_ && sd->def_ratio_atk_race_ & (1<<11)) {
+					damage2 = (damage2 * (def1 + def2))/100;
+					idef_flag_ = 1;
+				}
+			}
+		}
 	}
 	else {
 		int vitbonusmax, t_vit=0;
@@ -1786,10 +1827,38 @@ static struct Damage battle_calc_pc_weapon_attack(
 		if(sd->state.arrow_atk && sd->arrow_atk > 0)
 			damage += rand()%(sd->arrow_atk+1);
 
-		if(sd->special_state.def_ratio_atk)
-			damage = (damage * (def1 + def2))/100;
-		if(sd->special_state.def_ratio_atk_)
-			damage2 = (damage2 * (def1 + def2))/100;
+		if(skill_num != MO_INVESTIGATE) {
+			if(sd->def_ratio_atk_ele & (1<<t_ele) || sd->def_ratio_atk_race & (1<<t_race)) {
+				damage = (damage * (def1 + def2))/100;
+				idef_flag = 1;
+			}
+			if(sd->def_ratio_atk_ele_ & (1<<t_ele) || sd->def_ratio_atk_race_ & (1<<t_race)) {
+				damage2 = (damage2 * (def1 + def2))/100;
+				idef_flag_ = 1;
+			}
+			if(tmd) {
+				if(mob_db[tmd->class].mexp > 0) {
+					if(!idef_flag && sd->def_ratio_atk_race & (1<<10)) {
+						damage = (damage * (def1 + def2))/100;
+						idef_flag = 1;
+					}
+					if(!idef_flag_ && sd->def_ratio_atk_race_ & (1<<10)) {
+						damage2 = (damage2 * (def1 + def2))/100;
+						idef_flag_ = 1;
+					}
+				}
+				else {
+					if(!idef_flag && sd->def_ratio_atk_race & (1<<11)) {
+						damage = (damage * (def1 + def2))/100;
+						idef_flag = 1;
+					}
+					if(!idef_flag_ && sd->def_ratio_atk_race_ & (1<<11)) {
+						damage2 = (damage2 * (def1 + def2))/100;
+						idef_flag_ = 1;
+					}
+				}
+			}
+		}
 
 		// スキル修正１（攻撃力倍化系）
 		// オーバートラスト(+5% ～ +25%),他攻撃系スキルの場合ここで補正
@@ -1981,12 +2050,11 @@ static struct Damage battle_calc_pc_weapon_attack(
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
 			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST) {	//DEF, VIT無視
-				int idef_flag=0,idef_flag_=0;
 				t_vit = def2*8/10;
 				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
-				if(sd->ignore_def_ele & (1<<t_ele) || sd->ignore_def_race & (1<<t_race) || sd->special_state.def_ratio_atk)
+				if(sd->ignore_def_ele & (1<<t_ele) || sd->ignore_def_race & (1<<t_race))
 					idef_flag = 1;
-				if(sd->ignore_def_ele_ & (1<<t_ele) || sd->ignore_def_race_ & (1<<t_race) || sd->special_state.def_ratio_atk_)
+				if(sd->ignore_def_ele_ & (1<<t_ele) || sd->ignore_def_race_ & (1<<t_race))
 					idef_flag_ = 1;
 				if(tmd) {
 					if(mob_db[tmd->class].mexp > 0) {
@@ -2821,6 +2889,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.skill_out_range_consume=1;
 	battle_config.mob_skill_add_range=0;
 	battle_config.pc_damage_delay=1;
+	battle_config.pc_damage_delay_rate=100;
 	battle_config.defnotenemy=1;
 	battle_config.random_monster_checklv=1;
 	battle_config.attr_recover=1;
@@ -2841,6 +2910,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.gm_allskill=0;
 	battle_config.wp_rate=100;
 	battle_config.monster_active_enable=1;
+	battle_config.monster_damage_delay_rate=100;
 	battle_config.monster_loot_type=0;
 	battle_config.mob_skill_use=1;
 	battle_config.mob_count_rate=100;
@@ -2896,6 +2966,7 @@ int battle_config_read(const char *cfgName)
 			{ "skill_out_range_consume", &battle_config.skill_out_range_consume },
 			{ "monster_skill_add_range", &battle_config.mob_skill_add_range },
 			{ "player_damage_delay",	&battle_config.pc_damage_delay		},
+			{ "player_damage_delay_rate",	&battle_config.pc_damage_delay_rate		},
 			{ "defunit_not_enemy",		&battle_config.defnotenemy			},
 			{ "random_monster_checklv",		&battle_config.random_monster_checklv	},
 			{ "attribute_recover",		&battle_config.attr_recover			},
@@ -2916,6 +2987,7 @@ int battle_config_read(const char *cfgName)
 			{ "gm_all_skill",			&battle_config.gm_allskill			},
 			{ "weapon_produce_rate",	&battle_config.wp_rate				},
 			{ "monster_active_enable",	&battle_config.monster_active_enable},
+			{ "monster_damage_delay_rate",	&battle_config.monster_damage_delay_rate		},
 			{ "monster_loot_type",		&battle_config.monster_loot_type	},
 			{ "mob_skill_use",			&battle_config.mob_skill_use		},
 			{ "mob_count_rate",			&battle_config.mob_count_rate		},

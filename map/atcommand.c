@@ -139,8 +139,11 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 //u@savev‚Æ“ü—Í
 		if (strcmpi(command, "@save") == 0 && gm_level >= atcommand_config.save) {
 			pc_setsavepoint(sd,sd->mapname,sd->bl.x,sd->bl.y);
+			if(sd->status.pet_id && sd->pd)
+				intif_save_petdata(sd->status.account_id,&sd->pet);
 			pc_makesavestatus(sd);
 			chrif_save(sd);
+			storage_storage_save(sd);
 			clif_displaymessage(fd,"‚¤‚ÞA‚»‚È‚½‚Ì–`Œ¯‚ð‹L˜^‚µ‚½‚¼(L„DM)");
 			return 1;
 		}
@@ -466,8 +469,11 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			else if(sd->status.guild_id)
 				clif_displaymessage(fd,"ƒMƒ‹ƒh‚ð”²‚¯‚Ä‚©‚çŽÀs‚µ‚Ä‚­‚¾‚³‚¢");
 			else{
+				if(sd->status.pet_id && sd->pd)
+					intif_save_petdata(sd->status.account_id,&sd->pet);
 				pc_makesavestatus(sd);
 				chrif_save(sd);
+				storage_storage_save(sd);
 				clif_displaymessage(fd,"GM‚É‚È‚é‚½‚ß‚É–â‚¢‡‚í‚¹’†...");
 				chrif_changegm(sd->status.account_id,moji,strlen(moji)+1);
 			}

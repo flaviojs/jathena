@@ -532,7 +532,7 @@ int map_clearflooritem_timer(int tid,unsigned int tick,int id,int data)
 	if(data)
 		delete_timer(fitem->cleartimer,map_clearflooritem_timer);
 	else if(fitem->item_data.card[0] == (short)0xff00)
-		intif_delete_petdata(*((long *)(&fitem->item_data.card[2])));
+		intif_delete_petdata(*((long *)(&fitem->item_data.card[1])));
 	clif_clearflooritem(fitem,0);
 	map_delobject(fitem->bl.id);
 
@@ -733,17 +733,32 @@ int map_quit(struct map_session_data *sd)
 
 	pc_cleareventtimer(sd);	// イベントタイマを破棄する
 
+	storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
 	skill_castcancel(&sd->bl);	// 詠唱を中断する
 	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
 	skill_clear_unitgroup(&sd->bl);	// スキルユニットグループの削除
 	skill_cleartimerskill(&sd->bl);
+	pc_stop_walking(sd,0);
 	pc_stopattack(sd);
 	pc_delghosttimer(sd);
 	pc_delspiritball(sd,sd->spiritball,1);
 
-	storage_storage_quitsave(sd);	// 倉庫を開いてるなら保存する
-
 	clif_clearchar_area(&sd->bl,2);
+	if(sd->status.pet_id && sd->pd) {
+		pet_remove_map(sd);
+		if(sd->pet.intimate <= 0) {
+			intif_delete_petdata(sd->status.pet_id);
+			sd->status.pet_id = 0;
+			sd->pd = NULL;
+			sd->petDB = NULL;
+		}
+		else
+			intif_save_petdata(sd->status.account_id,&sd->pet);
+	}
+	pc_makesavestatus(sd);
+	chrif_save(sd);
+	storage_storage_save(sd);
+
 	map_delblock(&sd->bl);
 
 	numdb_erase(id_db,sd->bl.id);
@@ -962,68 +977,53 @@ int map_setipport(char *name,unsigned long ip,int port)
 
 // 初期化周り
 /*==========================================
- * 水場ファイルの第4列で水場高さ設定
+ * 水場高さ設定
  *------------------------------------------
  */
 static struct {
 	char mapname[24];
 	int waterheight;
 } *waterlist=NULL;
-static int wmap_max=0;
+
+#define NO_WATER 1000000
 
 static int map_waterheight(char *mapname)
 {
-	int n;
-	for(n=0;waterlist[n].mapname[0] && n<wmap_max;n++)
-		if(strcmp(waterlist[n].mapname,mapname)==0)
-			return waterlist[n].waterheight;
-	return 127;
+	if(waterlist){
+		int i;
+		for(i=0;waterlist[i].mapname[0] && i < MAX_MAP_PER_SERVER;i++)
+			if(strcmp(waterlist[i].mapname,mapname)==0)
+				return waterlist[i].waterheight;
+	}
+	return NO_WATER;
 }
 
 static void map_readwater(char *watertxt)
 {
-	char line[1024];
+	char line[1024],w1[1024];
 	FILE *fp;
-	static int n=0;
+	int n=0;
 
 	fp=fopen(watertxt,"r");
 	if(fp==NULL){
 		printf("file not found: %s\n",watertxt);
 		return;
 	}
-	while(fgets(line,1020,fp)){
-		char w1[1024],w2[1024],w3[1024];
+	if(waterlist==NULL)
+		waterlist=calloc(MAX_MAP_PER_SERVER,sizeof(*waterlist));
+	while(fgets(line,1020,fp) && n < MAX_MAP_PER_SERVER){
 		int wh,count;
 		if(line[0] == '/' && line[1] == '/')
 			continue;
-		if((count=sscanf(line,"%s%s%s%d",w1,w2,w3,&wh)) < 3){
+		if((count=sscanf(line,"%s%d",w1,&wh)) < 1){
 			continue;
 		}
-		if(strcmpi(w2,"mapflag")==0 && strcmpi(w3,"water")==0){
-			if(wmap_max==0){
-				waterlist=malloc(sizeof(waterlist[0])*16);
-				if(waterlist==NULL){
-					printf("out of memory : map_readwater\n");
-					exit(1);
-				}
-				memset(waterlist,0,sizeof(waterlist[0])*16);
-				wmap_max=16;
-			}else if(n>=wmap_max){
-				waterlist=realloc(waterlist,sizeof(waterlist[0])*(wmap_max+16));
-				if(waterlist==NULL){
-					printf("out of memory : map_readwater\n");
-					exit(1);
-				}
-				memset(&waterlist[wmap_max],0,sizeof(waterlist[0])*16);
-				wmap_max+=16;
-			}
-			strcpy(waterlist[n].mapname,w1);
-			if(count==4)
-				waterlist[n].waterheight=wh;
-			else
-				waterlist[n].waterheight=3;
-			n++;
-		}
+		strcpy(waterlist[n].mapname,w1);
+		if(count >= 2)
+			waterlist[n].waterheight = wh;
+		else
+			waterlist[n].waterheight = 3;
+		n++;
 	}
 	fclose(fp);
 }
@@ -1060,7 +1060,7 @@ static int map_readmap(int m,char *fn)
 	for(y=0;y<ys;y++){
 		p=(struct gat_1cell*)(gat+y*xs*20+14);
 		for(x=0;x<xs;x++){
-			if(wh!=127 && p->type==0){
+			if(wh!=NO_WATER && p->type==0){
 				// 水場判定
 				map[m].gat[x+y*xs]=(p->high[0]>wh || p->high[1]>wh || p->high[2]>wh || p->high[3]>wh) ? 3 : 0;
 			} else {
@@ -1154,7 +1154,7 @@ int map_config_read(char *cfgName)
 	while(fgets(line,1020,fp)){
 		if(line[0] == '/' && line[1] == '/')
 			continue;
-		i=sscanf(line,"%[^:]:%s",w1,w2);
+		i=sscanf(line,"%[^:]: %[^\r\n]",w1,w2);
 		if(i!=2)
 			continue;
 		if(strcmpi(w1,"userid")==0){
@@ -1179,11 +1179,14 @@ int map_config_read(char *cfgName)
 			clif_setip(w2);
 		} else if(strcmpi(w1,"map_port")==0){
 			clif_setport(atoi(w2));
+		} else if(strcmpi(w1,"water_height")==0){
+			map_readwater(w2);
+		} else if(strcmpi(w1,"gm_account_filename")==0){
+			pc_set_gm_account_fname(w2);
 		} else if(strcmpi(w1,"map")==0){
 			map_addmap(w2);
 		} else if(strcmpi(w1,"npc")==0){
 			npc_addsrcfile(w2);
-			map_readwater(w2);
 		} else if(strcmpi(w1,"data_grf")==0){
 			grfio_setdatafile(w2);
 		} else if(strcmpi(w1,"sdata_grf")==0){
@@ -1217,13 +1220,11 @@ int do_init(int argc,char *argv[])
 {
 	srand(gettick());
 
-	if(argc < 2) argv[1] = MAP_CONF_NAME;
-	if(argv[1]){
-		if(map_config_read(argv[1]))
-			exit(1);
-	}
-	battle_config_read((argc>2)?argv[2]:BATTLE_CONF_FILENAME);
-	atcommand_config_read(ATCOMMAND_CONF_FILENAME);
+	if(map_config_read((argc<2)? MAP_CONF_NAME:argv[1]))
+		exit(1);
+	battle_config_read((argc>2)? argv[2]:BATTLE_CONF_FILENAME);
+	atcommand_config_read((argc>3)? argv[3]:ATCOMMAND_CONF_FILENAME);
+	script_config_read((argc>4)? argv[4]:SCRIPT_CONF_NAME);
 
 	atexit(do_final);
 
@@ -1232,18 +1233,18 @@ int do_init(int argc,char *argv[])
 	nick_db = strdb_init(24);
 	charid_db = numdb_init();
 
-	grfio_init();
+	grfio_init((argc>5)? argv[5]:GRF_PATH_FILENAME);
 	map_readallmap();
 
 	add_timer_func_list(map_clearflooritem_timer,"map_clearflooritem_timer");
 
 	do_init_chrif();
 	do_init_clif();
+	do_init_itemdb();
 	do_init_mob();	// npcの初期化時内でmob_spawnして、mob_dbを参照するのでinit_npcより先
 	do_init_script();
 	do_init_npc();
 	do_init_pc();
-	do_init_itemdb();
 	do_init_storage();
 	do_init_party();
 	do_init_guild();

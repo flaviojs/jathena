@@ -346,9 +346,15 @@ monster_skill_add_range
 	モンスターのスキル射程から敵が離れた時どれぐらいの距離までスキルを使用可能にするかを決めます。スキルの射程+monster_skill_add_rangeまでスキルが届きます。デフォルトは0です。
 
 player_damage_delay
-	PCがダメージを受けた時移動できないディレイを入れるかどうかです。
+	プレイヤーキャラがダメージを受けた時移動できないディレイを入れるかどうかです。
 	yesにするとインデュアでも使わない限りダメージを受けた時
 	しばらくは動きません。デフォルトはyesです。
+
+player_damage_delay_rate
+	プレイヤーキャラがダメージを受けた時移動できないディレイを百分率で調整します。
+	200にするとディレイが倍になり、0にするとディレイがなくなります。
+	player_damage_delayがyesにしてないと意味がありません。
+	デフォルトは100です。
 
 defunit_not_enemy
 	防御ユニット（セイフティウォール/ニューマなど）がMOBに効果を
@@ -435,6 +441,11 @@ weapon_produce_rate
 monster_active_enable
 	先攻モンスターを先攻にするかどうかです。これをnoにすると
 	先攻モンスターが非先攻になります。デフォルトはyesです。
+
+monster_damage_delay_rate
+	モンスターがダメージを受けた時移動できないディレイを百分率で調整します。
+	200にするとディレイが倍になり、0にするとディレイがなくなります。
+	デフォルトは100です。
 
 monster_loot_type
 	ルートモンスターの行動の仕方を指定します。
@@ -602,6 +613,7 @@ player_skill_add_range: 0
 skill_out_range_consume: yes
 monster_skill_add_range: 0
 player_damage_delay: yes
+player_damage_delay_rate: 100
 defunit_not_enemy: yes
 random_monster_checklv: yes
 attribute_recover: yes
@@ -622,6 +634,7 @@ atcommand_gm_only: no
 gm_all_skill: 0
 weapon_produce_rate: 100
 monster_active_enable: yes
+monster_damage_delay_rate: 100
 monster_loot_type: 0
 mob_skill_use: yes
 mob_count_rate: 100

@@ -124,6 +124,7 @@ extern struct Battle_Config {
 	int skill_out_range_consume;
 	int mob_skill_add_range;
 	int pc_damage_delay;
+	int pc_damage_delay_rate;
 	int defnotenemy;
 	int random_monster_checklv;
 	int attr_recover;
@@ -139,6 +140,7 @@ extern struct Battle_Config {
 	int atc_gmonly,gm_allskill;
 	int wp_rate;
 	int monster_active_enable;
+	int monster_damage_delay_rate;
 	int monster_loot_type;
 	int mob_skill_use;
 	int mob_count_rate;

@@ -284,7 +284,7 @@ static int pc_walktoxy_sub(struct map_session_data *);
 int pc_makesavestatus(struct map_session_data *sd)
 {
 	// 服の色は色々弊害が多いので保存対象にはしない
-	sd->status.clothes_color=0;
+//	sd->status.clothes_color=0;
 
 	// 死亡状態だったのでhpを1、位置をセーブ場所に変更
 	if(pc_isdead(sd)){
@@ -683,7 +683,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	int b_base_atk;
 	struct skill b_skill[MAX_SKILL];
 	int i,bl,index;
-	int skill,aspd_rate,wele,wele_;
+	int skill,aspd_rate,wele,wele_,def_ele,refinedef=0;
 	int str,dstr,dex;
 
 	b_speed = sd->speed;
@@ -811,6 +811,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(sd->magic_subrace,0,sizeof(sd->magic_subrace));
 	sd->perfect_hit = 0;
 	sd->critical_rate = 100;
+	sd->def_ratio_atk_ele = sd->def_ratio_atk_ele_ = 0;
+	sd->def_ratio_atk_race = sd->def_ratio_atk_race_ = 0;
 	sd->get_zeny_num = 0;
 	sd->add_damage_class_count = sd->add_damage_class_count_ = sd->add_magic_damage_class_count = 0;
 	sd->add_def_class_count = sd->add_mdef_class_count = 0;
@@ -822,6 +824,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(sd->add_mdef_classrate,0,sizeof(sd->add_mdef_classrate));
 	memset(sd->monster_drop_race,0,sizeof(sd->monster_drop_race));
 	memset(sd->monster_drop_itemrate,0,sizeof(sd->monster_drop_itemrate));
+	sd->speed_add_rate = sd->aspd_add_rate = 100;
+	sd->double_add_rate = sd->perfect_hit_add = sd->get_zeny_add_num = 0;
 
 	for(i=0;i<10;i++) {
 		index = sd->equip_index[i];
@@ -862,6 +866,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	}
 	wele = sd->atk_ele;
 	wele_ = sd->atk_ele_;
+	def_ele = sd->def_ele;
 	memcpy(sd->paramcard,sd->parame,sizeof(sd->paramcard));
 
 	// 装備品によるステータス変化はここで実行
@@ -913,7 +918,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			}
 			else if(sd->inventory_data[index]->type == 5) {
 				sd->watk += sd->inventory_data[index]->atk;
-				sd->def += (sd->status.inventory[index].refine*refinebonus[0][0])/100;
+				refinedef += sd->status.inventory[index].refine*refinebonus[0][0];
 				run_script(sd->inventory_data[index]->equip_script,0,sd->bl.id,0);
 			}
 		}
@@ -928,6 +933,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->arrow_atk += sd->inventory_data[index]->atk;
 		}
 	}
+	sd->def += (refinedef+50)/100;
 
 	if(sd->attackrange < 1) sd->attackrange = 1;
 	if(sd->attackrange_ < 1) sd->attackrange_ = 1;
@@ -937,6 +943,15 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->atk_ele = wele;
 	if(wele_ > 0)
 		sd->atk_ele_ = wele_;
+	if(def_ele > 0)
+		sd->def_ele = def_ele;
+	sd->double_rate += sd->double_add_rate;
+	sd->perfect_hit += sd->perfect_hit_add;
+	sd->get_zeny_num += sd->get_zeny_add_num;
+	if(sd->speed_add_rate != 100)
+		sd->speed_rate += sd->speed_add_rate - 100;
+	if(sd->aspd_add_rate != 100)
+		sd->aspd_rate += sd->aspd_add_rate - 100;
 
 	// 武器ATKサイズ補正 (右手)
 	sd->atkmods[0] = atkmods[0][sd->weapontype1];
@@ -1414,9 +1429,9 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 			sd->dsprate+=val;
 		break;
 	case SP_ATTACKRANGE:
-		if(sd->state.lr_flag == 1)
-			sd->attackrange_ += val;
-		else
+		if(!sd->state.lr_flag)
+			sd->attackrange += val;
+		else if(sd->state.lr_flag == 2)
 			sd->attackrange += val;
 		break;
 	case SP_SPEED:
@@ -1431,7 +1446,7 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		break;
 	case SP_SPEED_ADDRATE:
 		if(sd->state.lr_flag != 2)
-			sd->speed_rate = sd->speed_rate * (100-val)/100;
+			sd->speed_add_rate = sd->speed_add_rate * (100-val)/100;
 		break;
 	case SP_ASPD:
 		if(sd->state.lr_flag != 2)
@@ -1445,7 +1460,7 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		break;
 	case SP_ASPD_ADDRATE:
 		if(sd->state.lr_flag != 2)
-			sd->aspd_rate = sd->aspd_rate * (100-val)/100;
+			sd->aspd_add_rate = sd->aspd_add_rate * (100-val)/100;
 		break;
 	case SP_HP_RECOV_RATE:
 		if(sd->state.lr_flag != 2)
@@ -1473,7 +1488,7 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		break;
 	case SP_DOUBLE_ADD_RATE:
 		if(sd->state.lr_flag == 0)
-			sd->double_rate += val;
+			sd->double_add_rate += val;
 		break;
 	case SP_MATK_RATE:
 		if(sd->state.lr_flag != 2)
@@ -1512,26 +1527,36 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 			sd->ignore_mdef_race |= 1<<val;
 		break;
 	case SP_PERFECT_HIT_RATE:
-		if(sd->state.lr_flag != 2)
+		if(sd->state.lr_flag != 2 && sd->perfect_hit < val)
 			sd->perfect_hit = val;
 		break;
 	case SP_PERFECT_HIT_ADD_RATE:
 		if(sd->state.lr_flag != 2)
-			sd->perfect_hit += val;
+			sd->perfect_hit_add += val;
 		break;
 	case SP_CRITICAL_RATE:
 		if(sd->state.lr_flag != 2)
 			sd->critical_rate+=val;
 		break;
 	case SP_GET_ZENY_NUM:
-		if(sd->state.lr_flag != 2) {
-			if(sd->get_zeny_num < val)
+		if(sd->state.lr_flag != 2 && sd->get_zeny_num < val)
 				sd->get_zeny_num = val;
-		}
 		break;
 	case SP_ADD_GET_ZENY_NUM:
 		if(sd->state.lr_flag != 2)
-			sd->get_zeny_num += val;
+			sd->get_zeny_add_num += val;
+		break;
+	case SP_DEF_RATIO_ATK_ELE:
+		if(!sd->state.lr_flag)
+			sd->def_ratio_atk_ele |= 1<<val;
+		else if(sd->state.lr_flag == 1)
+			sd->def_ratio_atk_ele_ |= 1<<val;
+		break;
+	case SP_DEF_RATIO_ATK_RACE:
+		if(!sd->state.lr_flag)
+			sd->def_ratio_atk_race |= 1<<val;
+		else if(sd->state.lr_flag == 1)
+			sd->def_ratio_atk_race_ |= 1<<val;
 		break;
 	case SP_RESTART_FULL_RECORVER:
 		if(sd->state.lr_flag != 2)
@@ -1560,12 +1585,6 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 	case SP_NO_GEMSTONE:
 		if(sd->state.lr_flag != 2)
 			sd->special_state.no_gemstone = 1;
-		break;
-	case SP_DEF_RATIO_ATK:
-		if(!sd->state.lr_flag)
-			sd->special_state.def_ratio_atk = 1;
-		else if(!sd->state.lr_flag)
-			sd->special_state.def_ratio_atk_ = 1;
 		break;
 	case SP_INFINITE_ENDURE:
 		if(sd->state.lr_flag != 2)
@@ -1726,19 +1745,20 @@ int pc_bonus3(struct map_session_data *sd,int type,int type2,int type3,int val)
 {
 	int i;
 	switch(type){
-	case ADD_MONSTER_DROP_ITEM:
+	case SP_ADD_MONSTER_DROP_ITEM:
 		if(sd->state.lr_flag != 2) {
 			for(i=0;i<sd->monster_drop_item_count;i++) {
 				if(sd->monster_drop_itemid[i] == type2) {
 					sd->monster_drop_race[i] |= 1<<type3;
-					sd->monster_drop_itemrate[i] += val;
+					if(sd->monster_drop_itemrate[i] < val)
+						sd->monster_drop_itemrate[i] = val;
 					break;
 				}
 			}
 			if(i >= sd->monster_drop_item_count && sd->monster_drop_item_count < 10) {
 				sd->monster_drop_itemid[sd->monster_drop_item_count] = type2;
 				sd->monster_drop_race[sd->monster_drop_item_count] |= 1<<type3;
-				sd->monster_drop_itemrate[sd->monster_drop_item_count] += val;
+				sd->monster_drop_itemrate[sd->monster_drop_item_count] = val;
 				sd->monster_drop_item_count++;
 			}
 		}
@@ -1829,11 +1849,13 @@ int pc_insert_card(struct map_session_data *sd,int idx_card,int idx_equip)
  */
 int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
 {
-	int skill;
+	int skill,val;
 	if((skill=pc_checkskill(sd,MC_DISCOUNT))>0)	// ディスカウント
-		orig_value-=(int)((double)orig_value*(5+skill*2-(skill==10))/100);
+		val = orig_value - (int)((double)orig_value*(5+skill*2-(skill==10))/100);
 	if((skill=pc_checkskill(sd,RG_COMPULSION))>0)	// コムパルションディスカウント
-		orig_value-=(int)((double)orig_value*(5+skill*4)/100);
+		val = orig_value - (int)((double)orig_value*(5+skill*4)/100);
+	if(val < 0) val = 0;
+	if(orig_value > 0 && val < 1) val = 1;
 
 	return orig_value;
 }
@@ -1845,9 +1867,11 @@ int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
  */
 int pc_modifysellvalue(struct map_session_data *sd,int orig_value)
 {
-	int skill;
+	int skill,val;
 	if((skill=pc_checkskill(sd,MC_OVERCHARGE))>0)	// オーバーチャージ
-		orig_value+=(int)((double)orig_value*(5+skill*2-(skill==10))/100);
+		val = orig_value + (int)((double)orig_value*(5+skill*2-(skill==10))/100);
+	if(val < 0) val = 0;
+	if(orig_value > 0 && val < 1) val = 1;
 
 	return orig_value;
 }
@@ -2297,7 +2321,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		chat_leavechat(sd);
 	if(sd->trade_partner)	// 取引を中断する
 		trade_tradecancel(sd);
-	storage_storage_quitsave(sd);	// 倉庫を開いてるなら保存する
+	storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
 	skill_castcancel(&sd->bl);	// 詠唱を中断する
 
 	if(sd->party_invite>0)	// パーティ勧誘を拒否する
@@ -2331,7 +2355,11 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 				sd->bl.x=x;
 				sd->bl.y=y;
 				sd->state.waitingdisconnect=1;
+				pc_makesavestatus(sd);
 				chrif_save(sd);
+				storage_storage_save(sd);
+				if(sd->status.pet_id && sd->pd)
+					intif_save_petdata(sd->status.account_id,&sd->pet);
 				chrif_changemapserver(sd,mapname,x,y,ip,port);
 				return 0;
 			}
@@ -2365,7 +2393,9 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 				sd->status.pet_id = 0;
 				sd->pd = NULL;
 				sd->petDB = NULL;
+				pc_makesavestatus(sd);
 				chrif_save(sd);
+				storage_storage_save(sd);
 			}
 			else if(sd->pet.intimate > 0) {
 				pet_stopattack(sd->pd);
@@ -2649,8 +2679,11 @@ int pc_stop_walking(struct map_session_data *sd,int type)
 	}
 	if(type&0x02 && battle_config.pc_damage_delay) {
 		unsigned int tick = gettick();
+		int delay = sd->dmotion;
+		if(battle_config.pc_damage_delay_rate != 100)
+			delay = delay*battle_config.pc_damage_delay_rate/100;
 		if(sd->canmove_tick < tick)
-			sd->canmove_tick = tick + sd->dmotion;
+			sd->canmove_tick = tick + delay;
 	}
 
 	return 0;
@@ -4492,11 +4525,12 @@ static int pc_autosave_sub(struct map_session_data *sd,va_list ap)
 {
 	if(save_flag==0 && sd->fd>last_save_fd){
 		//printf("autosave %d\n",sd->fd);
-		chrif_save(sd);
-		storage_storage_save(sd);
 		// pet
 		if(sd->status.pet_id && sd->pd)
 			intif_save_petdata(sd->status.account_id,&sd->pet);
+		pc_makesavestatus(sd);
+		chrif_save(sd);
+		storage_storage_save(sd);
 		save_flag=1;
 		last_save_fd = sd->fd;
 	}

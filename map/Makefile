@@ -13,7 +13,7 @@ pc.o: pc.c map.h clif.h intif.h pc.h npc.h mob.h itemdb.h battle.h skill.h scrip
 npc.o: npc.c map.h npc.h clif.h pc.h script.h mob.h itemdb.h battle.h ../common/db.h ../common/timer.h ../common/mmo.h
 chat.o: chat.c map.h clif.h pc.h chat.h ../common/db.h ../common/mmo.h
 path.o: path.c map.h ../common/mmo.h
-itemdb.o: itemdb.c map.h itemdb.h ../common/db.h ../common/grfio.h ../common/mmo.h
+itemdb.o: itemdb.c map.h itemdb.h battle.h ../common/db.h ../common/grfio.h ../common/mmo.h
 mob.o: mob.c map.h clif.h intif.h pc.h mob.h skill.h battle.h npc.h itemdb.h ../common/timer.h ../common/mmo.h
 script.o: script.c itemdb.h map.h pc.h mob.h clif.h intif.h npc.h script.h storage.h skill.h pet.h battle.h ../common/timer.h ../common/socket.h ../common/db.h ../common/mmo.h
 storage.o: storage.c itemdb.h pc.h clif.h intif.h storage.h ../common/mmo.h
@@ -24,8 +24,8 @@ intif.o: intif.c intif.h chrif.h clif.h party.h guild.h storage.h map.h pet.h ..
 trade.o: trade.c trade.h clif.h itemdb.h map.h pc.h ../common/mmo.h
 party.o: party.c party.h clif.h intif.h pc.h map.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
 vending.o: vending.c vending.h clif.h itemdb.h map.h pc.h ../common/mmo.h
-guild.o: guild.c guild.h clif.h intif.h pc.h map.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
-pet.o:pet.c pet.h map.h clif.h intif.h pc.h itemdb.h battle.h mob.h npc.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
+guild.o: guild.c guild.h battle.h clif.h intif.h pc.h map.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
+pet.o:pet.c pet.h map.h clif.h chrif.h intif.h pc.h itemdb.h battle.h mob.h npc.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h
 
 clean:
 	rm -f *.o ../map-server

@@ -1452,7 +1452,7 @@ int buildin_checkweight(struct script_state *st)
  */
 int buildin_getitem(struct script_state *st)
 {
-	int nameid,amount,flag;
+	int nameid,amount,flag = 0;
 	struct item item_tmp;
 	struct map_session_data *sd;
 
@@ -1460,13 +1460,18 @@ int buildin_getitem(struct script_state *st)
 	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
-	if(nameid<0) // ƒ‰ƒ“ƒ_ƒ€
+	if(nameid<0) { // ƒ‰ƒ“ƒ_ƒ€
 		nameid=itemdb_searchrandomid(-nameid);
+		flag = 1;
+	}
 
 	if(nameid > 0) {
 		memset(&item_tmp,0,sizeof(item_tmp));
 		item_tmp.nameid=nameid;
-		item_tmp.identify=1;
+		if(!flag)
+			item_tmp.identify=1;
+		else
+			item_tmp.identify=!itemdb_isequip(nameid);
 		if((flag = pc_additem(sd,&item_tmp,amount))) {
 			clif_additem(sd,0,0,flag);
 			map_addflooritem(&item_tmp,amount,sd->bl.m,sd->bl.x,sd->bl.y);

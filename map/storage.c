@@ -304,7 +304,6 @@ int storage_storageclose(struct map_session_data *sd)
 
 	stor=&storage[account2storage(sd->status.account_id)];
 	stor->storage_status=0;
-	intif_send_storage(sd->status.account_id);
 	clif_storageclose(sd);
 //	do_final_storage(); // map.exeが落ちたときのために、念のためセーブ
 	return 0;
@@ -314,15 +313,13 @@ int storage_storageclose(struct map_session_data *sd)
  * ログアウト時開いているカプラ倉庫の保存
  *------------------------------------------
  */
-int storage_storage_quitsave(struct map_session_data *sd)
+int storage_storage_quit(struct map_session_data *sd)
 {
 	int i,account_id=sd->status.account_id;
 	for(i=0;i<storage_num;i++){
 		if(account_id==storage[i].account_id){
-			if(storage[i].storage_status){
+			if(storage[i].storage_status)
 				storage[i].storage_status=0;
-				intif_send_storage(account_id);
-			}
 		}
 	}
 	return 0;

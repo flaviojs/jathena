@@ -41,8 +41,8 @@ bonus bDoubleRate,n;		ƒ_ƒuƒ‹ƒAƒ^ƒbƒN”­“®Šm—¦n%(•Ší–³Ž‹‚ÅA‚‚¢•¨‚¾‚¯“K—p)
 bonus bDoubleAddRate,n;		ƒ_ƒuƒ‹ƒAƒ^ƒbƒN”­“®Šm—¦+n%(•Ší–³Ž‹)
 bonus bPerfectHitRate,n;	•K’†UŒ‚Šm—¦n%(‚‚¢•¨‚¾‚¯“K—p)
 bonus bPerfectHitAddRate,n;	•K’†UŒ‚Šm—¦+n%
-bonus bGetZenyNum,n;		•¨—UŒ‚‚Åƒ‚ƒ“ƒXƒ^[‚ð“|‚µ‚½Žžrand()%n+1‚ÌZeny‚ð“¾‚é(n‚Í‚‚¢•¨‚¾‚¯“K—p)
-bonus bAddGetZenyNum,n;		•¨—UŒ‚‚Åƒ‚ƒ“ƒXƒ^[‚ð“|‚µ‚½Žžrand()%n+1‚ÌZeny‚ð“¾‚é(n‚Í+‚³‚ê‚é)
+bonus bGetZenyNum,n;		•¨—UŒ‚‚Åƒ‚ƒ“ƒXƒ^[‚ð“|‚µ‚½Žžƒ‚ƒ“ƒXƒ^[ƒŒƒxƒ‹*10 + rand()%n‚ÌZeny‚ð“¾‚é(n‚Í‚‚¢•¨‚¾‚¯“K—p)
+bonus bAddGetZenyNum,n;		•¨—UŒ‚‚Åƒ‚ƒ“ƒXƒ^[‚ð“|‚µ‚½Žžƒ‚ƒ“ƒXƒ^[ƒŒƒxƒ‹*10 + rand()%n‚ÌZeny‚ð“¾‚é(n‚Í+‚³‚ê‚é)
 bonus bCriticalDef,n;		ƒNƒŠƒeƒBƒJƒ‹‚ð‹ò‚ç‚í‚È‚¢Šm—¦+n%
 bonus bNearAtkDef,n;		‹ß‹——£UŒ‚‚Ìƒ_ƒ[ƒW‚ðn%ŒyŒ¸(–‚–@‚Æƒgƒ‰ƒbƒvA‘é‚ðœ‚­)
 bonus bLongAtkDef,n;		‰“‹——£UŒ‚‚Ìƒ_ƒ[ƒW‚ðn%ŒyŒ¸(–‚–@‚Æƒgƒ‰ƒbƒvA‘é‚ðœ‚­)
@@ -61,8 +61,11 @@ bonus bAtkEle,n;		•Ší‚Én‚Ì‘®«•t—^
 					0,–³@1,…@2,“y@3,‰Î@4,•—@5,“Å@6,¹@7,ˆÅ@8,”O@9,•sŽ€
 bonus bDefEle,n;		–h‹ï‚Én‚Ì‘®«•t—^
 					0,–³@1,…@2,“y@3,‰Î@4,•—@5,“Å@6,¹@7,ˆÅ@8,”O@9,•sŽ€
+bonus bDefRatioAtkEle,n;		n‘®«‚É‘Î‚µ‚Ä–hŒä—Í‚ª‚‚¯‚ê‚Î‚‚¢‚Ù‚Ç‘å‚«‚Èƒ_ƒ[ƒW‚ð—^‚¦‚é(–hŒä–³Ž‹)
+					0,–³@1,…@2,“y@3,‰Î@4,•—@5,“Å@6,¹@7,ˆÅ@8,”O@9,•sŽ€
+bonus bDefRatioAtkRace,n;		nŽí‘°‚É‘Î‚µ‚Ä–hŒä—Í‚ª‚‚¯‚ê‚Î‚‚¢‚Ù‚Ç‘å‚«‚Èƒ_ƒ[ƒW‚ð—^‚¦‚é(–hŒä–³Ž‹)
+					0,–³Œ`@1,•sŽ€@2,“®•¨@3,A•¨@4,©’Ž@5,‹›ŠL@6,ˆ«–‚@7,lŠÔ@8,“VŽg@9,—³‘°@10,ƒ{ƒXƒ‚ƒ“ƒXƒ^[@11,ƒ{ƒXƒ‚ƒ“ƒXƒ^[ˆÈŠO(•’Ê‚Ìƒ‚ƒ“ƒXƒ^[)
 
-bonus bDefRatioAtk,n;		‘ŠŽè‚Ì–hŒä—Í‚ª‚‚¯‚ê‚Î‚‚¢‚Ù‚Ç‘å‚«‚Èƒ_ƒ[ƒW‚ð—^‚¦‚é(–hŒä–³Ž‹An‚Í–³ˆÓ–¡)
 bonus bInfiniteEndure,n;	–³ŒÀƒCƒ“ƒfƒ…ƒA(n‚Í–³ˆÓ–¡)
 bonus bRestartFullRecover,n;	•œŠˆ‚µ‚½ŽžHP‚ÆSP‚ð‘S‚Ä‰ñ•œ(n‚Í–³ˆÓ–¡)
 bonus bNoCastCancel,n;		ƒLƒƒƒXƒeƒBƒ“ƒO‚ðƒLƒƒƒ“ƒZƒ‹‚³‚ê‚È‚¢(GVG‚Å‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚éAn‚Í–³ˆÓ–¡)
@@ -115,10 +118,11 @@ bonus2 bAddDefClass,n,x;		ƒNƒ‰ƒXn‚Ìƒ‚ƒ“ƒXƒ^[‚Éx%‚Ìƒ_ƒ[ƒWŒyŒ¸(•¨—UŒ‚‚Ì‚Ý)Aƒ
 bonus2 bAddMDefClass,n,x;		ƒNƒ‰ƒXn‚Ìƒ‚ƒ“ƒXƒ^[‚Éx%‚Ì–‚–@ƒ_ƒ[ƒWŒyŒ¸AƒvƒŒƒCƒ„[‚Ìê‡‚ÍnE‹Æ‚Éx%‚Ì–‚–@ƒ_ƒ[ƒWŒyŒ¸
 
 
-bonus3 bAddMonsterDropItem,n,x,y;	•¨—UŒ‚‚Åƒ‚ƒ“ƒXƒ^[‚ð“|‚µ‚½Žžƒ‚ƒ“ƒXƒ^[‚ÌŽí‘°‚ªx‚È‚çƒAƒCƒeƒ€n‚ð—Ž‚Æ‚·Šm—¦+y%(ƒ‚ƒ“ƒXƒ^[‚ª—Ž‚Æ‚·ƒAƒCƒeƒ€‚Æ‚Í–³ŠÖŒW‚Ì•¨)
+bonus3 bAddMonsterDropItem,n,x,y;	•¨—UŒ‚‚Åƒ‚ƒ“ƒXƒ^[‚ð“|‚µ‚½Žžƒ‚ƒ“ƒXƒ^[‚ÌŽí‘°‚ªx‚È‚çƒAƒCƒeƒ€n‚ð—Ž‚Æ‚·Šm—¦y%(ƒ‚ƒ“ƒXƒ^[‚ª—Ž‚Æ‚·ƒAƒCƒeƒ€‚Æ‚Í–³ŠÖŒW‚Ì•¨A‚‚¢•¨‚¾‚¯“K—p)
+					y‚Í–œ•ª—¦‚Å•¡”‚ÌŽí‘°‚ð“ü‚ê‚½‚¢Žž‚Ín‚ð“¯‚¶•¨‚É‚µ‚Äy‚ð0‚É‚·‚é‚Æx‚¾‚¯”½‰f‚·‚é‚±‚Æ‚ª‚Å‚«‚é
 						0,–³Œ`@1,•sŽ€@2,“®•¨@3,A•¨@4,©’Ž@5,‹›ŠL@6,ˆ«–‚@7,lŠÔ@8,“VŽg@9,—³‘°@10,ƒ{ƒXƒ‚ƒ“ƒXƒ^[@11,ƒ{ƒXƒ‚ƒ“ƒXƒ^[ˆÈŠO(•’Ê‚Ìƒ‚ƒ“ƒXƒ^[)
 
 
 bAddDamageClassAbAddMagicDamageClassAbAddMonsterDropItem‚Í10ŒÂ‚Ü‚ÅÝ’è‰Â”\‚Å‚·B10ŒÂ‚ð‰z‚¦‚é•¨‚Í–³Ž‹‚³‚ê‚Ü‚·B
 
-–î‚ÅŽg‚¦‚é•¨‚ÍbCriticalAbAtkEleAbHitAbAtkRangeAbAddEleAbAddRaceAbAddSizeAbAddEff‚Ì‚Ý‚Å‚·B‚»‚Ì‘¼‚Í–³Ž‹‚³‚ê‚Ü‚·B
+–î‚ÅŽg‚¦‚é•¨‚ÍbCriticalAbAtkEleAbHitAbAddEleAbAddRaceAbAddSizeAbAddEff‚Ì‚Ý‚Å‚·B‚»‚Ì‘¼‚Í–³Ž‹‚³‚ê‚Ü‚·B

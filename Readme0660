@@ -1,4 +1,70 @@
 --------------
+//0687 by 死神
+
+・少し修正。
+・battle_athena.confに項目追加。(詳しいことはconf_ref.txtで)
+・item_avail.txtの処理を変更。アイテムIDの後に0を入れると今まで通りに使用不可能になるが0以外の数値を入れると使用不可能ではなくその数値をアイテムのIDとして見た目だけをそれに変更します。よって鞍落ちアイテムを別の物に表示して鞍落ちを防ぐことができます。(表示だけ変えて鯖の処理は本当のアイテムIDの物として認識します。修正は全てしたと思いますが抜けた所があるかも知りませので見た目変更したアイテムで鞍落ちが起こったら報告してください。) 鯖の処理はこれが限界です。(少なくとも自分には) アイテムが同じ物が二つ表示されて間違い安いとかどうこうとかの文句を言いたい人は鞍作れよ。以上。
+・ジルタスとアリスのコマントアウト解除。item_avail.txtで卵をルビーとアクアマリンで表示して捕獲アイテムも他の物に表示するように変更しています。
+・ダメージ計算のバグ修正。(大した物じゃありませんが弓だけちょっと問題があったようです。)
+・青箱等のアイテムで得た装備品は未鑑定になるように変更。
+・装備ボーナスの内部処理修正と少し変更。(詳しいことはitem_bonus.txtで)
+・キャラ鯖にテータを送る時キャラ、倉庫、ペットのテータを同時に送るように変更。(キャラ鯖とマップ鯖の間の転送量が増えるかも知りれませんがデータを同期化の為です。)
+・FWの動作間隔を0.25秒から0.1秒に変更。(これで摺り抜は少し減るはずです。)
+・カートレボリュションでどんな状態異常もかからないように変更。
+	(conf/)
+	battle_athena.conf 修正。
+	(db/)
+	const.txt 修正。
+	item_avail.txt 修正。
+	pet_db.txt 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	item_bonus.txt 修正。
+	(map/)
+	map.h 修正。
+	map.c
+		map_quit() 修正。
+	battle.h 修正。
+	battle.c
+		battle_calc_pc_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pet_weapon_attack()、battle_calc_magic_attack() 修正。
+		battle_get_dmotion()、battle_config_read() 修正。
+	pc.c
+		pc_calcstatus()、pc_bonus()、pc_bonus3()、pc_setpos() 修正。
+		pc_makesavestatus()、pc_autosave_sub()、pc_modifybuyvalue() 修正。
+		pc_modifysellvalue()、pc_stop_walking() 修正。
+	skill.c
+		skill_additional_effect()、skill_unitsetting() 修正。
+	clif.c
+		clif_buylist()、clif_selllist()、clif_set009e()、clif_set0078() 修正。
+		clif_set007b()、clif_additem()、clif_itemlist()、clif_equiplist() 修正。
+		clif_storageitemlist()、clif_storageequiplist()、clif_changelook() 修正。
+		clif_arrow_create_list()、clif_useitemack()、clif_tradeadditem() 修正。
+		clif_storageitemadded()、clif_getareachar_item() 修正。
+		clif_skill_produce_mix_list()、clif_cart_additem()、clif_cart_itemlist() 修正。
+		clif_cart_equiplist()、clif_vendinglist()、clif_openvending() 修正。
+		clif_produceeffect()、clif_sendegg()、clif_pet_equip()、clif_mvp_item() 修正。
+		clif_pet0078()、clif_pet007b() 修正。
+	itemdb.h 修正。
+	itemdb.c
+		itemdb_searchrandomid()、itemdb_search()、itemdb_readdb() 修正。
+		itemdb_read_itemavail()、itemdb_read_itemvaluedb() 修正。
+		itemdb_equippoint() 削除。
+	storage.h 修正。
+	storage.c
+		storage_storage_quitsave() ->storage_storage_quit()に変更と修正。
+		storage_storageclose() 修正。
+	atcommand.c 修正。
+	pet.c
+		pet_change_name()、pet_equipitem()、pet_unequipitem() 修正。
+		pet_birth_process()、pet_return_egg() 修正。
+	script.c
+		buildin_getitem() 修正。
+	mob.c
+		mob_stop_walking() 修正。
+	makefile 修正。
+
+--------------
 //0686 by 聖
 
 ・細かい修正。
@@ -8,7 +74,7 @@
 --------------
 //0685 by 波浪
 
-・0683､0684でのbonusの追加にともなってitem_db.txtを修正
+・0683、0684でのbonusの追加にともなってitem_db.txtを修正
 ・他色々修正
 	(db/)
 	item_db.txt 修正。
