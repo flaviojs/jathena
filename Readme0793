@@ -1,4 +1,18 @@
 --------------------
+//0822 by ぴざまん
+・演奏スキルでの補正をダンサーにも適用。
+・サンクチュアリバグ修正。
+・KalenさんのMOBスキルデータベースをまとめときました。
+
+	(map/)
+	skill.c
+		skill_status_change_start()、skill_unit_onplace() 修正。
+	battle.c
+		battle_get_critical()、battle_get_hit() 修正。
+	pc.c
+		pc_calcstatus() 修正。
+
+--------------------
 //0821 by huge
 ・オートスペル仮実装。
 ・timerで判定しようかとも思いましたが、装備の無限オートスペルの為にsc_[].val1で見てマス。
@@ -39,7 +53,7 @@
 	(map/)
 	map.h 修正。
 	skill.c
-		skill_castend_nodamage_id() 修正。
+		skill_status_change_start()、skill_castend_nodamage_id() 修正。
 		skill_castfix()、skill_delayfix() 修正。
 	battle.c
 		battle_get_flee()、battle_get_max_hp() 修正。

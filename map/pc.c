@@ -1339,7 +1339,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->flee2+= sd->sc_data[SC_WHISTLE].val1 * 10;
 		}
 		if(sd->sc_data[SC_HUMMING].timer!=-1)  // ハミング
-			sd->hit += sd->sc_data[SC_HUMMING].val2 * sd->hit/100;
+			sd->hit += (sd->sc_data[SC_HUMMING].val1*2+sd->sc_data[SC_HUMMING].val2
+					+sd->sc_data[SC_HUMMING].val3/10) * sd->hit/100;
 		if(sd->sc_data[SC_BLIND].timer!=-1){	// 暗黒
 			sd->hit -= sd->hit*25/100;
 			sd->flee -= sd->flee*25/100;
@@ -1363,15 +1364,18 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 				sd->status.max_hp = battle_config.max_hp;
 		}
 		if(sd->sc_data[SC_SERVICE4U].timer!=-1) {	// サービスフォーユー
-			sd->status.max_sp += (sd->sc_data[SC_SERVICE4U].val2 * sd->status.max_sp)/100;
+			sd->status.max_sp += sd->status.max_sp*(10+sd->sc_data[SC_SERVICE4U].val1+sd->sc_data[SC_SERVICE4U].val2/2
+						+sd->sc_data[SC_SERVICE4U].val3/10)/100;
 			if(sd->status.max_sp < 0 || sd->status.max_sp > battle_config.max_sp)
 				sd->status.max_sp = battle_config.max_sp;
-			sd->dsprate-=sd->sc_data[SC_SERVICE4U].val3;
+			sd->dsprate-=(10+sd->sc_data[SC_SERVICE4U].val1*3+sd->sc_data[SC_SERVICE4U].val2/2
+					+sd->sc_data[SC_SERVICE4U].val3/10);
 			if(sd->dsprate<0)sd->dsprate=0;
 		}
 
 		if(sd->sc_data[SC_FORTUNE].timer!=-1)	// 幸運のキス
-			sd->critical += sd->sc_data[SC_FORTUNE].val1*10;
+			sd->critical += (10+sd->sc_data[SC_FORTUNE].val1+sd->sc_data[SC_FORTUNE].val2/2
+						+sd->sc_data[SC_FORTUNE].val3/10)*10;
 
 		if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer!=-1)	// 爆裂波動
 			sd->critical += sd->sc_data[SC_EXPLOSIONSPIRITS].val2;

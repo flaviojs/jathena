@@ -300,7 +300,8 @@ int battle_get_hit(struct block_list *bl)
 
 	if(sc_data) {
 		if(sc_data[SC_HUMMING].timer!=-1 && bl->type != BL_PC)	// 
-			hit += hit*sc_data[SC_HUMMING].val2/100;
+			hit += hit*(sc_data[SC_HUMMING].val1*2+sc_data[SC_HUMMING].val2
+					+sc_data[SC_HUMMING].val3/10)/100;
 		if(sc_data[SC_BLIND].timer!=-1 && bl->type != BL_PC)		// Žô‚¢
 			hit -= hit*25/100;
 	}
@@ -340,7 +341,8 @@ int battle_get_critical(struct block_list *bl)
 
 	if(sc_data) {
 		if(sc_data[SC_FORTUNE].timer!=-1 && bl->type != BL_PC)
-			critical += sc_data[SC_FORTUNE].val1*10;
+			critical += (10+sc_data[SC_FORTUNE].val1+sc_data[SC_FORTUNE].val2/2
+					+sc_data[SC_FORTUNE].val3/10)*10;
 		if(sc_data[SC_EXPLOSIONSPIRITS].timer!=-1 && bl->type != BL_PC)
 			critical += sc_data[SC_EXPLOSIONSPIRITS].val2;
 	}

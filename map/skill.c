@@ -3089,11 +3089,11 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 				int heal=sg->val2;
 				if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage)
 					heal=0;	/* 黄金蟲カード（ヒール量０） */
-				clif_skill_nodamage(&src->bl,bl,sg->skill_id,heal,1);
+				clif_skill_nodamage(&src->bl,bl,AL_HEAL,heal,1);
 				battle_heal(NULL,bl,heal,0);
 			}
 			else
-				skill_attack(BF_MAGIC,ss,&src->bl,bl,AL_HEAL,sg->skill_lv,tick,0);
+				skill_attack(BF_MAGIC,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
 		}
 		break;
 
@@ -4940,7 +4940,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 	struct status_change* sc_data;
 	short *sc_count, *option, *opt1, *opt2;
 	int opt_flag = 0, calc_flag = 0;
-	int val3=0,val4=val2;
+	int val5=0,val3=0,val4=val2;
 
 	if(bl->type == BL_SKILL)
 		return 0;
@@ -5155,25 +5155,31 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_WHISTLE:			/* 口笛 */
 			calc_flag = 1;
+			val2 = pc_checkskill(sd,BA_MUSICALLESSON);
+			val3 = battle_get_agi(bl);
 			break;
 		case SC_ASSNCROS:			/* 夕陽のアサシンクロス */
 			calc_flag = 1;
-			val2 = 10+val1;
+			val2 = pc_checkskill(sd,BA_MUSICALLESSON);
+			val3 = battle_get_agi(bl);
 			break;
 		case SC_POEMBRAGI:			/* ブラギの詩 */
-			val2 = val1 * 3;
+			val2 = pc_checkskill(sd,BA_MUSICALLESSON);
+			val3 = battle_get_dex(bl);
+			val5 = battle_get_int(bl);
 			break;
 		case SC_APPLEIDUN:			/* イドゥンの林檎 */
 			calc_flag = 1;
-			val2 = val1*2+5;
+			val2 = pc_checkskill(sd,BA_MUSICALLESSON);
+			val3 = battle_get_vit(bl);
 			break;
 		case SC_UGLYDANCE:			/* 自分勝手なダンス */
-			val2 = 10;
-			val3 = (val1+1)*5;
+			val2 = pc_checkskill(sd,DC_DANCINGLESSON);
 			break;
 		case SC_HUMMING:			/* ハミング */
 			calc_flag = 1;
-			val2 = val1*2;
+			val2 = pc_checkskill(sd,DC_DANCINGLESSON);
+			val3 = battle_get_dex(bl);
 			break;
 		case SC_DONTFORGETME:		/* 私を忘れないで */
 			calc_flag = 1;
@@ -5182,11 +5188,13 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_FORTUNE:			/* 幸運のキス */
 			calc_flag = 1;
+			val2 = pc_checkskill(sd,DC_DANCINGLESSON);
+			val3 = battle_get_luk(bl);
 			break;
 		case SC_SERVICE4U:			/* サービスフォーユー */
 			calc_flag = 1;
-			val2 = val1+10;
-			val3 = val1*3+10;
+			val2 = pc_checkskill(sd,DC_DANCINGLESSON);
+			val3 = battle_get_int(bl);
 			break;
 		case SC_DANCING:			/* ダンス/演奏中 */
 			calc_flag = 1;
