@@ -85,6 +85,16 @@ int account2storage(int account_id)
  */
 int storage_storageopen(struct map_session_data *sd)
 {
+	int i;
+	for(i=0;i<storage_num;i++){
+		if(sd->status.account_id == storage[i].account_id) {
+			storage[i].storage_status=1;
+			clif_storageitemlist(sd,&storage[i]);
+			clif_storageequiplist(sd,&storage[i]);
+			clif_updatestorageamount(sd,&storage[i]);
+			return 0;
+		}
+	}
 	intif_request_storage(sd->status.account_id);
 /*
 	struct storage *stor;
@@ -318,8 +328,10 @@ int storage_storage_quit(struct map_session_data *sd)
 	int i,account_id=sd->status.account_id;
 	for(i=0;i<storage_num;i++){
 		if(account_id==storage[i].account_id){
-			if(storage[i].storage_status)
+			if(storage[i].storage_status) {
 				storage[i].storage_status=0;
+				break;
+			}
 		}
 	}
 	return 0;
@@ -329,8 +341,10 @@ int storage_storage_save(struct map_session_data *sd)
 {
 	int i,account_id=sd->status.account_id;
 	for(i=0;i<storage_num;i++){
-		if(account_id==storage[i].account_id)
+		if(account_id==storage[i].account_id) {
 			intif_send_storage(account_id);
+			break;
+		}
 	}
 	return 0;
 }

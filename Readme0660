@@ -1,4 +1,15 @@
 --------------
+//0689 by 死神
+
+・倉庫バグ修正と細かい修正。
+	(map/)
+	pc.c
+		pc_modifybuyvalue()、pc_modifysellvalue() 修正。
+	storage.c
+		storage_storageopen() 修正。
+		storage_storage_quit()、storage_storage_save() 修正。
+
+--------------
 //0688 by 聖
 
 ・ディスカウント、コムパルションディスカウント、オーバーチャージが適用されなかった問題を修正。

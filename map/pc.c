@@ -1849,11 +1849,11 @@ int pc_insert_card(struct map_session_data *sd,int idx_card,int idx_equip)
  */
 int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
 {
-	int skill,val;
+	int skill,val = orig_value;
 	if((skill=pc_checkskill(sd,MC_DISCOUNT))>0)	// ディスカウント
-		val = orig_value - (int)((double)orig_value*(5+skill*2-(skill==10))/100);
+		val -= (int)((double)orig_value*(5+skill*2-(skill==10))/100);
 	if((skill=pc_checkskill(sd,RG_COMPULSION))>0)	// コムパルションディスカウント
-		val = orig_value - (int)((double)orig_value*(5+skill*4)/100);
+		val -= (int)((double)orig_value*(5+skill*4)/100);
 	if(val < 0) val = 0;
 	if(orig_value > 0 && val < 1) val = 1;
 
@@ -1867,9 +1867,9 @@ int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
  */
 int pc_modifysellvalue(struct map_session_data *sd,int orig_value)
 {
-	int skill,val;
+	int skill,val = orig_value;
 	if((skill=pc_checkskill(sd,MC_OVERCHARGE))>0)	// オーバーチャージ
-		val = orig_value + (int)((double)orig_value*(5+skill*2-(skill==10))/100);
+		val += (int)((double)orig_value*(5+skill*2-(skill==10))/100);
 	if(val < 0) val = 0;
 	if(orig_value > 0 && val < 1) val = 1;
 
