@@ -34,14 +34,23 @@
 	#include "zlib_win32.h"
 	HINSTANCE zlib_dll;
 	#define zlib_inflateInit(strm) zlib_inflateInit_((strm),ZLIB_VERSION, sizeof(z_stream))
-	int (WINAPI* zlib_inflateInit_) OF((z_streamp strm, const char *version, int stream_size));
-	int (WINAPI* zlib_inflate) OF((z_streamp strm, int flush));
-	int (WINAPI* zlib_inflateEnd) OF((z_streamp strm));
+	#define zlib_deflateInit(strm, level) zlib_deflateInit_((strm),(level),ZLIB_VERSION,sizeof(z_stream))
+
+	int (WINAPI* zlib_inflateInit_) (z_streamp strm, const char *version, int stream_size);
+	int (WINAPI* zlib_inflate) (z_streamp strm, int flush);
+	int (WINAPI* zlib_inflateEnd) (z_streamp strm);
+
+	int (WINAPI* zlib_deflateInit_) (z_streamp strm, int level, const char *version, int stream_size);
+	int (WINAPI* zlib_deflate) (z_streamp strm, int flush);
+	int (WINAPI* zlib_deflateEnd) (z_streamp strm);
 #else
 	#include <zlib.h>
 	#define zlib_inflateInit inflateInit
 	#define zlib_inflate     inflate
 	#define zlib_inflateEnd  inflateEnd
+	#define zlib_deflateInit deflateInit
+	#define zlib_deflate     deflate
+	#define zlib_deflateEnd  deflateEnd
 #endif
 
 #ifdef MEMWATCH
@@ -267,7 +276,7 @@ static void decode_des_etc(BYTE *buf,int len,int type,int cycle)
  *	Grf data decode sub : zip
  *------------------------------------------
  */
-static int decode_zip(Bytef* dest, uLongf* destLen, const Bytef* source, uLong sourceLen)
+int decode_zip(char *dest, unsigned long* destLen, const char* source, unsigned long sourceLen)
 {
 	z_stream stream;
 	int err;
@@ -297,6 +306,37 @@ static int decode_zip(Bytef* dest, uLongf* destLen, const Bytef* source, uLong s
 	err = zlib_inflateEnd(&stream);
 	return err;
 }
+
+int encode_zip(char *dest, unsigned long* destLen, const char* source, unsigned long sourceLen) {
+	z_stream stream;
+	int err;
+
+	stream.next_in = (Bytef*)source;
+	stream.avail_in = (uInt)sourceLen;
+	/* Check for source > 64K on 16-bit machine: */
+	if ((uLong)stream.avail_in != sourceLen) return Z_BUF_ERROR;
+
+	stream.next_out = dest;
+	stream.avail_out = (uInt)*destLen;
+	if ((uLong)stream.avail_out != *destLen) return Z_BUF_ERROR;
+
+	stream.zalloc = (alloc_func)0;
+	stream.zfree = (free_func)0;
+
+	err = zlib_deflateInit(&stream,Z_DEFAULT_COMPRESSION);
+	if (err != Z_OK) return err;
+
+	err = zlib_deflate(&stream, Z_FINISH);
+	if (err != Z_STREAM_END) {
+		zlib_inflateEnd(&stream);
+		return err == Z_OK ? Z_BUF_ERROR : err;
+	}
+	*destLen = stream.total_out;
+
+	err = zlib_deflateEnd(&stream);
+	return err;
+}
+
 /***********************************************************
  ***                File List Sobroutines                ***
  ***********************************************************/
@@ -848,6 +888,9 @@ void grfio_init(char *fname)
 		(FARPROC)zlib_inflateInit_ = GetProcAddress(zlib_dll,"inflateInit_");
 		(FARPROC)zlib_inflate      = GetProcAddress(zlib_dll,"inflate");
 		(FARPROC)zlib_inflateEnd   = GetProcAddress(zlib_dll,"inflateEnd");
+		(FARPROC)zlib_deflateInit_ = GetProcAddress(zlib_dll,"deflateInit_");
+		(FARPROC)zlib_deflate      = GetProcAddress(zlib_dll,"deflate");
+		(FARPROC)zlib_deflateEnd   = GetProcAddress(zlib_dll,"deflateEnd");
 		if(zlib_dll == NULL) {
 			MessageBox(NULL,"Can't load zlib.dll","grfio.c",MB_OK);
 			exit(1);

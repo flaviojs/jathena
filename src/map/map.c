@@ -70,10 +70,10 @@ struct charid2nick {
 	unsigned int port;
 };
 
-#define READ_FROM_GAT 0 //gatファイルから
-#define READ_FROM_BITMAP 1 //ビットマップファイルから
-int  map_read_flag=READ_FROM_GAT;//上の判定フラグ,どっちを使うかはmap_athana.conf内のread_map_from_bitmapで指定
-					//0ならばREAD_FROM_GAT,1ならばREAD_FROM_BITMAP
+int  map_read_flag=0;
+// マップキャッシュ利用フラグ,どっちを使うかはmap_athana.conf内のread_map_from_bitmapで指定
+// 0ならば利用しない、1だと非圧縮保存、2だと圧縮して保存
+
 int map_getcell(int,int x,int y,CELL_CHK cellchk);
 int map_getcellp(struct map_data* m,int x,int y,CELL_CHK cellchk);
 
@@ -1445,10 +1445,8 @@ int map_cache_read(struct map_data *m) {
 			if(map_cache.map[i].water_height != map_waterheight(m->name)) {
 				// 水場の高さが違うので読み直し
 				return 0;
-			} else if(map_cache.map[i].compressed) {
-				// 圧縮ファイルは未対応
-				return 0;
-			} else {
+			} else if(map_cache.map[i].compressed == 0) {
+				// 非圧縮ファイル
 				int size = map_cache.map[i].xs * map_cache.map[i].ys;
 				m->xs = map_cache.map[i].xs;
 				m->ys = map_cache.map[i].ys;
@@ -1459,12 +1457,36 @@ int map_cache_read(struct map_data *m) {
 					return 1;
 				} else {
 					// なぜかファイル後半が欠けてるので読み直し
-					m->xs = 0;
-					m->ys = 0;
-					free(m->gat);
-					m->gat = NULL;
+					m->xs = 0; m->ys = 0; m->gat = NULL; free(m->gat);
 					return 0;
 				}
+			} else if(map_cache.map[i].compressed == 1) {
+				// 圧縮フラグ=1 : zlib
+				unsigned char *buf;
+				unsigned long dest_len;
+				int size_compress = map_cache.map[i].compressed_len;
+				m->xs = map_cache.map[i].xs;
+				m->ys = map_cache.map[i].ys;
+				m->gat = (unsigned char *)aMalloc(m->xs * m->ys * sizeof(unsigned char));
+				buf = (unsigned char*)aMalloc(size_compress);
+				fseek(map_cache.fp,map_cache.map[i].pos,SEEK_SET);
+				if(fread(buf,1,size_compress,map_cache.fp) != size_compress) {
+					// なぜかファイル後半が欠けてるので読み直し
+					printf("fread error\n");
+					m->xs = 0; m->ys = 0; m->gat = NULL;
+					free(m->gat); free(buf);
+					return 0;
+				}
+				dest_len = m->xs * m->ys;
+				decode_zip(m->gat,&dest_len,buf,size_compress);
+				if(dest_len != map_cache.map[i].xs * map_cache.map[i].ys) {
+					// 正常に解凍が出来てない
+					m->xs = 0; m->ys = 0; m->gat = NULL;
+					free(m->gat); free(buf);
+					return 0;
+				}
+				free(buf);
+				return 1;
 			}
 		}
 	}
@@ -1473,29 +1495,52 @@ int map_cache_read(struct map_data *m) {
 
 static int map_cache_write(struct map_data *m) {
 	int i;
+	unsigned long len_new , len_old;
+	char *write_buf;
 	if(!map_cache.fp) { return 0; }
 	for(i = 0;i < map_cache.head.nmaps ; i++) {
 		if(!strcmp(m->name,map_cache.map[i].fn)) {
 			// 同じエントリーがあれば上書き
-			if(
-				map_cache.map[i].xs == m->xs && map_cache.map[i].ys == m->ys &&
-				!map_cache.map[i].compressed
-			) {
-				// 幅と高さ同じで圧縮してないなら場所は変わらない
-				fseek(map_cache.fp,map_cache.map[i].pos,SEEK_SET);
-				fwrite(m->gat,m->xs,m->ys,map_cache.fp);
+			if(map_cache.map[i].compressed == 0) {
+				len_old = map_cache.map[i].xs * map_cache.map[i].ys;
+			} else if(map_cache.map[i].compressed == 1) {
+				len_old = map_cache.map[i].compressed_len;
 			} else {
-				// 幅と高さが違うなら新しい場所に登録
-				int size = m->xs * m->ys;
-				fseek(map_cache.fp,map_cache.head.filesize,SEEK_SET);
-				fwrite(m->gat,1,size,map_cache.fp);
-				map_cache.map[i].pos = map_cache.head.filesize;
-				map_cache.map[i].xs  = m->xs;
-				map_cache.map[i].ys  = m->ys;
-				map_cache.head.filesize += size;
+				// サポートされてない形式なので長さ０
+				len_old = 0;
 			}
+			if(map_read_flag == 2) {
+				// 圧縮保存
+				// さすがに２倍に膨れる事はないという事で
+				write_buf = aMalloc(m->xs * m->ys * 2);
+				len_new = m->xs * m->ys * 2;
+				encode_zip(write_buf,&len_new,m->gat,m->xs * m->ys);
+				map_cache.map[i].compressed     = 1;
+				map_cache.map[i].compressed_len = len_new;
+			} else {
+				len_new = m->xs * m->ys;
+				write_buf = m->gat;
+				map_cache.map[i].compressed     = 0;
+				map_cache.map[i].compressed_len = 0;	
+			}
+			if(len_new <= len_old) {
+				// サイズが同じか小さくなったので場所は変わらない
+				fseek(map_cache.fp,map_cache.map[i].pos,SEEK_SET);
+				fwrite(write_buf,1,len_new,map_cache.fp);
+			} else {
+				// 新しい場所に登録
+				fseek(map_cache.fp,map_cache.head.filesize,SEEK_SET);
+				fwrite(write_buf,1,len_new,map_cache.fp);
+				map_cache.map[i].pos = map_cache.head.filesize;
+				map_cache.head.filesize += len_new;
+			}
+			map_cache.map[i].xs  = m->xs;
+			map_cache.map[i].ys  = m->ys;
 			map_cache.map[i].water_height = map_waterheight(m->name);
 			map_cache.dirty = 1;
+			if(map_read_flag == 2) {
+				free(write_buf);
+			}
 			return 0;
 		}
 	}
@@ -1503,16 +1548,30 @@ static int map_cache_write(struct map_data *m) {
 	for(i = 0;i < map_cache.head.nmaps ; i++) {
 		if(map_cache.map[i].fn[0] == 0) {
 			// 新しい場所に登録
-			int size = m->xs * m->ys;
+			if(map_read_flag == 2) {
+				write_buf = aMalloc(m->xs * m->ys * 2);
+				len_new = m->xs * m->ys * 2;
+				encode_zip(write_buf,&len_new,m->gat,m->xs * m->ys);
+				map_cache.map[i].compressed     = 1;
+				map_cache.map[i].compressed_len = len_new;
+			} else {
+				len_new = m->xs * m->ys;
+				write_buf = m->gat;
+				map_cache.map[i].compressed     = 0;
+				map_cache.map[i].compressed_len = 0;
+			}
 			strncpy(map_cache.map[i].fn,m->name,sizeof(map_cache.map[0].fn));
 			fseek(map_cache.fp,map_cache.head.filesize,SEEK_SET);
-			fwrite(m->gat,1,size,map_cache.fp);
+			fwrite(write_buf,1,len_new,map_cache.fp);
 			map_cache.map[i].pos = map_cache.head.filesize;
 			map_cache.map[i].xs  = m->xs;
 			map_cache.map[i].ys  = m->ys;
 			map_cache.map[i].water_height = map_waterheight(m->name);
-			map_cache.head.filesize += size;
+			map_cache.head.filesize += len_new;
 			map_cache.dirty = 1;
+			if(map_read_flag == 2) {
+				free(write_buf);
+			}
 			return 0;
 		}
 	}

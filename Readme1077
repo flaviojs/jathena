@@ -1,4 +1,26 @@
 --------------------
+//1087 by End_of_exam
+
+・マップキャッシュに圧縮機能を追加(1MB程に縮まるようです)
+・npc.c の巻き戻りを修正(質問スレッド Part14 , 111)
+・map_athena.conf のコメントアウトを修正(Athena雑談スレッドPart7 , 146)
+・Windows 用の起動スクリプトを追加してみる(eAthena のを元に改造）
+
+	(/)
+		win32_start.bat		Windows 用の起動ファイル
+
+	(src/map)
+		map.c	圧縮機能の追加
+		npc.c	巻き戻りを修正
+
+	(src/common)
+		grfio.c		decode_zip , encode_zip のエクスポート
+		grfio.h		decode_zip , encode_zip のエクスポート
+
+	(conf/)
+		map_athena.conf		修正
+
+--------------------
 //1086 by End_of_exam
 
 主に1085のバグ修正だったりもします。
