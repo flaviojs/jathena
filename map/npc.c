@@ -953,7 +953,7 @@ int npc_parse_mob(char *w1,char *w2,char *w3,char *w4)
 		memcpy(md->name,w3,24);
 
 		md->n = i;
-		md->class=class;
+		md->base_class = md->class = class;
 		md->bl.id=npc_id++;
 		md->x0=x;
 		md->y0=y;

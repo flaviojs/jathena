@@ -2153,8 +2153,14 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				skilllv,(skillid==NPC_SUMMONSLAVE)?1:0);
 		break;
 
+	case NPC_METAMORPHOSIS:
+		if(md)
+			mob_class_change(md,mob_db[md->class].skill[md->skillidx].val1);
+		break;
+
 	case NPC_EMOTION:			/* ƒGƒ‚[ƒVƒ‡ƒ“ */
-		clif_emotion(&md->bl,mob_db[md->class].skill[md->skillidx].val1);
+		if(md)
+			clif_emotion(&md->bl,mob_db[md->class].skill[md->skillidx].val1);
 		break;
 	}
 

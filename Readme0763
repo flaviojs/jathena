@@ -1,4 +1,31 @@
 --------------------
+//0776 by 死神
+
+・NPCスキル孵化実装。(mob_skill_db.txtのval1を使います。)
+・mob_skill_db.txtの確率を千分率から万分率に変更。(ただmob_skill_db.txtの修正はしてません。)
+・モンスターがダブルアタックする問題修正。(修正されたかどうかの自信はありませんが...)
+・その他細かい修正。
+	(db/)
+	mob_skill_db.txt 修正。
+	skill_db.txt 修正。
+	(map/)
+	map.h 修正。
+	mob.h 修正。
+	mob.c
+		mob_spawn_dataset()、mob_spawn() 修正。
+		mob_changestate()、mobskill_use() 修正。
+		mob_class_change() 追加。
+	npc.c
+		npc_parse_mob() 修正。
+	battle.c
+		battle_check_target() 修正。
+	clif.h 修正。
+	clif.c
+		clif_mob_class_change() 追加。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+
+--------------------
 //0775 by 死神
 
 ・シーズモードの処理修正。

@@ -678,6 +678,23 @@ static int clif_set007b(struct map_session_data *sd,unsigned char *buf)
 }
 
 /*==========================================
+ *
+ *------------------------------------------
+ */
+int clif_mob_class_change(struct mob_data *md,int class)
+{
+	char buf[16];
+
+	WBUFW(buf,0)=0x1b0;
+	WBUFL(buf,2)=md->bl.id;
+	WBUFB(buf,6)=1;
+	WBUFL(buf,7)=class;
+
+	clif_send(buf,packet_len_table[0x1b0],&md->bl,AREA);
+	return 0;
+}
+
+/*==========================================
  * MOB•\Ž¦1
  *------------------------------------------
  */

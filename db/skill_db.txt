@@ -222,7 +222,7 @@
 190,1,6,1,7,0,10,1,1,0,2	//npc_darknessattack：闇属性攻撃
 191,1,6,1,8,0,10,1,1,0,2	//npc_telekinesisattack：念属性攻撃
 192,1,6,1,0,0,10,1,1,0,2	//npc_magicalattack：魔法打撃攻撃
-193,0,0,4,0,0,10,1,1,0,2	//npc_metamorphosis：孵化or成長
+193,0,0,4,0,1,10,1,1,0,2	//npc_metamorphosis：孵化or成長
 194,0,0,4,0,1,10,1,1,0,2	//npc_provocation：挑発
 195,0,6,4,0,0,10,1,1,0,2	//npc_smoking：タバコを吸う
 196,0,0,4,0,1,10,1,1,0,2	//npc_summonslave：取り巻き召還

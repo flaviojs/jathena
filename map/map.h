@@ -276,7 +276,7 @@ struct npc_data {
 struct mob_data {
 	struct block_list bl;
 	short n;
-	short class,dir;
+	short base_class,class,dir;
 	short x0,y0,xs,ys;
 	char name[24];
 	int spawndelay1,spawndelay2;

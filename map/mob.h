@@ -90,6 +90,7 @@ int mob_catch_delete(struct mob_data *md);
 
 int mob_counttargeted(struct mob_data *md,struct block_list *src);
 
+int mob_class_change(struct mob_data *md,int class);
 int mob_warp(struct mob_data *md,int x,int y,int type);
 
 int mobskill_use(struct mob_data *md,unsigned int tick,int event);

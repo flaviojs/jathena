@@ -3433,10 +3433,10 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			if((g = guild_search(s_g))) {
 				int i;
 				for(i=0;i<MAX_GUILDALLIANCE;i++){
-					if(g->alliance[i].guild_id > 0){
-						if(g->alliance[i].opposition && g->alliance[i].guild_id == t_g)
+					if(g->alliance[i].guild_id > 0 &&g->alliance[i].guild_id == t_g) {
+						if(g->alliance[i].opposition)
 							return 0;//“G‘ÎƒMƒ‹ƒh‚È‚ç–³ğŒ‚É“G
-						if(!(g->alliance[i].opposition) && g->alliance[i].guild_id == t_g)
+						else
 							return 1;//“¯–¿ƒMƒ‹ƒh‚È‚ç–³ğŒ‚É–¡•û
 					}
 				}

@@ -69,7 +69,7 @@ int mob_spawn_dataset(struct mob_data *md,const char *mobname,int class)
 		memcpy(md->name,mobname,24);
 
 	md->n = 0;
-	md->class=class;
+	md->base_class = md->class = class;
 	md->bl.id= npc_get_new_npc_id();
 
 	memset(&md->state,0,sizeof(md->state));
@@ -414,7 +414,8 @@ int mob_changestate(struct mob_data *md,int state,int type)
 		if((i=calc_next_walk_step(md))>0){
 			i = i>>2;
 			md->timer=add_timer(gettick()+i,mob_timer,md->bl.id,0);
-		} else
+		}
+		else
 			md->state.state=MS_IDLE;
 		break;
 	case MS_ATTACK:
@@ -422,10 +423,14 @@ int mob_changestate(struct mob_data *md,int state,int type)
 		i=DIFF_TICK(md->attackabletime,tick);
 		if(i>0 && i<2000)
 			md->timer=add_timer(md->attackabletime,mob_timer,md->bl.id,0);
-		else if(type)
-			md->timer=add_timer(tick+mob_db[md->class].amotion,mob_timer,md->bl.id,0);
-		else
-			md->timer=add_timer(tick+1,mob_timer,md->bl.id,0);
+		else if(type) {
+			md->attackabletime = tick + battle_get_amotion(&md->bl);
+			md->timer=add_timer(md->attackabletime,mob_timer,md->bl.id,0);
+		}
+		else {
+			md->attackabletime = tick + 1;
+			md->timer=add_timer(md->attackabletime,mob_timer,md->bl.id,0);
+		}
 		break;
 	case MS_DELAY:
 		md->timer=add_timer(gettick()+type,mob_timer,md->bl.id,0);
@@ -604,6 +609,8 @@ int mob_spawn(int id)
 		skill_unit_out_all(&md->bl,gettick(),1);
 		map_delblock(&md->bl);
 	}
+	else
+		md->class = md->base_class;
 
 	do {
 		if(md->x0==0 && md->y0==0){
@@ -1863,6 +1870,67 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 }
 
 /*==========================================
+ *
+ *------------------------------------------
+ */
+int mob_class_change(struct mob_data *md,int class)
+{
+	unsigned int tick;
+	int i,c,hp_rate,max_hp;
+	if(md->bl.prev == NULL) return 0;
+
+	max_hp = battle_get_max_hp(&md->bl);
+	hp_rate = md->hp*100/max_hp;
+	clif_mob_class_change(md,class);
+	md->class = class;
+	max_hp = battle_get_max_hp(&md->bl);
+	md->hp = max_hp*hp_rate/100;
+	if(md->hp > max_hp) md->hp = max_hp;
+	else if(md->hp < 1) md->hp = 1;
+
+	tick  = gettick();
+
+	memcpy(md->name,mob_db[class].jname,24);
+	memset(&md->state,0,sizeof(md->state));
+	md->attacked_id = 0;
+	md->target_id = 0;
+	md->move_fail_count = 0;
+
+	md->speed = mob_db[md->class].speed;
+	md->def_ele = mob_db[md->class].element;
+
+	mob_changestate(md,MS_IDLE,0);
+	skill_castcancel(&md->bl,0);
+	md->state.skillstate = MSS_IDLE;
+	md->last_thinktime = tick;
+	md->next_walktime = tick+rand()%50+5000;
+	md->attackabletime = tick;
+	md->canmove_tick = tick;
+	md->sg_count=0;
+
+	for(i=0,c=tick-1000*3600*10;i<MAX_MOBSKILL;i++)
+		md->skilldelay[i] = c;
+	md->skillid=0;
+	md->skilllv=0;
+
+	if(md->lootitem == NULL && mob_db[class].mode&0x02) {
+		md->lootitem=malloc(sizeof(struct item)*LOOTITEM_SIZE);
+		if(md->lootitem==NULL){
+			printf("mob_class_change: out of memory !\n");
+			exit(1);
+		}
+	}
+
+	skill_clear_unitgroup(&md->bl);
+	skill_cleartimerskill(&md->bl);
+
+	clif_clearchar_area(&md->bl,0);
+	clif_spawnmob(md);
+
+	return 0;
+}
+
+/*==========================================
  * mob‰ñ•œ
  *------------------------------------------
  */
@@ -2381,7 +2449,7 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 		}
 
 		// Šm—¦”»’è
-		if( flag && rand()%1000 < ms[i].permillage ){
+		if( flag && rand()%10000 < ms[i].permillage ){
 
 			if( skill_get_inf(ms[i].skill_id)&2 ){
 				// êŠŽw’è

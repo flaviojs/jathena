@@ -1,4 +1,4 @@
-// MOB_ID,ダミー文字列,STATE,SKILL_ID,SKILL_LV,千分率,casttime,delay,妨害可能,ターゲット,条件タイプ,条件値,値1
+// MOB_ID,ダミー文字列,STATE,SKILL_ID,SKILL_LV,万分率,casttime,delay,妨害可能,ターゲット,条件タイプ,条件値,値1
 // ダミー文字列：わかりやすい名前を入れるといいかと。
 // STATE: any いつでも / idle 待機 / walk 移動 / attack 攻撃 /
 //        dead 死亡 / loot ルート / 突撃(?) / 追撃(?) / 反撃(?)
@@ -34,9 +34,9 @@
 1005,状態異常付与(暗闇)＠ファミリア,attack,177,3,100,0,10000,no,target,always,0,,,,,,,,
 //1005,状態異常付与(暗闇)＠ファミリア,反撃,177,3,100,0,10000,no,target,always,0,,,,,,,,
 1007,属性攻撃(地)＠ファブル,attack,185,1,100,0,15000,yes,target,always,0,,,,,,,,
-1007,孵化＠ファブル,idle,193,1,1,1000,0,yes,self,always,0,,,,,,,,
+1007,孵化＠ファブル,idle,193,1,1,1000,0,yes,self,always,0,1008,,,,,,,
 1008,エモ＠プパ,idle,197,1,5,0,10000,yes,self,always,0,,,,,,,,
-1008,孵化＠プパ,idle,193,1,1,1000,0,yes,self,always,0,,,,,,,,
+1008,孵化＠プパ,idle,193,1,1,1000,0,yes,self,always,0,1018,,,,,,,
 1009,AR＠コンドル,attack,111,1,50,1500,30000,yes,self,always,0,,,,,,,,
 1009,属性攻撃(風)＠コンドル,attack,187,1,100,0,15000,yes,target,always,0,,,,,,,,
 1009,エモ＠コンドル,idle,197,1,5,0,10000,yes,self,always,0,9,,,,,,,
