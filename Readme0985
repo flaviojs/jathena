@@ -1,4 +1,27 @@
 --------------------
+//0987 by 胡蝶蘭
+
+・ユーザー定義関数/サブルーティンに引数を指定可能に
+	詳しくは script_ref.txt を参照
+	
+	(map/)
+	scirpt.c
+		buildin_getarg()追加
+		buildin_callsub(),buildin_callfunc(),run_func()修正
+	(doc/)
+	script_ref.txt
+		引数についての説明追加
+
+・getguildname,getpartyname,getcastlename,strcharinfo修正
+	C_STRで定数文字列(C_CONSTSTR)を返していた問題修正
+	strcharinfoでギルド名などを所得する際、未所属だったときの問題
+	
+	(map/)
+	script.c
+		buildin_getguildname(),buildin_getpartyname()
+		buildin_getcastlename(),buildin_strcharinfo()
+
+--------------------
 //0986 by (凸)
 ・client_packetの記述から推察してトーキーボックスを実装してみたつもり
 

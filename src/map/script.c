@@ -87,6 +87,7 @@ int buildin_goto(struct script_state *st);
 int buildin_callsub(struct script_state *st);
 int buildin_callfunc(struct script_state *st);
 int buildin_return(struct script_state *st);
+int buildin_getarg(struct script_state *st);
 int buildin_next(struct script_state *st);
 int buildin_close(struct script_state *st);
 int buildin_menu(struct script_state *st);
@@ -227,9 +228,10 @@ struct {
 	{buildin_close,"close",""},
 	{buildin_menu,"menu","*"},
 	{buildin_goto,"goto","l"},
-	{buildin_callsub,"callsub","i"},
-	{buildin_callfunc,"callfunc","s"},
+	{buildin_callsub,"callsub","i*"},
+	{buildin_callfunc,"callfunc","s*"},
 	{buildin_return,"return","*"},
+	{buildin_getarg,"getarg","i"},
 	{buildin_jobchange,"jobchange","i*"},
 	{buildin_input,"input","*"},
 	{buildin_warp,"warp","sii"},
@@ -1396,14 +1398,18 @@ int buildin_callfunc(struct script_state *st)
 	char *str=conv_str(st,& (st->stack->stack_data[st->start+2]));
 
 	if( (scr=strdb_search(script_get_userfunc_db(),str)) ){
+		int i,j;
+		for(i=st->start+3,j=0;i<st->end;i++,j++)
+			push_copy(st->stack,i);
 
-		push_val(st->stack,C_INT,st->defsp);	// 現在の基準スタックポインタをプッシュ
+		push_val(st->stack,C_INT,j);				// 引数の数をプッシュ
+		push_val(st->stack,C_INT,st->defsp);		// 現在の基準スタックポインタをプッシュ
 		push_val(st->stack,C_INT,(int)st->script);	// 現在のスクリプトをプッシュ
 		push_val(st->stack,C_RETINFO,st->pos);		// 現在のスクリプト位置をプッシュ
 
 		st->pos=0;
 		st->script=scr;
-		st->defsp=st->start+3;
+		st->defsp=st->start+4+j;
 		st->state=GOTO;
 	}else{
 		printf("script:callfunc: function not found! [%s]\n",str);
@@ -1418,14 +1424,42 @@ int buildin_callfunc(struct script_state *st)
 int buildin_callsub(struct script_state *st)
 {
 	int pos=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	int i,j;
+	for(i=st->start+3,j=0;i<st->end;i++,j++)
+		push_copy(st->stack,i);
 
-	push_val(st->stack,C_INT,st->defsp);	// 現在の基準スタックポインタをプッシュ
+	push_val(st->stack,C_INT,j);				// 引数の数をプッシュ
+	push_val(st->stack,C_INT,st->defsp);		// 現在の基準スタックポインタをプッシュ
 	push_val(st->stack,C_INT,(int)st->script);	// 現在のスクリプトをプッシュ
 	push_val(st->stack,C_RETINFO,st->pos);		// 現在のスクリプト位置をプッシュ
 
 	st->pos=pos;
-	st->defsp=st->start+3;
+	st->defsp=st->start+4+j;
 	st->state=GOTO;
+	return 0;
+}
+
+/*==========================================
+ * 引数の所得
+ *------------------------------------------
+ */
+int buildin_getarg(struct script_state *st)
+{
+	int num=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	int max,stsp;
+	if( st->defsp<4 || st->stack->stack_data[st->defsp-1].type!=C_RETINFO ){
+		printf("script:getarg without callfunc or callsub!\n");
+		st->state=END;
+		return 0;
+	}
+	max=conv_num(st,& (st->stack->stack_data[st->defsp-4]));
+	stsp=st->defsp - max -4;
+	if( num >= max ){
+		printf("script:getarg arg1(%d) out of range(%d) !\n",num,max);
+		st->state=END;
+		return 0;
+	}
+	push_copy(st->stack,stsp+num);
 	return 0;
 }
 
@@ -2303,7 +2337,7 @@ int buildin_getpartyname(struct script_state *st)
 	if(name!=0)
 		push_str(st->stack,C_STR,name);
 	else
-		push_str(st->stack,C_STR,"null");
+		push_str(st->stack,C_CONSTSTR,"null");
 
 	return 0;
 }
@@ -2327,7 +2361,6 @@ char *buildin_getguildname_sub(int guild_id)
 		strcpy(buf,g->name);
 		return buf;
 	}
-
 	return 0;
 }
 int buildin_getguildname(struct script_state *st)
@@ -2338,7 +2371,7 @@ int buildin_getguildname(struct script_state *st)
 	if(name!=0)
 		push_str(st->stack,C_STR,name);
 	else
-		push_str(st->stack,C_STR,"null");
+		push_str(st->stack,C_CONSTSTR,"null");
 	return 0;
 }
 
@@ -2373,7 +2406,7 @@ int buildin_getguildmaster(struct script_state *st)
 	if(master!=0)
 		push_str(st->stack,C_STR,master);
 	else
-		push_str(st->stack,C_STR,"null");
+		push_str(st->stack,C_CONSTSTR,"null");
 	return 0;
 }
 
@@ -2421,12 +2454,16 @@ int buildin_strcharinfo(struct script_state *st)
 		buf=buildin_getpartyname_sub(sd->status.party_id);
 		if(buf!=0)
 			push_str(st->stack,C_STR,buf);
+		else
+			push_str(st->stack,C_CONSTSTR,"");
 	}
 	if(num==2){
 		char *buf;
 		buf=buildin_getguildname_sub(sd->status.guild_id);
 		if(buf!=0)
 			push_str(st->stack,C_STR,buf);
+		else
+			push_str(st->stack,C_CONSTSTR,"");
 	}
 
 	return 0;
@@ -4025,22 +4062,25 @@ int buildin_getcastlename(struct script_state *st)
 	char *mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	struct guild_castle *gc;
 	int i;
-	char *buf=calloc(24, 1);
-	if(buf==NULL){
-		if(battle_config.error_log)
-			printf("out of memory : buildin_getcastlename\n");
-		exit(1);
-	}
-	strcpy(buf,"");
+	char *buf=NULL;
 	for(i=0;i<MAX_GUILDCASTLE;i++){
 		if( (gc=guild_castle_search(i)) != NULL ){
 			if(strcmp(mapname,gc->map_name)==0){
+				buf=calloc(24, 1);
+				if(buf==NULL){
+					if(battle_config.error_log)
+						printf("out of memory : buildin_getcastlename\n");
+					exit(1);
+				}
 				strcpy(buf,gc->castle_name);
 				break;
 			}
 		}
 	}
-	push_str(st->stack,C_STR,buf);
+	if(buf)
+		push_str(st->stack,C_STR,buf);
+	else
+		push_str(st->stack,C_CONSTSTR,"");
 	return 0;
 }
 
@@ -4617,18 +4657,20 @@ int run_func(struct script_state *st)
 	if(st->state==RETFUNC){
 		// ユーザー定義関数からの復帰
 		int olddefsp=st->defsp;
+		int i;
 
 		pop_stack(st->stack,st->defsp,start_sp);	// 復帰に邪魔なスタック削除
-		if(st->defsp<3 || st->stack->stack_data[st->defsp-1].type!=C_RETINFO){
+		if(st->defsp<4 || st->stack->stack_data[st->defsp-1].type!=C_RETINFO){
 			printf("script:run_func(return) return without callfunc or callsub!\n");
 			st->state=END;
 			return 0;
 		}
-		st->pos=conv_num(st,& (st->stack->stack_data[st->defsp-1]));
-		st->script=(char*)conv_num(st,& (st->stack->stack_data[st->defsp-2]));
-		st->defsp=conv_num(st,& (st->stack->stack_data[st->defsp-3]));
+		i = conv_num(st,& (st->stack->stack_data[st->defsp-4]));				// 引数の数所得
+		st->pos=conv_num(st,& (st->stack->stack_data[st->defsp-1]));			// スクリプト位置の復元
+		st->script=(char*)conv_num(st,& (st->stack->stack_data[st->defsp-2]));	// スクリプトを復元
+		st->defsp=conv_num(st,& (st->stack->stack_data[st->defsp-3]));			// 基準スタックポインタを復元
 
-		pop_stack(st->stack,olddefsp-3,olddefsp);	// 要らなくなったスタック削除
+		pop_stack(st->stack,olddefsp-4-i,olddefsp);		// 要らなくなったスタック(引数と復帰用データ)削除
 
 		st->state=GOTO;
 	}

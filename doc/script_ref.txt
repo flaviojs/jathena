@@ -140,6 +140,7 @@ AthenaNPCScript
 		function<tab>script<tab><name><tab>{ <script> ... }
 		
 		callfunc命令で呼び出すことの出来る関数を作成します。
+		関数呼び出しの引数はgetarg関数で所得することが出来ます。
 		関数の最後には必ずreturn命令を入れてください。
 	
 	＊マップフラグ：MAPのルールを管理します。
@@ -913,31 +914,46 @@ AthenaNPCScript
 			（複数のNPCの同じ名前のラベルを実行できる。 例＞"::OnEvent"）
 	
 		callsub命令
-			callsub <label>
+			callsub <label>[,<arg0>[,<arg1> …]]
 		
-			label	ラベル
+			label		ラベル
+			arg0,arg1…	変数、文字列、数値など、省略可
 		
 			同一スクリプト内のラベル<label>をサブルーティンとして実行します。
+			arg0,arg1…は引数で、サブルーティン内においてgetarg関数で所得できます。
+
 			サブルーティンから復帰するときはreturn命令を使用してください。
 			この命令はreturn命令の実行状況によっては関数として使用することも出来ます。
+
+			引数は変数については参照渡し、数値や文字列については値渡しになります。
+			（つまり、変数を渡す場合、 set getarg(0), 1; と使うことも出来ます。）
 			
 		callfunc命令
-			callfunc <func>
+			callfunc <func>[,<arg0>[,<arg1> …]]
 		
-			func	文字列
+			func		文字列
+			arg0,arg1…	変数、文字列、数値など、省略可
 		
 			<func>で定義されたユーザー定義関数を実行します。
+			arg0,arg1…は引数で、ユーザー定義関数内においてgetarg関数で所得できます。
+
 			ユーザー定義関数から復帰するときはreturn命令を使用してください。
 			この命令はreturn命令の実行状況によっては関数として使用することも出来ます。
+			
+			引数は変数については参照渡し、数値や文字列については値渡しになります。
+			（つまり、変数を渡す場合、 set getarg(0), 1; と使うことも出来ます。）
 	
 		return命令
 			return <retval>
 			
-			retval	数値または文字列、省略可
+			retval	変数、文字列、数値など、省略可
 		
 			直ちにサブルーティンもしくはユーザー定義関数を抜け、呼び出し元に戻ります。
 			<retval>は戻り値で、callsubまたはcallfuncが関数として呼び出されているとき、この戻り値が使用されます。
 			callsubまたはfuncが命令として呼ばれているときは、<retval>は省略してください。
+
+			戻り値は変数については参照返し、数値や文字列については値返しになります。
+			（つまり、変数を返す場合、 set callfunc("func"), 1; と使うことも出来ます。）
 	
 	＊関数
 		rand関数
@@ -1196,14 +1212,24 @@ AthenaNPCScript
 			     getarraysize(@hoge)=5, getarraysize(@hoge[10])=10;
 		
 		callsub関数
-			callsub <label>
+			callsub(<label>[,<arg0>[,<arg1>…]])
 			
 			callsub命令を関数として実行します。詳しくはcallsub命令を見てください。
 
 		callfunc関数
-			callfunc <func>
+			callfunc(<func>[,<arg0>[,<arg1>…]])
 			
 			callfunc命令を関数として実行します。詳しくはcallfunc命令を見てください。
+		
+		getarg関数
+			getarg(<num>)
+			
+			num	数値
+			
+			ユーザー定義関数内またはサブルーティン内で、それらを呼び出した引数を所得します。
+			数値は0からです。
+			<例> callsub L_SUB01,"hoge",500,999; と呼ばれた場合、
+			     getarg(0)="hoge", getarg(1)=500, getarg(2)=999 になります。
 		
 	＊定数ラベル
 		-ラベル
