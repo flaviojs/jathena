@@ -1201,6 +1201,14 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->paramb[1]-=(sd->status.agi+sd->paramb[1]+sd->parame[1])/2;
 			sd->paramb[4]-=(sd->status.dex+sd->paramb[4]+sd->parame[4])/2;
 		}
+		if(sd->sc_data[SC_TURESIGHT].timer!=-1){	// トゥルーサイト
+			sd->paramb[0]+= 5;
+			sd->paramb[1]+= 5;
+			sd->paramb[2]+= 5;
+			sd->paramb[3]+= 5;
+			sd->paramb[4]+= 5;
+			sd->paramb[5]+= 5;
+		}
 	}
 
 	sd->paramc[0]=sd->status.str+sd->paramb[0]+sd->parame[0];
@@ -1281,10 +1289,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(sd->status.weapon == 11)
 			sd->attackrange += skill;
 	}
-	if( (skill=pc_checkskill(sd,TF_MISS))>0 )	// 回避率増加
-		sd->flee += skill*3;
-	if( (skill=pc_checkskill(sd,MO_DODGE))>0 )	// 見切り
-		sd->flee += (skill*3)>>1;
+
 	if( (skill=pc_checkskill(sd,BS_WEAPONRESEARCH))>0)	// 武器研究の命中率増加
 		sd->hit += skill*2;
 	if(sd->status.option&2 && (skill = pc_checkskill(sd,RG_TUNNELDRIVE))>0 )	// トンネルドライブ	// トンネルドライブ
@@ -1293,6 +1298,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->speed += (10-skill) * (DEFAULT_WALK_SPEED * 0.1);
 	else if (pc_isriding(sd))	// ペコペコ乗りによる速度増加
 		sd->speed -= (0.25 * DEFAULT_WALK_SPEED);
+	if(sd->sc_count){
+		if(sd->sc_data[SC_WINDWALK].timer!=-1) 	//ウィンドウォーク時はLv*2%減算
+			sd->speed -= sd->speed *(sd->sc_data[SC_WINDWALK].val1*2)/100;
+	}
 
 	if((skill=pc_checkskill(sd,CR_TRUST))>0) { // フェイス
 		sd->status.max_hp += skill*200;
@@ -1372,7 +1381,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == 4)
 				sd->watk_ = sd->watk_*(100+2*sd->sc_data[SC_PROVOKE].val1)/100;
 		}
-		if(sd->sc_data[SC_POISON].timer!=-1)	// プロボック
+		if(sd->sc_data[SC_POISON].timer!=-1)	// 毒状態
 			sd->def2 = sd->def2*75/100;
 		if(sd->sc_data[SC_DRUMBATTLE].timer!=-1){	// 戦太鼓の響き
 			sd->watk += sd->sc_data[SC_DRUMBATTLE].val2;
@@ -1398,6 +1407,14 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->def = sd->def * (100 - sd->sc_data[SC_SIGNUMCRUCIS].val2)/100;
 		if(sd->sc_data[SC_ETERNALCHAOS].timer!=-1)	// エターナルカオス
 			sd->def=0;
+
+		if(sd->sc_data[SC_CONCENTRATION].timer!=-1){ //コンセントレーション
+			sd->watk = sd->watk * (100 - 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
+			index = sd->equip_index[8];
+			if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == 4)
+				sd->watk_ = sd->watk * (100 - 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
+			sd->def = sd->def * (100 - 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
+		}
 
 		// ASPD/移動速度変化系
 		if(sd->sc_data[SC_TWOHANDQUICKEN].timer != -1 && sd->sc_data[SC_QUAGMIRE].timer == -1 && sd->sc_data[SC_DONTFORGETME].timer == -1)	// 2HQ
@@ -1426,6 +1443,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			aspd_rate -= sd->sc_data[i].val2;
 
 		// HIT/FLEE変化系
+		if( (skill=pc_checkskill(sd,TF_MISS))>0 )	// 回避率増加
+			sd->flee += skill*3;
+		if( (skill=pc_checkskill(sd,MO_DODGE))>0 )	// 見切り
+			sd->flee += (skill*3)>>1;
 		if(sd->sc_data[SC_WHISTLE].timer!=-1){  // 口笛
 			sd->flee += sd->flee * (sd->sc_data[SC_WHISTLE].val1
 					+sd->sc_data[SC_WHISTLE].val2+(sd->sc_data[SC_WHISTLE].val3>>16))/100;
@@ -1441,6 +1462,14 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->hit -= sd->hit*25/100;
 			sd->flee -= sd->flee*25/100;
 		}
+		if(sd->sc_data[SC_WINDWALK].timer!=-1) // ウィンドウォーク
+			sd->flee += sd->flee*(sd->sc_data[SC_WINDWALK].val2)/100;
+		if(sd->sc_data[SC_SPIDERWEB].timer!=-1) //スパイダーウェブ
+			sd->flee -= sd->flee*50/100;
+		if(sd->sc_data[SC_TURESIGHT].timer!=-1) //トゥルーサイト
+			sd->hit += 3*(sd->sc_data[SC_TURESIGHT].val1);
+		if(sd->sc_data[SC_CONCENTRATION].timer!=-1) //コンセントレーション
+			sd->hit += (sd->hit*(10*(sd->sc_data[SC_CONCENTRATION].val1)))/100;
 
 		// 耐性
 		if(sd->sc_data[SC_SIEGFRIED].timer!=-1){  // 不死身のジークフリード
@@ -1498,6 +1527,9 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->speed*=4;
 		if(sd->sc_data[SC_CURSE].timer!=-1)
 			sd->speed += 450;
+
+		if(sd->sc_data[SC_TURESIGHT].timer!=-1) //トゥルーサイト
+			sd->critical += sd->critical*(sd->sc_data[SC_TURESIGHT].val1)/100;
 
 /*		if(sd->sc_data[SC_VOLCANO].timer!=-1)	// エンチャントポイズン(属性はbattle.cで)
 			sd->addeff[2]+=sd->sc_data[SC_VOLCANO].val2;//% of granting
@@ -3325,6 +3357,18 @@ int pc_checkallowskill(struct map_session_data *sd)
 		skill_status_change_end(&sd->bl,SC_TWOHANDQUICKEN,-1);	// 2HQを解除
 		return -1;
 	}
+	if(!(skill_get_weapontype(LK_AURABLADE)&(1<<sd->status.weapon)) && sd->sc_data[SC_AURABLADE].timer!=-1) {	/* オーラブレード */
+		skill_status_change_end(&sd->bl,SC_AURABLADE,-1);	/* オーラブレードを解除 */
+		return -1;
+	}
+	if(!(skill_get_weapontype(LK_PARRYING)&(1<<sd->status.weapon)) && sd->sc_data[SC_PARRYING].timer!=-1) {	/* パリイング */
+		skill_status_change_end(&sd->bl,SC_PARRYING,-1);	/* パリイングを解除 */
+		return -1;
+	}
+	if(!(skill_get_weapontype(LK_CONCENTRATION)&(1<<sd->status.weapon)) && sd->sc_data[SC_CONCENTRATION].timer!=-1) {	/* コンセントレーション */
+		skill_status_change_end(&sd->bl,SC_CONCENTRATION,-1);	/* コンセントレーションを解除 */
+		return -1;
+	}
 	if(!(skill_get_weapontype(CR_SPEARQUICKEN)&(1<<sd->status.weapon)) && sd->sc_data[SC_SPEARSQUICKEN].timer!=-1){	// スピアクィッケン
 		skill_status_change_end(&sd->bl,SC_SPEARSQUICKEN,-1);	// スピアクイッケンを解除
 		return -1;
@@ -3339,11 +3383,11 @@ int pc_checkallowskill(struct map_session_data *sd)
 			skill_status_change_end(&sd->bl,SC_AUTOGUARD,-1);
 			return -1;
 		}
-		if(sd->sc_data[SC_DEFENDER].timer!=-1){	// オートガード
+		if(sd->sc_data[SC_DEFENDER].timer!=-1){	// ディフェンダー
 			skill_status_change_end(&sd->bl,SC_DEFENDER,-1);
 			return -1;
 		}
-		if(sd->sc_data[SC_REFLECTSHIELD].timer!=-1){
+		if(sd->sc_data[SC_REFLECTSHIELD].timer!=-1){ //リフレクトシールド
 			skill_status_change_end(&sd->bl,SC_REFLECTSHIELD,-1);
 			return -1;
 		}
@@ -4230,7 +4274,7 @@ int pc_setparam(struct map_session_data *sd,int type,int val)
 		if (val >= sd->status.job_level) {
 			if (val > up_level)val = up_level;
 			sd->status.skill_point += (val-sd->status.job_level);
-			sd->status.job_level = val;
+		sd->status.job_level = val;
 			sd->status.job_exp = 0;
 			clif_updatestatus(sd, SP_JOBLEVEL);
 			clif_updatestatus(sd, SP_NEXTJOBEXP);

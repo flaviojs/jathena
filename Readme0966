@@ -1,4 +1,67 @@
 --------------------
+//0976 by (凸)
+・転生スキルを修正したり色々
+・準備だけして実装できてないスキルもあります
+	ロードナイト オーラブレード 多分こんな感じ？
+	ロードナイト パリイング 跳ね返すけど攻撃を1回止めるのは未実装
+	ロードナイト コンセントレーション インデュア～は良く分からないので放置
+	ロードナイト スパイラルピアース 通常ダメージ増加と重量ダメージ増加と一応5回攻撃(なんか違う気がする)
+	ロードナイト ヘッドクラッシュ ダメージ増加とステータス変更？
+	ロードナイト ジョイントビート ダメージ増加とステータス変更？
+	アサシンクロス アドバンスドカタール研究 たぶんこんな感じ？
+	スナイパー トゥルーサイト たぶんこんな感じ？
+	スナイパー ウィンドウォーク たぶんこんな感じ？でも速度上昇とかと競合した時の処理は未実装
+	スパイダーウェッブ とりあえずアンクルスネアと同じような感じ＆回避率半減
+	チャンピオン 狂気功 適当に増やしていたのをちゃんと増やすようにした
+・出血状態と骨折状態の取り扱いがよくわかりませんっ！！
+
+	(db/)
+	cast_db.txt
+	skill_db.txt
+	skill_require_db.txt
+	(doc/)
+	db_ref.txt
+	(map/)
+	battle.c
+		battle_get_str() 修正
+		battle_get_agi() 修正
+		battle_get_vit() 修正
+		battle_get_int() 修正
+		battle_get_dex() 修正
+		battle_get_luk() 修正
+		battle_get_flee() 修正
+		battle_get_hit() 修正
+		battle_get_critical() 修正
+		battle_get_baseatk() 修正
+		battle_get_atk() 修正
+		battle_get_atk2() 修正
+		battle_get_def() 修正
+		battle_get_def2() 修正
+		battle_get_speed() 修正
+		battle_calc_damage() 修正
+	clif.c
+		clif_parse_WalkToXY() 修正
+	mob.c
+		mob_can_move() 修正
+		mobskill_castend_pos() 修正
+	pc.c
+		pc_calcstatus() 修正
+		pc_checkallowskill() 修正
+	skill.c
+		skill_get_unit_id() 修正
+		skill_additional_effect() 修正
+		skill_castend_nodamage_id() 修正
+		skill_castend_pos2() 修正
+		skill_unit_group() 修正
+		skill_unit_onplace() 修正
+		skill_unit_onout() 修正
+		skill_castend_pos() 修正
+		skill_check_condition() 修正
+		skill_status_change_end() 修正
+		skill_status_change_start() 修正
+		skill_readdb() 修正
+	skill.h 修正
+--------------------
 //0975 by Sin
 ・0973で実装されたスクリプトによるBaseLv, JobLvの変更時に、
 　ステータスポイントやスキルポイントを取得できるように修正。

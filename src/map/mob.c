@@ -288,7 +288,12 @@ int mob_can_move(struct mob_data *md)
 {
 	if(md->canmove_tick > gettick() || (md->opt1 > 0 && md->opt1 != 6) || md->option&2)
 		return 0;
-	if( md->sc_data[SC_ANKLE].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_BLADESTOP].timer != -1)	// アンクル中で動けない
+	// アンクル中で動けないとか
+	if( md->sc_data[SC_ANKLE].timer != -1 || //アンクルスネア
+		md->sc_data[SC_AUTOCOUNTER].timer != -1 || //オートカウンター
+		md->sc_data[SC_BLADESTOP].timer != -1 || //白刃取り
+		md->sc_data[SC_SPIDERWEB].timer != -1  //スパイダーウェッブ
+		)	
 		return 0;
 
 	return 1;
@@ -2521,6 +2526,7 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_BLASTMINE:
 			case HT_CLAYMORETRAP:
 			case HT_TALKIEBOX:
+			case PF_SPIDERWEB:		/* スパイダーウェッブ */
 				range = 0;
 				break;
 			case AL_PNEUMA:
@@ -2548,6 +2554,7 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_CLAYMORETRAP:
 			case HT_TALKIEBOX:
 			case AM_DEMONSTRATION:
+			case PF_SPIDERWEB:		/* スパイダーウェッブ */
 				range = 1;
 				break;
 			case AL_WARP:

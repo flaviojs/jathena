@@ -194,6 +194,8 @@ int battle_get_str(struct block_list *bl)
 			if(battle_check_undead(race,battle_get_elem_type(bl)) || race==6 )	str >>= 1;	// 悪 魔/不死
 			else str += sc_data[SC_BLESSING].val1;	// その他
 		}
+		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+			str += 5;
 	}
 	if(str < 0) str = 0;
 	return str;
@@ -229,6 +231,8 @@ int battle_get_agi(struct block_list *bl)
 
 		if(sc_data[SC_QUAGMIRE].timer!=-1 )	// クァグマイア
 			agi >>= 1;
+		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+			agi += 5;
 	}
 	if(agi < 0) agi = 0;
 	return agi;
@@ -248,8 +252,13 @@ int battle_get_vit(struct block_list *bl)
 		vit=((struct map_session_data *)bl)->paramc[2];
 	else if(bl->type==BL_PET)
 		vit=mob_db[((struct pet_data *)bl)->class].vit;
-	if(bl->type!=BL_PC && sc_data && sc_data[SC_STRIPARMOR].timer != -1)
-		vit = vit*60/100;
+	if(sc_data) {
+		if(sc_data[SC_STRIPARMOR].timer != -1 && bl->type!=BL_PC)
+			vit = vit*60/100;
+		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+			vit += 5;
+	}
+
 	if(vit < 0) vit = 0;
 	return vit;
 }
@@ -278,7 +287,8 @@ int battle_get_int(struct block_list *bl)
 		}
 		if( sc_data[SC_STRIPHELM].timer != -1 && bl->type != BL_PC)
 			int_ = int_*90/100;
-
+		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+			int_ += 5;
 	}
 	if(int_ < 0) int_ = 0;
 	return int_;
@@ -312,6 +322,8 @@ int battle_get_dex(struct block_list *bl)
 
 		if(sc_data[SC_QUAGMIRE].timer!=-1 )	// クァグマイア
 			dex >>= 1;
+		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+			dex += 5;
 	}
 	if(dex < 0) dex = 0;
 	return dex;
@@ -338,6 +350,8 @@ int battle_get_luk(struct block_list *bl)
 			luk += 30;
 		if(sc_data[SC_CURSE].timer!=-1 )		// 呪い
 			luk=0;
+		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+			luk += 5;
 	}
 	if(luk < 0) luk = 0;
 	return luk;
@@ -364,6 +378,10 @@ int battle_get_flee(struct block_list *bl)
 					+(sc_data[SC_WHISTLE].val3>>16))/100;
 		if(sc_data[SC_BLIND].timer!=-1 && bl->type != BL_PC)
 			flee -= flee*25/100;
+		if(sc_data[SC_WINDWALK].timer!=-1 && bl->type != BL_PC) // ウィンドウォーク
+			flee += flee*(sc_data[SC_WINDWALK].val2)/100;
+		if(sc_data[SC_SPIDERWEB].timer!=-1 && bl->type != BL_PC) //スパイダーウェブ
+			flee -= flee*50/100;
 	}
 	if(flee < 1) flee = 1;
 	return flee;
@@ -389,6 +407,10 @@ int battle_get_hit(struct block_list *bl)
 					+sc_data[SC_HUMMING].val3)/100;
 		if(sc_data[SC_BLIND].timer!=-1 && bl->type != BL_PC)		// 呪い
 			hit -= hit*25/100;
+		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)		// トゥルーサイト
+			hit += 3*(sc_data[SC_TURESIGHT].val1);
+		if(sc_data[SC_CONCENTRATION].timer!=-1 && bl->type != BL_PC) //コンセントレーション
+			hit += (hit*(10*(sc_data[SC_CONCENTRATION].val1)))/100;
 	}
 	if(hit < 1) hit = 1;
 	return hit;
@@ -441,6 +463,8 @@ int battle_get_critical(struct block_list *bl)
 					+sc_data[SC_FORTUNE].val3)*10;
 		if(sc_data[SC_EXPLOSIONSPIRITS].timer!=-1 && bl->type != BL_PC)
 			critical += sc_data[SC_EXPLOSIONSPIRITS].val2;
+		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC) //トゥルーサイト
+			critical += critical*sc_data[SC_TURESIGHT].val1/100;
 	}
 	if(critical < 1) critical = 1;
 	return critical;
@@ -467,6 +491,8 @@ int battle_get_baseatk(struct block_list *bl)
 			batk = batk*(100+2*sc_data[SC_PROVOKE].val1)/100; //base_atk増加
 		if(sc_data[SC_CURSE].timer!=-1 ) //呪われていたら
 			batk -= batk*25/100; //base_atkが25%減少
+		if(sc_data[SC_CONCENTRATION].timer!=-1 && bl->type != BL_PC) //コンセントレーション
+			batk += batk*(5*sc_data[SC_CONCENTRATION].val1)/100;
 	}
 	if(batk < 1) batk = 1; //base_atkは最低でも1
 	return batk;
@@ -492,6 +518,8 @@ int battle_get_atk(struct block_list *bl)
 			atk = atk*(100+2*sc_data[SC_PROVOKE].val1)/100;
 		if(sc_data[SC_CURSE].timer!=-1 )
 			atk -= atk*25/100;
+		if(sc_data[SC_CONCENTRATION].timer!=-1 && bl->type != BL_PC) //コンセントレーション
+			atk += atk*(5*sc_data[SC_CONCENTRATION].val1)/100;
 	}
 	if(atk < 0) atk = 0;
 	return atk;
@@ -542,6 +570,8 @@ int battle_get_atk2(struct block_list *bl)
 				atk2 += sc_data[SC_NIBELUNGEN].val2;
 			if(sc_data[SC_STRIPWEAPON].timer!=-1)
 				atk2 -= atk2*90/100;
+			if(sc_data[SC_CONCENTRATION].timer!=-1) //コンセントレーション
+				atk2 += atk2*(5*sc_data[SC_CONCENTRATION].val1)/100;
 		}
 		if(atk2 < 0) atk2 = 0;
 		return atk2;
@@ -653,6 +683,9 @@ int battle_get_def(struct block_list *bl)
 			//凍結、石化時は右シフト
 			if(sc_data[SC_FREEZE].timer != -1 || (sc_data[SC_STONE].timer != -1 && sc_data[SC_STONE].val2 == 0))
 				def >>= 1;
+			//コンセントレーション時は減算
+			if( sc_data[SC_CONCENTRATION].timer!=-1 && bl->type != BL_PC)
+				def = (def*(100 - 5*sc_data[SC_CONCENTRATION].val1))/100;
 		}
 		//詠唱中は詠唱時減算率に基づいて減算
 		if(skilltimer != -1) {
@@ -718,6 +751,9 @@ int battle_get_def2(struct block_list *bl)
 			def2 = (def2*(100 - 6*sc_data[SC_PROVOKE].val1)+50)/100;
 		if(sc_data[SC_POISON].timer!=-1 && bl->type != BL_PC)
 			def2 = def2*75/100;
+		//コンセントレーション時は減算
+		if( sc_data[SC_CONCENTRATION].timer!=-1 && bl->type != BL_PC)
+			def2 = def2*(100 - 5*sc_data[SC_CONCENTRATION].val1)/100;
 	}
 	if(def2 < 1) def2 = 1;
 	return def2;
@@ -782,6 +818,9 @@ int battle_get_speed(struct block_list *bl)
 			//呪い時は450加算
 			if(sc_data[SC_CURSE].timer!=-1)
 				speed = speed + 450;
+			//ウィンドウォーク時はLv*2%減算
+			if(sc_data[SC_WINDWALK].timer!=-1)
+				speed -= (speed*(sc_data[SC_WINDWALK].val1*2))/100;
 		}
 		if(speed < 1) speed = 1;
 		return speed;
@@ -1361,7 +1400,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 			if((--sc->val3)<=0 || (sc->val2<=0) || skill_num == AL_HOLYLIGHT)
 				skill_status_change_end(bl, SC_KYRIE, -1);
 		}
-
+		/* オートガード */
 		if(sc_data[SC_AUTOGUARD].timer != -1 && damage > 0 && flag&BF_WEAPON) {
 			if(rand()%100 < sc_data[SC_AUTOGUARD].val2) {
 				damage = 0;
@@ -1370,6 +1409,13 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 					((struct map_session_data *)bl)->canmove_tick = gettick() + 300;
 				else if(bl->type == BL_MOB)
 					((struct mob_data *)bl)->canmove_tick = gettick() + 300;
+			}
+		}
+		/* パリイング */
+		if(sc_data[SC_PARRYING].timer != -1 && damage > 0 && flag&BF_WEAPON) {
+			if(rand()%100 < sc_data[SC_PARRYING].val2) {
+				damage = 0;
+				clif_skill_nodamage(bl,bl,LK_PARRYING,sc_data[SC_PARRYING].val1,1);
 			}
 		}
 	}
@@ -1552,6 +1598,11 @@ int battle_addmastery(struct map_session_data *sd,struct block_list *target,int 
 				//ソニックブロー時は別処理（1撃に付き1/8適応)
 				damage += (skill * 3);
 			}
+			// アドバンスドカタール研究
+			if((skill = pc_checkskill(sd,ASC_KATAR)) > 0) {
+				damage += damage*(10+(skill * 2))/100;
+			}
+			
 			break;
 		}
 	}
@@ -1805,6 +1856,14 @@ static struct Damage battle_calc_pet_weapon_attack(
 			case MO_COMBOFINISH:	// 猛龍拳
 				damage = damage*(240+ 60*skill_lv)/100;
 				break;
+			case DC_THROWARROW:	// 矢撃ち
+				damage = damage*(100+ 50 * skill_lv)/100;
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
+				break;
+			case BA_MUSICALSTRIKE:	// ミュージカルストライク
+				damage = damage*(100+ 50 * skill_lv)/100;
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
+				break;
 			case CH_TIGERFIST:	// 伏虎拳
 				damage = damage*(100+ 20*skill_lv)/100;
 				break;
@@ -1815,14 +1874,18 @@ static struct Damage battle_calc_pet_weapon_attack(
 			case CH_PALMSTRIKE:	// 猛虎硬派山
 				damage = damage*(50+ 100*skill_lv)/100;
 				break;
-			case BA_MUSICALSTRIKE:	// ミュージカルストライク
-				damage = damage*(100+ 50 * skill_lv)/100;
-				flag=(flag&~BF_RANGEMASK)|BF_LONG;
+			case LK_SPIRALPIERCE:			/* スパイラルピアース */
+				damage = damage*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
+				div_=5;
+				if(target->type == BL_PC)
+					((struct map_session_data *)target)->canmove_tick = gettick() + 1000;
+				else if(target->type == BL_MOB)
+					((struct mob_data *)target)->canmove_tick = gettick() + 1000;
 				break;
-			case DC_THROWARROW:	// 矢撃ち
-				damage = damage*(100+ 50 * skill_lv)/100;
-				flag=(flag&~BF_RANGEMASK)|BF_LONG;
-				break;
+			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
+				damage = damage*(100+ 20*skill_lv)/100;
+			case LK_JOINTBEAT:				/* ジョイントビート */
+				damage = damage*(50+ 10*skill_lv)/100;
 			}
 		}
 
@@ -2069,6 +2132,9 @@ static struct Damage battle_calc_mob_weapon_attack(
 		// ソニックブロー
 		if( sc_data!=NULL && sc_data[SC_OVERTHRUST].timer!=-1)	// オーバートラスト
 			damage += damage*(5*sc_data[SC_OVERTHRUST].val1)/100;
+		if( sc_data!=NULL && sc_data[SC_TURESIGHT].timer!=-1)	// トゥルーサイト
+			damage += damage*(2*sc_data[SC_TURESIGHT].val1)/100;
+
 		if(skill_num>0){
 			int i;
 			if( (i=skill_get_pl(skill_num))>0 )
@@ -2226,6 +2292,14 @@ static struct Damage battle_calc_mob_weapon_attack(
 				damage = damage*(150+ 50*skill_lv)/100;
 				div_=4;
 				break;
+			case BA_MUSICALSTRIKE:	// ミュージカルストライク
+				damage = damage*(100+ 50 * skill_lv)/100;
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
+				break;
+			case DC_THROWARROW:	// 矢撃ち
+				damage = damage*(100+ 50 * skill_lv)/100;
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
+				break;
 			case MO_COMBOFINISH:	// 猛龍拳
 				damage = damage*(240+ 60*skill_lv)/100;
 				break;
@@ -2239,14 +2313,18 @@ static struct Damage battle_calc_mob_weapon_attack(
 			case CH_PALMSTRIKE:	// 猛虎硬派山
 				damage = damage*(50+ 100*skill_lv)/100;
 				break;
-			case BA_MUSICALSTRIKE:	// ミュージカルストライク
-				damage = damage*(100+ 50 * skill_lv)/100;
-				flag=(flag&~BF_RANGEMASK)|BF_LONG;
+			case LK_SPIRALPIERCE:			/* スパイラルピアース */
+				damage = damage*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
+				div_=5;
+				if(target->type == BL_PC)
+					((struct map_session_data *)target)->canmove_tick = gettick() + 1000;
+				else if(target->type == BL_MOB)
+					((struct mob_data *)target)->canmove_tick = gettick() + 1000;
 				break;
-			case DC_THROWARROW:	// 矢撃ち
-				damage = damage*(100+ 50 * skill_lv)/100;
-				flag=(flag&~BF_RANGEMASK)|BF_LONG;
-				break;
+			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
+				damage = damage*(100+ 20*skill_lv)/100;
+			case LK_JOINTBEAT:				/* ジョイントビート */
+				damage = damage*(50+ 10*skill_lv)/100;
 			}
 		}
 
@@ -2674,8 +2752,15 @@ static struct Damage battle_calc_pc_weapon_attack(
 		// メマーナイト,カートレボリューション
 		// ダブルストレイフィング,アローシャワー,チャージアロー,
 		// ソニックブロー
-		if( sc_data!=NULL && sc_data[SC_OVERTHRUST].timer!=-1)	// オーバートラスト
+		if( sc_data!=NULL && sc_data[SC_OVERTHRUST].timer!=-1){	// オーバートラスト
 			damage += damage*(5*sc_data[SC_OVERTHRUST].val1)/100;
+			damage2 += damage2*(5*sc_data[SC_OVERTHRUST].val1)/100;
+		}
+		if( sc_data!=NULL && sc_data[SC_TURESIGHT].timer!=-1){	// トゥルーサイト
+			damage += damage*(2*sc_data[SC_TURESIGHT].val1)/100;
+			damage2 += damage2*(2*sc_data[SC_TURESIGHT].val1)/100;
+		}
+
 		if(skill_num>0){
 			int i;
 			if( (i=skill_get_pl(skill_num))>0 )
@@ -2920,19 +3005,6 @@ static struct Damage battle_calc_pc_weapon_attack(
 				damage = damage*(240+ 60*skill_lv)/100;
 				damage2 = damage2*(240+ 60*skill_lv)/100;
 				break;
-			case CH_TIGERFIST:	// 伏虎拳
-				damage = damage*(100+ 20*skill_lv)/100;
-				damage2 = damage2*(100+ 20*skill_lv)/100;
-				break;
-			case CH_CHAINCRUSH:	// 連柱崩撃
-				damage = damage*(100+ 20*skill_lv)/100;
-				damage2 = damage2*(100+ 20*skill_lv)/100;
-				div_=skill_get_num(skill_num,skill_lv);
-				break;
-			case CH_PALMSTRIKE:	// 猛虎硬派山
-				damage = damage*(50+ 100*skill_lv)/100;
-				damage2 = damage2*(50+ 100*skill_lv)/100;
-				break;
 			case BA_MUSICALSTRIKE:	// ミュージカルストライク
 				if(!sd->state.arrow_atk && sd->arrow_atk > 0) {
 					int arr = rand()%(sd->arrow_atk+1);
@@ -2963,6 +3035,34 @@ static struct Damage battle_calc_pc_weapon_attack(
 				flag=(flag&~BF_RANGEMASK)|BF_LONG;
 				sd->state.arrow_atk = 1;
 				break;
+			case CH_TIGERFIST:	// 伏虎拳
+				damage = damage*(100+ 20*skill_lv)/100;
+				damage2 = damage2*(100+ 20*skill_lv)/100;
+				break;
+			case CH_CHAINCRUSH:	// 連柱崩撃
+				damage = damage*(100+ 20*skill_lv)/100;
+				damage2 = damage2*(100+ 20*skill_lv)/100;
+				div_=skill_get_num(skill_num,skill_lv);
+				break;
+			case CH_PALMSTRIKE:	// 猛虎硬派山
+				damage = damage*(50+ 100*skill_lv)/100;
+				damage2 = damage2*(50+ 100*skill_lv)/100;
+				break;
+			case LK_SPIRALPIERCE:			/* スパイラルピアース */
+				damage = damage*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
+				damage2 = damage2*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
+				div_=5;
+				if(target->type == BL_PC)
+					((struct map_session_data *)target)->canmove_tick = gettick() + 1000;
+				else if(target->type == BL_MOB)
+					((struct mob_data *)target)->canmove_tick = gettick() + 1000;
+				break;
+			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
+				damage = damage*(100+ 20*skill_lv)/100;
+				damage2 = damage2*(100+ 20*skill_lv)/100;
+			case LK_JOINTBEAT:				/* ジョイントビート */
+				damage = damage*(50+ 10*skill_lv)/100;
+				damage2 = damage2*(50+ 10*skill_lv)/100;
 			}
 		}
 		if(da == 2) { //三段掌が発動しているか
@@ -3041,6 +3141,15 @@ static struct Damage battle_calc_pc_weapon_attack(
 		if(sd->equip_index[8] >= 0) {
 			int index = sd->equip_index[8];
 			if(sd->inventory_data[index] && sd->inventory_data[index]->type == 5) {
+				damage += sd->inventory_data[index]->weight/10;
+				damage += sd->status.inventory[index].refine * pc_getrefinebonus(0,1);
+			}
+		}
+	}
+	if(skill_num == LK_SPIRALPIERCE) {			/* スパイラルピアース */
+		if(sd->equip_index[9] >= 0) {	//重量で追加ダメージらしいのでシールドブーメランを参考に追加
+			int index = sd->equip_index[9];
+			if(sd->inventory_data[index] && sd->inventory_data[index]->type == 4) {
 				damage += sd->inventory_data[index]->weight/10;
 				damage += sd->status.inventory[index].refine * pc_getrefinebonus(0,1);
 			}
@@ -3190,6 +3299,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		}
 	}
 //ディフェンダーによるダメージ減衰処理ここまで
+
 	if(damage < 0) damage = 0;
 	if(damage2 < 0) damage2 = 0;
 
@@ -3202,6 +3312,10 @@ static struct Damage battle_calc_pc_weapon_attack(
 	damage2 += sd->star_;
 	damage += sd->spiritball*3;
 	damage2 += sd->spiritball*3;
+
+	if(sc_data!=NULL && sc_data[SC_AURABLADE].timer!=-1)	/* オーラブレード 必中 */
+		damage += sc_data[SC_AURABLADE].val1 * 10;
+		damage2 += sc_data[SC_AURABLADE].val1 * 10;
 
 	// >二刀流の左右ダメージ計算誰かやってくれぇぇぇぇえええ！
 	// >map_session_data に左手ダメージ(atk,atk2)追加して

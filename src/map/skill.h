@@ -156,7 +156,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 
 enum {
 	ST_NONE,ST_HIDING,ST_CLOAKING,ST_HIDDEN,ST_RIDING,ST_FALCON,ST_CART,ST_SHIELD,ST_SIGHT,ST_EXPLOSIONSPIRITS,
-	ST_RECOV_WEIGHT_RATE,ST_MOVE_ENABLE,ST_WATER,
+	ST_RECOV_WEIGHT_RATE,ST_MOVE_ENABLE,ST_WATER,ST_SITTING,
 };
 
 enum {	// struct map_session_data の status_changeの番号テーブル
@@ -287,7 +287,9 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_DONTFORGETME			=175,
 	SC_FORTUNE				=176,
 	SC_SERVICE4U			=177,
-	
+
+	SC_SPIDERWEB			=180,		/* スパイダーウェッブ */
+
 };
 extern int SkillStatusChangeTable[];
 
