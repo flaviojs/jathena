@@ -83,6 +83,8 @@ int mob_spawn(int);
 int mob_damage(struct block_list *,struct mob_data*,int,int);
 int mob_changestate(struct mob_data *md,int state,int type);
 int mob_heal(struct mob_data*,int);
+int mob_exclusion_add(struct mob_data *md,int type,int id);
+int mob_exclusion_check(struct mob_data *md,struct map_session_data *sd);
 int mob_get_viewclass(int);
 int mob_get_sex(int);
 short mob_get_hair(int);
@@ -96,6 +98,7 @@ int do_init_mob(void);
 
 int mob_delete(struct mob_data *md);
 int mob_catch_delete(struct mob_data *md);
+int mob_timer_delete(int tid, unsigned int tick, int id, int data);
 
 int mob_counttargeted(struct mob_data *md,struct block_list *src);
 

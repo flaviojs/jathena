@@ -1,4 +1,27 @@
 --------------------
+//0848 by huge
+
+・スキル自爆を、HPが全回復している時は使えないよう修正。
+・スフィアマイン・バイオプラント･･･ターゲット変更できない...。
+・mobにターゲット無視IDを設定できるようにしました。(Gv用mobに使える？)
+	(map/)
+	map.h 修正。
+		mob_dataに int exclusion_src,exclusion_party,exclusion_guild 追加。
+	mob.h 修正。
+	mob.c
+		mob_exclusion_add() 追加。
+		mob_exclusion_check() 追加。
+		mob_timer_delete() 追加。
+		mob_attack() 修正。
+		mob_target() 修正。
+		mob_ai_sub_hard_activesearch() 修正。
+		mob_ai_sub_hard_mastersearch() 修正。
+		mob_ai_sub_hard() 修正。
+	skill.c
+		skill_castend_damage_id() 修正。
+		skill_castend_pos2() 修正。
+
+--------------------
 //0847 by 死神
 
 ・露店バグ修正。

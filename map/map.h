@@ -328,6 +328,7 @@ struct mob_data {
 	unsigned int skilldelay[MAX_MOBSKILL];
 	int def_ele;
 	int master_id,master_dist;
+	int exclusion_src,exclusion_party,exclusion_guild;
 	struct skill_timerskill skilltimerskill[MAX_MOBSKILLTIMERSKILL];
 	struct skill_unit_group skillunit[MAX_MOBSKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];

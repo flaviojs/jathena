@@ -1570,26 +1570,29 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case NPC_SELFDESTRUCTION:	/* 自爆 */
-		if(flag&1){
-			/* 個別にダメージを与える */
-			if(src->type==BL_MOB){
-				struct mob_data* mb=(struct mob_data*)src;
-				mb->hp=skill_area_temp[2];
-				if(bl->id!=skill_area_temp[1])
-					skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
-				mb->hp=1;
+		{
+			struct mob_data* mb=(struct mob_data*)src;
+			if(!mb || mb->hp == mob_db[mb->class].max_hp) break;
+			if(flag&1){
+				/* 個別にダメージを与える */
+				if(src->type==BL_MOB){
+					mb->hp=skill_area_temp[2];
+					if(bl->id!=skill_area_temp[1])
+						skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
+					mb->hp=1;
+				}
+			}else{
+				skill_area_temp[1]=bl->id;
+				skill_area_temp[2]=battle_get_hp(src);
+				/* まずターゲットに攻撃を加える */
+				skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
+				/* その後ターゲット以外の範囲内の敵全体に処理を行う */
+				map_foreachinarea(skill_area_sub,
+					bl->m,bl->x-5,bl->y-5,bl->x+5,bl->y+5,0,
+					src,skillid,skilllv,tick, flag|BCT_ALL|1,
+					skill_castend_damage_id);
+				battle_damage(src,src,1);
 			}
-		}else{
-			skill_area_temp[1]=bl->id;
-			skill_area_temp[2]=battle_get_hp(src);
-			/* まずターゲットに攻撃を加える */
-			skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
-			/* その後ターゲット以外の範囲内の敵全体に処理を行う */
-			map_foreachinarea(skill_area_sub,
-				bl->m,bl->x-5,bl->y-5,bl->x+5,bl->y+5,0,
-				src,skillid,skilllv,tick, flag|BCT_ALL|1,
-				skill_castend_damage_id);
-			battle_damage(src,src,1);
 		}
 		break;
 
@@ -2440,7 +2443,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		{
 			int sp=0;
 			if(bl->type==BL_MOB){	// MOB
-				if(dstmd->skilltimer!=-1 && dstmd->state.skillcastcancel){
+				if(dstmd->skilltimer!=-1){
 					sp = skill_db[dstmd->skillid].sp[dstmd->skilllv-1]*(skilllv-1)*25/100;
 					skill_castcancel(bl,0);
 					pc_heal(sd,0,sp);
@@ -2757,6 +2760,32 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case MO_BODYRELOCATION:
 		if(sd)
 			pc_movepos(sd,x,y);
+		break;
+	case AM_CANNIBALIZE:	// バイオプラント
+		if(sd){
+			int mx,my,id=0;
+
+			mx = x + (rand()%10 - 5);
+			my = y + (rand()%10 - 5);
+			id=mob_once_spawn(sd,"this",mx,my,"フローラ",1118,1,"");
+
+			add_timer(gettick()+30000+skilllv*10000,mob_timer_delete,id,0);
+		}
+		break;
+	case AM_SPHEREMINE:	// スフィアーマイン
+		if(sd){
+			int mx,my,id=0;
+			struct mob_data *mb;
+			struct block_list *mbl;
+
+			mx = x + (rand()%10 - 5);
+			my = y + (rand()%10 - 5);
+			id=mob_once_spawn(sd,"this",mx,my,"イクラ",1142,1,"");
+
+			mbl= map_id2bl(id);
+			mb = (struct mob_data *)mbl;
+			add_timer(gettick()+30000,mob_timer_delete,id,0);
+		}
 		break;
 	}
 
