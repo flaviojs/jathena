@@ -2922,18 +2922,17 @@ int pc_memo(struct map_session_data *sd,int i)
 	int skill=pc_checkskill(sd,AL_WARP);
 	int j;
 
+	if(map[sd->bl.m].flag.nomemo){
+		clif_skill_teleportmessage(sd,1);
+		return 0;
+	}
+
 	if(skill < 1) {
 		clif_skill_memo(sd,2);
-		return 0;
 	}
 
 	if(skill<2 || i<-1 || i>2){
 		clif_skill_memo(sd,1);
-		return 0;
-	}
-
-	if(map[sd->bl.m].flag.nomemo){
-		clif_skill_teleportmessage(sd,1);
 		return 0;
 	}
 

@@ -1,4 +1,593 @@
 --------------------
+//0930 by 胡蝶蘭
+
+	既存の char/ にあるlock.cとlock.hは削除してください。
+	これらは common/ に移動されます。
+
+・スクリプト追加修正
+	・setarray（配列へリスト代入）追加
+	・cleararray（配列を指定値でクリア）追加
+	・copyarray（配列をコピー）追加
+	・getarraysize（配列の有効な要素数を求める）追加
+	・deletearray（配列の要素を削除してつめる）追加
+	・warpwaitingpc：人数やアカウントIDをマップ変数にセットするように修正
+
+	(map/)
+	script.c
+		色々
+	(doc/)
+	script_ref.txt
+		命令追加など
+	(npc/sample/)
+	npc_test_array.txt
+		配列系テスト用NPCスクリプト
+
+・バグ修正など
+	・キャラクター名/アカウント名/パーティ名/ギルド名/ペット名に
+	  コントロールコードを使えないように修正。
+	・char.cなどの保存の効率を更にアップ。
+	・倉庫ファイル/ギルド倉庫ファイルに空行が残らないように修正
+	・lock.*をcommon/に移動、ファイルが保存できなくなるバグ修正、
+	  アカウントとマップ変数の保存にもlock_fopenを使うように。
+
+	(common/)
+	lock.c/lock.h
+		フォルダ移動、lock_fopen修正
+	(login/)
+	login.c
+		mmo_auth_new()修正
+	(char/)
+	char.c
+		mmo_char_tostr(),make_new_char()修正
+	int_storage.c
+		storage_tostr(),guild_storage_tostr(),
+		inter_storage_save_sub(),inter_guild_storage_save_sub()修正
+	int_party.c
+	int_guild.c
+		名前問題修正
+	(map/)
+	pet.c
+		名前問題修正
+
+--------------------
+//0929 by ぴざまん
+
+・ランドプロテクター完全実装。
+・プロボックのスキル仕様変更(詠唱妨害・凍結、石化、睡眠解除)。
+・リカバリーのスキル仕様変更(アンデッドに使用すると一定確率で暗闇効果)。
+・状態異常中でも装備の切り替えが出来るように変更。
+・アイテム自動取得中に@killmonsterを使用すると落ちるバグ修正。
+・胡蝶蘭さんが上げていたnpc.cを同梱しました。
+・skill_dbで気になってたとこをちょこっと修正。
+
+	(map/)
+	clif.c
+		clif_parse_EquipItem() 修正。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+		skill_unitsetting()、skill_unit_onplace() 修正。
+		skill_landprotector() 追加。
+	mob.c
+		mob_delay_item_drop()、mob_delay_item_drop2() 修正。
+	npc.c 修正
+
+	(db/)
+	skill_db.txt 修正。
+
+--------------------
+//0928 by End_of_exam
+
+・キャラや倉庫内アイテムが消える問題に暫定対処（キャラ鯖の改良）。
+
+　1.キャラデータ・倉庫データのデータ変換処理を改良。
+　　(char/char.c , char/int_storage.c)
+
+　2.ファイル書き出しが終わるまで、旧ファイルを残すように修正。
+　（char/lock.c, char/lock.h の追加。メイクファイルの修正。
+　　char/int_storage.c,int_guild.c,int_party.c,int_pet.c,char.c,inter.c
+　　内にある、データ書き出し処理を変更。）
+
+--------------------
+//0927 by ぴざまん
+
+・武器攻撃以外に種族補正が入っていなかったのを修正。
+・演奏中に楽器・鞭以外の武器に持ち変えると演奏が止まる様に修正。
+・演奏の効果が演奏者自身にはかからないように修正。
+・アイテム自動取得機能実装
+　敵を倒した時に、アイテムがドロップされるのではなく、その敵に一番多くのダメージを
+　与えた人(ルート権1位の人)にドロップアイテムが自動で与えられる機能です。
+　battle_athena.confのitem_auto_getで設定できます。
+　オリジナルアップデートの為、battle_athena.confでのデフォルトではnoにしています。
+・属性場(デリュージ・バイオレントゲイル・ボルケーノ・ランドプロテクター)仮実装
+　一部の機能が未実装です
+　　デリュージ：水場を用いたウォーターボール
+　　バイオレントゲイル：ファイアーウォールの持続時間補正
+　　ボルケーノ：アイスウォール禁止
+　　ランドプロテクター：オブジェクト設置系スキル禁止(つまり出るだけのLPです)
+
+	(map/)
+	battle.c
+		battle_calc_damage()、battle_calc_magic_attack() 修正。
+		battle_calc_misc_attack()、battle_config_read() 修正。
+	mob.c
+		mob_delay_item_drop()、mob_delay_item_drop2() 修正。
+	pc.c
+		pc_calcstatus()、pc_equipitem() 修正。
+	skill.c
+		ローカルプロトタイプ宣言修正。
+		SkillStatusChangeTable[] 修正。
+		skill_castend_nodamage_id()、skill_castend_pos2() 修正。
+		skill_unitsetting()、skill_unit_onplace() 修正。
+		skill_unit_onout()、skill_unit_ondelete() 修正。
+		skill_status_change_start()、skill_status_change_end() 修正。
+		skill_clear_element_field() 追加。
+	battle.h 修正。
+	skill.h 修正。
+	(conf/)
+	battle_athena.conf
+		item_auto_get項目を追加。
+	(db/)
+	cast_db.txt 修正。
+
+--------------------
+//0926 by 胡蝶蘭
+
+・ギルド城の初期化方法変更
+	・全てのギルド城（＋占拠ギルド情報）を所得したときにOnAgitInitが
+	  よばれるように。GetCastleDataやRequestGuildInfoの必要がなくなります。
+	  従って、現在のgvgスクリプトのOnInterIfInitやOnRecvCastleXXXは
+	  必要なくなります。（おそらく現行のスクリプトも動作は可能です）
+	  初期化が必要なNPCは変わりにOnAgitInitを使ってください。
+	  なお、不要になった命令などを削除する予定はありません。
+	
+	(char/)
+	inter.c/inter.h/char.c/int_guild.c/int_guild.h
+		マップサーバー接続時に処理を行えるように修正
+		接続時にギルド城データを送信するように
+	(map/)
+	intif.c/guild.c/guild.h
+		接続時のギルド城データ一括受信処理＆ギルド情報要求、
+		OnAgitInitの呼び出しなど
+	chrif.c
+		旧OnAgitInitの呼び出し削除
+	(doc/)
+	inter_server_packet.txt
+		ギルド城データ一括送信パケット0x3842追加
+
+・スクリプトにNPC主体イベント実行命令追加
+	・donpcevent(NPC主体イベント実行)追加
+	  こちらはdoeventと違いブロードキャスト可能です。詳細はscript_ref。
+	・isloggedinのコンパイル警告がでないように修正
+	(map/)
+	script.c
+		buildin_donpcevent()追加など
+	(doc/)
+	script_ref.txt
+		doevent,donpcevent,OnAgitInit追加など
+
+・その他修正
+	(map/)
+	clif.c
+		clif_parse_GMReqNoChat()追加
+
+
+--------------------
+//0925 by 胡蝶蘭
+
+・スクリプトのバグ修正
+	・monster,areamonsterの問題修正
+	  これらはscript_rid2sdを使用しないようにしました。
+	  sdがNULLのとき、レベルチェックを行わないようにしました。
+	
+	(map/)
+	script.c/mob.c
+		buildin_monster(),buildin_areamonster(),mob_once_spawn()他
+
+・スクリプトの機能追加
+	・detachrid命令（プレイヤーのデタッチ）追加
+	・isloggedin関数（プレイヤーのログインチェック）追加
+	・getitem,getitem2命令,countitem,checkweight関数で
+	  nameidにアイテムの名前を指定可能に。
+	  (item_dbなどに依存するため、使用すべきではありませんが、一応)
+
+	(map/)
+	script.c
+		色々
+	(doc/)
+	script_ref.txt
+		変更部分とエラー説明修正
+
+・athena-startとstartを修正
+	・athena-start stopでプロセスが終了するまで待つように
+	・startで再起動させるときathena-start restartを呼ぶように。
+
+--------------------
+//0924 by (凸)
+
+・バグ報告スレッド part4 >>66のnpcを取り込み
+・同 >>51のguild.cを反映
+・同 >>38のatcommand_athena.confへの変更を取り込み
+・なぜかnpcフォルダにあってmap_athena.confないファイルを一覧に追加。ついでにギルドフラッグのコメントアウトを解除
+・conf/npc/npc_job_1st.txt npc_script2.txt npc_shop3.txtはスナップショットから削除してください
+
+	(map/)
+	guild.c 修正
+	(conf/)
+	map_athena.conf 修正
+	atcommand_athena.conf 修正
+	(conf/npc/)
+	npc_event_hat.txt 修正
+	npc_event_oni.txt 修正
+	npc_job_1st.txt 削除
+	npc_script2.txt 削除
+	npc_shop3.txt 削除
+
+--------------------
+//0923 by 胡蝶蘭
+
+・スクリプトのバグ修正
+・script_rid2sdが失敗してもサーバーを終了しないように変更
+	・monster,areamonsterなどが実行できない問題修正
+
+	(map/)
+	script.c/mob.c
+		buildin_monster()など修正
+
+	(doc/)
+	script_ref.txt
+		ラベルとエラーの説明修正
+	
+--------------------
+//0922 by 胡蝶蘭
+
+・スクリプトエラーの行番号が正しく表示されるように
+	
+	(map/)
+	itemdb.c / npc.c
+		itemdb_readdb(),npc_parse_script()修正
+
+・キャラクター情報にアクセスできない状態でアクセスするとエラーを出すように修正
+・goto/menuでラベルが指定される場所にラベル以外が指定されると警告を出すように
+・script_refにエラーメッセージの説明追加
+・イベント起動されたスクリプトでキャラクターを使用できるようにする関数追加
+	・attachrid（指定したIDの情報を使用できるようにする）追加
+	・getcharid（3でアカウントIDを所得できるように）修正
+	(map/)
+	script.c
+		script_rid2sd(),buildin_attachrid()追加
+		多々修正。
+	(doc/)
+	script_ref.txt
+		エラーメッセージの説明追加、変数/ラベルの説明修正
+		他修正
+
+--------------------
+//0921 by RR
+・スクリプトバグ修正(ご迷惑をおかけしました)
+	(conf/npc/)
+	npc_event_tougijou.txt
+
+・steal率修正(自DEX - 敵DEX + SLv*3 +10の部分で一度判定をしていたので)
+・0918で0914以前に巻き戻ってしまっていた部分を元に戻した
+	(map/)
+	pc.c
+		pc_steal_item() 修正
+	itemdb.c
+	pet.c
+	skill.c 修正
+
+--------------------
+//0920 by 獅子o^.^o
+・ Steal率 = Drop率 * (自DEX - 敵DEX + SLv*3 +10) /100
+	(map/)
+	pc.c
+		int pc_steal_item()修正
+
+--------------------
+//0919 by RR
+・atcommandのlvupを使うと取得ステータスポイントがおかしい問題の修正
+・バグ修正(バグ報告スレで修正の出たものの取り込み　胡蝶蘭さん、pさん、共にお疲れ様です)
+	(map/)
+	atcommand.c
+		atcommand_baselevelup()修正
+	guild.c
+		guild_gvg_eliminate_timer()修正
+	pc.c
+		pc_setreg(),pc_setregstr()修正
+	(login/)
+	login.c 
+		parse_login()修正
+--------------------
+//0918 by 聖
+・item_db自体がオーバーライド可能になったので、class_equip_db.txtの廃止。
+・pet_db.txt、produce_db.txtもオーバーライド可能に修正。
+	(map/)
+	itemdb.c
+		do_init_itemdb() 修正。
+	pet.c
+		read_petdb() 修正。
+	skill.c
+		skill_readdb() 修正。
+
+--------------------
+//0917 by RR
+・スクリプト修正
+	桃太郎イベントと闘技場イベントをNPCタイマーに変更
+	(conf/npc/)
+	npc_event_momotarou.txt
+	npc_event_tougijou.txt 修正
+・スキルツリー修正(バグ報告スレ25より)
+	(db/)
+	skill_db.txt 修正
+
+--------------------
+//0916 by (凸)
+・npc_monsterにnpc_mob_jobを統合。npc_mob_job.txtは削除してかまいません
+
+	(conf/)
+	map_athena.conf npc_mob_jobを削除
+	(conf/mob/)
+	npc_monster.txt 更新
+
+--------------------
+//0915 by 胡蝶蘭
+
+・NPCタイマー関係の命令追加＆修正他
+	・delwaitingroom（NPCチャット終了）引数を見てなかったので修正
+	・initnpctimer（NPCタイマー初期化）追加
+	・stopnpctimer（NPCタイマー停止）追加
+	・startnpctimer（NPCタイマー開始）追加
+	・getnpctimer（NPCタイマー情報所得）追加
+	・setnpctimer（NPCタイマー値設定）追加
+
+	既存のaddtimerなどはプレイヤー単位のため、NPC単位のタイマーを作りました。
+	こちらは、addtimerなどとは違い、OnTimerXXXという風にラベルを指定します。
+	詳しくはサンプルとscrit_ref.txtを参照。
+	
+	(map/)
+	map.h
+		struct npc_data 修正、struct npc_timerevent_list追加
+	npc.c / npc.h
+		npc_timerevent(),npc_timerevent_start(),npc_timerevent_stop(),
+		npc_gettimerevent_tick(),npc_settimerevent_tick()追加
+		npc_parse_script()修正
+	script.c
+		buildin_*npctimer()追加など
+	(conf/sample/)
+	npc_test_npctimer.txt
+		NPCタイマー使用サンプル
+	(doc/)
+	script_ref.txt
+		NPCタイマー関係の命令/関数追加、定数ラベルの説明修正
+
+・Sageのアーススパイクの所得条件修正
+	(db/)
+	skill_tree.txt
+		アーススパイクの行（サイズミックウェポンをLv1に）
+
+--------------------
+//0914 by p
+・範囲スキル使用時に解放済みメモリを参照していた問題に対応
+・メモリを初期化せずに使用していた領域を、初期化してから使用するように変更
+	(common/)
+	db.c
+	grfio.c
+	socket.c
+	timer.c
+	(char/)
+	char.c
+	int_guild.c
+	int_party.c
+	int_pet.c
+	int_storage.c
+	inter.c
+	(login/)
+	login.c
+	(map/)
+	ほとんど.c
+
+--------------------
+//0913 by Kalen
+
+・GVGScriptの修正
+　911対応
+　フラグからアジトへ戻る機能追加
+　戻るときに聞かれるように修正(TESTscript)
+　砦取得時::OnRecvCastleXXXを発動するように修正
+	(conf/gvg/)
+	ほとんど.txt
+
+--------------------
+//0912 by (凸)
+・このファイルの文字化けとTEST_prtg_cas01_AbraiJの文字化けを修正
+・バグ報告スレの>>19-20を取り込み
+・昔やっちまったbattle_athena.confの誤字の訂正
+
+	(common)
+	mmo.h
+		#define MAX_STAR 3に修正
+	(conf)
+	battle_athena.conf
+	(conf/gvg/)
+	TEST_prtg_cas01_AbraiJ.txt
+	(map)
+	atcommand.c
+		get_atcommandinfo_byname() 修正
+
+
+--------------------
+//0911 by Michael_Huang
+
+	Mounting Emblem of the Flag-NPC.
+	(Added Script Command: FlagEmblem).
+
+(conf/gvg/)
+	TEST_prtg_cas01_AbraiJ.txt (FlagEmblem Test)
+
+	(map/)
+	map.h struct npc_data{}
+	clif.c clif_npc0078()
+	script.c buildin_flagemblem()
+
+--------------------
+//0910 by RR
+・スクリプトの間違いを修正
+(conf/gvg/)
+	ev_agit_payg.txt
+	ev_agit_gefg.txt
+
+・ひな祭りに一度入ったらマップ変数が残ったままになるので、マップ変数を使わないよう変更
+(一時的マップ変数にすれば問題ないとも言えますが、
+town_guideとtown_kafraに時期限定の物が常駐してしまうのが気になったので、
+それらをevent_hinamatsuriへ移動し、普段のをdisableしています)
+	(conf/npc/)
+	npc_event_hinamatsuri
+	npc_town_guide
+	npc_town_kafra
+
+・スキルリセット時のスキル取得制限判定をスキルポイント48以上消費から、
+	スキルポイント58以上消費か残りスキルポイントがJOBLEVELより小さくなったときに変更
+・@model時の服色染色制限を緩和(男アサ、ローグのみへ)
+	(map/)
+	pc.c pc_calc_skilltree()
+	atcommand.c atcommand_model()
+
+
+--------------------
+//0909 by 胡蝶蘭
+
+・NPCチャット関係の命令追加
+	・waitingroom（NPCチャット作成）修正（イベントを起こす人数を指定可能）
+	・delwaitingroom（NPCチャット終了）追加
+	・enablewaitingroomevent（NPCチャットイベント有効化）追加
+	・disablewaitingroomevent（NPCチャットイベント無効化）追加
+	・getwaitingroomstate（NPCチャット状態所得）追加
+	・warpwaitingpc（NPCチャットメンバーワープ）修正
+	詳しくはscript_ref.txtを参照
+
+	(map/)
+	script.c/npc.c/npc.h/chat.c/chat.h/clif.c
+		多々修正
+	(doc/)
+	script_ref.txt
+		修正
+	(conf/sample/)
+	npc_test_chat.txt
+		追加命令のテストスクリプト
+
+・スクリプトの間違いを修正
+	(conf/npc/)
+	npc_event_skillget.txt
+	npc_event_yuno.txt
+	npc_town_lutie.txt
+	npc_turtle.txt
+		謎命令additemをgetitemに置換
+	npc_town_guide.txt
+		謎命令scriptlabelをコメント化
+	npc_event_momotaro.txt
+	npc_job_swordman.txt
+	npc_job_magician.txt
+		';'付け忘れ修正
+	(conf/gvg/)
+	ev_agit_aldeg.txt
+		@GID4を@GIDa4に置換
+	ev_agit_gefg.txt
+	ev_agit_payg.txt
+		Annouceに色指定と';'の付け忘れを習性
+	
+
+・AthenaDB計画のデータとりこみ、その他修正
+	安定しているデータかどうかわかりませんが。
+
+	(db/)
+	item_db.txt/mob_db.txt/mob_skill_db.txt
+		AthenaDB計画のデータとりこみ
+	mob_skill_db.txt.orig
+		以前のデータ（コメント部分などの参考に）
+	(conf/)
+	water_height.txt/mapflag.txt
+		AthenaDB計画のデータとりこみ
+	map_athena.conf
+		npc_monster3*.txtを削除
+		追加マップデータ (by ID:UVsq5AE)
+	(conf/mob/)
+	npc_monster.txt
+		AthenaDB計画のデータとりこみ
+
+--------------------
+//0908 by 胡蝶蘭
+
+・スクリプトのエラーチェック処理を増やした
+	・文字列の途中で改行があるとエラーを出すように。
+	・関数呼び出し演算子'('の直前に関数名以外があるとエラーを出すように。
+	・命令があるべきところに関数名以外があるとエラーを出すように。
+	・命令および関数の引数区切りの','を省略すると警告を出すように。
+	・命令および関数の引数の数が異なると警告を出すように。
+
+	(map/)
+	script.c
+		色々修正
+
+・NPCスクリプト修正
+	(conf/npc/)
+	npc_town_guide.txt
+		４行目はいらないようなのでエラーが出ないようにコメント化
+	npc_event_hat.txt
+		コモドの仮面職人とフェイヨンの青年 (by ID:dS8kRnc)
+	(conf/sample/)
+	npc_card_remover.txt
+		@menuを使って短くした＆文章少し修正
+
+・その他
+	(db/)
+	skill_tree.txt
+		Sage応急手当
+
+--------------------
+//0907 by p
+・atcommand() の肥大化がひどいのでリファクタリング
+  @ コマンドを追加する場合は、atcommand.h 内で定数を、atcommand.c 内で
+  関数定義マクロとマッピングテーブル、処理用の関数を記述してください。
+・global 変数の atcommand_config を消去。
+  @ コマンド毎のレベルは get_atcommand_level() で取得してください。
+・一部のキャラ名を取る @ コマンドで、半角スペースを含む名前のキャラを
+  正常に処理できていなかった問題を修正。
+  この影響により、@rura+ など、キャラ名がパラメータの途中にあったものは
+  全て最後に回されています。
+・@ コマンドの文字列を正常に取得できなかった場合に、バッファの内容を
+  チェックせずに処理を行おうとしていた部分を修正しました。
+
+	(common/)
+	mmo.h
+	(map/)
+	atcommand.h
+	atcommand.c
+	clif.h
+	clif.c
+
+--------------------
+//0906 by Selena
+・胡蝶蘭さんの修正にあわせて、バルキリーレルム１以外のスクリプトの修正。
+・@コマンド入力ミスの際にエラーメッセージを表示。
+	(conf/gvg/)
+	ev_agit_aldeg.txt
+	ev_agit_gefg.txt
+	ev_agit_payg.txt
+	ev_agit_prtg.txt
+	aldeg_cas01～05.txt
+	gefg_cas01～05.txt
+	payg_cas01～05.txt
+	prtg_cas02～05.txt
+	(map/)
+	atcommand.c
+
+--------------------
+//0905 by 管理人
+
+・サーバーsnapshot
+・前スレのファイル取り忘れた人がいるかもしれないので
+
+--------------------
 //0904 by 胡蝶蘭
 
 ・スクリプト処理修正

@@ -1,4 +1,4 @@
-//item_db.txt＠AthenaDB計画 2004/03/31 18:50:44 +0900 (JST)
+//item_db.txt＠AthenaDB計画 2004/04/09 03:32:36 +0900 (JST)
 //ID,Name,Jname,Type,Price,Sell,Weight,ATK,DEF,Range,Slot,Job,Gender,Loc,wLV,eLV,View,{UseScript},{EquipScript}
 501,Red_Potion,赤ポーション,0,50,,70,,,,,10477567,2,,,,,{ itemheal rand(45,64),0; },{}
 502,Orange_Potion,紅ポーション,0,200,,100,,,,,10477567,2,,,,,{ itemheal rand(105,144),0; },{}
@@ -126,6 +126,7 @@
 676,Unknown_Item,銀貨の袋,2,,,400,,,,,,,,,,,{},{}
 677,Unknown_Item,白金貨,2,,,40,,,,,,,,,,,{},{}
 678,Unknown_Item,毒薬,2,,,100,,,,,,,,,,,{},{}
+679,Unknown_Item,召喚団,2,,,300,,,,,,,,,,,{},{}
 701,Ora_Ora,オラオラ,3,55000,,200,,,,,,,,,,,{},{}
 702,Animal_Gore,家畜の血,3,2,,100,,,,,,,,,,,{},{}
 703,Hinalle,ヒナレ,3,2,,10,,,,,,,,,,,{},{}
@@ -441,7 +442,7 @@
 1166,Dragon_Slayer,ドラゴンスレイヤー,4,20,,1300,150,,1,0,16514,2,34,4,48,3,{},{ bonus bIgnoreDefRace,9; bonus2 bAddRace,9,15; }
 1167,Schweizersabel,シュバイチェルシャベル,4,20,,1600,160,,1,0,16514,2,34,4,48,3,{},{ bonus bAtkEle,4; skill 20,3; bonus bDef,1; bonus3 bAutoSpell,20,3,25; }
 1168,Zweihander,ツヴァイハンダー,4,20,,2200,200,,1,0,16514,2,34,4,48,3,{},{}
-1169,Executioner_,エクスキューショナー,4,20,,2200,155,,1,0,16514,2,34,4,48,3,{},{ bonus bIgnoreDefRace,7; bonus2 bAddRace,7,20; bonus2 bSubRace,7,-10; }
+1169,Executioner_,エクスキューショナー,4,20,,2200,155,,1,0,16514,2,34,4,48,3,{},{ bonus bIgnoreDefRace,7; bonus2 bAddRace,7,20; bonus2 bSubRace,7,-10; bonus bAtkEle,7; }
 1170,Katzbalger,カッツバルゲル,4,20,,2000,175,,1,0,16514,2,34,4,48,3,{},{ bonus bVit,10; bonus bDef,10; }
 1201,Knife,ナイフ,4,50,,400,17,,1,3,10444527,2,2,1,1,1,{},{}
 1202,Knife_,ナイフ,4,50,,400,17,,1,4,10444527,2,2,1,1,1,{},{}
@@ -474,7 +475,7 @@
 1229,Mama's_Knife,包丁,4,20,,500,75,,1,0,2055918,2,2,4,36,1,{},{ bonus bCritical,30; bonus2 bAddRace,7,3; bonus3 bAddMonsterDropItem,517,2,5000; }
 1230,House_Auger,錐,4,20,,600,80,,1,0,2055918,2,2,4,36,1,{},{ bonus bDefRatioAtkRace,10; bonus bDefRatioAtkRace,11; }
 1231,Bazerald,バゼラルド,4,20,,500,70,,1,0,2055918,2,2,4,36,1,{},{ bonus bAtkEle,3; bonus bInt,5; bonus bMatkRate,10; }
-1232,Assassin_Dagger,アサシンダガー,4,20,,600,140,,1,0,4096,2,2,4,36,1,{},{ bonus bMaxHPrate,20; bonus bMaxSPrate,15; bonus bAspdAddRate,2; }
+1232,Assassin_Dagger,アサシンダガー,4,20,,600,140,,1,0,4096,2,2,4,36,1,{},{ bonus bMaxHPrate,20; bonus bMaxSPrate,15; bonus bAspdAddRate,2; bonus bAtkEle,7; }
 1233,Exercise,エキサーサイズ,4,20,,700,90,,1,0,2055918,2,2,4,36,1,{},{ bonus bIgnoreDefRace,6; bonus2 bSubRace,6,5; bonus2 bSubRace,7,-10; }
 1234,Moonlight_Sword,月光剣,4,20,,700,50,,1,0,2055918,2,2,4,36,1,{},{ bonus bMaxSPrate,10; }
 1235,Azoth,アゾート,4,20,,700,110,,1,0,262144,2,2,4,36,1,{},{}
@@ -518,7 +519,7 @@
 1362,Two_handed_Axe__,ツーハンドアックス,4,55000,,2500,185,,1,0,279714,2,34,3,30,7,{},{}
 1363,Blood_Axe,ブラッドアックス,4,20,,4000,170,,1,0,279714,2,34,4,44,7,{},{ bonus bStr,10; bonus bSpeedRate,25; }
 1364,Great_Axe,グレイトアックス,4,20,,1800,187,,1,0,279714,2,34,4,44,7,{},{ bonus2 bAddEff,Eff_Stan,1500; }
-1365,Sabbath,サバス,4,20,,2300,120,,1,0,279714,2,34,4,44,7,{},{ bonus2 bWeaponComaRace,6,50; }
+1365,Sabbath,サバス,4,20,,2300,120,,1,0,279714,2,34,4,44,7,{},{ bonus2 bWeaponComaRace,6,50; bonus bAtkEle,7; }
 1366,Light_Epsilon,ライトエプシロン,4,20,,2300,180,,1,0,279714,2,34,4,44,7,{},{ bonus bAtkEle,6; skill 28,3; bonus2 bAddRace,6,3; }
 1367,Slaughter,スローター,4,20,,2500,120,,1,0,279714,2,34,4,44,7,{},{ bonus bIgnoreDefRace,2; bonus2 bWeaponComaRace,2,40; }
 1368,Tomahawk,トマホーク,4,20,,2500,165,,1,0,279714,2,34,4,44,7,{},{ bonus bAtkEle,4; }
@@ -1360,25 +1361,26 @@
 7231,Unknown_Item,金鉱石,3,,,150,,,,,,,,,,,{},{}
 7232,Unknown_Item,銀鉱石,3,,,150,,,,,,,,,,,{},{}
 7233,Unknown_Item,ミスリル鉱石,3,,,150,,,,,,,,,,,{},{}
-7234,Unknown_Item,ギルドの心,3,,,1,,,,,,,,,,,{},{}
-7235,Unknown_Item,突撃の心,3,,,1,,,,,,,,,,,{},{}
-7236,Unknown_Item,守護の心,3,,,1,,,,,,,,,,,{},{}
-7237,Unknown_Item,協同の心,3,,,1,,,,,,,,,,,{},{}
-7238,Unknown_Item,調和の心,3,,,1,,,,,,,,,,,{},{}
-7239,Unknown_Item,前進の心,3,,,1,,,,,,,,,,,{},{}
-7240,Unknown_Item,信頼の心,3,,,1,,,,,,,,,,,{},{}
-7241,Unknown_Item,結束の心,3,,,1,,,,,,,,,,,{},{}
-7242,Unknown_Item,和合の心,3,,,1,,,,,,,,,,,{},{}
-7243,Unknown_Item,協力の心,3,,,1,,,,,,,,,,,{},{}
-7244,Unknown_Item,団結の心,3,,,1,,,,,,,,,,,{},{}
-7245,Unknown_Item,友情の心,3,,,1,,,,,,,,,,,{},{}
-7246,Unknown_Item,平和の心,3,,,1,,,,,,,,,,,{},{}
-7247,Unknown_Item,根性の心,3,,,1,,,,,,,,,,,{},{}
-7248,Unknown_Item,名誉の心,3,,,1,,,,,,,,,,,{},{}
-7249,Unknown_Item,奉仕の心,3,,,1,,,,,,,,,,,{},{}
-7250,Unknown_Item,栄光の心,3,,,1,,,,,,,,,,,{},{}
-7251,Unknown_Item,勝利の心,3,,,1,,,,,,,,,,,{},{}
-7252,Unknown_Item,漢方薬剤,3,,,1,,,,,,,,,,,{},{}
+7234,Unknown_Item,ギルドの心,3,,,10,,,,,,,,,,,{},{}
+7235,Unknown_Item,突撃の心,3,,,10,,,,,,,,,,,{},{}
+7236,Unknown_Item,守護の心,3,,,10,,,,,,,,,,,{},{}
+7237,Unknown_Item,協同の心,3,,,10,,,,,,,,,,,{},{}
+7238,Unknown_Item,調和の心,3,,,10,,,,,,,,,,,{},{}
+7239,Unknown_Item,前進の心,3,,,10,,,,,,,,,,,{},{}
+7240,Unknown_Item,信頼の心,3,,,10,,,,,,,,,,,{},{}
+7241,Unknown_Item,結束の心,3,,,10,,,,,,,,,,,{},{}
+7242,Unknown_Item,和合の心,3,,,10,,,,,,,,,,,{},{}
+7243,Unknown_Item,協力の心,3,,,10,,,,,,,,,,,{},{}
+7244,Unknown_Item,団結の心,3,,,10,,,,,,,,,,,{},{}
+7245,Unknown_Item,友情の心,3,,,10,,,,,,,,,,,{},{}
+7246,Unknown_Item,平和の心,3,,,10,,,,,,,,,,,{},{}
+7247,Unknown_Item,根性の心,3,,,10,,,,,,,,,,,{},{}
+7248,Unknown_Item,名誉の心,3,,,10,,,,,,,,,,,{},{}
+7249,Unknown_Item,奉仕の心,3,,,10,,,,,,,,,,,{},{}
+7250,Unknown_Item,栄光の心,3,,,10,,,,,,,,,,,{},{}
+7251,Unknown_Item,勝利の心,3,,,10,,,,,,,,,,,{},{}
+7252,Unknown_Item,漢方薬剤,3,,,10,,,,,,,,,,,{},{}
+7253,Unknown_Item,金色の大極旗,3,,,10,,,,,,,,,,,{},{}
 9001,Poring_Egg,ポリンの卵,7,20,,0,,,,,,,,,,,{},{}
 9002,Drops_Egg,ドロップスの卵,7,20,,0,,,,,,,,,,,{},{}
 9003,Poporing_Egg,ポポリンの卵,7,20,,0,,,,,,,,,,,{},{}
