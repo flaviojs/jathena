@@ -478,6 +478,7 @@ int pc_setequipindex(struct map_session_data *sd)
 int pc_isequip(struct map_session_data *sd,int n)
 {
 	struct item_data *item = sd->inventory_data[n];
+	struct status_change *sc_data = battle_get_sc_data(&sd->bl);
 
  	if( battle_config.gm_allequip>0 && pc_isGM(sd)>=battle_config.gm_allequip )
 		return 1;
@@ -493,6 +494,14 @@ int pc_isequip(struct map_session_data *sd,int n)
 	if(map[sd->bl.m].flag.pvp && (item->flag.no_equip==1 || item->flag.no_equip==3))
 		return 0;
 	if(map[sd->bl.m].flag.gvg && (item->flag.no_equip==2 || item->flag.no_equip==3))
+		return 0;
+	if(item->equip & 0x0002 && sc_data[SC_STRIPWEAPON].timer != -1)
+		return 0;
+	if(item->equip & 0x0020 && sc_data[SC_STRIPSHIELD].timer != -1)
+		return 0;
+	if(item->equip & 0x0010 && sc_data[SC_STRIPARMOR].timer != -1)
+		return 0;
+	if(item->equip & 0x0100 && sc_data[SC_STRIPHELM].timer != -1)
 		return 0;
 	return 1;
 }

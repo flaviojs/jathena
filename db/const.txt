@@ -32,6 +32,7 @@ mf_pvp_noparty	6
 mf_pvp_noguild	7
 mf_gvg		8
 mf_gvg_noparty	9
+mf_nozenypenalty	10
 
 StatusPoint	9	1
 BaseLevel	11	1

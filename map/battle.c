@@ -188,12 +188,15 @@ int battle_get_agi(struct block_list *bl)
 int battle_get_vit(struct block_list *bl)
 {
 	int vit=0;
+	struct status_change *sc_data=battle_get_sc_data(bl);
 	if(bl->type==BL_MOB)
 		vit=mob_db[((struct mob_data *)bl)->class].vit;
 	else if(bl->type==BL_PC)
 		vit=((struct map_session_data *)bl)->paramc[2];
 	else if(bl->type==BL_PET)
 		vit=mob_db[((struct pet_data *)bl)->class].vit;
+	if(bl->type!=BL_PC && sc_data && sc_data[SC_STRIPARMOR].timer != -1)
+		vit = vit*60/100;
 	if(vit < 0) vit = 0;
 	return vit;
 }
@@ -215,6 +218,9 @@ int battle_get_int(struct block_list *bl)
 			if(battle_check_undead(race,battle_get_elem_type(bl)) || race==6 )	int_ >>= 1;	// ˆ« –‚/•sŽ€
 			else int_ += sc_data[SC_BLESSING].val1;	// ‚»‚Ì‘¼
 		}
+		if( sc_data[SC_STRIPHELM].timer != -1 && bl->type != BL_PC)
+			int_ = int_*90/100;
+
 	}
 	if(int_ < 0) int_ = 0;
 	return int_;
@@ -428,6 +434,8 @@ int battle_get_atk2(struct block_list *bl)
 				atk2 += sc_data[SC_DRUMBATTLE].val2;
 			if(sc_data[SC_NIBELUNGEN].timer!=-1 && (battle_get_element(bl)/10) >= 8 )
 				atk2 += sc_data[SC_NIBELUNGEN].val2;
+			if(sc_data[SC_STRIPWEAPON].timer!=-1)
+				atk2 -= atk2*90/100;
 		}
 		if(atk2 < 0) atk2 = 0;
 		return atk2;
@@ -503,6 +511,8 @@ int battle_get_def(struct block_list *bl)
 				def += sc_data[SC_DRUMBATTLE].val3;
 			if(sc_data[SC_POISON].timer!=-1 && bl->type != BL_PC)
 				def = def*75/100;
+			if(sc_data[SC_STRIPSHIELD].timer!=-1 && bl->type != BL_PC)
+				def = def*85/100;
 			if(sc_data[SC_SIGNUMCRUCIS].timer!=-1 && bl->type != BL_PC)
 				def = def * (100 - sc_data[SC_SIGNUMCRUCIS].val2)/100;
 			if(sc_data[SC_ETERNALCHAOS].timer!=-1 && bl->type != BL_PC)

@@ -289,10 +289,10 @@
 212,-1,6,1,0,0,10,1,no,0,0,0,weapon,0	//RG_BACKSTAP#バックスタブ#
 213,0,0,0,0,0,5,0,no,0,0,0,none,0	//RG_TUNNELDRIVE#トンネルドライブ#
 214,0,6,4,0,1,5,1,no,0,0,0,weapon,0	//RG_RAID#サプライズアタック#
-215,1,6,1,0,1,5,1,no,0,0,0,weapon,0	//RG_STRIPWEAPON#ストリップウエポン#
-216,1,6,1,0,1,5,1,no,0,0,0,weapon,0	//RG_STRIPSHIELD#ストリップシールド#
-217,1,6,1,0,1,5,1,no,0,0,0,weapon,0	//RG_STRIPARMOR#ストリップアーマー#
-218,1,6,1,0,1,5,1,no,0,0,0,weapon,0	//RG_STRIPHELM#ストリップヘルム#
+215,1,6,1,0,1,5,1,yes,0,0,0,weapon,0	//RG_STRIPWEAPON#ストリップウエポン#
+216,1,6,1,0,1,5,1,yes,0,0,0,weapon,0	//RG_STRIPSHIELD#ストリップシールド#
+217,1,6,1,0,1,5,1,yes,0,0,0,weapon,0	//RG_STRIPARMOR#ストリップアーマー#
+218,1,6,1,0,1,5,1,yes,0,0,0,weapon,0	//RG_STRIPHELM#ストリップヘルム#
 219,-1,6,1,0,0,5,1,no,0,0,0,weapon,0	//RG_INTIMIDATE#インティミデイト#
 220,0,6,2,0,1,1,1,no,0,0,0,none,0	//RG_GRAFFITI#グラフィティ#
 221,0,6,2,0,1,5,1,no,0,0,0,none,0	//RG_FLAGGRAFFITI#フラッググラフィティ#
@@ -309,10 +309,10 @@
 231,8,6,16,0,1,5,1,no,0,3072,0,none,0	//AM_POTIONPITCHER#ポーションピッチャー#
 232,8,6,2,0,1,5,1,no,0,0,0,none,0	//AM_CANNIBALIZE#バイオプラント#
 233,8,6,2,0,1,5,1,no,0,128,0,none,0	//AM_SPHEREMINE#スフィアーマイン#
-234,1,6,16,0,1,5,1,no,0,0,0,weapon,0	//AM_CP_WEAPON#ケミカルウェポンチャージ#
-235,1,6,16,0,1,5,1,no,0,0,0,weapon,0	//AM_CP_SHIELD#ケミカルシールドチャージ#
-236,1,6,16,0,1,5,1,no,0,0,0,weapon,0	//AM_CP_ARMOR#ケミカルアーマーチャージ#
-237,1,6,16,0,1,5,1,no,0,0,0,weapon,0	//AM_CP_HELM#ケミカルヘルムチャージ#
+234,1,6,16,0,1,5,1,yes,0,0,0,weapon,0	//AM_CP_WEAPON#ケミカルウェポンチャージ#
+235,1,6,16,0,1,5,1,yes,0,0,0,weapon,0	//AM_CP_SHIELD#ケミカルシールドチャージ#
+236,1,6,16,0,1,5,1,yes,0,0,0,weapon,0	//AM_CP_ARMOR#ケミカルアーマーチャージ#
+237,1,6,16,0,1,5,1,yes,0,0,0,weapon,0	//AM_CP_HELM#ケミカルヘルムチャージ#
 
 238,0,0,0,0,0,1,0,no,0,0,0,none,0	//AM_BIOETHICS#生命倫理#
 239,0,0,0,0,0,10,0,no,0,0,0,none,0	//AM_BIOTECHNOLOGY#生命工学研究#

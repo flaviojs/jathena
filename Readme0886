@@ -1,4 +1,26 @@
 --------------------
+//0897 by ぴざまん
+
+・細かい調整
+・ストリップ系とケミカルプロテクション系スキルの全実装
+　本鯖での細かい仕様が分ったので実装しました。
+　確率は暫定です。
+
+	(map/)
+	pc.c
+		pc_isequip() 修正
+	skill.c
+		skill_status_change_start()、skill_castend_nodamage_id() 修正。
+		skill_abra_dataset() 修正。
+	battle.c
+		battle_get_def()、battle_get_atk2() 修正。
+		battle_get_vit()、battle_get_int() 修正。
+	(db/)
+	const.txt 修正。
+	skill_db.txt 修正。
+	cast_db.txt 修正。
+
+--------------------
 //0896 by 胡蝶蘭
 
 ・永続的マップ変数機能追加
