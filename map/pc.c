@@ -1991,6 +1991,8 @@ int pc_bonus3(struct map_session_data *sd,int type,int type2,int type3,int val)
  */
 int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 {
+	int i;
+	
 	if(level>10){
 		if(battle_config.error_log)
 			printf("support card skill only!\n");
@@ -2001,7 +2003,7 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 		pc_calcstatus(sd,0);
 		clif_skillinfoblock(sd);
 	}
-	else if(sd->status.skill[id].lv < level){	// 覚えられるがlvが小さいなら
+	/*else if(sd->status.skill[id].lv < level){	// 覚えられるがlvが小さいなら
 		if(sd->status.skill[id].id==id)
 			sd->status.skill[id].flag=sd->status.skill[id].lv+2;	// lvを記憶
 		else {
@@ -2009,6 +2011,27 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 			sd->status.skill[id].flag=1;	// cardスキルとする
 		}
 		sd->status.skill[id].lv=level;
+	}*/
+	else {
+		if(battle_config.gm_allskill>0 && pc_isGM(sd)>=battle_config.gm_allskill) {	// GMで全てのスキルを取得するようにしているかを判断
+			if(sd->status.skill[id].lv < level) {	// 覚えられるがlvが小さいなら
+				sd->status.skill[id].flag=sd->status.skill[id].lv+2;	// lvを記憶
+				sd->status.skill[id].lv=level;	// lvを上げる
+			}
+			return 0;
+		}
+		for(i=0;i<100;i++) {
+			if(skill_tree[sd->status.class][i].id==id && sd->status.skill[id].id==id) {	// 現在の職業で覚えられるスキルか、条件を満たしているかを判断
+				if(sd->status.skill[id].lv < level) {	// 覚えられるがlvが小さいなら
+					sd->status.skill[id].flag=sd->status.skill[id].lv+2;	// lvを記憶
+					sd->status.skill[id].lv=level;	// lvを上げる
+				}
+				return 0;
+			}
+		}
+		sd->status.skill[id].id=id;	// 現在の職業で覚えられないスキル、あるいは条件を満たしていない場合は覚えられるようにして
+		sd->status.skill[id].flag=1;	// cardスキルとする
+		sd->status.skill[id].lv=level;	// lvを上げる
 	}
 
 	return 0;
@@ -3537,18 +3560,26 @@ int pc_skillup(struct map_session_data *sd,int skill_num)
  */
 int pc_allskillup(struct map_session_data *sd)
 {
-	int i;
-
-	for(i=0;i<MAX_SKILL;i++) {
-		if(sd->status.skill[i].id!=0 && !sd->status.skill[i].flag) {
-			while(sd->status.skill[i].lv < skill_get_max(i)) {
-				sd->status.skill[i].lv++;
-				pc_calcstatus(sd,0);
-				clif_skillup(sd,i);
+	int i,j,flag=1;
+	
+	while(flag) {	// 覚えられるスキルがなくなる(flag==0)まで繰り返す
+		flag=0;	// とりあえずflagを0に設定
+		for(i=0;i<MAX_SKILL;i++) {	// スキルを0番から順番に検査
+			if(sd->status.skill[i].id==i) {	// 覚えられる場合で
+				if(sd->status.skill[i].flag)	// cardスキルの場合は
+					for(j=0;j<100;j++)
+						if(skill_tree[sd->status.class][j].id==i)	// 現在の職業で覚えられるスキルかを判断
+							sd->status.skill[i].flag=0;	// cardスキルを解除し、lv上げへ
+				if(!sd->status.skill[i].flag && sd->status.skill[i].lv < skill_get_max(i)) {	// cardスキルではなく、lvが小さいなら
+					sd->status.skill[i].lv=skill_get_max(i);	// lvを最大にして
+					sd->status.skill[i].flag=0;	// 記憶させたlvを消去
+					pc_calcstatus(sd,0);	// ステータスを計算し
+					clif_skillup(sd,i);	// lvアップを通知
+					flag=1;	// このlvアップで覚えられるスキルが増えたかもしれないので、flagを1にする
+				}
 			}
 		}
 	}
-	pc_calcstatus(sd,0);
 
 	return 0;
 }
