@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 #=========================================================================
-# serverstatus.cgi  ver.1.00  by 胡蝶蘭
+# serverstatus.cgi  ver.1.01  by 胡蝶蘭
 #	checkversionをラップした、サーバー状態を表示するcgi
 #
 # ** 設定方法 **
@@ -63,7 +63,7 @@ my(@state2)=(					# 色
 
 
 use strict;
-eval { use Net::Ping; };
+eval " use Net::Ping; ";
 
 
 my($msg)=<<"EOD";

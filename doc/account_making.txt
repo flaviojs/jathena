@@ -39,7 +39,7 @@
 	CygwinならInterpreter->Perlを入れればOK
 
  起動方法
-   $ perl tool/ladmin
+   $ perl bin/tool/ladmin
 　　　　最後に「ladmin>」というプロンプトがでればOK
 	失敗するなら次の項目をチェック。
 	・login_athena.cnfのadmin_passを変更した場合、

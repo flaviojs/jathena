@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########################################################################
-# Athenaのログインサーバー保守ツール Ver.1.05
+# Athenaのログインサーバー保守ツール Ver.1.05b  by 胡蝶蘭
 #
 # 　起動中のAthenaのlogin.exeに接続してアカウントの保守を行うツール.
 # 　アカウントの追加、削除、パスワードの変更、リスト表示ができます.
@@ -116,11 +116,12 @@ my($passenc)=2;					# パスワード暗号化タイプ
 use strict;
 use IO::Socket;
 use Term::ReadLine;
-eval { use POSIX qw(:termios_h); };
-eval { use Digest::MD5 qw(md5); } if $passenc;
+use POSIX qw(:termios_h);
+
+eval " use Digest::MD5 qw(md5); " if $passenc;
 $passenc=0 if($@);
 
-my($ver)="1.05";
+my($ver)="1.05b";
 
 
 

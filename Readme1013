@@ -1,3 +1,39 @@
+--------------------
+//1037 by 胡蝶蘭
+
+** FOR ENGLISH DEVELOPERS **
+DO NOT UPLOAD IF YOU DON'T USE JAPANESE ENCODE (SHIFT-JIS) !
+WHY WE(JAPANESE) REPAIR ERROR CHARACTER AFTER EVERY YOUR UPLOADING ?
+BREAKING IS EASY, REPAIRING IS VERY DIFFICULT !
+
+** 英語圏の開発者の方へ(日本語訳) **
+日本語エンコード(シフトJIS)を使う気が無いならアップロードしないてください！
+なぜ我々（日本人）があなた方のアップロードのたびに文字化けを直さなければならないんですか？
+壊すのは簡単ですが、直すのはとても難しいんです！
+
+・文字化けを根性で修正
+	(map/)
+	script.c
+
+・ladminがPOSIX必須に。Digest::MD5が無くても実行できるように修正
+・serverstatus.cgiで、Net::Pingが無くても実行できるように修正
+	(bin/tool/)
+	ladmin
+	(bin/tool/cgi/)
+	serverstatus.cgi
+
+・script_refで抜けてるものでわかるものを修正
+	何故かscript_refから抜けてるもの(getargなど)の一部を再び追加
+	** アップロードするときは最新パッチからの差分をアップロードしましょう **
+	(doc/)
+	script_ref.txt
+
+・account_making.txt修正
+	ladminスクリプトのパス
+	(doc/)
+	accoun_tmaking.txt
+
+--------------------
 //1036 by Michael
 ・追加 Script Command:
   getequipid(EquipPos);		EquipPos: 1-10
@@ -12,7 +48,7 @@
 		buildin_gettime(); 追加
 		buildin_gettimestr(); 追加
 
-----------------------------------------
+--------------------
 //1035 by Michael
 ・追加 GVG Script NPC edit from Aegis NPC(Chinese-big5 version), Please someone translate to Japanese.
 ・修正 NPC Script Command - buildin_getgdskilllv()
@@ -22,7 +58,7 @@
 	script.c
 		buildin_getgdskilllv() 修正
 
-----------------------------------------
+--------------------
 //1034 by (Pepermint)
 	FIX NPC Script Command - buildin_getgdskilllv()
         Add NPC Sctipt Command - buildin_agitcheck()
@@ -31,7 +67,7 @@
 		buildin_getgdskilllv() 修正
 		buildin_agitcheck() 追加
 
-----------------------------------------
+--------------------
 //1033 by Michael
 ・追加 NPC Script Command - buildin_getgdskilllv()
   getgdskilllv(Guild_ID, Skill_ID);
@@ -60,7 +96,7 @@
 	script.c
 		buildin_getitemname() 復活
 
-----------------------------------------
+--------------------
 //1031 by huge
 ・NPCのscriptに、makepetを追加。
     makepet 卵ID; で、ペットを作成します。
