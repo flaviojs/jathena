@@ -7,6 +7,7 @@ struct Damage {
 	int type,div_;
 	int amotion,dmotion;
 	int blewcount;
+	int flag;
 };
 
 // 属性表（読み込みはpc.c、battle_attr_fixで使用）
@@ -124,6 +125,7 @@ extern struct Battle_Config {
 	int warp_point_debug;
 	int enemy_critical;
 	int enemy_critical_rate;
+	int enemy_str;
 	int enemy_perfect_flee;
 	int cast_rate,delay_rate,delay_dependon_dex;
 	int sdelay_attack_enable;

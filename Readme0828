@@ -1,4 +1,17 @@
 --------------------
+//0845 by ぽぽぽ
+
+・mob_avail.txtでPCグラフィック(0～23)を指定したペットが出現したときクライアントエラーがでるのを暫定修正。
+・mob_avail.txtでペットにもPCキャラの性別･髪型&色･武器･盾･頭装備を指定できるようにしました。
+・MOBのATK計算にSTRを適用するかどうか設定可能にした。
+	(map/)
+	clif.c
+		clif_pet0078()、clif_pet007b()、clif_spawnpet()修正。
+	battle.h修正。
+	battle.c
+		battle_config_read()、battle_calc_mob_weapon_attack()修正。
+
+--------------------
 //0844 by ぽぽぽ
 
 ・mob_avail.txtでPCグラフィック(0～23)を指定したMOBが出現したときクライアントエラーがでるのを暫定修正。
@@ -8,7 +21,7 @@
 　となります。装備はitem_dbのView欄参照のこと。
 	(map/)
 	clif.c
-		clif_mob_0078()、clif_mob007b()、clif_spawnmob()修正。
+		clif_mob0078()、clif_mob007b()、clif_spawnmob()修正。
 	mob.h修正。
 	mob.c
 		mob_get_sex()、mob_get_hair()、mob_get_hair_color()、ob_get_weapon()、

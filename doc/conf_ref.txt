@@ -344,6 +344,9 @@ enemy_critical
 enemy_critical_rate
 	モンスターとペットのクリティカル頻度の百分率です。enemy_criticalがyesじゃないと設定しても何の意味もありません。デフォルトは100です。
 
+enemy_str
+	モンスターのが攻撃するときのATK計算にSTRを使用するかどうかです。
+	デフォルトはyesです。
 
 enemy_perfect_flee
 	敵が完全回避をするかどうかです。これをyesにすると敵も完全回避を
