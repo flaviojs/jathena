@@ -50,7 +50,7 @@ struct script_reg {
 };
 struct status_change {
 	int timer;
-	int val1,val2,val3,val4;
+	int val1,val2,val3,val4,val5;
 };
 struct vending {
 	short index;

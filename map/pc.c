@@ -1317,7 +1317,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			aspd_rate -= sd->sc_data[SC_SPEARSQUICKEN].val2;
 		if(sd->sc_data[SC_ASSNCROS].timer!=-1 && // —[—z‚ÌƒAƒTƒVƒ“ƒNƒƒX
 			sd->sc_data[SC_TWOHANDQUICKEN].timer==-1 && sd->sc_data[SC_ADRENALINE].timer==-1 && sd->sc_data[SC_SPEARSQUICKEN].timer==-1)
-			aspd_rate -= sd->sc_data[SC_ASSNCROS].val2;
+				aspd_rate -= 5+sd->sc_data[SC_ASSNCROS].val1+sd->sc_data[SC_ASSNCROS].val2/2+sd->sc_data[SC_ASSNCROS].val3/20;
 		if(sd->sc_data[SC_DONTFORGETME].timer!=-1){		// Ž„‚ð–Y‚ê‚È‚¢‚Å
 			aspd_rate += sd->sc_data[SC_DONTFORGETME].val2;
 			sd->speed= sd->speed* sd->sc_data[SC_DONTFORGETME].val3/100;
@@ -1334,7 +1334,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 		// HIT/FLEE•Ï‰»Œn
 		if(sd->sc_data[SC_WHISTLE].timer!=-1){  // Œû“J
-			sd->flee += sd->sc_data[SC_WHISTLE].val1 * sd->flee/100;
+			sd->flee += sd->flee * (sd->sc_data[SC_WHISTLE].val1
+					+sd->sc_data[SC_WHISTLE].val2/2+sd->sc_data[SC_WHISTLE].val3/10)/100;
 			sd->flee2+= sd->sc_data[SC_WHISTLE].val1 * 10;
 		}
 		if(sd->sc_data[SC_HUMMING].timer!=-1)  // ƒnƒ~ƒ“ƒO
@@ -1356,7 +1357,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 		// ‚»‚Ì‘¼
 		if(sd->sc_data[SC_APPLEIDUN].timer!=-1){	// ƒCƒhƒDƒ“‚Ì—ÑŒç
-			sd->status.max_hp += (sd->sc_data[SC_APPLEIDUN].val2 * sd->status.max_hp)/100;
+			sd->status.max_hp += ((5+sd->sc_data[SC_APPLEIDUN].val1*2+sd->sc_data[SC_APPLEIDUN].val2
+						+sd->sc_data[SC_APPLEIDUN].val3/10) * sd->status.max_hp)/100;
 			if(sd->status.max_hp < 0 || sd->status.max_hp > battle_config.max_hp)
 				sd->status.max_hp = battle_config.max_hp;
 		}

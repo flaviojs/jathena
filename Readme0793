@@ -1,4 +1,21 @@
 --------------------
+//0820 by ぴざまん
+・アドリブのメッセージが入ってなかったので修正
+・バードの演奏スキルで楽器の練習や自ステータスの補正が入ってなかったのを修正。
+　struct status_changeのvalが3つ必要だったので(val4は予約されてたっぽいので)val5を追加しました
+	(map/)
+	map.h 修正。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+		skill_castfix()、skill_delayfix() 修正。
+	battle.c
+		battle_get_flee()、battle_get_max_hp() 修正。
+		battle_get_adelay()、battle_get_amotion() 修正。
+		battle_calc_misc_attack() 修正。
+	pc.c
+		pc_calcstatus() 修正。
+
+--------------------
 //0819 by Kalen
 ・コンロン(NPC、Warp)修正
 	conf/npc/npc_town_gonryun.txt(案内員補充)

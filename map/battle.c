@@ -124,7 +124,8 @@ int battle_get_max_hp(struct block_list *bl)
 		}
 		if(sc_data) {
 			if(sc_data[SC_APPLEIDUN].timer!=-1)
-				max_hp += (sc_data[SC_APPLEIDUN].val2 * max_hp)/100;
+				max_hp += ((5+sc_data[SC_APPLEIDUN].val1*2+sc_data[SC_APPLEIDUN].val2
+						+sc_data[SC_APPLEIDUN].val3/10) * max_hp)/100;
 		}
 		if(max_hp < 1) max_hp = 1;
 		return max_hp;
@@ -278,9 +279,10 @@ int battle_get_flee(struct block_list *bl)
 		flee=battle_get_agi(bl) + battle_get_lv(bl);
 
 	if(sc_data) {
-		if(sc_data[SC_WHISTLE].timer!=-1 && bl->type != BL_PC)	// グロリア(PCはpc.cで)
-			flee += flee*sc_data[SC_WHISTLE].val1/100;
-		if(sc_data[SC_BLIND].timer!=-1 && bl->type != BL_PC)		// 呪い
+		if(sc_data[SC_WHISTLE].timer!=-1 && bl->type != BL_PC)
+			flee += flee*(sc_data[SC_WHISTLE].val1+sc_data[SC_WHISTLE].val2/2
+					+sc_data[SC_WHISTLE].val3/10)/100;
+		if(sc_data[SC_BLIND].timer!=-1 && bl->type != BL_PC)
 			flee -= flee*25/100;
 	}
 	if(flee < 1) flee = 1;
@@ -297,7 +299,7 @@ int battle_get_hit(struct block_list *bl)
 		hit=battle_get_dex(bl) + battle_get_lv(bl);
 
 	if(sc_data) {
-		if(sc_data[SC_HUMMING].timer!=-1 && bl->type != BL_PC)	// グロリア(PCはpc.cで)
+		if(sc_data[SC_HUMMING].timer!=-1 && bl->type != BL_PC)	// 
 			hit += hit*sc_data[SC_HUMMING].val2/100;
 		if(sc_data[SC_BLIND].timer!=-1 && bl->type != BL_PC)		// 呪い
 			hit -= hit*25/100;
@@ -621,7 +623,7 @@ int battle_get_adelay(struct block_list *bl)
 				aspd_rate -= sc_data[SC_SPEARSQUICKEN].val2;
 			if(sc_data[SC_ASSNCROS].timer!=-1 && // 夕陽のアサシンクロス
 				sc_data[SC_TWOHANDQUICKEN].timer==-1 && sc_data[SC_ADRENALINE].timer==-1 && sc_data[SC_SPEARSQUICKEN].timer==-1)
-				aspd_rate -= sc_data[SC_ASSNCROS].val2;
+				aspd_rate -= 5+sc_data[SC_ASSNCROS].val1+sc_data[SC_ASSNCROS].val2/2+sc_data[SC_ASSNCROS].val3/20;
 			if(sc_data[SC_DONTFORGETME].timer!=-1)		// 私を忘れないで
 				aspd_rate += sc_data[SC_DONTFORGETME].val2;
 			if(sc_data[SC_STEELBODY].timer!=-1)	// 金剛
@@ -659,7 +661,7 @@ int battle_get_amotion(struct block_list *bl)
 				aspd_rate -= sc_data[SC_SPEARSQUICKEN].val2;
 			if(sc_data[SC_ASSNCROS].timer!=-1 && // 夕陽のアサシンクロス
 				sc_data[SC_TWOHANDQUICKEN].timer==-1 && sc_data[SC_ADRENALINE].timer==-1 && sc_data[SC_SPEARSQUICKEN].timer==-1)
-				aspd_rate -= sc_data[SC_ASSNCROS].val2;
+				aspd_rate -= 5+sc_data[SC_ASSNCROS].val1+sc_data[SC_ASSNCROS].val2/2+sc_data[SC_ASSNCROS].val3/20;
 			if(sc_data[SC_DONTFORGETME].timer!=-1)		// 私を忘れないで
 				aspd_rate += sc_data[SC_DONTFORGETME].val2;
 			if(sc_data[SC_STEELBODY].timer!=-1)	// 金剛
@@ -3213,7 +3215,7 @@ struct Damage  battle_calc_misc_attack(
 		break;
 
 	case BA_DISSONANCE:	// 不協和音
-		damage=(skill_lv+3)*10;
+		damage=(skill_lv)*20+pc_checkskill(sd,BA_MUSICALLESSON)*3;
 		break;
 
 	case NPC_SELFDESTRUCTION:	// 自爆
