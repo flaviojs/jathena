@@ -3703,7 +3703,11 @@ void mob_reload(void)
 
 	*/
 
-	do_init_mob();
+	/*do_init_mob();*/
+	mob_readdb(); 
+	mob_readdb_mobavail(); 
+	mob_read_randommonster(); 
+	mob_readskilldb(); 
 }
 
 /*==========================================

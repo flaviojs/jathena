@@ -653,6 +653,18 @@ static int itemdb_final(void *key,void *data,va_list ap)
 	return 0;
 }
 
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
+void do_final_itemdb(void)
+{
+	if(item_db){
+		numdb_final(item_db,itemdb_final);
+		item_db=NULL;
+	}
+}
 /*==========================================
  *
  *------------------------------------------
@@ -665,20 +677,8 @@ void itemdb_reload(void)
 	itemdb_read();
 
 	*/
-
+	do_final_itemdb();
 	do_init_itemdb();
-}
-
-/*==========================================
- *
- *------------------------------------------
- */
-void do_final_itemdb(void)
-{
-	if(item_db){
-		numdb_final(item_db,itemdb_final);
-		item_db=NULL;
-	}
 }
 
 /*

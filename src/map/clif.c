@@ -8756,6 +8756,8 @@ static int clif_parse(int fd)
 		if(sd && sd->state.auth)
 			clif_quitsave(fd,sd);
 		close(fd);
+		if (sd) // ’Ç‰Á
+			map_deliddb(&sd->bl); // ’Ç‰Á
 		delete_session(fd);
 		return 0;
 	}

@@ -104,16 +104,16 @@ CFLAGS += -O3
 #CFLAGS +=-march=athlon-tbird -fomit-frame-pointer
 
 #Athlon-tbird XP (AMD)
-#CFLAGS +=-march=athlon-xp -pipe-msse -mfpmath=sse -mmmx -fomit-frame-pointer
+#CFLAGS +=-march=athlon-xp -pipe -msse -mfpmath=sse -mmmx -fomit-frame-pointer
 
 #Athlon 4(AMD)
 #CFLAGS +=-march=athlon-4 -m3dnow -fomit-frame-pointer
 
 #Athlon XP (AMD)
-#CFLAGS +=-march=athlon-xp -m3dnow-msse -mfpmath=sse -mmmx -fomit-frame-pointer  -m3dnow -msse -mfpmath=sse -mmmx
+#CFLAGS +=-march=athlon-xp -m3dnow -msse -mfpmath=sse -mmmx -fomit-frame-pointer -m3dnow -msse -mfpmath=sse -mmmx
 
 #Athlon MP (AMD)
-#CFLAGS +=-march=athlon-mp -m3dnow-msse -mfpmath=sse -mmmx -fomit-frame-pointer
+#CFLAGS +=-march=athlon-mp -m3dnow -msse -mfpmath=sse -mmmx -fomit-frame-pointer
 
 #Athlon XP XX00+
 #CFLAGS +=-march=athlon-xp -m3dnow -msse -mfpmath=sse -mmmx 
@@ -130,16 +130,16 @@ CFLAGS += -O3
 #optimize for Athlon-xp
 #CFLAGS += -march=athlon -m3dnow -msse -mcpu=athlon-xp -mfpmath=sse
 
-#603 (PowerPC)
+#603 (PowerPC / Kuro-Box)
 #CFLAGS +=-pipe
 
-#603e (PowerPC)
+#603e (PowerPC / Kuro-Box)
 #CFLAGS +=-pipe
 
-#604 (PowerPC)
+#604 (PowerPC / Kuro-Box)
 #CFLAGS +=-pipe
 
-#604e (PowerPC)
+#604e (PowerPC / Kuro-Box)
 #CFLAGS +=-pipe
 
 #750 aka as G3 (PowerPC)
@@ -162,6 +162,10 @@ CFLAGS += -O3
 
 #Sparc 64
 #CFLAGS +=-fomit-frame-pointer
+
+#Linux Zaurus (SL-C7xx)
+#CFLAGS +=-pipe -fomit-frame-pointer -Wall -Wstrict-prototypes
+
 #---------------------------------------------------
 
 MKDEF = CC="$(CC)" CFLAGS="$(CFLAGS)"

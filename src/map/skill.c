@@ -1890,6 +1890,35 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		}
 		break;
 
+	case HW_NAPALMVULCAN:
+			if(flag&1){
+				if(bl->id!=skill_area_temp[1]){
+					skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,
+						skill_area_temp[0]);
+				}
+			}else{
+				int ar=(skillid==HW_NAPALMVULCAN)?1:2;
+				skill_area_temp[1]=bl->id;
+				if(skillid==HW_NAPALMVULCAN){
+					skill_area_temp[0]=0;
+					map_foreachinarea(skill_area_sub,
+						bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
+						src,skillid,skilllv,tick, flag|BCT_ENEMY ,
+						skill_area_sub_count);
+				}else{
+					skill_area_temp[0]=0;
+					skill_area_temp[2]=bl->x;
+					skill_area_temp[3]=bl->y;
+				}
+				skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,
+					skill_area_temp[0] );
+				map_foreachinarea(skill_area_sub,
+					bl->m,bl->x-ar,bl->y-ar,bl->x+ar,bl->y+ar,0,
+					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
+					skill_castend_damage_id);
+			}
+			break;
+
 	case WZ_FROSTNOVA:			/* フロストノヴァ */
 		skill_castend_pos2(src,bl->x,bl->y,skillid,skilllv,tick,0);
 		break;
@@ -9618,7 +9647,8 @@ void skill_reload(void)
 	<empty skill database>
 	<?>
 	*/
-	do_init_skill();
+	/*do_init_skill();*/
+	skill_readdb(); 
 }
 
 /*==========================================
