@@ -1,4 +1,32 @@
 --------------------
+//0956 by (凸)
+・転生職仮実装(@jobchange2)、見た目と経験値テーブルだけです
+・養子職仮実装(@jobchange3)、見た目だけです現状では経験値は転生二次職と同じというマゾ仕様
+※上記2点は転生職が実装されているクライアントでなければ実行するとエラー落ちするので注意！！
+　その後直接セーブデータを弄らないとキャラセレにも行けなくなります！！
+・Athena雑談スレッド part2 >>149 稀枝さんの報告を元にガーディアンを修正
+・砦以外でガーディアンとかエンペリウムを殴るとmap-serverが落ちていたのも修正(未確認)
+・スパノビのJobテーブルはFor English User Forum >>13 kingboさんのデータを元に修正
+・転生職の経験値テーブルはOWNを参照してBase99の経験値は不明だったので適当に設定
+
+	(map/)
+	atcommand.c
+		atcommand_jobchange() 修正
+		atcommand_jobchange2() 追加
+		atcommand_jobchange3() 追加
+	atcommand.h 修正
+	clif.c
+		clif_changelook() 修正
+	pc.c
+		pc_nextbaseexp() 修正
+		pc_nextjobexp() 修正
+		pc_jobchange() 修正
+		pc_readdb() 修正
+	battle.c
+		battle_calc_damage() 修正
+		mob_can_reach() 修正
+
+--------------------
 //0955 by huge
 ・ペットのルート機能。
   ・仕様はmobのルートに近い感じですが、射程を短くしてます。

@@ -22,6 +22,8 @@ enum AtCommandType {
 	AtCommand_Option,
 	AtCommand_Hide,
 	AtCommand_JobChange,
+	AtCommand_JobChange2,
+	AtCommand_JobChange3,
 	AtCommand_Die,
 	AtCommand_Kill,
 	AtCommand_Alive,

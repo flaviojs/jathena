@@ -37,7 +37,7 @@ static int hp_sigma_val[MAX_PC_CLASS][MAX_LEVEL];
 static int sp_coefficient[MAX_PC_CLASS];
 static int aspd_base[MAX_PC_CLASS][20];
 static char job_bonus[MAX_PC_CLASS][MAX_LEVEL];
-static int exp_table[8][MAX_LEVEL];
+static int exp_table[14][MAX_LEVEL];
 static struct {
 	int id;
 	int max;
@@ -3576,8 +3576,11 @@ int pc_nextbaseexp(struct map_session_data *sd)
 
 	if(sd->status.class==0) i=0;
 	else if(sd->status.class<=6) i=1;
-	else if(sd->status.class<23) i=2;
-	else i=3;
+	else if(sd->status.class<=22) i=2;
+	else if(sd->status.class==23) i=3;
+	else if(sd->status.class==4001) i=4;
+	else if(sd->status.class<=4007) i=5;
+	else i=6;
 
 	return exp_table[i][sd->status.base_level-1];
 }
@@ -3594,10 +3597,13 @@ int pc_nextjobexp(struct map_session_data *sd)
 	if(sd->status.job_level>=MAX_LEVEL || sd->status.job_level<=0)
 		return 0;
 
-	if(sd->status.class==0) i=4;
-	else if(sd->status.class<=6) i=5;
-	else if(sd->status.class<23) i=6;
-	else i=7;
+	if(sd->status.class==0) i=7;
+	else if(sd->status.class<=6) i=8;
+	else if(sd->status.class<=22) i=9;
+	else if(sd->status.class==23) i=10;
+	else if(sd->status.class==4001) i=11;
+	else if(sd->status.class<=4007) i=12;
+	else i=13;
 
 	return exp_table[i][sd->status.job_level-1];
 }
@@ -4299,7 +4305,13 @@ int pc_jobchange(struct map_session_data *sd,int job)
 {
 	int i;
 
-	if((sd->status.sex == 0 && job == 19) || (sd->status.sex == 1 && job == 20) || job ==22 || sd->status.class == job)
+	if((sd->status.sex == 0 && job == 19) ||
+	   (sd->status.sex == 0 && job == 19 + 4001) ||
+	   (sd->status.sex == 0 && job == 19 + 4023) ||
+	   (sd->status.sex == 1 && job == 20) ||
+	   (sd->status.sex == 1 && job == 20 + 4001) ||
+	   (sd->status.sex == 1 && job == 20 + 4023) ||
+	   job ==22 || sd->status.class == job) //♀はバードになれない、♂はダンサーになれない、結婚衣裳もお断り
 		return 1;
 
 	sd->status.class = sd->view_class = job;
@@ -5474,6 +5486,7 @@ static int pc_autosave_sub(struct map_session_data *sd,va_list ap)
 	return 0;
 }
 
+
 /*==========================================
  * 自動セーブ (timer関数)
  *------------------------------------------
@@ -5562,19 +5575,25 @@ int pc_readdb(void)
 	}
 	i=0;
 	while(fgets(line,1020,fp)){
-		int bn,b1,b2,b3,jn,j1,j2,j3;
+		int bn,b1,b2,b3,b4,b5,b6,jn,j1,j2,j3,j4,j5,j6;
 		if(line[0]=='/' && line[1]=='/')
 			continue;
-		if(sscanf(line,"%d,%d,%d,%d,%d,%d,%d,%d",&bn,&b1,&b2,&b3,&jn,&j1,&j2,&j3)!=8)
+		if(sscanf(line,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",&bn,&b1,&b2,&b3,&b4,&b5,&b6,&jn,&j1,&j2,&j3,&j4,&j5,&j6)!=14)
 			continue;
 		exp_table[0][i]=bn;
 		exp_table[1][i]=b1;
 		exp_table[2][i]=b2;
 		exp_table[3][i]=b3;
-		exp_table[4][i]=jn;
-		exp_table[5][i]=j1;
-		exp_table[6][i]=j2;
-		exp_table[7][i]=j3;
+		exp_table[4][i]=b4;
+		exp_table[5][i]=b5;
+		exp_table[6][i]=b6;
+		exp_table[7][i]=jn;
+		exp_table[8][i]=j1;
+		exp_table[9][i]=j2;
+		exp_table[10][i]=j3;
+		exp_table[11][i]=j4;
+		exp_table[12][i]=j5;
+		exp_table[13][i]=j6;
 		i++;
 		if(i >= MAX_LEVEL)
 			break;

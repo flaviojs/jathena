@@ -1,4 +1,3 @@
-// $Id: mob.c,v 1.14 2003/06/30 14:45:10 lemit Exp $
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -842,6 +841,7 @@ int mob_can_reach(struct mob_data *md,struct block_list *bl,int range)
 	if(md->class == 1285 || md->class == 1286 || md->class == 1287) {
 		struct guild *g=guild_search(((struct map_session_data *)bl)->status.guild_id);
 		struct guild_castle *gc=guild_mapname2gc(map[bl->m].name);
+		if(gc==NULL) return 0;
 		if(g->guild_id == gc->guild_id)
 			return 0;
 	}

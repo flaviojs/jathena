@@ -43,6 +43,8 @@ ATCOMMAND_FUNC(guildstorage);
 ATCOMMAND_FUNC(option);
 ATCOMMAND_FUNC(hide);
 ATCOMMAND_FUNC(jobchange);
+ATCOMMAND_FUNC(jobchange2);
+ATCOMMAND_FUNC(jobchange3);
 ATCOMMAND_FUNC(die);
 ATCOMMAND_FUNC(kill);
 ATCOMMAND_FUNC(alive);
@@ -123,6 +125,8 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Option,					"@option",			0, atcommand_option },
 	{ AtCommand_Hide,					"@hide",			0, atcommand_hide },
 	{ AtCommand_JobChange,				"@jobchange",		0, atcommand_jobchange },
+	{ AtCommand_JobChange2,				"@jobchange2",		0, atcommand_jobchange2 },
+	{ AtCommand_JobChange3,				"@jobchange3",		0, atcommand_jobchange3 },
 	{ AtCommand_Die,					"@die",				0, atcommand_die },
 	{ AtCommand_Kill,					"@kill",			0, atcommand_kill },
 	{ AtCommand_Alive,					"@alive",			0, atcommand_alive },
@@ -743,8 +747,50 @@ atcommand_jobchange(
 		return -1;
 	job = atoi(message);
 	if ((job >= 0 && job < MAX_PC_CLASS)) {
-		pc_jobchange(sd, job);
-		clif_displaymessage(fd, msg_table[12]);
+		if(pc_jobchange(sd, job) == 0)
+			clif_displaymessage(fd, msg_table[12]);
+				}
+	
+	return 0;
+}
+/*==========================================
+ * “]¶E‚É“]E‚·‚éA‚Æ‚è‚ ‚¦‚¸Œ©‚½–Ú‚¾‚¯
+ *------------------------------------------
+ */
+int
+atcommand_jobchange2(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	int job = 0;
+	if (!message || !*message)
+		return -1;
+	job = atoi(message);
+	if ((job >= 0 && job < MAX_PC_CLASS - 2)) { //“]¶E‚ÉŒ‹¥‚ÆƒXƒpƒmƒr‚Í–³‚¢‚Á‚Û‚¢
+		job = job + 4001;
+		if(pc_jobchange(sd, job) == 0)
+			clif_displaymessage(fd, msg_table[12]);
+				}
+	
+	return 0;
+}
+/*==========================================
+ * —{Žq‰‘gE‚É“]E‚·‚éA‚Æ‚è‚ ‚¦‚¸Œ©‚½–Ú‚¾‚¯
+ *------------------------------------------
+ */
+int
+atcommand_jobchange3(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	int job = 0;
+	if (!message || !*message)
+		return -1;
+	job = atoi(message);
+	if ((job >= 0 && job != 22 && job < MAX_PC_CLASS)) { //—{Žq‰‘g‚ÉŒ‹¥‚Í–³‚¢‚Á‚Û‚¢
+		job = (job==23)?job + 4022:job + 4023;
+		if(pc_jobchange(sd, job) == 0)
+			clif_displaymessage(fd, msg_table[12]);
 				}
 	
 	return 0;
