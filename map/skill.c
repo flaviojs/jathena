@@ -1827,7 +1827,21 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			}
 		}
 		break;
-
+	case SA_COMA:
+		{
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			if(bl->type==BL_PC){
+				dstsd->status.hp=1;
+				if(skilllv!=0) {
+					dstsd->status.sp=1;
+					clif_updatestatus(dstsd,SP_SP);
+				}
+				clif_updatestatus(dstsd,SP_HP);
+			}
+			if(bl->type==BL_MOB)
+				dstmd->hp=1;
+		}
+		break;
 	case AL_INCAGI:			/* 速度増加 */
 	case AL_BLESSING:		/* ブレッシング */
 	case PR_SLOWPOISON:
@@ -3187,6 +3201,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		range=5;
 		target=BCT_ALL;
 		break;
+	case BD_RICHMANKIM:
 	case BD_DRUMBATTLEFIELD:	/* 戦太鼓の響き */
 	case BD_RINGNIBELUNGEN:		/* ニーベルングの指輪 */
 	case BD_INTOABYSS:			/* 深淵の中に */
@@ -5585,6 +5600,8 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_LULLABY:			/* 子守唄 */
 			val2 = 11;
+			break;
+		case SC_RICHMANKIM:
 			break;
 		case SC_ETERNALCHAOS:		/* エターナルカオス */
 			calc_flag = 1;

@@ -136,6 +136,7 @@ bHPDrainRate	1061
 bSPDrainRate	1062
 bShortWeaponDamageReturn	1063
 bLongWeaponDamageReturn	1064
+bWeaponComa	1065
 bRestartFullRecover	2000
 bNoCastCancel	2001
 bNoSizeFix	2002

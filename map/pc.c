@@ -917,6 +917,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(sd->addeff,0,sizeof(sd->addeff));
 	memset(sd->reseff,0,sizeof(sd->reseff));
 	memset(&sd->special_state,0,sizeof(sd->special_state));
+	memset(sd->weapon_coma,0,sizeof(sd->weapon_coma));
 
 	sd->watk_ = 0;			//“ñ“—¬—p(‰¼)
 	sd->watk_2 = 0;
@@ -2033,6 +2034,10 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 			sd->sp_drain_rate_ += type2;
 			sd->sp_drain_per_ += val;
 		}
+		break;
+	case SP_WEAPON_COMA:
+		if(sd->state.lr_flag != 2)
+			sd->weapon_coma[type2]=val;
 		break;
 	default:
 		if(battle_config.error_log)
@@ -3463,6 +3468,11 @@ int pc_gainexp(struct map_session_data *sd,int base_exp,int job_exp)
 {
 	if(sd->bl.prev == NULL || pc_isdead(sd))
 		return 0;
+
+	if(sd->sc_data[SC_RICHMANKIM].timer != -1) {
+		base_exp += base_exp*(25 + sd->sc_data[SC_RICHMANKIM].val1*25)/100;
+		job_exp += job_exp*(25 + sd->sc_data[SC_RICHMANKIM].val1*25)/100;
+	}
 
 	if(sd->status.guild_id>0){	// ƒMƒ‹ƒh‚Éã”[
 		base_exp-=guild_payexp(sd,base_exp);

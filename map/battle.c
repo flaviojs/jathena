@@ -3487,6 +3487,9 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			if(wd.damage > 0 || wd.damage2 > 0)
 				skill_additional_effect(src,target,0,0,BF_WEAPON,tick);
 		}
+		if(sd && sd->weapon_coma[battle_get_race(target)] && !(battle_get_mode(target)&0x20))
+			if(rand()%1000 < sd->weapon_coma[battle_get_race(target)])
+				skill_castend_nodamage_id(src,target,SA_COMA,0,0,1);
 		if(sc_data && sc_data[SC_AUTOSPELL].timer != -1 && rand()%100 < sc_data[SC_AUTOSPELL].val4) {
 			int skilllv=sc_data[SC_AUTOSPELL].val3,i,f=0;
 			i = rand()%100;

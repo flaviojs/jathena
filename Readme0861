@@ -1,4 +1,25 @@
 --------------------
+//0872 by ElFinLazz
+
+・スキルポーションピッチャー修正
+・スキルギムソバングドンボルオッネ具現
+・スキルアブラカダブなら義コーマ具現
+・コーマの武器オプション追加(種族, 千分率)
+・オプション説明追加
+	(db/)
+	const.txt 修正.
+	(doc/)
+	item_bonus.txt 修正.
+	(map/)
+	map.h 修正.
+	skill.c
+		skill_castend_nodamage_id(), skill_unit_group(), skill_status_change_start() 修正.
+	pc.c
+		pc_calcstatus(), pc_bonus2(), pc_gainexp() 修正.
+	battle.c
+		battle_weapon_attack() 修正.
+
+--------------------
 //0871 by 死神
 
 ・0869のバグ修正。
