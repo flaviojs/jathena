@@ -6012,7 +6012,9 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	case PF_MEMORIZE:				/* メモライズ */
 		casttime = 12000;
 		break;
-
+	case HW_MAGICPOWER:		/* 魔法力増幅 */
+		casttime = 700;
+		break;
 	}
 
 	//メモライズ状態ならキャストタイムが1/3
@@ -7094,6 +7096,11 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			*opt3 &= ~1024;
 			break;
 		case SC_ASSUMPTIO:		/* アスムプティオ */
+			/* キリエが掛かっていたら解除して */
+			if(sc_data[SC_KYRIE].timer!=-1)
+				skill_status_change_end(bl,SC_KYRIE,-1);
+			/* アスムのフラグを立てる */
+
 			*opt3 &= ~2048;
 			break;
 		}
@@ -7681,6 +7688,11 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			val2 = val1*20;
 			break;
 		case SC_KYRIE:				/* キリエエレイソン */
+			/* アスムが掛かっていたら解除して */
+			if(sc_data[SC_ASSUMPTIO].timer!=-1)
+			skill_status_change_end(bl,SC_ASSUMPTIO,-1);
+		
+			/* キリエを掛ける */
 			val2 = battle_get_max_hp(bl) * (val1 * 2 + 10) / 100;/* 耐久度 */
 			val3 = (val1 / 2 + 5);	/* 回数 */
 			break;

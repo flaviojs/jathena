@@ -1519,7 +1519,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 		// リジェクトソード
 		if(sc_data[SC_REJECTSWORD].timer!=-1 && damage > 0 && flag&BF_WEAPON &&
 		  ((src->type==BL_PC && ((struct map_session_data *)src)->status.weapon == (1 || 2 || 3)) || src->type==BL_MOB )){
-			if(rand()%100 < (10+5*sc_data[SC_REJECTSWORD].val1)){ //反射確率は10+5*Lv
+			if(rand()%100 < (15*sc_data[SC_REJECTSWORD].val1)){ //反射確率は15*Lv
 				damage = damage*50/100;
 				battle_damage(bl,src,damage,0);
 				//ダメージを与えたのは良いんだが、ここからどうして表示するんだかわかんねぇ
@@ -1988,10 +1988,12 @@ static struct Damage battle_calc_pet_weapon_attack(
 				hitrate= 1000000;
 				break;
 			case AM_DEMONSTRATION:	// デモンストレーション
+				hitrate= 1000000;
 				damage = damage*(100+ 20*skill_lv)/100;
 				damage2 = damage2*(100+ 20*skill_lv)/100;
 				break;
 			case AM_ACIDTERROR:	// アシッドテラー
+				hitrate= 1000000;
 				damage = damage*(100+ 40*skill_lv)/100;
 				damage2 = damage2*(100+ 40*skill_lv)/100;
 				break;
@@ -2029,14 +2031,14 @@ static struct Damage battle_calc_pet_weapon_attack(
 				damage = damage*(100+ 20*skill_lv)/100;
 				break;
 			case CH_CHAINCRUSH:	// 連柱崩撃
-				damage = damage*(100+ 20*skill_lv)/100;
+				damage = damage*(100+ 60*skill_lv)/100;
 				div_=skill_get_num(skill_num,skill_lv);
 				break;
 			case CH_PALMSTRIKE:	// 猛虎硬派山
 				damage = damage*(50+ 100*skill_lv)/100;
 				break;
 			case LK_SPIRALPIERCE:			/* スパイラルピアース */
-				damage = damage*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
+				damage = damage*(80+ 40*skill_lv)/100; //増加量が分からないので適当に
 				div_=5;
 				if(target->type == BL_PC)
 					((struct map_session_data *)target)->canmove_tick = gettick() + 1000;
@@ -2044,7 +2046,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 					((struct mob_data *)target)->canmove_tick = gettick() + 1000;
 				break;
 			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
-				damage = damage*(100+ 20*skill_lv)/100;
+				damage = damage*(100+ 40*skill_lv)/100;
 				break;
 			case LK_JOINTBEAT:				/* ジョイントビート */
 				damage = damage*(50+ 10*skill_lv)/100;
@@ -2056,7 +2058,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 				damage += damage*(30*skill_lv)/100;
 				break;
 			case CG_ARROWVULCAN:			/* アローバルカン */
-				damage = damage*(160+40*skill_lv)/100;
+				damage = damage*(200+100*skill_lv)/100;
 				div_=9;
 				break;
 			case AS_SPLASHER:		/* ベナムスプラッシャー */
@@ -2068,7 +2070,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && def1 < 1000000 ) {	//DEF, VIT無視
+			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && skill_num != AM_ACIDTERROR && def1 < 1000000 ) {	//DEF, VIT無視
 				int t_def;
 				target_count = 1 + battle_counttargeted(target,src,battle_config.vit_penaly_count_lv);
 				if(battle_config.vit_penaly_type > 0) {
@@ -2133,7 +2135,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 		damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
 
 	if(skill_num==PA_PRESSURE) /* プレッシャー 必中? */
-		damage = 700+100*skill_lv;
+		damage = 500+300*skill_lv;
 
 	// インベナム修正
 	if(skill_num==TF_POISON){
@@ -2327,7 +2329,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 			if(sc_data[SC_TRUESIGHT].timer!=-1)	// トゥルーサイト
 				damage += damage*(2*sc_data[SC_TRUESIGHT].val1)/100;
 			if(sc_data[SC_BERSERK].timer!=-1)	// バーサーク
-				damage += damage*50/100;
+				damage += damage;
 		}
 
 		if(skill_num>0){
@@ -2462,10 +2464,12 @@ static struct Damage battle_calc_mob_weapon_attack(
 				hitrate= 1000000;
 				break;
 			case AM_DEMONSTRATION:	// デモンストレーション
+				hitrate= 1000000;
 				damage = damage*(100+ 20*skill_lv)/100;
 				damage2 = damage2*(100+ 20*skill_lv)/100;
 				break;
 			case AM_ACIDTERROR:	// アシッドテラー
+				hitrate= 1000000;
 				damage = damage*(100+ 40*skill_lv)/100;
 				damage2 = damage2*(100+ 40*skill_lv)/100;
 				break;
@@ -2503,14 +2507,14 @@ static struct Damage battle_calc_mob_weapon_attack(
 				damage = damage*(100+ 20*skill_lv)/100;
 				break;
 			case CH_CHAINCRUSH:	// 連柱崩撃
-				damage = damage*(100+ 20*skill_lv)/100;
+				damage = damage*(100+ 60*skill_lv)/100;
 				div_=skill_get_num(skill_num,skill_lv);
 				break;
 			case CH_PALMSTRIKE:	// 猛虎硬派山
 				damage = damage*(50+ 100*skill_lv)/100;
 				break;
 			case LK_SPIRALPIERCE:			/* スパイラルピアース */
-				damage = damage*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
+				damage = damage*(80+ 40*skill_lv)/100; //増加量が分からないので適当に
 				div_=5;
 				if(tsd)
 					tsd->canmove_tick = gettick() + 1000;
@@ -2518,7 +2522,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 					tmd->canmove_tick = gettick() + 1000;
 				break;
 			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
-				damage = damage*(100+ 20*skill_lv)/100;
+				damage = damage*(100+ 40*skill_lv)/100;
 				break;
 			case LK_JOINTBEAT:				/* ジョイントビート */
 				damage = damage*(50+ 10*skill_lv)/100;
@@ -2530,7 +2534,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 				damage += damage*(30*skill_lv)/100;
 				break;
 			case CG_ARROWVULCAN:			/* アローバルカン */
-				damage = damage*(160+40*skill_lv)/100;
+				damage = damage*(200+100*skill_lv)/100;
 				div_=9;
 				break;
 			case AS_SPLASHER:		/* ベナムスプラッシャー */
@@ -2542,7 +2546,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && def1 < 1000000) {	//DEF, VIT無視
+			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && skill_num != AM_ACIDTERROR && def1 < 1000000) {	//DEF, VIT無視
 				int t_def;
 				target_count = 1 + battle_counttargeted(target,src,battle_config.vit_penaly_count_lv);
 				if(battle_config.vit_penaly_type > 0) {
@@ -2637,9 +2641,9 @@ static struct Damage battle_calc_mob_weapon_attack(
 		damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
 
 	if(sc_data && sc_data[SC_AURABLADE].timer!=-1)	/* オーラブレード 必中 */
-		damage += sc_data[SC_AURABLADE].val1 * 10;
+		damage += sc_data[SC_AURABLADE].val1 * 20;
 	if(skill_num==PA_PRESSURE) /* プレッシャー 必中? */
-		damage = 700+100*skill_lv;
+		damage = 500+300*skill_lv;
 
 	// インベナム修正
 	if(skill_num==TF_POISON){
@@ -2996,8 +3000,8 @@ static struct Damage battle_calc_pc_weapon_attack(
 				damage2 += damage2*(2*sc_data[SC_TRUESIGHT].val1)/100;
 			}
 			if(sc_data[SC_BERSERK].timer!=-1){	// バーサーク
-				damage += damage*50/100;
-				damage2 += damage2*50/100;
+				damage += damage;
+				damage2 += damage2;
 			}
 		}
 
@@ -3208,12 +3212,18 @@ static struct Damage battle_calc_pc_weapon_attack(
 					no_cardfix = 1;
 				break;
 			case AM_DEMONSTRATION:	// デモンストレーション
+				hitrate= 1000000;
 				damage = damage*(100+ 20*skill_lv)/100;
 				damage2 = damage2*(100+ 20*skill_lv)/100;
+				no_cardfix = 1;
 				break;
 			case AM_ACIDTERROR:	// アシッドテラー
+				hitrate= 1000000;
 				damage = damage*(100+ 40*skill_lv)/100;
 				damage2 = damage2*(100+ 40*skill_lv)/100;
+				s_ele = 0;
+				s_ele_ = 0;
+				no_cardfix = 1;
 				break;
 			case MO_FINGEROFFENSIVE:	//指弾
 				if(battle_config.finger_offensive_type == 0) {
@@ -3270,11 +3280,6 @@ static struct Damage battle_calc_pc_weapon_attack(
 				sd->state.arrow_atk = 1;
 				break;
 			case DC_THROWARROW:	// 矢撃ち
-				if(!sd->state.arrow_atk && sd->arrow_atk > 0) {
-					int arr = rand()%(sd->arrow_atk+1);
-					damage += arr;
-					damage2 += arr;
-				}
 				damage = damage*(100+ 50 * skill_lv)/100;
 				damage2 = damage2*(100+ 50 * skill_lv)/100;
 				if(sd->arrow_ele > 0) {
@@ -3282,15 +3287,14 @@ static struct Damage battle_calc_pc_weapon_attack(
 					s_ele_ = sd->arrow_ele;
 				}
 				flag=(flag&~BF_RANGEMASK)|BF_LONG;
-				sd->state.arrow_atk = 1;
 				break;
 			case CH_TIGERFIST:	// 伏虎拳
 				damage = damage*(100+ 20*skill_lv)/100;
 				damage2 = damage2*(100+ 20*skill_lv)/100;
 				break;
 			case CH_CHAINCRUSH:	// 連柱崩撃
-				damage = damage*(100+ 20*skill_lv)/100;
-				damage2 = damage2*(100+ 20*skill_lv)/100;
+				damage = damage*(100+ 60*skill_lv)/100;
+				damage2 = damage2*(100+ 60*skill_lv)/100;
 				div_=skill_get_num(skill_num,skill_lv);
 				break;
 			case CH_PALMSTRIKE:	// 猛虎硬派山
@@ -3298,8 +3302,8 @@ static struct Damage battle_calc_pc_weapon_attack(
 				damage2 = damage2*(50+ 100*skill_lv)/100;
 				break;
 			case LK_SPIRALPIERCE:			/* スパイラルピアース */
-				damage = damage*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
-				damage2 = damage2*(100+ 50*skill_lv)/100; //増加量が分からないので適当に
+				damage = damage*(80+ 40*skill_lv)/100;
+				damage2 = damage2*(80+ 40*skill_lv)/100;
 				div_=5;
 				if(tsd)
 					tsd->canmove_tick = gettick() + 1000;
@@ -3307,8 +3311,8 @@ static struct Damage battle_calc_pc_weapon_attack(
 					tmd->canmove_tick = gettick() + 1000;
 				break;
 			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
-				damage = damage*(100+ 20*skill_lv)/100;
-				damage2 = damage2*(100+ 20*skill_lv)/100;
+				damage = damage*(100+ 40*skill_lv)/100;
+				damage2 = damage2*(100+ 40*skill_lv)/100;
 				break;
 			case LK_JOINTBEAT:				/* ジョイントビート */
 				damage = damage*(50+ 10*skill_lv)/100;
@@ -3357,9 +3361,14 @@ static struct Damage battle_calc_pc_weapon_attack(
 				damage2 += damage2*(30*skill_lv)/100;
 				break;
 			case CG_ARROWVULCAN:			/* アローバルカン */
-				damage = damage*(160+40*skill_lv)/100;
-				damage2 = damage2*(160+40*skill_lv)/100;
+				damage = damage*(200+100*skill_lv)/100;
+				damage2 = damage2*(200+100*skill_lv)/100;
 				div_=9;
+				if(sd->arrow_ele > 0) {
+					s_ele = sd->arrow_ele;
+					s_ele_ = sd->arrow_ele;
+				}
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
 				break;
 			case AS_SPLASHER:		/* ベナムスプラッシャー */
 				damage = damage*(200+20*skill_lv+20*pc_checkskill(sd,AS_POISONREACT))/100;
@@ -3376,7 +3385,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && def1 < 1000000) {	//DEF, VIT無視
+			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && skill_num != AM_ACIDTERROR && def1 < 1000000) {	//DEF, VIT無視
 				int t_def;
 				target_count = 1 + battle_counttargeted(target,src,battle_config.vit_penaly_count_lv);
 				if(battle_config.vit_penaly_type > 0) {
@@ -3632,12 +3641,12 @@ static struct Damage battle_calc_pc_weapon_attack(
 	damage2 += sd->spiritball*3;
 
 	if(sc_data && sc_data[SC_AURABLADE].timer!=-1){	/* オーラブレード 必中 */
-		damage += sc_data[SC_AURABLADE].val1 * 10;
-		damage2 += sc_data[SC_AURABLADE].val1 * 10;
+		damage += sc_data[SC_AURABLADE].val1 * 20;
+		damage2 += sc_data[SC_AURABLADE].val1 * 20;
 	}
 	if(skill_num==PA_PRESSURE){ /* プレッシャー 必中? */
-		damage = 700+100*skill_lv;
-		damage2 = 700+100*skill_lv;
+		damage = 500+300*skill_lv;
+		damage2 = 500+300*skill_lv;
 	}
 
 	// >二刀流の左右ダメージ計算誰かやってくれぇぇぇぇえええ！
@@ -3834,8 +3843,8 @@ struct Damage battle_calc_magic_attack(
 	// 魔法力増幅によるMATK増加
 	sc_data = battle_get_sc_data(bl);
 	if (sc_data && sc_data[SC_MAGICPOWER].timer != -1) {
-		matk1 += (matk1 * sc_data[SC_MAGICPOWER].val1 * 2)/100;
-		matk2 += (matk2 * sc_data[SC_MAGICPOWER].val1 * 2)/100;
+		matk1 += (matk1 * sc_data[SC_MAGICPOWER].val1 * 5)/100;
+		matk2 += (matk2 * sc_data[SC_MAGICPOWER].val1 * 5)/100;
 	}
 	
 	if(skill_num > 0){
@@ -4108,6 +4117,10 @@ struct Damage  battle_calc_misc_attack(
 		damage=(dex/10+int_/2+skill*3+40)*2;
 		if(flag > 1)
 			damage /= flag;
+
+		if(battle_get_mode(target) & 0x40)
+			damage = 1;
+
 		break;
 
 	case TF_THROWSTONE:	// 石投げ
@@ -4145,7 +4158,15 @@ struct Damage  battle_calc_misc_attack(
 		}
 		break;
 	case SN_FALCONASSAULT:			/* ファルコンアサルト */
-		damage=(100+50*skill_lv)/100;
+		if( sd==NULL || (skill = pc_checkskill(sd,HT_STEELCROW)) <= 0)
+			skill=0;
+		damage=(dex/10+int_/2+skill*3+40)*2*(50+skill_lv*50)/100;
+		if(flag > 1)
+			damage /= flag;
+
+		if(battle_get_mode(target) & 0x40)
+			damage = 1;
+		
 		break;
 	}
 
