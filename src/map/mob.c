@@ -2546,6 +2546,7 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_BLASTMINE:
 			case HT_CLAYMORETRAP:
 			case HT_TALKIEBOX:
+			case AM_DEMONSTRATION:
 				range = 1;
 				break;
 			case AL_WARP:
@@ -2899,7 +2900,7 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 				struct block_list *bl = NULL;
 				int x=0,y=0;
 				if( ms[i].target<=MST_AROUND ){
-					bl= ((ms[i].target==MST_TARGET)? map_id2bl(md->target_id):
+					bl= ((ms[i].target==MST_TARGET || ms[i].target==MST_AROUND5)? map_id2bl(md->target_id):
 						 (ms[i].target==MST_FRIEND)? &fmd->bl : &md->bl);
 					if(bl!=NULL){
 						x=bl->x; y=bl->y;
@@ -2919,7 +2920,18 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 						x=bx; y=by;
 					}
 				}
-
+				// ‘ŠŽè‚ÌŽüˆÍ
+				if( ms[i].target>=MST_AROUND5 ){
+					int bx=x, by=y, i=0, c, m=bl->m, r=(ms[i].target-MST_AROUND5)+1;
+					do{
+						bx=x + rand()%(r*2+1) - r;
+						by=y + rand()%(r*2+1) - r;
+					}while( ( bx<=0 || by<=0 || bx>=map[m].xs || by>=map[m].ys ||
+						((c=read_gat(m,bx,by))==1 || c==5) ) && (i++)<1000);
+					if(i<1000){
+						x=bx; y=by;
+					}
+				}
 				if(!mobskill_use_pos(md,x,y,i))
 					return 0;
 
@@ -3287,6 +3299,10 @@ static int mob_readskilldb(void)
 		{	"target",	MST_TARGET	},
 		{	"self",		MST_SELF	},
 		{	"friend",	MST_FRIEND	},
+		{	"around5",	MST_AROUND5	},
+		{	"around6",	MST_AROUND6	},
+		{	"around7",	MST_AROUND7	},
+		{	"around8",	MST_AROUND8	},
 		{	"around1",	MST_AROUND1	},
 		{	"around2",	MST_AROUND2	},
 		{	"around3",	MST_AROUND3	},

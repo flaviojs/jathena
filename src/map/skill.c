@@ -3167,8 +3167,10 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 		}
 		break;
 	case MO_BODYRELOCATION:
-		if(sd)
+		if(sd){
 			pc_movepos(sd,x,y);
+		}else if( src->type==BL_MOB )
+			mob_warp((struct mob_data *)src,-1,x,y,0);
 		break;
 	case AM_CANNIBALIZE:	// バイオプラント
 		if(sd){

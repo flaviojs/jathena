@@ -1,4 +1,19 @@
 --------------------
+//0967 by Asong
+・モンスターの残影を実装。
+　通常モンスターはスキルによるフィルターがかからないので残像が出ません。
+　ＰＣ型モンスターには残像が出ます。
+・モンスタースキル使用対象を追加。
+　around5～around8はターゲットの周辺セルを対象にします。
+　
+　	(map)
+　	mob.c
+　		mobskill_use() 修正
+　		mob_readskill() 修正
+　	mob.h 修正
+　	skill.c
+　		skill_castend_pos2() 修正
+--------------------
 //0966 by (凸)
 ・サーバーsnapshot
 ・ディレクトリ構造を変更(common,login,char,mapは/src以下に移転)
