@@ -140,7 +140,7 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	SC_STEELBODY,
 	-1,
 /* 270- */
-	SC_EXPLOSIONSPIRITS,-1,-1,-1,-1,
+	SC_EXPLOSIONSPIRITS,-1,-1,-1,-1,	
 	SC_CASTCANCEL,
 	-1,
 	SC_SPELLBREAKER,
@@ -204,7 +204,7 @@ int skill_get_unit_id(int id,int flag)
 	switch(id){
 	case MG_SAFETYWALL:		return 0x7e;				/* セイフティウォール */
 	case MG_FIREWALL:		return 0x7f;				/* ファイアーウォール */
-	case AL_WARP:			return (flag==0)?0x81:0x80;		/* ワープポータル */
+	case AL_WARP:			return (flag==0)?0x81:0x80;	/* ワープポータル */
 	case PR_BENEDICTIO:		return 0x82;				/* 聖体降福 */
 	case PR_SANCTUARY:		return 0x83;				/* サンクチュアリ */
 	case PR_MAGNUS:			return 0x84;				/* マグヌスエクソシズム */
@@ -779,8 +779,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case BA_DISSONANCE:		/* 不協和音 */
 	case MO_INVESTIGATE:	/* 発勁 */
 	case MO_EXTREMITYFIST:	/* 阿修羅覇鳳拳 */
-	case MO_CHAINCOMBO:		/* 連打掌 */
-	case MO_COMBOFINISH:	/* 猛龍拳 */
 	case CR_HOLYCROSS:		/* ホーリークロス */
 	/* 以下MOB専用 */
 	/* 単体攻撃、SP減少攻撃、遠距離攻撃、防御無視攻撃、多段攻撃 */
@@ -827,6 +825,27 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			}
 		}
 
+		break;
+	case MO_CHAINCOMBO:		/* 連打掌 */
+		sd->combo_delay1 = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
+		if (sd->combo_delay1 < sd->aspd*2) sd->combo_delay1 = sd->aspd*2;
+		sd->combo_flag = 1;
+		if (pc_checkskill(sd, MO_COMBOFINISH)) sd->combo_delay1 += 300;
+		clif_status_change(src, 0x59, 1);
+		sd->canmove_tick = tick + sd->combo_delay1;
+		clif_combo_delay(src, sd->combo_delay1);
+		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+		break;
+
+	case MO_COMBOFINISH:	/* 猛龍拳 */
+		sd->combo_delay2 = 700 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
+		if (sd->combo_delay2 < sd->aspd*2) sd->combo_delay2 = sd->aspd*2;
+		sd->combo_flag = 3;
+		if (pc_checkskill(sd, MO_EXTREMITYFIST)) sd->combo_delay2 += 300;
+		clif_status_change(src, 0x59, 1);
+		sd->canmove_tick = tick + sd->combo_delay2;
+		clif_combo_delay(src, sd->combo_delay2);
+		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 
 	/* 武器系範囲攻撃スキル */
@@ -1038,7 +1057,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		md=(struct mob_data *)src;
 
 	if(bl->type==BL_PC)
-		dstsd=(struct map_session_data *)bl; 
+		dstsd=(struct map_session_data *)bl;
 
 	if(bl == NULL || bl->prev == NULL)
 		return 0;
@@ -1616,7 +1635,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 		return 0;
 	if(sd->bl.m != bl->m || pc_isdead(sd))
 		return 0;
-
+	
 	if(!skill_check_condition( sd ))		/* 使用条件チェック */
 		return 0;
 		
@@ -1709,9 +1728,9 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case HT_SHOCKWAVE:			/* ショックウェーブトラップ */
 	case HT_SANDMAN:			/* サンドマン */
 	case HT_FLASHER:			/* フラッシャー */
-	case HT_FREEZINGTRAP:			/* フリージングトラップ */
+	case HT_FREEZINGTRAP:		/* フリージングトラップ */
 	case HT_BLASTMINE:			/* ブラストマイン */
-	case HT_CLAYMORETRAP:			/* クレイモアートラップ */
+	case HT_CLAYMORETRAP:		/* クレイモアートラップ */
 	case AS_VENOMDUST:			/* ベノムダスト */
 		skill_unitsetting(src,skillid,skilllv,x,y,0);
 		break;
@@ -2255,7 +2274,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		{
 			int element=battle_get_element(bl) % 10;
 			int race=battle_get_race(bl);
-			if ( element!=9 && race!=6 )
+			if( element!=9 && race!=6 )
 				return 0;
 			skill_attack(BF_MAGIC,ss,&src->bl,bl,
 				sg->skill_id,sg->skill_lv,tick,0);
@@ -2626,7 +2645,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
  */
 int skill_check_condition( struct map_session_data *sd )
 {
-	int j=0,sp=0,zeny=0,spiritball=0;
+	int j=0,sp=0,zeny=0,spiritball=0, tick = 0;
 	int	i[3]={0,0,0},
 		item_id[3]={0,0,0},
 		item_amount[3]={0,0,0};
@@ -2670,7 +2689,7 @@ int skill_check_condition( struct map_session_data *sd )
 			item_amount[1]+=1;
 		case MG_SAFETYWALL:		// セイフティウォール
 		case AL_WARP:			// ワープポータル
-		case ALL_RESURRECTION:		// リザレクション
+		case ALL_RESURRECTION:	// リザレクション
 		case PR_SANCTUARY:		// サンクチュアリ
 		case PR_MAGNUS:			// マグヌスエクソシズム
 		case WZ_FIREPILLAR:		// ファイアーピラー
@@ -2826,7 +2845,6 @@ int skill_check_condition( struct map_session_data *sd )
 			else sd->spiritball_old = sd->skilllv;	
 			break;
 		case MO_INVESTIGATE:		//発勁
-		case MO_COMBOFINISH:
 			spiritball = 1;									// 氣球
 			break;
 
@@ -2838,7 +2856,33 @@ int skill_check_condition( struct map_session_data *sd )
 				spiritball = 1;									// 氣球
 			break;
 
-		
+		case MO_CHAINCOMBO:					//連打掌
+			tick = gettick();
+			if (sd->combo_delay1 <= tick && tick <= sd->combo_delay1 + 300) {
+				if (sd->skill_old == sd->skillid) {
+					return 0;
+				}
+				sd->skill_old = sd->skillid;
+				break;
+			} else {
+				sd->skill_old = 0;
+				return 0;
+			}
+
+		case MO_COMBOFINISH:					//猛龍拳
+			tick = gettick();
+			spiritball = 1;
+			if (sd->combo_delay2 <= tick && tick <= sd->combo_delay2 + 300) {
+				if (sd->skill_old == sd->skillid) {
+					return 0;
+				}
+				sd->skill_old = sd->skillid;
+				break;
+			} else {
+				sd->skill_old = 0;
+				return 0;
+			}
+
 		case MO_STEELBODY:						// 金剛
 		case MO_EXPLOSIONSPIRITS:				// 爆裂波動
 				spiritball = 5;									// 氣球
@@ -2856,7 +2900,7 @@ int skill_check_condition( struct map_session_data *sd )
 		}
 
 		if(!pc_check_equip_dcard(sd,4132) && 	// ミストレスカード
-			(item_id[0] || item_id[1] || item_id[2])) {
+			(item_id[0] || item_id[1] || item_id[2])) {	
 			for(j=0;j<3;j++) {
 				if(item_id[j] == 0 || item_amount[j] == 0)
 					continue;
@@ -2972,7 +3016,8 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		target_sd=(struct map_session_data*)bl;
 		target_fd=target_sd->fd;
 	}
-	pc_stopattack(sd);
+	if (!(skill_num == MO_CHAINCOMBO || skill_num == MO_COMBOFINISH))
+		pc_stopattack(sd);
 
 	casttime=skill_castfix(&sd->bl, skill_get_cast( skill_num,skill_lv) );
 	delay=skill_delayfix(&sd->bl, skill_get_delay( skill_num,skill_lv) );
@@ -3007,6 +3052,16 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	case MO_FINGEROFFENSIVE:	/* 指弾 */
 		casttime += casttime * ((skill_lv > sd->spiritball)? sd->spiritball:skill_lv);
 		sd->state.skillcastcancel=0;
+		break;
+	case MO_CHAINCOMBO:		/*連打掌*/
+		casttime = 0;
+		sd->state.skillcastcancel=0;
+		target_id = sd->attacktarget;
+		break;
+	case MO_COMBOFINISH:		/*猛龍拳*/
+		casttime = 0;
+		sd->state.skillcastcancel=0;
+		target_id = sd->attacktarget;
 		break;
 	}
 

@@ -1701,10 +1701,16 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
 				wd.damage, wd.div_ , wd.type, wd.damage2);
 		} else {
-			if (wd.div_ == 255 && src->type == BL_PC)	//三段掌
+			if (wd.div_ == 255 && src->type == BL_PC) {	//三段掌
+				sd->skill_old = 0;
+				sd->triple_delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
+				if (sd->triple_delay < sd->aspd*2) sd->triple_delay = sd->aspd*2;
+				if (pc_checkskill(sd, MO_COMBOFINISH)) sd->triple_delay += 300;
+				clif_status_change(src, 0x59, 1);
+				clif_combo_delay(src, sd->triple_delay);
 				clif_skill_damage(src , target , tick , wd.amotion , wd.dmotion , 
 					wd.damage , 3 , MO_TRIPLEATTACK, pc_checkskill(sd,MO_TRIPLEATTACK) , wd.type );
-			else
+			} else
 				clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
 					wd.damage, wd.div_ , wd.type, wd.damage2);
 			//二刀流左手とカタール追撃のミス表示(無理やり～)
@@ -1799,7 +1805,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			return 0;
 		}
 	}
-
+	
 	return 1;	// 該当しないので無関係人物（まあ敵じゃないので味方）
 }
 /*==========================================

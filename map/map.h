@@ -166,6 +166,8 @@ struct map_session_data {
 	int atk_ele_,star_,overrefine_;				//“ñ“—¬‚Ì‚½‚ß‚É’Ç‰Á
 	short spiritball, spiritball_old;
 	int spirit_timer[10];
+	unsigned short combo_flag, skill_old;
+	unsigned int combo_delay1, combo_delay2, triple_delay;
 
 	int reg_num;
 	struct script_reg *reg;

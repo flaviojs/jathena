@@ -1,4 +1,30 @@
 --------------
+//0534 by Diex
+
+・コンボシステム仮実装
+	map/
+		battle.c
+			battle_weapon_attack()	修正。
+		clif.c
+		clif.h
+			clif_combo_delay()　関数追加。
+		map.h
+			map_session_data　変数追加。
+		pc>c
+			pc_authok()　変数追加。
+			pc_attack_timer()　修正。
+		skill.c
+			skill_castend_damage_id()　修正。
+			skill_check_condition　修正。
+			skill_use_id　修正。
+	db/
+		skill_db.txt　修正。
+
+注）猛龍拳から阿修羅覇鳳拳にはまだつなげません。
+    阿修羅覇鳳拳を放った後、PCはMOBの背後(?)に移動してるっぽいのですが、
+　　そこらへんの情報が足りません。情報提供お願いします。
+
+--------------
 //0533 by るるる
 
 ・草とキノコに１ダメージ固定

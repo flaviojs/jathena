@@ -3825,6 +3825,17 @@ int clif_spiritball(struct map_session_data *sd)
 	return 0;
 }
 
+int clif_combo_delay(struct block_list *bl, int wait)
+{
+	unsigned char buf[32];
+
+	WBUFW(buf,0)=0x1d2;
+	WBUFL(buf,2)=bl->id;
+	WBUFL(buf,6)=wait;
+	clif_send(buf,packet_len_table[0x1d2],bl,AREA);
+
+	return 0;
+}
 /*==========================================
  *
  *------------------------------------------
@@ -4514,7 +4525,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	}
 	if(map[sd->bl.m].flag.gvg) {
 		clif_set0199(sd->fd,3);
-	}
+	}	
 	
 	// pet
 	if(sd->status.pet_id && sd->pet_npcdata && sd->pet.intimate > 0) {

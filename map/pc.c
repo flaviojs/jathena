@@ -354,6 +354,11 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->canmove_tick = tick;
 
 	sd->spiritball = 0;
+	sd->combo_flag = 0;
+	sd->combo_delay1 = 0;
+	sd->combo_delay2 = 0;
+	sd->triple_delay = 0;
+	sd->skill_old = 0;
 	for(i=0;i<10;i++)
 		sd->spirit_timer[i] = -1;
 	for(i=0;i<MAX_SKILLTIMERSKILL;i++)
@@ -2230,12 +2235,30 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 	sd->dir=sd->head_dir=map_calc_dir(&sd->bl, bl->x,bl->y );	// Œü‚«Ý’è
 
 	// ŽÀ Û‚ÉUŒ‚‚·‚é
- 	battle_weapon_attack(&sd->bl,bl,tick,0);
+ 	if (sd->combo_flag == 1) sd->combo_flag = 2;
+	else if (sd->combo_flag == 3) sd->combo_flag = 4;
+	else battle_weapon_attack(&sd->bl,bl,tick,0);
 
-	sd->attackabletime = tick + sd->aspd*2 ;
+	if (sd->triple_delay > 0) {
+		sd->attackabletime = tick + sd->triple_delay;
+		sd->combo_delay1 = tick + sd->triple_delay - 300;
+		sd->triple_delay = 0;
+
+	} else if (sd->combo_flag == 2) {
+		sd->attackabletime = tick + sd->combo_delay1;
+		sd->combo_delay2 = tick + sd->combo_delay1 - 300;
+		sd->combo_flag = 0;
+
+	} else if (sd->combo_flag == 4) {
+		sd->attackabletime = tick + sd->combo_delay2;
+		sd->combo_delay2 = tick + sd->combo_delay2 - 300;
+		sd->combo_flag = 0;
+
+	} else sd->attackabletime = tick + sd->aspd*2;
 
 	if(sd->state.attack_continue){
 		sd->attacktimer=add_timer(sd->attackabletime,pc_attack_timer,sd->bl.id,0);
+
 	}
 
 	return 0;
@@ -2265,7 +2288,7 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
 		sd->attacktimer=add_timer(sd->attackabletime,pc_attack_timer,sd->bl.id,0);
 	} else {
 		// –{—ˆtimerŠÖ”‚È‚Ì‚Åˆø”‚ð‡‚í‚¹‚é
-		pc_attack_timer(-1,gettick(),sd->bl.id,0);
+		pc_attack_timer(-1,gettick(),sd->bl.id,0);		
 	}
 
 	return 0;
