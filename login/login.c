@@ -786,7 +786,7 @@ int parse_login(int fd)
   }
   if(RFIFOW(fd,0)<30000) {
   	if(RFIFOW(fd,0) == 0x64 || RFIFOW(fd,0) == 0x01dd)
-		  printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
+		  printf("parse_login : %d %d %d %s\n",fd,RFIFOREST(fd),RFIFOW(fd,0),RFIFOP(fd,6));
 		else
 		  printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
 	}

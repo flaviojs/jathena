@@ -4466,8 +4466,7 @@ int pc_setreg(struct map_session_data *sd,int reg,int val)
 		printf("out of memory : pc_setreg\n");
 		exit(1);
 	}
-	memset(sd->reg + (sd->reg_num - 1) * sizeof(*(sd->reg)), 0,
-		sizeof(*(sd->reg)));
+
 	sd->reg[i].index = reg;
 	sd->reg[i].data = val;
 
@@ -4513,8 +4512,7 @@ int pc_setregstr(struct map_session_data *sd,int reg,char *str)
 		printf("out of memory : pc_setreg\n");
 		exit(1);
 	}
-	memset(sd->reg + (sd->reg_num - 1) * sizeof(*(sd->reg)), 0,
-		sizeof(*(sd->reg)));
+
 	sd->regstr[i].index=reg;
 	strcpy(sd->regstr[i].data,str);
 

@@ -1271,16 +1271,16 @@ int guild_agit_end(void)
 
 int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data)
 {	// Run One NPC_Event[OnAgitEliminate]
-	size_t len = strlen((const char*)data) + 4;
-	char *evname=(char*)calloc(len, 1);
+	size_t len = strlen((const char*)data);
+	char *evname=(char*)calloc(len + 4, 1);
 	if (evname == NULL) {
 		printf("out of memory: guild_gvg_eliminate_timer\n");
 		exit(1);
 	}
 	int c=0;
 	if(!agit_flag) return 0;	// Agit already End
-	memcpy(evname,(const char *)data,len - 1);
-	strcpy(evname + len - 1,"Eliminate");
+	memcpy(evname,(const char *)data,len - 5);
+	strcpy(evname + len - 5,"Eliminate");
 	c = npc_event_do(evname);
 	printf("NPC_Event:[%s] Run (%d) Events.\n",evname,c);
 	return 0;

@@ -932,13 +932,8 @@ atcommand_baselevelup(
 	
 	level = atoi(message);
 	if (level >= 1) {
-		for (i = 1;
-			 i <= sd->status.base_level + level; i++) {
-			if (i + sd->status.base_level >= 99)
-						sd->status.status_point += 22;
-					else
-				sd->status.status_point += (i + 14) / 5 ;
-				}
+		for (i = 1; i <= level; i++)
+				sd->status.status_point += (sd->status.base_level + i + 14) / 5 ;
 		sd->status.base_level += level;
 		clif_updatestatus(sd, SP_BASELEVEL);
 		clif_updatestatus(sd, SP_NEXTBASEEXP);
