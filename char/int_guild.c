@@ -12,7 +12,7 @@
 char guild_txt[1024]="guild.txt";
 
 static struct dbt *guild_db;
-static int guild_newid=100;
+static int guild_newid=10000;
 
 static int guild_exp[100];
 

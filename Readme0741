@@ -1,3 +1,57 @@
+--------------
+//0751 by 死神
+
+・skill_db.txtとcastdb.txtの変更とskill_require_db.txtの追加。
+・毒にかかるとHPが減るように変更。HPは1秒に最大HPの1%減ります。(未テスト)
+・石化を進行中の物と完全な物に分けてHPが減るように変更。(1秒に最大HPの1%)ブレッシングで完全石化だけ治せるように修正。(未テスト)
+・ハンターのトラップにエフェクト実装。ただランドマインとショックウェーブは爆発エフェクトが出ないようです。ランドマインはファイアピラーの爆発エフェクトが出るように変えています。
+・オートカウンターの方向チェックをするように変更と本鯖仕様に合わせました。
+・バックスタブも方向チェックをするように変更。
+・インティミデイトの処理変更。
+・ディフェンダーの移動速度減少を本鯖に合わせました。ASPDは勝手ながら
+(30 - (skilllv*5))%が減るようにしましたが本鯖でいくら程減るのかの情報をお願いします。
+・トンネルドライブLV1で移動速度が150から312になるのが確認されて計算を変更しましたがレベルによってどれぐらい増加するかは不明です。情報を求めます。(今の計算式は適度に作った物です。)
+・ポーション製造の計算式変更とちょっと修正。
+・一部地面スキルの重ね置きを禁止。
+・bNoMagicDamageで魔法による異常やステータスアップ効果が出ないように修正。(リザレクション以外の魔法は無効になります。)
+・battle_athena.confに項目追加。
+・その他色々と修正。
+・変更されたskill_db.txt、castdb.txtと追加されたskill_require_db.txtの構造は今の所自分しか知らないのでdb_ref.txtに説明を追加する予定なのでそれまではこれらの変更は控えてください。
+	(char/)
+	int_guild.c 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(db/)
+	skill_db.txt 修正。
+	skill_require_db.txt 修正。
+	cast_db.txt 修正。
+	(map/)
+	battle.h 修正。
+	battle.c
+		battle_counttargeted()、battle_calc_pet_weapon_attack() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_weapon_attack()、battle_config_read() 修正。
+	skill.h 修正。
+	skill.c
+		skill_attack()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_status_change_start() 修正。
+		skill_check_condition()、skill_castend_pos() 修正。
+		skill_use_id()、skill_use_pos() 修正。
+		skill_status_change_timer()、skill_status_change_start() 修正。
+		skill_check_unit_sub() 追加。
+	pc.h 修正。
+	pc.c
+		pc_damage()、pc_counttargeted()、pc_counttargeted_sub() 修正。
+	mob.h 修正。
+	mob.c
+		mob_countslave()、mob_counttargeted()、mob_counttargeted_sub() 修正。
+		mobskill_use()、mob_can_move()、mob_damage() 修正。
+		mobskill_use_id()、mobskill_use_pos()、mobskill_castend_id() 修正。
+		mobskill_castend_pos() 修正。
+	map.c
+		map_quit() 修正。
 
 --------------
 //0750 by CHRIS

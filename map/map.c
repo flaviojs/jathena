@@ -773,6 +773,7 @@ int map_quit(struct map_session_data *sd)
 	pc_stopattack(sd);
 	pc_delghosttimer(sd);
 	pc_delspiritball(sd,sd->spiritball,1);
+	skill_gangsterparadise(sd,0);
 
 	pc_calcstatus(sd,4);
 

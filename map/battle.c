@@ -31,12 +31,12 @@ static int distance(int x0,int y0,int x1,int y1)
 
 // 各種パラメータ所得
 
-int battle_counttargeted(struct block_list *bl)
+int battle_counttargeted(struct block_list *bl,struct block_list *src)
 {
 	if(bl->type == BL_PC)
-		return pc_counttargeted((struct map_session_data *)bl);
+		return pc_counttargeted((struct map_session_data *)bl,src);
 	else if(bl->type == BL_MOB)
-		return mob_counttargeted((struct mob_data *)bl);
+		return mob_counttargeted((struct mob_data *)bl,src);
 	return 0;
 }
 
@@ -1285,13 +1285,14 @@ static struct Damage battle_calc_pet_weapon_attack(
 	
 	// 回避率計算、回避判定は後で
 	flee = battle_get_flee(target);
+	if(battle_config.agi_penaly_type > 0 || battle_config.vit_penaly_type > 0)
+		target_count += battle_counttargeted(target,src);
 	if(battle_config.agi_penaly_type > 0) {
-		target_count = battle_counttargeted(target);
-		if(target_count >= 3) {
+		if(target_count >= battle_config.agi_penaly_count) {
 			if(battle_config.agi_penaly_type == 1)
-				flee = (flee * (100 - (target_count - 2)*battle_config.agi_penaly_num))/100;
+				flee = (flee * (100 - (target_count - (battle_config.agi_penaly_count - 1))*battle_config.agi_penaly_num))/100;
 			else if(battle_config.agi_penaly_type == 2)
-				flee -= (target_count - 2)*battle_config.agi_penaly_num;
+				flee -= (target_count - (battle_config.agi_penaly_count - 1))*battle_config.agi_penaly_num;
 			if(flee < 1) flee = 1;
 		}
 	}
@@ -1487,14 +1488,14 @@ static struct Damage battle_calc_pet_weapon_attack(
 			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST) {	//DEF, VIT無視
 				int t_def;
 				if(battle_config.vit_penaly_type > 0) {
-					if(target_count >= 3) {
+					if(target_count >= battle_config.vit_penaly_count) {
 						if(battle_config.vit_penaly_type == 1) {
-							def2 = (def2 * (100 - (target_count - 2)*battle_config.vit_penaly_num))/100;
-							t_vit = (t_vit * (100 - (target_count - 2)*battle_config.vit_penaly_num))/100;
+							def2 = (def2 * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
+							t_vit = (t_vit * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 						}
 						else if(battle_config.vit_penaly_type == 2) {
-							def2 -= (target_count - 2)*battle_config.vit_penaly_num;
-							t_vit -= (target_count - 2)*battle_config.vit_penaly_num;
+							def2 -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
+							t_vit -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 						}
 						if(def2 < 1) def2 = 1;
 						if(t_vit < 1) t_vit = 1;
@@ -1605,16 +1606,17 @@ static struct Damage battle_calc_mob_weapon_attack(
 	t_mode=battle_get_mode( target );
 	t_sc_data=battle_get_sc_data( target );
 
-	if(t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
+	if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
 		int dir = map_calc_dir(src,target->x,target->y),t_dir = battle_get_dir(target);
 		int dist = distance(src->x,src->y,target->x,target->y);
 		if(dist <= 0 || map_check_dir(dir,t_dir) ) {
 			memset(&wd,0,sizeof(wd));
 			t_sc_data[SC_AUTOCOUNTER].val3 = 0;
+			t_sc_data[SC_AUTOCOUNTER].val4 = 1;
 			if(sc_data && sc_data[SC_AUTOCOUNTER].timer == -1) {
 				int range = battle_get_range(target);
 				if((target->type == BL_PC && ((struct map_session_data *)target)->status.weapon != 11 && dist <= range) ||
-					(target->type == BL_MOB && dist <= 3 && dist <= range) )
+					(target->type == BL_MOB && range <= 3 && dist <= range) )
 					t_sc_data[SC_AUTOCOUNTER].val3 = src->id;
 			}
 			return wd;
@@ -1625,13 +1627,14 @@ static struct Damage battle_calc_mob_weapon_attack(
 
 	// 回避率計算、回避判定は後で
 	flee = battle_get_flee(target);
+	if(battle_config.agi_penaly_type > 0 || battle_config.vit_penaly_type > 0)
+		target_count += battle_counttargeted(target,src);
 	if(battle_config.agi_penaly_type > 0) {
-		target_count = battle_counttargeted(target);
-		if(target_count >= 3) {
+		if(target_count >= battle_config.agi_penaly_count) {
 			if(battle_config.agi_penaly_type == 1)
-				flee = (flee * (100 - (target_count - 2)*battle_config.agi_penaly_num))/100;
+				flee = (flee * (100 - (target_count - (battle_config.agi_penaly_count - 1))*battle_config.agi_penaly_num))/100;
 			else if(battle_config.agi_penaly_type == 2)
-				flee -= (target_count - 2)*battle_config.agi_penaly_num;
+				flee -= (target_count - (battle_config.agi_penaly_count - 1))*battle_config.agi_penaly_num;
 			if(flee < 1) flee = 1;
 		}
 	}
@@ -1664,11 +1667,11 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if(t_sc_data != NULL && t_sc_data[SC_SLEEP].timer!=-1 )	// 睡眠中はクリティカルが倍に
 		cri <<=1;
 
-	if(ac_flag) cri = 10000;
+	if(ac_flag) cri = 1000;
 
 	if(skill_num == KN_AUTOCOUNTER) {
 		if(battle_config.monster_auto_counter_type == 0)
-			cri = 10000;
+			cri = 1000;
 		else
 			cri <<= 1;
 	}
@@ -1850,14 +1853,14 @@ static struct Damage battle_calc_mob_weapon_attack(
 			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER) {	//DEF, VIT無視
 				int t_def;
 				if(battle_config.vit_penaly_type > 0) {
-					if(target_count >= 3) {
+					if(target_count >= battle_config.vit_penaly_count) {
 						if(battle_config.vit_penaly_type == 1) {
-							def2 = (def2 * (100 - (target_count - 2)*battle_config.vit_penaly_num))/100;
-							t_vit = (t_vit * (100 - (target_count - 2)*battle_config.vit_penaly_num))/100;
+							def2 = (def2 * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
+							t_vit = (t_vit * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 						}
 						else if(battle_config.vit_penaly_type == 2) {
-							def2 -= (target_count - 2)*battle_config.vit_penaly_num;
-							t_vit -= (target_count - 2)*battle_config.vit_penaly_num;
+							def2 -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
+							t_vit -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 						}
 						if(def2 < 1) def2 = 1;
 						if(t_vit < 1) t_vit = 1;
@@ -2014,16 +2017,17 @@ static struct Damage battle_calc_pc_weapon_attack(
 	t_mode=battle_get_mode( target );
 	t_sc_data=battle_get_sc_data( target );
 
-	if(t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
+	if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
 		int dir = map_calc_dir(src,target->x,target->y),t_dir = battle_get_dir(target);
 		int dist = distance(src->x,src->y,target->x,target->y);
 		if(dist <= 0 || map_check_dir(dir,t_dir) ) {
 			memset(&wd,0,sizeof(wd));
 			t_sc_data[SC_AUTOCOUNTER].val3 = 0;
+			t_sc_data[SC_AUTOCOUNTER].val4 = 1;
 			if(sc_data && sc_data[SC_AUTOCOUNTER].timer == -1) {
 				int range = battle_get_range(target);
 				if((target->type == BL_PC && ((struct map_session_data *)target)->status.weapon != 11 && dist <= range) ||
-					(target->type == BL_MOB && dist <= 3 && dist <= range) )
+					(target->type == BL_MOB && range <= 3 && dist <= range) )
 					t_sc_data[SC_AUTOCOUNTER].val3 = src->id;
 			}
 			return wd;
@@ -2035,17 +2039,17 @@ static struct Damage battle_calc_pc_weapon_attack(
 
 	// 回避率計算、回避判定は後で
 	flee = battle_get_flee(target);
+	if(battle_config.agi_penaly_type > 0 || battle_config.vit_penaly_type > 0)
+		target_count += battle_counttargeted(target,src);
 	if(battle_config.agi_penaly_type > 0) {
-		target_count = battle_counttargeted(target);
-		if(target_count >= 3) {
+		if(target_count >= battle_config.agi_penaly_count) {
 			if(battle_config.agi_penaly_type == 1)
-				flee = (flee * (100 - (target_count - 2)*battle_config.agi_penaly_num))/100;
+				flee = (flee * (100 - (target_count - (battle_config.agi_penaly_count - 1))*battle_config.agi_penaly_num))/100;
 			else if(battle_config.agi_penaly_type == 2)
-				flee -= (target_count - 2)*battle_config.agi_penaly_num;
+				flee -= (target_count - (battle_config.agi_penaly_count - 1))*battle_config.agi_penaly_num;
 			if(flee < 1) flee = 1;
 		}
 	}
-
 	hitrate=battle_get_hit(src) - flee + 80;
 
 	type=0;	// normal
@@ -2140,11 +2144,11 @@ static struct Damage battle_calc_pc_weapon_attack(
 		cri -= battle_get_luk(target) * 3;
 		if(t_sc_data != NULL && t_sc_data[SC_SLEEP].timer!=-1 )	// 睡眠中はクリティカルが倍に
 			cri <<=1;
-		if(ac_flag) cri = 10000;
+		if(ac_flag) cri = 1000;
 
 		if(skill_num == KN_AUTOCOUNTER) {
 			if(battle_config.pc_auto_counter_type == 0)
-				cri = 10000;
+				cri = 1000;
 			else
 				cri <<= 1;
 		}
@@ -2516,14 +2520,14 @@ static struct Damage battle_calc_pc_weapon_attack(
 			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER) {	//DEF, VIT無視
 				int t_def;
 				if(battle_config.vit_penaly_type > 0) {
-					if(target_count >= 3) {
+					if(target_count >= battle_config.vit_penaly_count) {
 						if(battle_config.vit_penaly_type == 1) {
-							def2 = (def2 * (100 - (target_count - 2)*battle_config.vit_penaly_num))/100;
-							t_vit = (t_vit * (100 - (target_count - 2)*battle_config.vit_penaly_num))/100;
+							def2 = (def2 * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
+							t_vit = (t_vit * (100 - (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num))/100;
 						}
 						else if(battle_config.vit_penaly_type == 2) {
-							def2 -= (target_count - 2)*battle_config.vit_penaly_num;
-							t_vit -= (target_count - 2)*battle_config.vit_penaly_num;
+							def2 -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
+							t_vit -= (target_count - (battle_config.vit_penaly_count - 1))*battle_config.vit_penaly_num;
 						}
 						if(def2 < 1) def2 = 1;
 						if(t_vit < 1) t_vit = 1;
@@ -3249,13 +3253,9 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				((struct mob_data *)src)->dir = map_calc_dir(src, target->x,target->y );
 			wd=battle_calc_weapon_attack(src,target,KN_AUTOCOUNTER,flag&0xff,0);
 		}
-		else {
+		else
 			wd=battle_calc_weapon_attack(src,target,0,0,0);
-			if(sc_data && sc_data[SC_AUTOCOUNTER].timer != -1 && sc_data[SC_AUTOCOUNTER].val3 == src->id) {
-				battle_weapon_attack(target,src,tick,0x8000|sc_data[SC_AUTOCOUNTER].val1);
-				return 0;
-			}
-		}
+
 		if (wd.div_ == 255 && src->type == BL_PC)	{ //三段掌
 			int delay = 300;
 			if(wd.damage+wd.damage2 < battle_get_hp(target)) {
@@ -3286,6 +3286,11 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		if(!(target->prev == NULL || (target->type == BL_PC && pc_isdead((struct map_session_data *)target) ) ) ) {
 			if(wd.damage > 0 || wd.damage2 > 0)
 				skill_additional_effect(src,target,0,0,BF_WEAPON,tick);
+		}
+		if(sc_data && sc_data[SC_AUTOCOUNTER].timer != -1 && sc_data[SC_AUTOCOUNTER].val4 > 0) {
+			if(sc_data[SC_AUTOCOUNTER].val3 == src->id)
+				battle_weapon_attack(target,src,tick,0x8000|sc_data[SC_AUTOCOUNTER].val1);
+			skill_status_change_end(target,SC_AUTOCOUNTER,-1);
 		}
 		map_freeblock_unlock();
 	}
@@ -3557,8 +3562,10 @@ int battle_config_read(const char *cfgName)
 	battle_config.pc_auto_counter_type = 1;
 	battle_config.monster_auto_counter_type = 0;
 	battle_config.agi_penaly_type = 0;
+	battle_config.agi_penaly_count = 3;
 	battle_config.agi_penaly_num = 0;
 	battle_config.vit_penaly_type = 0;
+	battle_config.vit_penaly_count = 3;
 	battle_config.vit_penaly_num = 0;
 
 	fp=fopen(cfgName,"r");
@@ -3656,8 +3663,10 @@ int battle_config_read(const char *cfgName)
 			{ "player_auto_counter_type", &battle_config.pc_auto_counter_type },
 			{ "monster_auto_counter_type", &battle_config.monster_auto_counter_type },
 			{ "agi_penaly_type", &battle_config.agi_penaly_type },
+			{ "agi_penaly_count", &battle_config.agi_penaly_count },
 			{ "agi_penaly_num", &battle_config.agi_penaly_num },
 			{ "vit_penaly_type", &battle_config.vit_penaly_type },
+			{ "vit_penaly_count", &battle_config.vit_penaly_count },
 			{ "vit_penaly_num", &battle_config.vit_penaly_num },
 		};
 		
@@ -3719,6 +3728,11 @@ int battle_config_read(const char *cfgName)
 	if(battle_config.max_cart_weight < 100)
 		battle_config.max_cart_weight = 100;
 	battle_config.max_cart_weight *= 10;
+
+	if(battle_config.agi_penaly_count < 2)
+		battle_config.agi_penaly_count = 2;
+	if(battle_config.vit_penaly_count < 2)
+		battle_config.vit_penaly_count = 2;
 
 	add_timer_func_list(battle_delay_damage_sub,"battle_delay_damage_sub");
 

@@ -212,7 +212,7 @@ int mob_can_move(struct mob_data *md)
 {
 	if(md->canmove_tick > gettick())
 		return 0;
-	if( md->sc_data[SC_ANKLE].timer!=-1 )	// アンクル中で動けない
+	if( md->sc_data[SC_ANKLE].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1 )	// アンクル中で動けない
 		return 0;
 
 	return 1;
@@ -328,6 +328,12 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 	md->state.skillstate=MSS_ATTACK;
 
 	if( md->skilltimer!=-1 )	// スキル使用中
+		return 0;
+
+	if(md->opt1>0 || md->option&6)
+		return 0;
+
+	if(md->sc_data[SC_AUTOCOUNTER].timer != -1)
 		return 0;
 
 	sd=map_id2sd(md->target_id);
@@ -1952,7 +1958,7 @@ int mob_countslave(struct mob_data *md)
 	int c=0;
 	map_foreachinarea(mob_countslave_sub, md->bl.m,
 		0,0,map[md->bl.m].xs-1,map[md->bl.m].ys-1,
-		BL_MOB,md->bl.id);
+		BL_MOB,md->bl.id,&c);
 	return c;
 }
 /*==========================================
@@ -2023,9 +2029,11 @@ int mob_summonslave(struct mob_data *md2,int class,int amount,int flag)
 static int mob_counttargeted_sub(struct block_list *bl,va_list ap)
 {
 	int id,*c;
+	struct block_list *src;
 	id=va_arg(ap,int);
 	c=va_arg(ap,int *);
-	if(id == bl->id) return 0;
+	src=va_arg(ap,struct block_list *);
+	if(id == bl->id || (src && id == src->id)) return 0;
 	if(bl->type == BL_PC) {
 		if(((struct map_session_data *)bl)->attacktarget == id && ((struct map_session_data *)bl)->attacktimer != -1)
 			(*c)++;
@@ -2044,12 +2052,12 @@ static int mob_counttargeted_sub(struct block_list *bl,va_list ap)
  * 自分をロックしているPCの数を数える
  *------------------------------------------
  */
-int mob_counttargeted(struct mob_data *md)
+int mob_counttargeted(struct mob_data *md,struct block_list *src)
 {
 	int c=0;
 	map_foreachinarea(mob_counttargeted_sub, md->bl.m,
 		md->bl.x-AREA_SIZE,md->bl.y-AREA_SIZE,
-		md->bl.x+AREA_SIZE,md->bl.y+AREA_SIZE,0,md->bl.id,&c );
+		md->bl.x+AREA_SIZE,md->bl.y+AREA_SIZE,0,md->bl.id,&c,src);
 	return c;
 }
 
@@ -2073,7 +2081,11 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 
 	if( md->skilltimer != tid )	// タイマIDの確認
 		return 0;
+
 	md->skilltimer=-1;
+	if(md->opt1>0 || md->sc_data[SC_DIVINA].timer != -1 || md->sc_data[SC_ROKISWEIL].timer != -1 ||
+		md->sc_data[SC_STEELBODY].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1)
+		return 0;
 	md->last_thinktime=tick + battle_get_adelay(&md->bl);
 
 	bl=map_id2bl(md->skilltarget);
@@ -2116,7 +2128,7 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 {
 	struct mob_data* md=NULL;
-	int range;
+	int range,c;
 
 	if( (md=(struct mob_data *)map_id2bl(id))==NULL ||
 		md->bl.type!=BL_MOB || md->bl.prev==NULL )
@@ -2124,7 +2136,32 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 
 	if( md->skilltimer != tid )	// タイマIDの確認
 		return 0;
+
 	md->skilltimer=-1;
+	if(md->opt1>0 || md->sc_data[SC_DIVINA].timer != -1 || md->sc_data[SC_ROKISWEIL].timer != -1 ||
+		md->sc_data[SC_STEELBODY].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1)
+		return 0;
+
+	switch(md->skillid) {
+		case MG_SAFETYWALL:
+		case AL_PNEUMA:
+		case AL_WARP:
+		case WZ_FIREPILLAR:
+		case HT_SKIDTRAP:
+		case HT_LANDMINE:
+		case HT_ANKLESNARE:
+		case HT_SHOCKWAVE:
+		case HT_SANDMAN:
+		case HT_FLASHER:
+		case HT_FREEZINGTRAP:
+		case HT_BLASTMINE:
+		case HT_CLAYMORETRAP:
+		case HT_TALKIEBOX:
+			c = 0;
+			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx-2,md->skilly-2,md->skillx+2,md->skilly+2,BL_SKILL,&c);
+			if(c > 0) return 0;
+			break;
+	}
 	range = skill_get_range(md->skillid,md->skilllv);
 	if(range < 0)
 		range = (1 - range) + battle_get_range(&md->bl);
@@ -2158,7 +2195,8 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 		return 0;
 
 	// 沈黙や異常
-	if( md->opt1>0 || md->option&6 || md->sc_data[SC_DIVINA].timer!=-1 )
+	if( md->opt1>0 || md->option&6 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
+		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
 		return 0;
 	
 	// 射程と障害物チェック
@@ -2230,7 +2268,8 @@ int mobskill_use_pos( struct mob_data *md,
 	if( md->bl.prev==NULL )
 		return 0;
 
-	if( md->opt1>0 || md->option&6 || md->sc_data[SC_DIVINA].timer!=-1 )
+	if( md->opt1>0 || md->option&6 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
+		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
 		return 0;	// 異常や沈黙など
 
 	// 射程と障害物チェック
@@ -2316,11 +2355,11 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 			case MSC_SLAVELT:		// slave < num
 				flag=( mob_countslave(md) < c2 ); break;
 			case MSC_ATTACKPCGT:	// attack pc > num
-				flag=( mob_counttargeted(md) > c2 ); break;
+				flag=( mob_counttargeted(md,NULL) > c2 ); break;
 			case MSC_SLAVELE:		// slave <= num
 				flag=( mob_countslave(md) <= c2 ); break;
 			case MSC_ATTACKPCGE:	// attack pc >= num
-				flag=( mob_counttargeted(md) >= c2 ); break;
+				flag=( mob_counttargeted(md,NULL) >= c2 ); break;
 			case MSC_SKILLUSED:		// specificated skill used
 				flag=( (event&0xffff)==MSC_SKILLUSED && (event>>16)==c2); break;
 			}

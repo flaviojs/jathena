@@ -59,7 +59,7 @@ int battle_weapon_attack( struct block_list *bl,struct block_list *target,
 	 unsigned int tick,int flag);
 
 // 各種パラメータを得る
-int battle_counttargeted(struct block_list *bl);
+int battle_counttargeted(struct block_list *bl,struct block_list *src);
 int battle_get_class(struct block_list *bl);
 int battle_get_dir(struct block_list *bl);
 int battle_get_lv(struct block_list *bl);
@@ -198,8 +198,10 @@ extern struct Battle_Config {
 	int pc_auto_counter_type;
 	int monster_auto_counter_type;
 	int agi_penaly_type;
+	int agi_penaly_count;
 	int agi_penaly_num;
 	int vit_penaly_type;
+	int vit_penaly_count;
 	int vit_penaly_num;
 } battle_config;
 

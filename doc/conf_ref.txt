@@ -663,37 +663,45 @@ save_clothcolor
 
 undead_detect_type
 	アンデッドを認識する方法を設定します。0で属性のみ、1で種族のみ、
-	2で属性と種族の両方のどちらでもあった場合になります。
+	2で属性と種族の両方のどちらでもあってる場合になります。
 	デフォルトは2です。
 
 player_auto_counter_type
 	プレイヤーのオートカウンターの仕様を設定します。0で100%クリティカル、
 	1で防御無視、Hit+20、クリティカル率2倍です。
-	デフォルトは1す。
+	デフォルトは1です。
 
 monster_auto_counter_type
 	モンスターのオートカウンターの仕様を設定します。0で100%クリティカル、
 	1で防御無視、Hit+20、クリティカル率2倍です。
-	デフォルトは1す。
+	デフォルトは1です。
 
 agi_penaly_type
-	3匹以上の敵に攻撃された時のagiペナルティの仕様を設定します。
+	agi_penaly_count以上の敵に攻撃された時のagiペナルティの仕様を設定します。
 	0でなし、1でagi_penaly_num%ずつ減って、2でagi_penaly_numだけ減ります。
-	デフォルトは0す。
+	デフォルトは0です。
+
+agi_penaly_count
+	agiペナルティを適用する敵の数を設定します。
+	2未満に設定することはできません。デフォルトは3です。
 
 agi_penaly_num
 	agiペナルティによって減る回避の量を設定します。
-	デフォルトは0す。
+	デフォルトは0です。
 
 vit_penaly_type
-	3匹以上の敵に攻撃された時のvitペナルティの仕様を設定します。
+	vit_penaly_count以上の敵に攻撃された時のvitペナルティの仕様を設定します。
 	0でなし、1でvit_penaly_num%ずつ減って、2でvit_penaly_numだけ減ります。
 	(減るのはvitによる防御のみ)
-	デフォルトは0す。
+	デフォルトは0です。
+
+vit_penaly_count
+	vitペナルティを適用する敵の数を設定します。
+	2未満に設定することはできません。デフォルトは3です。
 
 vit_penaly_num
 	vitペナルティによって減る回避の量を設定します。
-	デフォルトは0す。
+	デフォルトは0です。
 
 
 
@@ -783,8 +791,10 @@ undead_detect_type: 2
 player_auto_counter_type: 1
 monster_auto_counter_type: 0
 agi_penaly_type: 0
+agi_penaly_count: 3
 agi_penaly_num: 0
 vit_penaly_type: 0
+vit_penaly_count: 3
 vit_penaly_num: 0
 
 
