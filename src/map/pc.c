@@ -2311,6 +2311,16 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 			sd->hp_drain_per_ += val;
 		}
 		break;
+	case SP_HP_DRAIN_VALUE:
+		if(!sd->state.lr_flag) {
+			sd->hp_drain_rate += type2;
+			sd->hp_drain_value += val;
+		}
+		else if(sd->state.lr_flag == 1) {
+			sd->hp_drain_rate_ += type2;
+			sd->hp_drain_value_ += val;
+		}
+		break;
 	case SP_SP_DRAIN_RATE:
 		if(!sd->state.lr_flag) {
 			sd->sp_drain_rate += type2;
@@ -2319,6 +2329,16 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 		else if(sd->state.lr_flag == 1) {
 			sd->sp_drain_rate_ += type2;
 			sd->sp_drain_per_ += val;
+		}
+		break;
+	case SP_SP_DRAIN_VALUE:
+		if(!sd->state.lr_flag) {
+			sd->sp_drain_rate += type2;
+			sd->sp_drain_value += val;
+		}
+		else if(sd->state.lr_flag == 1) {
+			sd->sp_drain_rate_ += type2;
+			sd->sp_drain_value_ += val;
 		}
 		break;
 	case SP_WEAPON_COMA_ELE:

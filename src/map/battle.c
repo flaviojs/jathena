@@ -4341,25 +4341,74 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			}
 			if(wd.flag&BF_WEAPON && src != target && (wd.damage > 0 || wd.damage2 > 0)) {
 				int hp = 0,sp = 0;
-				if(sd->hp_drain_rate && sd->hp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate) {
-					hp += (wd.damage * sd->hp_drain_per)/100;
-					if(sd->hp_drain_rate > 0 && hp < 1) hp = 1;
-					else if(sd->hp_drain_rate < 0 && hp > -1) hp = -1;
-				}
-				if(sd->hp_drain_rate_ && sd->hp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->hp_drain_rate_) {
-					hp += (wd.damage2 * sd->hp_drain_per_)/100;
-					if(sd->hp_drain_rate_ > 0 && hp < 1) hp = 1;
-					else if(sd->hp_drain_rate_ < 0 && hp > -1) hp = -1;
-				}
-				if(sd->sp_drain_rate && sd->sp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate) {
-					sp += (wd.damage * sd->sp_drain_per)/100;
-					if(sd->sp_drain_rate > 0 && sp < 1) sp = 1;
-					else if(sd->sp_drain_rate < 0 && sp > -1) sp = -1;
-				}
-				if(sd->sp_drain_rate_ && sd->sp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->sp_drain_rate_) {
-					sp += (wd.damage2 * sd->sp_drain_per_)/100;
-					if(sd->sp_drain_rate_ > 0 && sp < 1) sp = 1;
-					else if(sd->sp_drain_rate_ < 0 && sp > -1) sp = -1;
+				if(!battle_config.left_cardfix_to_right) { // “ñ“—¬¶èƒJ[ƒh‚Ì‹zûŒnŒø‰Ê‚ğ‰Eè‚É’Ç‰Á‚µ‚È‚¢ê‡
+					if(sd->hp_drain_rate && sd->hp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate) {
+						hp += (wd.damage * sd->hp_drain_per)/100;
+						if(sd->hp_drain_rate > 0 && hp < 1) hp = 1;
+						else if(sd->hp_drain_rate < 0 && hp > -1) hp = -1;
+					}
+					if(sd->hp_drain_rate_ && sd->hp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->hp_drain_rate_) {
+						hp += (wd.damage2 * sd->hp_drain_per_)/100;
+						if(sd->hp_drain_rate_ > 0 && hp < 1) hp = 1;
+						else if(sd->hp_drain_rate_ < 0 && hp > -1) hp = -1;
+					}
+					if(sd->hp_drain_rate && sd->hp_drain_value > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate) {
+						hp += sd->hp_drain_value;
+						if(sd->hp_drain_rate > 0 && hp < 1) hp = 1;
+						else if(sd->hp_drain_rate < 0 && hp > -1) hp = -1;
+					}
+					if(sd->hp_drain_rate_ && sd->hp_drain_value_ > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate_) {
+						hp += sd->hp_drain_value_;
+						if(sd->hp_drain_rate_ > 0 && hp < 1) hp = 1;
+						else if(sd->hp_drain_rate_ < 0 && hp > -1) hp = -1;
+					}
+					if(sd->sp_drain_rate && sd->sp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate) {
+						sp += (wd.damage * sd->sp_drain_per)/100;
+						if(sd->sp_drain_rate > 0 && sp < 1) sp = 1;
+						else if(sd->sp_drain_rate < 0 && sp > -1) sp = -1;
+					}
+					if(sd->sp_drain_rate_ && sd->sp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->sp_drain_rate_) {
+						sp += (wd.damage2 * sd->sp_drain_per_)/100;
+						if(sd->sp_drain_rate_ > 0 && sp < 1) sp = 1;
+						else if(sd->sp_drain_rate_ < 0 && sp > -1) sp = -1;
+					}
+					if(sd->sp_drain_rate && sd->sp_drain_value > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate) {
+						sp += sd->sp_drain_value;
+						if(sd->sp_drain_rate > 0 && sp < 1) sp = 1;
+						else if(sd->sp_drain_rate < 0 && sp > -1) sp = -1;
+					}
+					if(sd->sp_drain_rate_ && sd->sp_drain_value_ > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate_) {
+						sp += sd->sp_drain_value_;
+						if(sd->sp_drain_rate_ > 0 && sp < 1) sp = 1;
+						else if(sd->sp_drain_rate_ < 0 && sp > -1) sp = -1;
+					}
+				} else { // “ñ“—¬¶èƒJ[ƒh‚Ì‹zûŒnŒø‰Ê‚ğ‰Eè‚É’Ç‰Á‚·‚éê‡
+					int hp_drain_rate = sd->hp_drain_rate + sd->hp_drain_rate_;
+					int hp_drain_per = sd->hp_drain_per + sd->hp_drain_per_;
+					int hp_drain_value = sd->hp_drain_value + sd->hp_drain_value_;
+					int sp_drain_rate = sd->sp_drain_rate + sd->sp_drain_rate_;
+					int sp_drain_per = sd->sp_drain_per + sd->sp_drain_per_;
+					int sp_drain_value = sd->sp_drain_value + sd->sp_drain_value_;
+					if(hp_drain_rate && hp_drain_per > 0 && wd.damage > 0 && rand()%100 < hp_drain_rate) {
+						hp += (wd.damage * hp_drain_per)/100;
+						if(hp_drain_rate > 0 && hp < 1) hp = 1;
+						else if(hp_drain_rate < 0 && hp > -1) hp = -1;
+					}
+					if(hp_drain_rate && hp_drain_value > 0 && wd.damage > 0 && rand()%100 < hp_drain_rate) {
+						hp += hp_drain_value;
+						if(hp_drain_rate > 0 && hp < 1) hp = 1;
+						else if(hp_drain_rate < 0 && hp > -1) hp = -1;
+					}
+					if(sp_drain_rate && sp_drain_per > 0 && wd.damage > 0 && rand()%100 < sp_drain_rate) {
+						sp += (wd.damage * sp_drain_per)/100;
+						if(sp_drain_rate > 0 && sp < 1) sp = 1;
+						else if(sp_drain_rate < 0 && sp > -1) sp = -1;
+					}
+					if(sp_drain_rate && sp_drain_value > 0 && wd.damage > 0 && rand()%100 < sp_drain_rate) {
+						sp += sp_drain_value;
+						if(sp_drain_rate > 0 && sp < 1) sp = 1;
+						else if(sp_drain_rate < 0 && sp > -1) sp = -1;
+					}
 				}
 				if(hp || sp) pc_heal(sd,hp,sp);
 			}

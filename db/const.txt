@@ -157,6 +157,8 @@ bAddEff2	1067
 bBreakWeaponRate	1068
 bBreakArmorRate	1069
 bAddStealRate	1070
+bHPDrainValue	1071
+bSPDrainValue	1072
 
 bRestartFullRecover	2000
 bNoCastCancel	2001

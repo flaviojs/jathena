@@ -1,4 +1,25 @@
 --------------------
+//1063 by nameless
+・月光剣の効果実装
+・左手カードによる、武器攻撃時のHP/SP吸収効果が右手に影響する様に修正(本鯖仕様)
+  (left_cardfix_to_rightがyesの時のみ。noだと従来通り)
+
+    (db)
+        const.txt
+            bHPDrainValue=1071とbSPDrainValue=1072を追加
+        item_db.txt
+            月光剣のEquipScriptにbonus2 bSPDrainValue,100,3を追加
+
+    (src/map)
+        battle.c
+            battle_weapon_attack() 修正
+        map.h
+            short hp_drain_value,sp_drain_value,hp_drain_value_,sp_drain_value_;を追加
+            SP_HP_DRAIN_VALUE,SP_SP_DRAIN_VALUE, // 1071-1072を追加
+        pc.c
+            pc_bonus2() 修正
+
+--------------------
 //1062 by nameless
 ・パケット送受信での誤送信修正
 ・バグ報告スレッド part7 からの取り込み・修正 >> 56,57,58

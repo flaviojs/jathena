@@ -240,6 +240,7 @@ struct map_session_data {
 	short autospell_id,autospell_lv,autospell_rate;
 	short hp_drain_rate,hp_drain_per,sp_drain_rate,sp_drain_per;
 	short hp_drain_rate_,hp_drain_per_,sp_drain_rate_,sp_drain_per_;
+	short hp_drain_value,sp_drain_value,hp_drain_value_,sp_drain_value_;
 	int short_weapon_damage_return,long_weapon_damage_return;
 	int weapon_coma_ele[10],weapon_coma_race[12];
 	short break_weapon_rate,break_armor_rate;
@@ -507,6 +508,7 @@ enum {
 	SP_SPLASH_RANGE,SP_SPLASH_ADD_RANGE,SP_AUTOSPELL,SP_HP_DRAIN_RATE,SP_SP_DRAIN_RATE, // 1058-1062
 	SP_SHORT_WEAPON_DAMAGE_RETURN,SP_LONG_WEAPON_DAMAGE_RETURN,SP_WEAPON_COMA_ELE,SP_WEAPON_COMA_RACE, // 1063-1066
 	SP_ADDEFF2,SP_BREAK_WEAPON_RATE,SP_BREAK_ARMOR_RATE,SP_ADD_STEAL_RATE, // 1067-1070
+	SP_HP_DRAIN_VALUE,SP_SP_DRAIN_VALUE, // 1071-1072
 
 	SP_RESTART_FULL_RECORVER=2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
 	SP_NO_CASTCANCEL2,SP_INFINITE_ENDURE,SP_UNBREAKABLE_WEAPON,SP_UNBREAKABLE_ARMOR // 2006-2009
