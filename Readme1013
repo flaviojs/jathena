@@ -1,4 +1,15 @@
 --------------------
+//1060 by mosya
+・モンスターがスキル詠唱中に座標ズレを起こす問題を修正
+・MOBのAI変更。前衛がタゲを取っているのに、後衛に攻撃をしにゆくのを修正
+	(src/map)
+		mob.c
+			mob_ai_sub_hard() 変更
+			mobskill_castend_id() 変更
+			mobskill_castend_pos() 変更
+			mobskill_use_id() 変更
+			mobskill_use_pos() 変更
+--------------------
 //1059 by SPDFMember
 ・eAthenaを参考にリロードDB系統を追加しました。
 	(conf/)
