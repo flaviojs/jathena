@@ -2555,12 +2555,14 @@ int skill_check_condition( struct map_session_data *sd )
 			break;
 
 		case MO_FINGEROFFENSIVE:	//Žw’e
-				spiritball = sd->skilllv;
-				if (sd->spiritball < spiritball) spiritball = sd->spiritball;
+				spiritball = sd->skilllv;							// Ÿ†‹…
+				if (sd->spiritball != 0 && sd->spiritball < spiritball)
+					spiritball = sd->spiritball;
+					sd->spiritball_old = sd->spiritball;				
 			break;
 		case MO_INVESTIGATE:		//”­™¤
 		case MO_COMBOFINISH:
-				spiritball = 1;
+				spiritball = 1;									// Ÿ†‹…
 			break;
 
 		case MO_BODYRELOCATION:

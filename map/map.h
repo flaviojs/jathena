@@ -149,7 +149,7 @@ struct map_session_data {
 	int addeff[10],reseff[10];
 	int watk_,watk_2,atkmods_[3],atkmodr_[16],atkmoda_[16];	//“ñ“—¬‚Ì‚½‚ß‚É’Ç‰Á
 	int atk_ele_,star_,overrefine_;				//“ñ“—¬‚Ì‚½‚ß‚É’Ç‰Á
-	short spiritball;
+	short spiritball, spiritball_old;
 	int spirit_timer[10];
 
 	int reg_num;

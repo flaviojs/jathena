@@ -1,4 +1,20 @@
 --------------
+//0510 by Diex
+・三段掌の表示バグ修正
+・指弾が気弾が無くても撃てるバグを修正
+	map.h
+		struct map_session_dataにspiritball_old変数追加。
+	skill.c
+		skill_check_condition() 修正。
+	clif.c
+		clif_skill_damage3() 修正。
+	battle.c
+		battle_weapon_attack()、battle_calc_weapon_attack 修正。
+
+--------------
+//0509 by 
+
+--------------
 //0508 by 死神
 
 ・バグ修正と息吹、気功、気奪の修正がメインです。(今度からは他の人にも気がちゃんと見えます。)

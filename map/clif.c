@@ -2636,7 +2636,7 @@ int clif_skill_damage3(struct block_list *src,struct block_list *dst,
 	WBUFL(buf,12)=tick;
 	WBUFL(buf,16)=sdelay;
 	WBUFL(buf,20)=ddelay;
-	WBUFW(buf,24)=damage;
+	WBUFL(buf,24)=damage;
 	WBUFW(buf,28)=skill_lv;
 	WBUFW(buf,30)=div;
 	WBUFB(buf,32)=(type>0)?type:skill_get_hit(skill_id);

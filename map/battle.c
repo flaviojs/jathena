@@ -1137,8 +1137,9 @@ struct Damage battle_calc_weapon_attack(
 				hitrate=hitrate*(100+10*skill_lv)/100;
 				break;
 			case MO_FINGEROFFENSIVE:	//指弾
-				damage = damage * (100 + 50 * skill_lv) / 100 * skill_lv;
-				if (skill_lv > 1) div_ = skill_lv;
+				damage = damage * (100 + 50 * skill_lv) / 100 * sd->spiritball_old;
+				printf("Spiritball = %d\n", sd->spiritball_old);
+				div_ = sd->spiritball_old;
 				break;
 			case MO_EXTREMITYFIST:	// 阿修羅覇鳳拳
 				damage = damage * (8 + ((sd->status.sp)/10)) + 250 + (skill_lv * 150);
@@ -1284,10 +1285,10 @@ struct Damage battle_calc_weapon_attack(
 		}
 		if(da == 2) { //三段掌が発動しているか
 			type = 0x08;
-			div_ = 3;
+			div_ = 255;	//三段掌用に…
 			damage = damage * (100 + 20 * pc_checkskill(sd, MO_TRIPLEATTACK)) / 100;
 			clif_skill_damage3(src,target,gettick(), battle_get_amotion(src), battle_get_dmotion(target),
-				damage, div_ , MO_TRIPLEATTACK, 
+				damage, 3 , MO_TRIPLEATTACK, 
 				pc_checkskill(sd,MO_TRIPLEATTACK), type );
 		}
 		item_id = pc_checkequip(sd,34);		// 両 手用か？
@@ -1639,9 +1640,9 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		// 攻撃対象となりうるので攻撃
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(src,target,0,0,0);
-		if (wd.div_ != 3)
-		clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
-			wd.damage, wd.div_, wd.type, wd.damage2);
+		if (wd.div_ != 255)	//三段掌
+			clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
+				wd.damage, wd.div_ , wd.type, wd.damage2);
 		//二刀流左手とカタール追撃のミス表示(無理やり～)
 		if(wd.damage2==-1){wd.damage2=0;clif_damage(src,target,tick+200, wd.amotion, wd.dmotion,0, 1, 0, 0);}
 		battle_damage(src,target,(wd.damage+wd.damage2));
