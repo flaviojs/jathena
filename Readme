@@ -1,4 +1,27 @@
 --------------
+//0538 by huge
+
+・グリムトゥースを範囲攻撃に修正
+・サプライズアタック実装 (有効範囲って、これであってるのかな？)
+・バックスタブの仮実装
+	本鯖でやってる人から話を聞いて、場所指定じゃなくて
+	タゲ取っても良さそうだったので変更しました。（やりやすかったので (^^;
+	まだ、mobの後ろに居るかどうかの判定は入ってません。
+
+・battle.c
+	battle_calc_weapon_attack() 修正
+
+・skill.c
+	skill_additional_effect() 修正
+	skill_castend_damage_id() 修正
+	skill_check_condition() 修正
+	skill_use_id() 修正
+	skill_castend_nodamage_id() 修正
+
+・skilldb.txt
+	バックスタブの種類を[場所]から[敵]へ変更
+
+--------------
 //0537 by 死神
 
 ・スティールバグ修正とbattle_athena.confの項目追加、仕様変更と細かい修正です。
@@ -25,7 +48,7 @@
 		finger_offencive_typeをfinger_offensive_typeに修正と少し追加。
 
 --------------
-//0536 by hogefuga3 (真*kyocs & Athena staff)
+//0536 by hogefuga3 (Athena staff)
 
 ・新GRFファイルフォーマット対応
 　- 真*kyocs & Athena staff 様の作成されたパッチを適用しました。

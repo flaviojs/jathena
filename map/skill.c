@@ -361,6 +361,13 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			skill_status_change_start(bl,SC_BLIND,1,0);
 		break;
 
+	case RG_RAID:		/* サプライズアタック */
+		if( rand()%100 < 10+3*skilllv )
+			skill_status_change_start(bl,SC_STAN,1,3000);
+		if( rand()%100 < 10+3*skilllv )
+			skill_status_change_start(bl,SC_BLIND,1,0);
+		break;
+
 #if 0
 	case BA_FROSTJOKE:		/* 寒いジョーク */
 		if( rand()%100 < 15+5*skilllv )
@@ -768,13 +775,14 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case MC_MAMMONITE:		/* メマーナイト */
 	case AC_DOUBLE:			/* ダブルストレイフィング */
 	case AS_SONICBLOW:		/* ソニックブロー */
-	case AS_GRIMTOOTH:		/* グリムトゥース */
 	case KN_PIERCE:			/* ピアース */
 	case KN_SPEARBOOMERANG:	/* スピアブーメラン */
 	case TF_POISON:			/* インベナム */
 	case TF_SPRINKLESAND:	/* 砂まき */
 	case AC_CHARGEARROW:	/* チャージアロー */
 	case KN_SPEARSTAB:		/* スピアスタブ */
+	case RG_BACKSTAP:		/* バックスタブ */
+	case RG_RAID:		/* サプライズアタック */
 	case RG_INTIMIDATE:		/* インティミデイト */
 	case BA_MUSICALSTRIKE:	/* ミュージカルストライク */
 	case DC_THROWARROW:		/* 矢撃ち */
@@ -813,6 +821,8 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case NPC_LICK:
 		if(skillid == MO_EXTREMITYFIST)
 			skill_status_change_end(src, SC_EXPLOSIONSPIRITS, -1);
+		if(skillid==RG_BACKSTAP && pc_ishiding(sd))
+			skill_status_change_end(src, SC_HIDDING, -1);	// ハイディング解除
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case MO_FINGEROFFENSIVE:	/* 指弾 */
@@ -854,6 +864,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	/* 武器系範囲攻撃スキル */
 	case AC_SHOWER:			/* アローシャワー */
 	case SM_MAGNUM:			/* マグナムブレイク */
+	case AS_GRIMTOOTH:		/* グリムトゥース */
 	case KN_BOWLINGBASH:	/* ボウリングバッシュ */
 	case MC_CARTREVOLUTION:	/* カートレヴォリューション */
 	case NPC_SPLASHATTACK:	/* スプラッシュアタック */
@@ -1241,6 +1252,21 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		if( rand()%100 < (20+ 10*skilllv) ) {
 			skill_status_change_start(bl,SC_STAN,skilllv,10000);
 		}
+		break;
+
+	case RG_RAID:			/* サプライズアタック */
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		{
+			int x=bl->x,y=bl->y;
+			skill_area_temp[1]=bl->id;
+			skill_area_temp[2]=x;
+			skill_area_temp[3]=y;
+			map_foreachinarea(skill_area_sub,
+				bl->m,x-1,y-1,x+1,y+1,0,
+				src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
+				skill_castend_damage_id);
+		}
+		skill_status_change_end(src, SC_HIDDING, -1);	// ハイディング解除
 		break;
 
 	/* パーティスキル */
@@ -2918,7 +2944,16 @@ int skill_check_condition( struct map_session_data *sd )
 				return 0;
 			}
 			break;
-		}
+
+	//		case RG_BACKSTAP:	// バックスタブ
+		case RG_RAID:		// サプライズアタック
+			if(!pc_ishiding(sd)) {		// ハイディング状態
+				clif_skill_fail(sd,sd->skillid,0,0);
+				return 0;
+			}
+			break;
+
+	}
 
 		if( sp>0 && sd->status.sp < sp) {			/* SPチェック */
 			clif_skill_fail(sd,sd->skillid,1,0);		/* SP不足：失敗通知 */
@@ -3030,7 +3065,7 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	/* 沈黙や異常（ただし、グリムなどの判定をする） */
 	if( sd->opt1>0 || sd->status.option&6 || sd->sc_data[SC_DIVINA].timer!=-1 ){
 		if( (sd->status.option&4) && skill_num==AS_CLOAKING );	/* クローキング中 */
-		else if( (sd->status.option&2) && (skill_num==TF_HIDING || skill_num==AS_GRIMTOOTH) );	/* ハイディング中 */
+		else if( (sd->status.option&2) && (skill_num==TF_HIDING || skill_num==AS_GRIMTOOTH || skill_num==RG_BACKSTAP || skill_num==RG_RAID ));	/* ハイディング中 */
 		else
 			return 0;
 	}

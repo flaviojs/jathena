@@ -1125,6 +1125,9 @@ struct Damage battle_calc_weapon_attack(
 			case NPC_TELEKINESISATTACK:
 				damage = damage*(100+25*skill_lv)/100;
 				break;
+			case RG_BACKSTAP:	// バックスタブ
+				damage = damage*(300+ 40*skill_lv)/100;
+				break;
 			case RG_RAID:	// サプライズアタック
 				damage = damage*(100+ 40*skill_lv)/100;
 				break;
@@ -1239,7 +1242,9 @@ struct Damage battle_calc_weapon_attack(
 		hitrate = ((hitrate<5)?5:hitrate);
 	else if(hitrate < 100000)
 		hitrate = ((hitrate>95)?95: ((hitrate<5)?5:hitrate) );
-	if( skill_num==NPC_GUIDEDATTACK || hitrate >= 100000 ||					// 必中攻撃
+	if( skill_num==NPC_GUIDEDATTACK ||
+		skill_num==RG_BACKSTAP ||		// バックスタブ
+		hitrate >= 100000 ||			// 必中攻撃
 		t_sc_data[SC_SLEEP].timer!=-1 ||	// 睡眠は必中
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
 		t_sc_data[SC_FREEZE].timer!=-1 )	// 凍結は必中
