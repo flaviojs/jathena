@@ -298,28 +298,36 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		1000, 0, 6000 };
 
 	struct map_session_data *sd=NULL;
-	struct map_session_data *sd2=NULL;
+	struct map_session_data *dstsd=NULL;
 	struct mob_data *md=NULL;
+	struct mob_data *dstmd=NULL;
 
 	int skill,skill2;
 	int rate;
+
+	/* インティミ用 */
+	int x,y,c,i=0;
+	int m=0;
 
 	int sc_def_mdef=100;
 	int sc_def_vit=100;
 	int sc_def_int=100;
 
-	if(src->type==BL_PC)
+	if(src->type==BL_PC){
 		sd=(struct map_session_data *)src;
+	}else if(src->type==BL_MOB){
+		md=(struct mob_data *)src;
+	}
 	if(bl->type==BL_PC){
-		sd2=(struct map_session_data *)bl;
-		sc_def_mdef=100-sd2->mdef;
-		sc_def_vit=100-(sd2->paramc[2]+sd2->paramc[5]/3);
-		sc_def_int=100-(sd2->paramc[3]+sd2->paramc[5]/3);
+		dstsd=(struct map_session_data *)bl;
+		sc_def_mdef=100-dstsd->mdef;
+		sc_def_vit=100-(dstsd->paramc[2]+dstsd->paramc[5]/3);
+		sc_def_int=100-(dstsd->paramc[3]+dstsd->paramc[5]/3);
 	}else if(bl->type==BL_MOB){
-		md=(struct mob_data *)bl;
-		sc_def_mdef=100-mob_db[md->class].mdef;
-		sc_def_vit=100-(mob_db[md->class].vit+mob_db[md->class].luk/3);
-		sc_def_int=100-(mob_db[md->class].int_+mob_db[md->class].luk/3);
+		dstmd=(struct mob_data *)bl;
+		sc_def_mdef=100-mob_db[dstmd->class].mdef;
+		sc_def_vit=100-(mob_db[dstmd->class].vit+mob_db[dstmd->class].luk/3);
+		sc_def_int=100-(mob_db[dstmd->class].int_+mob_db[dstmd->class].luk/3);
 		if(sc_def_mdef<50)
 			sc_def_mdef=50;
 		if(sc_def_vit<50)
@@ -388,17 +396,17 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case WZ_STORMGUST:		/* ストームガスト */
-		if(sd2){
-			sd2->sg_count++;
-			if(battle_get_elem_type(bl)!=9 && sd2->sg_count==3){
-				sd2->sg_count=0;
+		if(dstsd){
+			dstsd->sg_count++;
+			if(battle_get_elem_type(bl)!=9 && dstsd->sg_count==3){
+				dstsd->sg_count=0;
 				skill_status_change_start(bl,SC_FREEZE,skilllv,13000*sc_def_mdef/100);
 			}
 			break;
 		}else if(md){
-			md->sg_count++;
-			if(battle_get_elem_type(bl)!=9 && md->sg_count==3){
-				md->sg_count=0;
+			dstmd->sg_count++;
+			if(battle_get_elem_type(bl)!=9 && dstmd->sg_count==3){
+				dstmd->sg_count=0;
 				skill_status_change_start(bl,SC_FREEZE,skilllv,13000*sc_def_mdef/100);
 			}
 			break;
@@ -449,6 +457,50 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		if( rand()%100 < (15 + skilllv*5)*sc_def_vit/100 )
 			skill_status_change_start(bl,SC_STAN,skilllv,5000);
 		break;
+	case RG_INTIMIDATE:		/* インティミデイト */
+		if(1){/* 発動率が今ひとつわからないので100% */
+			if(dstmd && (mob_db[dstmd->class].mode & 0x20 || mob_db[dstmd->class].mexp > 0))
+				break;/* BOSSは誘拐できない */
+			if(sd)
+				m=sd->bl.m;
+			if(md)
+				m=md->bl.m;
+
+			if(map[m].flag.noteleport)	// テレポート禁止
+				break;
+
+			do{
+				x=rand()%(map[m].xs-2)+1;
+				y=rand()%(map[m].ys-2)+1;
+			}while( ((c=read_gat(m,x,y))==1 || c==5) && (i++)<1000 );
+
+			if(i<1000){
+				if(sd){
+					sd->intimidate_x=x;
+					sd->intimidate_y=y;
+					sd->intimidate_map=m;
+				}else if(md){
+					md->intimidate_x=x;
+					md->intimidate_y=y;
+				}
+				if(dstsd){
+					dstsd->intimidate_x=x;
+					dstsd->intimidate_y=y;
+					dstsd->intimidate_map=m;
+				}else if(dstmd){
+					dstmd->intimidate_x=x;
+					dstmd->intimidate_y=y;
+				}
+
+			}else{
+				if (battle_config.battle_log)
+					printf("Skill INTIMIDATE failed : random warp error\n");
+					break;
+			}
+			skill_status_change_start(src,SC_INTIMIDATE,0,600);
+			skill_status_change_start(bl,SC_INTIMIDATE,0,600);
+		}
+			break;
 
 	case RG_RAID:		/* サプライズアタック */
 		if( rand()%100 < (10+3*skilllv)*sc_def_vit/100 )
@@ -1812,19 +1864,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		}
        if(b==0){clif_displaymessage(sd->fd,"Nothing Equiped.");}*/
 		break;
-	case RG_INTIMIDATE:			/* インティミデイト */
-		if( sd ){
-			if(map[sd->bl.m].flag.noteleport)	/* テレポ禁止 */
-				break;
-			if( sd->skilllv==1 )
-				pc_randomwarp(sd,3);
-			else{
-				clif_skill_warppoint(sd,sd->skillid,"Random",
-					sd->status.save_point.map,"","");
-			}
-		}else if( bl->type==BL_MOB )
-			mob_warp((struct mob_data *)bl,-1,-1,3);
-		break;
+
 	/* PotionPitcher added by Tato [17/08/03] */
 	case AM_POTIONPITCHER:		/* ポーションピッチャー */
 		{
@@ -2204,13 +2244,6 @@ int skill_castend_map( struct map_session_data *sd,int skill_num, const char *ma
 		}
 		break;
 
-	case RG_INTIMIDATE:			/* インティミデイト */
-		if(strcmp(map,"Random")==0)
-			pc_randomwarp(sd,3);
-		else
-			pc_setpos(sd,sd->status.save_point.map,
-				sd->status.save_point.x,sd->status.save_point.y,3);
-		break;
 	}
 
 	return 0;
@@ -3837,15 +3870,21 @@ int skill_status_change_timer_sub(struct block_list *bl, va_list ap )
 int skill_status_change_end( struct block_list* bl , int type,int tid )
 {
 	struct status_change* sc_data;
+	struct map_session_data *sd=NULL;
+	struct mob_data *md=NULL;
 	int opt_flag=0;
 	short *sc_count, *option, *opt1, *opt2;
-	
+
 	sc_data=battle_get_sc_data(bl);
 	sc_count=battle_get_sc_count(bl);
 	option=battle_get_option(bl);
 	opt1=battle_get_opt1(bl);
 	opt2=battle_get_opt2(bl);
-	
+
+	if(bl->type==BL_PC)
+		sd=(struct map_session_data *)bl;
+	if(bl->type==BL_MOB)
+		md=(struct mob_data *)bl;
 	if(bl->type!=BL_PC && bl->type!=BL_MOB) {
 		if(battle_config.error_log)
 			printf("skill_status_change_end: neither MOB nor PC !\n");
@@ -3896,6 +3935,14 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			*option&=~8192;
 			opt_flag=1;
 			break;
+		case SC_INTIMIDATE:
+			if(sd)
+				pc_setpos(sd,map[sd->intimidate_map].name,
+					sd->intimidate_x,sd->intimidate_y,3);
+			if(md)
+				mob_warp(md,md->intimidate_x,md->intimidate_y,3);
+			break;
+
 		}
 
 		if(opt_flag)	/* optionの変更を伝える */
@@ -4458,6 +4505,10 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 
 		case SC_DEFENDER:
 			tick = 180*1000;
+			break;
+
+		case SC_INTIMIDATE: /* インティミ用 */
+			tick = val2;
 			break;
 
 		default:

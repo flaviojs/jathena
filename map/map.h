@@ -244,6 +244,7 @@ struct map_session_data {
 	int eventtimer[MAX_EVENTTIMER];
 
 	int sg_count;
+	int intimidate_x,intimidate_y,intimidate_map;
 };
 
 struct npc_item_list {
@@ -326,6 +327,7 @@ struct mob_data {
 	char npc_event[50];
 
 	int sg_count;
+	int intimidate_x,intimidate_y;
 };
 struct pet_data {
 	struct block_list bl;

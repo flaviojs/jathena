@@ -1,3 +1,18 @@
+--------------
+//0742 by ぴざまん
+・インティミデイトを実装
+　攻撃とワープの分別がうまくいかなかったので
+　SC_INTIMIDATEを使って遅延処理をしました
+・skill_dbの誤字等を修正
+	(map/)
+	skill.c
+		skill_additional_effect()、skill_castend_map()修正
+		skill_castend_nodamage_id()、修正
+		skill_status_change_start()、skill_status_change_end()修正
+	map.h 修正
+	skill.h 修正
+	(db/)
+	skill_db.txt 修正
 --------------------
 //0741 by whitedog
 
