@@ -10,6 +10,8 @@
 
 #include "socket.h"
 #include "timer.h"
+#include "malloc.h"
+#include "nullpo.h"
 #include "map.h"
 #include "battle.h"
 #include "chrif.h"
@@ -17,17 +19,18 @@
 #include "intif.h"
 #include "npc.h"
 #include "pc.h"
-#include "nullpo.h"
+#include "atcommand.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
 #endif
 
-static const int packet_len_table[0x20]={
+static const int packet_len_table[0x28]={
 	60, 3,-1, 3,14,-1, 7, 6,		// 2af8-2aff
 	 6,-1,10, 7,-1,41,40, 0,		// 2b00-2b07
-	 6,30,-1,10, 9, 7, 0, 0,		// 2b08-2b0f
-	-1,-1,10, 0, 0, 0, 0, 0,		// 2b10-2b17
+	 6,40,-1,10, 9, 7, 0, 0,		// 2b08-2b0f
+	-1,-1,10, 3, 3, 3,-1, 6,		// 2b10-2b17
+	10, 6, 0, 0, 0, 0, 0, 0,		// 2b18-2b1f
 };
 
 int char_fd;
@@ -117,7 +120,7 @@ int chrif_connect(int fd)
 	memcpy(WFIFOP(fd,26),passwd,24);
 	WFIFOL(fd,50)=0;
 	WFIFOL(fd,54)=clif_getip();
-	WFIFOL(fd,58)=clif_getport();
+	WFIFOW(fd,58)=clif_getport();
 	WFIFOSET(fd,60);
 
 	return 0;
@@ -164,6 +167,30 @@ int chrif_recvmap(int fd)
 	return 0;
 }
 /*==========================================
+ * 削除マップ受信
+ *------------------------------------------
+ */
+int chrif_recverasemap(int fd)
+{
+	int i,j,ip,port;
+	unsigned char *p=(unsigned char *)&ip;
+	
+	if(chrif_state<2)	// まだ準備中
+		return -1;
+	
+	ip=RFIFOL(fd,4);
+	port=RFIFOW(fd,8);
+	for(i=12,j=0;i<RFIFOW(fd,2);i+=16,j++){
+		map_eraseipport(RFIFOP(fd,i),ip,port);
+//		if(battle_config.etc_log)
+//			printf("recv map %d %s\n",j,RFIFOP(fd,i));
+	}
+	if(battle_config.etc_log)
+		printf("recv erase map on %d.%d.%d.%d:%d (%d maps)\n",p[0],p[1],p[2],p[3],port,j);
+
+	return 0;
+}
+/*==========================================
  * マップ鯖間移動のためのデータ準備要求
  *------------------------------------------
  */
@@ -180,7 +207,7 @@ int chrif_changemapserver(struct map_session_data *sd,char *name,int x,int y,int
 	WFIFOW(char_fd,30)=x;
 	WFIFOW(char_fd,32)=y;
 	WFIFOL(char_fd,34)=ip;
-	WFIFOL(char_fd,38)=port;
+	WFIFOW(char_fd,38)=port;
 	WFIFOB(char_fd,40)=sd->status.sex;
 	WFIFOSET(char_fd,41);
 	return 0;
@@ -460,7 +487,80 @@ int chrif_divorce(int char_id ,int partner_id){
 	}
 	return 0;
 }
+/*==========================================
+ * mapサーバアクティブ要求
+ *------------------------------------------
+ */
+int chrif_mapactive(int active){
+	if(char_fd<=0)
+		return -1;
 
+	WFIFOW(char_fd,0)=0x2b13;
+	WFIFOB(char_fd,2)=active;
+	WFIFOSET(char_fd,3);
+	printf("chrif: map_server_active %d\n",active);
+	return 0;
+}
+/*==========================================
+ * charサーバメンテナンス要求
+ *------------------------------------------
+ */
+int chrif_maintenance(int maintenance){
+	if(char_fd<=0)
+		return -1;
+
+	WFIFOW(char_fd,0)=0x2b14;
+	WFIFOB(char_fd,2)=maintenance;
+	WFIFOSET(char_fd,3);
+	printf("chrif: char_server_maintenance %d\n",maintenance);
+	return 0;
+
+}
+/*==========================================
+ * charサーバメンテナンス応答
+ *------------------------------------------
+ */
+int chrif_maintenanceack(int maintenance)
+{
+	if(maintenance)
+		clif_GMmessage(NULL,msg_table[82],strlen(msg_table[82])+1,0);
+	else
+		clif_GMmessage(NULL,msg_table[83],strlen(msg_table[83])+1,0);
+
+	return 0;
+}
+/*==========================================
+ * キャラクター切断通知
+ *------------------------------------------
+ */
+int chrif_chardisconnect(struct map_session_data *sd)
+{
+	nullpo_retr(-1, sd);
+
+	if(char_fd<=0)
+		return -1;
+
+	WFIFOW(char_fd,0)=0x2b18;
+	WFIFOL(char_fd,2)=sd->status.account_id;
+	WFIFOL(char_fd,6)=sd->status.char_id;
+	WFIFOSET(char_fd,10);
+	//printf("chrif: char disconnect: %d %s\n",sd->bl.id,sd->status.name);
+	return 0;
+
+}
+/*==========================================
+ * charからキャラクター強制切断要求
+ *------------------------------------------
+ */
+int chrif_parse_chardisconnectreq(int account_id)
+{
+	struct map_session_data *sd=map_id2sd(account_id);
+	
+	if(sd)
+		clif_setwaitclose(sd->fd);
+	
+	return 0;
+}
 /*==========================================
  *
  *------------------------------------------
@@ -508,11 +608,15 @@ int chrif_parse(int fd)
 		case 0x2b03: clif_charselectok(RFIFOL(fd,2)); break;
 		case 0x2b04: chrif_recvmap(fd); break;
 		case 0x2b06: chrif_changemapserverack(fd); break;
-		case 0x2b09: map_addchariddb(RFIFOL(fd,2),RFIFOP(fd,6)); break;
+		case 0x2b09: map_addchariddb(RFIFOL(fd,2),RFIFOP(fd,6),RFIFOL(fd,30),RFIFOL(fd,34),RFIFOW(fd,38)); break;
 		case 0x2b0b: chrif_changedgm(fd); break;
 		case 0x2b0d: chrif_changedsex(fd); break;
 		case 0x2b11: chrif_accountreg2(fd); break;
 		case 0x2b12: chrif_divorce(RFIFOL(fd,2),RFIFOL(fd,6)); break;
+		case 0x2b15: chrif_maintenanceack(RFIFOB(fd,2)); break;
+		case 0x2b16: chrif_recverasemap(fd); break;
+		case 0x2b17: map_delchariddb(RFIFOL(fd,2)); break;
+		case 0x2b19: chrif_parse_chardisconnectreq(RFIFOL(fd,2)); break;
 
 		default:
 			if(battle_config.error_log)
@@ -559,7 +663,18 @@ int check_connect_char_server(int tid,unsigned int tick,int id,int data)
 		realloc_fifo(char_fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
 
 		chrif_connect(char_fd);
+		chrif_mapactive(1);
+
 	}
+	return 0;
+}
+/*==========================================
+ * 終了
+ *------------------------------------------
+ */
+int do_final_chrif(void)
+{
+	delete_session(char_fd);
 	return 0;
 }
 

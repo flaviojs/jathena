@@ -1122,6 +1122,7 @@ moc_fild12.gat,35,303,4	script	サンダルマン要塞ガイド	59,{
 	 	mes "良い旅になることを";
 	 	mes "心よりお祈りします。";
 	 	mes "…";
+		close2;
 		warp "cmd_fild08",331,319;
 		end;
 	L_MENU_1:

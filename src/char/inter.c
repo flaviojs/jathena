@@ -1,17 +1,18 @@
+#include <string.h>
+#include <stdlib.h>
 #include "mmo.h"
 #include "char.h"
 #include "socket.h"
 #include "timer.h"
 #include "db.h"
-#include <string.h>
-#include <stdlib.h>
+#include "lock.h"
+#include "malloc.h"
 
 #include "inter.h"
 #include "int_party.h"
 #include "int_guild.h"
 #include "int_storage.h"
 #include "int_pet.h"
-#include "lock.h"
 
 #define WISDATA_TTL		(60*1000)	// Wisデータの生存時間(60秒)
 #define WISDELLIST_MAX	128			// Wisデータ削除リストの要素数
@@ -40,18 +41,20 @@ int inter_send_packet_length[]={
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	11,-1, 7, 3,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	31,51,51,-1,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 };
 // 受信パケット長リスト
 int inter_recv_packet_length[]={
 	-1,-1, 7, 0, -1, 6, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 6,-1, 0, 0,  0, 0, 0, 0, 10,-1, 0, 0,  0, 0,  0, 0,
 	72, 6,52,14, 10,29, 6,-1, 34, 0, 0, 0,  0, 0,  0, 0,
-	-1, 6,-1, 0, 55,19, 6,-1, 14,-1,-1,-1, 14,19,186,-1,
+	-1, 6,-1, 0, 55,19, 6,-1, 14,-1,-1,-1, 18,19,186,-1,
 	 5, 9, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	48,14,-1, 6,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	31,51,51,-1,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 };
 
 
@@ -141,11 +144,7 @@ int inter_accreg_init()
 		return 1;
 	while(fgets(line,sizeof(line),fp)){
 	
-		reg=calloc(sizeof(struct accreg), 1);
-		if(reg==NULL){
-			printf("inter: accreg: out of memory!\n");
-			exit(0);
-		}
+		reg=(struct accreg *)aCalloc(1,sizeof(struct accreg));
 		if(inter_accreg_fromstr(line,reg)==0 && reg->account_id>0){
 			numdb_insert(accreg_db,reg->account_id,reg);
 		}else{
@@ -233,7 +232,7 @@ int inter_config_read(const char *cfgName)
 			if(party_share_level < 0) party_share_level = 0;
 		}
 		else if(strcmpi(w1,"inter_log_filename")==0){
-			strcpy(inter_log_filename,w2);
+			strncpy(inter_log_filename,w2,1024);
 		}
 		else if(strcmpi(w1,"import")==0){
 			inter_config_read(w2);
@@ -386,13 +385,7 @@ int mapif_parse_WisRequest(int fd)
 		return 0;
 	}
 	
-	wd = (struct WisData *)calloc(sizeof(struct WisData), 1);
-	if(wd==NULL){
-		// Wis送信失敗（パケットを送る必要ありかも）
-		printf("inter: WisRequest: out of memory !\n");
-		return 0;
-	}
-	
+	wd = (struct WisData *)aCalloc(1,sizeof(struct WisData));
 	check_ttl_wisdata();
 	
 	wd->id = ++wisid;
@@ -432,10 +425,7 @@ int mapif_parse_AccReg(int fd)
 	int j,p;
 	struct accreg *reg=numdb_search(accreg_db,RFIFOL(fd,4));
 	if(reg==NULL){
-		if((reg=calloc(sizeof(struct accreg), 1))==NULL){
-			printf("inter: accreg: out of memory !\n");
-			exit(0);
-		}
+		reg=(struct accreg *)aCalloc(1,sizeof(struct accreg));
 		reg->account_id=RFIFOL(fd,4);
 		numdb_insert(accreg_db,RFIFOL(fd,4),reg);
 	}
@@ -456,7 +446,59 @@ int mapif_parse_AccRegRequest(int fd)
 //	printf("mapif: accreg request\n");
 	return mapif_account_reg_reply(fd,RFIFOL(fd,2));
 }
-
+/*==========================================
+ * キャラクターの位置要求
+ *------------------------------------------
+ */
+int mapif_parse_CharPosReq(int fd)
+{
+	unsigned char buf[40];
+	WBUFW(buf,0)=0x3890;
+	memcpy(WBUFP(buf,2),RFIFOP(fd,2),29);
+	mapif_sendall(buf,31);
+	//printf("mapif_parse_CharPosReq: %d %s\n",RFIFOL(fd,2),RFIFOP(fd,6));
+	return 0;
+}
+/*==========================================
+ * キャラクターの位置を要求者に通知
+ *------------------------------------------
+ */
+int mapif_parse_CharPos(int fd)
+{
+	unsigned char buf[60];
+	WBUFW(buf,0)=0x3891;
+	memcpy(WBUFP(buf,2),RFIFOP(fd,2),49);
+	mapif_sendall(buf,51);
+	//printf("mapif_parse_CharPos: %d %s %s %d %d\n",RFIFOL(fd,2),RFIFOP(fd,6),RFIFOP(fd,31),RFIFOW(fd,47),RFIFOW(fd,49));
+	return 0;
+}
+/*==========================================
+ * キャラクターの移動要求
+ *------------------------------------------
+ */
+int mapif_parse_CharMoveReq(int fd)
+{
+	unsigned char buf[60];
+	WBUFW(buf,0)=0x3892;
+	memcpy(WBUFP(buf,2),RFIFOP(fd,2),49);
+	mapif_sendall(buf,51);
+	//printf("mapif_parse_CharMoveReq: %d %s %s %d %d\n",RFIFOL(fd,2),RFIFOP(fd,6),RFIFOP(fd,31),RFIFOW(fd,47),RFIFOW(fd,49));
+	return 0;
+}
+/*==========================================
+ * 対象IDにメッセージを送信
+ *------------------------------------------
+ */
+int mapif_parse_DisplayMessage(int fd)
+{
+	int len=RFIFOW(fd,2);
+	unsigned char buf[len];
+	
+	WBUFW(buf,0)=0x3893;
+	memcpy(WBUFP(buf,2),RFIFOP(fd,2),len-2);
+	mapif_sendall(buf,len);
+	return 0;
+}
 //--------------------------------------------------------
 
 // map server からの通信（１パケットのみ解析すること）
@@ -482,6 +524,10 @@ int inter_parse_frommap(int fd)
 	case 0x3002: mapif_parse_WisReply(fd); break;
 	case 0x3004: mapif_parse_AccReg(fd); break;
 	case 0x3005: mapif_parse_AccRegRequest(fd); break;
+	case 0x3090: mapif_parse_CharPosReq(fd); break;
+	case 0x3091: mapif_parse_CharPos(fd); break;
+	case 0x3092: mapif_parse_CharMoveReq(fd); break;
+	case 0x3093: mapif_parse_DisplayMessage(fd); break;
 	default:
 		if( inter_party_parse_frommap(fd) )
 			break;
@@ -513,3 +559,28 @@ int inter_check_length(int fd,int length)
 	return length;
 }
 
+static int wis_db_final(void *key,void *data,va_list ap)
+{
+	struct WisData *wd=data;
+
+	free(wd);
+
+	return 0;
+}
+static int accreg_db_final(void *key,void *data,va_list ap)
+{
+	struct accreg *reg=data;
+
+	free(reg);
+
+	return 0;
+}
+
+void do_final_inter(void)
+{
+	if(wis_db)
+		numdb_final(wis_db,wis_db_final);
+	if(accreg_db)
+		numdb_final(accreg_db,accreg_db_final);
+
+}

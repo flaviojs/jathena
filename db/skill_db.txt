@@ -1,4 +1,4 @@
-//skill_db.txt＠AthenaDB計画 2004/06/06 14:27:11 +0900 (JST)
+//skill_db.txt＠AthenaDB計画 2004/09/09 21:28:07 +0900 (JST)
 //id,range,hit,inf,pl,nk,max,list_num,castcancel,cast_defence_rate,inf2,maxcount,skill_type,blow_count
 1,0,0,0,0,0,9,0,no,0,0,0,none,0	//NV_BASIC#基本スキル#
 2,0,0,0,0,0,10,0,no,0,0,0,weapon,0	//SM_SWORD#剣修練#
@@ -140,7 +140,7 @@
 138,8,6,16,5,1,10,1,no,0,1024,0,weapon,0	//AS_ENCHANTPOISON#エンチャントポイズン#
 139,0,6,16,5,1,10,1,no,0,0,0,weapon,0	//AS_POISONREACT#ポイズンリアクト#
 140,2,6,2,5,1,10,1,no,0,0,0,weapon,0	//AS_VENOMDUST#ベナムダスト#
-141,8,6,1,5,1,10,1,no,0,0,0,weapon,0	//AS_SPLASHER#ベナムスプラッシャー#
+141,2,6,1,0,1,10,1,yes,0,0,0,weapon,0	//AS_SPLASHER#ベナムスプラッシャー#
 142,0,6,4,0,1,1,1,no,0,1,0,none,0	//NV_FIRSTAID#応急手当#
 143,0,6,4,0,1,1,1,no,0,1,0,none,0	//NV_TRICKDEAD#死んだふり#
 144,0,0,0,0,0,1,0,no,0,1,0,none,0	//SM_MOVINGRECOVERY#移動時HP回復#
@@ -175,7 +175,7 @@
 170,-1,6,1,0,0,10,1,no,0,2,0,weapon,0	//NPC_CRITICALSLASH#防御無視攻撃#
 171,-1,8,1,0,0,10,2:3:4:5:6:7:8:9:10:11,no,0,2,0,weapon,0	//NPC_COMBOATTACK#多段攻撃#
 172,-1,6,1,0,0,10,1,no,0,2,0,weapon,0	//NPC_GUIDEATTACK#必中攻撃#
-173,1,6,4,0,0,10,1,no,0,2,0,misc,1	//NPC_SELFDESTRUCTION#自爆#
+173,1,6,4,3,1,10,1,no,0,2,0,misc,3	//NPC_SELFDESTRUCTION#自爆#
 174,-1,6,1,0,0,10,1,no,0,2,0,weapon,0	//NPC_SPLASHATTACK#範囲攻撃#
 175,0,0,4,0,1,10,1,no,0,2,0,misc,0	//NPC_SUICIDE#自決#
 176,-1,6,1,0,0,10,1,no,0,2,0,weapon,0	//NPC_POISON#毒攻撃#
@@ -281,8 +281,8 @@
 229,8,6,2,3,1,5,1,no,0,128,0,weapon,0	//AM_DEMONSTRATION#デモンストレーション#
 230,8,6,1,0,0,5,0,no,0,0,0,weapon,0	//AM_ACIDTERROR#アシッドテラー#
 231,8,6,16,0,1,5,1,no,0,3072,0,none,0	//AM_POTIONPITCHER#ポーションピッチャー#
-232,8,6,2,0,1,5,1,no,0,0,0,none,0	//AM_CANNIBALIZE#バイオプラント#
-233,8,6,2,0,1,5,1,no,0,128,0,none,0	//AM_SPHEREMINE#スフィアーマイン#
+232,3,6,2,0,1,5,1,no,0,0,3,none,0	//AM_CANNIBALIZE#バイオプラント#
+233,3,6,2,0,1,5,1,no,0,128,3,none,0	//AM_SPHEREMINE#スフィアーマイン#
 234,1,6,16,0,1,5,1,yes,0,0,0,weapon,0	//AM_CP_WEAPON#ケミカルウェポンチャージ#
 235,1,6,16,0,1,5,1,yes,0,0,0,weapon,0	//AM_CP_SHIELD#ケミカルシールドチャージ#
 236,1,6,16,0,1,5,1,yes,0,0,0,weapon,0	//AM_CP_ARMOR#ケミカルアーマーチャージ#
@@ -380,6 +380,7 @@
 328,0,6,4,0,1,10,1,no,0,0,0,misc,0	//DC_DONTFORGETME#私を忘れないで…#
 329,0,6,4,0,1,10,1,no,0,0,0,misc,0	//DC_FORTUNEKISS#幸運のキス#
 330,0,6,4,0,1,10,1,no,0,0,0,misc,0	//DC_SERVICEFORYOU#サービスフォーユー#
+331,1,6,4,3,1,10,1,no,0,2,0,misc,3	//NPC_SELFDESTRUCTION2#自爆2#
 
 334,8,6,4,0,1,1,1,yes,0,0,0,magic,0	//WE_MALE#君だけは護るよ#
 335,8,6,4,0,1,1,1,yes,0,0,0,magic,0	//WE_FEMALE#あなたに尽くします#

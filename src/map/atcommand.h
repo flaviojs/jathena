@@ -94,6 +94,10 @@ enum AtCommandType {
 	AtCommand_MapExit,
 	AtCommand_IDSearch,
 	AtCommand_ItemIdentify,
+	AtCommand_Shuffle,
+	AtCommand_Maintenance,
+	AtCommand_Misceffect,
+	AtCommand_Summon,
 	AtCommand_Unknown,
 	AtCommand_MAX
 };
@@ -119,6 +123,7 @@ int get_atcommand_level(const AtCommandType type);
 #define MSG_CONF_NAME	"conf/msg_athena.conf"
 int atcommand_config_read(const char *cfgName);
 int msg_config_read(const char *cfgName);
+extern char msg_table[200][1024];
 
 #endif
 

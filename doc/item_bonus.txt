@@ -43,6 +43,7 @@ bonus bPerfectHitRate,n;	•K’†UŒ‚Šm—¦n%(‚‚¢•¨‚¾‚¯“K—p)
 bonus bPerfectHitAddRate,n;	•K’†UŒ‚Šm—¦+n%
 bonus bGetZenyNum,n;		•¨—UŒ‚‚Åƒ‚ƒ“ƒXƒ^[‚ð“|‚µ‚½Žžƒ‚ƒ“ƒXƒ^[ƒŒƒxƒ‹*10 + rand()%n‚ÌZeny‚ð“¾‚é(n‚Í‚‚¢•¨‚¾‚¯“K—p)
 bonus bAddGetZenyNum,n;		•¨—UŒ‚‚Åƒ‚ƒ“ƒXƒ^[‚ð“|‚µ‚½Žžƒ‚ƒ“ƒXƒ^[ƒŒƒxƒ‹*10 + rand()%n‚ÌZeny‚ð“¾‚é(n‚Í+‚³‚ê‚é)
+bonus bAddStealRate,n;		ƒXƒeƒB[ƒ‹Šm—¦+n%
 bonus bCriticalDef,n;		ƒNƒŠƒeƒBƒJƒ‹‚ð‹ò‚ç‚í‚È‚¢Šm—¦+n%
 bonus bNearAtkDef,n;		‹ß‹——£UŒ‚‚Ìƒ_ƒ[ƒW‚ðn%ŒyŒ¸(–‚–@‚Æƒgƒ‰ƒbƒvA‘é‚ðœ‚­)
 bonus bLongAtkDef,n;		‰“‹——£UŒ‚‚Ìƒ_ƒ[ƒW‚ðn%ŒyŒ¸(–‚–@‚Æƒgƒ‰ƒbƒvA‘é‚ðœ‚­)
@@ -85,7 +86,11 @@ bonus bNoMagicDamage,n;		–‚–@‚Åƒ_ƒ[ƒW‚ðŽó‚¯‚È‚¢(ƒq[ƒ‹‚àŠÜ‚ÞAn‚Í–³ˆÓ–¡)
 bonus bNoGemStone,n;		ƒXƒLƒ‹‚ðŽg‚¤ŽžƒWƒFƒ€ƒXƒg[ƒ“‚ðÁ–Õ‚µ‚È‚¢(n‚Í–³ˆÓ–¡)
 bonus bShortWeaponDamageReturn,n;	‹ß‹——£•¨—UŒ‚‚Ìn%‚ð“G‚É’µ‚Ë•Ô‚·(ƒ_ƒ[ƒW‚ÍŒ¸‚ç‚È‚¢Bn‚Í+‚³‚ê‚éB)
 bonus bLongWeaponDamageReturn,n;	‰“‹——£•¨—UŒ‚‚Ìn%‚ð“G‚É’µ‚Ë•Ô‚·(ƒ_ƒ[ƒW‚ÍŒ¸‚ç‚È‚¢Bn‚Í+‚³‚ê‚éB)
-
+bonus bShortWeaponDamageReturn,n;	‹ß‹——£•¨—UŒ‚‚Ìn%‚ð“G‚É’µ‚Ë•Ô‚·(ƒ_ƒ[ƒW‚ÍŒ¸‚ç‚È‚¢Bn‚Í+‚³‚ê‚éB)
+bonus bBreakWeaponRate,n;	ƒvƒŒƒCƒ„[‘ÎÛUŒ‚‚Ìê‡An%‚ÌŠm—¦‚Å‘ÎÛ‚Ì•Ší‚ð”j‰ó(n‚Í–œ•ª—¦BŠm—¦‚Í+‚³‚ê‚é)
+bonus bBreakArmorRate,n;	ƒvƒŒƒCƒ„[‘ÎÛUŒ‚‚Ìê‡An%‚ÌŠm—¦‚Å‘ÎÛ‚ÌŠZ‚ð”j‰ó(n‚Í–œ•ª—¦BŠm—¦‚Í+‚³‚ê‚é)
+bonus bUnbreakableWeapon,n;		â‘Î‚É•Ší‚ª”j‰ó‚³‚ê‚È‚¢(n‚Í–³ˆÓ–¡)
+bonus bUnbreakableArmor,n;		â‘Î‚ÉŠZ‚ª”j‰ó‚³‚ê‚È‚¢(n‚Í–³ˆÓ–¡)
 
 bonus2 bAddEff,Eff_Blind,n;	n%‚ÌŠm—¦‚ÅUŒ‚‘ÎÛ‚ÉˆÃ••t—^(n‚Í–œ•ª—¦)
 bonus2 bAddEff,Eff_Sleep,n;	n%‚ÌŠm—¦‚ÅUŒ‚‘ÎÛ‚É‡–°•t—^(n‚Í–œ•ª—¦)
@@ -139,9 +144,9 @@ bonus2 bAddDefClass,n,x;		ƒNƒ‰ƒXn‚Ìƒ‚ƒ“ƒXƒ^[‚Éx%‚Ìƒ_ƒ[ƒWŒyŒ¸(•¨—UŒ‚‚Ì‚Ý)Aƒ
 bonus2 bAddMDefClass,n,x;		ƒNƒ‰ƒXn‚Ìƒ‚ƒ“ƒXƒ^[‚Éx%‚Ì–‚–@ƒ_ƒ[ƒWŒyŒ¸AƒvƒŒƒCƒ„[‚Ìê‡‚ÍnE‹Æ‚Éx%‚Ì–‚–@ƒ_ƒ[ƒWŒyŒ¸
 bonus2 bHPDrainRate,n,x;		“G‚É—^‚¦‚½ƒ_ƒ[ƒW‚ðn%Šm—¦‚Åx%‚ðHP‚É‹zŽûB(n‚Æx‚Í+‚³‚ê‚é)
 bonus2 bSPDrainRate,n,x;		“G‚É—^‚¦‚½ƒ_ƒ[ƒW‚ðn%Šm—¦‚Åx%‚ðSP‚É‹zŽûB(n‚Æx‚Í+‚³‚ê‚é)
-bonus2 bWeaponComaEle, n, x;		n‘®«‚É‘Î‚µ‚Ä x%Šm—¦‚ÅƒR[ƒ}”­“®(x‚Í–œ•ª—¦‚Å+‚³‚ê‚é)
+bonus2 bWeaponComaEle, n, x;		n‘®«‚É‘Î‚µ‚Ä x%Šm—¦‚Å‘¦Ž€UŒ‚(x‚Í–œ•ª—¦‚Å+‚³‚ê‚é)
 						0,–³@1,…@2,“y@3,‰Î@4,•—@5,“Å@6,¹@7,ˆÅ@8,”O@9,•sŽ€
-bonus2 bWeaponComaRace, n, x;		nŽí‘°‚É‘Î‚µ‚Ä x%Šm—¦‚ÅƒR[ƒ}”­“®(x‚Í–œ•ª—¦+‚³‚ê‚é)
+bonus2 bWeaponComaRace, n, x;		nŽí‘°‚É‘Î‚µ‚Ä x%Šm—¦‚Å‘¦Ž€UŒ‚(x‚Í–œ•ª—¦+‚³‚ê‚é)
 						0,–³Œ`@1,•sŽ€@2,“®•¨@3,A•¨@4,©’Ž@5,‹›ŠL@6,ˆ«–‚@7,lŠÔ@8,“VŽg@9,—³‘°@10,ƒ{ƒXƒ‚ƒ“ƒXƒ^[@11,ƒ{ƒXƒ‚ƒ“ƒXƒ^[ˆÈŠO(•’Ê‚Ìƒ‚ƒ“ƒXƒ^[AƒvƒŒƒCƒ„[‚àŠÜ‚Þ)
 
 

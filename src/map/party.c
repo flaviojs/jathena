@@ -5,20 +5,38 @@
 #include "party.h"
 #include "db.h"
 #include "timer.h"
+#include "socket.h"
+#include "nullpo.h"
+#include "malloc.h"
 #include "pc.h"
 #include "map.h"
 #include "battle.h"
 #include "intif.h"
 #include "clif.h"
-#include "socket.h"
-#include "nullpo.h"
+
+#ifdef MEMWATCH
+#include "memwatch.h"
+#endif
 
 #define PARTY_SEND_XYHP_INVERVAL	1000	// 座標やＨＰ送信の間隔
 
 static struct dbt* party_db;
 
 int party_send_xyhp_timer(int tid,unsigned int tick,int id,int data);
-
+/*==========================================
+ * 終了
+ *------------------------------------------
+ */
+static int party_db_final(void *key,void *data,va_list ap)
+{
+	free(data);
+	return 0;
+}
+void do_final_party(void)
+{
+	if(party_db)
+		numdb_final(party_db,party_db_final);
+}
 // 初期化
 void do_init_party(void)
 {
@@ -60,11 +78,7 @@ int party_created(int account_id,int fail,int party_id,char *name)
 			printf("party: id already exists!\n");
 			exit(1);
 		}
-		p=calloc(sizeof(struct party), 1);
-		if(p==NULL){
-			printf("party: out of memory!\n");
-			exit(1);
-		}
+		p=(struct party *)aCalloc(1,sizeof(struct party));
 		p->party_id=party_id;
 		memcpy(p->name,name,24);
 		numdb_insert(party_db,party_id,p);
@@ -134,11 +148,7 @@ int party_recv_info(struct party *sp)
 	nullpo_retr(0, sp);
 
 	if((p=numdb_search(party_db,sp->party_id))==NULL){
-		p=calloc(sizeof(struct party), 1);
-		if(p==NULL){
-			printf("party: out of memory!\n");
-			exit(1);
-		}
+		p=(struct party *)aCalloc(1,sizeof(struct party));
 		numdb_insert(party_db,sp->party_id,p);
 		
 		// 最初のロードなのでユーザーのチェックを行う

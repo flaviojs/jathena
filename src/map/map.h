@@ -30,6 +30,7 @@
 #define MAX_LEVEL 255
 #define MAX_WALKPATH 48
 #define MAX_DROP_PER_MAP 48
+#define MAX_WIS_REFUSAL 14
 
 #define DEFAULT_AUTOSAVE_INTERVAL 60*1000
 
@@ -145,6 +146,8 @@ struct map_session_data {
 		unsigned no_weapon_damage : 1;
 		unsigned no_gemstone : 1;
 		unsigned infinite_endure : 1;
+		unsigned unbreakable_weapon : 1;
+		unsigned unbreakable_armor : 1;
 	} special_state;
 	int char_id,login_id1,login_id2,sex;
 	struct mmo_charstatus status;
@@ -156,12 +159,12 @@ struct map_session_data {
 	int fd,new_fd;
 	short to_x,to_y;
 	short speed,prev_speed;
-	short opt1,opt2;
+	short opt1,opt2,opt3;
 	char dir,head_dir;
 	unsigned int client_tick,server_tick;
 	struct walkpath_data walkpath;
 	int walktimer;
-	int npc_id,npc_shopid;
+	int npc_id,areanpc_id,npc_shopid;
 	int npc_pos;
 	int npc_menu;
 	int npc_amount;
@@ -170,6 +173,9 @@ struct map_session_data {
 	char *npc_stackbuf;
 	char npc_str[256];
 	unsigned int chatID;
+
+	char wis_refusal[MAX_WIS_REFUSAL][24];	//Wis拒否リスト
+	int wis_all;	//Wis全拒否許可フラグ
 
 	int attacktimer;
 	int attacktarget;
@@ -236,12 +242,15 @@ struct map_session_data {
 	short hp_drain_rate_,hp_drain_per_,sp_drain_rate_,sp_drain_per_;
 	int short_weapon_damage_return,long_weapon_damage_return;
 	int weapon_coma_ele[10],weapon_coma_race[12];
+	short break_weapon_rate,break_armor_rate;
+	short add_steal_rate;
+
 	short spiritball, spiritball_old;
 	int spirit_timer[MAX_SKILL_LEVEL];
 
 	int die_counter;
 	short doridori_counter;
-
+	
 	int reg_num;
 	struct script_reg *reg;
 	int regstr_num;
@@ -298,6 +307,7 @@ struct npc_data {
 	char name[24];
 	char exname[24];
 	int chat_id;
+	short opt1,opt2,opt3,option;
 	short flag;
 	union {
 		struct {
@@ -309,6 +319,7 @@ struct npc_data {
 			struct npc_timerevent_list *timer_event;
 			int label_list_num;
 			struct npc_label_list *label_list;
+			int src_id;
 		} scr;
 		struct npc_item_list shop_item[1];
 		struct {
@@ -359,8 +370,10 @@ struct mob_data {
 
 	struct status_change sc_data[MAX_STATUSCHANGE];
 	short sc_count;
-	short opt1,opt2,option;
+	short opt1,opt2,opt3,option;
 	short min_chase;
+
+	int guild_id;
 
 	int deletetimer;
 
@@ -371,7 +384,6 @@ struct mob_data {
 	unsigned int skilldelay[MAX_MOBSKILL];
 	int def_ele;
 	int master_id,master_dist;
-	int exclusion_src,exclusion_party,exclusion_guild;
 	struct skill_timerskill skilltimerskill[MAX_MOBSKILLTIMERSKILL];
 	struct skill_unit_group skillunit[MAX_MOBSKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
@@ -435,6 +447,8 @@ struct map_data {
 		unsigned gvg : 1;
 		unsigned gvg_noparty : 1;
 		unsigned nozenypenalty : 1;
+		unsigned notrade : 1;
+		unsigned noskill : 1;
 	} flag;
 	struct point save;
 	struct npc_data *npc[MAX_NPC_PER_MAP];
@@ -470,7 +484,7 @@ enum {
 	SP_USTR,SP_UAGI,SP_UVIT,SP_UINT,SP_UDEX,SP_ULUK,SP_26,SP_27,	// 32-39
 	SP_28,SP_ATK1,SP_ATK2,SP_MATK1,SP_MATK2,SP_DEF1,SP_DEF2,SP_MDEF1,	// 40-47
 	SP_MDEF2,SP_HIT,SP_FLEE1,SP_FLEE2,SP_CRITICAL,SP_ASPD,SP_36,SP_JOBLEVEL,	// 48-55
-	SP_UPPER,	//56
+	SP_UPPER,SP_PARTNER,SP_CART,	//56-
 	SP_CARTINFO=99,	// 99
 
 	// original 1000-
@@ -492,10 +506,10 @@ enum {
 	SP_HIT_RATE,SP_FLEE_RATE,SP_FLEE2_RATE,SP_DEF_RATE,SP_DEF2_RATE,SP_MDEF_RATE,SP_MDEF2_RATE, // 1051-1057
 	SP_SPLASH_RANGE,SP_SPLASH_ADD_RANGE,SP_AUTOSPELL,SP_HP_DRAIN_RATE,SP_SP_DRAIN_RATE, // 1058-1062
 	SP_SHORT_WEAPON_DAMAGE_RETURN,SP_LONG_WEAPON_DAMAGE_RETURN,SP_WEAPON_COMA_ELE,SP_WEAPON_COMA_RACE, // 1063-1066
-	SP_ADDEFF2, // 1067
+	SP_ADDEFF2,SP_BREAK_WEAPON_RATE,SP_BREAK_ARMOR_RATE,SP_ADD_STEAL_RATE, // 1067-1070
 
 	SP_RESTART_FULL_RECORVER=2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
-	SP_NO_CASTCANCEL2,SP_INFINITE_ENDURE, // 2006-2007
+	SP_NO_CASTCANCEL2,SP_INFINITE_ENDURE,SP_UNBREAKABLE_WEAPON,SP_UNBREAKABLE_ARMOR // 2006-2009
 };
 
 enum {
@@ -524,8 +538,6 @@ extern int agit_flag;
 
 extern char motd_txt[];
 extern char help_txt[];
-
-extern char talkie_mes[];
 
 // 鯖全体情報
 void map_setusers(int);
@@ -559,7 +571,8 @@ int map_clearflooritem_timer(int,unsigned int,int,int);
 int map_addflooritem(struct item *,int,int,int,int,struct map_session_data *,struct map_session_data *,struct map_session_data *,int);
 
 // キャラid＝＞キャラ名 変換関連
-void map_addchariddb(int charid,char *name);
+void map_addchariddb(int charid, char *name, int account_id, unsigned long ip, int port);
+void map_delchariddb(int charid);
 int map_reqchariddb(struct map_session_data * sd,int charid);
 char * map_charid2nick(int);
 
@@ -568,6 +581,7 @@ struct block_list * map_id2bl(int);
 int map_mapname2mapid(char*);
 int map_mapname2ipport(char*,int*,int*);
 int map_setipport(char *name,unsigned long ip,int port);
+int map_eraseipport(char *name,unsigned long ip,int port);
 void map_addiddb(struct block_list *);
 void map_deliddb(struct block_list *bl);
 int map_foreachiddb(int (*)(void*,void*,va_list),...);
@@ -586,6 +600,7 @@ int map_calc_dir( struct block_list *src,int x,int y);
 int path_search(struct walkpath_data*,int,int,int,int,int,int);
 int path_blownpos(int m,int x0,int y0,int dx,int dy,int count);
 
+int map_who(int fd);
 
 
 #endif

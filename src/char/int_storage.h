@@ -9,6 +9,8 @@ int inter_guild_storage_delete(int guild_id);
 
 int inter_storage_parse_frommap(int fd);
 
+void do_final_int_storage(void);
+
 extern char storage_txt[1024];
 extern char guild_storage_txt[1024];
 

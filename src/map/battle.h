@@ -104,6 +104,7 @@ struct status_change *battle_get_sc_data(struct block_list *bl);
 short *battle_get_sc_count(struct block_list *bl);
 short *battle_get_opt1(struct block_list *bl);
 short *battle_get_opt2(struct block_list *bl);
+short *battle_get_opt3(struct block_list *bl);
 short *battle_get_option(struct block_list *bl);
 
 
@@ -277,6 +278,7 @@ extern struct Battle_Config {
 	int invite_request_check;
 	int skill_removetrap_type;
 	int disp_experience;
+	int castle_defense_rate;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

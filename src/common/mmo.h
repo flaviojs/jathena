@@ -117,6 +117,9 @@ struct mmo_charstatus {
 	short str,agi,vit,int_,dex,luk;
 	unsigned char char_num,sex;
 
+	unsigned long mapip;
+	unsigned int mapport;
+
 	struct point last_point,save_point,memo_point[10];
 	struct item inventory[MAX_INVENTORY],cart[MAX_CART];
 	struct skill skill[MAX_SKILL];
@@ -210,6 +213,7 @@ struct guild_castle {
 	int castle_id;
 	char map_name[24];
 	char castle_name[24];
+	char castle_event[24];
 	int guild_id;
 	int economy;
 	int defense;

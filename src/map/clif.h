@@ -7,6 +7,13 @@
 #include <arpa/inet.h>
 #include "map.h"
 
+#define MAX_PACKET_DB			0x220
+
+struct packet_db {
+	short len;
+	void (*func)();
+	short pos[20];
+};
 
 void clif_setip(char*);
 void clif_setport(int);
@@ -53,6 +60,7 @@ int clif_viewpoint(struct map_session_data*,int,int,int,int,int,int);	//self
 int clif_additem(struct map_session_data*,int,int,int);	//self
 int clif_delitem(struct map_session_data*,int,int);	//self
 int clif_updatestatus(struct map_session_data*,int);	//self
+int clif_changestatus(struct block_list*,int,int);	//area
 int clif_damage(struct block_list *,struct block_list *,unsigned int,int,int,int,int,int,int);	// area
 #define clif_takeitem(src,dst) clif_damage(src,dst,0,0,0,0,0,1,0)
 int clif_changelook(struct block_list *,int,int);	// area
@@ -63,6 +71,7 @@ int clif_statusupack(struct map_session_data *,int,int,int);	// self
 int clif_equipitemack(struct map_session_data *,int,int,int);	// self
 int clif_unequipitemack(struct map_session_data *,int,int,int);	// self
 int clif_misceffect(struct block_list*,int);	// area
+int clif_misceffect2(struct block_list *bl,int type);
 int clif_changeoption(struct block_list*);	// area
 int clif_useitemack(struct map_session_data*,int,int,int);	// self
 
@@ -79,7 +88,9 @@ int clif_changechatstatus(struct chat_data*);	// chat
 void clif_emotion(struct block_list *bl,int type);
 void clif_talkiebox(struct block_list *bl,char* talkie);
 void clif_wedding_effect(struct block_list *bl);
-void clif_sitting(int fd, struct map_session_data *sd);
+void clif_callpartner(struct map_session_data *sd);
+void clif_sitting(struct map_session_data *sd);
+void clif_soundeffect(struct map_session_data *sd,struct block_list *bl,char *name,int type);
 
 // trade
 int clif_traderequest(struct map_session_data *sd,char *name);
@@ -110,7 +121,7 @@ int clif_moboutsight(struct block_list *,va_list);	// map_forallinmovearea callb
 int clif_petoutsight(struct block_list *bl,va_list ap);
 int clif_petinsight(struct block_list *bl,va_list ap);
 
-int clif_mob_class_change(struct mob_data *md,int class);
+int clif_class_change(struct block_list *bl,int class,int type);
 
 int clif_skillinfo(struct map_session_data *sd,int skillid,int type,int range);
 int clif_skillinfoblock(struct map_session_data *sd);
@@ -171,6 +182,8 @@ int clif_cart_equiplist(struct map_session_data *sd);
 
 int clif_item_identify_list(struct map_session_data *sd);
 int clif_item_identified(struct map_session_data *sd,int idx,int flag);
+int clif_item_repair_list(struct map_session_data *sd);
+
 int clif_item_skill(struct map_session_data *sd,int skillid,int skilllv,const char *name);
 
 int clif_mvp_effect(struct map_session_data *sd);
@@ -253,6 +266,7 @@ int clif_GM_kick(struct map_session_data *sd,struct map_session_data *tsd,int ty
 
 int clif_foreachclient(int (*)(struct map_session_data*,va_list),...);
 
+int do_final_clif(void);
 int do_init_clif(void);
 
 #endif

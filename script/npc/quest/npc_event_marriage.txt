@@ -1,24 +1,6 @@
 //====================================================================
-//Ragnarok Online EP4.0(J) Marriage System          by Kalen    V0.5
+//Ragnarok Online EP4.0(J) Marriage System      V1.0
 //====================================================================
-//テストスクリプトなので途中で制限かけています。
-////////////////////////////結婚時の詳細///////////////////////////////
-//R00a0 アイテム取得 Index:98 数量:1 ItemID:結婚指輪(2634) IDflag:0 Attribute:0 Refine:0 Card1:0 Card2:0 Card3:0 Card4:0 EquipType:136 Type:4 Fail:0
-//R0196 スキル 適用、解除 Type:35 ID:新郎 SW:1
-//R00b0 キャラ 能力値の更新 Type:25 Val:61900
-//R00b0 キャラ 能力値の更新 Type:24 Val:31261
-//R0119 見た目変更 ID:新郎 p1:0 p2:0 p3:4352 ?:0(ペコ+ウェディング)
-//R00b0 キャラ 能力値の更新 Type:0 Val:262
-//R01d7 キャラ 装備画像 ID:新郎 装備場所:0 ItemID:10 ItemID:0
-//R0119 見た目変更 ID:新婦 p1:0 p2:0 p3:4128 ?:0(カード+タキシード)
-//R01d7 キャラ 装備画像 ID:新婦 装備場所:0 ItemID:7 ItemID:0
-//R01ea 結婚エフェクト ID:新婦 (スクリプトがアクティブな人＝新婦)
-//R009a 発言 天の声受信 国王陛下: 新郎NAMEと新婦NAME、新たなる夫婦の誕生をここに祝福しよう！
-////////////////////////////////////////////////////////////////////////
-//問題点(コメントアウトしてある場所)
-//新郎への指輪の渡し
-//新郎と新婦が同PTであることをチェックする方法
-//指輪を完全に移動できないものにする(現在スクリプト内では既婚未婚を指輪でチェックしています)
 prt_church.gat,94,100,4	script	結婚コンパニオン	71,{
 	mes "[ハッピーマリー]";
 	mes "結婚とは、幸せを夢見る";
@@ -199,19 +181,14 @@ prt_church.gat,94,100,4	script	結婚コンパニオン	71,{
 			mes "今日も幸せな一日にな～っれっ！";
 			close;
 		L3_1:
-			if ((countitem(2635)>=1) || (countitem(2634)>=1)) goto Lmarried;
-			if (event_marry==1) goto LError;
+			if (PartnerID > 0) goto Lmarried;
+			if (@event_marry==1) goto LError;
 			if (BaseLevel<45) goto Llowlevel;
 			if (countitem(2613)<1) goto LitemError1;
 			if ((Sex==0) && (countitem(2338)<1)) goto LitemError2W;
 			if ((Sex==0) && (Zeny<1200000)) goto LZenyError;
 			if ((Sex==1) && (countitem(7170)<1)) goto LitemError2M;
 			if ((Sex==1) && (Zeny<1300000)) goto LZenyError;
-//処理停止(未完成なため)----------------------------
-			mes "[ハッピーマリー]";
-			mes "まだ未実装です。";
-			close;
-//--------------------------------------------------
 			mes "[ハッピーマリー]";
 			mes "御結婚お祝い申し上げます！";
 			next;
@@ -227,7 +204,7 @@ prt_church.gat,94,100,4	script	結婚コンパニオン	71,{
 			if (Sex==0) set Zeny,Zeny-1200000;
 			if (Sex==1) delitem 7170,1;
 			if (Sex==1) set Zeny,Zeny-1300000;
-			set event_marry,1;
+			set @event_marry,1;
 			mes "[ハッピーマリー]";
 			mes "はい、申し込み書を承りました。";
 			mes "後程、陛下には結婚相手の名前も報告";
@@ -246,12 +223,12 @@ prt_church.gat,94,100,4	script	結婚コンパニオン	71,{
 			close;
 	L4:
 		emotion 23;
-		enablenpc "ソロ軍団#プロンテラ";
-		enablenpc "ソロ軍団#ゲフェン";
-		enablenpc "ソロ軍団#モロク";
-		enablenpc "ソロ軍団#フェイヨン";
-		enablenpc "ソロ軍団#アマツ";
-		enablenpc "ソロ軍団#コンロン";
+		hideoffnpc "ソロ軍団#プロンテラ";
+		hideoffnpc "ソロ軍団#ゲフェン";
+		hideoffnpc "ソロ軍団#モロク";
+		hideoffnpc "ソロ軍団#フェイヨン";
+		hideoffnpc "ソロ軍団#アマツ";
+		hideoffnpc "ソロ軍団#コンロン";
 		donpcevent "::OnSolos";
 		mes "[ソロ軍団]";
 		mes "精錬は1人で出来ちゃうぞ！";
@@ -261,12 +238,12 @@ prt_church.gat,94,100,4	script	結婚コンパニオン	71,{
 		mes "クリスマスにはシングルベ～ル！";
 		mes "私たちは無敵のソロ軍団！";
 		next;
-		disablenpc "ソロ軍団#プロンテラ";
-		disablenpc "ソロ軍団#ゲフェン";
-		disablenpc "ソロ軍団#モロク";
-		disablenpc "ソロ軍団#フェイヨン";
-		disablenpc "ソロ軍団#アマツ";
-		disablenpc "ソロ軍団#コンロン";
+		hideonnpc "ソロ軍団#プロンテラ";
+		hideonnpc "ソロ軍団#ゲフェン";
+		hideonnpc "ソロ軍団#モロク";
+		hideonnpc "ソロ軍団#フェイヨン";
+		hideonnpc "ソロ軍団#アマツ";
+		hideonnpc "ソロ軍団#コンロン";
 		emotion 4;
 		close;
 Llowlevel:
@@ -336,35 +313,49 @@ Lmarried:
 	mes "死んだとしても、誓いは永遠なのです。";
 	close;
 OnInterIfInit:
-	disablenpc "ソロ軍団#プロンテラ";
-	disablenpc "ソロ軍団#ゲフェン";
-	disablenpc "ソロ軍団#モロク";
-	disablenpc "ソロ軍団#フェイヨン";
-	disablenpc "ソロ軍団#アマツ";
-	disablenpc "ソロ軍団#コンロン";
+	hideonnpc "ソロ軍団#プロンテラ";
+	hideonnpc "ソロ軍団#ゲフェン";
+	hideonnpc "ソロ軍団#モロク";
+	hideonnpc "ソロ軍団#フェイヨン";
+	hideonnpc "ソロ軍団#アマツ";
+	hideonnpc "ソロ軍団#コンロン";
 	end;
 }
 //========================================================================================
 prt_church.gat,99,125,4	script	国王陛下	108,{
 	if ($@marry==1) goto LErrorWOS;
-	if ((countitem(2635)>=1) || (countitem(2634)>=1)) goto Lmarried;
-	if (event_marry==1) goto Lmarrychk;
+	if (PartnerID > 0) goto Lmarried;
+	if (@event_marry==1) goto Lmarrychk;
 	mes "[トリスタン3世]";
 	mes "結婚を望むなら、まずは申し込みから";
 	mes "済ませてきなさい。";
 	close;
 Lmarrychk:
 	if (Sex==0) goto LmarryWoman;
-	set $@marry,1;
-//同じPTに相棒(event_marryを持つ異性)がいるか
 //PTの人数は2人か？
+	getpartymember getcharid(1);
+	if ($@partymembercount != 2) goto LError;
+//同じPTに相棒(異性)がいるか
+	if (readparam(21,$@partymembername$[0]) == 1) goto LChechSexW;
+	if (readparam(21,$@partymembername$[0]) == 0) goto LChechSexM;
+LChechSexW:
+	if (readparam(21,$@partymembername$[1]) == 1) goto LError;
+	goto LChechEnd;
+LChechSexM:
+	if (readparam(21,$@partymembername$[1]) == 0) goto LError;
+	goto LChechEnd;
+LChechEnd:
+	if (getcharid(0,$@partymembername$[0]) < 0) goto LError;
+	if (getcharid(0,$@partymembername$[1]) < 0) goto LError;
 //男か⇒(LmarryMan)
+	if (Sex == 1) goto LmarryMan;
 LError:
 	mes "[トリスタン3世]";
 	mes "結婚を望むなら、式を挙げる二人で";
 	mes "パーティーを結成しなさい。";
 	close;
 LmarryMan:
+	set $@marry,1;
 	initnpctimer;/*3分以内に終わらせないとリセット*/
 	set $@NameMan$,strcharinfo(0);
 	mes "[トリスタン3世]";
@@ -381,6 +372,10 @@ LmarryMan:
 	mes "ここに告げよ。";
 	next;
 	input $@NameWoman$;
+//嫁が存在するか
+	if (getcharid(0,$@NameWoman$) < 0) goto LError2;
+//嫁が♀か
+	if (readparam(21,$@NameWoman$) != 0) goto LError3;
 	mapannounce "prt_church.gat","国王陛下: 汝、その富める時も、貧しき時も、病めるときも、健やかなる時も",8;
 	mes "[トリスタン3世]";
 	mes "新郎" + $@NameMan$ + "よ。";
@@ -397,8 +392,6 @@ LmarryMan:
 	mes "うむ。では、新婦に問うてみよう。";
 	set $@marry,2;
 	close;
-//ここで新郎終了。指輪が渡せない、、
-//getitem 2634,1;
 LmarryWoman:
 	if ($@marry!=2) goto LErrorWWF;
 	mes "[トリスタン3世]";
@@ -427,9 +420,12 @@ LmarryWoman:
 	mapannounce "prt_church.gat","国王陛下: " + $@NameMan$ + "を愛し、敬い、慰め、助け、その命の限り堅く節操を守ることを誓うか",8;
 	menu "誓います",-,"……やっぱりやめます",LWrong;
 //ｹｺｰﾝ処理
-//	marriage $@NameMan$;
-//	getitem 2635,1;
+	set $res,marriage($@NameMan$);
+	getitem 2635,1,0;
+	getitem 2634,1,0,getcharid(3,$@NameMan$);
 	set $@marry,0;
+	sc_start SC_WEDDING,3600,0;
+	sc_start SC_WEDDING,3600,0,getcharid(3,$@NameMan$);
 	wedding;
 	stopnpctimer;
 	mapannounce "prt_church.gat","国王陛下: 新郎" + $@NameMan$ + "と新婦" + $@NameWoman$ + "、新たなる夫婦の誕生をここに祝福しよう！",8;
@@ -454,13 +450,32 @@ LWrong:/*脳内*/
 	mes "[トリスタン3世]";
 	mes "そうか";
 	mapannounce "prt_church.gat","国王陛下: 新婦が嫌みたいだ……次の式を行うとしよう。",8;
+	stopnpctimer;
 	set $@marry,0;
 	close;
 Lmarried:
 	mes "[トリスタン3世]";
 	mes "いつまでも、お幸せに。";
 	close;
-//新郎が話して3分以内に結婚成立しないとき。(この状態になってもまた話せば結婚可能でした)
+LError2:
+	mes "[トリスタン3世]";
+	mes "Error!";
+	mes "嫁が存在しません";
+	mapannounce "prt_church.gat","国王陛下: 準備不足のようだ……次の式を行うとしよう。",8;
+	stopnpctimer;
+	set $@marry,0;
+	close;
+LError3:
+	mes "[トリスタン3世]";
+	mes "Error!";
+	mes "性別判定で不具合が出ました";
+	mes "本人Readparam:"+readparam(21,strcharinfo(0));
+	mes "相手Readparam:"+readparam(21,$@NameWoman$);
+	mapannounce "prt_church.gat","国王陛下: 準備不足のようだ……次の式を行うとしよう。",8;
+	stopnpctimer;
+	set $@marry,0;
+	close;
+//新郎が話して3分以内に結婚成立しないとき。(この状態になってもまた話せば結婚可能)
 OnTimer180000:
 	mapannounce "prt_church.gat","国王陛下: 返事が遅い……次の式を行うとしよう。",8;
 	set $@marry,0;

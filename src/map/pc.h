@@ -23,6 +23,8 @@
 
 void pc_set_gm_account_fname(char *str);
 int pc_isGM(struct map_session_data *sd);
+int pc_numisGM(int account_id);
+int pc_isquitable(struct map_session_data *sd);
 int pc_getrefinebonus(int lv,int type);
 
 int pc_counttargeted(struct map_session_data *sd,struct block_list *src,int target_lv);
@@ -145,6 +147,10 @@ int pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd);
 int pc_divorce(struct map_session_data *sd);
 struct map_session_data *pc_get_partner(struct map_session_data *sd);
 
+int pc_break_weapon(struct map_session_data *sd);
+int pc_break_armor(struct map_session_data *sd);
+
+
 void pc_setstand(struct map_session_data *sd);
 
 
@@ -162,6 +168,7 @@ int pc_delinvincibletimer(struct map_session_data *sd);
 int pc_addspiritball(struct map_session_data *sd,int,int);
 int pc_delspiritball(struct map_session_data *sd,int,int);
 
+int do_final_pc(void);
 int do_init_pc(void);
 
 enum {ADDITEM_EXIST,ADDITEM_NEW,ADDITEM_OVERAMOUNT};

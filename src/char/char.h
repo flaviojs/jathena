@@ -8,10 +8,11 @@
 #define DEFAULT_AUTOSAVE_INTERVAL 300*1000
 
 struct mmo_map_server{
-  long ip;
-  short port;
-  int users;
-  char map[MAX_MAP_PER_SERVER][16];
+	long ip;
+	short port;
+	int users;
+	char map[MAX_MAP_PER_SERVER][16];
+	short active;
 };
 
 int mapif_sendall(unsigned char *buf,unsigned int len);

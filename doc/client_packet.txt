@@ -38,8 +38,8 @@
     8, 14, 10, 35,  6,  8,  4, 11, 54, 53, 60,  2, -1, 47, 33,  6,
    30,  8, 34, 14,  2,  6, 26,  2, 28, 81,  6, 10, 26,  2, -1, -1,
    -1, -1, 20, 10, 32,  9, 34, 14,  2,  6, 48, 56, -1,  4,  5, 10,
-#0x200
-   26,  0,  0,  0, 18,  0,  0,  0,  0,  0,  0, 19,
+#0x0200
+   26, -1, 26, 10, 18, 26, 11, 34, 14, 36, 10, 19, 19, -1, 24,  0,
 
 S クライアントから見て送信
 R クライアントから見て受信
@@ -73,7 +73,7 @@ R 006a <error No>.B
 		err No=07 サーバーが混雑しています
 R 006b <len>.w <charactor select data>.106B*
 	キャラセレ鯖接続成功&キャラクタデータ
-	<charactor select data> = <charactor ID>.l <base exp>.l <zeny>.l <job exp>.l <job level>.l ?.8B <option>.l <karma>.l <manner>.l ?.2B <HP>.w <MaxHP>.w <SP>.w <MaxSP>.w <speed>.w <class>.w <hair>.w <weapon>.2w <base level>.w <skill point>.w <head_bottom>.w <sheild>.w <head option top>.w <head option mid>.w <hair color>.w ?.w <name>.24B <STR>.B <AGI>.B <VIT>.B <INT>.B <DEX>.B <LUK>.B <charactor number>.B ?.B
+	<charactor select data> = <charactor ID>.l <base exp>.l <zeny>.l <job exp>.l <job level>.l ?.8B <option>.l <karma>.l <manner>.l <status point>.w <HP>.w <MaxHP>.w <SP>.w <MaxSP>.w <speed>.w <class>.w <hair>.w <weapon>.2w <base level>.w <skill point>.w <head_bottom>.w <sheild>.w <head option top>.w <head option mid>.w <hair color>.w ?.w <name>.24B <STR>.B <AGI>.B <VIT>.B <INT>.B <DEX>.B <LUK>.B <charactor number>.B ?.B
 R 006c <error No>.B
 	キャラクタ選択失敗
 R 006d <charactor select data>.106B
@@ -90,11 +90,11 @@ R 0071 <charactor ID>.l <map name>.16B <ip>.l <port>.w
 	キャラクタ選択成功&マップ名&ゲーム鯖IP/port
 S 0072 <account ID>.l <charactor ID>.l <login ID1>.l <login ID2>.l <sex>.b
 	ゲーム鯖接続要求
-R 0073 <server tick>.l <coordidate>.3B ?.2B
+R 0073 <server tick>.l <coordidate>.3B ?.2B(05 05固定)
 	ゲーム鯖接続成功&サーバ側1ms時計&出現位置
-R 0078 <ID>.l <speed>.w <opt1>.w <opt2>.w <option>.w <class>.w <hair>.w <weapon>.w <head option bottom>.w <sheild>.w <head option top>.w <head option mid>.w <hair color>.w ?.w <head dir>.w <guild>.l <emblem>.l <manner>.w <karma>.B <sex>.B <X_Y_dir>.3B ?.B ?.B <sit>.B <Lv>.B
+R 0078 <ID>.l <speed>.w <opt1>.w <opt2>.w <option>.w <class>.w <hair>.w <weapon>.w <head option bottom>.w <sheild>.w <head option top>.w <head option mid>.w <hair color>.w <clothes color>.w <head dir>.w <guild>.l <emblem>.l <manner>.w <karma>.B <sex>.B <X_Y_dir>.3B ?.B(05固定) ?.B(05固定) <sit>.B <Lv>.B
 	マップロード時&移動時用、向き付き用キャラ情報?
-R 0079 <ID>.l <speed>.w <opt1>.w <opt2>.w <option>.w <class>.w <hair>.w <weapon>.w <head option bottom>.w <sheild>.w <head option top>.w <head option mid>.w <hair color>.w ?.w <head dir>.w <guild>.l <emblem>.l <manner>.w <karma>.B <sex>.B <X_Y_dir>.3B ?.B ?.B <Lv>.B
+R 0079 <ID>.l <speed>.w <opt1>.w <opt2>.w <option>.w <class>.w <hair>.w <weapon>.w <head option bottom>.w <sheild>.w <head option top>.w <head option mid>.w <hair color>.w <clothes color>.w <head dir>.w <guild>.l <emblem>.l <manner>.w <karma>.B <sex>.B <X_Y_dir>.3B ?.B(05固定) ?.B(05固定) <Lv>.B
 	テレポ等の表示範囲内沸きキャラ用、向き付き無しキャラ情報?
 R 007b <ID>.l <speed>.w <opt1>.w <opt2>.w <option>.w <class>.w <hair>.w <weapon>.w <head option bottom>.w <server tick>.l <sheild>.w <head option top>.w <head option mid>.w <hair color>.w ?.w <head dir>.w <guild>.l <emblem>.l <manner>.w <karma>.B <sex>.B <X_Y_X_Y>.5B ?.B ?.B ?.B <Lv>.B
 	表示範囲内キャラ移動情報
@@ -128,7 +128,7 @@ R 0081 <type>.B
 		type=11 チケットが買われていないか、有効期限が切れています
 S 0085 <X_Y>.3B
 	移動要求
-R 0087 <server tick>.l <X_Y_X_Y>.5B ?.B
+R 0087 <server tick>.l <X_Y_X_Y>.5B ?(0固定).B
 	移動応答
 R 0088 <ID>.l <X>.w <Y>.w
 	移動途中停止
@@ -179,8 +179,8 @@ R 0098 <type>.B
 	type=00 wis送信成功
 	type=01 wis相手がloginしてない?
 	type=02 wis相手からignoreされてる?
-S 0099 
-	神の声送信
+S 0099 <len>.w <message>.?B
+	GMコマンド/b,/bb,/nbにて発行。サーバー内ブロードキャスト
 R 009a <len>.w <message>.?B
 	GMからの天の声
 S 009b <head dir>.w <dir>.B
@@ -202,7 +202,7 @@ R 00a1 <ID>.l
 	IDの床アイテム消去
 S 00a2 <index>.w <amount>.w
 	所有アイテムを落す
-R 00a3 <len>.w {<index>.w <item ID>.w <type>.B <identify flag>.B <amount>.w ?.2B}.10B*
+R 00a3 <len>.w {<index>.w <item ID>.w <type>.B <identify flag>.B <amount>.w ?.2B(矢の場合0x8000?)}.10B*
 	所有消耗品&収集品リスト
 R 00a4 <len>.w {<index>.w <item ID>.w <type>.B <identify flag>.B <equip type>.w <equip point>.w <attribute?>.B <refine>.B <card>.4w}.20B*
 	所有装備リスト
@@ -227,7 +227,7 @@ R 00af <index>.w <amount>.w
 	アイテム数減少。amount個だけ減らす
 R 00b0 <type>.w <val>.l
 	色々な能力値の更新。以下type:対応する数値を列挙
-	0000:speed 0003:悪行値 0004:マナーポイント 0005:HP 0006:MaxHP
+	0000:speed 0003:悪行値 0004:マナーポイント(会話禁止) 0005:HP 0006:MaxHP
 	0007:SP 0008:MaxSP 0009:ステータスポイント 000b:ベースレベル
 	000c:スキルポイント 0018:重量(表示されてる数字の10倍)
 	0019:最大重量(表示されてる数字の10倍)
@@ -236,6 +236,8 @@ R 00b0 <type>.w <val>.l
 	0031:HIT 0032:FLEE前 0033:FLEE後 0034:クリティカル
 	0035:ASPD(2ms単位の時間?) 0037:ジョブレベル
 	0082:謎 ATK後と同じ数字?
+	
+	type 0004の時のvalは0-解除までの時間
 R 00b1 <type>.w <val>.l
 	色々な能力値の更新。以下type:対応する数値を列挙
 	0001:ベース側経験値 0002:ジョブ側経験値	0014:zeny
@@ -265,7 +267,7 @@ R 00bc <type>.w <fail>.B <val>.B
 	ステータスup応答。fail=01なら成功。typeは00bbと同じ。valは上った後の数字
 	失敗例は見た事無いので謎。ステータスポイントが足りない状態で
 	00bbを発行できるクライアントが有れば、fail=00になるのではないかと予想
-R 00bd <status point>.w <STR>.B <STRupP>.B <AGI>.B <AGIupP>.B <VIT>.B <VITupP>.B <INT>.B <INTupP>.B <DEX>.B <DEXupP>.B <LUK>.B <LUKupP>.B <ATK>.w <ATKbonus>.w <MATKmax>.w <MATKmin>.w <DEF>.w <DEFbonus>.w <MDEF>.w <MDEFbonus>.w <HIT>.w <FLEE>.w <FLEEbonus>.w <critical>.w ?.w
+R 00bd <status point>.w <STR>.B <STRupP>.B <AGI>.B <AGIupP>.B <VIT>.B <VITupP>.B <INT>.B <INTupP>.B <DEX>.B <DEXupP>.B <LUK>.B <LUKupP>.B <ATK>.w <ATKbonus>.w <MATKmax>.w <MATKmin>.w <DEF>.w <DEFbonus>.w <MDEF>.w <MDEFbonus>.w <HIT>.w <FLEE>.w <FLEEbonus>.w <critical>.w <karma?>.w <manner?>.w
 	まとめてステータス情報を送るパケット
 R 00be <type>.w <val>.B
 	必要ステータスポイント更新パケット。typeは0020～0025が順にSTR～LUKに対応
@@ -307,6 +309,8 @@ S 00cc <ID>.l
 R 00cd <ID？>.l
 	GM用右クリックメニュー「（name）使用者強制終了」の応答
 	<ID>が0の場合は失敗と表示。(このパケットはただの応答です。接続終了の機能はありません。)
+S 00ce
+	GMコマンド/killallにて発行。全員殺害？(@doom同等)
 S 00cf <nick>.24B <type>.B
 	type=00 nickからの発言受け付け拒否 (/ex nick)
 	type=01 nickからの発言受け付け許可 (/in nick)
@@ -314,11 +318,19 @@ S 00d0 <type>len.B
 	type=00 全ての発言受け付け拒否 (/exall)
 	type=01 全ての発言受け付け許可 (/inall)
 R 00d1 <type>.B <fail>.B
-	fail=00 発言受け付け拒否成功
-	fail=01 発言受け付け拒否失敗
+	type=00 発言受け付け拒否
+	type=01 発言受け付け許可
+	fail=00 成功
+	fail=01 失敗
 R 00d2 <type>.B <fail>.B
-	fail=00 全発言受け付け拒否成功
-	fail=01 全発言受け付け拒否失敗
+	type=00 全ての発言受け付け拒否
+	type=01 全ての発言受け付け許可
+	fail=00 成功
+	fail=01 失敗？
+S 00d3
+	Wis拒否リスト要求
+R 00d4 <len>.w <nick>.24B*
+	Wis拒否リスト応答
 S 00d5 <len>.w <limit>.w <pub>.B <passwd>.8B <title>.?B
 	チャット立て。ここからチャット関係が続くけど調べが甘いので補完よろ
 R 00d6 <fail>.B
@@ -410,6 +422,7 @@ R 00fd <nick>.24B <fail>.B
 	fail=00 相手は既にパーティに入っていた
 	fail=01 相手に拒否された
 	fail=02 勧誘成功
+	fail=04 相手の別キャラが既にパーティに入っていた
 R 00fe <ID>.l <party name>.24B
 	パーティに誘われた
 S 00ff <ID>.l <fail>.l
@@ -567,9 +580,6 @@ R 013c <ID>.w
 R 013d <type>.w <val>.w
 	HP回復スキル/SP回復スキルによる回復
 	type=5ならHP type=7ならSP
-R 013c <index>.w
-	装備している矢
-
 R 013e <src ID>.l <dst ID>.l <X>.w <Y>.w <lv?>.w ?.w <wait>.l
 	スキル詠唱中。PC/NPCが相手の場合は(X,Y)は0。場所がターゲットの場合はdst IDは0になる
 
@@ -578,6 +588,10 @@ R 013e <src ID>.l <dst ID>.l <X>.w <Y>.w <lv?>.w ?.w <wait>.l
 	将来的に、詠唱中のエフェクトが属性で変わるのかと。
 
 	waitはms単位かな?
+S 013f <Name>.24B
+	GMコマンド/monsterと/itemにて発行。指定のMob召還(Item名ならItem作成)
+S 0140 <MapName>.16B <x>.w <y>.w
+	GMコマンド/mm(=/mapmove)にて発行。指定のMAP、座標へテレポート
 R 0141 <type>.l <base>.l <bonus>.l
 	ステータス情報。typeは0dから12が順にSTR,AGI,VIT,INT,DEX,LUKに対応
 	base+bonusと表示される
@@ -591,8 +605,8 @@ R 0144 <ID>.l <type>.l <X>.l <Y>.l <point ID>.B <color>.3B ?.B
 	type=2 アイコンを消去
 R 0145 <file name>.16B <type>.B
 	(今の所)カプラさんcutin表示
-	type=02 表示
-	type=ff 消去
+	type=0x02 表示
+	type=0xff 消去
 S 0146 <ID>.l
 	IDのNPCとの会話。CLOSEボタンを押した。ack無しにNPCメッセージウィンドを同時に閉じる
 R 0147 <skill ID>.w <target type>.w ?.w <lv>.w <sp>.w <range>.w <skill name>.24B <up>.B
@@ -600,12 +614,15 @@ R 0147 <skill ID>.w <target type>.w ?.w <lv>.w <sp>.w <range>.w <skill name>.24B
 R 0148 <ID>.l
 	リザレクションの相手決め? @ β1
 S 0149 <ID>.l <type>.B <time>.w
-	IDにチャット禁止時間を付加 type=0 マイナス type=1 プラス
-	tymeは分単位
+	GM用右クリックメニュー「チャット禁止時間を下げる（解ける）」使用 → type=00
+	GM用右クリックメニュー「チャット禁止時間を上げる（掛ける）」使用 → type=01
+	喋りすぎでクライアントから送信 → type=02
+	timeは分単位です（確か
 R 014a <fail>.l
 	マナーポイントを与えた結果。fail=0 成功 fail=1 失敗
 R 014b <type>.B <nick>.24B
 	マナーポイントを貰った。type=00 プラス type=01 マイナス
+	アマツ以降？会話禁止状態になった nick=自分の名前 type=1のみ？
 R 014C <len>.w (<type>.l <guildID>.l <guild name>.24B).*
 	同盟・敵対ギルド表示
 	type=0 同盟
@@ -735,8 +752,10 @@ R 0184 <guild_id>.l <type>.l
 	ギルド関係解消通知
 R 0185 <flag>.l <guild_id>.l <guild_name>.24B
 	ギルド関係追加 flag=0 同盟/ 1 敵対
+S 0187 <account ID>.l
+	alive信号送信?
 R 0187 <account ID>.l
-	alive信号?
+	alive信号受信?
 R 0188 <fail?>.w <index>.w <val>.w
 	武器精錬。結果+val武器に
 R 0189 <fail?>.w
@@ -860,6 +879,9 @@ S 0197 <type>.w
 	type=0 /resetstate
 	type=1 /resetskill
 	効能は無し?
+S 0198 <?>.w <?>.w <Flag>.w
+	GMコマンド/cmt(=/changemaptype)にて発行。おそらく、MAP属性変更コマンド
+	Flagのみ1か0
 R 0199 <type>.w
 	type=1 pvpモード開始?
 	type=3 gvgモード開始?
@@ -871,15 +893,10 @@ R 019b <ID>.l <type>.l
 	type=1 job lvup?
 	type=2 武器精錬失敗
 	type=3 武器精錬成功
-
+S 019c <len>.w <message>.?B
+	GMコマンド/nlb,/lbにて発行。MAP内ブロードキャスト
 R 019d <?>.4B
-	GMコマンド/hide
-
-S 0149 <ID>.l <type>.B <time>.w
-	GM用右クリックメニュー「チャット禁止時間を下げる（解ける）」使用 → type=00
-	GM用右クリックメニュー「チャット禁止時間を上げる（掛ける）」使用 → type=01
-	timeは分単位です（確か
-
+	GMコマンド/hideにて発行。
 R 019e
 	捕獲モンスター決め
 S 019f <ID>.l
@@ -924,6 +941,10 @@ R 01aa <ID>.l <emotion>.l
 	<emotion>
 	33以下のとき：エモーション
 	34以上のとき：発言テーブル？
+R 01ab <ID>.l <type>.w <val>.l
+	00b0の他人に見せるバージョン
+	0004:マナーポイント(会話禁止)	
+	type 0004の時のvalは0-解除までの時間
 R 01ac <object id>.l
 	アンクルの発動(≠設置)時のみ毎回出現(機能は謎)
 R 01ad <len>.l <item>.w
@@ -940,13 +961,30 @@ S 01b2 <len>.w <message>.80B <flag>.B {<index>.w <amount>.w <value>.l}.8B*
 	露店開設
 	flag ： 0=キャンセル , 1=オープン
 R 01b3 <filename>.64B <type>.B
-	R 0145の上位互換
-R 01B6 <guildID>.l <guildLv>.l <connum>.l <定員>.l <Avl.lvl>.l <now_exp>.l <next_exp>.l <上納ポイント>.l <性向F-V>.l <性向R-W>.l <members>.l <guild name>.24B <guild master>.24B <agit?>.20B
+	画像表示(R 0145の上位互換)
+	type	0:左
+		1:中央
+		2:右(カプラ)
+		3:バーつき移動可能×ボタン付
+		4:バーなし移動可能×ボタン付(髪型カタログ)
+		255:非表示
+R 01b6 <guildID>.l <guildLv>.l <connum>.l <定員>.l <Avl.lvl>.l <now_exp>.l <next_exp>.l <上納ポイント>.l <性向F-V>.l <性向R-W>.l <members>.l <guild name>.24B <guild master>.24B <agit?>.20B
 	ギルド情報 
 R 01b9 <ID>.I
 	被ダメ等によるIDの詠唱中断
+S 01ba <CharName>.24B
+	GMコマンド/removeにて発行。account_nameへ飛ぶコマンド
+S 01bb <CharName>.24B
+	GMコマンド/shiftにて発行。char_nameへ飛ぶコマンド(@jumpto)
+S 01bc <CharName>.24B
+	GMコマンド/recallにて発行。account_name呼び出しコマンド
+S 01bd <CharName>.24B
+	GMコマンド/summonにて発行。char_name呼び出しコマンド(@recall)
+S 01c0
+	GMコマンド/ｿ莖ﾝにて発行。何かの要求パケ
 R 01c4 <index>.w <amount>.l <itemID>.w <item data>.12B
 	カプラ倉庫アイテム 
+R 01c5 <index>.w <amount>.l <itemID>.w <item data>.12B
 R 01c8 <index>.w <item ID>.w <ID>.l <amount left>.w <type>.B
 	アイテム使用応答。(00a8の上位バーション？)
 	type=00の場合使用失敗? amountもゴミの模様
@@ -1035,6 +1073,10 @@ S 01df <ID>.|
 	GM右クリックによるIDのチャット禁止回数参照？
 R 01e1 <ID>.l <num>.w 
 	<num> : 気功の数(非Lv) 一度表示したら後どんなnumが来ても無視される。
+R 01e4
+	プロポーズターゲット表示
+S 01e5 <ID>.l
+	プロポーズ要求
 R 01e6 <partner name>.24B
 	結婚スキルあなたに逢いたい使用時の叫び声
 S 01e7
@@ -1064,9 +1106,15 @@ R 01f4 <name>.24B <trade id?>.L <LV>.w
 R 01f5 <result>.B <trade id?>.L <LV>.w
 	こちらからの取引要請に対する反応
 	00e7から変更
+R 01f8
+	養子ターゲット表示
+S 01f9 <ID>.l
+	養子要求
 S 0200 <login name>.24B
 	ragexeに/accountオプションをつけて起動するとログイン要求に付加されるパケット
-S 0204 <?>.16B
+S 0202 <nick name>.24B
+	友達リストへ追加要求
+S 0204 <ragexe md5>.16B
 	ログイン要求に付加されるパケット。16バイトは固定？
-S 020B <?>.17B
+S 020B <?>.B<ragexe md5>.16B
 	キャラクタサーバ接続要求0065に付加されるパケット。1+0204の16バイトで17バイト？

@@ -2,7 +2,7 @@ S map鯖=>inter鯖
 R inter鯖=>map鯖
 
 パケット長リスト
-R 3800-388f
+R 3800-389f
 	-1,-1,27, 0, -1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	-1, 7, 0, 0,  0, 0, 0, 0, -1,11, 0, 0,  0, 0,  0, 0,
 	35,-1,11,15, 34,29, 7,-1,  0, 0, 0, 0,  0, 0,  0, 0,
@@ -12,16 +12,18 @@ R 3800-388f
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	11,-1, 7, 3,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
-S 3000-308f
+	31,51,51,-1,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+S 3000-309f
 	-1,-1, 7, 0, -1, 6, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 6,-1, 0, 0,  0, 0, 0, 0, 10,-1, 0, 0,  0, 0,  0, 0,
 	72, 6,52,14, 10,29, 6,-1, 34, 0, 0, 0,  0, 0,  0, 0,
-	-1, 6,-1, 0, 55,17, 6,-1, 14,-1,-1,-1, 14,19,186,-1,
+	-1, 6,-1, 0, 55,17, 6,-1, 14,-1,-1,-1, 18,19,186,-1,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	48,14,-1, 6,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	31,51,51,-1,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 
 
 
@@ -167,7 +169,7 @@ R 383B <len>.w <guild_id>.l <position>.l <struct guild_position>.?B
 	ギルド役職変更通知
 S 303C <guild_id>.l <skill_num>.l <account_id>.l
 	ギルドスキル割り振り
-R 383C <guild_id>.l <skill_num>.l <account_id>.l
+R 383C <guild_id>.l <skill_num>.l <account_id>.l <flag>.l
 	ギルドスキル割り振り(skill_num==0で失敗)
 S 303D <guild_id1>.l <guild_id2>.l <account_id1>.l <account_id2>.l <flag>.B
 	ギルド同盟/敵対要求
@@ -229,3 +231,23 @@ R 3883 <flag>.b
 		いないと言うことは削除する必要がないことにもなりますので
 		意味はありません）
 
+S 3090 <account_id>.l <target_name>.24B <flag>.B
+	target_nameの位置要求
+	flag=0 @where
+	flag=1 @jumpto
+R 3890 <account_id>.l <target_name>.24B <flag>.B
+	target_nameの位置要求
+S 3091 <account_id>.l <target_name>.24B <flag>.B <map_name>.16B <x>.w <y>.w
+	target_nameの位置応答
+R 3891 <account_id>.l <target_name>.24B <flag>.B <map_name>.16B <x>.w <y>.w
+	target_nameの位置応答
+S 3092 <account_id>.l <target_name>.24B <map_name>.16B <flag>.B <x>.w <y>.w
+	target_nameを指定位置に移動要求
+	flag=0 あなたに逢いたい
+	flag=1 @recall
+R 3892 <account_id>.l <target_name>.24B <map_name>.16B <flag>.B <x>.w <y>.w
+	target_nameを指定位置に移動通知
+S 3093 <len>.w <account_id>.l <message>.?B
+	account_idにmessageを送信
+R 3893 <len>.w <account_id>.l <message>.?B
+	account_idにmessageを送信

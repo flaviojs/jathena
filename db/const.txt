@@ -1,3 +1,12 @@
+//GVGê›íË
+//GvGÇÃójì˙ (0:ì˙ 1:åé 2:âŒ 3:êÖ 4:ñÿ 5:ã‡ 6:ìy 7:ñàì˙)
+GvGWeekDay	6
+
+//GvGéûä‘ (0éûÅ`23éû)
+GvGTimeST	20
+GvGTimeED	22
+
+
 Job_Novice	0
 Job_Swordman	1
 Job_Mage	2
@@ -33,6 +42,8 @@ mf_pvp_noguild	7
 mf_gvg		8
 mf_gvg_noparty	9
 mf_nozenypenalty	10
+mf_notrade	11
+mf_noskill	12
 
 StatusPoint	9	1
 BaseLevel	11	1
@@ -52,6 +63,8 @@ Hp		5	1
 MaxHp		6	1
 Sp		7	1
 MaxSp		8	1
+PartnerId	57	1
+Cart		58	1
 
 bMaxHP		6
 bMaxSP		8
@@ -141,6 +154,9 @@ bLongWeaponDamageReturn	1064
 bWeaponComaEle	1065
 bWeaponComaRace	1066
 bAddEff2	1067
+bBreakWeaponRate	1068
+bBreakArmorRate	1069
+bAddStealRate	1070
 
 bRestartFullRecover	2000
 bNoCastCancel	2001
@@ -150,6 +166,8 @@ bNoWeaponDamage	2004
 bNoGemStone	2005
 bNoCastCancel2	2006
 bInfiniteEndure	2007
+bUnbreakableWeapon	2008
+bUnbreakableArmor	2009
 
 Eff_Stone	0
 Eff_Freeze	1
@@ -175,3 +193,10 @@ SC_SpeedPot1	38
 SC_SpeedPot2	39
 SC_INCATK	185
 SC_INCMATK	186
+SC_WEDDING	187
+
+GD_APPROVAL	10000
+GD_KAFRACONTACT	10001
+GD_GUARDIANRESEARCH	10002
+GD_CHARISMA	10003
+GD_EXTENSION	10004

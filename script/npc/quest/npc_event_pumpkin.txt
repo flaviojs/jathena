@@ -50,7 +50,7 @@ pvp_2vs2.gat,40,30,4	script	臆病者	67,{
 	mes "おれを殴る気なのか？！";
 	mes "く、くるな～～～！！";
 	mes "おまえなんかどっかに飛んでいけ！";
-	next;
+	close2;
 	warp "prt_monk.gat",95,212;
 	end;
 }
@@ -142,7 +142,7 @@ LStart2:
 		mes "[修行僧]";
 		mes "よしきた！";
 		mes "近くまで連れて行ってやろう。";
-		next;
+		close2;
 		warp "xmas_fild01.gat",150,150;
 		end;
 }
@@ -169,14 +169,14 @@ gef_fild00.gat,73,209,4	script	聖なるピエロ	715,{
 		mes "本当に!?";
 		mes "ありがと～";
 		mes "じゃ、待ってるよ！";
-		next;
+		close2;
 		warp "xmas_dun01.gat",205,17;
 		end;
 	L1_2:
 		mes "[聖なるピエロ]";
 		mes "む！";
 		mes "ケチ！";
-		next;
+		close2;
 		warp "prt_monk.gat",182,236;
 		end;
 LStart2:
@@ -207,7 +207,7 @@ LStart2:
 			mes "もっと変わったアメを";
 			mes "持ってきなっ！";
 			mes "ベロベロベ～";
-			next;
+			close2;
 			warp "prt_monk.gat",95,212;
 			end;
 LStart3:
@@ -230,7 +230,7 @@ LStart3:
 		next;
 		mes "[聖なるピエロ]";
 		mes "あっちに行っちゃえ！";
-		next;
+		close2;
 		warp "prt_monk.gat",95,212;
 		end;
 	L3_1:

@@ -6,6 +6,7 @@
 struct item_data {
 	int nameid;
 	char name[24],jname[24];
+	char cardillustname[64];
 	int value_buy;
 	int value_sell;
 	int type;
@@ -63,6 +64,8 @@ int itemdb_searchrandomid(int flags);
 int itemdb_isequip(int);
 int itemdb_isequip2(struct item_data *);
 int itemdb_isequip3(int);
+int itemdb_isdropable(int nameid);
+
 // itemdb_equipマクロとitemdb_equippointとの違いは
 // 前者が鯖側dbで定義された値そのものを返すのに対し
 // 後者はsessiondataを考慮した鞍側での装備可能場所

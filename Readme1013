@@ -1,4 +1,1111 @@
 --------------------
+//1046 by SVN
+※db/packet_db.txtは2004-09-06aSakexe用なので、jROクライアントで使用する際は「//jROはここまで」以下をコメントアウトするか削除してください
+
+・変更点が多いので詳細はファイル、関数ごとに記述しています
+・1045にそのまま上書きしても動作しますが、使われないファイルがいくつか残ります
+・script/以下は名前が変更されているファイルが大量にあるのでscript/の変更点を参考にしてください
+・スクリプト用の関数や命令が増えたり仕様が変更されているものがあります
+	基本的には互換性があるはずですが、getgdskilllv()だけは第二引数を数字ではなくスキル名(GD_APPROVALなど)に置き換える必要があります
+	getgdskilllv()が使われている/script/npc/gvg_big5/*.* は中国語で必要ないので削除してください
+	追加や変更に関しては概ねscript_ref.txtに反映してありますが、詳細はscript.cの変更点を読んでください
+・追加された@コマンドについては@helpとatcommand.cの変更点を読んでください
+・追加された設定はconf_ref.txtを参照してください
+・記述漏れの変更点もあるかもしれません
+
+追加したファイルは「A」
+変更したファイルは「C」
+削除したファイルは「D」
+移動したファイルは「M」
+	/
+		C athena-start
+			./conf/import 以下を起動時に自動作成するように変更
+			seqコマンドを使わないようにしてFreeBSDでも動作するように変更
+			start
+				すでにAthenaが起動している時は何もしないように変更
+				execで ./ がダブっていたので削除
+			stop
+				FreeBSDでもシェルに戻るように変更
+			kill
+				同上
+		C Makefile
+			PACKETDEF に PACKETVER=6 を追加
+			FreeBSDを判定して make と gmake を切り替えるように変更
+			CFLAGS を分解して弄りやすいように変更
+		C start
+			1行目のシェル指定が正しくなかったのを変更
+			すでにAthenaが起動している時は何もしないように変更
+			起動確認の条件式を athena-start と同じ物に変更
+		bin/tool/
+			シェルスクリプトの改行コードを CRLF から LF のみに変更
+			C getlogincount
+				ログインバージョンを $loginversion として変更できるように変更
+			C ladmin
+				アカウント名に「-」を使えるように変更
+			
+		conf/
+			D import/
+				配布物から削除(athena-start start で自動作成される)
+			C atcommand_athena.conf
+				shuffle maintenance misceffect 追加
+			C char_athena.conf
+				default_map_type default_map_name 追加
+			C help.txt
+				説明追加
+			C login_athena.conf
+				login_version login_type 追加
+			C map_athena.conf
+				npc map 色々変更
+			C mapflag.txt
+				最新版に更新
+			C msg_athena.conf
+				81以降追加
+			C water_height.txt
+				最新版に更新
+		db/
+			C castle_db.txt
+				ギルド解体時に発生する OnGuildBreak イベントのために <Event_Name> 追加
+			C const.txt
+				GvGの開始時間等を設定できるように追加
+				マップフラグ mf_notrade mf_noskill 追加
+				パラメータ PartnerId Cart 追加
+				ボーナス bBreakWeaponRate bBreakArmorRate bAddStealRate bUnbreakableWeapon bUnbreakableArmor 追加
+				ステータス変化 SC_WEDDING 追加
+				スクリプト命令 getgdskilllv 用に GD_APPROVAL など追加
+			C exp.txt
+				転生二次職がBaseLv12になるときに必要な経験値を41→481に修正
+			C item_db.txt
+			C mob_db.txt
+			C mob_skill_db.txt
+			C skill_cast_db.txt
+			C skill_db.txt
+			C skill_require_db.txt
+			C skill_tree.txt
+				最新版に更新
+			A packet_db.txt
+				パケット定義ファイル追加
+		doc/
+			C client_packet.txt
+				新しく判明したパケットをいくつか追加
+			C conf_ref.txt
+				新しく追加した設定の説明を追加
+			C db_ref.txt
+				skill_cast_db.txt の list_hp_rate list_sp_rate で負数を指定した時の挙動を追加
+			C help.txt
+				conf/help.txt 同様に変更
+			C inter_server_packet.txt
+				新規で追加したパケットを追加と実態とあっていなかった部分を修正
+			C item.txt
+				最新版に更新
+			C item_bonus.txt
+				新規で追加されたボーナスを追加
+			C script_ref.txt
+				新規命令の追加と既存命令の変更など
+			C serverlink_packet.txt
+				新規で追加したパケットを追加と既存で書かれていなかったパケットの追加
+		script/
+			mob/
+				C npc_monster.txt
+					最新版に更新
+					ニブルヘイムのMobはnpc_parse_mob()の変更サンプルになってます
+			npc/
+				ほぼすべてのNPCをnpc_function.txtを使ったユーザー定義関数と複製などで書き換え
+				移動したファイルに関しては移動後のファイルが含まれているので移動前のファイルのみ削除してください
+				例) etc/npc_etc_cTower.txt は含まれているので npc_cTower.txt を削除
+				M npc_cTower.txt
+					→etc/npc_etc_cTower.txt
+				A npc_function.txt
+				M npc_pota.txt
+					→../sample/npc_debug_pota.txt
+				M npc_pvp.txt
+				M npc_pvproom.txt
+					2ファイル合体
+					→etc/npc_etc_pvp.txt
+				M npc_resetJ.txt
+					→../sample/npc_debug_reset.txt
+				A etc/
+					A npc_etc_gefenia.txt
+				C gvg/
+					すべてev_agit_common.txtを使ったユーザー定義関数で書き換え
+					すべて削除してからこのパッチを当ててください
+					ギルド解散時に砦を放棄するためにev_agit_砦.txtにOnGuildBreakイベントを追加
+					D test/
+					A ev_agit_common.txt
+					D ev_agit_event.txt
+					D TEST_prtg_cas01_AbraiJ.txt
+					D TEST_prtg_cas01_mob.txt
+				D gvg_big5/
+				C job/
+					転職スクリプトの名前をnpc_job_[JOB番号][ジョブ名].txtに変更
+					すべて削除してからこのパッチを当ててください
+				C quest/
+					M npc_event_arrow.txt
+						→../../sample/npc_debug_arrow.txt
+					A npc_event_hat2.txt
+						ニブル同時実装の新頭装備スクリプトを追加
+		src/
+			calloc() realloc() を極力各型にキャストするように変更
+			calloc() 後に memset() で \0 を埋めていたのを削除
+			calloc() なのに(サイズ*個数,1)で指定していたのを(個数,サイズ)に変更
+			メモリ確保をエラー処理をまとめた関数に書き換え
+				malloc() → aMalloc()
+				calloc() → aCalloc()
+				realloc() → aRealloc()
+			strcpy() を strncpy() に極力変更
+			
+			char/
+				C char.c
+					スペースでインデントされていたところをタブで統一
+					A isGM()
+					A read_gm_account()
+						GMアカウントが必要になったので追加
+					C mmo_char_tostr()
+					C mmo_char_fromstr()
+						nullpoチェック追加
+					C count_users()
+						必要ない{}を削除
+					C char_delete()
+						nullチェック追加
+						削除メッセージをコンソールに表示するようにした
+						削除時に接続しているキャラを切断するようmap-serverに通知(0x2b19パケット)するようにした
+					C parse_tologin()
+						C 0x2713
+							char-serverメンテナンス設定時はGM以外入れないようにした
+							接続数制限で最大値でもGMは接続できるようにした
+						C 0x272a
+							0x2730を0x272aに変更して番号を詰めた
+							アカウント削除した時にキャラが一部消されない問題を修正
+						A 0x272c
+							受信時にlogin-serverに通知(0x2b15パケット)してメンテナンス状態になるようにした
+					A char_erasemap()
+						map-server切断時に他map-serverにマップの削除を通知(0x2b16パケット)するようにした
+						これにより他map-server管轄のマップに移動しようとして、そのmap-serverが切断されていたら、
+						pc_setpos()で存在しないマップということで移動しようとしなくなるので、
+						クライアントが「永遠にお待ちください状態」にならないようになります
+					C parse_frommap()
+						map-server切断時にchar_erasemap()を実行するようにした
+						map-server切断時に管轄のマップにキャラが残っていたら切断を他map-serverに通知(0x2b17パケット)するようにした
+						C 0x2afc
+							認証失敗時に char_dat[].mapip/mapport を 0 にするようにした
+							認証成功時に char_dat[].mapip/mapport をmap-serverのIPアドレスとポートにするようにした
+							認証成功時に他map-serverにキャラがログインしたことを通知(0x2b09パケット)するようにした
+						C 0x2b02
+						C 0x2b05
+							コンソールへの出力にパケット番号を記述するようにした
+						C 0x2b08
+							パケット仕様を変更して account_id mapip mapport も通知するように変更
+							map-serverに接続していない時はすべて 0 が入ります
+						A 0x2b13
+							map-server起動途中などでキャラがログインできないようにする server[].active フラグを操作する
+							active = 0 でキャラはログインできずに切断される
+							map-serverが起動を完了したときに active = 1 にするパケットが送られてくる
+						A 0x2b14
+							char-serverをメンテナンス状態にする char_maintenance フラグを操作する
+							login-serverにも通知(0x272bパケット)してワールド選択画面でメンテナンス表示をする
+							メンテナンス状態ではGM以外のユーザーはログインできません
+						A 0x2b18
+							キャラクターの切断を他map-serverに通知(0x2b17パケット)するようにした
+					C search_mapserver()
+						引数に struct mmo_charstatus *cd を追加
+						cdが渡された＆探しているマップが接続しているmap-serverに無かったときに、最初に見つけたmap-serverの最初に見つけたマップに接続するようにした
+						これは char_athena.conf default_map_type: 2 の時の挙動です
+					C parse_char()
+						C 0x65
+							メンテナンス状態の時にGM以外を切断するようにした
+							最大接続数が設定されていて最大接続数のときもGMは接続できるようにした
+						C 0x66
+							char-serverに接続しているmap-serverにlast_pointが見つけられなかったときに、
+							default_map_type&1 の時は default_map_name に接続する
+							default_map_type&2 の時は 最初に見つけたmap-serverの最初に見つけたマップに接続する
+							それでも見つからない時は切断するようにした
+							コンソールへの出力にパケット番号を記述するようにした
+						C 0x2af8
+							他マップに接続しているキャラ情報を通知(0x2b09パケット)するようにした
+						C 0x187
+							S 0187パケットを返信するようにした
+					C check_connect_login_server()
+						char_portをWFIFOLで送っていたのをWFIFOWに修正
+						80と82の間が空いていたのを詰めてパケット長を86→84に変更
+					C char_config_read()
+						default_map_type default_map_name を読み込むようにした
+					A gm_account_db_final()
+						確保した gm_account_db のメモリを終了時に開放するようにした
+					C do_final()
+						inter.c など他ファイルの終了処理(do_final_*)を追加した
+						exit_dbn() でdb用のメモリを開放するようにした
+						接続されているmap-serverのセッションを削除するようにした
+						do_final_timer()でtimerを終了させるようにした
+					C do_init()
+						server[].active = 0 で初期化
+						read_gm_account() でGMアカウントファイルを読み込むようにした
+				C char.h
+					mmo_map_server に active フラグを追加した
+				C int_guild.c
+					C mapif_parse_GuildSkillUp()
+						ギルドポイントを消費しないでギルドスキルを上げるために int flag を追加
+					C inter_guild_parse_frommap()
+						0x303C
+							パケット定義を変更してflagを追加した
+					A guild_db_final()
+					A castle_db_final()
+					A do_final_int_guild()
+						終了時にメモリを開放するようにした
+				C int_guild.h
+					A do_final_int_guild()
+						定義を追加
+				C int_party.c
+					A party_db_final()
+					A do_final_int_party()
+						終了時にメモリを開放するようにした
+				C int_party.h
+					A do_final_int_party()
+						定義を追加
+				C int_pet.c
+					A pet_db_final()
+					A do_final_int_pet()
+						終了時にメモリを開放するようにした
+				C int_pet.h
+					A do_final_int_pet()
+						定義を追加
+				C int_storage.c
+					A storage_db_final()
+					A guild_storage_db_final()
+					A do_final_int_storage()
+						終了時にメモリを開放するようにした
+				C int_storage.h
+					A do_final_int_storage()
+						定義を追加
+				C inter.c
+					パケット長定義を変更
+					A mapif_parse_CharPosReq()
+						0x3090パケットへの対応
+						キャラの位置要求をmap-serverに通知(0x3890パケット)する
+					A mapif_parse_CharPos()
+						0x3091パケットへの対応
+						キャラの位置要求をしたキャラに位置情報を通知(0x3891パケット)する
+					A mapif_parse_CharMoveReq()
+						0x3092パケットへの対応
+						要求したキャラまで対象のキャラを飛ばす要求を通知(0x3892パケット)をする
+					A mapif_parse_DisplayMessage()
+						0x3093パケットへの対応
+						キャラにメッセージを送信(0x3893パケット)する
+					C inter_parse_frommap()
+						各追加パケットへの対応を追加した
+					A wis_db_final()
+					A accreg_db_final()
+					A do_final_inter()
+						終了時にメモリを開放するようにした
+				C inter.h
+					A do_final_inter()
+						定義を追加
+				C Makefile
+					A nullpo.o nullpo.h を追加
+					A malloc.o malloc.h を追加
+			common/
+				C db.c
+					A exit_dbn()
+						終了時にメモリを開放するために追加
+				C db.h
+					A exit_dbn()
+						定義追加
+				A malloc.h
+				A malloc.c
+					メモリ確保関数のまとめ
+				C mmo.h
+					C mmp_charstatus
+						mapip mapport 追加
+					C guild_castle
+						castle_event 追加
+				C Makefile
+					A malloc.o malloc.h malloc.c を追加
+				C nullpo.h
+					古いgccでコンパイルできるように\を削除
+				C socket.c
+					C recv_to_fifo()
+						汎用性を高めるために read() を recv() に変更
+					C send_from_fifo()
+						汎用性を高めるために write() を send() に変更
+				C timer.c
+					A do_final_timer()
+						終了時にメモリを開放するようにした
+				C timer.h
+					A do_final_timer()
+						定義追加
+			login/
+				C login.c
+					A login_version login_type
+						clientinfo.xmlで指定する login_version login_type でログインを規制するときに使います
+					C parse_fromchar()
+						A 0x272b
+							server[].maintenance フラグを変更する
+							変更した内容をchar-serverに返信(0x272cパケット)する
+					C parse_admin()
+						C 0x7932
+							0x2730→0x272a に変更
+					C parse_login()
+						C 0x64 0x01dd
+							login_version login_type を判定するようにした
+						C 0x2710
+							パケット長の定義が正しくなかったのを修正した
+							char.c check_connect_login_server の変更を反映
+					C login_config_read()
+						login_version login_typeの読み込みを追加
+					A gm_account_db_final()
+					C do_final()
+						終了時にメモリを開放するように変更
+				C Makefile
+					A malloc.o malloc.h を追加
+			map/
+				C atcommand.c
+					コンパイルオプションでmemwatchを読み込めるようにした
+					C atcommand_where()
+						他map-serverにいるキャラの居場所も表示できるようにした
+					C atcommand_jumpto()
+						他map-serverにいるキャラにも飛べるようにした
+					C atcommand_who()
+						ワールド内のすべてにいるキャラを表示するようにした
+					C atcommand_go()
+						ニブルヘルムの移動ポイントを変更
+					C atcommand_recall()
+						他map-serverにいるキャラも呼び出せるようにした
+					A atshuffle_sub()
+					A atcommand_shuffle()
+						PCとMOBのシャッフルを行う @shuffle を追加
+					A atcommand_maintenance()
+						char-serverをメンテナンス状態にする @maintenance を追加
+					A atcommand_misceffect()
+						実行したキャラから0x1f3パケットを発信してエフェクトを表示する @misceffect を追加
+					A atcommand_summon()
+						コールホムンクルスと叫んで指定したMobを召喚する @summon を追加
+						召喚されたMobは他のMob(Pv等では敵対PC含む)を攻撃します
+						召喚されたMobに攻撃されたMobは召喚主を攻撃します(バイオプラントのフローラと同じ挙動)
+						召喚されたMobは1分後に消滅します
+						ネタなので隠しコマンドとしてhelp.txtには記述してません
+				C atcommand.h
+					追加した@コマンドを AtCommandType に追加
+					C msg_table[] を外から使えるようにするためにexternした
+				C battle.c
+					コンパイルオプションでmemwatchを読み込めるようにした
+					A battle_config.castle_defense_rate
+						本鯖で防御値がどのように影響するか具体的には分からなかったので、砦の防御値を反映させる率を設定できるようにした
+					C battle_get_opt1()
+					C battle_get_opt2()
+					C battle_get_option()
+						NPCのオプションも返すようにした
+					A battle_get_opt3()
+						opt3を返すように追加
+					C battle_calc_damage()
+						砦内のMobへのダメージは防御値で減算(ダメージ*(防御値/100)*(castle_defense_rate/100))されるようにした
+						ガーディアンにはスキルが効くようにした
+					C battle_calc_pet_weapon_attack()
+					C battle_calc_mob_weapon_attack()
+					C battle_calc_pc_weapon_attack()
+						ベナムスプラッシャーのダメージ計算をするようにした
+					C battle_weapon_attack()
+						武器攻撃による即死の仕様を変更
+						武器、鎧破壊の確率計算をするように変更
+						ベナムスプラッシャーが解除されるように変更
+					C battle_check_target()
+						src じゃなくて ss からparty_id guild_idを取得するように修正
+						target=BCT_NOENEMY なスキル 口笛、ハミングなどがPvP、GvGの時にも他PCに影響するようにした
+						Mobがspecial_aiならMobを敵とみなすようにした
+					C battle_config_read()
+						castle_defense_rate を読み込むようにした
+				C battle.h
+					A battle_get_opt3()
+						定義追加
+					C Battle_Config
+						castle_defense_rate 追加
+				C chat.c
+					C chat_createnpcchat()
+						引数に int pub を追加
+						pub=3 ではチャットの看板に(0/20)のような表示がされなくなります
+					A do_final_chat()
+						何もしてないけどとりあえず追加
+				C chat.h
+					C chat_createnpcchat()
+						定義を変更
+					A do_final_chat()
+						定義を追加
+				C chrif.c
+					パケット長テーブルを拡張
+					C chrif_connect()
+					C chrif_changemapserver()
+						WFIFOLでポートを送っていたのをWFIFOWに修正
+					A chrif_recverasemap()
+						他map-serverが切断されたことがchar-serverより通知された時に、そのmap-serverが管理していたマップの情報を削除するようにした
+					A chrif_mapactive()
+						map-server起動準備中に0、完了時に1をchar-serverに通知(0x2b13)して起動途中にユーザーがログインできないようにした
+					A chrif_maintenance()
+						char-serverをメンテナンス状態にしたり解除したりを通知(0x2b14)する
+					A chrif_maintenanceack()
+						char-serverをメンテナンス状態にした時の応答
+						メンテナンス状態にした旨をマップ内に通知する
+					A chrif_chardisconnect()
+						char-serverにキャラが切断されたことを通知(0x2b18)する
+					A chrif_parse_chardisconnectreq()
+						char-serverからのキャラ切断要求を受けて、対象キャラがいる場合には切断する
+					C chrif_parse()
+						C 0x2b09
+							map_addchariddb() の引数増加に対応
+						A 0x2b15
+						A 0x2b16
+						A 0x2b17
+						A 0x2b19
+							各新規パケットに対応
+					C check_connect_char_server()
+						接続時char-serverにmap-serverの準備が出来たことを通知するようにした
+					A do_final_chrif()
+						終了時にchar-serverとの接続を削除するようにした
+				C chrif.h
+					A chrif_mapactive()
+					A chrif_maintenance()
+					A chrif_chardisconnect()
+					A do_final_chrif()
+						定義を追加
+				C clif.c
+					すべてのパケット定義を packet_db から読み込むように変更
+					packet_db.txtを変更することで、度々変更される韓国クライアントのパケット定義に対応しやすくなります
+					packet_len_table[] は packet_db[].len に置き換わりました
+					<time.h> をinclude
+					clif_parse_*を先頭で宣言するようにした
+					clif_parse_*内のRFIFO系で使われている第2引数は packet_db[cmd].pos[] で表記されるようになりました
+					パケット番号の最大値を MAX_PACKET_DB で定義するようにした
+					C clif_set0078()
+					C clif_set007b()
+						パケットの内容が本鯖と違っていたのでguild_emblem_id,manner,opt3を正しく送るように変更
+					C clif_class_change()
+						Mob以外のNPCでも使えるようにした
+					C clif_mob0078()
+					C clif_mob007b()
+						ガーディアンにギルドエンブレムを表示するように変更
+					C clif_npc0078()
+						ワープポータルをギルドフラッグにするオプションを有効にした時にmap-serverが落ちる問題を修正
+					C clif_spawnnpc()
+						NPCが無効でもHide状態の時はパケットを送るように変更
+					C clif_quitsave()
+						キャラ終了時にchar-serverに切断を通知するようにした
+					C clif_scriptmenu()
+					C clif_dispchat()
+					C clif_changechatstatus()
+						lenに1バイト追加
+					C clif_updatestatus()
+						マナーポイントを送信するようにした
+					A clif_changestatus()
+						周囲に赤エモ状態であることを送信
+					A clif_misceffect2()
+						エフェクトを発生させるパケットを送信
+						@misceffect, misceffect命令で使用
+					C clif_changeoption()
+						状態異常時以外は状態異常アイコン表示パケットを送らないようにした
+						PCの時は clif_changelook() を送信するようにした(結婚衣裳表示用？)
+					C clif_traderequest()
+						取引パケットの 0xe5 → 0x1f4 に仮対応(本鯖での算出式は不明なのでとりあえず char_id を送信)
+					C clif_tradestart()
+						取引パケットの 0xe7 → 0x1f5 に仮対応(本鯖での算出式は不明なのでとりあえず char_id を送信)
+					C clif_getareachar_pc()
+						マナーポイントが負数の時には赤エモ表示パケットを送信するようにした
+					C clif_getareachar_npc()
+						NPCのHide状態に対応
+					C clif_getareachar_skillunit()
+					C clif_skill_nodamage()
+						自爆の時はhealを負数にできるようにした
+					C clif_skill_setunit()
+						グラフィティに対応
+					A clif_item_repair_list()
+						武器修理スキルに対応しようとしたけどパケットが分からないので頓挫中
+					C clif_produceeffect()
+						map_addchariddb() の引数増加に対応
+					C clif_guild_skillinfo()
+						未実装ギルドスキル カリスマを表示しないようにした
+					C clif_callpartner()
+						あなたに逢いたい 使用時に相手の名前を叫ぶようにした
+					C clif_sitting()
+						引数 fd は不要なので削除
+					C clif_GM_kick()
+						フラグを0にするようにした
+					A clif_wisexin()
+						Wis拒否許可の応答を送信
+					A clif_wisall()
+						Wis全拒否許可の応答を送信
+					A clif_soundeffect()
+						SEを鳴らすパケットを送信
+						soundeffect命令で使用
+					C clif_parse_LoadEndAck()
+						結婚後のウェディングドレスやタキシードの状態をログアウトしても1時間は継続されるようにした
+						赤エモ状態はログアウトしてもログインした時からまた継続するようにした
+					C clif_parse_QuitGame()
+					C clif_parse_Restart()
+						終了できない条件を pc_isquitable() にまとめた
+					C clif_parse_GlobalMessage()
+					C clif_parse_Wis()
+					C clif_parse_PartyMessage()
+					C clif_parse_GuildMessage()
+						赤エモ状態では発言できないようにした
+					C clif_parse_ActionRequest()
+						ギルド未加入などの場合はガーディアンやエンペリウムを殴れないようにした
+						clif_sitting()の引数変更に対応
+					C clif_parse_UseItem()
+						赤エモ状態ではアイテムを使えないようにした
+					C clif_parse_EquipItem()
+						アイテムが破壊されている時は装備できないようにした
+					C clif_parse_TradeRequest()
+					C clif_parse_TradeAck()
+						notradeマップでは取引要請を送れないようにした
+					C clif_parse_UseSkillToId()
+					C clif_parse_UseSkillToPos()
+					C clif_parse_UseSkillMap()
+						noskillマップではスキルを使用できないようにした
+						チャット中はスキルを使用できないようにした
+						赤エモ中はスキルを使用できないようにした
+						ウェディング状態ではスキルを使用できないようにした
+					C clif_parse_MoveToKafra()
+						itemdb_isdropable()==0 は倉庫に入れられないようにした
+					C clif_parse_GMReqNoChat()
+						GM右クリックで赤エモを付与・解除できるようにした
+					C clif_parse_GMReqNoChatCount()
+						本鯖での返答パケットがよく分からないので仮対応
+						本当はアカウント名が返るのかな？
+					C clif_parse_sn_explosionspirits()
+						クライアントからパケットが来た時にコンソールにログを表示するようにした
+						BaseLv99以上の時に0で除算する可能性があるのを回避
+					A pstrcmp()
+						clif_parse_wisexin()のqsort()で使用
+					A clif_parse_wisexin()
+						Wis拒否許可に対応
+					A clif_parse_wisexlist()
+						Wis拒否リスト表示に対応
+					A clif_parse_wisall()
+						Wis全拒否許可に対応
+					A clif_parse_GMkillall()
+						GMコマンド/killall(=@kickall)に対応
+					A clif_parse_GMsummon()
+						GMコマンド/summon(=@recall)に対応
+					A clif_parse_GMshift()
+						GMコマンド/shift(=@jumpto)に対応
+					A clif_parse_debug()
+						packet_db.txtのデバグ用に追加
+						パケット内容をダンプします
+					C clif_parse()
+						clif_parse_func_table を削除(packet_db[cmd].funcに入るようになりました)
+					A packetdb_readdb()
+						packet_db.txtを読み込みます
+						フォーマットは パケット番号,パケット長[,コマンド,コマンド引数の位置(:区切りで複数指定)]
+						コマンド引数の位置は各コマンドに対応する関数内で設定されているのでclif.cを読まないと分からない難解なフォーマットです
+						変更されたパケットはpacket_db.txtの末尾に追加します
+						古いクライアントを利用する場合には不要な定義を末尾から削除すればよいようにします
+					A do_final_clif()
+						終了時にセッションを削除するようにした
+					C do_init_clif()
+						packet_dbを読み込むようにした
+						終了時にセッションを削除できるように make_listen_port() の戻り値を map_fd に入れるようにした
+				C clif.h
+					A MAX_PACKET_DB
+					A struct packet_db
+					A clif_changestatus()
+					A clif_misceffect2()
+					A clif_callpartner()
+					A clif_sitting()
+					A clif_soundeffect()
+					A clif_item_repair_list()
+					A do_final_clif()
+						定義を追加
+					C clif_class_change
+						clif_mob_class_change() から変更
+				C guild.c
+					C guild_read_castledb()
+						castle_event を読み込むようにした
+					C guild_skillup()
+						引数を変更
+						flag=1 でギルドポイントを使用しないようにした
+					C guild_broken()
+						ギルド解散時に所有砦を破棄するための OnGuildBreak イベントを追加
+					A guild_db_final()
+					A castle_db_final()
+					A guild_expcache_db_final()
+					A guild_infoevent_db_final()
+					A do_final_guild()
+						終了時にメモリを開放するようにした
+				C guild.h
+					C guild_skillup()
+						定義を変更
+					A do_final_guild()
+						定義を追加
+				C intif.c
+					atcommand.h をinclude
+					packet_len_table[] 拡張
+					C intif_guild_skillup()
+						引数 flag 追加
+					A intif_charposreq()
+						キャラの場所要求パケットを送信
+						flag=1 @jumpto
+						flag=0 @where
+					A intif_jumpto()
+						他map-serverのキャラに @jumpto 出来るようにした
+					A intif_where()
+						他map-serverのキャラに @where 出来るようにした
+					A intif_charmovereq()
+						キャラを呼び寄せる
+						flag=1 @recall
+						flag=0 あなたに逢いたい
+					A intif_displaymessage()
+						他map-serverのキャラにメッセージを送れるようにした
+						(Wisではなくて送りっぱなし。@recall 成功時用)
+					C intif_parse_WisMessage()
+						Wis拒否の判定をするようにした
+					A intif_parse_CharPosReq()
+						キャラの居場所をInterへ返答
+					A intif_parse_CharPos()
+						キャラの居場所がInterから送られてきたので
+						flag=1 キャラの場所へ移動(@jumpto)
+						flag=0 キャラの場所を表示(@where)
+					A intif_parse_CharMoveReq()
+						キャラがいたら指定位置に移動させる
+						flag=1 @recall なのでGMレベルを比較、メッセージを表示
+					A intif_parse_DisplayMessage()
+						指定キャラにメッセージを送信
+					C intif_parse()
+						新パケットを追加
+				C intif.h
+					C intif_guild_skillup()
+						定義変更
+					A intif_jumpto()
+					A intif_where()
+					A intif_charmovereq()
+					A intif_displaymessage()
+						定義の追加
+				C itemdb.c
+					A itemdb_isdropable()
+						アイテムが捨てられるかどうかの判定をする
+					A itemdb_read_cardillustnametable()
+						grfファイルから num2cardillustnametable.txt を読み込む
+						cutincard命令で使用
+					C do_init_itemdb()
+						itemdb_read_cardillustnametable() を追加
+				C itemdb.h
+					C struct item_data
+						char cardillustname[64] 追加
+					A itemdb_isdropable()
+						定義の追加
+				C Makefile
+					A malloc.o malloc.h を追加
+				C map.c
+					C struct charid2nick
+						@whoで他map-serverのキャラも表示できるように account_id ip port を追加
+					C map_freeblock()
+					C map_freeblock_unlock()
+						二重free()対策でNULLを代入するようにした
+					C map_delblock()
+						見やすいように繰り返し使用される変数をまとめた
+					C map_addchariddb()
+						charid2nick の拡張にあわせて引数を増やした
+					A map_delchariddb()
+						charid_db からキャラを削除(実際にはip portを0に)する
+					C map_quit()
+						結婚状態中はログアウトしても1時間は状態が続くようにPCグローバル変数 PC_WEDDING_TIME に開始時間を記録するようにした
+					C map_id2bl()
+						見やすいように書き換え
+					A map_eraseipport()
+						他map-server管理のマップを map_db から削除する
+					A map_who_sub()
+					A map_who()
+						他map-serverにいるキャラも @who で表示されるようにした
+						表示上キャラが残ることがあるのは調査中
+					A id_db_final()
+					A map_db_final()
+					A nick_db_final()
+					A charid_db_final()
+					C do_final()
+						終了時にメモリを開放するように変更
+				C map.h
+					A MAX_WIS_REFUSAL
+						Wis拒否リストの保存最大値
+					C struct map_session_data
+						C special_state
+							A unbreakable_weapon
+								武器が絶対に壊れない
+							A unbreakable_armor
+								鎧が絶対に壊れない
+						A opt3
+							画面外から入ってきたキャラの状態
+						A areanpc_id
+							OnTouchイベントを実行したNPCのID
+						A wis_refusal[][]
+							Wis拒否リスト
+						A wis_all
+							Wis全拒否フラグ
+						A break_weapon_rate
+							武器破壊率
+						A break_armor_rate
+							鎧破壊率
+						A add_steal_rate
+							追加スティール率
+					C struct npc_data
+						A opt1,opt2,opt3,option
+							PCと同じ
+						C u.scr
+							A src_id
+								終了時のメモリ開放用
+					C struct mob_data
+						A opt3
+							PCと同じ
+						A guild_id
+							ガーディアンなどで使用
+						D exclusion_*
+							関連関数を消したので削除した
+					C struct map_data
+						C flag
+							A notrade
+								取引禁止マップフラグ
+							A noskill
+								スキル使用禁止マップフラグ
+					定数の追加
+						SP_PARTNER SP_CART
+						SP_BREAK_WEAPON_RATE SP_BREAK_ARMOR_RATE SP_ADD_STEAL_RATE
+						SP_UNBREAKABLE_WEAPON SP_UNBREAKABLE_ARMOR
+					D talkie_mes[]
+						定義削除
+					C map_addchariddb()
+						定義変更
+					A map_delchariddb()
+					A map_eraseipport()
+					A map_who()
+						定義追加
+				C mob.c
+					D mob_exclusion_add()
+					D mob_exclusion_check()
+						意味がある使用をされていないのとbattle_check_target()で代用できるので削除した
+					C mob_stop_walking()
+						type&4で目的の場所まで距離があれば1歩進んで止まるようにした
+					C mob_attack()
+						MobがMobを攻撃できるようにした
+					C mob_target()
+					C mob_ai_sub_hard_slavemob()
+						mob_exclusion_check()を削除
+					C mob_ai_sub_hard_activesearch()
+					C mob_ai_sub_hard()
+						special_mob_aiな場合はMobも索敵するようにした
+						ルートモンスターが目標のアイテムを見失った時は目的の場所まで歩かないようにした
+					C mob_damage()
+						スフィアマインが殴られた時に自爆しなかったのを修正した
+						スフィアマインが殴られて自爆する時に移動するようにした
+						srcがMobの時はsrcのターゲットを外すようにした
+					C mob_skillid2skillidx()
+						インデックスが0から始まるのにエラーも0を返すしていたのを修正した
+						スフィアマインが殴られても自爆しない原因はこれ
+					C mobskill_use()
+						自爆状態ではスキルを使用できないようにした
+					C mob_spawn()
+						ガーディアンとエンペリウムが砦で発生した場合は guild_id を設定
+						opt3 を 0 で初期化
+					C mob_can_reach()
+						GvG以外ではガーディアンは何もしないようにした
+					C mob_catch_delete()
+						Mobが消えるときのエフェクトを type で指定できるようにした
+					C mob_timer_delete()
+						スフィアマインとバイオプラントが消えるときはテレポエフェクトで消えるようにした
+					C mob_deleteslave_sub()
+						nullチェック前に代入している部分を修正
+					C mob_class_change()
+						clif_class_change() の変更に対応
+				C mob.h
+					C mob_catch_delete()
+						定義変更
+					D mob_exclusion_add()
+					D mob_exclusion_check()
+						定義削除
+				C npc.c
+					C struct npc_src_list
+						A prev
+							終了時のメモリ開放用に追加
+					C npc_checknear()
+						イベントPCの場合に常にOKを返していなかったのを修正
+					A npc_enable_sub()
+						npc_enable() から呼ばれて周囲のPCにOnTouchイベントを実行する
+					C npc_enable()
+						flag による挙動を追加
+						flag=2 NPCのHide状態を解除する
+						flag=4 NPCをHide状態にする
+						HideしているNPCは無効になります
+						有効にした時に npc_enable_sub() を呼ぶようにした
+					C npc_event()
+						エラー時は1を返すように変更
+						OnTouchイベントから呼ばれたときはイベントが見つからないエラーを返さないようにした
+					C npc_touch_areanpc()
+						PCがエリア内を通った時に何度も実行されるのを修正
+						NPCにOnTouchイベントがあった場合には実行するようにした
+						互換性を保つためにOnTouchイベントが無い場合は今までと同じように動きます
+					C npc_parse_warp()
+						option,opt1,opt2,opt3 を 0 で初期化
+					C npc_parse_warp()
+					C npc_parse_shop()
+						IDをnpc_get_new_npc_id()で取得するようにした
+						option,opt1,opt2,opt3 を 0 で初期化
+					C npc_convertlabel_db()
+						メモリ確保後にnullかどうか確認していないのを修正
+					C npc_parse_script()
+						bad duplicate name!エラー表示が改行されていなかったのを修正
+						終了時メモリ開放用にduplicateで src_id を挿入
+						IDをnpc_get_new_npc_id()で取得するようにした
+						option,opt1,opt2,opt3 を 0 で初期化
+					C npc_parse_mob()
+						memwatch対策でメモリを一括確保しないようにした
+						モンスター名に --ja-- --en-- を指定するとmob_dbの名前を使うようにした
+						IDをnpc_get_new_npc_id()で取得するようにした
+					C npc_parse_mapflag()
+						notrade noskill を読み込むようにした
+					A ev_db_final()
+					A npcname_db_final()
+					A do_final_npc()
+						終了時にメモリを開放するようにした
+					C do_init_npc()
+						メモリを開放するようにした
+				C npc.h
+					A do_final_npc()
+						定義の追加
+				C party.c
+					A party_db_final()
+					A do_final_party()
+						終了時にメモリを開放するようにした
+				C party.h
+					A do_final_party()
+						定義の追加
+				C pc.c
+					A pc_numisGM()
+						account_idでGMかどうか判断する
+					A pc_isquitable()
+						PCが終了できる状態にあるかどうか判断する
+						1を返すときは終了できない
+					C pc_counttargeted_sub()
+						Mob状態によって値を正しく返さないような気がするので条件を仮変更
+					C pc_makesavestatus()
+						マナーポイントが正数の場合は 0 にする
+					C pc_authok()
+						wis_all を 0 で初期化
+						map_addchariddb() の変更に対応と常に実行するようにした
+					C pc_calcstatus()
+						break_weapon_rate break_armor_rate add_steal_rate を 0 で初期化
+						結婚状態では歩く速度が半分になるようにした
+					C pc_bonus()
+						SP_UNBREAKABLE_WEAPON SP_UNBREAKABLE_ARMOR SP_BREAK_WEAPON_RATE SP_BREAK_ARMOR_RATE SP_ADD_STEAL_RATE
+						処理を追加
+					C pc_dropitem()
+						アイテムを捨てられるかどうか判定するようにした
+					C pc_putitemtocart()
+						アイテムをカートに移動できるか判定するようにした
+					C pc_steal_item()
+						スティール率に add_steal_rate を加算するようにした
+					C pc_walk()
+					C pc_movepos()
+						範囲NPCがいないときには areanpc_id=0 にした
+					C pc_checkbaselevelup()
+						スパノビがレベルアップした時にかかるスキルのレベルを本鯖にあわせた
+					C pc_skillup()
+						guild_skillup() の変更に対応
+					C pc_damage()
+						スパノビがExp99%でHPが0になるとHPが回復して金剛状態になるようにした
+					C pc_readparam()
+						nullチェック前にsdを使っていたのを修正
+						A SP_PARTNER
+							結婚相手のchar_id
+						A SP_CART
+							カートを引いている場合は0以上が返る
+					C pc_jobchange()
+						マナーポイントが負数の場合は赤エモ表示するようにした
+					A pc_break_weapon()
+						武器破壊をする
+					A pc_break_armor()
+						鎧破壊をする
+					C pc_natural_heal_sp()
+						スパノビは爆裂状態でもSPが自然回復するようにした
+					A gm_account_db_final()
+					A do_final_pc()
+						終了時にメモリ開放するようにした
+				C pc.h
+					A pc_numisGM()
+					A pc_isquitable()
+					A pc_break_weapon()
+					A pc_break_armor()
+					A do_final_pc()
+						定義追加
+				C pet.c
+					C pet_data_init()
+					C pet_lootitem_drop()
+						メモリ確保できたかどうか確認していなかったので修正
+					C pet_catch_process2()
+						mob_catch_delete() の変更に対応
+				C script.c
+					追加した関数のプロトタイプを先頭に追加
+					buildin_func[]に追加した命令や関数を追加
+					演算子に C_R_SHIFT C_L_SHIFT を追加
+					C parse_subexpr()
+						演算子 >> << 追加
+					C get_val()
+						PC主体の変数でPCがアタッチされていなかったらエラーを出すようにした
+						PC主体の変数でsd=NULLだった場合にはpc_read*で取得に行かないようにした
+					A buildin_close2()
+						スクリプトを中断してCloseボタンを表示します
+					C buildin_areawarp_sub()
+						RandomだけでなくSavePointにも飛ばせるようにした
+					A buildin_cutincard()
+						カードのアイテムIDを指定することでカード画像を表示します
+					C buildin_getitem()
+						引数を変更して鑑定した状態で渡すかどうかを指定できるようにした
+						account_idを指定することで、そのPCにアイテムを渡せるようにした(結婚用拡張)
+					C buildin_getitem2()
+						account_idを指定することで、そのPCにアイテムを渡せるようにした(結婚用拡張)
+					C buildin_readparam()
+						キャラ名を指定することで、そのPCのパラメータを読み取れるようにした
+					C buildin_getcharid()
+						キャラ名を指定することで、そのPCの関係IDを取得できるようにした
+					A buildin_getpartymember()
+						指定IDのパーティ人数の取得とパーティーメンバーのIDを配列で取得できます
+					A buildin_guildskill()
+						ギルドスキルを覚えることができます
+					C buildin_getgdskilllv()
+						ギルドスキルIDをGD_APPROVALのようなスキル名で指定するようにした
+					A buildin_hideoffnpc()
+						Hide状態のNPCを表示する
+					A buildin_hideonnpc()
+						NPCをHide状態にする
+					C buildin_sc_start()
+						ID指定したキャラを状態異常にできるようにした
+					A buildin_sc_start2()
+						確率指定でキャラを状態異常にできます(アイス、おもち等で使用)
+					A buildin_getscrate()
+						状態異常耐性を計算した確率を返す
+					C buildin_changebase()
+						IDで指定したキャラの見た目を変更することができるようにした
+					C buildin_waitingroom()
+						limit=0の時は(1/10)を表示しないようにした
+					C buildin_setmapflag()
+						MF_NOTRADE MF_NOSKILL を追加
+					C buildin_flagemblem()
+						NPCが特定できなかったときにmap-serverが落ちる問題を修正
+					A buildin_getinventorylist()
+						配列で所持品を返します
+					A buildin_getskilllist()
+						配列で所有スキルを返します
+					A buildin_clearitem()
+						所持アイテムを削除します
+					A buildin_getrepairableitemcount()
+						壊れているアイテムを数えます
+					A buildin_repairitem()
+						壊れているアイテムをすべて修理します
+					A buildin_classchange()
+						NPCをクラスチェンジします
+					A buildin_misceffect()
+						エフェクトを表示します
+					A buildin_soundeffect()
+						指定したSEを鳴らします
+					C op_2num()
+					C run_script_main()
+						シフト演算子を追加
+					A mapreg_db_final()
+					A mapregstr_db_final()
+					A scriptlabel_db_final()
+					A userfunc_db_final()
+					C do_final_script()
+						終了時にメモリを開放するようにした
+				C skill.c
+					<timer.h> intif.h をinclude
+					コメントのスキル名をjRO仕様に書き換え
+					C SkillStatusChangeTable[]
+						ベナムスプラッシャー グラフィティ 自爆 自爆2 を追加
+					C skill_additional_effect()
+						ベナムスプラッシャー追加
+						アンクルスネアを削除
+					C skill_attack()
+						チャット中にスキルが影響しないようにした(チャットキャンセル)
+						ベナムスプラッシャーはSkillLv=-1でclif_skill_damage()するようにした
+						自爆はダメージ表示しないようにした
+					C skill_castend_damage_id()
+						アシッドテラーで武器破壊をするようにした
+						ベナムスプラッシャーが3*3の範囲攻撃をするようにした
+						自爆の処理を変更した
+					C skill_castend_nodamage_id()
+						sdとdstsdでPCかどうかを判定するようにした
+						スパノビの嫁がヒールを使うと回復量が2倍になるようにした
+						clif_sitting()の変更に対応
+						武器修理はパケットが分からないのでコメントアウト
+						ストリップ～、ケミカル～をスキルユニットに使用した場合、map-serverが落ちる問題を修正
+						君だけは護るよ、あなたの為に犠牲になりますの計算をMAX_HPまたはMAX_SPからするようにした
+						あなたに逢いたい を相手の名前を叫ぶ、複数設置できない等、本鯖風にした
+						アンクルスネアでPCが引っかかっている時にリムーブトラップしてもPCが動けるようにならなかったのを修正
+						アンコールを叫ぶようにした
+						ベナムスプラッシャーを実装した
+						自爆で自爆状態を開始するようにした
+					C skill_castend_pos2()
+						バイオプラント、スフィアマイン
+							パケット順番を変更
+							指定した場所に設置するようにした
+							効果時間をskill_cast_db.txtで指定するようにした
+							mob_exclusion_add()を削除
+						グラフィティを実装、1個しか置けません
+					C skill_castend_map()
+						ワープポータルは実際の設置時にブルージェムストーンを消費するようにした
+					C skill_unitsetting()
+						グラフィティのスキルユニットを1個に修正
+						トーキーボックス、グラフィティの文字列は sd->message に格納するようにした
+					C skill_unit_onplace()
+						チャット時はスキルユニットが動作しないようにした(チャットキャンセル)
+						アンクルスネアにかかる処理をskill_additional_effect()から移動
+						ワープポータルに術者が乗ったら消えるようにした
+						デモンストレーションによる武器破壊をするようにした
+						アンクルスネア、スパイダーウェッブでメモリアクセス違反が起きる可能性があったのを修正
+					C skill_unit_onout()
+						アンクルスネアで「}」が足りなかったために近くを通りかかっただけで1秒後罠に戻ってしまったのを修正
+					C skill_unit_onlimit()
+						ワープポータル発動前の処理を削除
+						あなたに逢いたいを他map-serverにいても呼べるようにした
+					A skill_check_condition_mob_master_sub()
+						マップ内で同じPCから出たバイオプラントやスフィアマインの数を数える
+					C skill_check_condition()
+						hp_rateとsp_rateに負数を指定すると消費計算をMax値からするようにした
+						あなたに逢いたいを結婚していない状態で使ったら使用失敗を表示するようにした
+						バイオプラントとスフィアマインの設置数をskill_cast_db.txtで設定できるようにした
+						ファイアーウォールの数制限を skill_use_pos() から移動
+					C skill_use_id()
+						バジリカをGvGでは使用できないようにした
+						ベナムスプラッシャーは対象が毒状態でなければ使用失敗
+					C skill_use_pos()
+						ファイアーウォールの数制限を skill_check_condition() に移動
+					C skill_status_change_end()
+						opt3の処理を追加
+						結婚状態の終了を追加
+						ベナムスプラッシャーを追加
+						自爆を追加
+					C skill_status_change_timer()
+						結婚状態と赤エモ状態のタイマー再設定を追加
+						自爆状態では1秒ごとに速度が変化するようにした
+					C skill_status_change_start()
+						opt3の処理を追加
+						グラフィティは追加で置いたら前のは消えるようにした
+						結婚状態と赤エモ状態を追加
+						グラフィティは状態異常開始時にスキルユニットを設置するようにした
+						ベナムスプラッシャーは特に何も追加はなし
+						自爆は詠唱パケットをここで送るようにした
+					C skill_status_change_clear()
+						opt3の処理を追加
+					C skill_unit_timer_sub()
+						ワープポータル発動前が時間切れになるときに見た目を変更して本鯖のように効果音が出るようにした
+						ブラストマイン以外の罠は時間切れで罠に戻るようにした
+				C skill.h
+					状態異常にスキル名をいくつかつけたり、新規の状態異常を増やした
+				C storage.c
+					A storage_db_final()
+					A guild_storage_db_final()
+					C do_final_storage()
+						終了時にメモリを開放するようにした
+				C trade.c
+					C trade_tradeadditem()
+					C trade_tradecommit()
+						itemdb_isdropable()で交換できないアイテムを判定するようにした
+				C vending.c
+					vending_purchasereq()
+						金額計算をdoubleでするようにしてintで桁あふれしないようにした
+
+--------------------
 //1045 by TEILU
 
 ・スティール、スティールコイン、スナッチャーの失敗メッセージが

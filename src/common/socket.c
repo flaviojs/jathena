@@ -13,6 +13,7 @@
 #include <sys/time.h>
 
 #include "socket.h"
+#include "malloc.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -51,7 +52,7 @@ static int recv_to_fifo(int fd)
 	if(session[fd]->eof)
 		return -1;
 
-	len=read(fd,session[fd]->rdata+session[fd]->rdata_size,RFIFOSPACE(fd));
+	len=recv(fd,session[fd]->rdata+session[fd]->rdata_size,RFIFOSPACE(fd),0);
 	//{ int i; printf("recv %d : ",fd); for(i=0;i<len;i++){ printf("%02x ",RFIFOB(fd,session[fd]->rdata_size+i)); } printf("\n");}
 	if(len>0){
 		session[fd]->rdata_size+=len;
@@ -70,7 +71,7 @@ static int send_from_fifo(int fd)
 	if(session[fd]->eof)
 		return -1;
 
-	len=write(fd,session[fd]->wdata,session[fd]->wdata_size);
+	len=send(fd,session[fd]->wdata,session[fd]->wdata_size,0);
 	//{ int i; printf("send %d : ",fd);  for(i=0;i<len;i++){ printf("%02x ",session[fd]->wdata[i]); } printf("\n");}
 	if(len>0){
 		if(len<session[fd]->wdata_size){
@@ -128,22 +129,9 @@ static int connect_client(int listen_fd)
 		FD_SET(fd,&readfds);
 	}
 	result = fcntl(fd, F_SETFL, O_NONBLOCK);
-	session[fd] = calloc(sizeof(*session[fd]), 1);
-	if(session[fd]==NULL){
-		printf("out of memory : connect_client\n");
-		exit(1);
-	}
-	memset(session[fd],0,sizeof(*session[fd]));
-	session[fd]->rdata       = calloc(rfifo_size, 1);
-	if(session[fd]->rdata==NULL){
-		printf("out of memory : connect_client rdata\n");
-		exit(1);
-	}
-	session[fd]->wdata       = calloc(wfifo_size, 1);
-	if(session[fd]->wdata==NULL){
-		printf("out of memory : connect_client wdata\n");
-		exit(1);
-	}
+	session[fd] = (struct socket_data *)aCalloc(1,sizeof(*session[fd]));
+	session[fd]->rdata       = (unsigned char *)aCalloc(1,rfifo_size);
+	session[fd]->wdata       = (unsigned char *)aCalloc(1,wfifo_size);
 	session[fd]->max_rdata   = rfifo_size;
 	session[fd]->max_wdata   = wfifo_size;
 	session[fd]->func_recv   = recv_to_fifo;
@@ -190,12 +178,7 @@ int make_listen_port(int port)
 	}
 
 	FD_SET(fd, &readfds );
-	session[fd] = calloc(sizeof(*session[fd]), 1);
-	if(session[fd]==NULL){
-		printf("out of memory : make_listen_port\n");
-		exit(1);
-	}
-	memset(session[fd],0,sizeof(*session[fd]));
+	session[fd] = (struct socket_data *)aCalloc(1,sizeof(*session[fd]));
 	session[fd]->func_recv = connect_client;
 
 	return fd;
@@ -227,23 +210,10 @@ int make_connection(long ip,int port)
 	result = connect(fd, (struct sockaddr *)(&server_address),sizeof(struct sockaddr_in));
 
 	FD_SET(fd,&readfds);
-	session[fd] = calloc(sizeof(*session[fd]), 1);
-	if(session[fd]==NULL){
-		printf("out of memory : make_connection\n");
-		exit(1);
-	}
-	memset(session[fd],0,sizeof(*session[fd]));
+	session[fd] = (struct socket_data *)aCalloc(1,sizeof(*session[fd]));
 
-	session[fd]->rdata      = calloc(rfifo_size, 1);
-	if(session[fd]->rdata==NULL){
-		printf("out of memory : make_connection rdata\n");
-		exit(1);
-	}
-	session[fd]->wdata      = calloc(wfifo_size, 1);
-	if(session[fd]->wdata==NULL){
-		printf("out of memory : make_connection wdata\n");
-		exit(1);
-	}
+	session[fd]->rdata      = (unsigned char *)aCalloc(1,rfifo_size);
+	session[fd]->wdata      = (unsigned char *)aCalloc(1,wfifo_size);
 	session[fd]->max_rdata  = rfifo_size;
 	session[fd]->max_wdata  = wfifo_size;
 	session[fd]->func_recv  = recv_to_fifo;
@@ -277,18 +247,11 @@ int realloc_fifo(int fd,int rfifo_size,int wfifo_size)
 	struct socket_data *s=session[fd];
 	if( s->max_rdata != rfifo_size && s->rdata_size < rfifo_size){
 	
-		s->rdata      = realloc(s->rdata, rfifo_size);
-		if (s->rdata == NULL) {
-			printf("out of memory : realloc_fifo rdata\n");
-		}
+		s->rdata      = (unsigned char *)aRealloc(s->rdata, rfifo_size);
 		s->max_rdata  = rfifo_size;
 	}
 	if( s->max_wdata != wfifo_size && s->wdata_size < wfifo_size){
-		s->wdata      = realloc(s->wdata, wfifo_size);
-		if (s->wdata == NULL){
-			printf("out of memory : realloc_fifo wdata\n");
-			exit(1);
-		}
+		s->wdata      = (unsigned char *)aRealloc(s->wdata, wfifo_size);
 		s->max_wdata  = wfifo_size;
 	}
 	return 0;

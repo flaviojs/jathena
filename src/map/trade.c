@@ -10,6 +10,10 @@
 #include "battle.h"
 #include "nullpo.h"
 
+#ifdef MEMWATCH
+#include "memwatch.h"
+#endif
+
 /*==========================================
  * æˆø—v¿‚ğ‘Šè‚É‘—‚é
  *------------------------------------------
@@ -92,7 +96,7 @@ void trade_tradeadditem(struct map_session_data *sd,int index,int amount)
 				sd->deal_zeny=amount;
 				clif_tradeadditem(sd,target_sd,0,amount);
 			}
-		}else if(amount <= sd->status.inventory[index-2].amount && amount > 0){
+		}else if(amount <= sd->status.inventory[index-2].amount && amount > 0 && itemdb_isdropable(sd->status.inventory[index-2].nameid)){
 			for(trade_i=0; trade_i<10;trade_i++){
 				if(sd->deal_item_amount[trade_i] == 0){
 					trade_weight+=sd->inventory_data[index-2]->weight*amount;
@@ -191,22 +195,26 @@ void trade_tradecommit(struct map_session_data *sd)
 					if(sd->deal_item_amount[trade_i] != 0) {
 						int n=sd->deal_item_index[trade_i]-2;
 						int flag;
-						flag = pc_additem(target_sd,&sd->status.inventory[n],sd->deal_item_amount[trade_i]);
-						if(flag==0)
-							pc_delitem(sd,n,sd->deal_item_amount[trade_i],1);
-						else
-							clif_additem(sd,n,sd->deal_item_amount[trade_i],0);
+						if(itemdb_isdropable(sd->status.inventory[n].nameid)){
+							flag = pc_additem(target_sd,&sd->status.inventory[n],sd->deal_item_amount[trade_i]);
+							if(flag==0)
+								pc_delitem(sd,n,sd->deal_item_amount[trade_i],1);
+							else
+								clif_additem(sd,n,sd->deal_item_amount[trade_i],0);
+						}
 						sd->deal_item_index[trade_i] =0;
 						sd->deal_item_amount[trade_i]=0;
 					}
 					if(target_sd->deal_item_amount[trade_i] != 0) {
 						int n=target_sd->deal_item_index[trade_i]-2;
 						int flag;
-						flag = pc_additem(sd,&target_sd->status.inventory[n],target_sd->deal_item_amount[trade_i]);
-						if(flag==0)
-							pc_delitem(target_sd,n,target_sd->deal_item_amount[trade_i],1);
-						else
-							clif_additem(target_sd,n,target_sd->deal_item_amount[trade_i],0);
+						if(itemdb_isdropable(target_sd->status.inventory[n].nameid)){
+							flag = pc_additem(sd,&target_sd->status.inventory[n],target_sd->deal_item_amount[trade_i]);
+							if(flag==0)
+								pc_delitem(target_sd,n,target_sd->deal_item_amount[trade_i],1);
+							else
+								clif_additem(target_sd,n,target_sd->deal_item_amount[trade_i],0);
+						}
 						target_sd->deal_item_index[trade_i] =0;
 						target_sd->deal_item_amount[trade_i]=0;
 					}

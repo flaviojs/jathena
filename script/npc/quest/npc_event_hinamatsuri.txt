@@ -1,5 +1,5 @@
 //==============================================================================
-// Event Hinamatsuri2004(ひな祭り2004ver) by kalen
+//Ragnarok Online - Hinamatsuri Event Script (2004 ver) by kalen
 //==============================================================================
 alberta.gat,218,87,3	script	アマツ貿易商	762,{
 	mes "[貿易商]";
@@ -74,7 +74,7 @@ LStart2:
 			mes "そうですか！";
 			mes "楽しんできてください。";
 			mes "では、出発!!";
-			next;
+			close2;
 			warp "amatsu.gat",197,83;
 			end;
 Lno:
@@ -167,7 +167,7 @@ LStart2:
 			mes "わ～い!!";
 			mes "じゃあ、楽しんできてくださいね～。";
 			mes "では、出発～!!";
-			next;
+			close2;
 			warp "amatsu.gat",197,83;
 			end;
 Lno:
@@ -259,7 +259,7 @@ LStart2:
 			mes "わかりました！";
 			mes "楽しんできてください。";
 			mes "では、出発です!!";
-			next;
+			close2;
 			warp "amatsu.gat",197,83;
 			end;
 Lno:
@@ -348,7 +348,7 @@ LStart2:
 			mes "おお!!";
 			mes "楽しんできてね。";
 			mes "では、しゅっぱーつ!!";
-			next;
+			close2;
 			warp "amatsu.gat",197,83;
 			end;
 Lno:
@@ -612,7 +612,7 @@ Lwarp:
 	mes "はい、では";
 	mes "お気をつけて";
 	mes "いってらっしゃいませ。";
-	next;
+	close2;
 	if ((@gonum == 1) || (@gonum == 4) || (@gonum == 6) || (@gonum == 9) || (@gonum == 10) || (@gonum == 11)) delitem 542,1;
 	if ((@gonum == 2) || (@gonum == 3) || (@gonum == 5) || (@gonum == 7) || (@gonum == 8) || (@gonum == 12)) delitem 543,1;
 	if ((@gonum == 13) || (@gonum == 14) || (@gonum == 15) || (@gonum == 16)) delitem 542,1;

@@ -6,6 +6,9 @@
 #include "storage.h"
 #include "db.h"
 #include "timer.h"
+#include "socket.h"
+#include "nullpo.h"
+#include "malloc.h"
 #include "battle.h"
 #include "npc.h"
 #include "pc.h"
@@ -13,8 +16,10 @@
 #include "mob.h"
 #include "intif.h"
 #include "clif.h"
-#include "socket.h"
-#include "nullpo.h"
+
+#ifdef MEMWATCH
+#include "memwatch.h"
+#endif
 
 static struct dbt *guild_db;
 static struct dbt *castle_db;
@@ -67,12 +72,8 @@ static int guild_read_castledb(void)
 		if(line[0]=='/' && line[1]=='/')
 			continue;
 		memset(str,0,sizeof(str));
-		gc=calloc(sizeof(struct guild_castle), 1);
-		if(gc==NULL){
-			printf("guild: out of memory!\n");
-			exit(0);
-		}
-		for(j=0,p=line;j<5 && p;j++){
+		gc=(struct guild_castle *)aCalloc(1,sizeof(struct guild_castle));
+		for(j=0,p=line;j<6 && p;j++){
 			str[j]=p;
 			p=strchr(p,',');
 			if(p) *p++=0;
@@ -86,6 +87,7 @@ static int guild_read_castledb(void)
 		gc->castle_id=atoi(str[0]);
 		memcpy(gc->map_name,str[1],24);
 		memcpy(gc->castle_name,str[2],24);
+		memcpy(gc->castle_event,str[3],24);
 
 		numdb_insert(castle_db,gc->castle_id,gc);
 
@@ -314,10 +316,7 @@ int guild_npc_request_info(int guild_id,const char *event)
 	if(event==NULL || *event==0)
 		return guild_request_info(guild_id);
 
-	if((ev=(struct eventlist *)calloc(sizeof(struct eventlist), 1) )==NULL){
-		printf("guild_npc_request_info: out of memory !");
-		exit(0);
-	}
+	ev=(struct eventlist *)aCalloc(1,sizeof(struct eventlist));
 	memcpy(ev->name,event,sizeof(ev->name));
 	ev->next=(struct eventlist *)numdb_search(guild_infoevent_db,guild_id);
 	numdb_insert(guild_infoevent_db,guild_id,ev);
@@ -376,11 +375,7 @@ int guild_recv_info(struct guild *sg)
 	nullpo_retr(0, sg);
 
 	if((g=numdb_search(guild_db,sg->guild_id))==NULL){
-		g=calloc(sizeof(struct guild), 1);
-		if(g==NULL){
-			printf("guild_recv_info: out of memory!\n");
-			exit(1);
-		}
+		g=(struct guild *)aCalloc(1,sizeof(struct guild));
 		numdb_insert(guild_db,sg->guild_id,g);
 		before=*sg;
 
@@ -885,11 +880,7 @@ int guild_payexp(struct map_session_data *sd,int exp)
 		return 0;
 	
 	if( (c=numdb_search(guild_expcache_db,sd->status.char_id))==NULL ){
-		c=calloc(sizeof(struct guild_expcache), 1);
-		if(c==NULL){
-			printf("guild_payexp: out of memory !\n");
-			exit(1);
-		}
+		c=(struct guild_expcache *)aCalloc(1,sizeof(struct guild_expcache));
 		c->guild_id=sd->status.guild_id;
 		c->account_id=sd->status.account_id;
 		c->char_id=sd->status.char_id;
@@ -902,7 +893,7 @@ int guild_payexp(struct map_session_data *sd,int exp)
 }
 
 // ÉXÉLÉãÉ|ÉCÉìÉgäÑÇËêUÇË
-int guild_skillup(struct map_session_data *sd,int skill_num)
+int guild_skillup(struct map_session_data *sd,int skill_num,int flag)
 {
 	struct guild *g;
 	int idx;
@@ -914,10 +905,10 @@ int guild_skillup(struct map_session_data *sd,int skill_num)
 	if(strcmp(sd->status.name,g->master))
 		return 0;
 	
-	if( g->skill_point>0 &&
+	if( (g->skill_point>0 || flag&1) &&
 		g->skill[(idx=skill_num-10000)].id!=0 &&
 		g->skill[idx].lv < guild_skill_get_max(skill_num) ){
-		intif_guild_skillup(g->guild_id,skill_num,sd->status.account_id);
+		intif_guild_skillup(g->guild_id,skill_num,sd->status.account_id,flag);
 	}
 	return 0;
 }
@@ -1186,11 +1177,25 @@ int guild_broken_sub(void *key,void *data,va_list ap)
 int guild_broken(int guild_id,int flag)
 {
 	struct guild *g=guild_search(guild_id);
+	struct guild_castle *gc=NULL;
 	struct map_session_data *sd;
 	int i;
+	char *name=(char *)aCalloc(50,sizeof(char));
+
 	if(flag!=0 || g==NULL)
 		return 0;
-	
+
+	//èäóLç‘ÇÃîjä¸
+	for(i=0;i<MAX_GUILDCASTLE;i++){
+		if( (gc=guild_castle_search(i)) != NULL ){
+			if(gc->guild_id == guild_id){
+				memcpy(name,gc->castle_event,50);
+				npc_event_do(strcat(name,"::OnGuildBreak"));
+			}
+		}
+	}
+	free(name);
+
 	for(i=0;i<g->max_member;i++){	// ÉMÉãÉhâéUÇí ím
 		if((sd=g->member[i].sd)!=NULL){
 			if(sd->state.storage_flag)
@@ -1251,10 +1256,7 @@ int guild_addcastleinfoevent(int castle_id,int index,const char *name)
 	if( name==NULL || *name==0 )
 		return 0;
 		
-	if( (ev=calloc(sizeof(struct eventlist), 1))==NULL ){
-		printf("guild_addcastleinfoevent: out of memory !!");
-		exit(0);
-	}
+	ev=(struct eventlist *)aCalloc(1,sizeof(struct eventlist));
 	memcpy(ev->name,name,sizeof(ev->name));
 	ev->next=numdb_search(guild_castleinfoevent_db,code);
 	numdb_insert(guild_castleinfoevent_db,code,ev);
@@ -1392,12 +1394,9 @@ int guild_agit_end(void)
 int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data)
 {	// Run One NPC_Event[OnAgitEliminate]
 	size_t len = strlen((const char*)data);
-	char *evname=(char*)calloc(len + 4, 1);
+	char *evname=(char*)aCalloc(len + 4,sizeof(char));
 	int c=0;
-	if (evname == NULL) {
-		printf("out of memory: guild_gvg_eliminate_timer\n");
-		exit(1);
-	}
+
 	if(!agit_flag) return 0;	// Agit already End
 	memcpy(evname,(const char *)data,len - 5);
 	strcpy(evname + len - 5,"Eliminate");
@@ -1412,12 +1411,8 @@ int guild_agit_break(struct mob_data *md)
 
 	nullpo_retr(0, md);
 
-	evname=calloc(strlen(md->npc_event) + 1, 1);
+	evname=(char *)aCalloc(strlen(md->npc_event) + 1, sizeof(char));
 
-	if (evname == NULL) {
-		printf("out of memory: guild_agit_break\n");
-		exit(1);
-	}
 	strcpy(evname,md->npc_event);
 // Now By User to Run [OnAgitBreak] NPC Event...
 // It's a little impossible to null point with player disconnect in this!
@@ -1429,3 +1424,48 @@ int guild_agit_break(struct mob_data *md)
 	return 0;
 }
 
+static int guild_db_final(void *key,void *data,va_list ap)
+{
+	struct guild *g=data;
+
+	free(g);
+
+	return 0;
+}
+static int castle_db_final(void *key,void *data,va_list ap)
+{
+	struct guild_castle *gc=data;
+
+	free(gc);
+
+	return 0;
+}
+static int guild_expcache_db_final(void *key,void *data,va_list ap)
+{
+	struct guild_expcache *c=data;
+
+	free(c);
+
+	return 0;
+}
+static int guild_infoevent_db_final(void *key,void *data,va_list ap)
+{
+	struct eventlist *ev=data;
+
+	free(ev);
+
+	return 0;
+}
+void do_final_guild(void)
+{
+	if(guild_db)
+		numdb_final(guild_db,guild_db_final);
+	if(castle_db)
+		numdb_final(castle_db,castle_db_final);
+	if(guild_expcache_db)
+		numdb_final(guild_expcache_db,guild_expcache_db_final);
+	if(guild_infoevent_db)
+		numdb_final(guild_infoevent_db,guild_infoevent_db_final);
+	if(guild_castleinfoevent_db)
+		numdb_final(guild_castleinfoevent_db,guild_infoevent_db_final);
+}

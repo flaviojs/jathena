@@ -497,7 +497,7 @@ Lmemmer:
 		mes "避ける事ができず";
 		mes "大ダメージを受けた！";
 		mes "意識が遠のいていく……";
-		next;
+		close2;
 		warp "payon_in01.gat",170,45;end;
 	Lmemmer2:
 		mes "スッ……";
@@ -553,7 +553,7 @@ Lkonbou:
 		mes "防御をとかれてしまった。";
 		mes "そこに強烈な一撃が入った！";
 		mes "全身の力が抜けていく……";
-		next;
+		close2;
 		warp "payon_in01.gat",165,140;end;
 	Lkonbou3:
 		mes "ガガッ……";
@@ -605,7 +605,7 @@ Lfinal:
 	mes "後一歩のところで";
 	mes "反撃を受けてしまった！";
 	mes "目の前が暗くなっていく……";
-	next;
+	close2;
 	warp "payon_in01.gat",165,140;end;
 Lsucsess:
 	set event_oni,1;
@@ -617,7 +617,7 @@ Lsucsess:
 	next;
 	mes "鬼を倒した証拠として";
 	mes "町にもって帰ろう。";
-	next;
+	close2;
 	warp "payon.gat",90,30;end;
 }
 

@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "inter.h"
 #include "int_party.h"
 #include "mmo.h"
@@ -5,9 +9,7 @@
 #include "socket.h"
 #include "db.h"
 #include "lock.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "malloc.h"
 
 char party_txt[1024]="save/party.txt";
 
@@ -48,7 +50,7 @@ int inter_party_fromstr(char *str,struct party *p)
 		return 1;
 	
 	p->party_id=tmp_int[0];
-	strcpy(p->name,tmp_str);
+	strncpy(p->name,tmp_str,24);
 	p->exp=tmp_int[1];
 	p->item=tmp_int[2];	
 //	printf("%d [%s] %d %d\n",tmp_int[0],tmp_str[0],tmp_int[1],tmp_int[2]);
@@ -98,12 +100,7 @@ int inter_party_init()
 			continue;
 		}
 	
-		p=calloc(sizeof(struct party), 1);
-		if(p==NULL){
-			printf("int_party: out of memory!\n");
-			exit(0);
-		}
-		memset(p,0,sizeof(struct party));
+		p=(struct party *)aCalloc(1,sizeof(struct party));
 		if(inter_party_fromstr(line,p)==0 && p->party_id>0){
 			if( p->party_id >= party_newid)
 				party_newid=p->party_id+1;
@@ -373,13 +370,7 @@ int mapif_parse_CreateParty(int fd,int account_id,char *name,char *nick,char *ma
 		mapif_party_created(fd,account_id,NULL);
 		return 0;
 	}
-	p=calloc(sizeof(struct party), 1);
-	if(p==NULL){
-		printf("int_party: out of memory !\n");
-		mapif_party_created(fd,account_id,NULL);
-		return 0;
-	}
-	memset(p,0,sizeof(struct party));
+	p=(struct party *)aCalloc(1,sizeof(struct party));
 	p->party_id=party_newid++;
 	memcpy(p->name,name,24);
 	p->exp=0;
@@ -571,5 +562,18 @@ int inter_party_leave(int party_id,int account_id)
 	return mapif_parse_PartyLeave(-1,party_id,account_id);
 }
 
+static int party_db_final(void *key,void *data,va_list ap)
+{
+	struct party *p=data;
+
+	free(p);
+
+	return 0;
+}
+void do_final_int_party(void)
+{
+	if(party_db)
+		numdb_final(party_db,party_db_final);
+}
 
 

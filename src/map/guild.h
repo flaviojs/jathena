@@ -41,7 +41,7 @@ int guild_member_leaved(int guild_id,int account_id,int char_id,int flag,
 	const char *name,const char *mes);
 int guild_explusion(struct map_session_data *sd,int guild_id,
 	int account_id,int char_id,const char *mes);
-int guild_skillup(struct map_session_data *sd,int skill_num);
+int guild_skillup(struct map_session_data *sd,int skill_num,int flag);
 int guild_reqalliance(struct map_session_data *sd,int account_id);
 int guild_reply_reqalliance(struct map_session_data *sd,int account_id,int flag);
 int guild_alliance(int guild_id1,int guild_id2,int account_id1,int account_id2);
@@ -78,5 +78,6 @@ int guild_agit_start(void);
 int guild_agit_end(void);
 int guild_agit_break(struct mob_data *md);
 
+void do_final_guild(void);
 
 #endif

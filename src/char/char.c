@@ -19,9 +19,12 @@
 #include "core.h"
 #include "socket.h"
 #include "timer.h"
+#include "db.h"
 #include "mmo.h"
 #include "version.h"
 #include "lock.h"
+#include "nullpo.h"
+#include "malloc.h"
 #include "char.h"
 
 #include "inter.h"
@@ -52,6 +55,9 @@ int char_new;
 char char_txt[1024];
 char unknown_char_name[1024]="Unknown";
 char char_log_filename[1024]="log/char.log";
+char GM_account_filename[1024] = "conf/GM_account.txt";
+char default_map_name[16]="prontera.gat";
+int default_map_type=0;
 
 #define CHAR_STATE_WAITAUTH 0
 #define CHAR_STATE_AUTHOK 1
@@ -77,253 +83,302 @@ int start_zeny = 500;
 // 初期位置（confファイルから再設定可能）
 struct point start_point={"new_1-1.gat",53,111};
 
+static struct dbt *gm_account_db;
+int isGM(int account_id)
+{
+	struct gm_account *p;
+	p = numdb_search(gm_account_db,account_id);
+	if( p == NULL)
+		return 0;
+	return p->level;
+}
+int read_gm_account()
+{
+	char line[8192];
+	struct gm_account *p;
+	FILE *fp;
+	int c=0;
+
+	gm_account_db = numdb_init();
+
+	if( (fp=fopen(GM_account_filename,"r"))==NULL )
+		return 1;
+	while(fgets(line,sizeof(line),fp)){
+		if(line[0] == '/' && line[1] == '/')
+			continue;
+		p=(struct gm_account *)aCalloc(1,sizeof(struct gm_account));
+		if(sscanf(line,"%d %d",&p->account_id,&p->level) != 2 || p->level <= 0) {
+			printf("gm_account: broken data [%s] line %d\n",GM_account_filename,c);
+		}
+		else {
+			if(p->level > 99)
+				p->level = 99;
+			numdb_insert(gm_account_db,p->account_id,p);
+		}
+		c++;
+	}
+	fclose(fp);
+//	printf("gm_account: %s read done (%d gm account ID)\n",gm_account_txt,c);
+	return 0;
+}
+
 int mmo_char_tostr(char *str,struct mmo_charstatus *p)
 {
-  int i;
-  char *str_p = str;
-  str_p += sprintf(str_p,"%d\t%d,%d\t%s\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
-	  "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
-	  "\t%s,%d,%d\t%s,%d,%d,%d\t",
-	  p->char_id,p->account_id,p->char_num,p->name, //
-	  p->class,p->base_level,p->job_level,
-	  p->base_exp,p->job_exp,p->zeny,
-	  p->hp,p->max_hp,p->sp,p->max_sp,
-	  p->str,p->agi,p->vit,p->int_,p->dex,p->luk,
-	  p->status_point,p->skill_point,
-	  p->option,p->karma,p->manner,	//
-	  p->party_id,p->guild_id,p->pet_id,
-	  p->hair,p->hair_color,p->clothes_color,
-	  p->weapon,p->shield,p->head_top,p->head_mid,p->head_bottom,
-	  p->last_point.map,p->last_point.x,p->last_point.y, //
-	  p->save_point.map,p->save_point.x,p->save_point.y,
-	  p->partner_id
-	  );
-  for(i=0;i<10;i++)
-    if(p->memo_point[i].map[0]){
-      str_p += sprintf(str_p,"%s,%d,%d",p->memo_point[i].map,p->memo_point[i].x,p->memo_point[i].y);
-    }
-  
-  *(str_p++)='\t';
-  for(i=0;i<MAX_INVENTORY;i++)
-    if(p->inventory[i].nameid){
-      str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
-	      p->inventory[i].id,p->inventory[i].nameid,p->inventory[i].amount,p->inventory[i].equip,
-	      p->inventory[i].identify,p->inventory[i].refine,p->inventory[i].attribute,
-	      p->inventory[i].card[0],p->inventory[i].card[1],p->inventory[i].card[2],p->inventory[i].card[3]);
-    }
-  *(str_p++)='\t';
-  for(i=0;i<MAX_CART;i++)
-    if(p->cart[i].nameid){
-      str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
-	      p->cart[i].id,p->cart[i].nameid,p->cart[i].amount,p->cart[i].equip,
-	      p->cart[i].identify,p->cart[i].refine,p->cart[i].attribute,
-	      p->cart[i].card[0],p->cart[i].card[1],p->cart[i].card[2],p->cart[i].card[3]);
-    }
-  *(str_p++)='\t';
-  for(i=0;i<MAX_SKILL;i++)
-    if(p->skill[i].id && p->skill[i].flag!=1){
-      str_p += sprintf(str_p,"%d,%d ",p->skill[i].id,(p->skill[i].flag==0)?p->skill[i].lv:p->skill[i].flag-2);
-    }
-  *(str_p++)='\t';
-  for(i=0;i<p->global_reg_num;i++)
-    str_p += sprintf(str_p,"%s,%d ",p->global_reg[i].str,p->global_reg[i].value);
-  *(str_p++)='\t';
-
-  *str_p='\0';
-  return 0;
+	int i;
+	char *str_p = str;
+	
+	nullpo_retr(-1,p);
+	
+	str_p += sprintf(str_p,"%d\t%d,%d\t%s\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
+		"\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
+		"\t%s,%d,%d\t%s,%d,%d,%d\t",
+		p->char_id,p->account_id,p->char_num,p->name, //
+		p->class,p->base_level,p->job_level,
+		p->base_exp,p->job_exp,p->zeny,
+		p->hp,p->max_hp,p->sp,p->max_sp,
+		p->str,p->agi,p->vit,p->int_,p->dex,p->luk,
+		p->status_point,p->skill_point,
+		p->option,p->karma,p->manner,	//
+		p->party_id,p->guild_id,p->pet_id,
+		p->hair,p->hair_color,p->clothes_color,
+		p->weapon,p->shield,p->head_top,p->head_mid,p->head_bottom,
+		p->last_point.map,p->last_point.x,p->last_point.y, //
+		p->save_point.map,p->save_point.x,p->save_point.y,
+		p->partner_id
+	);
+	for(i=0;i<10;i++)
+		if(p->memo_point[i].map[0])
+			str_p += sprintf(str_p,"%s,%d,%d",p->memo_point[i].map,p->memo_point[i].x,p->memo_point[i].y);
+	
+	*(str_p++)='\t';
+	
+	for(i=0;i<MAX_INVENTORY;i++)
+		if(p->inventory[i].nameid){
+			str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+			p->inventory[i].id,p->inventory[i].nameid,p->inventory[i].amount,p->inventory[i].equip,
+			p->inventory[i].identify,p->inventory[i].refine,p->inventory[i].attribute,
+			p->inventory[i].card[0],p->inventory[i].card[1],p->inventory[i].card[2],p->inventory[i].card[3]);
+		}
+	*(str_p++)='\t';
+	
+	for(i=0;i<MAX_CART;i++)
+		if(p->cart[i].nameid){
+			str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+			p->cart[i].id,p->cart[i].nameid,p->cart[i].amount,p->cart[i].equip,
+			p->cart[i].identify,p->cart[i].refine,p->cart[i].attribute,
+			p->cart[i].card[0],p->cart[i].card[1],p->cart[i].card[2],p->cart[i].card[3]);
+		}
+	*(str_p++)='\t';
+	
+	for(i=0;i<MAX_SKILL;i++)
+		if(p->skill[i].id && p->skill[i].flag!=1)
+			str_p += sprintf(str_p,"%d,%d ",p->skill[i].id,(p->skill[i].flag==0)?p->skill[i].lv:p->skill[i].flag-2);
+	*(str_p++)='\t';
+	
+	for(i=0;i<p->global_reg_num;i++)
+		str_p += sprintf(str_p,"%s,%d ",p->global_reg[i].str,p->global_reg[i].value);
+	*(str_p++)='\t';
+	*str_p='\0';
+	return 0;
 }
 
 int mmo_char_fromstr(char *str,struct mmo_charstatus *p)
 {
-  int tmp_int[256];
-  int set,next,len,i;
-
+	int tmp_int[256];
+	int set,next,len,i;
+	
+	nullpo_retr(0,p);
+	
 	// 1008以降の形式読み込み
-  if( (set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
-		   "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
-		   "\t%[^,],%d,%d\t%[^,],%d,%d,%d%n",
-		   &tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
-		   &tmp_int[3],&tmp_int[4],&tmp_int[5],
-		   &tmp_int[6],&tmp_int[7],&tmp_int[8],
-		   &tmp_int[9],&tmp_int[10],&tmp_int[11],&tmp_int[12],
-		   &tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],&tmp_int[17],&tmp_int[18],
-		   &tmp_int[19],&tmp_int[20],
-		   &tmp_int[21],&tmp_int[22],&tmp_int[23], //
-		   &tmp_int[24],&tmp_int[25],&tmp_int[26],
-		   &tmp_int[27],&tmp_int[28],&tmp_int[29],
-		   &tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
-		   p->last_point.map,&tmp_int[35],&tmp_int[36], //
-		   p->save_point.map,&tmp_int[37],&tmp_int[38],&tmp_int[39],&next
-		 )
+	if( (set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
+		"\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
+		"\t%[^,],%d,%d\t%[^,],%d,%d,%d%n",
+		&tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
+		&tmp_int[3],&tmp_int[4],&tmp_int[5],
+		&tmp_int[6],&tmp_int[7],&tmp_int[8],
+		&tmp_int[9],&tmp_int[10],&tmp_int[11],&tmp_int[12],
+		&tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],&tmp_int[17],&tmp_int[18],
+		&tmp_int[19],&tmp_int[20],
+		&tmp_int[21],&tmp_int[22],&tmp_int[23], //
+		&tmp_int[24],&tmp_int[25],&tmp_int[26],
+		&tmp_int[27],&tmp_int[28],&tmp_int[29],
+		&tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
+		p->last_point.map,&tmp_int[35],&tmp_int[36], //
+		p->save_point.map,&tmp_int[37],&tmp_int[38],&tmp_int[39],&next
+		)
 	)!=43 ){
-	// 384以降1008以前の形式読み込み
-		   tmp_int[39]=0;
-	   if( (set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
-			   "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
-			   "\t%[^,],%d,%d\t%[^,],%d,%d%n",
-			   &tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
-			   &tmp_int[3],&tmp_int[4],&tmp_int[5],
-			   &tmp_int[6],&tmp_int[7],&tmp_int[8],
-			   &tmp_int[9],&tmp_int[10],&tmp_int[11],&tmp_int[12],
-			   &tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],&tmp_int[17],&tmp_int[18],
-			   &tmp_int[19],&tmp_int[20],
-			   &tmp_int[21],&tmp_int[22],&tmp_int[23], //
-			   &tmp_int[24],&tmp_int[25],&tmp_int[26],
-			   &tmp_int[27],&tmp_int[28],&tmp_int[29],
-			   &tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
-			   p->last_point.map,&tmp_int[35],&tmp_int[36], //
-			   p->save_point.map,&tmp_int[37],&tmp_int[38],&next
-			 )
+		// 384以降1008以前の形式読み込み
+		tmp_int[39]=0;
+		if( (set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
+			"\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
+			"\t%[^,],%d,%d\t%[^,],%d,%d%n",
+			&tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
+			&tmp_int[3],&tmp_int[4],&tmp_int[5],
+			&tmp_int[6],&tmp_int[7],&tmp_int[8],
+			&tmp_int[9],&tmp_int[10],&tmp_int[11],&tmp_int[12],
+			&tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],&tmp_int[17],&tmp_int[18],
+			&tmp_int[19],&tmp_int[20],
+			&tmp_int[21],&tmp_int[22],&tmp_int[23], //
+			&tmp_int[24],&tmp_int[25],&tmp_int[26],
+			&tmp_int[27],&tmp_int[28],&tmp_int[29],
+			&tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
+			p->last_point.map,&tmp_int[35],&tmp_int[36], //
+			p->save_point.map,&tmp_int[37],&tmp_int[38],&next
+			)
 		)!=42 ){
-	// 384以前の形式の読み込み
-		   tmp_int[26]=0;
-		   set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
-			   "\t%d,%d,%d\t%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
-			   "\t%[^,],%d,%d\t%[^,],%d,%d%n",
-			   &tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
-			   &tmp_int[3],&tmp_int[4],&tmp_int[5],
-			   &tmp_int[6],&tmp_int[7],&tmp_int[8],
-			   &tmp_int[9],&tmp_int[10],&tmp_int[11],&tmp_int[12],
-			   &tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],&tmp_int[17],&tmp_int[18],
-			   &tmp_int[19],&tmp_int[20],
-			   &tmp_int[21],&tmp_int[22],&tmp_int[23], //
-			   &tmp_int[24],&tmp_int[25],//
-			   &tmp_int[27],&tmp_int[28],&tmp_int[29],
-			   &tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
-			   p->last_point.map,&tmp_int[35],&tmp_int[36], //
-			   p->save_point.map,&tmp_int[37],&tmp_int[38],&next);
-			   set+=2;
-		   	   printf("char: old char data ver.1\n");
-  	  }else{// 383~1008Verでの読み込みに成功しているならsetを正常値へ
-		   set++;
-		   printf("char: old char data ver.2\n");
-	  }
-  }
-  p->char_id=tmp_int[0];
-  p->account_id=tmp_int[1];
-  p->char_num=tmp_int[2];
-  p->class=tmp_int[3];
-  p->base_level=tmp_int[4];
-  p->job_level=tmp_int[5];
-  p->base_exp=tmp_int[6];
-  p->job_exp=tmp_int[7];
-  p->zeny=tmp_int[8];
-  p->hp=tmp_int[9];
-  p->max_hp=tmp_int[10];
-  p->sp=tmp_int[11];
-  p->max_sp=tmp_int[12];
-  p->str=tmp_int[13];
-  p->agi=tmp_int[14];
-  p->vit=tmp_int[15];
-  p->int_=tmp_int[16];
-  p->dex=tmp_int[17];
-  p->luk=tmp_int[18];
-  p->status_point=tmp_int[19];
-  p->skill_point=tmp_int[20];
-  p->option=tmp_int[21];
-  p->karma=tmp_int[22];
-  p->manner=tmp_int[23];
-  p->party_id=tmp_int[24];
-  p->guild_id=tmp_int[25];
+			// 384以前の形式の読み込み
+			tmp_int[26]=0;
+			set=sscanf(str,"%d\t%d,%d\t%[^\t]\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
+				"\t%d,%d,%d\t%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
+				"\t%[^,],%d,%d\t%[^,],%d,%d%n",
+				&tmp_int[0],&tmp_int[1],&tmp_int[2],p->name, //
+				&tmp_int[3],&tmp_int[4],&tmp_int[5],
+				&tmp_int[6],&tmp_int[7],&tmp_int[8],
+				&tmp_int[9],&tmp_int[10],&tmp_int[11],&tmp_int[12],
+				&tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],&tmp_int[17],&tmp_int[18],
+				&tmp_int[19],&tmp_int[20],
+				&tmp_int[21],&tmp_int[22],&tmp_int[23], //
+				&tmp_int[24],&tmp_int[25],//
+				&tmp_int[27],&tmp_int[28],&tmp_int[29],
+				&tmp_int[30],&tmp_int[31],&tmp_int[32],&tmp_int[33],&tmp_int[34],
+				p->last_point.map,&tmp_int[35],&tmp_int[36], //
+				p->save_point.map,&tmp_int[37],&tmp_int[38],&next
+				);
+			set+=2;
+			printf("char: old char data ver.1\n");
+		}else{// 383~1008Verでの読み込みに成功しているならsetを正常値へ
+			set++;
+			printf("char: old char data ver.2\n");
+		}
+	}
+	p->char_id=tmp_int[0];
+	p->account_id=tmp_int[1];
+	p->char_num=tmp_int[2];
+	p->class=tmp_int[3];
+	p->base_level=tmp_int[4];
+	p->job_level=tmp_int[5];
+	p->base_exp=tmp_int[6];
+	p->job_exp=tmp_int[7];
+	p->zeny=tmp_int[8];
+	p->hp=tmp_int[9];
+	p->max_hp=tmp_int[10];
+	p->sp=tmp_int[11];
+	p->max_sp=tmp_int[12];
+	p->str=tmp_int[13];
+	p->agi=tmp_int[14];
+	p->vit=tmp_int[15];
+	p->int_=tmp_int[16];
+	p->dex=tmp_int[17];
+	p->luk=tmp_int[18];
+	p->status_point=tmp_int[19];
+	p->skill_point=tmp_int[20];
+	p->option=tmp_int[21];
+	p->karma=tmp_int[22];
+	p->manner=tmp_int[23];
+	p->party_id=tmp_int[24];
+	p->guild_id=tmp_int[25];
 	p->pet_id=tmp_int[26];
-  p->hair=tmp_int[27];
-  p->hair_color=tmp_int[28];
-  p->clothes_color=tmp_int[29];
-  p->weapon=tmp_int[30];
-  p->shield=tmp_int[31];
-  p->head_top=tmp_int[32];
-  p->head_mid=tmp_int[33];
-  p->head_bottom=tmp_int[34];
-  p->last_point.x=tmp_int[35];
-  p->last_point.y=tmp_int[36];
-  p->save_point.x=tmp_int[37];
-  p->save_point.y=tmp_int[38];
-  p->partner_id=tmp_int[39];
-  if(set!=43)
-    return 0;
-  if(str[next]=='\n' || str[next]=='\r')
-    return 1;	// 新規データ
-  next++;
-  for(i=0;str[next] && str[next]!='\t';i++){
-    set=sscanf(str+next,"%[^,],%d,%d%n",p->memo_point[i].map,&tmp_int[0],&tmp_int[1],&len);
-    if(set!=3) 
-      return 0;
-    p->memo_point[i].x=tmp_int[0];
-    p->memo_point[i].y=tmp_int[1];
-    next+=len;
-    if(str[next]==' ')
-      next++;
-  }
-  next++;
-  for(i=0;str[next] && str[next]!='\t';i++){
-    set=sscanf(str+next,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d%n",
-	       &tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
-	       &tmp_int[4],&tmp_int[5],&tmp_int[6],
-	       &tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],&len);
-    if(set!=11)
-      return 0;
-    p->inventory[i].id=tmp_int[0];
-    p->inventory[i].nameid=tmp_int[1];
-    p->inventory[i].amount=tmp_int[2];
-    p->inventory[i].equip=tmp_int[3];
-    p->inventory[i].identify=tmp_int[4];
-    p->inventory[i].refine=tmp_int[5];
-    p->inventory[i].attribute=tmp_int[6];
-    p->inventory[i].card[0]=tmp_int[7];
-    p->inventory[i].card[1]=tmp_int[8];
-    p->inventory[i].card[2]=tmp_int[9];
-    p->inventory[i].card[3]=tmp_int[10];
-    next+=len;
-    if(str[next]==' ')
-      next++;
-  }
-  next++;
-  for(i=0;str[next] && str[next]!='\t';i++){
-    set=sscanf(str+next,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d%n",
-	       &tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
-	       &tmp_int[4],&tmp_int[5],&tmp_int[6],
-	       &tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],&len);
-    if(set!=11)
-      return 0;
-    p->cart[i].id=tmp_int[0];
-    p->cart[i].nameid=tmp_int[1];
-    p->cart[i].amount=tmp_int[2];
-    p->cart[i].equip=tmp_int[3];
-    p->cart[i].identify=tmp_int[4];
-    p->cart[i].refine=tmp_int[5];
-    p->cart[i].attribute=tmp_int[6];
-    p->cart[i].card[0]=tmp_int[7];
-    p->cart[i].card[1]=tmp_int[8];
-    p->cart[i].card[2]=tmp_int[9];
-    p->cart[i].card[3]=tmp_int[10];
-    next+=len;
-    if(str[next]==' ')
-      next++;
-  }
-  next++;
-  for(i=0;str[next] && str[next]!='\t';i++){
-    set=sscanf(str+next,"%d,%d%n",
-	       &tmp_int[0],&tmp_int[1],&len);
-    if(set!=2)
-      return 0;
-    p->skill[tmp_int[0]].id=tmp_int[0];
-    p->skill[tmp_int[0]].lv=tmp_int[1];
-    next+=len;
-    if(str[next]==' ')
-      next++;
-  }
-  next++;
-  for(i=0;str[next] && str[next]!='\t' && str[next]!='\n' && str[next]!='\r';i++){ //global_reg実装以前のathena.txt互換のため一応'\n'チェック
-    set=sscanf(str+next,"%[^,],%d%n",
-	       p->global_reg[i].str,&p->global_reg[i].value,&len);
-    if(set!=2)
-      return 0;
-    next+=len;
-    if(str[next]==' ')
-      next++;
-  }
-  p->global_reg_num=i;
-  return 1;
+	p->hair=tmp_int[27];
+	p->hair_color=tmp_int[28];
+	p->clothes_color=tmp_int[29];
+	p->weapon=tmp_int[30];
+	p->shield=tmp_int[31];
+	p->head_top=tmp_int[32];
+	p->head_mid=tmp_int[33];
+	p->head_bottom=tmp_int[34];
+	p->last_point.x=tmp_int[35];
+	p->last_point.y=tmp_int[36];
+	p->save_point.x=tmp_int[37];
+	p->save_point.y=tmp_int[38];
+	p->partner_id=tmp_int[39];
+	if(set!=43)
+		return 0;
+	if(str[next]=='\n' || str[next]=='\r')
+		return 1;	// 新規データ
+	next++;
+	for(i=0;str[next] && str[next]!='\t';i++){
+		set=sscanf(str+next,"%[^,],%d,%d%n",p->memo_point[i].map,&tmp_int[0],&tmp_int[1],&len);
+		if(set!=3)
+	    	return 0;
+		p->memo_point[i].x=tmp_int[0];
+		p->memo_point[i].y=tmp_int[1];
+		next+=len;
+		if(str[next]==' ')
+			next++;
+	}
+	next++;
+	for(i=0;str[next] && str[next]!='\t';i++){
+		set=sscanf(str+next,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d%n",
+		&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+		&tmp_int[4],&tmp_int[5],&tmp_int[6],
+		&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],&len);
+		if(set!=11)
+			return 0;
+		p->inventory[i].id=tmp_int[0];
+		p->inventory[i].nameid=tmp_int[1];
+		p->inventory[i].amount=tmp_int[2];
+		p->inventory[i].equip=tmp_int[3];
+		p->inventory[i].identify=tmp_int[4];
+		p->inventory[i].refine=tmp_int[5];
+		p->inventory[i].attribute=tmp_int[6];
+		p->inventory[i].card[0]=tmp_int[7];
+		p->inventory[i].card[1]=tmp_int[8];
+		p->inventory[i].card[2]=tmp_int[9];
+		p->inventory[i].card[3]=tmp_int[10];
+		next+=len;
+		if(str[next]==' ')
+			next++;
+	}
+	next++;
+	for(i=0;str[next] && str[next]!='\t';i++){
+		set=sscanf(str+next,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d%n",
+		&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+		&tmp_int[4],&tmp_int[5],&tmp_int[6],
+		&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],&len);
+		if(set!=11)
+			return 0;
+		p->cart[i].id=tmp_int[0];
+		p->cart[i].nameid=tmp_int[1];
+		p->cart[i].amount=tmp_int[2];
+		p->cart[i].equip=tmp_int[3];
+		p->cart[i].identify=tmp_int[4];
+		p->cart[i].refine=tmp_int[5];
+		p->cart[i].attribute=tmp_int[6];
+		p->cart[i].card[0]=tmp_int[7];
+		p->cart[i].card[1]=tmp_int[8];
+		p->cart[i].card[2]=tmp_int[9];
+		p->cart[i].card[3]=tmp_int[10];
+		next+=len;
+		if(str[next]==' ')
+			next++;
+	}
+	next++;
+	for(i=0;str[next] && str[next]!='\t';i++){
+		set=sscanf(str+next,"%d,%d%n",
+		&tmp_int[0],&tmp_int[1],&len);
+		if(set!=2)
+			return 0;
+		p->skill[tmp_int[0]].id=tmp_int[0];
+		p->skill[tmp_int[0]].lv=tmp_int[1];
+		next+=len;
+		if(str[next]==' ')
+			next++;
+	}
+	next++;
+	for(i=0;str[next] && str[next]!='\t' && str[next]!='\n' && str[next]!='\r';i++){ //global_reg実装以前のathena.txt互換のため一応'\n'チェック
+		set=sscanf(str+next,"%[^,],%d%n",
+		p->global_reg[i].str,&p->global_reg[i].value,&len);
+		if(set!=2)
+			return 0;
+		next+=len;
+		if(str[next]==' ')
+			next++;
+	}
+	p->global_reg_num=i;
+	p->mapip=0;
+	p->mapport=0;
+	
+	return 1;
 }
 
 int mmo_char_init(void)
@@ -333,11 +388,7 @@ int mmo_char_init(void)
 	FILE *fp;
 	
 	fp=fopen(char_txt,"r");
-	char_dat=calloc(sizeof(char_dat[0])*256, 1);
-	if (!char_dat) {
-		printf("out of memory: mmo_char_init\n");
-		exit(1);
-	}
+	char_dat=(struct mmo_charstatus *)aCalloc(256,sizeof(char_dat[0]));
 	char_max=256;
 	if(fp==NULL)
 		return 0;
@@ -351,13 +402,8 @@ int mmo_char_init(void)
 	
 		if(char_num>=char_max){
 			char_max+=256;
-			char_dat=realloc(char_dat,sizeof(char_dat[0])*char_max);
-			if (!char_dat) {
-				printf("out of memory: mmo_char_init\n");
-				exit(1);
-			}
-			memset(char_dat + (char_max - 256), '\0',
-				256 * sizeof(*char_dat));
+			char_dat=(struct mmo_charstatus *)aRealloc(char_dat,sizeof(char_dat[0])*char_max);
+			memset(char_dat + (char_max - 256), '\0', 256 * sizeof(*char_dat));
     	}
 		memset(&char_dat[char_num],0,sizeof(char_dat[0]));
 		ret=mmo_char_fromstr(line,&char_dat[char_num]);
@@ -373,19 +419,19 @@ int mmo_char_init(void)
 
 void mmo_char_sync(void)
 {
-  char line[65536];
-  int i,lock;
-  FILE *fp;
-
-  fp=lock_fopen(char_txt,&lock);
-  if(fp==NULL)
-    return;
-  for(i=0;i<char_num;i++){
-    mmo_char_tostr(line,&char_dat[i]);
-    fprintf(fp,"%s" RETCODE,line);
-  }
-  fprintf(fp,"%d\t%%newid%%" RETCODE,char_id_count);
-  lock_fclose(fp,char_txt,&lock);
+	char line[65536];
+	int i,lock;
+	FILE *fp;
+	
+	fp=lock_fopen(char_txt,&lock);
+	if(fp==NULL)
+		return;
+	for(i=0;i<char_num;i++){
+		mmo_char_tostr(line,&char_dat[i]);
+		fprintf(fp,"%s" RETCODE,line);
+	}
+	fprintf(fp,"%d\t%%newid%%" RETCODE,char_id_count);
+	lock_fclose(fp,char_txt,&lock);
 }
 int mmo_char_sync_timer(int tid,unsigned int tick,int id,int data)
 {
@@ -432,11 +478,7 @@ int make_new_char(int fd,unsigned char *dat)
 		return -1;
 	if(char_num>=char_max){
 		char_max+=256;
-		char_dat=realloc(char_dat,sizeof(char_dat[0])*char_max);
-		if (!char_dat) {
-			printf("out of memory: make_new_char\n");
-			exit(1);
-		}
+		char_dat=(struct mmo_charstatus *)aRealloc(char_dat,sizeof(char_dat[0])*char_max);
 		memset(char_dat + (char_max - 256), '\0', 256 * sizeof(*char_dat));
 	}
 	memset(&char_dat[i],0,sizeof(char_dat[0]));
@@ -444,7 +486,7 @@ int make_new_char(int fd,unsigned char *dat)
 	char_dat[i].char_id=char_id_count++;
 	char_dat[i].account_id=sd->account_id;
 	char_dat[i].char_num=dat[30];
-	strcpy(char_dat[i].name,dat);
+	strncpy(char_dat[i].name,dat,24);
 	char_dat[i].class=0;
 	char_dat[i].base_level=1;
 	char_dat[i].job_level=1;
@@ -502,11 +544,9 @@ int count_users(void)
 {
 	if(login_fd>0 && session[login_fd]){
 		int i,users;
-		for(i=0,users=0;i<MAX_MAP_SERVERS;i++){
-			if(server_fd[i]>0){
+		for(i=0,users=0;i<MAX_MAP_SERVERS;i++)
+			if(server_fd[i]>0)
 				users+=server[i].users;
-			}
-		}
 		return users;
 	}
   return 0;
@@ -514,79 +554,78 @@ int count_users(void)
 
 int mmo_char_send006b(int fd,struct char_session_data *sd)
 {
-  int i,j,found_num;
+	int i,j,found_num;
 #ifdef NEW_006b
-  int offset=24;
+	int offset=24;
 #else
-  int offset=4;
+	int offset=4;
 #endif
 
-  sd->state=CHAR_STATE_AUTHOK;
-  for(i=found_num=0;i<char_num;i++){
-    if(char_dat[i].account_id==sd->account_id){
-      sd->found_char[found_num]=i;
-      found_num++;
-      if(found_num==9)
+	sd->state=CHAR_STATE_AUTHOK;
+	for(i=found_num=0;i<char_num;i++){
+		if(char_dat[i].account_id==sd->account_id){
+			sd->found_char[found_num]=i;
+			found_num++;
+			if(found_num==9)
 				break;
-    }
-  }
-  for(i=found_num;i<9;i++)
-    sd->found_char[i]=-1;
+		}
+	}
+	for(i=found_num;i<9;i++)
+		sd->found_char[i]=-1;
 
 	memset(WFIFOP(fd,0),0,offset+found_num*106);
-  WFIFOW(fd,0)=0x6b;
-  WFIFOW(fd,2)=offset+found_num*106;
+	WFIFOW(fd,0)=0x6b;
+	WFIFOW(fd,2)=offset+found_num*106;
 
-  for( i = 0; i < found_num; i++ ) {
+	for( i = 0; i < found_num; i++ ) {
+		j=sd->found_char[i];
+		
+		memset(WFIFOP(fd,offset+(i*106)),0x00,106);
+		
+		WFIFOL(fd,offset+(i*106)) = char_dat[j].char_id;
+		WFIFOL(fd,offset+(i*106)+4) = char_dat[j].base_exp;
+		WFIFOL(fd,offset+(i*106)+8) = char_dat[j].zeny;
+		WFIFOL(fd,offset+(i*106)+12) = char_dat[j].job_exp;
+		WFIFOL(fd,offset+(i*106)+16) = char_dat[j].job_level;
+		
+		WFIFOL(fd,offset+(i*106)+20) = 0;
+		WFIFOL(fd,offset+(i*106)+24) = 0;
+		WFIFOL(fd,offset+(i*106)+28) = char_dat[j].option;
+		
+		WFIFOL(fd,offset+(i*106)+32) = char_dat[j].karma;
+		WFIFOL(fd,offset+(i*106)+36) = char_dat[j].manner;
+		
+		WFIFOW(fd,offset+(i*106)+40) = char_dat[j].status_point;
+		WFIFOW(fd,offset+(i*106)+42) = (char_dat[j].hp > 0x7fff)? 0x7fff:char_dat[j].hp;
+		WFIFOW(fd,offset+(i*106)+44) = (char_dat[j].max_hp > 0x7fff)? 0x7fff:char_dat[j].max_hp;
+		WFIFOW(fd,offset+(i*106)+46) = (char_dat[j].sp > 0x7fff)? 0x7fff:char_dat[j].sp;
+		WFIFOW(fd,offset+(i*106)+48) = (char_dat[j].max_sp > 0x7fff)? 0x7fff:char_dat[j].max_sp;
+		WFIFOW(fd,offset+(i*106)+50) = DEFAULT_WALK_SPEED; // char_dat[j].speed;
+		WFIFOW(fd,offset+(i*106)+52) = char_dat[j].class;
+		WFIFOW(fd,offset+(i*106)+54) = char_dat[j].hair;
+		WFIFOW(fd,offset+(i*106)+56) = char_dat[j].weapon;
+		WFIFOW(fd,offset+(i*106)+58) = char_dat[j].base_level;
+		WFIFOW(fd,offset+(i*106)+60) = char_dat[j].skill_point;
+		WFIFOW(fd,offset+(i*106)+62) = char_dat[j].head_bottom;
+		WFIFOW(fd,offset+(i*106)+64) = char_dat[j].shield;
+		WFIFOW(fd,offset+(i*106)+66) = char_dat[j].head_top;
+		WFIFOW(fd,offset+(i*106)+68) = char_dat[j].head_mid;
+		WFIFOW(fd,offset+(i*106)+70) = char_dat[j].hair_color;
+		WFIFOW(fd,offset+(i*106)+72) = char_dat[j].clothes_color;
+		
+		memcpy( WFIFOP(fd,offset+(i*106)+74), char_dat[j].name, 24 );
+		
+		WFIFOB(fd,offset+(i*106)+98) = (char_dat[j].str > 255)? 255:char_dat[j].str;
+		WFIFOB(fd,offset+(i*106)+99) = (char_dat[j].agi > 255)? 255:char_dat[j].agi;
+		WFIFOB(fd,offset+(i*106)+100) = (char_dat[j].vit > 255)? 255:char_dat[j].vit;
+		WFIFOB(fd,offset+(i*106)+101) = (char_dat[j].int_ > 255)? 255:char_dat[j].int_;
+		WFIFOB(fd,offset+(i*106)+102) = (char_dat[j].dex > 255)? 255:char_dat[j].dex;
+		WFIFOB(fd,offset+(i*106)+103) = (char_dat[j].luk > 255)? 255:char_dat[j].luk;
+		WFIFOB(fd,offset+(i*106)+104) = char_dat[j].char_num;
+	}
 
-    j=sd->found_char[i];
-
-    memset(WFIFOP(fd,offset+(i*106)),0x00,106);
-
-    WFIFOL(fd,offset+(i*106)) = char_dat[j].char_id;
-    WFIFOL(fd,offset+(i*106)+4) = char_dat[j].base_exp;
-    WFIFOL(fd,offset+(i*106)+8) = char_dat[j].zeny;
-    WFIFOL(fd,offset+(i*106)+12) = char_dat[j].job_exp;
-    WFIFOL(fd,offset+(i*106)+16) = char_dat[j].job_level;
-
-    WFIFOL(fd,offset+(i*106)+20) = 0;
-    WFIFOL(fd,offset+(i*106)+24) = 0;
-    WFIFOL(fd,offset+(i*106)+28) = char_dat[j].option;
-
-    WFIFOL(fd,offset+(i*106)+32) = char_dat[j].karma;
-    WFIFOL(fd,offset+(i*106)+36) = char_dat[j].manner;
-
-    WFIFOW(fd,offset+(i*106)+40) = char_dat[j].status_point;
-    WFIFOW(fd,offset+(i*106)+42) = (char_dat[j].hp > 0x7fff)? 0x7fff:char_dat[j].hp;
-    WFIFOW(fd,offset+(i*106)+44) = (char_dat[j].max_hp > 0x7fff)? 0x7fff:char_dat[j].max_hp;
-    WFIFOW(fd,offset+(i*106)+46) = (char_dat[j].sp > 0x7fff)? 0x7fff:char_dat[j].sp;
-    WFIFOW(fd,offset+(i*106)+48) = (char_dat[j].max_sp > 0x7fff)? 0x7fff:char_dat[j].max_sp;
-    WFIFOW(fd,offset+(i*106)+50) = DEFAULT_WALK_SPEED; // char_dat[j].speed;
-    WFIFOW(fd,offset+(i*106)+52) = char_dat[j].class;
-    WFIFOW(fd,offset+(i*106)+54) = char_dat[j].hair;
-    WFIFOW(fd,offset+(i*106)+56) = char_dat[j].weapon;
-    WFIFOW(fd,offset+(i*106)+58) = char_dat[j].base_level;
-    WFIFOW(fd,offset+(i*106)+60) = char_dat[j].skill_point;
-    WFIFOW(fd,offset+(i*106)+62) = char_dat[j].head_bottom;
-    WFIFOW(fd,offset+(i*106)+64) = char_dat[j].shield;
-    WFIFOW(fd,offset+(i*106)+66) = char_dat[j].head_top;
-    WFIFOW(fd,offset+(i*106)+68) = char_dat[j].head_mid;
-    WFIFOW(fd,offset+(i*106)+70) = char_dat[j].hair_color;
-    WFIFOW(fd,offset+(i*106)+72) = char_dat[j].clothes_color;
-
-    memcpy( WFIFOP(fd,offset+(i*106)+74), char_dat[j].name, 24 );
-
-    WFIFOB(fd,offset+(i*106)+98) = (char_dat[j].str > 255)? 255:char_dat[j].str;
-    WFIFOB(fd,offset+(i*106)+99) = (char_dat[j].agi > 255)? 255:char_dat[j].agi;
-    WFIFOB(fd,offset+(i*106)+100) = (char_dat[j].vit > 255)? 255:char_dat[j].vit;
-    WFIFOB(fd,offset+(i*106)+101) = (char_dat[j].int_ > 255)? 255:char_dat[j].int_;
-    WFIFOB(fd,offset+(i*106)+102) = (char_dat[j].dex > 255)? 255:char_dat[j].dex;
-    WFIFOB(fd,offset+(i*106)+103) = (char_dat[j].luk > 255)? 255:char_dat[j].luk;
-    WFIFOB(fd,offset+(i*106)+104) = char_dat[j].char_num;
-  }
-
-  WFIFOSET(fd,WFIFOW(fd,2));
-  return 0;
+	WFIFOSET(fd,WFIFOW(fd,2));
+	return 0;
 }
 
 int set_account_reg2(int acc,int num,struct global_reg *reg)
@@ -629,6 +668,16 @@ int char_divorce(struct mmo_charstatus *cs){
 static int char_delete(struct mmo_charstatus *cs,const char *mail)
 {
 	int j;
+	char buf[64];
+	
+	nullpo_retr(-1,cs);
+	
+	printf("char_delete: %s\n",cs->name);
+	// キャラが接続しているかもしれないのでmapに切断要求
+	WBUFW(buf,0)=0x2b19;
+	WBUFL(buf,2)=cs->account_id;
+	mapif_sendall(buf,6);
+	
 	// ペット削除
 	if(cs->pet_id)
 		inter_pet_delete(cs->pet_id);
@@ -647,7 +696,6 @@ static int char_delete(struct mmo_charstatus *cs,const char *mail)
 	// 離婚
 	if(cs->partner_id){
 		// 離婚情報をmapに通知
-		char buf[64];
 		WBUFW(buf,0)=0x2b12;
 		WBUFL(buf,2)=cs->char_id;
 		WBUFL(buf,6)=cs->partner_id;
@@ -655,6 +703,7 @@ static int char_delete(struct mmo_charstatus *cs,const char *mail)
 		// 離婚
 		char_divorce(cs);
 	}
+
 	return 0;
 }
 
@@ -729,8 +778,13 @@ int parse_tologin(int fd)
 			sd->account_id=RFIFOL(fd,7);
 			sd->login_id1=RFIFOL(fd,11);
 	
+			if(char_maintenance && isGM(sd->account_id)==0){
+				close(fd);
+				session[fd]->eof=1;
+				return 0;
+			}
 			if(max_connect_user > 0) {
-				if(count_users() < max_connect_user)
+				if(count_users() < max_connect_user  || isGM(sd->account_id)>0)
 					mmo_char_send006b(fdc,sd);
 				else {
 					WFIFOW(fdc,0)=0x6c;
@@ -830,11 +884,11 @@ int parse_tologin(int fd)
 			} break;
 	
 		// アカウント削除通知
-		case 0x2730:
+		case 0x272a:
 			{
 				// 該当キャラクターの削除
 				int i;
-				for(i=0;i<char_num;i++){
+				for(i=0;i<char_max;i++){
 					if(char_dat[i].account_id==RFIFOL(fd,2)){
 						char_delete(&char_dat[i],NULL);
 						if( i<char_num-1 )
@@ -847,7 +901,19 @@ int parse_tologin(int fd)
 				inter_storage_delete(RFIFOL(fd,2));
 				RFIFOSKIP(fd,6);
 			} break;
-	
+		//charメンテナンス状態変更応答
+		case 0x272c:
+			{
+				unsigned char buf[10];
+				if(RFIFOREST(fd)<3)
+					return 0;
+				WBUFW(buf,0)=0x2b15;
+				WBUFB(buf,2)=RFIFOB(fd,2);
+				mapif_sendall(buf,3);
+				
+				RFIFOSKIP(fd,3);
+			}
+			break;
 		default:
 			close(fd);
 			session[fd]->eof=1;
@@ -857,7 +923,31 @@ int parse_tologin(int fd)
 	RFIFOFLUSH(fd);
 	return 0;
 }
+int char_erasemap(int fd,int id)
+{
+	unsigned char buf[16384];
+	int i,j;
+	
+	WBUFW(buf,0)=0x2b16;
+	WBUFL(buf,4)=server[id].ip;
+	WBUFW(buf,8)=server[id].port;
+	for(i=0,j=0;i<MAX_MAP_PER_SERVER;i++){
+		if(server[id].map[i][0]>0){
+			memcpy(WBUFP(buf,12+(j++)*16),server[id].map[i],16);
+//			printf("char: map erase: %d %d %s\n",id,i,server[id].map[i]);
+		}
+	}
+	WBUFW(buf,10)=j;
+	WBUFW(buf,2)=j*16+12;
+	mapif_sendallwos(fd,buf,WBUFW(buf,2));
 
+	printf("char: map erase: %d (%d maps)\n",id,j);
+
+	for(j=0;j<MAX_MAP_PER_SERVER;j++)
+		server[id].map[j][0]=0;
+
+	return 0;
+}
 int parse_frommap(int fd)
 {
 	int i,j;
@@ -871,7 +961,21 @@ int parse_frommap(int fd)
 	if(session[fd]->eof){
 		for(i=0;i<MAX_MAP_SERVERS;i++)
 			if(server_fd[i]==fd)
-		server_fd[i]=-1;
+				server_fd[i]=-1;
+		char_erasemap(fd,id);
+		//map-serverが切れたときに残っていたキャラの切断を他map-serverに通知
+		for(i=0;i<char_num;i++){
+			unsigned char buf[10];
+			
+			if(char_dat[i].mapip == server[id].ip && char_dat[i].mapport == server[id].port){
+				//printf("char: mapdisconnect %s %d %d %d %d\n",char_dat[i].name,(int)char_dat[i].mapip,(int)server[id].ip,char_dat[i].mapport,server[id].port);
+				char_dat[i].mapip=0;
+				char_dat[i].mapport=0;
+				WBUFW(buf,0)=0x2b17;
+				WBUFL(buf,2)=char_dat[i].char_id;
+				mapif_sendallwos(fd,buf,6);
+			}
+		}
 		close(fd);
 		delete_session(fd);
 		return 0;
@@ -944,12 +1048,19 @@ int parse_frommap(int fd)
 				}
 			}
 			if(i==AUTH_FIFO_SIZE){
+				char_dat[auth_fifo[i].char_pos].mapip=0;
+				char_dat[auth_fifo[i].char_pos].mapport=0;
 				WFIFOW(fd,0)=0x2afe;
 				WFIFOW(fd,2)=RFIFOL(fd,2);
 				WFIFOB(fd,6)=0;
 				WFIFOSET(fd,7);
 				printf("auth_fifo search error!\n");
 			} else {
+				unsigned char buf[60];
+				
+				char_dat[auth_fifo[i].char_pos].mapip=server[id].ip;
+				char_dat[auth_fifo[i].char_pos].mapport=server[id].port;
+				
 				WFIFOW(fd,0)=0x2afd;
 				WFIFOW(fd,2)=12+sizeof(char_dat[0]);
 				WFIFOL(fd,4)=RFIFOL(fd,2);
@@ -958,6 +1069,15 @@ int parse_frommap(int fd)
 				char_dat[auth_fifo[i].char_pos].sex=auth_fifo[i].sex;
 				memcpy(WFIFOP(fd,12),&char_dat[auth_fifo[i].char_pos],sizeof(char_dat[0]));
 				WFIFOSET(fd,WFIFOW(fd,2));
+				
+				//このmap-server以外にログインしたことを通知する
+				WBUFW(buf,0)=0x2b09;
+				WBUFL(buf,2)=char_dat[auth_fifo[i].char_pos].char_id;
+				memcpy(WBUFP(buf,6),char_dat[auth_fifo[i].char_pos].name,24);
+				WBUFL(buf,30)=char_dat[auth_fifo[i].char_pos].account_id;
+				WBUFL(buf,34)=char_dat[auth_fifo[i].char_pos].mapip;
+				WBUFW(buf,38)=char_dat[auth_fifo[i].char_pos].mapport;
+				mapif_sendallwos(fd,buf,40);
 			}
 			RFIFOSKIP(fd,24);
 			break;
@@ -990,7 +1110,7 @@ int parse_frommap(int fd)
 			if(auth_fifo_pos>=AUTH_FIFO_SIZE){
 				auth_fifo_pos=0;
 			}
-			printf("auth_fifo set %d - %08x %08x %08x %08x\n",
+			printf("auth_fifo set 0x2b02 %d - %08x %08x %08x %08x\n",
 				auth_fifo_pos,RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10),RFIFOL(fd,14));
 			auth_fifo[auth_fifo_pos].account_id=RFIFOL(fd,2);
 			auth_fifo[auth_fifo_pos].char_id=0;
@@ -1021,7 +1141,7 @@ int parse_frommap(int fd)
 			memcpy(WFIFOP(fd,2),RFIFOP(fd,2),38);
 			WFIFOW(fd,0)=0x2b06;
 
-			printf("auth_fifo set %d - %08x %08x\n",auth_fifo_pos,RFIFOL(fd,2),RFIFOL(fd,6));
+			printf("auth_fifo set 0x2b05 %d - %08x %08x\n",auth_fifo_pos,RFIFOL(fd,2),RFIFOL(fd,6));
 			auth_fifo[auth_fifo_pos].account_id=RFIFOL(fd,2);
 			auth_fifo[auth_fifo_pos].char_id=RFIFOL(fd,10);
 			auth_fifo[auth_fifo_pos].login_id1=RFIFOL(fd,6);
@@ -1062,11 +1182,18 @@ int parse_frommap(int fd)
 			}
 			WFIFOW(fd,0)=0x2b09;
 			WFIFOL(fd,2)=RFIFOL(fd,2);
-			if(i!=char_num)
+			if(i!=char_num){
 				memcpy(WFIFOP(fd,6),char_dat[i].name,24);
-			else
+				WFIFOL(fd,30)=char_dat[i].account_id;
+				WFIFOL(fd,34)=char_dat[i].mapip;
+				WFIFOW(fd,38)=char_dat[i].mapport;
+			}else{
 				memcpy(WFIFOP(fd,6),unknown_char_name,24);
-			WFIFOSET(fd,30);
+				WFIFOL(fd,30)=0;
+				WFIFOL(fd,34)=0;
+				WFIFOW(fd,38)=0;
+			}
+			WFIFOSET(fd,36);
 			
 			RFIFOSKIP(fd,6);
 			break;
@@ -1126,6 +1253,51 @@ int parse_frommap(int fd)
 //			printf("char: save_account_reg (from map)\n");
 			break;
 		}
+		//mapサーバ 有効化
+		case 0x2b13:
+			if(RFIFOREST(fd)<3)
+				return 0;
+			server[id].active=RFIFOB(fd,2);
+			printf("char: map_server_active: %d %d\n",id,server[id].active);
+			RFIFOSKIP(fd,3);
+			break;
+		//charサーバ メンテナンス状態に
+		case 0x2b14:
+			if(RFIFOREST(fd)<3)
+				return 0;
+			char_maintenance=RFIFOB(fd,2);
+			printf("char: maintenance: %d\n",char_maintenance);
+			//loginに通知
+			WFIFOW(login_fd,0)=0x272b;
+			WFIFOB(login_fd,2)=char_maintenance;
+			WFIFOSET(login_fd,3);
+			
+			RFIFOSKIP(fd,3);
+			break;
+		//キャラクター切断を他mapに通知
+		case 0x2b18:
+			{
+				unsigned char buf[10];
+				
+				if(RFIFOREST(fd)<10)
+					return 0;
+				
+				for(i=0;i<char_num;i++){
+					if(char_dat[i].account_id==RFIFOL(fd,2) &&
+						char_dat[i].char_id==RFIFOL(fd,6))
+						break;
+				}
+				if(i!=char_num){
+					char_dat[i].mapip=0;
+					char_dat[i].mapport=0;
+					WBUFW(buf,0)=0x2b17;
+					WBUFL(buf,2)=RFIFOL(fd,6);
+					mapif_sendallwos(fd,buf,6);
+				}
+				
+				RFIFOSKIP(fd,10);
+			}
+			break;
 
 		default:
 			// inter server処理に渡す
@@ -1144,8 +1316,11 @@ int parse_frommap(int fd)
 	}
 	return 0;
 }
-
-int search_mapserver(char *map)
+/*==========================================
+ * mapが含まれているmap-serverを探す
+ *------------------------------------------
+ */
+int search_mapserver(char *map, struct mmo_charstatus *cd)
 {
 	int i,j,k;
 	printf("search_mapserver %s\n",map);
@@ -1159,6 +1334,17 @@ int search_mapserver(char *map)
 				return i;
 			}
 			//printf("%s : %s = %d\n",server[i].map[j],map,k);
+		}
+	}
+	if(cd){
+		for(i=0;i<MAX_MAP_SERVERS;i++){
+			if(server_fd[i]<0)
+				continue;
+			for(j=0;server[i].map[j][0];j++){
+				memcpy(cd->last_point.map,server[i].map[j],16);
+				printf("search_mapserver success? %s -> %d\n",map,i);
+				return i;
+			}
 		}
 	}
 	printf("search_mapserver failed\n");
@@ -1211,10 +1397,8 @@ int parse_char(int fd)
 		case 0x65:	// 接続要求
 			if(RFIFOREST(fd)<17)
 				return 0;
-			if(sd==NULL){
-				sd=session[fd]->session_data=calloc(sizeof(*sd), 1);
-				memset(sd,0,sizeof(*sd));
-			}
+			if(sd==NULL)
+				sd=session[fd]->session_data=(struct char_session_data *)aCalloc(1,sizeof(*sd));
 			sd->account_id=RFIFOL(fd,2);
 			sd->login_id1=RFIFOL(fd,6);
 			sd->login_id2=RFIFOL(fd,10);
@@ -1244,8 +1428,13 @@ int parse_char(int fd)
 				WFIFOL(login_fd,19)=sd->account_id;
 				WFIFOSET(login_fd,23);
 			} else {
+				if(char_maintenance && isGM(sd->account_id)==0){
+					close(fd);
+					session[fd]->eof=1;
+					return 0;
+				}
 				if(max_connect_user > 0) {
-					if(count_users() < max_connect_user)
+					if(count_users() < max_connect_user  || isGM(sd->account_id)>0)
 						mmo_char_send006b(fd,sd);
 					else {
 						WFIFOW(fd,0)=0x6c;
@@ -1274,15 +1463,27 @@ int parse_char(int fd)
 					fclose(logfp);
 				}
 
+				i=search_mapserver(char_dat[sd->found_char[ch]].last_point.map,NULL);
+				if(i<0){
+					if(default_map_type&1){
+						memcpy(char_dat[sd->found_char[ch]].last_point.map,default_map_name,16);
+						i=search_mapserver(char_dat[sd->found_char[ch]].last_point.map,NULL);
+					}
+					if(default_map_type&2){
+						if(i<0)
+							i=search_mapserver(char_dat[sd->found_char[ch]].last_point.map,&char_dat[sd->found_char[ch]]);
+					}
+				}
+				if(i<0 || server[i].active==0){
+					WFIFOW(fd,0)=0x6c;
+					WFIFOW(fd,2)=0;
+					WFIFOSET(fd,3);
+					RFIFOSKIP(fd,3);
+					break;
+				}
+				
 				WFIFOW(fd,0)=0x71;
 				WFIFOL(fd,2)=char_dat[sd->found_char[ch]].char_id;
-				i=search_mapserver(char_dat[sd->found_char[ch]].last_point.map);
-				if(i<0){
-					memcpy(char_dat[sd->found_char[ch]].last_point.map,"prontera.gat",16);
-					i=search_mapserver(char_dat[sd->found_char[ch]].last_point.map);
-					if(i<0)
-						i=0;
-				}
 				memcpy(WFIFOP(fd,6),char_dat[sd->found_char[ch]].last_point.map,16);
 				WFIFOL(fd,22)=server[i].ip;
 				WFIFOW(fd,26)=server[i].port;
@@ -1291,7 +1492,7 @@ int parse_char(int fd)
 				if(auth_fifo_pos>=AUTH_FIFO_SIZE){
 					auth_fifo_pos=0;
 				}
-				printf("auth_fifo set %d - %08x %08x %08x %08x\n",
+				printf("auth_fifo set 0x66 %d - %08x %08x %08x %08x\n",
 					auth_fifo_pos,sd->account_id,char_dat[sd->found_char[ch]].char_id,sd->login_id1,sd->login_id2);
 				auth_fifo[auth_fifo_pos].account_id=sd->account_id;
 				auth_fifo[auth_fifo_pos].char_id=char_dat[sd->found_char[ch]].char_id;
@@ -1411,6 +1612,18 @@ int parse_char(int fd)
 				server[i].users=0;
 				memset(server[i].map,0,sizeof(server[i].map));
 				WFIFOSET(fd,3);
+				for(i=0;i<char_num;i++){
+				//他マップにログインしているキャラクター情報を送信する
+					if(char_dat[i].mapip != 0 && char_dat[i].mapport !=0){
+						WFIFOW(fd,0)=0x2b09;
+						WFIFOL(fd,2)=char_dat[i].char_id;
+						memcpy(WFIFOP(fd,6),char_dat[i].name,24);
+						WFIFOL(fd,30)=char_dat[i].account_id;
+						WFIFOL(fd,34)=char_dat[i].mapip;
+						WFIFOW(fd,38)=char_dat[i].mapport;
+						WFIFOSET(fd,40);
+					}
+				}
 				RFIFOSKIP(fd,60);
 				realloc_fifo(fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
 				char_mapif_init(fd);
@@ -1421,6 +1634,9 @@ int parse_char(int fd)
 			if (RFIFOREST(fd) < 6) {
 				return 0;
 			}
+			WFIFOW(fd,0)=0x187;
+			WFIFOL(fd,2)=sd->account_id;
+			WFIFOSET(fd,6);
 			RFIFOSKIP(fd, 6);
 			break;
 		
@@ -1507,46 +1723,46 @@ int mapif_send(int fd,unsigned char *buf,unsigned int len)
 
 int send_users_tologin(int tid,unsigned int tick,int id,int data)
 {
-  if(login_fd>0 && session[login_fd]){
-    int i,users;
-    for(i=0,users=0;i<MAX_MAP_SERVERS;i++){
-      if(server_fd[i]>0){
-	users+=server[i].users;
-      }
-    }
-    WFIFOW(login_fd,0)=0x2714;
-    WFIFOL(login_fd,2)=users;
-    WFIFOSET(login_fd,6);
-    for(i=0;i<MAX_MAP_SERVERS;i++){
-      int fd;
-      if((fd=server_fd[i])>0){
-	WFIFOW(fd,0)=0x2b00;
-	WFIFOL(fd,2)=users;
-	WFIFOSET(fd,6);
-      }
-    }
-  }
-  return 0;
+	if(login_fd>0 && session[login_fd]){
+		int i,users;
+		for(i=0,users=0;i<MAX_MAP_SERVERS;i++)
+			if(server_fd[i]>0)
+				users+=server[i].users;
+		
+		WFIFOW(login_fd,0)=0x2714;
+		WFIFOL(login_fd,2)=users;
+		WFIFOSET(login_fd,6);
+		
+		for(i=0;i<MAX_MAP_SERVERS;i++){
+			int fd;
+			if((fd=server_fd[i])>0){
+				WFIFOW(fd,0)=0x2b00;
+				WFIFOL(fd,2)=users;
+				WFIFOSET(fd,6);
+			}
+		}
+	}
+	return 0;
 }
 
 int check_connect_login_server(int tid,unsigned int tick,int id,int data)
 {
-  if(login_fd<=0 || session[login_fd]==NULL){
-    login_fd=make_connection(login_ip,login_port);
-    session[login_fd]->func_parse=parse_tologin;
-	realloc_fifo(login_fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
-    WFIFOW(login_fd,0)=0x2710;
-    memcpy(WFIFOP(login_fd,2),userid,24);
-    memcpy(WFIFOP(login_fd,26),passwd,24);
-    WFIFOL(login_fd,50)=0;
-    WFIFOL(login_fd,54)=char_ip;
-    WFIFOL(login_fd,58)=char_port;
-    memcpy(WFIFOP(login_fd,60),server_name,20);
-    WFIFOW(login_fd,82)=char_maintenance;
-    WFIFOW(login_fd,84)=char_new;
-    WFIFOSET(login_fd,86);
-  }
-  return 0;
+	if(login_fd<=0 || session[login_fd]==NULL){
+		login_fd=make_connection(login_ip,login_port);
+		session[login_fd]->func_parse=parse_tologin;
+		realloc_fifo(login_fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
+		WFIFOW(login_fd,0)=0x2710;
+		memcpy(WFIFOP(login_fd,2),userid,24);
+		memcpy(WFIFOP(login_fd,26),passwd,24);
+		WFIFOL(login_fd,50)=0;
+		WFIFOL(login_fd,54)=char_ip;
+		WFIFOW(login_fd,58)=char_port;
+		memcpy(WFIFOP(login_fd,60),server_name,20);
+		WFIFOW(login_fd,80)=char_maintenance;
+		WFIFOW(login_fd,82)=char_new;
+		WFIFOSET(login_fd,84);
+	}
+	return 0;
 }
 
 int char_config_read(const char *cfgName)
@@ -1607,7 +1823,7 @@ int char_config_read(const char *cfgName)
 			char_new=atoi(w2);
 		}
 		else if(strcmpi(w1,"char_txt")==0){
-			strcpy(char_txt,w2);
+			strncpy(char_txt,w2,1024);
 		}
 		else if(strcmpi(w1,"max_connect_user")==0){
 			max_connect_user=atoi(w2);
@@ -1631,11 +1847,17 @@ int char_config_read(const char *cfgName)
 			if(start_zeny < 0) start_zeny = 0;
 		}
 		else if(strcmpi(w1,"unknown_char_name")==0){
-			strcpy(unknown_char_name,w2);
+			strncpy(unknown_char_name,w2,1024);
 			unknown_char_name[24] = 0;
 		}
 		else if(strcmpi(w1,"char_log_filename")==0){
-			strcpy(char_log_filename,w2);
+			strncpy(char_log_filename,w2,1024);
+		}
+		else if(strcmpi(w1,"default_map_type")==0){
+			default_map_type=atoi(w2);
+		}
+		else if(strcmpi(w1,"default_map_name")==0){
+			strncpy(default_map_name,w2,16);
 		}
 		else if(strcmpi(w1,"import")==0){
 			char_config_read(w2);
@@ -1646,13 +1868,38 @@ int char_config_read(const char *cfgName)
 	return 0;
 }
 
+static int gm_account_db_final(void *key,void *data,va_list ap)
+{
+	struct gm_account *p=data;
+
+	free(p);
+
+	return 0;
+}
 void do_final(void)
 {
+	int i;
+
 	mmo_char_sync();
 	inter_save();
 	free(char_dat);
+	do_final_inter();
+	do_final_int_guild();
+	do_final_int_party();
+	do_final_int_pet();
+	do_final_int_storage();
+	if(gm_account_db)
+		numdb_final(gm_account_db,gm_account_db_final);
+
+	exit_dbn();
+
 	delete_session(login_fd);
 	delete_session(char_fd);
+	for(i=0;i<MAX_MAP_SERVERS;i++){
+		if(server_fd[i]>0)
+			delete_session(server_fd[i]);
+	}
+	do_final_timer();
 }
 
 int do_init(int argc,char **argv)
@@ -1664,11 +1911,13 @@ int do_init(int argc,char **argv)
 	login_ip=inet_addr(login_ip_str);
 	char_ip=inet_addr(char_ip_str);
 
-	for(i=0;i<MAX_MAP_SERVERS;i++)
+	for(i=0;i<MAX_MAP_SERVERS;i++){
 		server_fd[i]=-1;
+		server[i].active=0;
+	}
 
 	mmo_char_init();
-
+	read_gm_account();
 	inter_init((argc>2)?argv[2]:inter_cfgName);	// inter server 初期化
 
 //	set_termfunc(mmo_char_sync);

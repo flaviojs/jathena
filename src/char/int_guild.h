@@ -9,6 +9,8 @@ int inter_guild_mapif_init(int fd);
 
 int inter_guild_leave(int guild_id,int account_id,int char_id);
 
+void do_final_int_guild(void);
+
 extern char guild_txt[1024];
 extern char castle_txt[1024];
 

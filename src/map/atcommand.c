@@ -25,7 +25,11 @@
 #define OPTION_HIDE 0x40
 #define STATE_BLIND 0x10
 
-static char msg_table[200][1024];	/* Server message */
+#ifdef MEMWATCH
+#include "memwatch.h"
+#endif
+
+char msg_table[200][1024];	/* Server message */
 
 #define ATCOMMAND_FUNC(x) int atcommand_ ## x (const int fd, struct map_session_data* sd, const char* command, const char* message)
 //ATCOMMAND_FUNC(broadcast);
@@ -107,6 +111,10 @@ ATCOMMAND_FUNC(agitend);
 ATCOMMAND_FUNC(mapexit);
 ATCOMMAND_FUNC(idsearch);
 ATCOMMAND_FUNC(itemidentify);
+ATCOMMAND_FUNC(shuffle);
+ATCOMMAND_FUNC(maintenance);
+ATCOMMAND_FUNC(misceffect);
+ATCOMMAND_FUNC(summon);
 
 /*==========================================
  *AtCommandInfo atcommand_info[]構造体の定義
@@ -198,6 +206,10 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_MapExit,				"@mapexit",			0, atcommand_mapexit },
 	{ AtCommand_IDSearch,				"@idsearch",		0, atcommand_idsearch },
 	{ AtCommand_ItemIdentify,			"@itemidentify",	0, atcommand_itemidentify },
+	{ AtCommand_Shuffle,				"@shuffle",			0, atcommand_shuffle },
+	{ AtCommand_Maintenance,			"@maintenance",		0, atcommand_maintenance },
+	{ AtCommand_Misceffect,				"@misceffect",		0, atcommand_misceffect },
+	{ AtCommand_Summon,					"@summon",			0, atcommand_summon },
 	// add here
 	{ AtCommand_MapMove,				"@mapmove",			0, NULL },
 	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
@@ -358,7 +370,7 @@ int msg_config_read(const char *cfgName)
 			continue;
 				}
 		if (msg_number>=0&&msg_number<=200)
-			strcpy(msg_table[msg_number],w2);
+			strncpy(msg_table[msg_number],w2,1024);
 		//printf("%d:%s\n",msg_number,msg);
 			}
 	fclose(fp);
@@ -510,8 +522,8 @@ atcommand_where(
 	const char* command, const char* message)
 {
 	char character[100];
-	char output[200];
-	struct map_session_data *pl_sd = NULL;
+//	char output[200];
+//	struct map_session_data *pl_sd = NULL;
 
 	nullpo_retr(-1, sd);
 
@@ -520,6 +532,11 @@ atcommand_where(
 	memset(character, '\0', sizeof character);
 	if (sscanf(message, "%99[^\n]", character) < 1)
 		return -1;
+	if(strncmp(sd->status.name,character,24)==0)
+		return -1;
+
+	intif_where(sd->status.account_id,character);
+/*
 	if ((pl_sd = map_nick2sd(character)) == NULL) {
 		snprintf(output, sizeof output, "%s %d %d",
 			sd->mapname, sd->bl.x, sd->bl.y);
@@ -529,7 +546,7 @@ atcommand_where(
 	snprintf(output, sizeof output, "%s %s %d %d",
 		character, pl_sd->mapname, pl_sd->bl.x, pl_sd->bl.y);
 	clif_displaymessage(fd, output);
-	
+*/	
 	return 0;
 }
 
@@ -543,7 +560,7 @@ atcommand_jumpto(
 	const char* command, const char* message)
 {
 	char character[100];
-	struct map_session_data *pl_sd = NULL;
+//	struct map_session_data *pl_sd = NULL;
 	
 	nullpo_retr(-1, sd);
 
@@ -553,7 +570,11 @@ atcommand_jumpto(
 	memset(character, '\0', sizeof character);
 	if (sscanf(message, "%99[^\n]", character) < 1)
 		return -1;
-	if ((pl_sd = map_nick2sd(character)) != NULL) {
+	if(strncmp(sd->status.name,character,24)==0)
+		return -1;
+
+	intif_jumpto(sd->status.account_id,character);
+/*	if ((pl_sd = map_nick2sd(character)) != NULL) {
 		char output[200];
 		pc_setpos((struct map_session_data*)sd,
 			pl_sd->mapname, pl_sd->bl.x, pl_sd->bl.y, 3);
@@ -561,8 +582,8 @@ atcommand_jumpto(
 		clif_displaymessage(fd, output);
 	} else {
 		clif_displaymessage(fd, msg_table[3]);
-		}
-	
+	}
+*/
 	return 0;
 }
 
@@ -588,7 +609,7 @@ atcommand_jump(
 		clif_displaymessage(fd, output);
 	} else {
 		clif_displaymessage(fd, msg_table[2]);
-				}
+	}
 	
 	return 0;
 }
@@ -602,15 +623,7 @@ atcommand_who(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	struct map_session_data *pl_sd = NULL;
-	int i = 0;
-	for (i = 0; i < fd_max; i++) {
-		if (session[i] && (pl_sd = session[i]->session_data) &&
-			pl_sd->state.auth) {
-			if( !(battle_config.hide_GM_session && pc_isGM(pl_sd)) )
-				clif_displaymessage(fd, pl_sd->status.name);
-			}
-		}
+	map_who(fd);
 	return 0;
 }
 
@@ -1406,9 +1419,9 @@ atcommand_go(
 				{	"yuno.gat",		157,  51	},	//	9=ジュノー
 				{	"amatsu.gat",	198,  84	},	//	10=アマツ
 				{	"gonryun.gat",	160, 120	},	//	11=ゴンリュン
-				{	"umbala.gat",	89, 157		},	//	12=ウンバラ
-				{	"niflheim.gat",	21,153		},	//	13=ニフルヘイム
-				{	"louyang.gat",	217,40		},	//	14=洛陽
+				{	"umbala.gat",	 89, 157	},	//	12=ウンバラ
+				{	"niflheim.gat",	202, 177	},	//	13=ニブルヘルム
+				{	"louyang.gat",	217,  40	},	//	14=洛陽
 			};
 	
 	nullpo_retr(-1, sd);
@@ -2008,7 +2021,7 @@ atcommand_recall(
 	const char* command, const char* message)
 {
 	char character[100];
-	struct map_session_data *pl_sd = NULL;
+//	struct map_session_data *pl_sd = NULL;
 	
 	nullpo_retr(-1, sd);
 
@@ -2016,8 +2029,14 @@ atcommand_recall(
 		return -1;
 	
 	memset(character, '\0', sizeof character);
-	memset(character, '\0', sizeof character);
-	sscanf(message, "%99[^\n]", character);
+	if(sscanf(message, "%99[^\n]", character) < 1)
+		return -1;
+	if(strncmp(sd->status.name,character,24)==0)
+		return -1;
+
+	intif_charmovereq(sd,character,1);
+
+/*
 	if ((pl_sd = map_nick2sd(character)) != NULL) {
 		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
 			char output[200];
@@ -2027,8 +2046,8 @@ atcommand_recall(
 				}
 	} else {
 		clif_displaymessage(fd, msg_table[47]);
-					}
-	
+	}
+*/
 	return 0;
 }
 
@@ -2757,7 +2776,6 @@ atcommand_idsearch(
 	clif_displaymessage(fd,output);
 	return 0;
 }
-
 /*==========================================
  * 
  *------------------------------------------
@@ -2778,5 +2796,124 @@ atcommand_itemidentify(
 		}
 	clif_displaymessage(fd, msg_table[80]);
 	
+	return 0;
+}
+static int atshuffle_sub(struct block_list *bl,va_list ap)
+{
+
+	nullpo_retr(0, bl);
+
+	mob_warp((struct mob_data *)bl,bl->m,-1,-1,3);
+
+	return 0;
+}
+
+int
+atcommand_shuffle(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd = NULL;
+	int i = 0,mode = 0;
+
+	nullpo_retr(-1, sd);
+
+	if (sscanf(message, "%d", &mode) < 0)
+		return -1;
+
+	//PCのシャッフル
+	if(!mode){
+		for (i = 0; i < fd_max; i++) {
+			if (session[i] && (pl_sd = session[i]->session_data) &&
+				pl_sd->state.auth && sd->bl.m == pl_sd->bl.m &&
+				pc_isGM(sd) > pc_isGM(pl_sd))
+						pc_randomwarp(pl_sd,3);
+		}
+	//MOBのシャッフル
+	}else if(mode == 1){
+		map_foreachinarea(atshuffle_sub, sd->bl.m, 0, 0,
+			map[sd->bl.m].xs, map[sd->bl.m].ys, BL_MOB);
+
+	}else {
+		return -1;
+	}
+	clif_displaymessage(fd, msg_table[81]);
+	return 0;
+}
+
+int
+atcommand_maintenance(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	int maintenance = 0;
+
+	nullpo_retr(-1, sd);
+
+	if (sscanf(message, "%d", &maintenance) < 0)
+		return -1;
+
+	chrif_maintenance(maintenance);
+
+	return 0;
+}
+int
+atcommand_misceffect(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	int effno = 0;
+
+	nullpo_retr(-1, sd);
+
+	if (sscanf(message, "%d", &effno) < 0)
+		return -1;
+
+	clif_misceffect2(&sd->bl,effno);
+
+	return 0;
+}
+/*==========================================
+ * 
+ *------------------------------------------
+ */
+int
+atcommand_summon(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char name[100];
+	int mob_id = 0;
+	int x = 0;
+	int y = 0;
+	int id = 0;
+	struct mob_data *md;
+	unsigned int tick=gettick();
+	
+	nullpo_retr(-1, sd);
+
+	if (!message || !*message)
+		return -1;
+	if (sscanf(message, "%99s", name) < 1)
+		return -1;
+	
+	if ((mob_id = atoi(name)) == 0)
+		mob_id = mobdb_searchname(name);
+	if(mob_id == 0)
+		return -1;
+
+	x = sd->bl.x + (rand() % 10 - 5);
+	y = sd->bl.y + (rand() % 10 - 5);
+
+	id = mob_once_spawn(sd,"this", x, y, "--ja--", mob_id, 1, "");
+	if((md=(struct mob_data *)map_id2bl(id))){
+		md->master_id=sd->bl.id;
+		md->state.special_mob_ai=1;
+		md->mode=mob_db[md->class].mode|0x04;
+		md->deletetimer=add_timer(tick+60000,mob_timer_delete,id,0);
+		clif_misceffect2(&md->bl,344);
+	}
+	clif_skill_poseffect(&sd->bl,AM_CALLHOMUN,1,x,y,tick);
+
 	return 0;
 }

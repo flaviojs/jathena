@@ -7,9 +7,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/time.h>
+#include <time.h>
 
 #include "socket.h"
 #include "timer.h"
+#include "malloc.h"
+#include "lock.h"
 
 #include "map.h"
 #include "clif.h"
@@ -28,7 +31,6 @@
 #include "battle.h"
 #include "party.h"
 #include "guild.h"
-#include "lock.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -91,6 +93,7 @@ int buildin_return(struct script_state *st);
 int buildin_getarg(struct script_state *st);
 int buildin_next(struct script_state *st);
 int buildin_close(struct script_state *st);
+int buildin_close2(struct script_state *st);
 int buildin_menu(struct script_state *st);
 int buildin_rand(struct script_state *st);
 int buildin_warp(struct script_state *st);
@@ -118,6 +121,7 @@ int buildin_checkweight(struct script_state *st);
 int buildin_readparam(struct script_state *st);
 int buildin_getcharid(struct script_state *st);
 int buildin_getpartyname(struct script_state *st);
+int buildin_getpartymember(struct script_state *st);
 int buildin_getguildname(struct script_state *st);
 int buildin_getguildmaster(struct script_state *st);
 int buildin_getguildmasterid(struct script_state *st);
@@ -133,12 +137,14 @@ int buildin_getequippercentrefinery(struct script_state *st);
 int buildin_successrefitem(struct script_state *st);
 int buildin_failedrefitem(struct script_state *st);
 int buildin_cutin(struct script_state *st);
+int buildin_cutincard(struct script_state *st);
 int buildin_statusup(struct script_state *st);
 int buildin_statusup2(struct script_state *st);
 int buildin_bonus(struct script_state *st);
 int buildin_bonus2(struct script_state *st);
 int buildin_bonus3(struct script_state *st);
 int buildin_skill(struct script_state *st);
+int buildin_guildskill(struct script_state *st);
 int buildin_getskilllv(struct script_state *st);
 int buildin_getgdskilllv(struct script_state *st);
 int buildin_basicskillcheck(struct script_state *st);
@@ -180,8 +186,12 @@ int buildin_getareausers(struct script_state *st);
 int buildin_getareadropitem(struct script_state *st);
 int buildin_enablenpc(struct script_state *st);
 int buildin_disablenpc(struct script_state *st);
+int buildin_hideoffnpc(struct script_state *st);
+int buildin_hideonnpc(struct script_state *st);
 int buildin_sc_start(struct script_state *st);
+int buildin_sc_start2(struct script_state *st);
 int buildin_sc_end(struct script_state *st);
+int buildin_getscrate(struct script_state *st);
 int buildin_debugmes(struct script_state *st);
 int buildin_catchpet(struct script_state *st);
 int buildin_birthpet(struct script_state *st);
@@ -224,6 +234,14 @@ int buildin_divorce(struct script_state *st);
 int buildin_getitemname(struct script_state *st);
 int buildin_makepet(struct script_state *st);
 int buildin_getexp(struct script_state *st);
+int buildin_getinventorylist(struct script_state *st);
+int buildin_getskilllist(struct script_state *st);
+int buildin_clearitem(struct script_state *st);
+int buildin_getrepairableitemcount(struct script_state *st);
+int buildin_repairitem(struct script_state *st);
+int buildin_classchange(struct script_state *st);
+int buildin_misceffect(struct script_state *st);
+int buildin_soundeffect(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -239,6 +257,7 @@ struct {
 	{buildin_mes,"mes","s"},
 	{buildin_next,"next",""},
 	{buildin_close,"close",""},
+	{buildin_close2,"close2",""},
 	{buildin_menu,"menu","*"},
 	{buildin_goto,"goto","l"},
 	{buildin_callsub,"callsub","i*"},
@@ -258,10 +277,11 @@ struct {
 	{buildin_deletearray,"deletearray","ii"},
 	{buildin_getelementofarray,"getelementofarray","ii"},
 	{buildin_if,"if","i*"},
-	{buildin_getitem,"getitem","ii"},
-	{buildin_getitem2,"getitem2","iiiiiiiii"},
+	{buildin_getitem,"getitem","ii**"},
+	{buildin_getitem2,"getitem2","iiiiiiiii*"},
 	{buildin_delitem,"delitem","ii"},
 	{buildin_cutin,"cutin","si"},
+	{buildin_cutincard,"cutincard","i"},
 	{buildin_viewpoint,"viewpoint","iiiii"},
 	{buildin_heal,"heal","ii"},
 	{buildin_itemheal,"itemheal","ii"},
@@ -269,9 +289,10 @@ struct {
 	{buildin_rand,"rand","i*"},
 	{buildin_countitem,"countitem","i"},
 	{buildin_checkweight,"checkweight","ii"},
-	{buildin_readparam,"readparam","i"},
-	{buildin_getcharid,"getcharid","i"},
+	{buildin_readparam,"readparam","i*"},
+	{buildin_getcharid,"getcharid","i*"},
 	{buildin_getpartyname,"getpartyname","i"},
+	{buildin_getpartymember,"getpartymember","i"},
 	{buildin_getguildname,"getguildname","i"},
 	{buildin_getguildmaster,"getguildmaster","i"},
 	{buildin_getguildmasterid,"getguildmasterid","i"},
@@ -292,6 +313,7 @@ struct {
 	{buildin_bonus2,"bonus2","iii"},
 	{buildin_bonus3,"bonus3","iiii"},
 	{buildin_skill,"skill","ii*"},
+	{buildin_guildskill,"guildskill","ii*"},
 	{buildin_getskilllv,"getskilllv","i"},
 	{buildin_getgdskilllv,"getgdskilllv","ii"},
 	{buildin_basicskillcheck,"basicskillcheck","*"},
@@ -333,14 +355,18 @@ struct {
 	{buildin_getareadropitem,"getareadropitem","siiiii"},
 	{buildin_enablenpc,"enablenpc","s"},
 	{buildin_disablenpc,"disablenpc","s"},
-	{buildin_sc_start,"sc_start","iii"},
+	{buildin_hideoffnpc,"hideoffnpc","s"},
+	{buildin_hideonnpc,"hideonnpc","s"},
+	{buildin_sc_start,"sc_start","iii*"},
+	{buildin_sc_start2,"sc_start2","iiii*"},
 	{buildin_sc_end,"sc_end","i"},
+	{buildin_getscrate,"getscrate","ii*"},
 	{buildin_debugmes,"debugmes","s"},
 	{buildin_catchpet,"pet","i"},
 	{buildin_birthpet,"bpet",""},
 	{buildin_resetstatus,"resetstatus",""},
 	{buildin_resetskill,"resetskill",""},
-	{buildin_changebase,"changebase","i"},
+	{buildin_changebase,"changebase","i*"},
 	{buildin_changesex,"changesex",""},
 	{buildin_waitingroom,"waitingroom","si*"},
 	{buildin_delwaitingroom,"delwaitingroom","*"},
@@ -377,6 +403,15 @@ struct {
 	{buildin_getitemname,"getitemname","i"},
 	{buildin_makepet,"makepet","i"},
 	{buildin_getexp,"getexp","ii"},
+	{buildin_getinventorylist,"getinventorylist",""},
+	{buildin_getskilllist,"getskilllist",""},
+	{buildin_clearitem,"clearitem",""},
+	{buildin_getrepairableitemcount,"getrepairableitemcount","*"},
+	{buildin_repairitem,"repairitem",""},
+	{buildin_classchange,"classchange","ii"},
+	{buildin_misceffect,"misceffect","i"},
+	{buildin_soundeffect,"soundeffect","si"},
+
 	{NULL,NULL,NULL}
 };
 enum {
@@ -384,7 +419,7 @@ enum {
 	C_NAME,C_EOL, C_RETINFO,
 
 	C_LOR,C_LAND,C_LE,C_LT,C_GE,C_GT,C_EQ,C_NE,   //operator
-	C_XOR,C_OR,C_AND,C_ADD,C_SUB,C_MUL,C_DIV,C_MOD,C_NEG,C_LNOT,C_NOT
+	C_XOR,C_OR,C_AND,C_ADD,C_SUB,C_MUL,C_DIV,C_MOD,C_NEG,C_LNOT,C_NOT,C_R_SHIFT,C_L_SHIFT
 };
 
 /*==========================================
@@ -455,20 +490,12 @@ static int add_str(const unsigned char *p)
 	}
 	if(str_num>=str_data_size){
 		str_data_size+=128;
-		str_data=realloc(str_data,sizeof(str_data[0])*str_data_size);
-		if(str_data==NULL){
-			printf("out of memory : add_str str_data\n");
-			exit(1);
-		}
+		str_data=aRealloc(str_data,sizeof(str_data[0])*str_data_size);
 		memset(str_data + (str_data_size - 128), '\0', 128);
 	}
 	while(str_pos+strlen(p)+1>=str_size){
 		str_size+=256;
-		str_buf=realloc(str_buf,str_size);
-		if(str_buf==NULL){
-			printf("out of memory : add_str str_buf\n");
-			exit(1);
-		}
+		str_buf=(char *)aRealloc(str_buf,str_size);
 		memset(str_buf + (str_size - 256), '\0', 256);
 	}
 	strcpy(str_buf+str_pos,p);
@@ -491,11 +518,7 @@ static void check_script_buf(int size)
 {
 	if(script_pos+size>=script_size){
 		script_size+=SCRIPT_BLOCK_SIZE;
-		script_buf=realloc(script_buf,script_size);
-		if(script_buf==NULL){
-			printf("out of memory : check_script_buf \n");
-			exit(1);
-		}
+		script_buf=(char *)aRealloc(script_buf,script_size);
 		memset(script_buf + script_size - SCRIPT_BLOCK_SIZE, '\0',
 			SCRIPT_BLOCK_SIZE);
 	}
@@ -820,8 +843,10 @@ unsigned char* parse_subexpr(unsigned char *p,int limit)
 		   (op=C_XOR,opl=3,len=1,*p=='^') ||
 		   (op=C_EQ,opl=2,len=2,*p=='=' && p[1]=='=') ||
 		   (op=C_NE,opl=2,len=2,*p=='!' && p[1]=='=') ||
+		   (op=C_R_SHIFT,opl=5,len=2,*p=='>' && p[1]=='>') ||
 		   (op=C_GE,opl=2,len=2,*p=='>' && p[1]=='=') ||
 		   (op=C_GT,opl=2,len=1,*p=='>') ||
+		   (op=C_L_SHIFT,opl=5,len=2,*p=='<' && p[1]=='<') ||
 		   (op=C_LE,opl=2,len=2,*p=='<' && p[1]=='=') ||
 		   (op=C_LT,opl=2,len=1,*p=='<')) && opl>limit){
 		p+=len;
@@ -1022,11 +1047,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 		read_constdb();
 	}
 	first=0;
-	script_buf=calloc(SCRIPT_BLOCK_SIZE, 1);
-	if(script_buf==NULL){
-		printf("out of memory : parse_script\n");
-		exit(1);
-	}
+	script_buf=(unsigned char *)aCalloc(SCRIPT_BLOCK_SIZE,sizeof(unsigned char));
 	script_pos=0;
 	script_size=SCRIPT_BLOCK_SIZE;
 	str_data[LABEL_NEXTLINE].type=C_NOP;
@@ -1091,11 +1112,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 	add_scriptc(C_NOP);
 
 	script_size = script_pos;
-	script_buf=realloc(script_buf,script_pos);
-	if(script_buf==NULL){
-		printf("out of momory : parse_script realloc\n");
-		exit(1);
-	}
+	script_buf=(char *)aRealloc(script_buf,script_pos);
 
 	// 未解決のラベルを解決
 	for(i=LABEL_START;i<str_num;i++){
@@ -1156,14 +1173,16 @@ int get_val(struct script_state*st,struct script_data* data)
 		char prefix=*name;
 		char postfix=name[strlen(name)-1];
 
-		if(prefix!='$')
-			sd=script_rid2sd(st);
-
+		if(prefix!='$'){
+			if((sd=script_rid2sd(st))==NULL)
+				printf("get_val error name?:%s\n",name);
+		}
 		if(postfix=='$'){
 
 			data->type=C_CONSTSTR;
 			if( prefix=='@' || prefix=='l' ){
-				data->u.str = pc_readregstr(sd,data->u.num);
+				if(sd)
+					data->u.str = pc_readregstr(sd,data->u.num);
 			}else if(prefix=='$'){
 				data->u.str = (char *)numdb_search(mapregstr_db,data->u.num);
 			}else{
@@ -1179,18 +1198,24 @@ int get_val(struct script_state*st,struct script_data* data)
 			if(str_data[data->u.num&0x00ffffff].type==C_INT){
 				data->u.num = str_data[data->u.num&0x00ffffff].val;
 			}else if(str_data[data->u.num&0x00ffffff].type==C_PARAM){
-				data->u.num = pc_readparam(sd,str_data[data->u.num&0x00ffffff].val);
+				if(sd)
+					data->u.num = pc_readparam(sd,str_data[data->u.num&0x00ffffff].val);
 			}else if(prefix=='@' || prefix=='l'){
-				data->u.num = pc_readreg(sd,data->u.num);
+				if(sd)
+					data->u.num = pc_readreg(sd,data->u.num);
 			}else if(prefix=='$'){
 				data->u.num = (int)numdb_search(mapreg_db,data->u.num);
 			}else if(prefix=='#'){
-				if( name[1]=='#')
-					data->u.num = pc_readaccountreg2(sd,name);
-				else
-					data->u.num = pc_readaccountreg(sd,name);
+				if( name[1]=='#'){
+					if(sd)
+						data->u.num = pc_readaccountreg2(sd,name);
+				}else{
+					if(sd)
+						data->u.num = pc_readaccountreg(sd,name);
+				}
 			}else{
-				data->u.num = pc_readglobalreg(sd,name);
+				if(sd)
+					data->u.num = pc_readglobalreg(sd,name);
 			}
 		}
 	}
@@ -1258,11 +1283,7 @@ char* conv_str(struct script_state *st,struct script_data *data)
 	get_val(st,data);
 	if(data->type==C_INT){
 		char *buf;
-		buf=calloc(16, 1);
-		if(buf==NULL){
-			printf("out of memory : conv_str\n");
-			exit(1);
-		}
+		buf=(char *)aCalloc(16,sizeof(char));
 		sprintf(buf,"%d",data->u.num);
 		data->type=C_STR;
 		data->u.str=buf;
@@ -1302,12 +1323,8 @@ void push_val(struct script_stack *stack,int type,int val)
 {
 	if(stack->sp >= stack->sp_max){
 		stack->sp_max += 64;
-		stack->stack_data = realloc(stack->stack_data,
+		stack->stack_data = (struct script_data *)aRealloc(stack->stack_data,
 			sizeof(stack->stack_data[0]) * stack->sp_max);
-		if(stack->stack_data==NULL){
-			printf("push_val:stack over flow\n");
-			exit(1);
-		}
 		memset(stack->stack_data + (stack->sp_max - 64), 0,
 			64 * sizeof(*(stack->stack_data)));
 	}
@@ -1326,12 +1343,8 @@ void push_str(struct script_stack *stack,int type,unsigned char *str)
 {
 	if(stack->sp>=stack->sp_max){
 		stack->sp_max += 64;
-		stack->stack_data = realloc(stack->stack_data,
+		stack->stack_data = (struct script_data *)aRealloc(stack->stack_data,
 			sizeof(stack->stack_data[0]) * stack->sp_max);
-		if(stack->stack_data==NULL){
-			printf("push_val:stack over flow\n");
-			exit(1);
-		}
 		memset(stack->stack_data + (stack->sp_max - 64), '\0',
 			64 * sizeof(*(stack->stack_data)));
 	}
@@ -1522,6 +1535,12 @@ int buildin_close(struct script_state *st)
 	clif_scriptclose(script_rid2sd(st),st->oid);
 	return 0;
 }
+int buildin_close2(struct script_state *st)
+{
+	st->state=STOP;
+	clif_scriptclose(script_rid2sd(st),st->oid);
+	return 0;
+}
 
 /*==========================================
  *
@@ -1542,11 +1561,7 @@ int buildin_menu(struct script_state *st)
 			conv_str(st,& (st->stack->stack_data[i]));
 			len+=strlen(st->stack->stack_data[i].u.str)+1;
 		}
-		buf=calloc(len, 1);
-		if(buf==NULL){
-			printf("out of memory : buildin_menu\n");
-			exit(1);
-		}
+		buf=(char *)aCalloc(len,sizeof(char));
 		buf[0]=0;
 		for(i=st->start+2,len=0;i<st->end;i+=2){
 			strcat(buf,st->stack->stack_data[i].u.str);
@@ -1635,14 +1650,26 @@ int buildin_warp(struct script_state *st)
 int buildin_areawarp_sub(struct block_list *bl,va_list ap)
 {
 	int x,y;
-	char *map;
-	map=va_arg(ap, char *);
+	char *mapname;
+	struct map_session_data *sd;
+
+	mapname=va_arg(ap, char *);
 	x=va_arg(ap,int);
 	y=va_arg(ap,int);
-	if(strcmp(map,"Random")==0)
-		pc_randomwarp((struct map_session_data *)bl,3);
-	else
-		pc_setpos((struct map_session_data *)bl,map,x,y,0);
+
+	if((sd=(struct map_session_data *)bl) == NULL)
+		return 0;
+
+	if(strcmp(mapname,"Random")==0)
+		pc_randomwarp(sd,3);
+	else if(strcmp(mapname,"SavePoint")==0){
+		if(map[sd->bl.m].flag.noreturn)	// 蝶禁止
+			return 0;
+
+		pc_setpos(sd,sd->status.save_point.map,
+			sd->status.save_point.x,sd->status.save_point.y,3);
+	}else
+		pc_setpos(sd,mapname,x,y,0);
 	return 0;
 }
 int buildin_areawarp(struct script_state *st)
@@ -2039,6 +2066,20 @@ int buildin_cutin(struct script_state *st)
 
 	return 0;
 }
+/*==========================================
+ * カードのイラストを表示する
+ *------------------------------------------
+ */
+int buildin_cutincard(struct script_state *st)
+{
+	int itemid;
+
+	itemid=conv_num(st,& (st->stack->stack_data[st->start+2]));
+
+	clif_cutin(script_rid2sd(st),itemdb_search(itemid)->cardillustname,4);
+
+	return 0;
+}
 
 /*==========================================
  *
@@ -2153,6 +2194,8 @@ int buildin_getitem(struct script_state *st)
 		nameid=conv_num(st,data);
 
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	if( st->end>st->start+4 ) //鑑定した状態で渡すかどうか
+		flag=(conv_num(st,& (st->stack->stack_data[st->start+4]))==0)?1:0;
 
 	if(nameid<0) { // ランダム
 		nameid=itemdb_searchrandomid(-nameid);
@@ -2166,6 +2209,10 @@ int buildin_getitem(struct script_state *st)
 			item_tmp.identify=1;
 		else
 			item_tmp.identify=!itemdb_isequip3(nameid);
+		if( st->end>st->start+5 ) //アイテムを指定したIDに渡す
+			sd=map_id2sd(conv_num(st,& (st->stack->stack_data[st->start+5])));
+		if(sd == NULL) //アイテムを渡す相手がいなかったらお帰り
+			return 0;
 		if((flag = pc_additem(sd,&item_tmp,amount))) {
 			clif_additem(sd,0,0,flag);
 			map_addflooritem(&item_tmp,amount,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
@@ -2209,6 +2256,10 @@ int buildin_getitem2(struct script_state *st)
 	c2=conv_num(st,& (st->stack->stack_data[st->start+8]));
 	c3=conv_num(st,& (st->stack->stack_data[st->start+9]));
 	c4=conv_num(st,& (st->stack->stack_data[st->start+10]));
+	if( st->end>st->start+11 ) //アイテムを指定したIDに渡す
+		sd=map_id2sd(conv_num(st,& (st->stack->stack_data[st->start+11])));
+	if(sd == NULL) //アイテムを渡す相手がいなかったらお帰り
+		return 0;
 
 	if(nameid<0) { // ランダム
 		nameid=itemdb_searchrandomid(-nameid);
@@ -2307,7 +2358,7 @@ int buildin_delitem(struct script_state *st)
 }
 
 /*==========================================
- *
+ *キャラ関係のパラメータ取得
  *------------------------------------------
  */
 int buildin_readparam(struct script_state *st)
@@ -2316,7 +2367,16 @@ int buildin_readparam(struct script_state *st)
 	struct map_session_data *sd;
 
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if( st->end>st->start+3 )
+		sd=map_nick2sd(conv_str(st,& (st->stack->stack_data[st->start+3])));
+	else
 	sd=script_rid2sd(st);
+
+	if(sd==NULL){
+		push_val(st->stack,C_INT,-1);
+		return 0;
+	}
+
 	push_val(st->stack,C_INT,pc_readparam(sd,type));
 
 	return 0;
@@ -2331,7 +2391,14 @@ int buildin_getcharid(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=script_rid2sd(st);
+	if( st->end>st->start+3 )
+		sd=map_nick2sd(conv_str(st,& (st->stack->stack_data[st->start+3])));
+	else
+		sd=script_rid2sd(st);
+	if(sd==NULL){
+		push_val(st->stack,C_INT,-1);
+		return 0;
+	}
 	if(num==0)
 		push_val(st->stack,C_INT,sd->status.char_id);
 	if(num==1)
@@ -2355,12 +2422,7 @@ char *buildin_getpartyname_sub(int party_id)
 
 	if(p!=NULL){
 		char *buf;
-		buf=calloc(24, 1);
-		if(buf==NULL){
-			if(battle_config.error_log)
-				printf("out of memory : buildin_getpartyname_sub\n");
-			exit(1);
-		}
+		buf=(char *)aCalloc(24,sizeof(char));
 		strcpy(buf,p->name);
 		return buf;
 	}
@@ -2382,6 +2444,31 @@ int buildin_getpartyname(struct script_state *st)
 	return 0;
 }
 /*==========================================
+ *指定IDのPT人数とメンバーID取得
+ *------------------------------------------
+ */
+int buildin_getpartymember(struct script_state *st)
+{
+	struct party *p;
+	int i,j=0;
+
+	p=NULL;
+	p=party_search(conv_num(st,& (st->stack->stack_data[st->start+2])));
+
+	if(p!=NULL){
+		for(i=0;i<MAX_PARTY;i++){
+			if(p->member[i].account_id){
+//				printf("name:%s %d\n",p->member[i].name,i);
+				mapreg_setregstr(add_str("$@partymembername$")+(i<<24),p->member[i].name);
+				j++;
+			}
+		}
+	}
+	mapreg_setreg(add_str("$@partymembercount"),j);
+
+	return 0;
+}
+/*==========================================
  *指定IDのギルド名取得
  *------------------------------------------
  */
@@ -2392,12 +2479,7 @@ char *buildin_getguildname_sub(int guild_id)
 
 	if(g!=NULL){
 		char *buf;
-		buf=calloc(24, 1);
-		if(buf==NULL){
-			if(battle_config.error_log)
-				printf("out of memory : buildin_getguildname_sub\n");
-			exit(1);
-		}
+		buf=(char *)aCalloc(24,sizeof(char));
 		strcpy(buf,g->name);
 		return buf;
 	}
@@ -2426,12 +2508,7 @@ char *buildin_getguildmaster_sub(int guild_id)
 
 	if(g!=NULL){
 		char *buf;
-		buf=calloc(24, 1);
-		if(buf==NULL){
-			if(battle_config.error_log)
-				printf("out of memory : buildin_getguildmaster_sub\n");
-			exit(1);
-		}
+		buf=(char *)aCalloc(24,sizeof(char));
 		strncpy(buf,g->master, 23);
 		return buf;
 	}
@@ -2481,11 +2558,7 @@ int buildin_strcharinfo(struct script_state *st)
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	if(num==0){
 		char *buf;
-		buf=calloc(24, 1);
-		if(buf==NULL){
-			printf("out of memory : buildin_strcharinfo\n");
-			exit(1);
-		}
+		buf=(char *)aCalloc(24,sizeof(char));
 		strncpy(buf,sd->status.name, 23);
 		push_str(st->stack,C_STR,buf);
 	}
@@ -2552,11 +2625,7 @@ int buildin_getequipname(struct script_state *st)
 	struct item_data* item;
 	char *buf;
 
-	buf=calloc(64, 1);
-	if(buf==NULL){
-		printf("out of memory : buildin_getequipname\n");
-		exit(1);
-	}
+	buf=(char *)aCalloc(64,sizeof(char));
 	sd=script_rid2sd(st);
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	i=pc_checkequip(sd,equip[num-1]);
@@ -2851,6 +2920,26 @@ int buildin_skill(struct script_state *st)
 	return 0;
 }
 /*==========================================
+ * ギルドスキル取得
+ *------------------------------------------
+ */
+int buildin_guildskill(struct script_state *st)
+{
+	int id,level,flag=0;
+	struct map_session_data *sd;
+	int i=0;
+
+	id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	level=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	if( st->end>st->start+4 )
+		flag=conv_num(st,&(st->stack->stack_data[st->start+4]) );
+	sd=script_rid2sd(st);
+	for(i=0;i<level;i++)
+		guild_skillup(sd,id,flag);
+
+	return 0;
+}
+/*==========================================
  * スキルレベル所得
  *------------------------------------------
  */
@@ -2862,11 +2951,6 @@ int buildin_getskilllv(struct script_state *st)
 }
 /*==========================================
  * getgdskilllv(Guild_ID, Skill_ID);
- * skill_id = 1 : GD_APPROVAL
- *            2 : GD_KAFRACONTACT
- *            3 : GD_GUARDIANRESEARCH
- *            4 : GD_CHARISMA
- *            5 : GD_EXTENSION
  *------------------------------------------
  */
 int buildin_getgdskilllv(struct script_state *st)
@@ -2874,7 +2958,7 @@ int buildin_getgdskilllv(struct script_state *st)
 	int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	int skill_id=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	struct guild *g=guild_search(guild_id);
-	push_val(st->stack,C_INT, (g==NULL)?-1:guild_checkskill(g,skill_id+9999) );
+	push_val(st->stack,C_INT, (g==NULL)?-1:guild_checkskill(g,skill_id) );
 	return 0;
 /*
 	struct map_session_data *sd=NULL;
@@ -3105,11 +3189,7 @@ int buildin_gettimestr(struct script_state *st)
 	fmtstr=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	maxlen=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
-	tmpstr=calloc(maxlen+1, 1);
-	if(tmpstr==NULL){
-		printf("out of memory : buildin_gettimestr\n");
-		exit(1);
-	}
+	tmpstr=(char *)aCalloc(maxlen+1,sizeof(char));
 	strftime(tmpstr,maxlen,fmtstr,localtime(&now));
 	tmpstr[maxlen]='\0';
 
@@ -3671,6 +3751,28 @@ int buildin_disablenpc(struct script_state *st)
 }
 
 /*==========================================
+ * 隠れているNPCの表示
+ *------------------------------------------
+ */
+int buildin_hideoffnpc(struct script_state *st)
+{
+	char *str;
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	npc_enable(str,2);
+	return 0;
+}
+/*==========================================
+ * NPCをハイディング
+ *------------------------------------------
+ */
+int buildin_hideonnpc(struct script_state *st)
+{
+	char *str;
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	npc_enable(str,4);
+	return 0;
+}
+/*==========================================
  * 状態異常にかかる
  *------------------------------------------
  */
@@ -3681,10 +3783,36 @@ int buildin_sc_start(struct script_state *st)
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	tick=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	val1=conv_num(st,& (st->stack->stack_data[st->start+4]));
+	if( st->end>st->start+5 ) //指定したキャラを状態異常にする
+		bl = map_id2bl(conv_num(st,& (st->stack->stack_data[st->start+5])));
+	else
 	bl = map_id2bl(st->rid);
 	if(bl->type == BL_PC && ((struct map_session_data *)bl)->state.potionpitcher_flag)
 		bl = map_id2bl(((struct map_session_data *)bl)->skilltarget);
 	skill_status_change_start(bl,type,val1,0,0,0,tick,0);
+	return 0;
+}
+
+/*==========================================
+ * 状態異常にかかる(確率指定)
+ *------------------------------------------
+ */
+int buildin_sc_start2(struct script_state *st)
+{
+	struct block_list *bl;
+	int type,tick,val1,per;
+	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	tick=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	val1=conv_num(st,& (st->stack->stack_data[st->start+4]));
+	per=conv_num(st,& (st->stack->stack_data[st->start+5]));
+	if( st->end>st->start+6 ) //指定したキャラを状態異常にする
+		bl = map_id2bl(conv_num(st,& (st->stack->stack_data[st->start+6])));
+	else
+		bl = map_id2bl(st->rid);
+	if(bl->type == BL_PC && ((struct map_session_data *)bl)->state.potionpitcher_flag)
+		bl = map_id2bl(((struct map_session_data *)bl)->skilltarget);
+	if(rand()%10000 < per)
+		skill_status_change_start(bl,type,val1,0,0,0,tick,0);
 	return 0;
 }
 
@@ -3704,6 +3832,44 @@ int buildin_sc_end(struct script_state *st)
 //	if(battle_config.etc_log)
 //		printf("sc_end : %d %d\n",st->rid,type);
 	return 0;
+}
+/*==========================================
+ * 状態異常耐性を計算した確率を返す
+ *------------------------------------------
+ */
+int buildin_getscrate(struct script_state *st)
+{
+	struct block_list *bl;
+	int sc_def=100,sc_def_mdef2,sc_def_vit2,sc_def_int2,sc_def_luk2;
+	int type,rate,luk;
+
+	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	rate=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	if( st->end>st->start+4 ) //指定したキャラの耐性を計算する
+		bl = map_id2bl(conv_num(st,& (st->stack->stack_data[st->start+6])));
+	else
+		bl = map_id2bl(st->rid);
+
+	luk = battle_get_luk(bl);
+	sc_def_mdef2=100 - (3 + battle_get_mdef(bl) + luk/3);
+	sc_def_vit2=100 - (3 + battle_get_vit(bl) + luk/3);
+	sc_def_int2=100 - (3 + battle_get_int(bl) + luk/3);
+	sc_def_luk2=100 - (3 + luk);
+
+	if(type==SC_STONE || type==SC_FREEZE)
+		sc_def=sc_def_mdef2;
+	else if(type==SC_STAN || type==SC_POISON || type==SC_SILENCE)
+		sc_def=sc_def_vit2;
+	else if(type==SC_SLEEP || type==SC_CONFUSION || type==SC_BLIND)
+		sc_def=sc_def_int2;
+	else if(type==SC_CURSE)
+		sc_def=sc_def_luk2;
+
+	rate=rate*sc_def/100;
+	push_val(st->stack,C_INT,rate);
+
+	return 0;
+
 }
 
 /*==========================================
@@ -3775,7 +3941,15 @@ int buildin_changebase(struct script_state *st)
 {
 	struct map_session_data *sd;
 	int vclass;
-	sd=script_rid2sd(st);
+
+	if( st->end>st->start+3 )
+		sd=map_id2sd(conv_num(st,& (st->stack->stack_data[st->start+3])));
+	else
+		sd=script_rid2sd(st);
+
+	if(sd == NULL)
+		return 0;
+
 	vclass = conv_num(st,& (st->stack->stack_data[st->start+2]));
 	if(vclass == 22 && !battle_config.wedding_modifydisplay)
 		return 0;
@@ -3827,9 +4001,11 @@ int buildin_changesex(struct script_state *st)
 int buildin_waitingroom(struct script_state *st)
 {
 	char *name,*ev="";
-	int limit, trigger = 0;
+	int limit, trigger = 0,pub=1;
 	name=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	limit= conv_num(st,& (st->stack->stack_data[st->start+3]));
+	if(limit==0)
+		pub=3;
 
 	if( (st->end > st->start+5) ){
 		struct script_data* data=&(st->stack->stack_data[st->start+5]);
@@ -3849,7 +4025,7 @@ int buildin_waitingroom(struct script_state *st)
 			ev=conv_str(st,& (st->stack->stack_data[st->start+4]));
 	}
 	chat_createnpcchat( (struct npc_data *)map_id2bl(st->oid),
-		limit,trigger,name,strlen(name)+1,ev);
+		limit,pub,trigger,name,strlen(name)+1,ev);
 	return 0;
 }
 /*==========================================
@@ -4043,7 +4219,7 @@ int buildin_isloggedin(struct script_state *st)
  *
  *------------------------------------------
  */
-enum { MF_NOMEMO,MF_NOTELEPORT,MF_NOSAVE,MF_NOBRANCH,MF_NOPENALTY,MF_NOZENYPENALTY,MF_PVP,MF_PVP_NOPARTY,MF_PVP_NOGUILD,MF_GVG,MF_GVG_NOPARTY };
+enum { MF_NOMEMO,MF_NOTELEPORT,MF_NOSAVE,MF_NOBRANCH,MF_NOPENALTY,MF_PVP,MF_PVP_NOPARTY,MF_PVP_NOGUILD,MF_GVG,MF_GVG_NOPARTY,MF_NOZENYPENALTY,MF_NOTRADE,MF_NOSKILL };
 
 int buildin_setmapflagnosave(struct script_state *st)
 {
@@ -4098,6 +4274,12 @@ int buildin_setmapflag(struct script_state *st)
 				break;
 			case MF_NOZENYPENALTY:
 				map[m].flag.nozenypenalty=1;
+				break;
+			case MF_NOTRADE:
+				map[m].flag.notrade=1;
+				break;
+			case MF_NOSKILL:
+				map[m].flag.noskill=1;
 				break;
 		}
 	}
@@ -4321,12 +4503,18 @@ int buildin_agitcheck(struct script_state *st)
 int buildin_flagemblem(struct script_state *st)
 {
 	int g_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	struct block_list *bl=map_id2bl(st->oid);
+	struct npc_data *nd;
 
 	if(g_id < 0) return 0;
 
 //	printf("Script.c: [FlagEmblem] GuildID=%d, Emblem=%d.\n", g->guild_id, g->emblem_id);
-	((struct npc_data *)map_id2bl(st->oid))->u.scr.guild_id = g_id;
-	return 1;
+	if(bl && (nd=(struct npc_data *)bl)){
+		nd->u.scr.guild_id = g_id;
+		return 1;
+	}
+
+	return 0;
 }
 
 int buildin_getcastlename(struct script_state *st)
@@ -4338,13 +4526,8 @@ int buildin_getcastlename(struct script_state *st)
 	for(i=0;i<MAX_GUILDCASTLE;i++){
 		if( (gc=guild_castle_search(i)) != NULL ){
 			if(strcmp(mapname,gc->map_name)==0){
-				buf=calloc(24, 1);
-				if(buf==NULL){
-					if(battle_config.error_log)
-						printf("out of memory : buildin_getcastlename\n");
-					exit(1);
-				}
-				strcpy(buf,gc->castle_name);
+				buf=(char *)aCalloc(24,sizeof(char));
+				strncpy(buf,gc->castle_name,24);
 				break;
 			}
 		}
@@ -4656,16 +4839,163 @@ int buildin_getitemname(struct script_state *st)
 
 	i_data = NULL;
 	i_data = itemdb_search(item_id);
-	item_name=calloc(24, 1);
-
-	if(i_data==NULL){
-		if(battle_config.error_log)
-			printf("out of memory : buildin_getitemname\n");
-		exit(1);
-	}
+	item_name=(char *)aCalloc(24,sizeof(char));
 
 	strncpy(item_name,i_data->jname,23);
 	push_str(st->stack,C_STR,item_name);
+	return 0;
+}
+
+/*==========================================
+ * PCの所持品情報読み取り
+ *------------------------------------------
+ */
+int buildin_getinventorylist(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	int i,j=0;
+	if(!sd) return 0;
+	for(i=0;i<MAX_INVENTORY;i++){
+		if(sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].amount > 0){
+			pc_setreg(sd,add_str("@inventorylist_id")+(j<<24),sd->status.inventory[i].nameid);
+			pc_setreg(sd,add_str("@inventorylist_amount")+(j<<24),sd->status.inventory[i].amount);
+			pc_setreg(sd,add_str("@inventorylist_equip")+(j<<24),sd->status.inventory[i].equip);
+			pc_setreg(sd,add_str("@inventorylist_refine")+(j<<24),sd->status.inventory[i].refine);
+			pc_setreg(sd,add_str("@inventorylist_identify")+(j<<24),sd->status.inventory[i].identify);
+			pc_setreg(sd,add_str("@inventorylist_attribute")+(j<<24),sd->status.inventory[i].attribute);
+			pc_setreg(sd,add_str("@inventorylist_card1")+(j<<24),sd->status.inventory[i].card[0]);
+			pc_setreg(sd,add_str("@inventorylist_card2")+(j<<24),sd->status.inventory[i].card[1]);
+			pc_setreg(sd,add_str("@inventorylist_card3")+(j<<24),sd->status.inventory[i].card[2]);
+			pc_setreg(sd,add_str("@inventorylist_card4")+(j<<24),sd->status.inventory[i].card[3]);
+			j++;
+		}
+	}
+	pc_setreg(sd,add_str("@inventorylist_count"),j);
+	return 0;
+}
+
+int buildin_getskilllist(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	int i,j=0;
+	if(!sd) return 0;
+	for(i=0;i<MAX_SKILL;i++){
+		if(sd->status.skill[i].id > 0 && sd->status.skill[i].lv > 0){
+			pc_setreg(sd,add_str("@skilllist_id")+(j<<24),sd->status.skill[i].id);
+			pc_setreg(sd,add_str("@skilllist_lv")+(j<<24),sd->status.skill[i].lv);
+			pc_setreg(sd,add_str("@skilllist_flag")+(j<<24),sd->status.skill[i].flag);
+			j++;
+		}
+	}
+	pc_setreg(sd,add_str("@skilllist_count"),j);
+	return 0;
+}
+
+int buildin_clearitem(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	int i;
+	if(sd==NULL) return 0;
+	for (i=0; i<MAX_INVENTORY; i++) {
+		if (sd->status.inventory[i].amount)
+			pc_delitem(sd, i, sd->status.inventory[i].amount, 0);
+	}
+	return 0;
+}
+/*==========================================
+ * アイテム修理関連
+ * 修理可能アイテムを数える buildin_getrepairableitemcount
+ * 修理可能アイテムを修理する buildin_repairitem
+ *------------------------------------------
+ */
+int buildin_getrepairableitemcount(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	int i,c=0;
+
+	if(sd){
+		for(i=0;i<MAX_INVENTORY;i++){
+			if(sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].amount > 0 && sd->status.inventory[i].attribute){
+				c++;
+			}
+		}
+		push_val(st->stack,C_INT,c);
+	}
+	return 0;
+}
+int buildin_repairitem(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	int i,c=0;
+	if(sd){
+		for(i=0;i<MAX_INVENTORY;i++){
+			if(sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].amount > 0 && sd->status.inventory[i].attribute){
+				sd->status.inventory[i].attribute = 0;
+				c++;
+			}
+		}
+		clif_itemlist(sd);
+		clif_equiplist(sd);
+	}
+	return 0;
+}
+/*==========================================
+ * NPCクラスチェンジ
+ * classは変わりたいclass
+ * typeは通常0なのかな？
+ *------------------------------------------
+ */
+int buildin_classchange(struct script_state *st)
+{
+	int class,type;
+	struct block_list *bl=map_id2bl(st->oid);
+	
+	if(bl==NULL) return 0;
+
+	class=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	type=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	clif_class_change(bl,class,type);
+	return 0;
+}
+
+/*==========================================
+ * NPCから発生するエフェクト
+ *------------------------------------------
+ */
+int buildin_misceffect(struct script_state *st)
+{
+	int type;
+
+	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if(st->oid)
+		clif_misceffect2(map_id2bl(st->oid),type);
+	else{
+		struct map_session_data *sd=script_rid2sd(st);
+		if(sd)
+			clif_misceffect2(&sd->bl,type);
+	}
+	return 0;
+}
+/*==========================================
+ * サウンドエフェクト
+ *------------------------------------------
+ */
+int buildin_soundeffect(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	char *name;
+	int type=0;
+
+
+	name=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	type=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	if(sd){
+		if(st->oid)
+			clif_soundeffect(sd,map_id2bl(st->oid),name,type);
+		else{
+			clif_soundeffect(sd,&sd->bl,name,type);
+		}
+	}
 	return 0;
 }
 
@@ -4759,12 +5089,8 @@ void op_add(struct script_state* st)
 		st->stack->stack_data[st->stack->sp-1].u.num += st->stack->stack_data[st->stack->sp].u.num;
 	} else { // ssの予定
 		char *buf;
-		buf=calloc(strlen(st->stack->stack_data[st->stack->sp-1].u.str)+
-				strlen(st->stack->stack_data[st->stack->sp].u.str)+1, 1);
-		if(buf==NULL){
-			printf("out of memory : op_add\n");
-			exit(1);
-		}
+		buf=(char *)aCalloc(strlen(st->stack->stack_data[st->stack->sp-1].u.str)+
+				strlen(st->stack->stack_data[st->stack->sp].u.str)+1,sizeof(char));
 		strcpy(buf,st->stack->stack_data[st->stack->sp-1].u.str);
 		strcat(buf,st->stack->stack_data[st->stack->sp].u.str);
 		if(st->stack->stack_data[st->stack->sp-1].type==C_STR)
@@ -4866,6 +5192,12 @@ void op_2num(struct script_state *st,int op,int i1,int i2)
 		break;
 	case C_LE:
 		i1=i1<=i2;
+		break;
+	case C_R_SHIFT:
+		i1=i1>>i2;
+		break;
+	case C_L_SHIFT:
+		i1=i1<<i2;
 		break;
 	}
 	push_val(st->stack,C_INT,i1);
@@ -5082,6 +5414,8 @@ int run_script_main(unsigned char *script,int pos,int rid,int oid,struct script_
 		case C_XOR:
 		case C_LAND:
 		case C_LOR:
+		case C_R_SHIFT:
+		case C_L_SHIFT:
 			op_2(st,c);
 			break;
 
@@ -5130,10 +5464,7 @@ int run_script_main(unsigned char *script,int pos,int rid,int oid,struct script_
 		if(sd/* && sd->npc_stackbuf==NULL*/){
 			if( sd->npc_stackbuf )
 				free( sd->npc_stackbuf );
-			if( (sd->npc_stackbuf = malloc(sizeof(stack->stack_data[0]) * stack->sp_max))==NULL ){
-				printf("run_script: out of memory ! (rerunline)\n");
-				exit(0);
-			}
+			sd->npc_stackbuf = (char *)aCalloc(sizeof(stack->stack_data[0])*stack->sp_max,sizeof(char));
 			memcpy(sd->npc_stackbuf, stack->stack_data, sizeof(stack->stack_data[0]) * stack->sp_max);
 			sd->npc_stack = stack->sp;
 			sd->npc_stackmax = stack->sp_max;
@@ -5164,11 +5495,7 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 		script=sd->npc_script;
 		stack.sp=sd->npc_stack;
 		stack.sp_max=sd->npc_stackmax;
-		stack.stack_data=calloc(sizeof(stack.stack_data[0])*stack.sp_max, 1);
-		if(stack.stack_data==NULL){
-			printf("out of memory : run_script (restore stack)\n");
-			exit(1);
-		}
+		stack.stack_data=(struct script_data *)aCalloc(stack.sp_max,sizeof(stack.stack_data[0]));
 		memcpy(stack.stack_data,sd->npc_stackbuf,sizeof(stack.stack_data[0])*stack.sp_max);
 		free(sd->npc_stackbuf);
 		sd->npc_stackbuf=NULL;
@@ -5176,11 +5503,7 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 		// スタック初期化
 		stack.sp=0;
 		stack.sp_max=64;
-		stack.stack_data=calloc(sizeof(stack.stack_data[0])*stack.sp_max, 1);
-		if(stack.stack_data==NULL){
-			printf("out of memory : run_script (initialize stack)\n");
-			exit(1);
-		}
+		stack.stack_data=(struct script_data *)aCalloc(stack.sp_max,sizeof(stack.stack_data[0]));
 	}
 	st.stack=&stack;
 	st.pos=pos;
@@ -5224,10 +5547,7 @@ int mapreg_setregstr(int num,const char *str)
 		mapreg_dirty=1;
 		return 0;
 	}
-	if( (p=calloc(strlen(str)+1, 1))==NULL ){
-		printf("script: mapreg_setregstr: out of memory !!");
-		return 0;
-	}
+	p=(char *)aCalloc(strlen(str)+1, sizeof(char));
 	strcpy(p,str);
 	numdb_insert(mapregstr_db,num,p);
 	mapreg_dirty=1;
@@ -5257,10 +5577,7 @@ static int script_load_mapreg()
 				printf("%s: %s broken data !\n",mapreg_txt,buf1);
 				continue;
 			}
-			if( (p=(char *)calloc(strlen(buf2) + 1, 1))==NULL ){
-				printf("script_load_mapreg: out of memory !!");
-				exit(0);
-			}
+			p=(char *)aCalloc(strlen(buf2) + 1,sizeof(char));
 			strcpy(p,buf2);
 			s=add_str(buf1);
 			numdb_insert(mapregstr_db,(i<<24)|s,p);
@@ -5390,10 +5707,41 @@ int script_config_read(char *cfgName)
  * 終了
  *------------------------------------------
  */
+static int mapreg_db_final(void *key,void *data,va_list ap)
+{
+	return 0;
+}
+static int mapregstr_db_final(void *key,void *data,va_list ap)
+{
+	free(data);
+	return 0;
+}
+static int scriptlabel_db_final(void *key,void *data,va_list ap)
+{
+	return 0;
+}
+static int userfunc_db_final(void *key,void *data,va_list ap)
+{
+	free(key);
+	free(data);
+	return 0;
+}
 int do_final_script()
 {
 	if(mapreg_dirty>=0)
 		script_save_mapreg();
+	if(script_buf)
+		free(script_buf);
+
+	if(mapreg_db)
+		numdb_final(mapreg_db,mapreg_db_final);
+	if(mapregstr_db)
+		strdb_final(mapregstr_db,mapregstr_db_final);
+	if(scriptlabel_db)
+		strdb_final(scriptlabel_db,scriptlabel_db_final);
+	if(userfunc_db)
+		strdb_final(userfunc_db,userfunc_db_final);
+
 	return 0;
 }
 /*==========================================

@@ -1,7 +1,8 @@
 # $Id: Makefile,v 1.1 2003/06/20 05:30:43 lemit Exp $
 
 CC = gcc -pipe
-PACKETDEF = -DPACKETVER=5 -DNEW_006b
+PACKETDEF = -DPACKETVER=6 -DNEW_006b
+#PACKETDEF = -DPACKETVER=5 -DNEW_006b
 #PACKETDEF = -DPACKETVER=4 -DNEW_006b
 #PACKETDEF = -DPACKETVER=3 -DNEW_006b
 #PACKETDEF = -DPACKETVER=2 -DNEW_006b
@@ -15,16 +16,34 @@ else
 OS_TYPE =
 endif
 
-CFLAGS = -g -O2 -Wall -I../common $(PACKETDEF) $(OS_TYPE)
+ifeq ($(findstring FreeBSD,$(PLATFORM)), FreeBSD)
+MAKE = gmake
+else
+MAKE = make
+endif
+
+CFLAGS = -Wall -I../common $(PACKETDEF) $(OS_TYPE)
+
+#debug(recommended)
+CFLAGS += -g
+
+#optimize(recommended)
+CFLAGS += -O2
+
+#change authfifo
+#CFLAGS += -DCMP_AUTHFIFO_IP -DCMP_AUTHFIFO_LOGIN2
+
+#optimize for pentium4
+#CFLAGS += -march=pentium4 -mfpmath=sse -msse -msse2
 
 MKDEF = CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 
 all clean: src/common/GNUmakefile src/login/GNUmakefile src/char/GNUmakefile src/map/GNUmakefile
-	cd src ; cd common ; make $(MKDEF) $@ ; cd ..
-	cd src ; cd login ; make $(MKDEF) $@ ; cd ..
-	cd src ; cd char ; make $(MKDEF) $@ ; cd ..
-	cd src ; cd map ; make $(MKDEF) $@ ; cd ..
+	cd src ; cd common ; $(MAKE) $(MKDEF) $@ ; cd ..
+	cd src ; cd login ; $(MAKE) $(MKDEF) $@ ; cd ..
+	cd src ; cd char ; $(MAKE) $(MKDEF) $@ ; cd ..
+	cd src ; cd map ; $(MAKE) $(MKDEF) $@ ; cd ..
 
 src/common/GNUmakefile: src/common/Makefile
 	sed -e 's/$$>/$$^/' src/common/Makefile > src/common/GNUmakefile

@@ -15,4 +15,6 @@ int inter_log(char *fmt,...);
 extern int party_share_level;
 extern char inter_log_filename[1024];
 
+void do_final_inter(void);
+
 #endif

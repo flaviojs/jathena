@@ -83,7 +83,7 @@ L1:
 		mes "それでは早速……";
 		mes "<モモタロ体験館>!!";
 		mes "楽しんできてください";
-		next;
+		close2;
 		warp "ama_test",52,35;
 		end;
 L2:
@@ -160,7 +160,7 @@ ama_test.gat,52,44,4	script	待機室担当者	109,{
 		mes "外の職員から話を聞いてきなさい。";
 		mes "それからです……";
 		mes "さようなら～";
-		next;
+		close2;
 		warp "amatsu.gat",223,230;
 		end;
 L1:
@@ -315,7 +315,7 @@ L1:
 	mes "[管理人]";
 	mes "何はともあれ、その強き心を";
 	mes "失うなかれ！";
-	next;
+	close2;
 	set event_momo,1;
 	stopnpctimer "roomt";
 	disablenpc "管理人";
@@ -356,7 +356,7 @@ L2_1:
 	mes "[管理人]";
 	mes "何はともあれ、その強き心を";
 	mes "失うなかれ！";
-	next;
+	close2;
 	set event_momo,2;
 	stopnpctimer "roomt";
 	disablenpc "管理人";

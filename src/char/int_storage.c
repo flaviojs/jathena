@@ -1,3 +1,5 @@
+#include <string.h>
+#include <stdlib.h>
 #include "inter.h"
 #include "int_storage.h"
 #include "int_pet.h"
@@ -7,9 +9,8 @@
 #include "socket.h"
 #include "db.h"
 #include "lock.h"
+#include "malloc.h"
 
-#include <string.h>
-#include <stdlib.h>
 
 // ファイル名のデフォルト
 // inter_config_read()で再設定される
@@ -151,12 +152,7 @@ struct storage *account2storage(int account_id)
 	struct storage *s;
 	s=numdb_search(storage_db,account_id);
 	if(s == NULL) {
-		s = calloc(sizeof(struct storage), 1);
-		if(s==NULL){
-			printf("int_storage: out of memory!\n");
-			exit(0);
-		}
-		memset(s,0,sizeof(struct storage));
+		s = (struct storage *)aCalloc(1,sizeof(struct storage));
 		s->account_id=account_id;
 		numdb_insert(storage_db,s->account_id,s);
 	}
@@ -169,12 +165,7 @@ struct guild_storage *guild2storage(int guild_id)
 	if(inter_guild_search(guild_id) != NULL) {
 		gs=numdb_search(guild_storage_db,guild_id);
 		if(gs == NULL) {
-			gs = calloc(sizeof(struct guild_storage), 1);
-			if(gs==NULL){
-				printf("int_storage: out of memory!\n");
-				exit(0);
-			}
-			memset(gs,0,sizeof(struct guild_storage));
+			gs = (struct guild_storage *)aCalloc(1,sizeof(struct guild_storage));
 			gs->guild_id=guild_id;
 			numdb_insert(guild_storage_db,gs->guild_id,gs);
 		}
@@ -201,12 +192,7 @@ int inter_storage_init()
 	}
 	while(fgets(line,65535,fp)){
 		sscanf(line,"%d",&tmp_int);
-		s=calloc(sizeof(struct storage), 1);
-		if(s==NULL){
-			printf("int_storage: out of memory!\n");
-			exit(0);
-		}
-		memset(s,0,sizeof(struct storage));
+		s=(struct storage *)aCalloc(1,sizeof(struct storage));
 		s->account_id=tmp_int;
 		if(s->account_id > 0 && storage_fromstr(line,s) == 0) {
 			numdb_insert(storage_db,s->account_id,s);
@@ -229,12 +215,7 @@ int inter_storage_init()
 	}
 	while(fgets(line,65535,fp)){
 		sscanf(line,"%d",&tmp_int);
-		gs=calloc(sizeof(struct guild_storage), 1);
-		if(gs==NULL){
-			printf("int_storage: out of memory!\n");
-			exit(0);
-		}
-		memset(gs,0,sizeof(struct guild_storage));
+		gs=(struct guild_storage *)aCalloc(1,sizeof(struct guild_storage));
 		gs->guild_id=tmp_int;
 		if(gs->guild_id > 0 && guild_storage_fromstr(line,gs) == 0) {
 			numdb_insert(guild_storage_db,gs->guild_id,gs);
@@ -456,4 +437,27 @@ int inter_storage_parse_frommap(int fd)
 		return 0;
 	}
 	return 1;
+}
+static int storage_db_final(void *key,void *data,va_list ap)
+{
+	struct storage *s=data;
+
+	free(s);
+
+	return 0;
+}
+static int guild_storage_db_final(void *key,void *data,va_list ap)
+{
+	struct guild_storage *gs=data;
+
+	free(gs);
+
+	return 0;
+}
+void do_final_int_storage(void)
+{
+	if(storage_db)
+		numdb_final(storage_db,storage_db_final);
+	if(guild_storage_db)
+		numdb_final(guild_storage_db,guild_storage_db_final);
 }

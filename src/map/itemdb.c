@@ -5,12 +5,13 @@
 
 #include "db.h"
 #include "grfio.h"
+#include "nullpo.h"
+#include "malloc.h"
 #include "map.h"
 #include "battle.h"
 #include "itemdb.h"
 #include "script.h"
 #include "pc.h"
-#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -112,11 +113,7 @@ struct item_data* itemdb_search(int nameid)
 	id=numdb_search(item_db,nameid);
 	if(id) return id;
 
-	id=calloc(sizeof(struct item_data), 1);
-	if(id==NULL){
-		printf("out of memory : itemdb_search\n");
-		exit(1);
-	}
+	id=(struct item_data *)aCalloc(1,sizeof(struct item_data));
 	numdb_insert(item_db,nameid,id);
 
 	id->nameid=nameid;
@@ -192,6 +189,22 @@ int itemdb_isequip3(int nameid)
 	if(type==4 || type==5 || type == 8)
 		return 1;
 	return 0;
+}
+
+/*==========================================
+ * 捨てられるアイテムは1、そうでないアイテムは0
+ *------------------------------------------
+ */
+int itemdb_isdropable(int nameid)
+{
+	//結婚指輪は捨てられない
+	switch(nameid){
+	case 2634: //結婚指輪
+	case 2635: //結婚指輪
+		return 0;
+	}
+
+	return 1;
 }
 
 //
@@ -539,6 +552,40 @@ static int itemdb_read_itemnametable(void)
 	return 0;
 }
 /*==========================================
+ * カードイラストのリソース名前テーブルを読み込む
+ *------------------------------------------
+ */
+static int itemdb_read_cardillustnametable(void)
+{
+	char *buf,*p;
+	int s;
+
+	buf=grfio_reads("data\\num2cardillustnametable.txt",&s);
+
+	if(buf==NULL)
+		return -1;
+
+	buf[s]=0;
+	for(p=buf;p-buf<s;){
+		int nameid;
+		char buf2[64];
+
+		if(	sscanf(p,"%d#%[^#]#",&nameid,buf2)==2 ){
+			strcat(buf2,".bmp");
+			memcpy(itemdb_search(nameid)->cardillustname,buf2,64);
+//			printf("%d %s\n",nameid,itemdb_search(nameid)->cardillustname);
+		}
+		
+		p=strchr(p,10);
+		if(!p) break;
+		p++;
+	}
+	free(buf);
+	printf("read data\\num2cardillustnametable.txt done.\n");
+
+	return 0;
+}
+/*==========================================
  * 装備制限ファイル読み出し
  *------------------------------------------
  */
@@ -642,6 +689,6 @@ int do_init_itemdb(void)
 	itemdb_read_noequip();
 	if(battle_config.item_name_override_grffile)
 		itemdb_read_itemnametable();
-
+	itemdb_read_cardillustnametable();
 	return 0;
 }

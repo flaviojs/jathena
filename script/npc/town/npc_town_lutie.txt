@@ -53,7 +53,7 @@ aldebaran.gat,168,168,4	script	リンクサンタ	718,{
 		mes "さあ、行こうか！";
 		mes "ホーホーホー";
 		mes "メリークリスマス!!";
-		next;
+		close2;
 		warp "xmas_fild01.gat",68,152;
 		end;
 	Lcancel:

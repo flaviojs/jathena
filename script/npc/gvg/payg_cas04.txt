@@ -1,545 +1,73 @@
 //===================================================================
-//pay_gld04         by kalen
+//Ragnarok Online EP2.5 GVG Script	payg_cas04         by kalen
 //===================================================================
-pay_gld.gat,137,160,0	script	ギルドフラッグ#f4-1	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
+-	script	gfpayD	722,{
+callfunc "flagsc","payg_cas04.gat",2,0,0,0;
 OnRecvCastleF04:
 	FlagEmblem getcastledata("payg_cas04.gat",1);
 	end;
 }
-pay_gld.gat,143,160,0	script	ギルドフラッグ#f4-2	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
-OnRecvCastleF04:
-	FlagEmblem getcastledata("payg_cas04.gat",1);
-	end;
-}
-pay_gld.gat,133,151,2	script	ギルドフラッグ#f4-3	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
-OnRecvCastleF04:
-	FlagEmblem getcastledata("payg_cas04.gat",1);
-	end;
-}
-pay_gld.gat,153,166,1	script	ギルドフラッグ#f4-4	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
-OnRecvCastleF04:
-	FlagEmblem getcastledata("payg_cas04.gat",1);
-	end;
-}
-payg_cas04.gat,255,259,0	script	ギルドフラッグ#f4-5	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
-OnRecvCastleF04:
-	FlagEmblem getcastledata("payg_cas04.gat",1);
-	end;
-}
-payg_cas04.gat,248,259,0	script	ギルドフラッグ#f4-6	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
-OnRecvCastleF04:
-	FlagEmblem getcastledata("payg_cas04.gat",1);
-	end;
-}
-payg_cas04.gat,248,168,6	script	ギルドフラッグ#f4-7	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
-OnRecvCastleF04:
-	FlagEmblem getcastledata("payg_cas04.gat",1);
-	end;
-}
-payg_cas04.gat,248,160,6	script	ギルドフラッグ#f4-8	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
-OnRecvCastleF04:
-	FlagEmblem getcastledata("payg_cas04.gat",1);
-	end;
-}
-payg_cas04.gat,232,181,4	script	ギルドフラッグ#f4-9	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
-OnRecvCastleF04:
-	FlagEmblem getcastledata("payg_cas04.gat",1);
-	end;
-}
-payg_cas04.gat,239,181,4	script	ギルドフラッグ#f4-10	722,{
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (@GIDf4 != 0) goto LStartg;
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "正式所有者がないアジトであることを";
-		mes "公表する。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "こちらを守っている凄じい";
-		mes "試練に勝って、エンペリウムを";
-		mes "破壊する勇者には国王が";
-		mes "認定するアジト所有権が附与される";
-		close;
-LStartg:
-		mes "[ ルーンミッドガッツ王国領 ]";
-		mes " ";
-		mes "1.";
-		mes "こちらはルーンミッドガッツ王国に";
-		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GIDf4) + " ^000000の";
-		mes "所有であることを認められている。";
-		next;
-		mes " ";
-		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GIDf4) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GIDf4) + " ^000000である。";
-		mes "これに異議のある者は、剣を取り";
-		mes "力を以って名誉を勝ち取りなさい。";
-		close;
-OnRecvCastleF04:
-	FlagEmblem getcastledata("payg_cas04.gat",1);
-	end;
-}
+pay_gld.gat,137,160,0	duplicate(gfpayD)	ギルドフラッグ#f4-1	722
+pay_gld.gat,143,160,0	duplicate(gfpayD)	ギルドフラッグ#f4-2	722
+pay_gld.gat,133,151,2	duplicate(gfpayD)	ギルドフラッグ#f4-3	722
+pay_gld.gat,153,166,1	duplicate(gfpayD)	ギルドフラッグ#f4-4	722
+payg_cas04.gat,255,259,0	duplicate(gfpayD)	ギルドフラッグ#f4-5	722
+payg_cas04.gat,248,259,0	duplicate(gfpayD)	ギルドフラッグ#f4-6	722
+payg_cas04.gat,248,168,6	duplicate(gfpayD)	ギルドフラッグ#f4-7	722
+payg_cas04.gat,248,160,6	duplicate(gfpayD)	ギルドフラッグ#f4-8	722
+payg_cas04.gat,232,181,4	duplicate(gfpayD)	ギルドフラッグ#f4-9	722
+payg_cas04.gat,239,181,4	duplicate(gfpayD)	ギルドフラッグ#f4-10	722
 //------------------------------カプラ--------------------------------
 payg_cas04.gat,40,235,1	script	カプラ職員::kapra_payg04	117,{
-	cutin "kafra_01",2;
-	set @GIDf4,getcastledata("payg_cas04.gat",1);
-	if (getcharid(2) == @GIDf4) goto LStartg;
-	mes "[カプラ職員]";
-	mes "私は、ギルド";
-	mes " ^ff0000" + GetGuildName(@GIDf4) + "^000000";
-	mes "の皆様にだけお仕えするように";
-	mes "契約されております。";
-	mes "他のカプラサービスを";
-	mes "ご利用くださいませ。";
-	goto L_EXIT;
-LStartg:
-	mes "[カプラ職員]";
-	mes "いらっしゃいませ ^ff0000" + GetGuildName(@GIDf4) + "^000000 の皆さん";
-	mes "カプラサービスは";
-	mes "いつも皆様のそばにいます。";
-	next;
+	callfunc "gkfmenu","payg_cas04.gat";
 	menu "倉庫サービス",L2,"空間移動サービス",L3,"カートサービス",L4,"終了",L7;
 L2:
-	if(getskilllv(1) < 6) goto Lerror2_1;
-	if (Zeny < 40) goto Lerror2_2;
-		set Zeny,Zeny-40;
-		openstorage;
-		goto L_EXIT;
-	Lerror2_1:
-		mes "[カプラ職員]";
-		mes "倉庫は基本スキルレベル6を";
-		mes "習得してから利用可能となります。";
-		goto L_EXIT;
-	Lerror2_2:
-		mes "[カプラ職員]";
-		mes "お客様、お金が足りません。";
-		mes "倉庫利用料金は 40 Zenyです。";
-		goto L_EXIT;
+	callfunc "kfstorage",40;
 L3:
-	mes "[カプラ職員]";
-	mes "目的地をお選び下さい。";
-	next;
-	menu "フェイヨン -> 200 z",L3_1,"取り消し",L3_2;
-		L3_1:
-			if (Zeny < 200) goto Lerror3;
-			set Zeny,Zeny-200;set KF_PIT,KF_PIT+20;warp "payon.gat",82,128;end;
-		L3_2:
-				mes "[カプラ職員]";
-				mes "ありがとうございました。";
-				mes "またご利用くださいませ。";
-				goto L_EXIT;
-		Lerror3:
-				mes "[カプラ職員]";
-  				mes "お客様、お金が足りません。";
-   				mes "所持金をお確かめください。";
-				goto L_EXIT;
+	callfunc "gkfwarp","フェイヨン","payon.gat",82,128;
 L4:
-	if (!((Class == 5) || (Class == 10) || (Class == 18))) goto Lerror4_1;
-	mes "[カプラ職員]";
-	mes "カート利用料金は 800 Zenyです。";
-	mes "また、カートを利用するには";
-	mes "｢プッシュカート｣スキルが必要です。";
-	mes "そのスキルがないとカートを利用";
-	mes "できずにお金だけ消えてしまいます。";
-	mes "準備はよろしいですか？";
-	next;
-	menu "利用する",L4_1,"取り消し",-;
-		mes "[カプラ職員]";
-		mes "ありがとうございました。";
-		mes "またご利用くださいませ。";
-		goto L_EXIT;
-	L4_1:
-		if (Zeny < 800) goto Lerror4_2;
-		set Zeny,Zeny-800;
-		setcart;
-		goto L_EXIT;
-	Lerror4_1:
-		mes "[カプラ職員]";
-		mes "申し訳ございません。";
-		mes "カートは商人とブラックスミス、";
-		mes "そしてアルケミスト専用の";
-		mes "サービスです。";
-		goto L_EXIT;
-	Lerror4_2:
-		mes "[カプラ職員]";
-		mes "お客様、お金が足りません。";
-		mes "カート利用料金は 800 Zenyです。";
-		goto L_EXIT;
-//Cart already have
-//Lerror4_3:
-//mes "[カプラ職員]";
-//mes "お客様は現在カートを";
-//mes "利用されています。";
-//goto L_EXIT;
+	callfunc "kfcart",800;
 L7:
-	mes "[カプラ職員]";
-	mes "我々カプラサービスは、より完璧な";
-	mes "サービスと管理業務を目指し";
-	mes "お客様が安心してご利用いただけるよう";
-	mes "いつも最善を尽くしています。";
-	mes "（株）カプラサービスをご利用いただき";
-	mes "ありがとうございました。";
-L_EXIT:
-	cutin "kafra_01",255;
-	close;
-OnInit:
-	disablenpc "kapra_payg04";
-	end;
-OnRecvCastleF04:
-	if (getcastledata("payg_cas04.gat",9) != 1) end;
-	enablenpc "kapra_payg04";
-	end;
+	callfunc "kfend";
 }
 //-------------------------------執事---------------------------------
-//payg_cas04.gat,38,284,3	script	ディージェイ	55,{
-//	set @GIDf4,getcastledata("payg_cas04.gat",1);
-//	if (getcharid(2) == @GIDf4) goto LStartg;
-//	mes "NO MSG";
-//	close;
-//LStartgm:
-//	mes "[執事ディージェイ]";
-//	mes "あなた方がいくら脅そうとも、";
-//	mes "私は私のマスターである";
-//	mes "^ff0000" + getguildmaster(@GIDf4) + "^000000様にのみ";
-//	mes "お仕えする身である。";
-//	mes "ガーディアンたちはどこか！";
-//	mes "早くこの無礼な者等を追放しなさい！";
-//	close;
-//LStartg:
-//	mes "執事機能は未実装です。";
-//	close;
-//}
-//-----------------------------スイッチ-------------------------------
-payg_cas04.gat,143,45,0	script	　	111,{
-	mes "小さなレバーがあります。";
-	mes "引きますか？";
-	next;
-	menu "引く",-,"引かない",L2;
-	warp "payg_cas04",38,285;
-	end;
+payg_cas04.gat,38,284,3	script	ディージェイ	55,{
+	callfunc "Steward_menu0","payg_cas04.gat","ディージェイ";
+	menu "砦の状態を表示",L1,"商業発展に投資",L2,"砦の防衛に投資",L3,"ガーディアン設置",L4,"カプラとの契約 / 解雇",L5,"マスターの部屋に入る",L6,"アジトを放棄する",L7;
+L1:
+	callfunc "Steward_menu1","payg_cas04.gat","ディージェイ";
 L2:
+	callfunc "Steward_menu2","payg_cas04.gat","ディージェイ";
+L3:
+	callfunc "Steward_menu3","payg_cas04.gat","ディージェイ";
+L4:
+	callfunc "Steward_menu4","payg_cas04.gat","ディージェイ";
+	if (@GDnum == 10) monster "payg_cas04.gat",251,212,"--ja--",1285,1,"Agit_C04::On_GDf41";
+	if (@GDnum == 11) monster "payg_cas04.gat",232,212,"--ja--",1285,1,"Agit_C04::On_GDf42";
+	if (@GDnum == 12) monster "payg_cas04.gat",231,175,"--ja--",1285,1,"Agit_C04::On_GDf43";
+	if (@GDnum == 13) monster "payg_cas04.gat",32,287,"--ja--",1285,1,"Agit_C04::On_GDf44";
+	if (@GDnum == 14) monster "payg_cas04.gat",32,232,"--ja--",1285,1,"Agit_C04::On_GDf45";
+	if (@GDnum == 15) monster "payg_cas04.gat",35,45,"--ja--",1285,1,"Agit_C04::On_GDf46";
+	if (@GDnum == 16) monster "payg_cas04.gat",36,17,"--ja--",1285,1,"Agit_C04::On_GDf47";
+	if (@GDnum == 17) monster "payg_cas04.gat",270,41,"--ja--",1286,1,"Agit_C04::On_GDf48";
+	mes "[執事ディージェイ]";
+	mes "ガーディアンが設置されました。";
+	mes "ガーディアンは私達の城を";
+	mes "敵から守ってくれるでしょう。";
 	close;
+L5:
+	callfunc "Steward_menu5","payg_cas04.gat","ディージェイ","kapra_payg04";
+L6:
+	callfunc "Steward_menu6","payg_cas04.gat","ディージェイ",143,45;
+L7:
+	callfunc "Steward_menu7","payg_cas04.gat","ディージェイ";
+	callfunc "resetcastledata","payg_cas04.gat","::OnRecvCastleF04","kapra_payg04",@GID;
+}
+//-----------------------------スイッチ-------------------------------
+payg_cas04.gat,151,47,0	script	　	111,{
+callfunc "gdswitch","payg_cas04.gat",38,285;
 }
 //-----------------------------スイッチ2------------------------------
 payg_cas04.gat,52,48,0	script	　	111,{
-	mes "[声]";
-	mes "試練に挑むならば先へ進むがよい";
-	next;
-	mes " ";
-	mes "小さなレバーがあります。";
-	mes "引きますか？";
-	next;
-	menu "引く",-,"引かない",L2;
-	getcastledata "payg_cas04.gat",1,@GIDf4;
-	if (getcharid(2) != @GIDf4) goto L1n;
-	if (0 == @GIDf4) goto L1n;
-	warp "gld_dun01",186,39;
-	end;
-L1n:
-	mes " ";
-	mes "しかし何も起こらなかった。";
-L2:
-	close;
+callfunc "gdswitch2","payg_cas04.gat","gld_dun01.gat",186,39;
 }

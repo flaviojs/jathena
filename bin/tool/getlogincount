@@ -19,6 +19,7 @@
 
 $loginserverip="127.0.0.1";		#ログイン鯖のIP
 $loginserverport=6900;			#ログイン鯖のポート
+$loginversion=10;			#ログイン鯖のバージョン
 $loginaccount="s1";			#アカウント
 $loginpasswd="p1";			#パスワード
 
@@ -54,7 +55,7 @@ if($er || $@){
 }
 
 #ログイン要求
-print $so pack("v V a24 a24 C",0x0064,9,$loginaccount,$loginpasswd,3);
+print $so pack("v V a24 a24 C",0x0064,$loginversion,$loginaccount,$loginpasswd,3);
 $so->flush();
 
 # 成功してない

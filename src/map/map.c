@@ -9,6 +9,8 @@
 #include "timer.h"
 #include "db.h"
 #include "grfio.h"
+#include "nullpo.h"
+#include "malloc.h"
 #include "map.h"
 #include "chrif.h"
 #include "clif.h"
@@ -27,7 +29,6 @@
 #include "guild.h"
 #include "pet.h"
 #include "atcommand.h"
-#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -60,6 +61,9 @@ int agit_flag=0;
 struct charid2nick {
 	char nick[24];
 	int req_id;
+	int account_id;
+	unsigned long ip;
+	unsigned int port;
 };
 
 
@@ -96,8 +100,10 @@ int map_getusers(void)
  */
 int map_freeblock( void *bl )
 {
-	if(block_free_lock==0)
+	if(block_free_lock==0){
 		free(bl);
+		bl = NULL;
+	}
 	else{
 		if( block_free_count>=block_free_max ) {
 			if(battle_config.error_log)
@@ -131,8 +137,10 @@ int map_freeblock_unlock(void)
 //			if(battle_config.error_log)
 //				printf("map_freeblock_unlock: free %d object\n",block_free_count);
 //		}
-		for(i=0;i<block_free_count;i++)
+		for(i=0;i<block_free_count;i++){
 			free(block_free[i]);
+			block_free[i] = NULL;
+		}
 		block_free_count=0;
 	}else if(block_free_lock<0){
 		if(battle_config.error_log)
@@ -184,7 +192,7 @@ int map_addblock(struct block_list *bl)
 		bl->prev = &bl_head;
 		if(bl->next) bl->next->prev = bl;
 		map[m].block_mob[x/BLOCK_SIZE+(y/BLOCK_SIZE)*map[m].bxs] = bl;
-		map[m].block_mob_count[x/BLOCK_SIZE+(y/BLOCK_SIZE)*map[m].bxs]++;;
+		map[m].block_mob_count[x/BLOCK_SIZE+(y/BLOCK_SIZE)*map[m].bxs]++;
 	} else {
 		bl->next = map[m].block[x/BLOCK_SIZE+(y/BLOCK_SIZE)*map[m].bxs];
 		bl->prev = &bl_head;
@@ -205,6 +213,7 @@ int map_addblock(struct block_list *bl)
  */
 int map_delblock(struct block_list *bl)
 {
+	int b;
 	nullpo_retr(0, bl);
 
 	// 既にblocklistから抜けている
@@ -217,19 +226,21 @@ int map_delblock(struct block_list *bl)
 		return 0;
 	}
 
+	b = bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs;
+
 	if(bl->type==BL_PC)
 		map[bl->m].users--;
 	if(bl->next) bl->next->prev = bl->prev;
 	if(bl->prev==&bl_head){
 		// リストの頭なので、map[]のblock_listを更新する
 		if(bl->type==BL_MOB){
-			map[bl->m].block_mob[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs] = bl->next;
-			if((map[bl->m].block_mob_count[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs]--) < 0)
-				map[bl->m].block_mob_count[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs] = 0;
+			map[bl->m].block_mob[b] = bl->next;
+			if((map[bl->m].block_mob_count[b]--) < 0)
+				map[bl->m].block_mob_count[b] = 0;
 		} else {
-			map[bl->m].block[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs] = bl->next;
-			if((map[bl->m].block_count[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs]--) < 0)
-				map[bl->m].block_count[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs] = 0;
+			map[bl->m].block[b] = bl->next;
+			if((map[bl->m].block_count[b]--) < 0)
+				map[bl->m].block_count[b] = 0;
 		}
 	} else {
 		bl->prev->next = bl->next;
@@ -678,11 +689,7 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y,struct 
 		return 0;
 	r=rand();
 
-	fitem = calloc(sizeof(*fitem), 1);
-	if(fitem==NULL){
-		printf("out of memory : map_addflooritem\n");
-		exit(1);
-	}
+	fitem = (struct flooritem_data *)aCalloc(1,sizeof(*fitem));
 	fitem->bl.type=BL_ITEM;
 	fitem->bl.prev = fitem->bl.next = NULL;
 	fitem->bl.m=m;
@@ -740,23 +747,22 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y,struct 
  * charid_dbへ追加(返信待ちがあれば返信)
  *------------------------------------------
  */
-void map_addchariddb(int charid,char *name)
+void map_addchariddb(int charid, char *name, int account_id, unsigned long ip, int port)
 {
 	struct charid2nick *p;
 	int req=0;
 	p=numdb_search(charid_db,charid);
 	if(p==NULL){	// データベースにない
-		p = calloc(sizeof(struct charid2nick), 1);
-		if(p==NULL){
-			printf("out of memory : map_addchariddb\n");
-			exit(1);
-		}
+		p = (struct charid2nick *)aCalloc(1,sizeof(struct charid2nick));
 		p->req_id=0;
 	}else
 		numdb_erase(charid_db,charid);
 
 	req=p->req_id;
 	memcpy(p->nick,name,24);
+	p->account_id=account_id;
+	p->ip=ip;
+	p->port=port;
 	p->req_id=0;
 	numdb_insert(charid_db,charid,p);
 	if(req){	// 返信待ちがあれば返信
@@ -764,6 +770,25 @@ void map_addchariddb(int charid,char *name)
 		if(sd!=NULL)
 			clif_solved_charname(sd,charid);
 	}
+	//printf("map add chariddb:%s\n",p->nick);
+	return;
+}
+/*==========================================
+ * charid_dbから削除
+ *------------------------------------------
+ */
+void map_delchariddb(int charid)
+{
+	struct charid2nick *p;
+	p=numdb_search(charid_db,charid);
+	if(p){	// データベースにあった
+		p->ip=0;	//実際に削除すると武器の名前とか取れなくなるのでmap-serverのIPとPortだけ削除
+		p->port=0;
+//		printf("map delete chariddb:%s\n",p->nick);
+	}//else
+//		printf("map delete chariddb:notfound %d\n",charid);
+
+	return;
 }
 /*==========================================
  * charid_dbへ追加（返信要求のみ）
@@ -778,11 +803,7 @@ int map_reqchariddb(struct map_session_data * sd,int charid)
 	p=numdb_search(charid_db,charid);
 	if(p!=NULL)	// データベースにすでにある
 		return 0;
-	p = calloc(sizeof(struct charid2nick), 1);
-	if(p==NULL){
-		printf("out of memory : map_reqchariddb\n");
-		exit(1);
-	}
+	p = (struct charid2nick *)aCalloc(1,sizeof(struct charid2nick));
 	p->req_id=sd->bl.id;
 	numdb_insert(charid_db,charid,p);
 	return 0;
@@ -864,6 +885,11 @@ int map_quit(struct map_session_data *sd)
 	if(sd->sc_data && sd->sc_data[SC_BERSERK].timer!=-1) //バーサーク中の終了はHPを100に
 		sd->status.hp = 100;
 
+	if(sd->sc_data && sd->sc_data[SC_WEDDING].timer!=-1) //結婚中はリログしても1時間は継続
+		pc_setglobalreg(sd,"PC_WEDDING_TIME",sd->sc_data[SC_WEDDING].val2);
+	else
+		pc_setglobalreg(sd,"PC_WEDDING_TIME",0);
+
 	skill_status_change_clear(&sd->bl,1);	// ステータス異常を解除する
 	skill_clear_unitgroup(&sd->bl);	// スキルユニットグループの削除
 	skill_cleartimerskill(&sd->bl);
@@ -912,6 +938,7 @@ int map_quit(struct map_session_data *sd)
 	numdb_erase(id_db,sd->bl.id);
 	strdb_erase(nick_db,sd->status.name);
 	numdb_erase(charid_db,sd->status.char_id);
+//printf("map quit:%s\n",sd->status.name);
 
 	return 0;
 }
@@ -962,9 +989,13 @@ struct map_session_data * map_nick2sd(char *nick)
  */
 struct block_list * map_id2bl(int id)
 {
+	struct block_list *bl;
 	if(id<sizeof(object)/sizeof(object[0]))
-		return object[id];
-	return numdb_search(id_db,id);
+		bl = object[id];
+	else
+		bl = numdb_search(id_db,id);
+
+	return bl;
 }
 
 /*==========================================
@@ -1155,11 +1186,7 @@ int map_setipport(char *name,unsigned long ip,int port)
 
 	md=strdb_search(map_db,name);
 	if(md==NULL){ // not exist -> add new data
-		mdos=calloc(sizeof(*mdos), 1);
-		if(mdos==NULL){
-			printf("out of memory : map_setipport\n");
-			exit(1);
-		}
+		mdos=(struct map_data_other_server *)aCalloc(1,sizeof(struct map_data_other_server));
 		memcpy(mdos->name,name,24);
 		mdos->gat  = NULL;
 		mdos->ip   = ip;
@@ -1175,6 +1202,31 @@ int map_setipport(char *name,unsigned long ip,int port)
 			mdos=(struct map_data_other_server *)md;
 			mdos->ip   = ip;
 			mdos->port = port;
+		}
+	}
+	return 0;
+}
+/*==========================================
+ * 他鯖管理のマップをdbから削除
+ *------------------------------------------
+ */
+int map_eraseipport(char *name,unsigned long ip,int port)
+{
+	struct map_data *md;
+	struct map_data_other_server *mdos;
+//	unsigned char *p=(unsigned char *)&ip;
+
+	md=strdb_search(map_db,name);
+	if(md){
+		if(md->gat) // local -> check data
+			return 0;
+		else{
+			mdos=(struct map_data_other_server *)md;
+			if(mdos->ip==ip && mdos->port == port){
+				strdb_erase(map_db,name);
+//				if(battle_config.etc_log)
+//					printf("erase map %s %d.%d.%d.%d:%d\n",name,p[0],p[1],p[2],p[3],port);
+			}
 		}
 	}
 	return 0;
@@ -1215,7 +1267,7 @@ static void map_readwater(char *watertxt)
 		return;
 	}
 	if(waterlist==NULL)
-		waterlist=calloc(MAX_MAP_PER_SERVER,sizeof(*waterlist));
+		waterlist=aCalloc(MAX_MAP_PER_SERVER,sizeof(*waterlist));
 	while(fgets(line,1020,fp) && n < MAX_MAP_PER_SERVER){
 		int wh,count;
 		if(line[0] == '/' && line[1] == '/')
@@ -1223,7 +1275,7 @@ static void map_readwater(char *watertxt)
 		if((count=sscanf(line,"%s%d",w1,&wh)) < 1){
 			continue;
 		}
-		strcpy(waterlist[n].mapname,w1);
+		strncpy(waterlist[n].mapname,w1,24);
 		if(count >= 2)
 			waterlist[n].waterheight = wh;
 		else
@@ -1257,11 +1309,7 @@ static int map_readmap(int m,char *fn)
 	map[m].m=m;
 	xs=map[m].xs=*(int*)(gat+6);
 	ys=map[m].ys=*(int*)(gat+10);
-	map[m].gat = calloc(s = map[m].xs * map[m].ys, 1);
-	if(map[m].gat==NULL){
-		printf("out of memory : map_readmap gat\n");
-		exit(1);
-	}
+	map[m].gat = (unsigned char *)aCalloc(s = map[m].xs * map[m].ys,sizeof(unsigned char));
 	map[m].npc_num=0;
 	map[m].users=0;
 	memset(&map[m].flag,0,sizeof(map[m].flag));
@@ -1283,35 +1331,11 @@ static int map_readmap(int m,char *fn)
 	map[m].bxs=(xs+BLOCK_SIZE-1)/BLOCK_SIZE;
 	map[m].bys=(ys+BLOCK_SIZE-1)/BLOCK_SIZE;
 	size = map[m].bxs * map[m].bys * sizeof(struct block_list*);
-
-	map[m].block = calloc(size, 1);
-	if(map[m].block == NULL){
-		printf("out of memory : map_readmap block\n");
-		exit(1);
-	}
-
-	map[m].block_mob = calloc(size, 1);
-	if (map[m].block_mob == NULL) {
-		printf("out of memory : map_readmap block_mob\n");
-		exit(1);
-	}
-
+	map[m].block = (struct block_list **)aCalloc(1,size);
+	map[m].block_mob = (struct block_list **)aCalloc(1,size);
 	size = map[m].bxs*map[m].bys*sizeof(int);
-
-	map[m].block_count = calloc(size, 1);
-	if(map[m].block_count==NULL){
-		printf("out of memory : map_readmap block\n");
-		exit(1);
-	}
-	memset(map[m].block_count,0,size);
-
-	map[m].block_mob_count=calloc(size, 1);
-	if(map[m].block_mob_count==NULL){
-		printf("out of memory : map_readmap block_mob\n");
-		exit(1);
-	}
-	memset(map[m].block_mob_count,0,size);
-
+	map[m].block_count = (int *)aCalloc(1,size);
+	map[m].block_mob_count=(int *)aCalloc(1,size);
 	strdb_insert(map_db,map[m].name,&map[m]);
 
 //	printf("%s read done\n",fn);
@@ -1386,7 +1410,35 @@ int map_delmap(char *mapname)
 	}
 	return 0;
 }
+/*==========================================
+ * @whoのDB版
+ *------------------------------------------
+ */
+ int map_who_sub(void *key,void *data,va_list ap)
+{
+	struct charid2nick *p;
+	int fd;
 
+	nullpo_retr(-1, ap);
+	nullpo_retr(-1, data);
+	nullpo_retr(-1, p=(struct charid2nick *)data);
+
+//printf("who: %s %d %d\n",p->nick,(int)p->ip,p->port);
+
+	fd=va_arg(ap,int);
+
+	if( p->ip != 0 && 
+		p->port != 0 &&
+		!(battle_config.hide_GM_session && pc_numisGM(p->account_id))
+	)
+		clif_displaymessage(fd, p->nick);
+
+	return 0;
+}
+int map_who(int fd){
+	numdb_foreach( charid_db, map_who_sub, fd );
+	return 0;
+}
 /*==========================================
  * 設定ファイルを読み込む
  *------------------------------------------
@@ -1454,11 +1506,11 @@ int map_config_read(char *cfgName)
 			if(autosave_interval <= 0)
 				autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
 		} else if(strcmpi(w1,"motd_txt")==0){
-			strcpy(motd_txt,w2);
+			strncpy(motd_txt,w2,256);
 		} else if(strcmpi(w1,"help_txt")==0){
-			strcpy(help_txt,w2);
+			strncpy(help_txt,w2,256);
 		} else if(strcmpi(w1,"mapreg_txt")==0){
-			strcpy(mapreg_txt,w2);
+			strncpy(mapreg_txt,w2,256);
 		} else if(strcmpi(w1,"import")==0){
 			map_config_read(w2);
 		}
@@ -1472,9 +1524,56 @@ int map_config_read(char *cfgName)
  * map鯖終了時処理
  *------------------------------------------
  */
+static int id_db_final(void *key,void *data,va_list ap)
+{
+	return 0;
+}
+static int map_db_final(void *key,void *data,va_list ap)
+{
+//	char *name;
+
+//	nullpo_retr(0, name=data);
+
+//	free(name);
+
+	return 0;
+}
+static int nick_db_final(void *key,void *data,va_list ap)
+{
+	char *nick;
+
+	nullpo_retr(0, nick=data);
+
+	free(nick);
+
+	return 0;
+}
+static int charid_db_final(void *key,void *data,va_list ap)
+{
+	struct charid2nick *p;
+
+	nullpo_retr(0, p=data);
+
+	free(p);
+
+	return 0;
+}
 void do_final(void)
 {
 	int i;
+
+	chrif_mapactive(0); //マップサーバー停止中
+
+	do_final_npc();
+	do_final_script();
+	do_final_itemdb();
+	do_final_storage();
+	do_final_guild();
+	do_final_clif();
+	do_final_chrif();
+	do_final_pc();
+	do_final_party();
+
 	for(i=0;i<=map_num;i++){
 		if(map[i].gat) free(map[i].gat);
 		if(map[i].block) free(map[i].block);
@@ -1482,9 +1581,18 @@ void do_final(void)
 		if(map[i].block_count) free(map[i].block_count);
 		if(map[i].block_mob_count) free(map[i].block_mob_count);
 	}
-	do_final_script();
-	do_final_itemdb();
-	do_final_storage();
+
+	if(map_db)
+		strdb_final(map_db,map_db_final);
+	if(nick_db)
+		strdb_final(nick_db,nick_db_final);
+	if(charid_db)
+		numdb_final(charid_db,charid_db_final);
+	if(id_db)
+		numdb_final(id_db,id_db_final);
+	exit_dbn();
+
+	do_final_timer();
 }
 
 /*==========================================

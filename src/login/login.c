@@ -24,7 +24,7 @@
 #include "db.h"
 #include "lock.h"
 #include "timer.h"
-
+#include "malloc.h"
 
 #ifdef PASSWORDENC
 #include "md5calc.h"
@@ -87,6 +87,7 @@ char admin_pass[64]="";
 char gm_pass[64]="";
 const int gm_start=704554,gm_last=704583;
 
+int login_version = -1, login_type = -1;
 
 static struct dbt *gm_account_db;
 
@@ -129,11 +130,7 @@ int read_gm_account()
 	while(fgets(line,sizeof(line),fp)){
 		if(line[0] == '/' && line[1] == '/')
 			continue;
-		p=calloc(sizeof(struct gm_account), 1);
-		if(p==NULL){
-			printf("gm_account: out of memory!\n");
-			exit(0);
-		}
+		p=(struct gm_account *)aCalloc(1,sizeof(struct gm_account));
 		if(sscanf(line,"%d %d",&p->account_id,&p->level) != 2 || p->level <= 0) {
 			printf("gm_account: broken data [%s] line %d\n",GM_account_filename,c);
 		}
@@ -222,11 +219,10 @@ int mmo_auth_init(void)
 	int i,account_id,logincount,state,n,j,v;
 	char line[1024],*p,userid[24],pass[24],lastlogin[24],sex;
 	char str[64];
-	fp=fopen(account_filename,"r");
-	auth_dat=calloc(sizeof(auth_dat[0])*256, 1);
-	auth_max=256;
-	if(fp==NULL)
+	if((fp=fopen(account_filename,"r"))==NULL)
 		return 0;
+	auth_max=256;
+	auth_dat=aCalloc(auth_max,sizeof(auth_dat[0]));
 	while(fgets(line,1023,fp)!=NULL){
 		p=line;
 		i=sscanf(line,"%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\t%d\t%d\t%n",
@@ -234,7 +230,7 @@ int mmo_auth_init(void)
 		if(i>=5){
 			if(auth_num>=auth_max){
 				auth_max+=256;
-				auth_dat=realloc(auth_dat,sizeof(auth_dat[0])*auth_max);
+				auth_dat=aRealloc(auth_dat,sizeof(auth_dat[0])*auth_max);
 			}
 			auth_dat[auth_num].account_id=account_id;
 			strncpy(auth_dat[auth_num].userid,userid,24);
@@ -257,7 +253,7 @@ int mmo_auth_init(void)
 				p+=n;
 				if(sscanf(p,"%[^\t,],%d %n",str,&v,&n)!=2)
 					break;
-				strcpy(auth_dat[auth_num].account_reg2[j].str,str);
+				strncpy(auth_dat[auth_num].account_reg2[j].str,str,32);
 				auth_dat[auth_num].account_reg2[j].value=v;
 			}
 			auth_dat[auth_num].account_reg2_num=j;
@@ -323,7 +319,7 @@ int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 	
 	if(auth_num>=auth_max){
 		auth_max+=256;
-		auth_dat=realloc(auth_dat,sizeof(auth_dat[0])*auth_max);
+		auth_dat=aRealloc(auth_dat,sizeof(auth_dat[0])*auth_max);
 	}
 	while(isGM(account_id_count) > 0)
 		account_id_count++;
@@ -391,10 +387,10 @@ int mmo_auth( struct mmo_account* account, int fd )
 			if(j>2)j=1;
 			do{
 				if(j==1){
-					strcpy(md5str,ld->md5key);
+					strncpy(md5str,ld->md5key,20);
 					strcat(md5str,auth_dat[i].pass);
 				}else if(j==2){
-					strcpy(md5str,auth_dat[i].pass);
+					strncpy(md5str,auth_dat[i].pass,24);
 					strcat(md5str,ld->md5key);
 				}else
 					md5str[0]=0;
@@ -442,7 +438,7 @@ int mmo_auth( struct mmo_account* account, int fd )
 		
 		if(auth_num>=auth_max){
 			auth_max+=256;
-			auth_dat=realloc(auth_dat,sizeof(auth_dat[0])*auth_max);
+			auth_dat=aRealloc(auth_dat,sizeof(auth_dat[0])*auth_max);
 		}
 		auth_dat[i].account_id=account_id_count++;
 		strncpy(auth_dat[i].userid,account->userid,24);
@@ -677,7 +673,19 @@ int parse_fromchar(int fd)
 				RFIFOSKIP(fd,RFIFOW(fd,2));
 	//			printf("login: save account_reg (from char)\n");
 			} break;
-		
+
+		case 0x272b:	//charサーバメンテナンス状態
+			if(RFIFOREST(fd)<3)
+				return 0;
+			server[id].maintenance=RFIFOB(fd,2);
+			//charサーバに応答
+			WFIFOW(fd,0)=0x272c;
+			WFIFOB(fd,2)=server[id].maintenance;
+			WFIFOSET(fd,3);
+			
+			RFIFOSKIP(fd,3);
+			break;
+
 		default:
 			printf("login: unknown packet %x! (from char).\n",RFIFOW(fd,0));
 			close(fd);
@@ -757,7 +765,7 @@ int parse_admin(int fd)
 				if( strncmp(auth_dat[i].userid,RFIFOP(fd,4),24)==0 ){
 					// キャラサーバーへ削除通知
 					unsigned char buf[16];
-					WBUFW(buf,0)=0x2730;
+					WBUFW(buf,0)=0x272a;
 					WBUFL(buf,2)=auth_dat[i].account_id;
 					charif_sendallwos(-1,buf,6);
 
@@ -799,7 +807,7 @@ int parse_admin(int fd)
 			WFIFOL(fd,28)=auth_dat[i].state;
 			WFIFOSET(fd,32);
 			RFIFOSKIP(fd,RFIFOW(fd,2));
-			break;			
+			break;
 		default:
 			close(fd);
 			session[fd]->eof=1;
@@ -814,7 +822,7 @@ int parse_admin(int fd)
 int parse_login(int fd)
 {
 	struct mmo_account account;
-	int result,i;
+  int result=0,i;
 	
 	if(session[fd]->eof){
 		for(i=0;i<MAX_SERVERS;i++)
@@ -852,8 +860,13 @@ int parse_login(int fd)
 					RFIFOP(fd,6),p[0],p[1],p[2],p[3]);
 			}
 	
+			if(login_version > 0 && RFIFOL(fd,2) != login_version)	//規定外のバージョンからの接続を拒否
+				result = 0x03;
+			if(login_type > 0 && RFIFOB(fd,(RFIFOW(fd,0)==0x64)?54:46) != login_type)	//規定外のタイプからの接続を拒否
+				result = 0x03;
+
 			if( !check_ip(session[fd]->client_addr.sin_addr.s_addr) ){
-			  struct timeval tv;
+				struct timeval tv;
 				char tmpstr[256];
 				gettimeofday(&tv,NULL);
 				strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&(tv.tv_sec)));
@@ -871,7 +884,8 @@ int parse_login(int fd)
 #else
 			account.passwdenc=0;
 #endif
-			result=mmo_auth(&account,fd);
+			if(result == 0)
+				result=mmo_auth(&account,fd);
 			if(result==100){
 				server_num=0;
 				for(i=0;i<MAX_SERVERS;i++){
@@ -924,15 +938,8 @@ int parse_login(int fd)
 					session[fd]->eof=1;
 					return 0;
 				}
-				ld=session[fd]->session_data=calloc(sizeof(*ld), 1);
-				if(!ld){
-					printf("login: md5key request: out of memory !\n");
-					close(fd);
-					session[fd]->eof=1;
-					return 0;
-				}
+				ld=session[fd]->session_data=(struct login_session_data *)aCalloc(1,sizeof(*ld));
 				// 暗号化キー生成
-				memset(ld->md5key,0,sizeof(ld->md5key));
 				ld->md5keylen=rand()%4+12;
 				for(i=0;i<ld->md5keylen;i++)
 				ld->md5key[i]=rand()%255+1;
@@ -946,7 +953,7 @@ int parse_login(int fd)
 			break;
 			
 		case 0x2710:	// Charサーバー接続要求
-			if(RFIFOREST(fd)<76)
+			if(RFIFOREST(fd)<84)
 				return 0;
 			{
 				FILE *logfp=fopen(login_log_filename,"a");
@@ -967,8 +974,8 @@ int parse_login(int fd)
 				server[account.account_id].port=RFIFOW(fd,58);
 				memcpy(server[account.account_id].name,RFIFOP(fd,60),20);
 				server[account.account_id].users=0;
-				server[account.account_id].maintenance=RFIFOW(fd,82);
-				server[account.account_id].new=RFIFOW(fd,84);
+				server[account.account_id].maintenance=RFIFOW(fd,80);
+				server[account.account_id].new=RFIFOW(fd,82);
 				server_fd[account.account_id]=fd;
 				WFIFOW(fd,0)=0x2711;
 				WFIFOB(fd,2)=0;
@@ -980,7 +987,7 @@ int parse_login(int fd)
 				WFIFOB(fd,2)=3;
 				WFIFOSET(fd,3);
 			}
-			RFIFOSKIP(fd,86);
+			RFIFOSKIP(fd,84);
 			return 0;
 	
 		case 0x7530:	// Athena情報所得
@@ -1020,10 +1027,10 @@ int parse_login(int fd)
 					}else{
 						char md5str[64]="",md5bin[32];
 						if(RFIFOW(fd,4)==1){
-							strcpy(md5str,ld->md5key);
+							strncpy(md5str,ld->md5key,20);
 							strcat(md5str,admin_pass);
 						}else if(RFIFOW(fd,4)==2){
-							strcpy(md5str,admin_pass);
+							strncpy(md5str,admin_pass,64);
 							strcat(md5str,ld->md5key);
 						};
 						MD5_String2binary(md5str,md5bin);
@@ -1079,10 +1086,10 @@ int login_config_read(const char *cfgName)
 			continue;
 
 		if(strcmpi(w1,"admin_pass")==0){
-			strcpy(admin_pass,w2);
+			strncpy(admin_pass,w2,64);
 		}
 		else if(strcmpi(w1,"gm_pass")==0){
-			strcpy(gm_pass,w2);
+			strncpy(gm_pass,w2,64);
 		}
 		else if(strcmpi(w1,"new_account")==0){
 			new_account_flag = atoi(w2);
@@ -1091,10 +1098,10 @@ int login_config_read(const char *cfgName)
 			login_port=atoi(w2);
 		}
 		else if(strcmpi(w1,"account_filename")==0){
-			strcpy(account_filename,w2);
+			strncpy(account_filename,w2,1024);
 		}
 		else if(strcmpi(w1,"gm_account_filename")==0){
-			strcpy(GM_account_filename,w2);
+			strncpy(GM_account_filename,w2,1024);
 		}
 		
 		else if(strcmpi(w1,"order")==0){
@@ -1111,9 +1118,9 @@ int login_config_read(const char *cfgName)
 				access_allownum=0;
 			}else{		
 				if(access_allow)
-					access_allow=realloc( access_allow, (access_allownum+1)*ACO_STRSIZE);
+					access_allow=(char *)aRealloc( access_allow, (access_allownum+1)*ACO_STRSIZE);
 				else
-					access_allow=calloc( ACO_STRSIZE , 1);
+					access_allow=(char *)aCalloc(1,ACO_STRSIZE);
 				if(strcmpi(w2,"all")==0)
 					access_allow[(access_allownum++)*ACO_STRSIZE]=0;
 				else if(w2[0])
@@ -1128,9 +1135,9 @@ int login_config_read(const char *cfgName)
 				access_denynum=0;
 			}else{
 				if(access_deny)
-					access_deny=realloc( access_deny,(access_denynum+1)*ACO_STRSIZE);
+					access_deny=(char *)aRealloc( access_deny,(access_denynum+1)*ACO_STRSIZE);
 				else
-					access_deny=calloc( ACO_STRSIZE , 1);
+					access_deny=(char *)aCalloc(1,ACO_STRSIZE);
 				if(strcmpi(w2,"all")==0)
 					access_deny[(access_denynum++)*ACO_STRSIZE]=0;
 				else if(w2[0])
@@ -1138,21 +1145,40 @@ int login_config_read(const char *cfgName)
 			}
 		}
 		else if(strcmpi(w1,"login_log_filename")==0){
-			strcpy(login_log_filename,w2);
+			strncpy(login_log_filename,w2,1024);
 		}
 		else if(strcmpi(w1,"import")==0){
 			login_config_read(w2);
+		}
+		else if(strcmpi(w1,"login_version")==0){
+			login_version=atoi(w2);
+		}
+		else if(strcmpi(w1,"login_type")==0){
+			login_type=atoi(w2);
 		}
 	}
 	fclose(fp);
 
 	return 0;
 }
+static int gm_account_db_final(void *key,void *data,va_list ap)
+{
+	struct gm_account *p=data;
+
+	free(p);
+
+	return 0;
+}
 void do_final(void)
 {
 	int i;
-	free(auth_dat);
-	free(gm_account_db);
+	if(auth_dat)
+		free(auth_dat);
+	if(gm_account_db)
+		numdb_final(gm_account_db,gm_account_db_final);
+
+	exit_dbn();
+
 	for(i=0;i<MAX_SERVERS;i++){
 		int fd;
 		if((fd=server_fd[i])>0){

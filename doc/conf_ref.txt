@@ -104,6 +104,17 @@ login_log_filename
 	ログインサーバーのログファイルを指定します。
 	省略可能で、デフォルトはlog/login.logです。
 
+login_version
+	clientinfo.xmlの<version>でアクセス制限をします。
+	一致しないクライアントの接続は拒否します。
+	-1ですべてを許可します(デフォルト)。
+
+login_type
+	clientinfo.xmlの<servertype>でアクセス制限をします。
+	一致しないクライアントの接続は拒否します。
+	sakray=9,primary=3です。
+	-1ですべてを許可します(デフォルト)。
+
 import
 	その行を別ファイルの中身と置き換えます。
 
@@ -122,6 +133,8 @@ allow: 10.0.
 allow: 172.16.0.0/16
 allow: 192.168.0.0/255.255.255.0
 login_log_filename: log/login.log
+login_version: -1
+login_type: -1
 
 ==========================================================================
 2. conf/char_athena.conf
@@ -204,6 +217,17 @@ unknown_char_name
 char_log_filename
 	キャラクターサーバーのログファイルを指定します。
 	省略可能で、デフォルトはlog/char.logです。
+default_map_type
+	キャラクターサーバーがキャラの接続先マップを見つけられなかった時の挙動を設定します。
+	省略可能でデフォルトは0です。
+	0:強制切断。
+	1:default_map_nameで設定されたマップへキャラの最終位置を設定して接続。駄目なら強制切断。
+	2:キャラクターサーバーに接続しているマップサーバーの最初のマップにキャラの最終位置を設定して接続。駄目なら強制切断。
+	3:1を試して、駄目なら2を試して、駄目なら強制切断。
+
+default_map_name
+	default_map_typeで使用する標準のマップ名
+	省略可能で、デフォルトはprontera.gatです。
 
 import
 	その行を別ファイルの中身と置き換えます。
@@ -226,7 +250,8 @@ start_point: new_,150,120
 start_zeny: 500
 unknown_char_name: Unknown
 char_log_filename: log/char.log
-
+default_map_type: 0
+default_map_name: prontera.gat
 
 ==========================================================================
 3. conf/inter_athena.conf
@@ -1115,6 +1140,10 @@ disp_experience
 	経験値を表示するかどうかです。
 	yesにすると、敵を倒した時など経験値が入った時に本人にのみ表示されます。
 	デフォルトはnoです。
+castle_defense_rate
+	砦の防御値によるダメージ減少を反映させる割合。
+	防御値(%)で減少させてるんですが防御値が100になるとすべてのダメージが0になってしまうために暫定処置でダメージを減らすのを減らす。
+	デフォルトは100です。
 
 import
 	その行を別ファイルの中身と置き換えます。
@@ -1267,6 +1296,7 @@ hide_GM_session: no
 invite_request_check: yes
 unit_movement_type: 0
 disp_experience: no
+castle_defense_rate: 100
 
 ==========================================================================
 6. atcommand_athena.conf

@@ -7,6 +7,7 @@
 
 #include "timer.h"
 #include "nullpo.h"
+#include "malloc.h"
 
 #include "map.h"
 #include "pc.h"
@@ -16,6 +17,10 @@
 #include "clif.h"
 #include "pet.h"
 #include "guild.h"
+
+#ifdef MEMWATCH
+#include "memwatch.h"
+#endif
 
 int attr_fix_table[4][10][10];
 
@@ -1099,13 +1104,13 @@ int battle_get_party_id(struct block_list *bl)
 	else if(bl->type==BL_MOB && (struct mob_data *)bl){
 		struct mob_data *md=(struct mob_data *)bl;
 		if( md->master_id>0 )
-			return -md->master_id;
-		return -md->bl.id;
+				return -md->master_id;
+			return -md->bl.id;
 	}
 	else if(bl->type==BL_SKILL && (struct skill_unit *)bl)
 		return ((struct skill_unit *)bl)->group->party_id;
 	else
-		return 0;
+	return 0;
 }
 int battle_get_guild_id(struct block_list *bl)
 {
@@ -1191,6 +1196,8 @@ short *battle_get_opt1(struct block_list *bl)
 		return &((struct mob_data*)bl)->opt1;
 	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return &((struct map_session_data*)bl)->opt1;
+	else if(bl->type==BL_NPC && (struct npc_data *)bl)
+		return &((struct npc_data*)bl)->opt1;
 	return 0;
 }
 short *battle_get_opt2(struct block_list *bl)
@@ -1200,6 +1207,19 @@ short *battle_get_opt2(struct block_list *bl)
 		return &((struct mob_data*)bl)->opt2;
 	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return &((struct map_session_data*)bl)->opt2;
+	else if(bl->type==BL_NPC && (struct npc_data *)bl)
+		return &((struct npc_data*)bl)->opt2;
+	return 0;
+}
+short *battle_get_opt3(struct block_list *bl)
+{
+	nullpo_retr(0, bl);
+	if(bl->type==BL_MOB && (struct mob_data *)bl)
+		return &((struct mob_data*)bl)->opt3;
+	else if(bl->type==BL_PC && (struct map_session_data *)bl)
+		return &((struct map_session_data*)bl)->opt3;
+	else if(bl->type==BL_NPC && (struct npc_data *)bl)
+		return &((struct npc_data*)bl)->opt3;
 	return 0;
 }
 short *battle_get_option(struct block_list *bl)
@@ -1209,6 +1229,8 @@ short *battle_get_option(struct block_list *bl)
 		return &((struct mob_data*)bl)->option;
 	else if(bl->type==BL_PC && (struct map_session_data *)bl)
 		return &((struct map_session_data*)bl)->status.option;
+	else if(bl->type==BL_NPC && (struct npc_data *)bl)
+		return &((struct npc_data*)bl)->option;
 	return 0;
 }
 
@@ -1230,16 +1252,11 @@ int battle_delay_damage_sub(int tid,unsigned int tick,int id,int data)
 }
 int battle_delay_damage(unsigned int tick,struct block_list *src,struct block_list *target,int damage,int flag)
 {
-	struct battle_delay_damage_ *dat =
-		(struct battle_delay_damage_*)calloc(sizeof *dat, 1);
+	struct battle_delay_damage_ *dat = (struct battle_delay_damage_*)aCalloc(1,sizeof(struct battle_delay_damage_));
 
 	nullpo_retr(0, src);
 	nullpo_retr(0, target);
 
-	if (dat == NULL) {
-		printf("out of memory: battle_delay_damage\n");
-		exit(1);
-	}
 	
 	dat->src=src;
 	dat->target=target;
@@ -1514,35 +1531,42 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 		}
 	}
 
-	if(class == 1288 || class == 1287 || class == 1286 || class == 1285) {
-//	if(class == 1288) {
-		if(flag&BF_SKILL)
-			damage=0;
-		if(src->type == BL_PC) {
-			struct guild *g=guild_search(((struct map_session_data *)src)->status.guild_id);
-			struct guild_castle *gc=guild_mapname2gc(map[bl->m].name);
+	if(damage > 0) { //GvG
+		struct guild_castle *gc=guild_mapname2gc(map[bl->m].name);
+		struct guild *g;
 
-			if(g == NULL)
-				damage=0;//ギルド未加入ならダメージ無し
-			else if((gc != NULL) && g->guild_id == gc->guild_id)
-				damage=0;//自占領ギルドのエンペならダメージ無し
-			else if(guild_checkskill(g,GD_APPROVAL) <= 0)
-				damage=0;//正規ギルド承認がないとダメージ無し
+		if(class == 1288) {
+			if(flag&BF_SKILL)
+				return 0;
+			if(src->type == BL_PC) {
+				g=guild_search(((struct map_session_data *)src)->status.guild_id);
+
+				if(g == NULL)
+					return 0;//ギルド未加入ならダメージ無し
+				else if((gc != NULL) && g->guild_id == gc->guild_id)
+					return 0;//自占領ギルドのエンペならダメージ無し
+				else if(guild_checkskill(g,GD_APPROVAL) <= 0)
+					return 0;//正規ギルド承認がないとダメージ無し
+			}
+			else
+				return 0;
 		}
-		else damage = 0;
-	}
-	if(map[bl->m].flag.gvg && damage > 0) { //GvG
-		if(flag&BF_WEAPON) {
-			if(flag&BF_SHORT)
-				damage=damage*battle_config.gvg_short_damage_rate/100;
-			if(flag&BF_LONG)
-				damage=damage*battle_config.gvg_long_damage_rate/100;
+		if(map[bl->m].flag.gvg){
+			if(gc && bl->type == BL_MOB){	//defenseがあればダメージが減るらしい？
+				damage -= damage*(gc->defense/100)*(battle_config.castle_defense_rate/100);
+			}
+			if(flag&BF_WEAPON) {
+				if(flag&BF_SHORT)
+					damage=damage*battle_config.gvg_short_damage_rate/100;
+				if(flag&BF_LONG)
+					damage=damage*battle_config.gvg_long_damage_rate/100;
+			}
+			if(flag&BF_MAGIC)
+				damage = damage*battle_config.gvg_magic_damage_rate/100;
+			if(flag&BF_MISC)
+				damage=damage*battle_config.gvg_misc_damage_rate/100;
+			if(damage < 1) damage  = 1;
 		}
-		if(flag&BF_MAGIC)
-			damage = damage*battle_config.gvg_magic_damage_rate/100;
-		if(flag&BF_MISC)
-			damage=damage*battle_config.gvg_misc_damage_rate/100;
-		if(damage < 1) damage  = 1;
 	}
 
 	if(battle_config.skill_min_damage || flag&BF_MISC) {
@@ -2006,6 +2030,9 @@ static struct Damage battle_calc_pet_weapon_attack(
 			case CG_ARROWVULCAN:			/* アローバルカン */
 				damage = damage*(160+40*skill_lv)/100;
 				div_=9;
+				break;
+			case AS_SPLASHER:		/* ベナムスプラッシャー */
+				damage = damage*(200+20*skill_lv)/100;
 				break;
 			}
 		}
@@ -2476,6 +2503,9 @@ static struct Damage battle_calc_mob_weapon_attack(
 			case CG_ARROWVULCAN:			/* アローバルカン */
 				damage = damage*(160+40*skill_lv)/100;
 				div_=9;
+				break;
+			case AS_SPLASHER:		/* ベナムスプラッシャー */
+				damage = damage*(200+20*skill_lv)/100;
 				break;
 			}
 		}
@@ -3263,6 +3293,10 @@ static struct Damage battle_calc_pc_weapon_attack(
 				damage2 = damage2*(160+40*skill_lv)/100;
 				div_=9;
 				break;
+			case AS_SPLASHER:		/* ベナムスプラッシャー */
+				damage = damage*(200+20*skill_lv+20*pc_checkskill(sd,AS_POISONREACT))/100;
+				damage2 = damage2*(200+20*skill_lv+20*pc_checkskill(sd,AS_POISONREACT))/100;
+				break;
 			}
 		}
 		if(da == 2) { //三段掌が発動しているか
@@ -4003,6 +4037,7 @@ struct Damage  battle_calc_misc_attack(
 		break;
 
 	case NPC_SELFDESTRUCTION:	// 自爆
+	case NPC_SELFDESTRUCTION2:	// 自爆2
 		damage=battle_get_hp(bl)-(bl==target?1:0);
 		damagefix=0;
 		break;
@@ -4211,17 +4246,25 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				skill_additional_effect(src,target,0,0,BF_WEAPON,tick);
 				if(sd) {
 					if(sd->weapon_coma_ele[ele] > 0 && rand()%10000 < sd->weapon_coma_ele[ele])
-						skill_castend_nodamage_id(src,target,SA_COMA,7,tick,0);
+						battle_damage(src,target,battle_get_max_hp(target),1);
 					if(sd->weapon_coma_race[race] > 0 && rand()%10000 < sd->weapon_coma_race[race])
-						skill_castend_nodamage_id(src,target,SA_COMA,7,tick,0);
+						battle_damage(src,target,battle_get_max_hp(target),1);
 					if(battle_get_mode(target) & 0x20) {
 						if(sd->weapon_coma_race[10] > 0 && rand()%10000 < sd->weapon_coma_race[10])
-							skill_castend_nodamage_id(src,target,SA_COMA,7,tick,0);
+							battle_damage(src,target,battle_get_max_hp(target),1);
 					}
 					else {
 						if(sd->weapon_coma_race[11] > 0 && rand()%10000 < sd->weapon_coma_race[11])
-							skill_castend_nodamage_id(src,target,SA_COMA,7,tick,0);
+							battle_damage(src,target,battle_get_max_hp(target),1);
 					}
+
+					if(sd->break_weapon_rate > 0 && rand()%10000 < sd->break_weapon_rate
+						&& target->type ==BL_PC)
+							pc_break_weapon((struct map_session_data *)target);
+					if(sd->break_armor_rate > 0 && rand()%10000 < sd->break_armor_rate
+						&& target->type ==BL_PC)
+							pc_break_armor((struct map_session_data *)target);
+
 				}
 			}
 		}
@@ -4336,6 +4379,8 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			skill_status_change_start(src,SC_BLADESTOP,lv,1,(int)src,(int)target,skill_get_time2(MO_BLADESTOP,lv),0);
 			skill_status_change_start(target,SC_BLADESTOP,lv,2,(int)target,(int)src,skill_get_time2(MO_BLADESTOP,lv),0);
 		}
+		if(t_sc_data && t_sc_data[SC_SPLASHER].timer!=-1)	//殴ったので対象のベナムスプラッシャー状態を解除
+			skill_status_change_end(target,SC_SPLASHER,-1);
 
 		map_freeblock_unlock();
 	}
@@ -4409,7 +4454,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	if(target->type == BL_PET)
 		return -1;
 
-				// スキルユニットの場合、親を求める
+	// スキルユニットの場合、親を求める
 	if( src->type==BL_SKILL) {
 		int inf2 = skill_get_inf2(((struct skill_unit *)src)->group->skill_id);
 		if( (ss=map_id2bl( ((struct skill_unit *)src)->group->src_id))==NULL )
@@ -4425,6 +4470,31 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 				return -1;
 		}
 	}
+	// Mobでmaster_idがあってspecial_mob_aiなら、召喚主を求める
+	if( src->type==BL_MOB ){
+		struct mob_data *md=(struct mob_data *)src;
+		if(md && md->master_id>0){
+			if(md->master_id==target->id)	// 主なら肯定
+				return 1;
+			if(md->state.special_mob_ai){
+				if(target->type==BL_MOB){	//special_mob_aiで対象がMob
+					struct mob_data *tmd=(struct mob_data *)target;
+					if(tmd){
+						if(tmd->master_id != md->master_id)	//召喚主が一緒でなければ否定
+							return 0;
+						else{	//召喚主が一緒なので肯定したいけど自爆は否定
+							if(md->state.special_mob_ai>2)
+								return 0;
+							else
+								return 1;
+						}
+					}
+				}
+			}
+			if((ss=map_id2bl(md->master_id))==NULL)
+				return -1;
+		}
+	}
 
 	if( src==target || ss==target )	// 同じなら肯定
 		return 1;
@@ -4436,10 +4506,6 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 		(src->type==BL_PC && pc_isdead((struct map_session_data *)src) ) )
 		return -1;
 
-	// 主なら肯定
-	if( ss->type == BL_MOB && ((struct mob_data *)ss)->master_id==target->id )
-		return 1;
-
 	if( (ss->type == BL_PC && target->type==BL_MOB) ||
 		(ss->type == BL_MOB && target->type==BL_PC) )
 		return 0;	// PCvsMOBなら否定
@@ -4447,8 +4513,8 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	if(ss->type == BL_PET && target->type==BL_MOB)
 		return 0;
 
-	s_p=battle_get_party_id(src);
-	s_g=battle_get_guild_id(src);
+	s_p=battle_get_party_id(ss);
+	s_g=battle_get_guild_id(ss);
 
 	t_p=battle_get_party_id(target);
 	t_g=battle_get_guild_id(target);
@@ -4463,16 +4529,26 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	if(ss->type == BL_MOB && s_g > 0 && t_g > 0 && s_g == t_g )	// 同じギルド/mobクラスなら肯定（味方）
 		return 1;
 
-	if( ss->type==BL_PC && target->type==BL_PC) { // 両 方PVPモードなら否定（敵）
-		if(map[src->m].flag.pvp) {
-			if(map[src->m].flag.pvp_noparty && s_p > 0 && t_p > 0 && s_p == t_p)
+//printf("ss:%d src:%d target:%d flag:0x%x %d %d ",ss->id,src->id,target->id,flag,src->type,target->type);
+//printf("p:%d %d g:%d %d\n",s_p,t_p,s_g,t_g);
+
+	if( ss->type==BL_PC && target->type==BL_PC) { // 両方PVPモードなら否定（敵）
+		struct skill_unit *su=NULL;
+		if(src->type==BL_SKILL)
+			su=(struct skill_unit *)src;
+		if(map[ss->m].flag.pvp) {
+			if(su && su->group->target_flag==BCT_NOENEMY)
 				return 1;
-			else if(map[src->m].flag.pvp_noguild && s_g > 0 && t_g > 0 && s_g == t_g)
+			if(map[ss->m].flag.pvp_noparty && s_p > 0 && t_p > 0 && s_p == t_p)
+				return 1;
+			else if(map[ss->m].flag.pvp_noguild && s_g > 0 && t_g > 0 && s_g == t_g)
 				return 1;
 			return 0;
 		}
 		if(map[src->m].flag.gvg) {
 			struct guild *g=NULL;
+			if(su && su->group->target_flag==BCT_NOENEMY)
+				return 1;
 			if( s_g > 0 && s_g == t_g)
 				return 1;
 			if(map[src->m].flag.gvg_noparty && s_p > 0 && t_p > 0 && s_p == t_p)
@@ -4480,7 +4556,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			if((g = guild_search(s_g))) {
 				int i;
 				for(i=0;i<MAX_GUILDALLIANCE;i++){
-					if(g->alliance[i].guild_id > 0 &&g->alliance[i].guild_id == t_g) {
+					if(g->alliance[i].guild_id > 0 && g->alliance[i].guild_id == t_g) {
 						if(g->alliance[i].opposition)
 							return 0;//敵対ギルドなら無条件に敵
 						else
@@ -4720,6 +4796,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.invite_request_check = 1;
 		battle_config.skill_removetrap_type = 0;
 		battle_config.disp_experience = 0;
+		battle_config.castle_defense_rate = 100;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4890,6 +4967,7 @@ int battle_config_read(const char *cfgName)
 			{ "invite_request_check",		&battle_config.invite_request_check		},
 			{ "skill_removetrap_type",		&battle_config.skill_removetrap_type	},
 			{ "disp_experience",			&battle_config.disp_experience			},
+			{ "castle_defense_rate",		&battle_config.castle_defense_rate		},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')
@@ -4966,6 +5044,11 @@ int battle_config_read(const char *cfgName)
 			battle_config.guild_exp_limit = 0;
 		if(battle_config.pet_weight < 0)
 			battle_config.pet_weight = 0;
+
+		if(battle_config.castle_defense_rate < 0)
+			battle_config.castle_defense_rate = 0;
+		if(battle_config.castle_defense_rate > 100)
+			battle_config.castle_defense_rate = 100;
 
 		add_timer_func_list(battle_delay_damage_sub,"battle_delay_damage_sub");
 	}

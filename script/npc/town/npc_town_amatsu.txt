@@ -98,7 +98,7 @@ alberta.gat,245,93,4	script	貿易船船長	709,{
 			if (Zeny < 10000) goto Lzeny;
 			mes "[ワルター=メオス]";
 			mes "よし、出発だ！";
-			next;
+			close2;
 			set Zeny,Zeny-10000;
 			warp "amatsu",197,83;
 			end;
@@ -126,7 +126,7 @@ amatsu.gat,194,79,4	script	貿易船船長	709,{
 		mes "出発だ。";
 		mes "帰ったら友達に土産話でも";
 		mes "してやりな。";
-		next;
+		close2;
 		warp "alberta",243,91;
 		end;
 }
@@ -622,7 +622,7 @@ ama_in01.gat,22,111,0	script	お婆さん	761,{
 	mes "^FF6060我は石田一門が絶える";
 	mes "その日までここにある……";
 	mes "邪魔をするな！^000000";
-	next;
+	close2;
 	warp "amatsu",167,197;
 	end;
 LStart2:
@@ -667,7 +667,7 @@ Lfail:
 	mes "それでも我を追い出そうとしている";
 	mes "つもりか？クキキ……";
 	mes "消えろ!!!^000000";
-	next;
+	close2;
 	warp "amatsu",167,197;
 	end;
 LStart3:
@@ -1021,7 +1021,7 @@ L2_1:
 			mes "[十郎]";
 			mes "それでは門を開けよう。";
 			mes "くれぐれも気をつけるよう。";
-			next;
+			close2;
 			warp "ama_dun01.gat",229,10;
 			end;
 L2_2:
@@ -1057,7 +1057,7 @@ L2_2:
 			mes "そろそろ門を開ける。";
 			mes "くれぐれも身の安全には";
 			mes "気をつけることだ。";
-			next;
+			close2;
 			warp "ama_dun01.gat",229,10;
 			end;
 Llost:
@@ -1085,7 +1085,7 @@ ama_dun01.gat,229,7,0	script	兵士	767,{
 	menu "戻ります",-,"まだここに居ます",L1;
 		mes "[十郎]";
 		mes "気をつけて帰られよ。";
-		next;
+		close2;
 		warp "ama_in02.gat",119,181;
 		end;
 L1:

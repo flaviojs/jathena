@@ -1,4 +1,4 @@
-//mob_skill_db.txt＠AthenaDB計画 2004/06/21 03:31:19 +0900 (JST)
+//mob_skill_db.txt＠AthenaDB計画 2004/09/09 21:12:13 +0900 (JST)
 // MOB_ID,ダミー文字列,STATE,SKILL_ID,SKILL_LV,万分率,casttime,delay,妨害可能,ターゲット,条件タイプ,条件値,値1,値2,値3,値4,値5,使用時エモーション
 // ダミー文字列：わかりやすい名前を入れるといいかと。
 //
@@ -590,9 +590,10 @@
 1141,防御無視攻撃＠マリナ,attack,170,3,300,0,10000,no,target,myhpltmaxrate,30,,,,,,
 1141,防御無視攻撃＠マリナ,attack,170,3,100,0,10000,no,target,always,0,,,,,,
 1141,水属性攻撃＠マリナ,attack,184,1,200,0,7500,yes,target,always,0,,,,,,
-1142,自爆＠マリンスフィア,idle,173,1,160,3000,0,no,self,myhpltmaxrate,90,,,,,,
-1142,自爆＠マリンスフィア,idle,173,1,1000,3000,0,no,self,skillused,173,,,,,,
+1142,自爆＠マリンスフィア,idle,173,1,160,0,0,no,self,myhpltmaxrate,90,,,,,,
+1142,自爆＠マリンスフィア,idle,173,1,1000,0,0,no,self,skillused,173,,,,,,
 1142,水属性攻撃＠マリンスフィア,attack,184,1,100,0,15000,yes,target,always,0,,,,,,
+1142,自爆2＠マリンスフィア,idle,331,1,0,0,0,no,self,always,,,,,,,
 1143,エモーション＠マリオネット,idle,197,1,5,0,10000,yes,self,always,0,,,,,,
 1143,フリージングトラップ＠マリオネット,idle,121,5,50,1500,30000,yes,self,always,0,,,,,,
 1143,念属性攻撃＠マリオネット,attack,191,5,200,0,7500,yes,target,always,0,,,,,,
@@ -962,8 +963,8 @@
 1249,錯覚＠ミストケース,attack,207,1,100,1000,10000,yes,target,always,0,,,,,,
 1249,スピアスタブ＠ミストケース,attack,58,1,150,1000,10000,no,target,myhpltmaxrate,30,,,,,,
 1249,スピアスタブ＠ミストケース,attack,58,1,50,1000,10000,no,target,always,0,,,,,,
-1249,メマーナイト＠ミストケース,attack,42,1,150,1500,10000,no,target,myhpltmaxrate,30,,,,,,
-1249,メマーナイト＠ミストケース,attack,42,1,50,1500,10000,no,target,always,0,,,,,,
+1249,メマーナイト＠ミストケース,attack,42,1,150,1500,10000,no,target,myhpltmaxrate,30,,,,,,8
+1249,メマーナイト＠ミストケース,attack,42,1,50,1500,10000,no,target,always,0,,,,,,8
 1249,エモーション＠ミストケース,chase,197,1,15,0,10000,yes,self,always,0,,,,,,
 1249,錯覚＠ミストケース,chase,207,1,100,0,10000,yes,target,always,0,,,,,,
 1250,ヒール＠チェペット,idle,28,5,1000,2500,7000,yes,friend,friendhpltmaxrate,60,,,,,,
@@ -1987,3 +1988,4 @@
 1492,取り巻き召喚＠怨霊武士,chase,196,5,10000,3000,10000,no,self,slavele,2,1405,,,,,
 1499,ツーハンドクイッケン＠ウータンファイター,attack,60,6,300,3000,300000,no,self,myhpltmaxrate,30,,,,,,
 1499,マグナムブレイク＠ウータンファイター,attack,7,5,1000,1500,10000,no,target,attackpcge,2,,,,,,
+1511,取り巻き召喚＠アモンラー,any,196,10,3000,5000,2000,no,around1,slavele,0,1132,1194,,,,

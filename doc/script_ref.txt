@@ -22,7 +22,7 @@ AthenaNPCScript
 	(  0,  0)--(200,  0)→Xの増加
 
 １．NPCの定義
-	athenaディレクトリ以下ならどこでもよい（できればathena/conf以下）ので、とりあえずtxtを作成してください。
+	athenaディレクトリ以下ならどこでもよい（できればathena/script以下）ので、とりあえずtxtを作成してください。
 	まずそのNPCが何を示すのか記述します（場合によってはNPCという言い方は不適切）。
 
 	＊ワープポイント：MAP間の移動を行います。
@@ -96,6 +96,7 @@ AthenaNPCScript
 		npcid			配置する店の表示スプライトIDを指定します。
 		item_id			配置する店に置くアイテムIDを指定します。item_dbを参照してください。
 		price			item_idで指定したアイテムの値段を設定します。
+						負数を指定するとitem_db.txtで設定された値段になります。
 			<item_id>:<price>は,（カンマ）区切りで複数指定できます。
 
 	＊スクリプト：NPCを作成します。
@@ -206,6 +207,8 @@ AthenaNPCScript
 			^	ビット排他的論理和
 			&&	論理積
 			||	論理和
+			>>	右シフト
+			<<	左シフト
 
 		以下の２項演算子は数値どうし、または文字列どうしの比較を行います。
 		これらの関係演算子は関係が成り立つと1、成り立たないと0を返します。
@@ -316,6 +319,13 @@ AthenaNPCScript
 
 			メッセージウィンドウにcloseボタンを表示し、スクリプトを終了します。
 
+		close2命令
+			close2;
+
+			メッセージウィンドウにcloseボタンを表示し、待機します。
+			スクリプトを終了するためにはend命令と併用してください。
+			closeボタンが押された後の処理を実行することが出来ます。
+
 		menu命令
 			menu <string1>,<label1>[,<stringN>,<labelN>...];
 
@@ -342,6 +352,13 @@ AthenaNPCScript
 			カプラ職員などのカットインを表示します。<filename>は表示したいファイル名、<position>は表示位置を指定します。
 			position：0,左下、1,中央下、2,右下、255,カットイン消去
 
+		cutincard命令
+			cutincard <item id>;
+
+			item id		数値
+
+			アイテムIDに対応するカードの画像を表示します。
+
 		jobchange命令
 			jobchange <job>[, <upper>];
 
@@ -353,6 +370,15 @@ AthenaNPCScript
 			jobLvは自動で１になります。
 			バードとダンサーには注意してください。
 
+		changebase命令
+			changebase <job>[, <id>];
+			
+			job		数値
+			char id	見た目を変更する対象のIDです。省略時は自分の見た目が変更されます。
+			
+			見た目を変更します。<job>はdb/const.txtを参照してください。
+			jobを22にしたときは自動的に装備が外れます。
+			
 		input命令
 			input [<variable>];
 
@@ -441,21 +467,26 @@ AthenaNPCScript
 			<cond>が0以外の場合、<label>からスクリプトを開始します。
 
 		getitem命令
-			getitem <itemid>,<num>;
+			getitem <itemid>,<num>[,<identify>,<account_id>];
 
 			itemid		数値または文字列
 			num		数値
+			identify	数値(省略可)
+			account_id	数値(省略可)
 
 			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分入手します。
 			<itemid>が文字列の場合、その名前(name,jname)を持つアイテムのIDを使用します。
 			ただし、アイテム名はitem_db.txtなどに依存するため、テスト目的以外では使用すべきではありません。
+			<identify> 鑑定状態(0で未鑑定、1で鑑定)
+			<account_id>アイテムを渡す相手を指定(省略すると自分)
 
 		getitem2命令
 			getitem <itemid>,<num>,<identify>,<refine>,<attribute>,<card1>,
-			<card2>,<card3>,<card4>
+			<card2>,<card3>,<card4>[,<account_id>]
 
 			itemid		数値または文字列
 			num,identify,refine,attribute,card1,card2,card3,card4	数値
+			account_id	数値(省略可)
 
 			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分入手します。
 			<identify> 鑑定状態(0で未鑑定、1で鑑定)
@@ -465,6 +496,7 @@ AthenaNPCScript
 			<card2> 差さているカード、製造武器なら属性と星のかけらの数を設定。星のかけらの数(範囲:0~3)*5*256 + 属性(無:0、火:3、水:1、風:4、土:2)
 			<card3> 差さているカード、製造武器やキャラの名前が入るアイテムはキャラIDの下の2バイト
 			<card4> 差さているカード、製造武器やキャラの名前が入るアイテムはキャラIDの上の2バイト
+			<account_id>アイテムを渡す相手を指定(省略すると自分)
 
 			<itemid>が文字列の場合、その名前(name,jname)を持つアイテムのIDを使用します。
 			ただし、アイテム名はitem_db.txtなどに依存するため、テスト目的以外では使用すべきではありません。
@@ -578,6 +610,11 @@ AthenaNPCScript
 			精錬失敗エフェクトを表示します。
 			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
 
+		repairitem命令
+			repairitem;
+			
+			所有している修理可能(＝破壊された)アイテムをすべて修理します。
+			
 		setfalcon命令
 			setfalcon;
 
@@ -710,6 +747,24 @@ AthenaNPCScript
 			npcname		文字列
 
 			<npcname>を有効にします。
+			<npcname>に範囲が指定されている場合は、同時に範囲内PCに対してOnTouchイベントを実行します。
+
+		hideonnpc命令
+			hideonnpc <npcname>;
+			
+			npcname		文字列
+			
+			<npcname>をハイディング状態にします。
+			同時に<npcname>を無効にします。
+
+		hideoffnpc命令
+			hideoffnpc <npcname>;
+			
+			npcname		文字列
+			
+			ハイディング状態の<npcname>を表示します。
+			<npcname>を有効にし、さらに範囲が指定されている場合は、同時に範囲内PCに対してOnTouchイベントを実行します。
+			
 
 		mapannounce命令
 			mapannounce <gatname>,<string>,<flag>;
@@ -791,6 +846,15 @@ AthenaNPCScript
 			flag:0,恒久的なスキル取得(スキルツリーにない物は無効)、1,一時的(範囲は不明)な取得、
 			<skilllv>を0にするとこでそのスキルを忘れさせることも可能です。
 
+		guildskill命令
+			guildskill <skillid>,<skilllv>,<flag>;
+
+			skillid,skilllv,flag	数値
+
+			<skillid>に指定されたIDを持つLV<skilllv>スキルを習得します。
+			flag:0,ギルドスキルポイントを消費します、1,ギルドスキルポイントを消費しません
+			<skilllv>を0にするとこでそのスキルを忘れさせることも可能です。
+			
 		waitingroom命令
 			waitingroom <title>,<limit>[,<event>[,<trigger>]];
 
@@ -829,8 +893,8 @@ AthenaNPCScript
 			また、既にイベントが起こる人数に達している場合、
 			即座にイベントを実行します。
 
-		warpwaitingnpc命令
-			warpwaitingnpc <gatname>,<x>,<y>[,<num>];
+		warpwaitingpc命令
+			warpwaitingpc <gatname>,<x>,<y>[,<num>];
 
 			gatname		文字列
 			x,y,num		数値
@@ -849,6 +913,31 @@ AthenaNPCScript
 			n		数値
 
 			<n>エモーションを出します。
+
+		classchange命令
+			classchange <class>, <type>;
+
+			class	数値
+			type	数値
+
+			<class>で指定したClassにクラスチェンジします。
+
+		misceffect命令
+			misceffect <type>;
+
+			type	数値
+
+		soundeffect命令
+			soundeffect <name>, <type>;
+
+			name	文字列(24文字まで)
+			type	数値
+
+			<name>で指定したエフェクト音を発生させます。
+			<type>
+				0	1回鳴らす
+				1	繰り返し鳴らす
+				2	繰り返しの停止
 
 		setmapflag命令
 			setmapflag <gatname>,<flag>;
@@ -1071,6 +1160,13 @@ AthenaNPCScript
 			精錬成功率を返します。
 			n:1,頭装備、2,鎧、3,左手、4,右手、5,かけるもの、6,靴、7,アクセ１、8,アクセ２、9,頭中段、10,頭下段
 
+		getrepairableitemcount関数
+			getrepairableitemcount(<n>)
+
+			n		数値(ダミーなのでなんでもよい)
+			
+			所有アイテムで修理可能(＝破壊された)アイテムの数を返します。
+			
 		getusers関数
 			getusers(<n>)
 
@@ -1101,16 +1197,41 @@ AthenaNPCScript
 
 			<skillid>で指定したIDを持つスキルのLVを返します。習得していない場合は0を返します。
 
+		getgdskilllv命令
+			getgdskilllv(<guild_id>,<skillid>)
+			
+			guild_id,skillid	数値
+			
+			<skillid>で指定したIDを持つスキルのLVを返します。習得していない場合は0を返します。
+
+		readparam関数
+			readparam(<param>[,<charname>])
+			
+			param		パラメータ(const.txt参照、でも記述は数字で)
+			charname	キャラクタ名(省略可)
+			
+			<param>で指定されたキャラクタのパラメータを返します
+			<charname>が指定されている場合は対象キャラクタのパラメータが返ります
+
 		getcharid関数
-			getcharid(<n>)
+			getcharid(<n>[,<charname>])
 
 			n		数値
+			charname	キャラクタ名(省略可)
 
-			キャラ情報をIDで返します。
+			キャラ情報をIDで返します(charnameが指定されていない場合は自分)。
 			n=0	キャラID
 			n=1	パーティー
 			n=2	ギルド
 			n=3	アカウントID
+
+		getpartymember関数
+			getpartymember(<n>)
+			
+			n		数値
+			
+			<n>で指定したIDを持つパーティーの人数を $@partymembercount に返します。
+			配列 $@partymembername$ にパーティメンバーの名前をセットします。
 
 		getpartyname関数
 			getpartyname(<n>)
@@ -1178,6 +1299,35 @@ AthenaNPCScript
 			num=16	チャットルームのイベント名（文字列）
 			num=32	チャットルームが満員かどうか（数値）
 			num=33	チャットルームでイベントが起こる人数かどうか（数値）
+
+		getinventorylist関数
+			getinventorylist(引数無し)
+
+			現在アタッチされているプレイヤーの装備品含むアイテムデータを
+			配列変数@inventorylist_***にロードします。
+			以下変数の説明
+			@inventorylist_id : アイテムのID
+			@inventorylist_amount : アイテムの量
+			@inventorylist_equip : 装備している場合の装備箇所
+			@inventorylist_refine : アイテムの精錬値
+			@inventorylist_identify : アイテムの鑑定状態
+			@inventorylist_attribute : アイテムの破損の有無
+			@inventorylist_card1 : アイテムに挿しているカードデータ(1枚目)
+			@inventorylist_card2 : アイテムに挿しているカードデータ(2枚目)
+			@inventorylist_card3 : アイテムに挿しているカードデータ(3枚目)
+			@inventorylist_card4 : アイテムに挿しているカードデータ(4枚目)
+			@inventorylist_count : プレイヤーの所持している総アイテム種類数
+
+		getskilllist関数
+			getskilllist(引数無し)
+
+			現在アタッチされているプレイヤーのスキルデータを
+			配列変数@skilllist_***にロードします。
+			以下変数の説明
+			@skilllist_id : スキルのID
+			@skilllist_lv : スキルの最大レベル
+			@skilllist_flag : スキルの種別フラグ
+			@skilllist_count : プレイヤーの覚えているスキルの最大数
 
 		getnpctimer関数
 			getnpctimer(<num>[,<name>])
@@ -1300,6 +1450,13 @@ AthenaNPCScript
 		OnAgitEliminateラベル
 			エンペリウム破壊後、ギルドの所有者が書き換わるときに
 			呼ばれます。
+
+		OnGuildBreakラベル
+			ギルドを解体したときに実行されます。
+
+		OnTouchラベル
+			範囲NPCの有効範囲にPCが入った場合に実行されます。
+			OnTouchを設定するNPCの名前はサーバー内でユニークな物にしなければなりません。
 
 	＊注意事項
 		文字列と説明されている引数は""で囲ってください。

@@ -28,6 +28,7 @@
 #include <zlib.h>
 
 #include "grfio.h"
+#include "malloc.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -42,9 +43,9 @@ static char adata_file[1024] = "adata.grf";
 static char sdata_file[1024] = "sdata.grf";
 
 // accessor to data_file,adata_file,sdata_file
-char *grfio_setdatafile(const char *str){ strcpy(data_file,str); return data_file; }
-char *grfio_setadatafile(const char *str){ strcpy(adata_file,str); return adata_file; }
-char *grfio_setsdatafile(const char *str){ strcpy(sdata_file,str); return sdata_file; }
+char *grfio_setdatafile(const char *str){ strncpy(data_file,str,1024); return data_file; }
+char *grfio_setadatafile(const char *str){ strncpy(adata_file,str,1024); return adata_file; }
+char *grfio_setsdatafile(const char *str){ strncpy(sdata_file,str,1024); return sdata_file; }
 
 //----------------------------
 //	file entry table struct
@@ -335,17 +336,12 @@ static FILELIST* filelist_add(FILELIST *entry)
 	}
 
 	if (filelist_entrys>=filelist_maxentry) {
-		FILELIST *new_filelist = (FILELIST*)realloc(
+		FILELIST *new_filelist = (FILELIST*)aRealloc(
 			(void*)filelist, (filelist_maxentry+FILELIST_ADDS)*sizeof(FILELIST) );
-		if (new_filelist != NULL) {
-			filelist = new_filelist;
-			memset(filelist + filelist_maxentry, '\0',
-				FILELIST_ADDS * sizeof(FILELIST));
-			filelist_maxentry += FILELIST_ADDS;
-		} else {
-			printf("out of memory : filelist_add\n");
-			exit(1);
-		}
+		filelist = new_filelist;
+		memset(filelist + filelist_maxentry, '\0',
+			FILELIST_ADDS * sizeof(FILELIST));
+		filelist_maxentry += FILELIST_ADDS;
 	}
 
 	memcpy( &filelist[filelist_entrys], entry, sizeof(FILELIST) );
@@ -380,15 +376,10 @@ static void filelist_adjust(void)
 {
 	if (filelist!=NULL) {
 		if (filelist_maxentry>filelist_entrys) {
-			FILELIST *new_filelist = (FILELIST*)realloc(
+			FILELIST *new_filelist = (FILELIST*)aRealloc(
 				(void*)filelist,filelist_entrys*sizeof(FILELIST) );
-			if (new_filelist != NULL) {
-				filelist = new_filelist;
-				filelist_maxentry = filelist_entrys;
-			} else {
-				printf("out of memory : filelist\n");
-				exit(1);
-			}
+			filelist = new_filelist;
+			filelist_maxentry = filelist_entrys;
 		}
 	}
 }
@@ -457,11 +448,7 @@ void* grfio_reads(char *fname, int *size)
 				lentry.declen = ftell(in);
 			}
 			fseek(in,0,0);	// SEEK_SET
-			buf2 = calloc(lentry.declen+1024, 1);
-			if (buf2==NULL) {
-				printf("file read memory allocate error : declen\n");
-				goto errret;
-			}
+			buf2 = (char *)aCalloc(1,lentry.declen+1024);
 			fread(buf2,1,lentry.declen,in);
 			fclose(in); in = NULL;
 			strncpy( lentry.fn, fname, sizeof(lentry.fn)-1 );
@@ -477,11 +464,7 @@ void* grfio_reads(char *fname, int *size)
 		}
 	}
 	if (entry!=NULL && entry->gentry>0) {	// Archive[GRF] File Read
-		buf = calloc(entry->srclen_aligned+1024, 1);
-		if (buf==NULL) {
-			printf("file read memory allocate error : srclen_aligned\n");
-			goto errret;
-		}
+		buf = (char *)aCalloc(1,entry->srclen_aligned+1024);
 		gfname = gentry_table[entry->gentry-1];
 		in = fopen(gfname,"rb");
 		if(in==NULL) {
@@ -491,11 +474,7 @@ void* grfio_reads(char *fname, int *size)
 		fseek(in,entry->srcpos,0);
 		fread(buf,1,entry->srclen_aligned,in);
 		fclose(in);
-		buf2=calloc(entry->declen+1024, 1);
-		if (buf2==NULL) {
-			printf("file decode memory allocate error\n");
-			goto errret;
-		}
+		buf2=(char *)aCalloc(1,entry->declen+1024);
 		if(entry->type==1 || entry->type==3 || entry->type==5) {
 			uLongf len;
 			if (entry->cycle>=0) {
@@ -580,12 +559,7 @@ static int grfio_entryread(char *gfname,int gentry)
 
 	if (grf_version==0x01) {	//****** Grf version 01xx ******
 		list_size = grf_size-ftell(fp);
-		grf_filelist = calloc(list_size, 1);
-		if(grf_filelist==NULL){
-			fclose(fp);
-			printf("out of memory : grf_filelist\n");
-			return 3;	// 3:memory alloc error
-		}
+		grf_filelist = (char *)aCalloc(1,list_size);
 		fread(grf_filelist,1,list_size,fp);
 		fclose(fp);
 		
@@ -607,7 +581,7 @@ static int grfio_entryread(char *gfname,int gentry)
 					exit(1);
 				}
 				srclen=0;
-				if((period_ptr=rindex(fname,'.'))!=NULL){
+				if((period_ptr=strrchr(fname,'.'))!=NULL){
 					for(lop=0;lop<4;lop++) {
 						if(strcasecmp(period_ptr,".gnd\0.gat\0.act\0.str"+lop*5)==0)
 							break;
@@ -655,19 +629,8 @@ static int grfio_entryread(char *gfname,int gentry)
 			return 4;
 		}
 		
-		rBuf = calloc( rSize , 1);	// Get a Read Size
-		if (rBuf==NULL) {
-			fclose(fp);
-			printf("out of memory : grf compress entry table buffer\n");
-			return 3;
-		}
-		grf_filelist = calloc( eSize , 1);	// Get a Extend Size
-		if (grf_filelist==NULL) {
-			free(rBuf);
-			fclose(fp);
-			printf("out of memory : grf extract entry table buffer\n");
-			return 3;
-		}
+		rBuf = (char *)aCalloc(1,rSize);	// Get a Read Size
+		grf_filelist = (char *)aCalloc(1,eSize);	// Get a Extend Size
 		fread(rBuf,1,rSize,fp);
 		fclose(fp);
 		decode_zip(grf_filelist,&eSize,rBuf,rSize);	// Decode function
@@ -788,26 +751,17 @@ int grfio_add(char *fname)
 	printf("%s file reading...\n",fname);
 
 	if (gentry_entrys>=gentry_maxentry) {
-		char **new_gentry = (char**)realloc(
+		char **new_gentry = (char**)aRealloc(
 			(void*)gentry_table,(gentry_maxentry+GENTRY_ADDS)*sizeof(char*) );
-		if (new_gentry!=NULL) {
-			int lop;
-			gentry_table = new_gentry;
-			gentry_maxentry += GENTRY_ADDS;
-			for(lop=gentry_entrys;lop<gentry_maxentry;lop++)
-				gentry_table[lop] = NULL;
-		} else {
-			printf("out of memory : grfio_add\n");
-			exit(1);
-		}
+		int lop;
+		gentry_table = new_gentry;
+		gentry_maxentry += GENTRY_ADDS;
+		for(lop=gentry_entrys;lop<gentry_maxentry;lop++)
+			gentry_table[lop] = NULL;
 	}
 	len = strlen( fname );
-	buf = calloc(len+1, 1);
-	if (buf==NULL) {
-		printf("out of memory : gentry\n");
-		exit(1);
-	}
-	strcpy( buf, fname );
+	buf = (char *)aCalloc(1,len+1);
+	strncpy( buf, fname, len+1 );
 	gentry_table[gentry_entrys++] = buf;
 
 	result = grfio_entryread(fname,gentry_entrys-1);
@@ -861,11 +815,11 @@ void grfio_init(char *fname)
 		while(fgets(line,1020,data_conf)) {
 			if(sscanf(line,"%[^:]: %[^\r\n]", w1, w2) == 2) {
 				if(strcmp(w1,"data") == 0)
-					strcpy(data_file, w2);
+					strncpy(data_file, w2, 1024);
 				else if(strcmp(w1,"sdata") == 0)
-					strcpy(sdata_file, w2);
+					strncpy(sdata_file, w2, 1024);
 				else if(strcmp(w1,"adata") == 0)
-					strcpy(adata_file, w2);
+					strncpy(adata_file, w2, 1024);
 			}
 		}
 		fclose(data_conf);

@@ -4,12 +4,13 @@
 #include <string.h>
 
 #include "db.h"
+#include "nullpo.h"
+#include "malloc.h"
 #include "map.h"
 #include "clif.h"
 #include "pc.h"
 #include "chat.h"
 #include "npc.h"
-#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -28,11 +29,7 @@ int chat_createchat(struct map_session_data *sd,int limit,int pub,char* pass,cha
 
 	nullpo_retr(0, sd);
 
-	cd = calloc(sizeof(*cd), 1);
-	if(cd==NULL){
-		printf("out of memory : chat_createchat\n");
-		exit(1);
-	}
+	cd = aCalloc(1,sizeof(struct chat_data));
 
 	cd->limit = limit;
 	cd->pub = pub;
@@ -260,22 +257,18 @@ int chat_kickchat(struct map_session_data *sd,char *kickusername)
  * npcチャットルーム作成
  *------------------------------------------
  */
-int chat_createnpcchat(struct npc_data *nd,int limit,int trigger,char* title,int titlelen,const char *ev)
+int chat_createnpcchat(struct npc_data *nd,int limit,int pub,int trigger,char* title,int titlelen,const char *ev)
 {
 	struct chat_data *cd;
 
 	nullpo_retr(1, nd);
 
-	cd = calloc(sizeof(*cd), 1);
-	if(cd==NULL){
-		printf("out of memory : chat_createnpcchat\n");
-		exit(1);
-	}
+	cd = aCalloc(1,sizeof(struct chat_data));
 
 	cd->limit = cd->trigger = limit;
 	if(trigger>0)
 		cd->trigger = trigger;
-	cd->pub = 1;
+	cd->pub = pub;
 	cd->users = 0;
 	memcpy(cd->pass,"",8);
 	if(titlelen>=sizeof(cd->title)-1) titlelen=sizeof(cd->title)-1;
@@ -367,5 +360,14 @@ int chat_npckickall(struct chat_data *cd)
 	while(cd->users>0){
 		chat_leavechat(cd->usersd[cd->users-1]);
 	}
+	return 0;
+}
+
+/*==========================================
+ * 終了
+ *------------------------------------------
+ */
+int do_final_chat(void)
+{
 	return 0;
 }

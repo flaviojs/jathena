@@ -4,19 +4,20 @@
 
 #include "db.h"
 #include "timer.h"
+#include "socket.h"
+#include "nullpo.h"
+#include "malloc.h"
 #include "pc.h"
 #include "map.h"
 #include "intif.h"
 #include "clif.h"
 #include "chrif.h"
-#include "socket.h"
 #include "pet.h"
 #include "itemdb.h"
 #include "battle.h"
 #include "mob.h"
 #include "npc.h"
 #include "script.h"
-#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -656,11 +657,7 @@ int pet_data_init(struct map_session_data *sd)
 		return 1;
 	}
 	sd->petDB = &pet_db[i];
-	sd->pd = pd = calloc(sizeof(struct pet_data), 1);
-	if(pd==NULL){
-		printf("out of memory : pet_data_init\n");
-		exit(1);
-	}
+	sd->pd = pd = (struct pet_data *)aCalloc(1,sizeof(struct pet_data));
 
 	pd->bl.m = sd->bl.m;
 	pd->bl.prev = pd->bl.next = NULL;
@@ -697,8 +694,7 @@ int pet_data_init(struct map_session_data *sd)
 	if(interval <= 0)
 		interval = 1;
 	sd->pet_hungry_timer = add_timer(gettick()+interval,pet_hungry,sd->bl.id,0);
-	pd->lootitem=calloc(sizeof(struct item)*LOOTITEM_SIZE, 1);
-	memset(pd->lootitem,0,sizeof(pd->lootitem));
+	pd->lootitem=(struct item *)aCalloc(LOOTITEM_SIZE,sizeof(struct item));
 	pd->lootitem_count = 0;
 	pd->lootitem_weight = 0;
 	pd->lootitem_timer = gettick();
@@ -829,7 +825,7 @@ int pet_catch_process2(struct map_session_data *sd,int target_id)
 		pet_catch_rate = (pet_catch_rate*battle_config.pet_catch_rate)/100;
 
 	if(rand()%10000 < pet_catch_rate) {
-		mob_catch_delete(md);
+		mob_catch_delete(md,0);
 		clif_pet_rulet(sd,1);
 //		if(battle_config.etc_log)
 //			printf("rulet success %d\n",target_id);
@@ -1300,11 +1296,7 @@ int pet_lootitem_drop(struct pet_data *pd,struct map_session_data *sd)
 			for(i=0;i<pd->lootitem_count;i++) {
 				struct delay_item_drop2 *ditem;
 
-				ditem=calloc(sizeof(*ditem), 1);
-				if(ditem==NULL){
-					printf("out of memory : pet_lootitem_drop\n");
-					exit(1);
-				}
+				ditem=(struct delay_item_drop2 *)aCalloc(1,sizeof(struct delay_item_drop2));
 				memcpy(&ditem->item_data,&pd->lootitem[i],sizeof(pd->lootitem[0]));
 				ditem->m = pd->bl.m;
 				ditem->x = pd->bl.x;
@@ -1324,8 +1316,7 @@ int pet_lootitem_drop(struct pet_data *pd,struct map_session_data *sd)
 					add_timer(gettick()+540+i,pet_delay_item_drop2,(int)ditem,0);
 			}
 			pd->lootitem=NULL;
-			pd->lootitem=calloc(sizeof(struct item)*LOOTITEM_SIZE, 1);
-			memset(pd->lootitem,0,sizeof(pd->lootitem));
+			pd->lootitem=(struct item *)aCalloc(LOOTITEM_SIZE,sizeof(struct item));
 			pd->lootitem_count = 0;
 			pd->lootitem_weight = 0;
 			pd->lootitem_timer = gettick()+10000;	//	10*1000ms‚ÌŠÔE‚í‚È‚¢

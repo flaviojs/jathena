@@ -41,10 +41,16 @@ check_account() {
 		mkdir ./log
 	fi
 
+	if [ ! -d ./conf/import ]; then
+		mkdir ./conf/import
+	fi
+
 	if [ ! -f ./save/account.txt ]; then
-		for i in `seq 0 4`
+		i=0
+		while [ $i -le 4 ];
 		do
 			echo -e "$i\ts`expr $i + 1`\tp`expr $i + 1`\t-\tS\t0\t0\r" >> save/account.txt
+			i=`expr $i + 1`
 		done
 	fi
 
@@ -73,10 +79,36 @@ check_account() {
 	fi
 
 	if [ ! -f ./save/castle.txt ]; then
-		for i in `seq 0 19`
+		i=0
+		while [ $i -le 19 ];
 		do
 			echo -e "$i,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\r" >> save/castle.txt
+			i=`expr $i + 1`
 		done
+	fi
+
+	if [ ! -f ./conf/import/atcommand_conf.txt ]; then
+		echo -n > conf/import/atcommand_conf.txt
+	fi
+
+	if [ ! -f ./conf/import/battle_conf.txt ]; then
+		echo -n > conf/import/battle_conf.txt
+	fi
+
+	if [ ! -f ./conf/import/char_conf.txt ]; then
+		echo -n > conf/import/char_conf.txt
+	fi
+
+	if [ ! -f ./conf/import/inter_conf.txt ]; then
+		echo -n > conf/import/inter_conf.txt
+	fi
+
+	if [ ! -f ./conf/import/login_conf.txt ]; then
+		echo -n > conf/import/login_conf.txt
+	fi
+
+	if [ ! -f ./conf/import/map_conf.txt ]; then
+		echo -n > conf/import/map_conf.txt
 	fi
 }
 
@@ -100,33 +132,38 @@ echo "Looks good, have a nice athena!"
 
 case $1 in
 	'start')
-		print_start
-		check_account
-		check_files
+		if [ $(ps ax | grep -E "${M_SRV}|${C_SRV}|${L_SRV}" | grep -v grep | wc -l) -eq 0 ]; then
+			print_start
+			check_account
+			check_files
 
-		exec ./${L_SRV} ${L_SRV_C}&
-#		exec ./${C_SRV} ${C_SRV_C} ${C_SRV_C2} > /dev/null&
-#		exec ./${M_SRV} ${M_SRV_C} ${M_SRV_C2} > /dev/null&
-		exec ./${C_SRV} ${C_SRV_C} ${C_SRV_C2}&
-		exec ./${M_SRV} ${M_SRV_C} ${M_SRV_C2} ${M_SRV_C3} ${M_SRV_C4} ${M_SRV_C5} ${M_SRV_C6}&
+			exec ${L_SRV} ${L_SRV_C}&
+#			exec ${C_SRV} ${C_SRV_C} ${C_SRV_C2} > /dev/null&
+#			exec ${M_SRV} ${M_SRV_C} ${M_SRV_C2} > /dev/null&
+			exec ${C_SRV} ${C_SRV_C} ${C_SRV_C2}&
+#			exec nice -n -20 ${M_SRV} ${M_SRV_C} ${M_SRV_C2} ${M_SRV_C3} ${M_SRV_C4} ${M_SRV_C5} ${M_SRV_C6}&
+			exec ${M_SRV} ${M_SRV_C} ${M_SRV_C2} ${M_SRV_C3} ${M_SRV_C4} ${M_SRV_C5} ${M_SRV_C6}&
 
-		echo "Now Started Athena."
+			echo "Now Started Athena."
+		else
+			echo "Athena is already running..."
+		fi
 ;;
 	'stop')
-		ps ax | grep -E "${L_SRV}|${C_SRV}|${M_SRV}" | awk '{print $1}' | xargs kill
-		while	[ "      0" != "$(ps | grep -e login | wc -l)" ] ||
-			[ "      0" != "$(ps | grep -e char | wc -l)" ] ||
-			[ "      0" != "$(ps | grep -e map  | wc -l)" ]; do
-			sleep 1
-		done
+		if [ $(ps ax | grep -E "${M_SRV}|${C_SRV}|${L_SRV}" | grep -v grep | wc -l) -ne 0 ]; then
+			ps ax | grep -E "${L_SRV}|${C_SRV}|${M_SRV}" | awk '{print $1}' | xargs kill
+			while	[ $(ps ax | grep -E "${L_SRV}|${C_SRV}|${M_SRV}" | grep -v grep | wc -l) -ne 0 ]; do
+				sleep 1
+			done
+		fi
 	;;
 	'kill')
-		ps ax | grep -E "${L_SRV}|${C_SRV}|${M_SRV}" | awk '{print $1}' | xargs kill -9
-		while	[ "      0" != "$(ps | grep -e login | wc -l)" ] ||
-			[ "      0" != "$(ps | grep -e char | wc -l)" ] ||
-			[ "      0" != "$(ps | grep -e map  | wc -l)" ]; do
-			sleep 1
-		done
+		if [ $(ps ax | grep -E "${M_SRV}|${C_SRV}|${L_SRV}" | grep -v grep | wc -l) -ne 0 ]; then
+			ps ax | grep -E "${M_SRV}|${C_SRV}|${L_SRV}" | awk '{print $1}' | xargs kill -9
+			while	[ $(ps ax | grep -E "${L_SRV}|${C_SRV}|${M_SRV}" | grep -v grep | wc -l) -ne 0 ]; do
+				sleep 1
+			done
+		fi
 	;;
 	'restart')
 		$0 stop

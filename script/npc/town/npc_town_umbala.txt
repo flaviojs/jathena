@@ -563,7 +563,7 @@ umbala.gat,221,193,1	script	 #Š[œ–å	111,{
 					mes "–å‚ªŠJ‚¢‚½B–å‚ªŠJ‚­‚Æ“¯‚É";
 					mes "–³ˆÓ¯‚Ì‚¤‚¿‚É‘«‚ªŒš•¨‚Ì’†‚Ö‚Æ";
 					mes "Œü‚©‚Á‚Ä‚¢‚½B^000000";
-					next;
+					close2;
 				LwarpNoText:
 					warp "um_in.gat",32,71;
 					end;
@@ -996,7 +996,7 @@ L1:
 		next;
 	L1_input:
 		input @umchange[4];
-		if (@umchange[4]==0) goto L1_cancel;
+		if (@umchange[4]<=0) goto L1_cancel;
 		if (@umchange[4]>9) goto L1_numError;
 		set @umchange[4],1;/*1ˆÈã‚Å‚È‚»‚¤‚È‚Ì‚Å*/
 		mes "[ƒvƒcƒ`ƒ@ƒ‹ƒ^ƒ“]";
@@ -1118,7 +1118,7 @@ L2:
 		next;
 	L2_input:
 		input @umchange[4];
-		if (@umchange[4]==0) goto L2_cancel;
+		if (@umchange[4]<=0) goto L2_cancel;
 		if (@umchange[4]>9) goto L2_numError;
 //ŒvZ“K“–
 		set @umchange[4],rand(5)+@umchange[4];
@@ -1201,7 +1201,7 @@ LumWord:
 	mes "ƒEƒ€ƒoƒoƒEƒ€ƒoƒEƒ€ƒoƒoƒEƒ€ƒoƒoƒEƒ€ƒo";
 	mes "ƒEƒ€ƒoƒoƒEƒ€ƒoƒoƒEƒ€ƒoƒEƒ€ƒoƒoƒEƒ€ƒo";
 	mes "ƒtƒ€ƒEƒ€ƒoƒEƒ€ƒoB";
-	next;
+	close2;
 	warp "umbala.gat",217,186;
 	end;
 }
@@ -1636,13 +1636,15 @@ mapannounce "umbala.gat","ƒoƒ“ƒW[ƒWƒƒƒ“ƒv‘ä: " + strcharinfo(0) + " : ƒLƒƒƒAƒAƒ
 	percentheal -50,0;
 end;
 
-L3:/*HP99%‚Ìƒ_ƒ[ƒW*/
+L3:/*HP‚ª0‚É‚È‚èƒjƒuƒ‹ƒwƒCƒ€‚Ö“]‘—B€‚ñ‚Å‚µ‚Ü‚¤‚Ì‚Å99*/
 mapannounce "umbala.gat","ƒoƒ“ƒW[ƒWƒƒƒ“ƒv‘ä: " + strcharinfo(0) + " : ƒEƒƒAƒAƒAƒAƒAƒAƒA```I",8;
 	percentheal -99,0;
+	warp "nif_in.gat",68,14;
 end;
 }
 
 umbala.gat,136,195,0	script	#ƒ[ƒvƒ|ƒCƒ“ƒg	139,1,1,{
+OnTouch:
 	warp "umbala.gat",145,166;
 	end;
 }

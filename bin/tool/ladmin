@@ -328,7 +328,7 @@ sub listaccount(){
 # アカウント追加
 sub addaccount(){
 	my($userid,$sex,$passwd)= @_;
-	if($userid=~/[^A-Za-z0-9\@-_]/){
+	if($userid=~/[^A-Za-z0-9\@-_-]/){
 		print "Illeagal charactor found in user_id ".$`."[${&}]${'}\n";
 		return 101;
 	}

@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "inter.h"
 #include "int_pet.h"
 #include "mmo.h"
@@ -5,9 +9,7 @@
 #include "socket.h"
 #include "db.h"
 #include "lock.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "malloc.h"
 
 
 char pet_txt[1024]="save/pet.txt";
@@ -87,12 +89,7 @@ int inter_pet_init()
 	if( (fp=fopen(pet_txt,"r"))==NULL )
 		return 1;
 	while(fgets(line,sizeof(line),fp)){
-		p=calloc(sizeof(struct s_pet), 1);
-		if(p==NULL){
-			printf("int_pet: out of memory!\n");
-			exit(0);
-		}
-		memset(p,0,sizeof(struct s_pet));
+		p=(struct s_pet *)aCalloc(1,sizeof(struct s_pet));
 		if(inter_pet_fromstr(line,p)==0 && p->pet_id>0){
 			if( p->pet_id >= pet_newid)
 				pet_newid=p->pet_id+1;
@@ -209,13 +206,7 @@ int mapif_create_pet(int fd,int account_id,int char_id,short pet_class,short pet
 	short pet_equip,short intimate,short hungry,char rename_flag,char incuvate,char *pet_name)
 {
 	struct s_pet *p;
-	p=malloc(sizeof(struct s_pet));
-	if(p==NULL){
-		printf("int_pet: out of memory !\n");
-		mapif_pet_created(fd,account_id,NULL);
-		return 0;
-	}
-	memset(p,0,sizeof(struct s_pet));
+	p=(struct s_pet *)aCalloc(1,sizeof(struct s_pet));
 	p->pet_id = pet_newid++;
 	memcpy(p->name,pet_name,24);
 	if(incuvate == 1)
@@ -281,13 +272,7 @@ int mapif_save_pet(int fd,int account_id,struct s_pet *data)
 		pet_id = data->pet_id;
 		p=numdb_search(pet_db,pet_id);
 		if(p == NULL) {
-			p=malloc(sizeof(struct s_pet));
-			if(p==NULL){
-				printf("int_pet: out of memory !\n");
-				mapif_save_pet_ack(fd,account_id,1);
-				return 0;
-			}
-			memset(p,0,sizeof(struct s_pet));
+			p=(struct s_pet *)aCalloc(1,sizeof(struct s_pet));
 			p->pet_id = data->pet_id;
 			if(p->pet_id == 0)
 				data->pet_id = p->pet_id = pet_newid++;
@@ -361,3 +346,16 @@ int inter_pet_parse_frommap(int fd)
 	return 1;
 }
 
+static int pet_db_final(void *key,void *data,va_list ap)
+{
+	struct s_pet *p=data;
+
+	free(p);
+
+	return 0;
+}
+void do_final_int_pet(void)
+{
+	if(pet_db)
+		numdb_final(pet_db,pet_db_final);
+}

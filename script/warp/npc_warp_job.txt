@@ -265,14 +265,6 @@ sword_1-1.gat,181,163,0	script	3_blank_30_c	139,2,0,{doevent "3rd_fall";end;}
 job_thief1.gat,180,15,0	warp	jthf	7,1,moc_ruins.gat,145,117
 
 //==============================================================================
-//Knight
-//==============================================================================
-job_knt.gat,165,151,0	warp	jknt01	3,3,job_knt.gat,0,0
-job_knt.gat,122,151,0	warp	jknt02	3,3,job_knt.gat,0,0
-job_knt.gat,65,145,0	warp	jknt03	3,3,job_knt.gat,0,0
-job_knt.gat,22,145,0	warp	jknt04	3,3,job_knt.gat,0,0
-
-//==============================================================================
 //Wizerd
 //==============================================================================
 //job_wiz.gat,0,0,0	warp	jwiz	3,3,job_wiz.gat,0,0
@@ -337,10 +329,11 @@ alde_alche.gat,159,163,0	warp	alche04	1,1,alde_alche.gat,126,104
 alde_alche.gat,131,77,0	warp	alche05	1,1,alde_alche.gat,162,107
 alde_alche.gat,159,107,0	warp	alche06	1,1,alde_alche.gat,128,77
 //Alchemist Hall 1st Floor Bottom Rooms
-alde_alche.gat,47,103,0	warp	alche07	1,1,alde_alche.gat,88,18
-alde_alche.gat,92,18,0	warp	alche08	1,1,alde_alche.gat,50,103
-alde_alche.gat,47,77,0	warp	alche09	1,1,alde_alche.gat,155,18
-alde_alche.gat,159,18,0	warp	alche10	1,1,alde_alche.gat,50,77
+alde_alche.gat,47,103,0	warp	alche07	1,1,alde_alche.gat,155,18
+alde_alche.gat,159,18,0	warp	alche08	1,1,alde_alche.gat,50,103
+alde_alche.gat,47,77,0	warp	alche09	1,1,alde_alche.gat,88,18
+alde_alche.gat,92,18,0	warp	alche10	1,1,alde_alche.gat,50,77
+
 //Alchemist Hall 2nd Floor - 1st Floor Link
 alde_alche.gat,14,184,0	warp	alche11	1,1,alde_alche.gat,88,113
 alde_alche.gat,88,117,0	warp	alche12	1,1,alde_alche.gat,14,180

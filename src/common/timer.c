@@ -9,6 +9,7 @@
 #include <sys/time.h>
 
 #include "timer.h"
+#include "malloc.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -28,21 +29,17 @@ struct timer_func_list {
 	struct timer_func_list* next;
 	char name[4];
 };
-static struct timer_func_list* tfl_root;
+static struct timer_func_list* tfl_root=NULL;
 
 //
 int add_timer_func_list(int (*func)(int,unsigned int,int,int),char* name)
 {
 	struct timer_func_list* tfl;
 
-	tfl = calloc(sizeof(*tfl) + strlen(name), 1);
-	if (tfl == NULL) {
-		printf("out of memory : add_timer_func_list\n");
-		return 1;
-	}
+	tfl = (struct timer_func_list*)aCalloc(1,sizeof(*tfl) + strlen(name)+1);
 	tfl->next = tfl_root;
 	tfl->func = func;
-	strcpy(tfl->name,name);
+	strncpy(tfl->name,name,strlen(name)+1);
 	tfl_root = tfl;
 
 	return 0;
@@ -91,11 +88,7 @@ static void push_timer_heap(int index)
 		int first = timer_heap == NULL;
 
 		timer_heap_max += 256;
-		timer_heap = realloc(timer_heap, sizeof(int) * timer_heap_max);
-		if (timer_heap == NULL) {
-			printf("out of memory : push_timer_heap\n");
-			exit(1);
-		}
+		timer_heap = (int*)aRealloc(timer_heap, sizeof(int) * timer_heap_max);
 		memset(timer_heap + (timer_heap_max - 256), 0, sizeof(int) * 256);
 		if (first)
 			timer_heap[0] = 0;
@@ -167,19 +160,11 @@ int add_timer(unsigned int tick,int (*func)(int,unsigned int,int,int),int id,int
 		int j;
 		if (timer_data_max == 0) {
 			timer_data_max = 256;
-			timer_data = calloc(sizeof(struct TimerData) * timer_data_max, 1);
-			if (timer_data == NULL) {
-				printf("out of memory : add_timer timer_data\n");
-				exit(1);
-			}
+			timer_data = (struct TimerData*)aCalloc(timer_data_max,sizeof(struct TimerData));
 			//timer_data[0] = NULL;
 		} else {
 			timer_data_max += 256;
-			timer_data = realloc(timer_data,sizeof(struct TimerData) * timer_data_max);
-			if (timer_data == NULL) {
-				printf("out of memory : add_timer timer_data\n");
-				exit(1);
-			}
+			timer_data = (struct TimerData*)aRealloc(timer_data,sizeof(struct TimerData) * timer_data_max);
 			memset(timer_data + (timer_data_max - 256), 0,
 				sizeof(struct TimerData) * 256);
 		}
@@ -238,6 +223,22 @@ struct TimerData* get_timer(int tid)
 	return &timer_data[tid];
 }
 
+void do_final_timer(void)
+{
+	struct timer_func_list *tfl,*tfl_next;
+
+	for(tfl = tfl_root;tfl;tfl=tfl_next) {
+		tfl_next = tfl->next;
+		free(tfl);
+		tfl=NULL;
+	}
+	if(timer_heap)
+		free(timer_heap);
+	if(free_timer_list)
+		free(free_timer_list);
+	if(timer_data)
+		free(timer_data);
+}
 
 int do_timer(unsigned int tick)
 {
@@ -275,12 +276,8 @@ int do_timer(unsigned int tick)
 				timer_data[i].type = 0;
 				if (free_timer_list_pos >= free_timer_list_max) {
 					free_timer_list_max += 256;
-					free_timer_list = realloc(free_timer_list,
+					free_timer_list = (int *)aRealloc(free_timer_list,
 						free_timer_list_max * sizeof(free_timer_list[0]));
-					if (free_timer_list == NULL) {
-						printf("out of memory : do_timer\n");
-						exit(1);
-					}
 					memset(free_timer_list + (free_timer_list_max - 256), 0,
 						256 * sizeof(free_timer_list[0]));
 				}

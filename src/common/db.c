@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "db.h"
+#include "malloc.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -19,11 +20,7 @@ static void * malloc_dbn(void)
 
 	if(dbn_free==NULL){
 		if(dbn_root_rest<=0){
-			dbn_root[dbn_root_num]=calloc(sizeof(struct dbn)*ROOT_SIZE, 1);
-			if(dbn_root[dbn_root_num]==NULL){
-				printf("out of memory : malloc_dbn\n");
-				exit(1);
-			}
+			dbn_root[dbn_root_num]=(struct dbn *)aCalloc(ROOT_SIZE,sizeof(struct dbn));
 			dbn_root_rest=ROOT_SIZE;
 			dbn_root_num++;
 		}
@@ -38,6 +35,20 @@ static void free_dbn(struct dbn* add_dbn)
 {
 	add_dbn->parent = dbn_free;
 	dbn_free = add_dbn;
+}
+
+void exit_dbn(void)
+{
+   int i;
+
+   for (i=0;i<dbn_root_num;i++)
+     if (dbn_root[i])
+     	free(dbn_root[i]);
+   
+   dbn_root_rest=0;
+   dbn_root_num=0;
+   
+   return;
 }
 
 static int strdb_cmp(struct dbt* table,void* a,void* b)
@@ -66,11 +77,7 @@ struct dbt* strdb_init(int maxlen)
 	int i;
 	struct dbt* table;
 
-	table = calloc(sizeof(*table), 1);
-	if (table == NULL) {
-		printf("out of memory : strdb_init\n");
-		exit(1);
-	}
+	table = (struct dbt*)aCalloc(1,sizeof(struct dbt));
 	table->cmp=strdb_cmp;
 	table->hash=strdb_hash;
 	table->maxlen=maxlen;
@@ -102,11 +109,7 @@ struct dbt* numdb_init(void)
 	int i;
 	struct dbt* table;
 
-	table = calloc(sizeof *table, 1);
-	if (table == NULL) {
-		printf("out of memory : numdb_init\n");
-		exit(1);
-	}
+	table = (struct dbt*)aCalloc(1,sizeof(struct dbt));
 	table->cmp=numdb_cmp;
 	table->hash=numdb_hash;
 	table->maxlen=sizeof(int);
@@ -340,12 +343,8 @@ struct dbn* db_insert(struct dbt *table,void* key,void* data)
 #ifdef MALLOC_DBN
 	p=malloc_dbn();
 #else
-	p=calloc(sizeof(*p), 1);
+	p=(struct dbn *)aCalloc(1,sizeof(struct dbn));
 #endif
-	if(p==NULL){
-		printf("out of memory : db_insert\n");
-		return NULL;
-	}
 	p->parent= NULL;
 	p->left  = NULL;
 	p->right = NULL;

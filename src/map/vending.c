@@ -10,6 +10,10 @@
 #include "battle.h"
 #include "nullpo.h"
 
+#ifdef MEMWATCH
+#include "memwatch.h"
+#endif
+
 /*==========================================
  * 露店閉鎖
  *------------------------------------------
@@ -46,9 +50,10 @@ void vending_vendinglistreq(struct map_session_data *sd,int id)
  */
 void vending_purchasereq(struct map_session_data *sd,int len,int id,unsigned char *p)
 {
-	int i,j,w,z,new=0,blank,vend_list[12];
+	int i,j,new=0,blank,vend_list[12];
 	short amount,index;
 	struct map_session_data *vsd=map_id2sd(id);
+	double w,z;
 
 	nullpo_retv(sd);
 
@@ -81,13 +86,13 @@ void vending_purchasereq(struct map_session_data *sd,int len,int id,unsigned cha
 		if(j==vsd->vend_num)
 			return;	// 売り切れ
 		vend_list[i]=j;
-		z+=vsd->vending[j].value*amount;
-		if(z > sd->status.zeny){
+		z+=(double)vsd->vending[j].value*amount;
+		if(z > (double)sd->status.zeny){
 			clif_buyvending(sd,index,amount,1);
 			return;	// zeny不足
 		}
-		w+=itemdb_weight(vsd->status.cart[index].nameid)*amount;
-		if(w+sd->weight > sd->max_weight){
+		w+=(double)itemdb_weight(vsd->status.cart[index].nameid)*amount;
+		if(w+(double)sd->weight > (double)sd->max_weight){
 			clif_buyvending(sd,index,amount,2);
 			return;	// 重量超過
 		}
@@ -103,8 +108,8 @@ void vending_purchasereq(struct map_session_data *sd,int len,int id,unsigned cha
 			return;	// アイテム数超過
 		}
 	}
-	pc_payzeny(sd,z);
-	pc_getzeny(vsd,z);
+	pc_payzeny(sd,(int)z);
+	pc_getzeny(vsd,(int)z);
 	for(i=0;8+4*i<len;i++){
 		amount=*(short*)(p+4*i);
 		index=*(short*)(p+2+4*i)-2;
@@ -140,7 +145,7 @@ void vending_openvending(struct map_session_data *sd,int len,char *message,int f
 		}
 		sd->vender_id=sd->bl.id;
 		sd->vend_num=i;
-		strcpy(sd->message,message);
+		strncpy(sd->message,message,80);
 		if(clif_openvending(sd,sd->vender_id,sd->vending) > 0)
 			clif_showvendingboard(&sd->bl,message,0);
 		else

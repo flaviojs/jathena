@@ -1,9 +1,8 @@
-//----------------------------------------------------------------------
-// スクリプト : Event_Bunny v1.0
-//----------------------------------------------------------------------
-// 猫耳を装備してると猫耳が消えないでウサミミが手に入るバグあり
+//==============================================================================
+//Ragnarok Online - Kafra bunny hairband Script
+//==============================================================================
 
--	script	カプラ職員::usamimi	83,{
+-	script	usamimi	83,{
 	mes "[カプラ職員]";
 	mes "- いつもお客様のそばに -";
 	mes "^529DFFウサギのヘアバンド^FF0000製作イベント";
@@ -96,17 +95,8 @@
 		close;
 }
 
-//[ウサギのヘアバンド - プロンテラ]
-prontera.gat,146,87,6	duplicate(usamimi)	カプラ職員	83,
-
-//[ウサギのヘアバンド - ゲフェン]
-geffen.gat,116,62,0	duplicate(usamimi)	カプラ職員	83,
-
-//[ウサギのヘアバンド - モロク]
-morocc.gat,154,97,4	duplicate(usamimi)	カプラ職員	83,
-
-//[ウサギのヘアバンド - アルベルタ]
-alberta.gat,26,229,0	duplicate(usamimi)	カプラ職員	83,
-
-//[ウサギのヘアバンド - フェイヨン]
-payon.gat,97,116,4	duplicate(usamimi)	カプラ職員	83,
+//prontera.gat,146,87,6	duplicate(usamimi)	カプラ職員	83
+//geffen.gat,116,62,0	duplicate(usamimi)	カプラ職員	83
+//morocc.gat,154,97,4	duplicate(usamimi)	カプラ職員	83
+alberta.gat,26,229,0	duplicate(usamimi)	カプラ職員	83
+//payon.gat,97,116,4	duplicate(usamimi)	カプラ職員	83

@@ -24,6 +24,7 @@
 #include "guild.h"
 #include "pet.h"
 #include "nullpo.h"
+#include "atcommand.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -39,6 +40,7 @@ static const int packet_len_table[]={
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	11,-1, 7, 3,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	31,51,51,-1,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 };
 
 extern int char_fd;		// inter serverのfdはchar_fdを使う
@@ -447,13 +449,14 @@ int intif_guild_position(int guild_id,int idx,struct guild_position *p)
 	return 0;
 }
 // ギルドスキルアップ要求
-int intif_guild_skillup(int guild_id,int skill_num,int account_id)
+int intif_guild_skillup(int guild_id,int skill_num,int account_id,int flag)
 {
 	WFIFOW(inter_fd, 0)=0x303c;
 	WFIFOL(inter_fd, 2)=guild_id;
 	WFIFOL(inter_fd, 6)=skill_num;
 	WFIFOL(inter_fd,10)=account_id;
-	WFIFOSET(inter_fd,14);
+	WFIFOL(inter_fd,14)=flag;
+	WFIFOSET(inter_fd,18);
 	return 0;
 }
 // ギルド同盟/敵対要求
@@ -511,6 +514,81 @@ int intif_guild_castle_datasave(int castle_id,int index, int value)
 	WFIFOSET(inter_fd,9);
 	return 0;
 }
+
+/*==========================================
+ * 指定した名前のキャラの場所要求
+ *------------------------------------------
+ */
+int intif_charposreq(int account_id,char *name,int flag)
+{
+	WFIFOW(inter_fd,0)=0x3090;
+	WFIFOL(inter_fd,2)=account_id;
+	memcpy(WFIFOP(inter_fd,6),name,24);
+	WFIFOB(inter_fd,30)=flag;
+	WFIFOSET(inter_fd,31);
+	return 0;
+}
+/*==========================================
+ * 指定した名前のキャラの場所に移動する
+ * @jumpto
+ *------------------------------------------
+ */
+int intif_jumpto(int account_id,char *name)
+{
+	intif_charposreq(account_id,name,1);
+	//printf("intif_jumpto: %d %s\n",account_id,name);
+	return 0;
+}
+/*==========================================
+ * 指定した名前のキャラの場所表示する
+ * @where
+ *------------------------------------------
+ */
+int intif_where(int account_id,char *name)
+{
+	intif_charposreq(account_id,name,0);
+	//printf("intif_where: %d %s\n",account_id,name);
+	return 0;
+}
+/*==========================================
+ * 指定した名前のキャラを呼び寄せる
+ * flag=0 あなたに逢いたい
+ * flag=1 @recall
+ *------------------------------------------
+ */
+int intif_charmovereq(struct map_session_data *sd,char *name,int flag)
+{
+	nullpo_retr(0,sd);
+	
+	//printf("intif_charmovereq: %d %s\n",sd->status.account_id,name);
+	if(name==NULL)
+		return -1;
+	
+	WFIFOW(inter_fd,0)=0x3092;
+	WFIFOL(inter_fd,2)=sd->status.account_id;
+	memcpy(WFIFOP(inter_fd,6),name,24);
+	WFIFOB(inter_fd,30)=flag;
+	memcpy(WFIFOP(inter_fd,31),sd->mapname,16);
+	WFIFOW(inter_fd,47)=sd->bl.x;
+	WFIFOW(inter_fd,49)=sd->bl.y;
+	WFIFOSET(inter_fd,51);
+	return 0;
+}
+/*==========================================
+ * 対象IDにメッセージを送信
+ *------------------------------------------
+ */
+int intif_displaymessage(int account_id, char* mes)
+{
+	int len = 6+strlen(mes)+1;
+	WFIFOW(inter_fd,0) = 0x3093;
+	WFIFOW(inter_fd,2) = len;
+	WFIFOL(inter_fd,4) = account_id;
+	strncpy(WFIFOP(inter_fd,8), mes, len-6);
+	WFIFOSET(inter_fd, len );
+
+	return 0;
+}
 //-----------------------------------------------------------------
 // inter serverから受信
 
@@ -519,19 +597,29 @@ int intif_parse_WisMessage(int fd)
 {
 	struct map_session_data* sd;
 	int id=RFIFOL(fd,4);
+	int i,j=0;
 
 //	if(battle_config.etc_log)
 //		printf("intif_parse_wismessage: %d %s %s %s\n",id,RFIFOP(fd,6),RFIFOP(fd,30),RFIFOP(fd,54) );
 	
 	sd=map_nick2sd(RFIFOP(fd,32));	// 送信先を探す
 	if(sd!=NULL){
-		clif_wis_message(sd->fd,RFIFOP(fd,8),RFIFOP(fd,56),RFIFOW(fd,2)-56);
-		
-		intif_wis_replay(id,0);	// 送信成功
-		
-	}else{
+		for(i=0;i<MAX_WIS_REFUSAL;i++){	//拒否リストに名前があるかどうか判定してあれば拒否
+			if(strcmp(sd->wis_refusal[i],RFIFOP(fd,8))==0){
+				j++;
+				break;
+			}
+		}
+		if(sd->wis_all)
+			intif_wis_replay(id,3);	// 受信拒否
+		else if(j>0)
+			intif_wis_replay(id,2);	// 受信拒否
+		else{
+			clif_wis_message(sd->fd,RFIFOP(fd,8),RFIFOP(fd,56),RFIFOW(fd,2)-56);
+			intif_wis_replay(id,0);	// 送信成功
+		}
+	}else
 		intif_wis_replay(id,1);	// そんな人いません
-	}
 	return 0;
 }
 
@@ -906,6 +994,90 @@ int intif_parse_DeletePetOk(int fd)
 
 	return 0;
 }
+/*==========================================
+ * キャラが存在したらInterへその位置を返信
+ *------------------------------------------
+ */int intif_parse_CharPosReq(int fd)
+{
+	//3890
+	struct map_session_data *sd=map_nick2sd(RFIFOP(fd,6));
+	//printf("intif_parse_CharPosReq: %d %s\n",RFIFOL(fd,2),RFIFOP(fd,6));
+	
+	if(sd){
+		WFIFOW(inter_fd,0)=0x3091;
+		memcpy(WFIFOP(inter_fd,2),RFIFOP(fd,2),29);
+		memcpy(WFIFOP(inter_fd,31),sd->mapname,16);
+		WFIFOW(inter_fd,47)=sd->bl.x;
+		WFIFOW(inter_fd,49)=sd->bl.y;
+		WFIFOSET(inter_fd,51);
+	}
+	return 0;
+}
+/*==========================================
+ * Interから対象キャラの居場所が送られて来た
+ * flag=0 @where
+ * flag=1 @jumpto
+ *------------------------------------------
+ */
+int intif_parse_CharPos(int fd)
+{
+	//3891
+	struct map_session_data *sd=map_id2sd(RFIFOL(fd,2));
+	int flag=RFIFOB(fd,30);
+	
+	if(sd){
+		char output[200];
+		
+		if(flag==1){
+			pc_setpos(sd,RFIFOP(fd,31),RFIFOW(fd,47),RFIFOW(fd,49),3);
+			snprintf(output, sizeof output, msg_table[4], RFIFOP(fd,6));
+		}else{
+			snprintf(output, sizeof output, "%s %s %d %d",RFIFOP(fd,6),RFIFOP(fd,31),RFIFOW(fd,47),RFIFOW(fd,49));
+		}
+		clif_displaymessage(sd->fd, output);
+	}
+	return 0;
+}
+/*==========================================
+ * キャラクターを指定位置に移動させる
+ * flag=1 @recallなのでGMレベルを比べたりメッセージを表示したり
+ *------------------------------------------
+ */
+int intif_parse_CharMoveReq(int fd)
+{
+	//3892
+	struct map_session_data *sd=map_nick2sd(RFIFOP(fd,6));
+	int flag=RFIFOB(fd,30);
+	int account_id=RFIFOL(fd,2);
+	printf("intif_parse_CharMoveReq: %d %s %s %d %d\n",RFIFOL(fd,2),RFIFOP(fd,6),RFIFOP(fd,31),RFIFOW(fd,47),RFIFOW(fd,49));
+	
+	if(sd){
+		if(flag==1){
+			char output[200];
+			if(pc_numisGM(account_id) > pc_isGM(sd)){	//@recallかつ呼び出し元GMレベルが大きい
+				pc_setpos(sd,RFIFOP(fd,31),RFIFOW(fd,47),RFIFOW(fd,49),2);
+				snprintf(output, sizeof output, msg_table[46], RFIFOP(fd,6));
+				intif_displaymessage(account_id,output);
+			}
+		}else{
+			pc_setpos(sd,RFIFOP(fd,31),RFIFOW(fd,47),RFIFOW(fd,49),3);
+		}
+	}
+	return 0;
+}
+/*==========================================
+ * 対象IDにメッセージを送信
+ *------------------------------------------
+ */
+int intif_parse_DisplayMessage(int fd)
+{
+	struct map_session_data *sd=map_id2sd(RFIFOL(fd,4));
+	
+	if(sd){
+		clif_displaymessage(sd->fd,RFIFOP(fd,8));
+	}
+	return 0;
+}
 //-----------------------------------------------------------------
 // inter serverからの通信
 // エラーがあれば0(false)を返すこと
@@ -971,6 +1143,10 @@ int intif_parse(int fd)
 	case 0x3881:	intif_parse_RecvPetData(fd); break;
 	case 0x3882:	intif_parse_SavePetOk(fd); break;
 	case 0x3883:	intif_parse_DeletePetOk(fd); break;
+	case 0x3890:	intif_parse_CharPosReq(fd); break;
+	case 0x3891:	intif_parse_CharPos(fd); break;
+	case 0x3892:	intif_parse_CharMoveReq(fd); break;
+	case 0x3893:	intif_parse_DisplayMessage(fd); break;
 	default:
 		if(battle_config.error_log)
 			printf("intif_parse : unknown packet %d %x\n",fd,RFIFOW(fd,0));

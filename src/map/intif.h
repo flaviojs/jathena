@@ -39,7 +39,7 @@ int intif_guild_change_basicinfo(int guild_id,int type,const void *data,int len)
 int intif_guild_change_memberinfo(int guild_id,int account_id,int char_id,
 	int type,const void *data,int len);
 int intif_guild_position(int guild_id,int idx,struct guild_position *p);
-int intif_guild_skillup(int guild_id,int skill_num,int account_id);
+int intif_guild_skillup(int guild_id,int skill_num,int account_id,int flag);
 int intif_guild_alliance(int guild_id1,int guild_id2,int account_id1,int account_id2,int flag);
 int intif_guild_notice(int guild_id,const char *mes1,const char *mes2);
 int intif_guild_emblem(int guild_id,int len,const char *data);
@@ -51,5 +51,10 @@ int intif_create_pet(int account_id,int char_id,short pet_type,short pet_lv,shor
 int intif_request_petdata(int account_id,int char_id,int pet_id);
 int intif_save_petdata(int account_id,struct s_pet *p);
 int intif_delete_petdata(int pet_id);
+
+int intif_jumpto(int account_id,char *name);
+int intif_where(int account_id,char *name);
+int intif_charmovereq(struct map_session_data *sd,char *name,int flag);
+int intif_displaymessage(int account_id, char* mes);
 
 #endif

@@ -19,6 +19,11 @@ int chrif_changegm(int id,const char *pass,int len);
 int chrif_changesex(int id,int sex);
 int chrif_saveaccountreg2(struct map_session_data *sd);
 
+int chrif_mapactive(int active);
+int chrif_maintenance(int maintenance);
+int chrif_chardisconnect(struct map_session_data *sd);
+
+int do_final_chrif(void);
 int do_init_chrif(void);
 
 #endif
