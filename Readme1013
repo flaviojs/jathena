@@ -1,3 +1,107 @@
+//1069 by lizorett (2004/11/26) special thanks to 名無し様@ｇ＠ｍｅ
+・メルトダウンの実装
+・魔法力増幅が詠唱のある魔法で有効にならなかった問題を修正
+・map-serverがダウンする問題の修正(質問スレッド Part13 >>55)
+・map-serverに不正IDでログインするとchar-serverがダウンする問題の修正
+・サフラギウムが無詠唱スキルで取り消されない問題を修正
+・重複して猛毒状態とならないよう修正
+・マグナムブレイクのダメージを修正
+・バーサク中にHP/SP吸収、毒などのダメージを受けるよう修正
+・月光剣のSP吸収量が増加していく問題を修正(暫定)
+・@helpにキーワード検索機能を追加
+
+	(src/map)
+		battle.c	- マジックパワーによるMATK増加の実装
+					- 武器鎧破壊をpc_break_equip()に書き換え
+					- HP/SP吸収を修正
+		map.h		- 装備破壊の定義を追加
+		pc.c		- pc_break_armor()/pc_break_weapon()を、新規の装備破壊の
+					関数pc_break_equip()に統合
+					- 魔法力増幅のコードを削除(battle.cで行う)
+					- HP/SP吸収関係の変数の初期化を追加
+		pc.h		- 関数定義を修正
+		skill.c		- メルトダウンによる装備破壊を実装
+					- 魔法力増幅に関する修正
+					- 重複して猛毒状態とならないよう修正
+		clif.c		- map-serverがダウンする問題の修正
+		atcommand.c	- @helpにキーワード検索を追加("@help jobchange"など)
+	(src/char)
+		char.c		- char-serverがダウンする問題の修正
+	(db)
+		const.txt	- bUnbreakableHelm, bUnbreakableShield追加
+		skill_cast_db.txt
+					- メルトダウンの状態異常時間を設定
+
+//1068 by huge
+・atcommandをいくつか追加と、eAthenaからいくつか移植。(help.txt参照)
+・非GMキャラが@で始まる発言をした時、そのまま表示するようにした。(GMレベル0のコマンドは実行)
+・天気コマンドに合わせて、mapflag設定できるように。
+・scriptをいくつか追加と、eAthenaから一つ移植。
+・初期HP倍率とSP倍率をbattle_athenaで設定できるようにした。
+・全キャラが、GMには位置・HPを通知させるようbattle_athenaで設定できるようにした。
+・ドクロドロップについて、battle_athenaで設定できるようにした。
+・GMのアイテムドロップや交換についてGMレベルを制限できるようにした。
+・ディテクティングスキル修正。
+※デフォルトの日本クライアントだと、雨で落ちます。
+
+	(conf/)
+		atcommand_athena.conf	修正
+		battle_athena.conf	修正
+		help.txt	修正
+		msg_athena.conf	修正
+
+	(doc/)
+		help.txt	修正
+		script_ref.txt	修正
+		conf_ref.txt	修正
+
+	(src/map/)
+		atcommand.c
+		atcommnad.h
+			guild.h party.hを読む様に修正
+			is_atcommand() 修正
+			atcommand() 修正
+			※移植・新規コマンドについては help.txt を確認して下さい。
+		battle.c
+		battle.h
+			hp_rate,sp_rate,hp_meter,bone_drop 追加
+		clif.c
+		clif.h
+			clif_spawnpc() 修正
+			clif_hpmeter() 追加
+		guild.c
+		guild.h
+			guild_searchname() 追加
+			guild_searchname_sub() 追加
+		map.h
+			天候に関するflag追加
+		npc.c
+			npc_parse_mapflag() 修正
+		party.c
+		party.h
+			party_searchname() 追加
+			party_searchname_sub() 追加
+		pc.c
+		pc.h
+			pc_calcstatus() 修正
+			pc_damage() 修正
+			pc_walk() 修正
+			pc_can_drop() 追加
+		script.c
+			gmcommand	移植追加
+			dispbottom		追加
+			getusersname		追加
+			recovery		追加
+			petinfo		追加
+			checkequipedcard		追加
+			getexp	削除(setを使うようにして下さい)
+		skill.c
+		skill.h
+			skill_castend_pos2() 修正
+
+	＋Athena雑談スレッドPart7 >>54 もっさりさんの分
+	記述漏れがあったらすいません。
+--------------------
 //1067 by kai
 ・メディテイティオによるヒール回復量増加の効果を修正
 ・アドバンスドカタール研究の修正

@@ -146,13 +146,12 @@ struct map_session_data {
 		unsigned no_weapon_damage : 1;
 		unsigned no_gemstone : 1;
 		unsigned infinite_endure : 1;
-		unsigned unbreakable_weapon : 1;
-		unsigned unbreakable_armor : 1;
 	} special_state;
 	int char_id,login_id1,login_id2,sex;
 	struct mmo_charstatus status;
 	struct item_data *inventory_data[MAX_INVENTORY];
 	short equip_index[11];
+	unsigned short unbreakable_equip;
 	int weight,max_weight;
 	int cart_weight,cart_max_weight,cart_num,cart_max_num;
 	char mapname[24];
@@ -421,6 +420,14 @@ enum { NONE_ATTACKABLE,ATTACKABLE };
 
 enum { ATK_LUCKY=1,ATK_FLEE,ATK_DEF};	// 囲まれペナルティ計算用
 
+// 装備コード
+enum {
+	EQP_WEAPON		= 0x0002,		// 右手
+	EQP_ARMOR		= 0x0010,		// 体
+	EQP_SHIELD		= 0x0020,		// 左手
+	EQP_HELM		= 0x0100,		// 頭上段
+};
+
 struct map_data {
 	char name[24];
 	unsigned char *gat;	// NULLなら下のmap_data_other_serverとして扱う
@@ -450,6 +457,11 @@ struct map_data {
 		unsigned nozenypenalty : 1;
 		unsigned notrade : 1;
 		unsigned noskill : 1;
+		unsigned snow : 1;
+		unsigned fog : 1;
+		unsigned sakura : 1;
+		unsigned leaves : 1;
+		unsigned rain : 1;
 	} flag;
 	struct point save;
 	struct npc_data *npc[MAX_NPC_PER_MAP];
@@ -511,7 +523,8 @@ enum {
 	SP_HP_DRAIN_VALUE,SP_SP_DRAIN_VALUE, // 1071-1072
 
 	SP_RESTART_FULL_RECORVER=2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
-	SP_NO_CASTCANCEL2,SP_INFINITE_ENDURE,SP_UNBREAKABLE_WEAPON,SP_UNBREAKABLE_ARMOR // 2006-2009
+	SP_NO_CASTCANCEL2,SP_INFINITE_ENDURE,SP_UNBREAKABLE_WEAPON,SP_UNBREAKABLE_ARMOR, // 2006-2009
+	SP_UNBREAKABLE_HELM, SP_UNBREAKABLE_SHIELD	// 2010-2011
 };
 
 enum {

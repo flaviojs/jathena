@@ -1048,8 +1048,8 @@ int parse_frommap(int fd)
 				}
 			}
 			if(i==AUTH_FIFO_SIZE){
-				char_dat[auth_fifo[i].char_pos].mapip=0;
-				char_dat[auth_fifo[i].char_pos].mapport=0;
+//				char_dat[auth_fifo[i].char_pos].mapip=0;
+//				char_dat[auth_fifo[i].char_pos].mapport=0;
 				WFIFOW(fd,0)=0x2afe;
 				WFIFOW(fd,2)=RFIFOL(fd,2);
 				WFIFOB(fd,6)=0;

@@ -332,6 +332,7 @@ int skill_get_unit_id(int id,int flag)
 	case WZ_FROSTNOVA:		return 0x86;				/* フロストノヴァ */
 	case WZ_STORMGUST:		return 0x86;				/* ストームガスト(とりあえずLoVと同じで処理) */
 	case CR_GRANDCROSS:		return 0x86;				/* グランドクロス */
+	case NPC_DARKGRANDCROSS:	return 0x86;			/*闇グランドクロス*/
 	case WZ_FIREPILLAR:		return (flag==0)?0x87:0x88;	/* ファイアーピラー */
 	case HT_TALKIEBOX:		return 0x99;				/* トーキーボックス */
 	case WZ_ICEWALL:		return 0x8d;				/* アイスウォール */
@@ -486,27 +487,38 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		}
 		// エンチャントデットリーポイズン(猛毒効果)
 		if (sd && sd->sc_data[SC_EDP].timer != -1 && rand() % 10000 < sd->sc_data[SC_EDP].val2 * sc_def_vit) {
-			int mhp = battle_get_max_hp(bl);
-			int hp = battle_get_hp(bl);
 			int lvl = sd->sc_data[SC_EDP].val1;
-			int diff;
-			// MHPの1/4以下にはならない
-			if(hp > mhp>>2) {
-				if(bl->type == BL_PC) {
-					diff = mhp*10/100;
-					if (hp - diff < mhp>>2)
-						diff = hp - (mhp>>2);
-					pc_heal((struct map_session_data *)bl, -hp, 0);
-				} else if(bl->type == BL_MOB) {
-					struct mob_data *md = (struct mob_data *)bl;
-					hp -= mhp*15/100;
-					if (hp > mhp>>2)
-						md->hp = hp;
-					else
-						md->hp = mhp>>2;
+			skill_status_change_start(bl,SC_DPOISON,lvl,0,0,0,skill_get_time2(ASC_EDP,lvl),0);
+		}
+		// メルトダウン(武器・装備破壊)
+		if (sd && sd->sc_data[SC_MELTDOWN].timer != -1) {
+			if (rand() % 100 < sd->sc_data[SC_MELTDOWN].val1) {
+				// 武器破壊
+				if (dstsd) {
+					pc_break_equip(dstsd, EQP_WEAPON);
+				} else {
+					skill_status_change_start(bl,SC_STRIPWEAPON,1,0,0,0,skill_get_time2(WS_MELTDOWN,sd->sc_data[SC_MELTDOWN].val1),0);
 				}
 			}
-			skill_status_change_start(bl,SC_DPOISON,lvl,0,0,0,skill_get_time2(ASC_EDP,lvl),0);
+			if (rand() % 1000 < sd->sc_data[SC_MELTDOWN].val1*2) {
+				// 装備破壊
+				if (dstsd) {
+					switch (rand() % 3) {
+						case 0:
+							pc_break_equip(dstsd, EQP_HELM);
+							break;
+						case 1:
+							pc_break_equip(dstsd, EQP_SHIELD);
+							break;
+						case 2:
+							pc_break_equip(dstsd, EQP_ARMOR);
+							break;
+					}
+				} else {
+					int where = (rand() % 3) + SC_STRIPSHIELD;
+					skill_status_change_start(bl,where,1,0,0,0,skill_get_time2(WS_MELTDOWN,sd->sc_data[SC_MELTDOWN].val1),0);
+				}
+			}
 		}
 		break;
 	case SM_BASH:			/* バッシュ（急所攻撃） */
@@ -590,6 +602,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case CR_GRANDCROSS:		/* グランドクロス */
+	case NPC_DARKGRANDCROSS:	/*闇グランドクロス*/
 		{
 			int race = battle_get_race(bl);
 			if( (battle_check_undead(race,battle_get_elem_type(bl)) || race == 6) && rand()%100 < 100000*sc_def_int/100)	//強制付与だが完全耐性には無効
@@ -955,7 +968,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	if(damage <= 0 || damage < dmg.div_) //吹き飛ばし判定？※
 		dmg.blewcount = 0;
 
-	if(skillid == CR_GRANDCROSS) {//グランドクロス
+	if(skillid == CR_GRANDCROSS||skillid == NPC_DARKGRANDCROSS) {//グランドクロス
 		if(battle_config.gx_disptype) dsrc = src;	// 敵ダメージ白文字表示
 		if( src == bl) type = 4;	// 反動はダメージモーションなし
 	}
@@ -1571,7 +1584,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	if(sd && pc_isdead(sd))
 		return 1;
 
-	if((skillid == WZ_SIGHTRASHER || skillid == CR_GRANDCROSS) && src != bl)
+	if((skillid == WZ_SIGHTRASHER || skillid == CR_GRANDCROSS || skillid == NPC_DARKGRANDCROSS) && src != bl)
 		bl = src;
 	if(bl->prev == NULL)
 		return 1;
@@ -1689,7 +1702,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case AM_ACIDTERROR:		/* アシッドテラー */
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		if(bl->type == BL_PC && rand()%100 < skill_get_time(skillid,skilllv))
-			pc_break_armor((struct map_session_data *)bl);
+			pc_break_equip((struct map_session_data *)bl, EQP_ARMOR);
 		break;
 	case MO_FINGEROFFENSIVE:	/* 指弾 */
 		{
@@ -1868,6 +1881,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 
 	/* 魔法系スキル */
 	case MG_SOULSTRIKE:			/* ソウルストライク */
+	case NPC_DARKSOULSTRIKE:		/*闇ソウルストライク*/
 	case MG_COLDBOLT:			/* コールドボルト */
 	case MG_FIREBOLT:			/* ファイアーボルト */
 	case MG_LIGHTNINGBOLT:		/* ライトニングボルト */
@@ -1876,6 +1890,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case AL_HOLYLIGHT:			/* ホーリーライト */
 	case MG_FROSTDIVER:			/* フロストダイバー */
 	case WZ_JUPITEL:			/* ユピテルサンダー */
+	case NPC_DARKJUPITEL:			/*闇ユピテル*/
 	case NPC_MAGICALATTACK:		/* MOB:魔法打撃攻撃 */
 	case PR_ASPERSIO:			/* アスペルシオ */
 	case HW_NAPALMVULCAN:		/* ナパームバルカン */
@@ -1965,6 +1980,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case CR_GRANDCROSS:			/* グランドクロス */
+	case NPC_DARKGRANDCROSS:		/*闇グランドクロス*/
 		/* スキルユニット配置 */
 		skill_castend_pos2(src,bl->x,bl->y,skillid,skilllv,tick,0);
 		if(sd)
@@ -3664,8 +3680,12 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case HT_DETECTING:				/* ディテクティング */
 		{
 			const int range=7;
+			if(src->x!=x)
+				x+=(src->x-x>0)?-range:range;
+			if(src->y!=y)
+				y+=(src->y-y>0)?-range:range;
 			map_foreachinarea( skill_status_change_timer_sub,
-				src->m, src->x-range, src->y-range, src->x+range,src->y+range,0,
+				src->m, x-range, y-range, x+range,y+range,0,
 				src,SC_SIGHT,tick);
 		}
 		break;
@@ -3685,6 +3705,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case PR_SANCTUARY:			/* サンクチュアリ */
 	case PR_MAGNUS:				/* マグヌスエクソシズム */
 	case CR_GRANDCROSS:			/* グランドクロス */
+	case NPC_DARKGRANDCROSS:		/*闇グランドクロス*/
 	case HT_SKIDTRAP:			/* スキッドトラップ */
 	case HT_LANDMINE:			/* ランドマイン */
 	case HT_ANKLESNARE:			/* アンクルスネア */
@@ -4047,6 +4068,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		break;
 
 	case CR_GRANDCROSS:			/* グランドクロス */
+	case NPC_DARKGRANDCROSS:		/*闇グランドクロス*/
 		count=29;
 		limit=1000;
 		interval=300;
@@ -4318,6 +4340,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 			break;
 
 		case CR_GRANDCROSS:		/* グランドクロス */
+		case NPC_DARKGRANDCROSS:	/*闇グランドクロス*/
 			{
 				static const int dx[]={
 					0, 0, -1,0,1, -2,-1,0,1,2, -4,-3,-2,-1,0,1,2,3,4, -2,-1,0,1,2, -1,0,1, 0, 0, };
@@ -4533,7 +4556,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		}
 		break;
 
-	case 0x86:	/* ロードオブヴァーミリオン(＆ストームガスト ＆グランドクロス) */
+	case 0x86:	/* ロードオブヴァーミリオン(＆ストームガスト ＆グランドクロス＆闇グランドクロス) */
 		skill_attack(BF_MAGIC,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
 		break;
 
@@ -4730,7 +4753,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0xb1:	/* デモンストレーション */
 		skill_attack(BF_WEAPON,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
 		if(bl->type == BL_PC && rand()%100 < sg->skill_lv)
-			pc_break_weapon((struct map_session_data *)bl);
+			pc_break_equip((struct map_session_data *)bl, EQP_WEAPON);
 		break;
 	case 0x99:				/* トーキーボックス */
 		if(sg->src_id == bl->id) //自分が踏んでも発動しない
@@ -5704,7 +5727,24 @@ int skill_castfix( struct block_list *bl, int time )
 
 	sc_data = battle_get_sc_data(bl);
 	dex=battle_get_dex(bl);
-	
+
+	// 魔法力増幅の効果終了
+	if(sc_data && sc_data[SC_MAGICPOWER].timer != -1) {
+		if (sc_data[SC_MAGICPOWER].val2 > 0) {
+			/* 最初に通った時にはアイコン消去だけ */
+			sc_data[SC_MAGICPOWER].val2--;
+			clif_status_change(bl, SC_MAGICPOWER, 0);
+		} else {
+			skill_status_change_end( bl, SC_MAGICPOWER, -1);
+		}
+	}
+
+	/* サフラギウム */
+	if (sc_data && sc_data[SC_SUFFRAGIUM].timer != -1){
+		time = time * (100 - sc_data[SC_SUFFRAGIUM].val1 * 15) / 100;
+		skill_status_change_end(bl, SC_SUFFRAGIUM, -1);
+	}
+
 	if(time==0)
 		return 0;
 	if(bl->type==BL_PC) {
@@ -5713,11 +5753,6 @@ int skill_castfix( struct block_list *bl, int time )
 		time=time*battle_config.cast_rate/100;
 	}
 
-	/* サフラギウム */
-	if(sc_data && sc_data[SC_SUFFRAGIUM].timer!=-1 ){
-		time=time*(100-sc_data[SC_SUFFRAGIUM].val1*15)/100;
-		skill_status_change_end( bl, SC_SUFFRAGIUM, -1);
-	}
 	/* ブラギの詩 */
 	if(sc_data && sc_data[SC_POEMBRAGI].timer!=-1 )
 		time=time*(100-(sc_data[SC_POEMBRAGI].val1*3+sc_data[SC_POEMBRAGI].val2
@@ -6035,10 +6070,6 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		skill_castend_id(sd->skilltimer,tick,sd->bl.id,0);
 	}
 
-	//マジックパワーの効果終了
-	if(sc_data && sc_data[SC_MAGICPOWER].timer != -1 && skill_num != HW_MAGICPOWER)
-		skill_status_change_end(&sd->bl,SC_MAGICPOWER,-1);
-
 	return 0;
 }
 
@@ -6144,9 +6175,6 @@ int skill_use_pos( struct map_session_data *sd,
 		sd->skilltimer = -1;
 		skill_castend_pos(sd->skilltimer,tick,sd->bl.id,0);
 	}
-	//マジックパワーの効果終了
-	if(sc_data && sc_data[SC_MAGICPOWER].timer != -1 && skill_num != HW_MAGICPOWER)
-		skill_status_change_end(&sd->bl,SC_MAGICPOWER,-1);
 
 	return 0;
 }
@@ -6891,7 +6919,6 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			case SC_WINDWALK:		/* ウインドウォーク */
 			case SC_TRUESIGHT:		/* トゥルーサイト */
 			case SC_SPIDERWEB:		/* スパイダーウェッブ */
-			case SC_MAGICPOWER:		/* 魔法力増幅 */
 			case SC_INCATK:		//item 682用
 			case SC_INCMATK:	//item 683用
 			case SC_WEDDING:	//結婚用(結婚衣裳になって歩くのが遅いとか)
@@ -7105,6 +7132,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	if(sc_data[type].timer != tid) {
 		if(battle_config.error_log)
 			printf("skill_status_change_timer %d != %d\n",tid,sc_data[type].timer);
+		return 0;
 	}
 
 
@@ -7314,8 +7342,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	case SC_MAGICPOWER:		/* 魔法力増幅 */
 	case SC_REJECTSWORD:	/* リジェクトソード */
 	case SC_MEMORIZE:	/* メモライズ */
-		if(sc_data[type].timer==tid)
-			sc_data[type].timer=add_timer( 1000*600+tick,skill_status_change_timer, bl->id, data );
+		sc_data[type].timer=add_timer( 1000*600+tick,skill_status_change_timer, bl->id, data );
 		return 0;
 
 	case SC_DANCING: //ダンススキルの時間SP消費
@@ -7543,7 +7570,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		if(sc_data[type].val1 > val1 && type != SC_COMBO && type != SC_DANCING && type != SC_DEVOTION &&
 			type != SC_SPEEDPOTION0 && type != SC_SPEEDPOTION1 && type != SC_SPEEDPOTION2)
 			return 0;
-		if(type >=SC_STAN && type <= SC_BLIND)
+		if ((type >=SC_STAN && type <= SC_BLIND) || type == SC_DPOISON)
 			return 0;/* 継ぎ足しができない状態異常である時は状態異常を行わない */
 		if(type == SC_GRAFFITI){	//異常中にもう一度状態異常になった時に解除してから再度かかる
 			skill_status_change_end(bl,type,-1);
@@ -7686,6 +7713,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 				skill_status_change_end(bl,SC_WINDWALK,-1);
 			if(sc_data[SC_CARTBOOST].timer!=-1 )	/* カートブースト */
 				skill_status_change_end(bl,SC_CARTBOOST,-1);
+			break;
+		case SC_MAGICPOWER:			/* 魔法力増幅 */
+			val2 = 1;				// 一度だけ増幅
 			break;
 		case SC_FLAMELAUNCHER:		/* フレームランチャー */
 			skill_encchant_eremental_end(bl,SC_FLAMELAUNCHER);
@@ -7915,8 +7945,28 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 
 		/* option2 */
-		case SC_POISON:				/* 毒 */
 		case SC_DPOISON:			/* 猛毒 */
+		{
+			int mhp = battle_get_max_hp(bl);
+			int hp = battle_get_hp(bl);
+			// MHPの1/4以下にはならない
+			if (hp > mhp>>2) {
+				if(bl->type == BL_PC) {
+					int diff = mhp*10/100;
+					if (hp - diff < mhp>>2)
+						hp = hp - (mhp>>2);
+					pc_heal((struct map_session_data *)bl, -hp, 0);
+				} else if(bl->type == BL_MOB) {
+					struct mob_data *md = (struct mob_data *)bl;
+					hp -= mhp*15/100;
+					if (hp > mhp>>2)
+						md->hp = hp;
+					else
+						md->hp = mhp>>2;
+				}
+			}
+		}	// fall through
+		case SC_POISON:				/* 毒 */
 			calc_flag = 1;
 			if(!(flag&2)) {
 				int sc_def = 100 - (battle_get_vit(bl) + battle_get_luk(bl)/5);
@@ -8055,7 +8105,6 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_CARTBOOST:		/* カートブースト */
 		case SC_TRUESIGHT:		/* トゥルーサイト */
 		case SC_SPIDERWEB:		/* スパイダーウェッブ */
-		case SC_MAGICPOWER:		/* 魔法力増幅 */
 			calc_flag = 1;
 			break;
 		case SC_REJECTSWORD:	/* リジェクトソード */

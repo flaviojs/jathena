@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
+#include <time.h>
 
 #include "socket.h"
 #include "timer.h"
@@ -21,6 +23,10 @@
 #include "party.h"
 #include "guild.h"
 #include "atcommand.h"
+#include "script.h"
+#include "npc.h"
+//#include "trade.h"
+//#include "core.h"
 
 #define OPTION_HIDE 0x40
 #define STATE_BLIND 0x10
@@ -81,10 +87,15 @@ ATCOMMAND_FUNC(zeny);
 ATCOMMAND_FUNC(param);
 ATCOMMAND_FUNC(guildlevelup);
 ATCOMMAND_FUNC(makepet);
+ATCOMMAND_FUNC(hatch);
 ATCOMMAND_FUNC(petfriendly);
 ATCOMMAND_FUNC(pethungry);
 ATCOMMAND_FUNC(petrename);
+ATCOMMAND_FUNC(charpetrename);
 ATCOMMAND_FUNC(recall);
+ATCOMMAND_FUNC(recallall);
+ATCOMMAND_FUNC(recallguild);
+ATCOMMAND_FUNC(recallparty);
 ATCOMMAND_FUNC(character_job);
 ATCOMMAND_FUNC(revive);
 ATCOMMAND_FUNC(character_stats);
@@ -102,15 +113,14 @@ ATCOMMAND_FUNC(kick);
 ATCOMMAND_FUNC(kickall);
 ATCOMMAND_FUNC(allskill);
 ATCOMMAND_FUNC(questskill);
+ATCOMMAND_FUNC(charquestskill);
 ATCOMMAND_FUNC(lostskill);
+ATCOMMAND_FUNC(charlostskill);
 ATCOMMAND_FUNC(spiritball);
 ATCOMMAND_FUNC(party);
 ATCOMMAND_FUNC(guild);
 ATCOMMAND_FUNC(agitstart);
 ATCOMMAND_FUNC(agitend);
-ATCOMMAND_FUNC(reloaditemdb);
-ATCOMMAND_FUNC(reloadmobdb);
-ATCOMMAND_FUNC(reloadskilldb);
 ATCOMMAND_FUNC(mapexit);
 ATCOMMAND_FUNC(idsearch);
 ATCOMMAND_FUNC(itemidentify);
@@ -119,6 +129,21 @@ ATCOMMAND_FUNC(maintenance);
 ATCOMMAND_FUNC(misceffect);
 ATCOMMAND_FUNC(summon);
 ATCOMMAND_FUNC(whop);
+ATCOMMAND_FUNC(reloaditemdb);
+ATCOMMAND_FUNC(reloadmobdb);
+ATCOMMAND_FUNC(reloadskilldb);
+ATCOMMAND_FUNC(charskreset);
+ATCOMMAND_FUNC(charstreset);
+ATCOMMAND_FUNC(charreset);
+ATCOMMAND_FUNC(charstpoint);
+ATCOMMAND_FUNC(charskpoint);
+ATCOMMAND_FUNC(charzeny);
+ATCOMMAND_FUNC(mapinfo);
+ATCOMMAND_FUNC(mobsearch);
+ATCOMMAND_FUNC(cleanmap);
+ATCOMMAND_FUNC(clock);
+ATCOMMAND_FUNC(giveitem);
+ATCOMMAND_FUNC(weather);
 
 /*==========================================
  *AtCommandInfo atcommand_info[]構造体の定義
@@ -180,10 +205,15 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Luck,					"@luk",				0, atcommand_param },
 	{ AtCommand_GuildLevelUp,			"@guildlvup",		0, atcommand_guildlevelup },
 	{ AtCommand_MakePet,				"@makepet",			0, atcommand_makepet },
+	{ AtCommand_Hatch,					"@hatch",			0, atcommand_hatch },
 	{ AtCommand_PetFriendly,			"@petfriendly",		0, atcommand_petfriendly },
 	{ AtCommand_PetHungry,				"@pethungry",		0, atcommand_pethungry },
 	{ AtCommand_PetRename,				"@petrename",		0, atcommand_petrename },
+	{ AtCommand_CharPetRename,			"@charpetrename",	0, atcommand_charpetrename },
 	{ AtCommand_Recall,					"@recall",			0, atcommand_recall },
+	{ AtCommand_Recallall,				"@recallall",		0, atcommand_recallall },
+	{ AtCommand_RecallGuild,			"@recallguild",		0, atcommand_recallguild },
+	{ AtCommand_RecallParty,			"@recallparty",		0, atcommand_recallparty },
 	{ AtCommand_CharacterJob,			"@charjob",			0, atcommand_character_job },
 	{ AtCommand_Revive,					"@revive",			0, atcommand_revive },
 	{ AtCommand_CharacterStats,			"@charstats",		0, atcommand_character_stats },
@@ -200,16 +230,16 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Kick,					"@kick",			0, atcommand_kick },
 	{ AtCommand_KickAll,				"@kickall",			0, atcommand_kickall },
 	{ AtCommand_AllSkill,				"@allskill",		0, atcommand_allskill },
+	{ AtCommand_AllSkill,				"@skillall",		0, atcommand_allskill },
 	{ AtCommand_QuestSkill,				"@questskill",		0, atcommand_questskill },
+	{ AtCommand_CharQuestSkill,			"@charquestskill",	0, atcommand_charquestskill },
 	{ AtCommand_LostSkill,				"@lostskill",		0, atcommand_lostskill },
+	{ AtCommand_CharLostSkill,			"@charlostskill",	0, atcommand_charlostskill },
 	{ AtCommand_SpiritBall,				"@spiritball",		0, atcommand_spiritball },
 	{ AtCommand_Party,					"@party",			0, atcommand_party },
 	{ AtCommand_Guild,					"@guild",			0, atcommand_guild },
 	{ AtCommand_AgitStart,				"@agitstart",		0, atcommand_agitstart },
 	{ AtCommand_AgitEnd,				"@agitend",			0, atcommand_agitend },
-	{ AtCommand_ReloadItemDB,	        "@reloaditemdb",    0, atcommand_reloaditemdb },
-	{ AtCommand_ReloadMobDB,			"@reloadmobdb",     0, atcommand_reloadmobdb },
-	{ AtCommand_ReloadSkillDB,			"@reloadskilldb",   0, atcommand_reloadskilldb },
 	{ AtCommand_MapExit,				"@mapexit",			0, atcommand_mapexit },
 	{ AtCommand_IDSearch,				"@idsearch",		0, atcommand_idsearch },
 	{ AtCommand_ItemIdentify,			"@itemidentify",	0, atcommand_itemidentify },
@@ -217,14 +247,26 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Maintenance,			"@maintenance",		0, atcommand_maintenance },
 	{ AtCommand_Misceffect,				"@misceffect",		0, atcommand_misceffect },
 	{ AtCommand_Summon,					"@summon",			0, atcommand_summon },
-	//add
+	{ AtCommand_WhoP,					"@who+",			0, atcommand_whop },
+	{ AtCommand_ReloadItemDB,			"@reloaditemdb",	0, atcommand_reloaditemdb }, // admin command
+	{ AtCommand_ReloadMobDB,			"@reloadmobdb",		0, atcommand_reloadmobdb }, // admin command
+	{ AtCommand_ReloadSkillDB,			"@reloadskilldb",	0, atcommand_reloadskilldb }, // admin command
+	{ AtCommand_CharReset,				"@charreset",		0, atcommand_charreset },
+	{ AtCommand_CharSkReset,			"@charskreset",		0, atcommand_charskreset },
+	{ AtCommand_CharStReset,			"@charstreset",		0, atcommand_charstreset },
+	{ AtCommand_CharSKPoint,			"@charskpoint",		0, atcommand_charskpoint },
+	{ AtCommand_CharSTPoint,			"@charstpoint",		0, atcommand_charstpoint },
+	{ AtCommand_CharZeny,				"@charzeny",		0, atcommand_charzeny },
+	{ AtCommand_MapInfo,				"@mapinfo",			0, atcommand_mapinfo },
+	{ AtCommand_MobSearch,				"@mobsearch",		0, atcommand_mobsearch },
+	{ AtCommand_CleanMap,				"@cleanmap",		0, atcommand_cleanmap },
+	{ AtCommand_Clock,					"@clock",			0, atcommand_clock },
+	{ AtCommand_GiveItem,				"@giveitem",		0, atcommand_giveitem },
+	{ AtCommand_Weather,				"@weather",			0, atcommand_weather },
+	// add here
 	{ AtCommand_MapMove,				"@mapmove",			0, NULL },
 	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
 	{ AtCommand_LocalBroadcast,			"@local_broadcast",	0, NULL },
-	//add
-	{ AtCommand_WhoP,					"@who+",			0, atcommand_whop },
-	//add 1052
-	//add here
 	{ AtCommand_Unknown,				NULL,				0, NULL }
 };
 
@@ -246,7 +288,7 @@ int get_atcommand_level(const AtCommandType type)
  *------------------------------------------
  */
 AtCommandType
-is_atcommand(const int fd, struct map_session_data* sd, const char* message)
+is_atcommand(const int fd, struct map_session_data* sd, const char* message, int gmlvl)
 {
 	const char* str = message;
 	int s_flag = 0;
@@ -266,7 +308,8 @@ is_atcommand(const int fd, struct map_session_data* sd, const char* message)
 	}
 	if (!*str)
 		return AtCommand_None;
-	type = atcommand(pc_isGM(sd), str, &info);
+	type = atcommand((gmlvl > 0 )?gmlvl:pc_isGM(sd), str, &info);
+//	type = atcommand(pc_isGM(sd), str, &info);
 	if (type != AtCommand_None) {
 		char command[25];
 		char output[100];
@@ -281,14 +324,21 @@ is_atcommand(const int fd, struct map_session_data* sd, const char* message)
 		if (isspace(*p))
 			p++;
 		if (type == AtCommand_Unknown) {
- 			snprintf(output, sizeof output, "%s is Unknown Command.", command);
- 			clif_displaymessage(fd, output);
-		} else {
+			if(pc_isGM(sd)){
+	 			snprintf(output, sizeof output, "%s is Unknown Command.", command);
+	 			clif_displaymessage(fd, output);
+	 		}else{
+ 				return AtCommand_None;
+	 		}
+		} else if(pc_isGM(sd)) {
 			if (info.proc(fd, sd, command, p) != 0) {
 				// 異常終了
  				snprintf(output, sizeof output, "%s failed.", command);
  				clif_displaymessage(fd, output);
 			}
+		} else {
+			if (info.proc(fd, sd, command, p) != 0)
+ 				return AtCommand_None;
 		}
 		return info.type;
 	}
@@ -313,6 +363,9 @@ atcommand(
 	if (!*p || *p != '@')
 		return AtCommand_None;
 	
+	if(p[0] == '@' && p[1] == '@')
+		return AtCommand_None;
+
 	memset(info, 0, sizeof(AtCommandInfo));
 	{
 		char command[101];
@@ -351,7 +404,59 @@ static int atkillmonster_sub(struct block_list *bl,va_list ap)
 		mob_delete((struct mob_data *)bl);
 	return 0;
 }
+/*==========================================
+ * Mob search
+ *------------------------------------------
+ */
+static int atmobsearch_sub(struct block_list *bl,va_list ap)
+{
+	int mob_id,fd;
+	static int number=0;
+	struct mob_data *md;
+	char output[128];
+	
+	nullpo_retr(0, bl);
+	
+	if(!ap){
+		number=0;
+		return 0;
+	}
+	mob_id = va_arg(ap,int);
+	fd = va_arg(ap,const int);
+	
+	md = (struct mob_data *)bl;
+	
+	if(md && fd && (mob_id==-1 || (md->class==mob_id))){
+		snprintf(output, sizeof output, msg_table[94],
+				++number,bl->x, bl->y,md->name);
+		clif_displaymessage(fd, output);
+	}
+	return 0;
+}
+/*==========================================
+ * cleanmap
+ *------------------------------------------
+ */
+static int atcommand_cleanmap_sub(struct block_list *bl,va_list ap)
+{
+	struct flooritem_data *fitem;
 
+	nullpo_retr(0, bl);
+
+	fitem = (struct flooritem_data *)bl;
+	if(fitem==NULL || fitem->bl.type!=BL_ITEM){
+		if(battle_config.error_log)
+			printf("map_clearflooritem_timer : error\n");
+		return 1;
+	}
+	delete_timer(fitem->cleartimer,map_clearflooritem_timer);
+	if(fitem->item_data.card[0] == (short)0xff00)
+		intif_delete_petdata(*((long *)(&fitem->item_data.card[1])));
+	clif_clearflooritem(fitem,0);
+	map_delobject(fitem->bl.id);
+
+	return 0;
+}
 /*==========================================
  * 
  *------------------------------------------
@@ -1234,6 +1339,8 @@ atcommand_help(
 	const char* command, const char* message)
 {
 	char buf[BUFSIZ];
+	int display = 1;
+
 	FILE* fp = fopen(help_txt, "r");
 	if (fp != NULL) {
 		int i = 0;
@@ -1242,9 +1349,16 @@ atcommand_help(
 			for (i = 0; buf[i] != '\0'; i++) {
 				if (buf[i] == '\r' || buf[i] == '\n') {
 					buf[i] = '\0';
-					}
 				}
-			clif_displaymessage(fd, buf);
+			}
+			if (message && *message && buf[0] == '@') {
+				if (strstr(buf, message))
+					display = 1;
+				else
+					display = 0;
+			}
+			if (display)
+				clif_displaymessage(fd, buf);
 		}
 		fclose(fp);
 	} else
@@ -1558,7 +1672,7 @@ atcommand_killmonster_sub(
 			}
 		if ((map_id = map_mapname2mapid(map_name)) < 0)
 			map_id = sd->bl.m;
-						}
+	}
 	map_foreachinarea(atkillmonster_sub, map_id, 0, 0,
 		map[map_id].xs, map[map_id].ys, BL_MOB, drop);
 }
@@ -1960,7 +2074,23 @@ atcommand_makepet(
 
 	return 0;
 }
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int atcommand_hatch(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	if (sd->status.pet_id <= 0)
+		clif_sendegg(sd);
+	else {
+		clif_displaymessage(fd, "atcomand_hatch");
+		return -1;
+	}
 
+	return 0;
+}
 /*==========================================
  * 
  *------------------------------------------
@@ -2048,7 +2178,42 @@ atcommand_petrename(
 
 	return 0;
 }
+int atcommand_charpetrename(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char character[100];
+	struct map_session_data *pl_sd;
 
+	memset(character, '\0', sizeof(character));
+
+	if (!message || !*message || sscanf(message, "%99[^\n]", character) < 1) {
+		clif_displaymessage(fd, "Please, enter a player name (usage: @charpetrename <char name>).");
+		return -1;
+	}
+
+	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		if (pl_sd->status.pet_id > 0 && pl_sd->pd) {
+			if (pl_sd->pet.rename_flag != 0) {
+				pl_sd->pet.rename_flag = 0;
+				intif_save_petdata(pl_sd->status.account_id, &pl_sd->pet);
+				clif_send_petstatus(pl_sd);
+				clif_displaymessage(fd, "atcommand charpetrename_This player can now rename his/her pet");
+			} else {
+				clif_displaymessage(fd, "atcommand charpetrename_This player can already rename his/her pet.");
+				return -1;
+			}
+		} else {
+			clif_displaymessage(fd, "atcommand charpetrename_Sorry, but this player has no pet.");
+			return -1;
+		}
+	} else {
+		clif_displaymessage(fd, "atcommand charpetrename_Character not found.");
+		return -1;
+	}
+
+	return 0;
+}
 /*==========================================
  * 
  *------------------------------------------
@@ -2088,7 +2253,103 @@ atcommand_recall(
 */
 	return 0;
 }
+/*==========================================
+ * recallを接続者全員にかける
+ *------------------------------------------
+ */
+int atcommand_recallall(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd;
+	int i;
+	char output[200];
 
+	memset(output, '\0', sizeof(output));
+
+	for (i = 0; i < fd_max; i++)
+		if (session[i] && (pl_sd = session[i]->session_data) && pl_sd->state.auth
+			&& sd->status.account_id != pl_sd->status.account_id
+				&& pc_isGM(sd) >= pc_isGM(pl_sd) && pl_sd)
+					pc_setpos(pl_sd, sd->mapname, sd->bl.x, sd->bl.y, 2);
+//					intif_charmovereq(sd,pl_sd->status.name,1);
+	clif_displaymessage(fd, msg_table[105]);
+
+	return 0;
+}
+/*==========================================
+ * Recall online characters of a guild to your location
+ *------------------------------------------
+ */
+int atcommand_recallguild(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd;
+	int i;
+	char guild_name[100];
+	char output[200];
+	struct guild *g;
+
+	memset(guild_name, '\0', sizeof(guild_name));
+	memset(output, '\0', sizeof(output));
+
+	if (!message || !*message || sscanf(message, "%99[^\n]", guild_name) < 1)
+		return -1;
+
+	if ((g = guild_searchname(guild_name)) != NULL ||
+	    (g = guild_search(atoi(message))) != NULL) {
+		for (i = 0; i < fd_max; i++)
+			if (session[i] && (pl_sd = session[i]->session_data) && pl_sd->state.auth
+			    && sd->status.account_id != pl_sd->status.account_id
+			    && pl_sd->status.guild_id == g->guild_id)
+					pc_setpos(pl_sd, sd->mapname, sd->bl.x, sd->bl.y, 2);
+		sprintf(output, msg_table[106], g->name);
+		clif_displaymessage(fd, output);
+	} else {
+		clif_displaymessage(fd, msg_table[107]);
+		return -1;
+	}
+
+	return 0;
+}
+
+/*==========================================
+ * Recall online characters of a party to your location
+ *------------------------------------------
+ */
+int atcommand_recallparty(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	int i;
+	struct map_session_data *pl_sd;
+	char party_name[100];
+	char output[200];
+	struct party *p;
+
+	memset(party_name, '\0', sizeof(party_name));
+	memset(output, '\0', sizeof(output));
+
+	if (!message || !*message || sscanf(message, "%99[^\n]", party_name) < 1)
+		return -1;
+
+	if ((p = party_searchname(party_name)) != NULL ||
+	    (p = party_search(atoi(message))) != NULL) {
+		for (i = 0; i < fd_max; i++)
+			if (session[i] && (pl_sd = session[i]->session_data) && pl_sd->state.auth
+				&& sd->status.account_id != pl_sd->status.account_id
+				&& pl_sd->status.party_id == p->party_id)
+					pc_setpos(pl_sd, sd->mapname, sd->bl.x, sd->bl.y, 2);
+		sprintf(output, msg_table[108], p->name);
+		clif_displaymessage(fd, output);
+	} else {
+		clif_displaymessage(fd, msg_table[109]);
+		return -1;
+	}
+
+	return 0;
+}
 /*==========================================
  * 対象キャラクターを転職させる upper指定で転生や養子も可能
  *------------------------------------------
@@ -2615,10 +2876,43 @@ atcommand_questskill(
 	if (skill_get_inf2(skill_id) & 0x01) {
 		pc_skill(sd, skill_id, 1, 0);
 		clif_displaymessage(fd, msg_table[70]);
-		}
+	}
 	return 0;
 }
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int atcommand_charquestskill(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char character[100];
+	char output[100];
+	struct map_session_data *pl_sd;
+	int skill_id = 0;
 
+	memset(character, '\0', sizeof(character));
+
+	if (!message || !*message || sscanf(message, "%d %99[^\n]", &skill_id, character) < 2 || skill_id < 0)
+		return -1;
+
+	if (skill_id >= 0 && skill_id < MAX_SKILL_DB) {
+		if(skill_get_inf2(skill_id) & 0x01
+		   && (pl_sd = map_nick2sd(character)) != NULL
+		   && pc_checkskill(pl_sd, skill_id) == 0){
+				pc_skill(pl_sd, skill_id, 1, 0);
+				sprintf(output,msg_table[110], pl_sd->status.name);
+				clif_displaymessage(fd, output);
+		} else {
+			clif_displaymessage(fd, msg_table[3]);
+			return -1;
+		}
+	}
+	else
+		return -1;
+	return 0;
+}
 /*==========================================
  * 
  *------------------------------------------
@@ -2645,7 +2939,41 @@ atcommand_lostskill(
 
 	return 0;
 }
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int atcommand_charlostskill(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char character[100];
+	char output[100];
+	struct map_session_data *pl_sd;
+	int skill_id = 0;
 
+	memset(character, '\0', sizeof(character));
+
+	if (!message || !*message || sscanf(message, "%d %99[^\n]", &skill_id, character) < 2 || skill_id < 0)
+		return -1;
+
+	if (skill_id >= 0 && skill_id < MAX_SKILL) {
+		if (skill_get_inf2(skill_id) & 0x01
+			&& (pl_sd = map_nick2sd(character)) != NULL
+			&& pc_checkskill(pl_sd, skill_id) > 0) {
+				pl_sd->status.skill[skill_id].lv = 0;
+				pl_sd->status.skill[skill_id].flag = 0;
+				clif_skillinfoblock(pl_sd);
+				sprintf(output,msg_table[111],pl_sd->status.name);
+				clif_displaymessage(fd, output);
+		} else {
+			clif_displaymessage(fd, msg_table[3]);
+			return -1;
+		}
+	} else
+		return -1;
+	return 0;
+}
 /*==========================================
  * 
  *------------------------------------------
@@ -2749,7 +3077,6 @@ atcommand_agitend(
 	clif_displaymessage(fd, msg_table[74]);
 	return 0;
 }
-
 /*==========================================
  *itemDBのリロード
  *------------------------------------------
@@ -2995,5 +3322,667 @@ atcommand_summon(
 	}
 	clif_skill_poseffect(&sd->bl,AM_CALLHOMUN,1,x,y,tick);
 
+	return 0;
+}
+/*==========================================
+ * Character Skill Reset
+ *------------------------------------------
+ */
+int atcommand_charskreset(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char character[100];
+	char output[200];
+	struct map_session_data *pl_sd;
+
+	memset(character, '\0', sizeof(character));
+	memset(output, '\0', sizeof(output));
+
+	if (!message || !*message || sscanf(message, "%99[^\n]", character) < 1)
+		return -1;
+
+	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		if (pc_isGM(sd) >= pc_isGM(pl_sd)) {
+			pc_resetskill(pl_sd);
+			sprintf(output, msg_table[99], character);
+			clif_displaymessage(fd, output);
+		} else
+			return -1;
+	} else {
+		clif_displaymessage(fd, msg_table[3]);
+		return -1;
+	}
+
+	return 0;
+}
+
+/*==========================================
+ * Character Stat Reset
+ *------------------------------------------
+ */
+int atcommand_charstreset(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char character[100];
+	char output[200];
+	struct map_session_data *pl_sd;
+
+	memset(character, '\0', sizeof(character));
+	memset(output, '\0', sizeof(output));
+
+	if (!message || !*message || sscanf(message, "%99[^\n]", character) < 1)
+		return -1;
+
+	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		if (pc_isGM(sd) >= pc_isGM(pl_sd)) {
+			pc_resetstate(pl_sd);
+			sprintf(output, msg_table[100], character);
+			clif_displaymessage(fd, output);
+		} else
+			return -1;
+	} else {
+		clif_displaymessage(fd, msg_table[3]);
+		return -1;
+	}
+
+	return 0;
+}
+
+/*==========================================
+ * Character Reset
+ *------------------------------------------
+ */
+int atcommand_charreset(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char character[100];
+	char output[200];
+	struct map_session_data *pl_sd;
+
+	memset(character, '\0', sizeof(character));
+	memset(output, '\0', sizeof(output));
+
+	if (!message || !*message || sscanf(message, "%99[^\n]", character) < 1)
+		return -1;
+
+	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		if (pc_isGM(sd) >= pc_isGM(pl_sd)) {
+			pc_resetstate(pl_sd);
+			pc_resetskill(pl_sd);
+			sprintf(output, msg_table[101], character);
+			clif_displaymessage(fd, output);
+		} else
+			return -1;
+	} else {
+		clif_displaymessage(fd, msg_table[3]);
+		return -1;
+	}
+
+	return 0;
+}
+/*==========================================
+ * Character Status Point (rewritten by [Yor])
+ *------------------------------------------
+ */
+int atcommand_charstpoint(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd;
+	char character[100];
+	char output[100];
+	int new_status_point;
+	int point = 0;
+
+	memset(character, '\0', sizeof(character));
+
+	if (!message || !*message || sscanf(message, "%d %99[^\n]", &point, character) < 2 || point == 0)
+		return -1;
+
+	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		new_status_point = (int)pl_sd->status.status_point + point;
+		if (point > 0 && (point > 0x7FFF || new_status_point > 0x7FFF)) // fix positiv overflow
+			new_status_point = 0x7FFF;
+		else if (point < 0 && (point < -0x7FFF || new_status_point < 0)) // fix negativ overflow
+			new_status_point = 0;
+		if (new_status_point != (int)pl_sd->status.status_point) {
+			pl_sd->status.status_point = new_status_point;
+			clif_updatestatus(pl_sd, SP_STATUSPOINT);
+			sprintf(output, msg_table[102], character);
+			clif_displaymessage(fd, output);
+		} else {
+			return -1;
+		}
+	} else {
+		clif_displaymessage(fd, msg_table[3]);
+		return -1;
+	}
+
+	return 0;
+}
+/*==========================================
+ * Character Skill Point (Rewritten by [Yor])
+ *------------------------------------------
+ */
+int atcommand_charskpoint(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd;
+	char character[100];
+	char output[100];
+	int new_skill_point;
+	int point = 0;
+
+	memset(character, '\0', sizeof(character));
+
+	if (!message || !*message || sscanf(message, "%d %99[^\n]", &point, character) < 2 || point == 0)
+		return -1;
+
+	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		new_skill_point = (int)pl_sd->status.skill_point + point;
+		if (point > 0 && (point > 0x7FFF || new_skill_point > 0x7FFF)) // fix positiv overflow
+			new_skill_point = 0x7FFF;
+		else if (point < 0 && (point < -0x7FFF || new_skill_point < 0)) // fix negativ overflow
+			new_skill_point = 0;
+		if (new_skill_point != (int)pl_sd->status.skill_point) {
+			pl_sd->status.skill_point = new_skill_point;
+			clif_updatestatus(pl_sd, SP_SKILLPOINT);
+			sprintf(output, msg_table[103], character);
+			clif_displaymessage(fd, output);
+		} else {
+			return -1;
+		}
+	} else {
+		clif_displaymessage(fd, msg_table[3]);
+		return -1;
+	}
+
+	return 0;
+}
+/*==========================================
+ * Character Zeny Point (Rewritten by [Yor])
+ *------------------------------------------
+ */
+int atcommand_charzeny(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd;
+	char character[100];
+	char output[100];
+	int zeny = 0, new_zeny;
+
+	memset(character, '\0', sizeof(character));
+
+	if (!message || !*message || sscanf(message, "%d %99[^\n]", &zeny, character) < 2 || zeny == 0)
+		return -1;
+
+	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		new_zeny = pl_sd->status.zeny + zeny;
+		if (zeny > 0 && (zeny > MAX_ZENY || new_zeny > MAX_ZENY)) // fix positiv overflow
+			new_zeny = MAX_ZENY;
+		else if (zeny < 0 && (zeny < -MAX_ZENY || new_zeny < 0)) // fix negativ overflow
+			new_zeny = 0;
+		if (new_zeny != pl_sd->status.zeny) {
+			pl_sd->status.zeny = new_zeny;
+			clif_updatestatus(pl_sd, SP_ZENY);
+			sprintf(output, msg_table[104], character);
+			clif_displaymessage(fd, output);
+		} else {
+			return -1;
+		}
+	} else {
+		clif_displaymessage(fd, msg_table[3]);
+		return -1;
+	}
+
+	return 0;
+}
+
+/*==========================================
+ * @mapinfo <map name> [0-3] by MC_Cameri
+ * => Shows information about the map [map name]
+ * 0 = no additional information
+ * 1 = Show users in that map and their location
+ * 2 = Shows NPCs in that map
+ * 3 = Shows the shops/chats in that map (not implemented)
+ *------------------------------------------
+ */
+int atcommand_mapinfo(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd;
+	struct npc_data *nd = NULL;
+	struct chat_data *cd = NULL;
+	char output[200], map_name[100];
+	char direction[12];
+	int m_id, i, chat_num, list = 0;
+
+	memset(output, '\0', sizeof(output));
+	memset(map_name, '\0', sizeof(map_name));
+	memset(direction, '\0', sizeof(direction));
+
+	sscanf(message, "%d %99[^\n]", &list, map_name);
+
+	if (list < 0 || list > 3)
+		return -1;
+
+	if (map_name[0] == '\0')
+		strcpy(map_name, sd->mapname);
+	if (strstr(map_name, ".gat") == NULL && strstr(map_name, ".afm") == NULL && strlen(map_name) < 13) // 16 - 4 (.gat)
+		strcat(map_name, ".gat");
+
+	if ((m_id = map_mapname2mapid(map_name)) < 0)
+		return -1;
+
+	clif_displaymessage(fd, "------ Map Info ------");
+	sprintf(output, "Map Name: %s", map_name);
+	clif_displaymessage(fd, output);
+	sprintf(output, "Players In Map: %d", map[m_id].users);
+	clif_displaymessage(fd, output);
+	sprintf(output, "NPCs In Map: %d", map[m_id].npc_num);
+	clif_displaymessage(fd, output);
+
+	for (i=chat_num=0; i<fd_max; i++)
+		if (session[i] && (pl_sd = session[i]->session_data)
+			 && pl_sd->state.auth && (cd = (struct chat_data*)map_id2bl(pl_sd->chatID)))
+				chat_num++;
+
+	sprintf(output, "Chats In Map: %d", chat_num);
+	clif_displaymessage(fd, output);
+	clif_displaymessage(fd, "------ Map Flags ------");
+	sprintf(output, "Player vs Player: %s | No Guild: %s | No Party: %s",
+		(map[m_id].flag.pvp) ? "True" : "False",
+		(map[m_id].flag.pvp_noguild) ? "True" : "False",
+		(map[m_id].flag.pvp_noparty) ? "True" : "False");
+	clif_displaymessage(fd, output);
+	sprintf(output, "Guild vs Guild: %s | No Party: %s",
+		(map[m_id].flag.gvg) ? "True" : "False",
+		(map[m_id].flag.gvg_noparty) ? "True" : "False");
+	clif_displaymessage(fd, output);
+	sprintf(output, "No Dead Branch: %s",
+		(map[m_id].flag.nobranch) ? "True" : "False");
+	clif_displaymessage(fd, output);
+	sprintf(output, "No Memo: %s",
+		(map[m_id].flag.nomemo) ? "True" : "False");
+	clif_displaymessage(fd, output);
+	sprintf(output, "No Penalty: %s",
+		(map[m_id].flag.nopenalty) ? "True" : "False");
+	clif_displaymessage(fd, output);
+	sprintf(output, "No Return: %s",
+		(map[m_id].flag.noreturn) ? "True" : "False");
+	clif_displaymessage(fd, output);
+	sprintf(output, "No Save: %s",
+		(map[m_id].flag.nosave) ? "True" : "False");
+	clif_displaymessage(fd, output);
+	sprintf(output, "No Teleport: %s",
+		(map[m_id].flag.noteleport) ? "True" : "False");
+	clif_displaymessage(fd, output);
+	sprintf(output, "No Monster Teleport: %s",
+		(map[m_id].flag.monster_noteleport) ? "True" : "False");
+	clif_displaymessage(fd, output);
+	sprintf(output, "No Zeny Penalty: %s",
+		(map[m_id].flag.nozenypenalty) ? "True" : "False");
+	clif_displaymessage(fd, output);
+
+	switch (list) {
+		case 0:
+			// Do nothing. It's list 0, no additional display.
+			break;
+		case 1:
+			clif_displaymessage(fd, "----- Players in Map -----");
+			for (i = 0; i < fd_max; i++) {
+				if (session[i] && (pl_sd = session[i]->session_data) && pl_sd->state.auth && strcmp(pl_sd->mapname, map_name) == 0) {
+					sprintf(output, "Player '%s' (session #%d) | Location: %d,%d",
+						pl_sd->status.name, i, pl_sd->bl.x, pl_sd->bl.y);
+					clif_displaymessage(fd, output);
+				}
+			}
+			break;
+		case 2:
+			clif_displaymessage(fd, "----- NPCs in Map -----");
+			for (i = 0; i < map[m_id].npc_num;) {
+				nd = map[m_id].npc[i];
+				switch(nd->dir) {
+				case 0:
+					strcpy(direction, "North");
+					break;
+				case 1:
+					strcpy(direction, "North West");
+					break;
+				case 2:
+					strcpy(direction, "West");
+					break;
+				case 3:
+					strcpy(direction, "South West");
+					break;
+				case 4:
+					strcpy(direction, "South");
+					break;
+				case 5:
+					strcpy(direction, "South East");
+					break;
+				case 6:
+					strcpy(direction, "East");
+					break;
+				case 7:
+					strcpy(direction, "North East");
+					break;
+				case 9:
+					strcpy(direction, "North");
+					break;
+				default:
+					strcpy(direction, "Unknown");
+					break;
+				}
+				sprintf(output, "NPC %d: %s | Direction: %s | Sprite: %d | Location: %d %d",
+				        ++i, nd->name, direction, nd->class, nd->bl.x, nd->bl.y);
+				clif_displaymessage(fd, output);
+			}
+			break;
+		case 3:
+			clif_displaymessage(fd, "----- Chats in Map -----");
+			for (i = 0; i < fd_max; i++) {
+				if (session[i] && (pl_sd = session[i]->session_data) && pl_sd->state.auth &&
+					(cd = (struct chat_data*)map_id2bl(pl_sd->chatID)) &&
+					strcmp(pl_sd->mapname, map_name) == 0 &&
+					cd->usersd[0] == pl_sd) {
+					sprintf(output, "Chat %d: %s | Player: %s | Location: %d %d",
+							i, cd->title, pl_sd->status.name, cd->bl.x, cd->bl.y);
+					clif_displaymessage(fd, output);
+					sprintf(output, "   Users: %d/%d | Password: %s | Public: %s",
+							cd->users, cd->limit, cd->pass, (cd->pub) ? "Yes" : "No");
+					clif_displaymessage(fd, output);
+				}
+			}
+			break;
+		default: // normally impossible to arrive here
+			clif_displaymessage(fd, "Please, enter at least a valid list number (usage: @mapinfo <0-3> [map]).");
+			return -1;
+			break;
+	}
+	return 0;
+}
+/*==========================================
+ * 	MOB Search
+ *------------------------------------------
+ */
+int
+atcommand_mobsearch(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char mob_name[100];
+	char output[100];
+	int mob_id,map_id = 0;
+
+	nullpo_retr(-1, sd);
+
+	if (sscanf(message, "%99s", mob_name) < 0)
+		return -1;
+
+	if ((mob_id = atoi(mob_name)) == 0)
+		 mob_id = mobdb_searchname(mob_name);
+	if(mob_id !=-1 && (mob_id <= 1000 || mob_id >= 2000)){
+		snprintf(output, sizeof output, msg_table[93],mob_name);
+		clif_displaymessage(fd, output);
+		return 0;
+	}
+	if(mob_id == atoi(mob_name) && mob_db[mob_id].jname)
+				strcpy(mob_name,mob_db[mob_id].jname);	// --ja--
+//				strcpy(mob_name,mob_db[mob_id].name);	// --en--
+
+	map_id = sd->bl.m;
+
+	snprintf(output, sizeof output, msg_table[92],
+		mob_name, sd->mapname);
+	clif_displaymessage(fd, output);
+
+	map_foreachinarea(atmobsearch_sub, map_id, 0, 0,
+		map[map_id].xs, map[map_id].ys, BL_MOB, mob_id, fd);
+
+	atmobsearch_sub(&sd->bl,0);		// 番号リセット
+
+	return 0;
+}
+/*==========================================
+ * ドロップアイテムの掃除
+ *------------------------------------------
+ */
+int
+atcommand_cleanmap(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	int i=0;
+	map_foreachinarea(atcommand_cleanmap_sub,sd->bl.m,
+					  sd->bl.x-AREA_SIZE*2,sd->bl.y-AREA_SIZE*2,
+					  sd->bl.x+AREA_SIZE*2,sd->bl.y+AREA_SIZE*2,
+					  BL_ITEM,sd,&i);
+	clif_displaymessage(fd, msg_table[95]);
+	return 0;
+}
+/*==========================================
+ * Clock
+ *------------------------------------------
+ */
+int
+atcommand_clock(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char output[48];
+	struct tm *tm;
+	time_t t;
+	t = time(NULL);
+	tm = localtime(&t);
+	
+	sprintf(output, msg_table[96],tm->tm_hour,tm->tm_min,tm->tm_sec);
+	
+	clif_displaymessage(fd, output);
+	return 0;
+}
+/*==========================================
+ * Give Item
+ * @giveitem (item_id or item_name) amount charname
+ *------------------------------------------
+ */
+static void 
+atcommand_giveitem_sub(struct map_session_data *sd,struct item_data *item_data,int number)
+{
+	int flag = 0;
+	int loop = 1, get_count = number,i;
+	struct item item_tmp;
+
+	if(sd && item_data){
+		if (item_data->type == 4 || item_data->type == 5 ||
+			item_data->type == 7 || item_data->type == 8) {
+			loop = number;
+			get_count = 1;
+		}
+		for (i = 0; i < loop; i++) {
+			memset(&item_tmp, 0, sizeof(item_tmp));
+			item_tmp.nameid = item_data->nameid;
+			item_tmp.identify = 1;
+			if ((flag = pc_additem((struct map_session_data*)sd,
+					&item_tmp, get_count)))
+				clif_additem((struct map_session_data*)sd, 0, 0, flag);
+		}
+	}
+}
+int
+atcommand_giveitem(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *pl_sd = NULL;
+	struct item_data *item_data;
+	char item_name[100];
+	char character[100];
+	char output[100];
+	int number,i,item_id;
+
+	if (!message || !*message)
+		return -1;
+
+	if (sscanf(message, "%99s %d %99[^\n]", item_name, &number, character) < 3)
+		return -1;
+
+	if (number <= 0)
+		number = 1;
+
+	if ((item_id = atoi(item_name)) > 0) {
+		if (battle_config.item_check) {
+			item_id =
+				(((item_data = itemdb_exists(item_id)) &&
+				 itemdb_available(item_id)) ? item_id : 0);
+		} else {
+			item_data = itemdb_search(item_id);
+		}
+	} else if ((item_data = itemdb_searchname(item_name)) != NULL) {
+		item_id = (!battle_config.item_check ||
+			itemdb_available(item_data->nameid)) ? item_data->nameid : 0;
+	}
+	if(item_id == 0)
+		return -1;
+
+	if ((pl_sd = map_nick2sd(character)) != NULL) { //該当名のキャラが存在する
+		atcommand_giveitem_sub(pl_sd,item_data,number);
+		snprintf(output, sizeof output ,msg_table[97],item_name,number);
+		clif_displaymessage(pl_sd->fd, output);
+		snprintf(output, sizeof output ,msg_table[98],pl_sd->status.name,item_name,number);
+		clif_displaymessage(fd, output);
+	}
+	else if(strcmp(character,"ALL")==0){			// 名前がALLなら、接続者全員へ
+		for (i = 0; i < fd_max; i++) {
+			if (session[i] && (pl_sd = session[i]->session_data)){
+				atcommand_giveitem_sub(pl_sd,item_data,number);
+				snprintf(output, sizeof output ,msg_table[97],item_name,number);
+				clif_displaymessage(pl_sd->fd, output);
+			}
+		}
+		snprintf(output, sizeof output ,msg_table[98],"全員",item_name,number);
+		clif_displaymessage(fd, output);
+	}
+	return 0;
+}
+/*==========================================
+ * Weather control
+ * 発動後に効果を戻す(消す)方法が分からない・・・
+ *------------------------------------------
+ */
+int
+atcommand_weather(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	struct map_session_data *psd=NULL;
+	int i,type,map_id,effno=0;
+	char weather[100],map_name[100],output[100];
+
+	if (sscanf(message, "%99s %99s", weather , map_name) < 1)
+		return -1;
+
+	if (map_name[0] == '\0')
+		strcpy(map_name, sd->mapname);
+	else if (strstr(map_name, ".gat") == NULL && strlen(map_name) < 13)
+		strcat(map_name, ".gat");
+
+	if ((map_id = map_mapname2mapid(map_name)) < 0)
+		map_id = sd->bl.m;
+
+	if(!atoi(weather)){
+		if(!strcmp(weather,"rain"))
+			type=1;
+		else if(!strcmp(weather,"snow"))
+			type=2;
+		else if(!strcmp(weather,"sakura"))
+			type=3;
+		else if(!strcmp(weather,"fog"))
+			type=4;
+		else if(!strcmp(weather,"leaves"))
+			type=5;
+		else
+			return -1;
+	}
+	else
+		type=atoi(weather);
+
+	if(type<0 || type>5)
+		return -1;
+
+	switch(type){
+		case 0:
+			map[map_id].flag.rain=0;
+			map[map_id].flag.snow=0;
+			map[map_id].flag.sakura=0;
+			map[map_id].flag.fog=0;
+			map[map_id].flag.leaves=0;
+			return 0;
+		case 1:
+			if(!map[map_id].flag.rain){
+				effno=161;
+				map[map_id].flag.rain=1;
+				snprintf(output, sizeof output ,msg_table[84]);
+				clif_displaymessage(fd, output);
+			}else{
+				map[map_id].flag.rain=0;
+			}
+			break;
+		case 2:
+			if(!map[map_id].flag.snow){
+				effno=162;
+				map[map_id].flag.snow=1;
+				snprintf(output, sizeof output ,msg_table[85]);
+				clif_displaymessage(fd, output);
+			}else{
+				map[map_id].flag.snow=0;
+			}
+			break;
+		case 3:
+			if(!map[map_id].flag.sakura){
+				effno=163;
+				map[map_id].flag.sakura=1;
+				snprintf(output, sizeof output ,msg_table[86]);
+				clif_displaymessage(fd, output);
+			}else{
+				map[map_id].flag.sakura=0;
+			}
+			break;
+		case 4:
+			if(!map[map_id].flag.fog){
+				effno=233;
+				map[map_id].flag.fog=1;
+				snprintf(output, sizeof output ,msg_table[87]);
+				clif_displaymessage(fd, output);
+			}else{
+				map[map_id].flag.fog=0;
+			}
+			break;
+		case 5:
+			if(!map[map_id].flag.leaves){
+				effno=333;
+				map[map_id].flag.leaves=1;
+				snprintf(output, sizeof output ,msg_table[88]);
+				clif_displaymessage(fd, output);
+			}else{
+				map[map_id].flag.leaves=0;
+			}
+			break;
+		default:
+			break;
+	}
+	// 指定マップ内に既に居るキャラは即時に天候変化
+	for(i=0; effno && i < fd_max; i++) {
+		if (session[i] && (psd = session[i]->session_data) != NULL && psd->state.auth){
+			if(strcmp(map_name,"all.gat") && !strcmp(map_name,psd->mapname))
+				clif_misceffect3(&psd->bl,effno);
+		}
+	}
 	return 0;
 }

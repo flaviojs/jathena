@@ -733,6 +733,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 
 	//スパノビ用死にカウンターのスクリプト変数からの読み出しとsdへのセット
 	sd->die_counter = pc_readglobalreg(sd,"PC_DIE_COUNTER");
+
 	// ステータス初期計算など
 	pc_calcstatus(sd,1);
 
@@ -994,7 +995,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	sd->max_weight = max_weight_base[s_class.job]+sd->status.str*300;
 	if(pc_checkskill(sd,KN_RIDING)==1) // ライディングスキル所持
-	sd->max_weight +=battle_config.riding_weight; // Weight+α(初期設定は0)
+		sd->max_weight +=battle_config.riding_weight; // Weight+α(初期設定は0)
 	if( (skill=pc_checkskill(sd,MC_INCCARRY))>0 )	// 所持量増加
 		sd->max_weight += skill*1000;
 
@@ -1041,8 +1042,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->matk1 =0;
 	sd->matk2 =0;
 	sd->speed = DEFAULT_WALK_SPEED ;
-	sd->hprate=100;
-	sd->sprate=100;
+	sd->hprate=battle_config.hp_rate;
+	sd->sprate=battle_config.sp_rate;
 	sd->castrate=100;
 	sd->dsprate=100;
 	sd->base_atk=0;
@@ -1115,9 +1116,11 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->autospell_id = sd->autospell_lv = sd->autospell_rate = 0;
 	sd->hp_drain_rate = sd->hp_drain_per = sd->sp_drain_rate = sd->sp_drain_per = 0;
 	sd->hp_drain_rate_ = sd->hp_drain_per_ = sd->sp_drain_rate_ = sd->sp_drain_per_ = 0;
+	sd->hp_drain_value = sd->hp_drain_value_ = sd->sp_drain_value = sd->sp_drain_value_ = 0;
 	sd->short_weapon_damage_return = sd->long_weapon_damage_return = 0;
 	sd->break_weapon_rate = sd->break_armor_rate = 0;
 	sd->add_steal_rate = 0;
+	sd->unbreakable_equip = 0;
 
 	for(i=0;i<10;i++) {
 		index = sd->equip_index[i];
@@ -1410,8 +1413,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->speed += (1.2*DEFAULT_WALK_SPEED - skill*9);
 	if (pc_iscarton(sd) && (skill=pc_checkskill(sd,MC_PUSHCART))>0)	// カートによる速度低下
 		sd->speed += (10-skill) * (DEFAULT_WALK_SPEED * 0.1);
-	else if (pc_isriding(sd))
-		sd->speed -= (0.25 * DEFAULT_WALK_SPEED);	// ペコペコ乗りによる速度増加
+	else if (pc_isriding(sd))	// ペコペコ乗りによる速度増加
+		sd->speed -= (0.25 * DEFAULT_WALK_SPEED);
 	if(sd->sc_count){
 		if(sd->sc_data[SC_WINDWALK].timer!=-1) 	//ウィンドウォーク時はLv*2%減算
 			sd->speed -= sd->speed *(sd->sc_data[SC_WINDWALK].val1*2)/100;
@@ -1562,10 +1565,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->def = sd->def * (100 - 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
 		}
 
-		if(sd->sc_data[SC_MAGICPOWER].timer!=-1){ //魔法力増幅
-			sd->matk1 = sd->matk1*(100+2*sd->sc_data[SC_MAGICPOWER].val1)/100;
-			sd->matk2 = sd->matk2*(100+2*sd->sc_data[SC_MAGICPOWER].val1)/100;
-		}
 		if(sd->sc_data[SC_INCATK].timer!=-1)	//item 682用
 			sd->watk += sd->sc_data[SC_INCATK].val1;
 		if(sd->sc_data[SC_INCMATK].timer!=-1){	//item 683用
@@ -2113,11 +2112,19 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		break;
 	case SP_UNBREAKABLE_WEAPON:
 		if(sd->state.lr_flag != 2)
-			sd->special_state.unbreakable_weapon = 1;
+			sd->unbreakable_equip |= EQP_WEAPON;
 		break;
 	case SP_UNBREAKABLE_ARMOR:
 		if(sd->state.lr_flag != 2)
-			sd->special_state.unbreakable_armor = 1;
+			sd->unbreakable_equip |= EQP_ARMOR;
+		break;
+	case SP_UNBREAKABLE_HELM:
+		if(sd->state.lr_flag != 2)
+			sd->unbreakable_equip |= EQP_HELM;
+		break;
+	case SP_UNBREAKABLE_SHIELD:
+		if(sd->state.lr_flag != 2)
+			sd->unbreakable_equip |= EQP_SHIELD;
 		break;
 	case SP_SPLASH_RANGE:
 		if(sd->state.lr_flag != 2 && sd->splash_range < val)
@@ -2722,6 +2729,8 @@ int pc_dropitem(struct map_session_data *sd,int n,int amount)
 
 	if(itemdb_isdropable(sd->status.inventory[n].nameid) == 0)
 		return 1;
+	if(pc_candrop(sd,sd->status.inventory[n].nameid))
+		return 1;
 
 	map_addflooritem(&sd->status.inventory[n],amount,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 	pc_delitem(sd,n,amount,0);
@@ -2810,8 +2819,6 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 	if(nameid == 602 && map[sd->bl.m].flag.noreturn)
 		return 0;
 	if(nameid == 604 && (map[sd->bl.m].flag.nobranch || map[sd->bl.m].flag.gvg))
-		return 0;
-	if(nameid == 823 && (map[sd->bl.m].flag.nobranch || map[sd->bl.m].flag.gvg))
 		return 0;
 	if(item->sex != 2 && sd->status.sex != item->sex)
 		return 0;
@@ -2947,6 +2954,8 @@ int pc_putitemtocart(struct map_session_data *sd,int idx,int amount)
 	nullpo_retr(0, item_data=&sd->status.inventory[idx]);
 
 	if(itemdb_isdropable(sd->status.inventory[idx].nameid) == 0)
+		return 1;
+	if(pc_candrop(sd,sd->status.inventory[idx].nameid)==1)
 		return 1;
 
 	if( item_data->nameid==0 || item_data->amount<amount || sd->vender_id )
@@ -3505,6 +3514,8 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 			i = 1;
 		sd->walktimer=add_timer(tick+i,pc_walk,id,sd->walkpath.path_pos);
 	}
+	if(battle_config.disp_hpmeter)
+		clif_hpmeter(sd);
 
 	return 0;
 }
@@ -4514,6 +4525,18 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	clif_updatestatus(sd,SP_HP);
 	pc_calcstatus(sd,0);
 
+	if(battle_config.bone_drop==2
+		|| (battle_config.bone_drop==1 && map[sd->bl.m].flag.pvp)){	// ドクロドロップ
+		struct item item_tmp;
+		memset(&item_tmp,0,sizeof(item_tmp));
+		item_tmp.nameid=7005;
+		item_tmp.identify=1;
+		item_tmp.card[0]=0x00fe;
+		item_tmp.card[1]=0;
+		*((unsigned long *)(&item_tmp.card[2]))=sd->char_id;	/* キャラID */
+		map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+	}
+
 	for(i=0;i<5;i++)
 		if(sd->dev.val1[i]){
 			skill_status_change_end(&map_id2sd(sd->dev.val1[i])->bl,SC_DEVOTION,-1);
@@ -4814,8 +4837,13 @@ int pc_heal(struct map_session_data *sd,int hp,int sp)
 			sp = 0;
 	}
 
-	if(sd->sc_data && sd->sc_data[SC_BERSERK].timer!=-1) //バーサーク中は回復させないらしい
-		return 0;
+	// バーサーク中は回復させない
+	if(sd->sc_data && sd->sc_data[SC_BERSERK].timer!=-1) {
+		if (sp > 0)
+			sp = 0;
+		if (hp > 0)
+			hp = 0;
+	}
 
 	if(hp+sd->status.hp>sd->status.max_hp)
 		hp=sd->status.max_hp-sd->status.hp;
@@ -5173,7 +5201,16 @@ int pc_setriding(struct map_session_data *sd)
 
 	return 0;
 }
-
+/*==========================================
+ * アイテムドロップ可不可判定
+ *------------------------------------------
+ */
+int pc_candrop(struct map_session_data *sd,int item_id)
+{
+	if(pc_isGM(sd) && pc_isGM(sd) < battle_config.gm_can_drop_lv)
+		return 1;
+	return 0;
+}
 
 /*==========================================
  * script用変数の値を読む
@@ -6024,40 +6061,37 @@ struct map_session_data *pc_get_partner(struct map_session_data *sd)
 	return p_sd;
 }
 
-//武器破壊
-int pc_break_weapon(struct map_session_data *sd){
+//装備破壊
+int pc_break_equip(struct map_session_data *sd, unsigned short where)
+{
 	int i;
+	int sc;
 
 	if(sd == NULL)
 		return -1;
-	if(sd->special_state.unbreakable_weapon)
+	if(sd->unbreakable_equip & where)
 		return 0;
-	if( sd->sc_data && sd->sc_data[SC_CP_WEAPON].timer != -1 )
-		return 0;
-	for(i=0;i<MAX_INVENTORY;i++){
-		if(sd->status.inventory[i].equip && sd->status.inventory[i].equip & 0x0002){
-			sd->status.inventory[i].attribute = 1;
-			pc_unequipitem(sd,i,0);
+	switch (where) {
+		case EQP_WEAPON:
+			sc = SC_CP_WEAPON;
 			break;
-		}
+		case EQP_ARMOR:
+			sc = SC_CP_ARMOR;
+			break;
+		case EQP_SHIELD:
+			sc = SC_CP_SHIELD;
+			break;
+		case EQP_HELM:
+			sc = SC_CP_HELM;
+			break;
+		default:
+			return 0;
 	}
-	clif_itemlist(sd);
-	clif_equiplist(sd);
-	return 0;
-}
-
-//鎧破壊
-int pc_break_armor(struct map_session_data *sd){
-	int i;
-
-	if(sd == NULL)
-		return -1;
-	if(sd->special_state.unbreakable_armor)
+	if( sd->sc_data && sd->sc_data[sc].timer != -1 )
 		return 0;
-	if( sd->sc_data && sd->sc_data[SC_CP_ARMOR].timer != -1 )
-		return 0;
-	for(i=0;i<MAX_INVENTORY;i++){
-		if(sd->status.inventory[i].equip && sd->status.inventory[i].equip & 0x0010){
+
+	for (i=0;i<MAX_INVENTORY;i++) {
+		if (sd->status.inventory[i].equip & where) {
 			sd->status.inventory[i].attribute = 1;
 			pc_unequipitem(sd,i,0);
 			break;

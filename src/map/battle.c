@@ -1585,6 +1585,33 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 }
 
 /*==========================================
+ * HP/SP吸収の計算
+ *------------------------------------------
+ */
+inline int battle_calc_drain(int damage, int rate, int per, int val)
+{
+	int diff = 0;
+
+	if (damage <= 0 || rate <= 0)
+		return 0;
+
+	if (per && rand()%100 < rate) {
+		diff = (damage * per) / 100;
+		if (diff == 0) {
+			if (per > 0)
+				diff = 1;
+			else
+				diff = -1;
+		}
+	}
+
+	if (val && rand()%100 < rate) {
+		diff += val;
+	}
+	return diff;
+}
+
+/*==========================================
  * 修練ダメージ
  *------------------------------------------
  */
@@ -1848,7 +1875,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 				hitrate = (hitrate*(100+5*skill_lv))/100;
 				break;
 			case SM_MAGNUM:		// マグナムブレイク
-				damage = damage*(5*skill_lv +(wflag)?65:115 )/100;
+				damage = damage*(5*skill_lv + (wflag?65:115))/100;
 				break;
 			case MC_MAMMONITE:	// メマーナイト
 				damage = damage*(100+ 50*skill_lv)/100;
@@ -1957,6 +1984,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 				div_=2;
 				break;
 			case CR_GRANDCROSS:
+			case NPC_DARKGRANDCROSS:
 				hitrate= 1000000;
 				break;
 			case AM_DEMONSTRATION:	// デモンストレーション
@@ -2128,7 +2156,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	if(t_mode&0x40 && damage > 0)
 		damage = 1;
 
-	if(skill_num != CR_GRANDCROSS)
+	if(skill_num != CR_GRANDCROSS||skill_num !=NPC_DARKGRANDCROSS)
 		damage=battle_calc_damage(src,target,damage,div_,skill_num,skill_lv,flag);
 
 	wd.damage=damage;
@@ -2191,7 +2219,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 
 	if((skill_num == 0 || (target->type == BL_PC && battle_config.pc_auto_counter_type&2) ||
 		(target->type == BL_MOB && battle_config.monster_auto_counter_type&2)) && skill_lv >= 0) {
-		if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
+		if((skill_num != CR_GRANDCROSS||skill_num !=NPC_DARKGRANDCROSS)&& t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
 			int dir = map_calc_dir(src,target->x,target->y),t_dir = battle_get_dir(target);
 			int dist = distance(src->x,src->y,target->x,target->y);
 			if(dist <= 0 || map_check_dir(dir,t_dir) ) {
@@ -2314,7 +2342,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 				hitrate = (hitrate*(100+5*skill_lv))/100;
 				break;
 			case SM_MAGNUM:		// マグナムブレイク
-				damage = damage*(5*skill_lv +(wflag)?65:115 )/100;
+				damage = damage*(5*skill_lv + (wflag?65:115))/100;
 				break;
 			case MC_MAMMONITE:	// メマーナイト
 				damage = damage*(100+ 50*skill_lv)/100;
@@ -2430,6 +2458,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 				div_=2;
 				break;
 			case CR_GRANDCROSS:
+			case NPC_DARKGRANDCROSS:
 				hitrate= 1000000;
 				break;
 			case AM_DEMONSTRATION:	// デモンストレーション
@@ -2642,7 +2671,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if( tsd && tsd->special_state.no_weapon_damage)
 		damage = 0;
 
-	if(skill_num != CR_GRANDCROSS)
+	if(skill_num != CR_GRANDCROSS||skill_num !=NPC_DARKGRANDCROSS)
 		damage=battle_calc_damage(src,target,damage,div_,skill_num,skill_lv,flag);
 
 	wd.damage=damage;
@@ -2705,7 +2734,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	opt1=battle_get_opt1(src); //石化、凍結、スタン、睡眠、暗闇
 	opt2=battle_get_opt2(src); //毒、呪い、沈黙、暗闇？
 
-	if(skill_num != CR_GRANDCROSS) //グランドクロスでないなら
+	if(skill_num != CR_GRANDCROSS||skill_num !=NPC_DARKGRANDCROSS) //グランドクロスでないなら
 		sd->state.attack_type = BF_WEAPON; //攻撃タイプは武器攻撃
 
 	// ターゲット
@@ -2722,7 +2751,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 //オートカウンター処理ここから
 	if((skill_num == 0 || (target->type == BL_PC && battle_config.pc_auto_counter_type&2) ||
 		(target->type == BL_MOB && battle_config.monster_auto_counter_type&2)) && skill_lv >= 0) {
-		if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) { //グランドクロスでなく、対象がオートカウンター状態の場合
+		if((skill_num != CR_GRANDCROSS||skill_num !=NPC_DARKGRANDCROSS) && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) { //グランドクロスでなく、対象がオートカウンター状態の場合
 			int dir = map_calc_dir(src,target->x,target->y),t_dir = battle_get_dir(target);
 			int dist = distance(src->x,src->y,target->x,target->y);
 			if(dist <= 0 || map_check_dir(dir,t_dir) ) { //対象との距離が0以下、または対象の正面？
@@ -2991,8 +3020,8 @@ static struct Damage battle_calc_pc_weapon_attack(
 				hitrate = (hitrate*(100+5*skill_lv))/100;
 				break;
 			case SM_MAGNUM:		// マグナムブレイク
-				damage = damage*(5*skill_lv +(wflag)?65:115 )/100;
-				damage2 = damage2*(5*skill_lv +(wflag)?65:115 )/100;
+				damage = damage*(5*skill_lv + (wflag?65:115))/100;
+				damage2 = damage2*(5*skill_lv + (wflag?65:115))/100;
 				break;
 			case MC_MAMMONITE:	// メマーナイト
 				damage = damage*(100+ 50*skill_lv)/100;
@@ -3173,6 +3202,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 				div_=2;
 				break;
 			case CR_GRANDCROSS:
+			case NPC_DARKGRANDCROSS:
 				hitrate= 1000000;
 				if (!battle_config.gx_cardfix)
 					no_cardfix = 1;
@@ -3439,7 +3469,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 
 	// スキル修正２（修練系）
 	// 修練ダメージ(右手のみ) ソニックブロー時は別処理（1撃に付き1/8適応)
-	if( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != CR_GRANDCROSS) {			//修練ダメージ無視
+	if( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && (skill_num != CR_GRANDCROSS||skill_num !=NPC_DARKGRANDCROSS)) {			//修練ダメージ無視
 		damage = battle_addmastery(sd,target,damage,0);
 		damage2 = battle_addmastery(sd,target,damage2,1);
 	}
@@ -3684,10 +3714,10 @@ static struct Damage battle_calc_pc_weapon_attack(
 	}
 
 	//bNoWeaponDamage(設定アイテム無し？)でグランドクロスじゃない場合はダメージが0
-	if( tsd && tsd->special_state.no_weapon_damage && skill_num != CR_GRANDCROSS)
+	if( tsd && tsd->special_state.no_weapon_damage &&(skill_num != CR_GRANDCROSS||skill_num !=NPC_DARKGRANDCROSS))
 		damage = damage2 = 0;
 
-	if(skill_num != CR_GRANDCROSS && (damage > 0 || damage2 > 0) ) {
+	if((skill_num != CR_GRANDCROSS||skill_num !=NPC_DARKGRANDCROSS) && (damage > 0 || damage2 > 0) ) {
 		if(damage2<1)		// ダメージ最終修正
 			damage=battle_calc_damage(src,target,damage,div_,skill_num,skill_lv,flag);
 		else if(damage<1)	// 右手がミス？
@@ -3764,7 +3794,7 @@ struct Damage battle_calc_magic_attack(
 	int ele=0,race=7,t_ele=0,t_race=7,t_mode = 0,cardfix,t_class,i;
 	struct map_session_data *sd=NULL,*tsd=NULL;
 	struct mob_data *tmd = NULL;
-
+	struct status_change *sc_data;
 
 	//return前の処理があるので情報出力部のみ変更
 	if( bl == NULL || target == NULL ){
@@ -3800,6 +3830,13 @@ struct Damage battle_calc_magic_attack(
 		tmd=(struct mob_data *)target;
 
 	aflag=BF_MAGIC|BF_LONG|BF_SKILL;
+
+	// 魔法力増幅によるMATK増加
+	sc_data = battle_get_sc_data(bl);
+	if (sc_data && sc_data[SC_MAGICPOWER].timer != -1) {
+		matk1 += (matk1 * sc_data[SC_MAGICPOWER].val1 * 2)/100;
+		matk2 += (matk2 * sc_data[SC_MAGICPOWER].val1 * 2)/100;
+	}
 	
 	if(skill_num > 0){
 		switch(skill_num){	// 基本ダメージ計算(スキルごとに処理)
@@ -3887,6 +3924,7 @@ struct Damage battle_calc_magic_attack(
 			break;
 		case WZ_METEOR:
 		case WZ_JUPITEL:	// ユピテルサンダー
+		case NPC_DARKJUPITEL:	//闇ユピテル
 			break;
 		case WZ_VERMILION:	// ロードオブバーミリオン
 			MATK_FIX( skill_lv*20+80, 100 );
@@ -3979,14 +4017,13 @@ struct Damage battle_calc_magic_attack(
 
 	damage=battle_attr_fix(damage, ele, battle_get_element(target) );		// 属 性修正
 
-	if(skill_num == CR_GRANDCROSS) {	// グランドクロス
+	if(skill_num == CR_GRANDCROSS||skill_num ==NPC_DARKGRANDCROSS) {	// グランドクロス
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(bl,target,skill_num,skill_lv,flag);
 		damage = (damage + wd.damage) * (100 + 40*skill_lv)/100;
 		if(battle_config.gx_dupele) damage=battle_attr_fix(damage, ele, battle_get_element(target) );	//属性2回かかる
 		if(bl==target) damage=damage/2;	//反動は半分
 	}
-
 	div_=skill_get_num( skill_num,skill_lv );
 	
 	if(div_>1 && skill_num != WZ_VERMILION)
@@ -4306,10 +4343,10 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 
 				if(sd->break_weapon_rate > 0 && rand()%10000 < sd->break_weapon_rate
 					&& target->type ==BL_PC)
-						pc_break_weapon((struct map_session_data *)target);
+						pc_break_equip((struct map_session_data *)target, EQP_WEAPON);
 				if(sd->break_armor_rate > 0 && rand()%10000 < sd->break_armor_rate
 					&& target->type ==BL_PC)
-						pc_break_armor((struct map_session_data *)target);
+						pc_break_equip((struct map_session_data *)target, EQP_ARMOR);
 
 			}
 		}
@@ -4386,49 +4423,13 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				if(!f) pc_heal(sd,0,-sp);
 			}
 		}
-		if(wd.flag&BF_WEAPON && src != target && (wd.damage > 0 || wd.damage2 > 0)) {
+		if (wd.flag&BF_WEAPON && src != target && (wd.damage > 0 || wd.damage2 > 0)) {
 			int hp = 0,sp = 0;
-			if(!battle_config.left_cardfix_to_right) { // 二刀流左手カードの吸収系効果を右手に追加しない場合
-				if(sd->hp_drain_rate && sd->hp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate) {
-					hp += (wd.damage * sd->hp_drain_per)/100;
-					if(sd->hp_drain_rate > 0 && hp < 1) hp = 1;
-					else if(sd->hp_drain_rate < 0 && hp > -1) hp = -1;
-				}
-				if(sd->hp_drain_rate_ && sd->hp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->hp_drain_rate_) {
-					hp += (wd.damage2 * sd->hp_drain_per_)/100;
-					if(sd->hp_drain_rate_ > 0 && hp < 1) hp = 1;
-					else if(sd->hp_drain_rate_ < 0 && hp > -1) hp = -1;
-				}
-				if(sd->hp_drain_rate && sd->hp_drain_value > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate) {
-					hp += sd->hp_drain_value;
-					if(sd->hp_drain_rate > 0 && hp < 1) hp = 1;
-					else if(sd->hp_drain_rate < 0 && hp > -1) hp = -1;
-				}
-				if(sd->hp_drain_rate_ && sd->hp_drain_value_ > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate_) {
-					hp += sd->hp_drain_value_;
-					if(sd->hp_drain_rate_ > 0 && hp < 1) hp = 1;
-					else if(sd->hp_drain_rate_ < 0 && hp > -1) hp = -1;
-				}
-				if(sd->sp_drain_rate && sd->sp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate) {
-					sp += (wd.damage * sd->sp_drain_per)/100;
-					if(sd->sp_drain_rate > 0 && sp < 1) sp = 1;
-					else if(sd->sp_drain_rate < 0 && sp > -1) sp = -1;
-				}
-				if(sd->sp_drain_rate_ && sd->sp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->sp_drain_rate_) {
-					sp += (wd.damage2 * sd->sp_drain_per_)/100;
-					if(sd->sp_drain_rate_ > 0 && sp < 1) sp = 1;
-					else if(sd->sp_drain_rate_ < 0 && sp > -1) sp = -1;
-				}
-				if(sd->sp_drain_rate && sd->sp_drain_value > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate) {
-					sp += sd->sp_drain_value;
-					if(sd->sp_drain_rate > 0 && sp < 1) sp = 1;
-					else if(sd->sp_drain_rate < 0 && sp > -1) sp = -1;
-				}
-				if(sd->sp_drain_rate_ && sd->sp_drain_value_ > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate_) {
-					sp += sd->sp_drain_value_;
-					if(sd->sp_drain_rate_ > 0 && sp < 1) sp = 1;
-					else if(sd->sp_drain_rate_ < 0 && sp > -1) sp = -1;
-				}
+			if (!battle_config.left_cardfix_to_right) { // 二刀流左手カードの吸収系効果を右手に追加しない場合
+				hp += battle_calc_drain(wd.damage, sd->hp_drain_rate, sd->hp_drain_per, sd->hp_drain_value);
+				hp += battle_calc_drain(wd.damage2, sd->hp_drain_rate_, sd->hp_drain_per_, sd->hp_drain_value_);
+				sp += battle_calc_drain(wd.damage, sd->sp_drain_rate, sd->sp_drain_per, sd->sp_drain_value);
+				sp += battle_calc_drain(wd.damage2, sd->sp_drain_rate_, sd->sp_drain_per_, sd->sp_drain_value_);
 			} else { // 二刀流左手カードの吸収系効果を右手に追加する場合
 				int hp_drain_rate = sd->hp_drain_rate + sd->hp_drain_rate_;
 				int hp_drain_per = sd->hp_drain_per + sd->hp_drain_per_;
@@ -4436,29 +4437,11 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				int sp_drain_rate = sd->sp_drain_rate + sd->sp_drain_rate_;
 				int sp_drain_per = sd->sp_drain_per + sd->sp_drain_per_;
 				int sp_drain_value = sd->sp_drain_value + sd->sp_drain_value_;
-				if(hp_drain_rate && hp_drain_per > 0 && wd.damage > 0 && rand()%100 < hp_drain_rate) {
-					hp += (wd.damage * hp_drain_per)/100;
-					if(hp_drain_rate > 0 && hp < 1) hp = 1;
-					else if(hp_drain_rate < 0 && hp > -1) hp = -1;
-				}
-				if(hp_drain_rate && hp_drain_value > 0 && wd.damage > 0 && rand()%100 < hp_drain_rate) {
-					hp += hp_drain_value;
-					if(hp_drain_rate > 0 && hp < 1) hp = 1;
-					else if(hp_drain_rate < 0 && hp > -1) hp = -1;
-				}
-				if(sp_drain_rate && sp_drain_per > 0 && wd.damage > 0 && rand()%100 < sp_drain_rate) {
-					sp += (wd.damage * sp_drain_per)/100;
-					if(sp_drain_rate > 0 && sp < 1) sp = 1;
-					else if(sp_drain_rate < 0 && sp > -1) sp = -1;
-				}
-				if(sp_drain_rate && sp_drain_value > 0 && wd.damage > 0 && rand()%100 < sp_drain_rate) {
-					sp += sp_drain_value;
-					if(sp_drain_rate > 0 && sp < 1) sp = 1;
-					else if(sp_drain_rate < 0 && sp > -1) sp = -1;
-				}
+				hp += battle_calc_drain(wd.damage, hp_drain_rate, hp_drain_per, hp_drain_value);
+				sp += battle_calc_drain(wd.damage, sp_drain_rate, sp_drain_per, sp_drain_value);
 			}
 
-			if(hp || sp) pc_heal(sd,hp,sp);
+			if (hp || sp) pc_heal(sd, hp, sp);
 		}
 	}
 
@@ -4896,6 +4879,11 @@ int battle_config_read(const char *cfgName)
 		battle_config.disp_experience = 0;
 		battle_config.castle_defense_rate = 100;
 		battle_config.riding_weight = 0;
+		battle_config.hp_rate = 100;
+		battle_config.sp_rate = 100;
+		battle_config.gm_can_drop_lv = 0;
+		battle_config.disp_hpmeter = 0;
+		battle_config.bone_drop = 0;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -5071,6 +5059,11 @@ int battle_config_read(const char *cfgName)
 			{ "disp_experience",			&battle_config.disp_experience			},
 			{ "castle_defense_rate",		&battle_config.castle_defense_rate		},
 			{ "riding_weight",		&battle_config.riding_weight		},
+			{ "hp_rate",					&battle_config.hp_rate					},
+			{ "sp_rate",					&battle_config.sp_rate					},
+			{ "gm_can_drop_lv",				&battle_config.gm_can_drop_lv			},
+			{ "disp_hpmeter",				&battle_config.disp_hpmeter				},
+			{ "bone_drop",					&battle_config.bone_drop				},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')
@@ -5118,6 +5111,10 @@ int battle_config_read(const char *cfgName)
 			battle_config.max_aspd = 10;
 		if(battle_config.max_aspd > 1000)
 			battle_config.max_aspd = 1000;
+		if(battle_config.hp_rate < 0)
+			battle_config.hp_rate = 1;
+		if(battle_config.sp_rate < 0)
+			battle_config.sp_rate = 1;
 		if(battle_config.max_hp > 1000000)
 			battle_config.max_hp = 1000000;
 		if(battle_config.max_hp < 100)

@@ -6,11 +6,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <time.h>
 
 #include "socket.h"
 #include "timer.h"
@@ -1203,6 +1203,16 @@ int clif_spawnpc(struct map_session_data *sd)
 	if(sd->spiritball > 0)
 		clif_spiritball(sd);
 
+	if (map[sd->bl.m].flag.rain)
+		clif_misceffect3(&sd->bl, 161);
+	if (map[sd->bl.m].flag.snow)
+		clif_misceffect3(&sd->bl, 162);
+	if (map[sd->bl.m].flag.sakura)
+		clif_misceffect3(&sd->bl, 163);
+	if (map[sd->bl.m].flag.fog)
+		clif_misceffect3(&sd->bl, 233);
+	if (map[sd->bl.m].flag.leaves)
+		clif_misceffect3(&sd->bl, 333);
 	return 0;
 }
 
@@ -2266,6 +2276,8 @@ int clif_updatestatus(struct map_session_data *sd,int type)
 		break;
 	case SP_HP:
 		WFIFOL(fd,4)=sd->status.hp;
+		if(battle_config.disp_hpmeter)
+			clif_hpmeter(sd);
 		break;
 	case SP_SP:
 		WFIFOL(fd,4)=sd->status.sp;
@@ -2724,6 +2736,24 @@ int clif_misceffect2(struct block_list *bl,int type)
 	WBUFL(buf,6)=type;
 
 	clif_send(buf,packet_db[0x1f3].len,bl,AREA);
+
+	return 0;
+}
+/*==========================================
+ * 
+ *------------------------------------------
+ */
+int clif_misceffect3(struct block_list *bl,int type)
+{
+	char buf[32];
+
+	nullpo_retr(0, bl);
+
+	WBUFW(buf,0)=0x1f3;
+	WBUFL(buf,2)=bl->id;
+	WBUFL(buf,6)=type;
+
+	clif_send(buf,packet_db[0x1f3].len,bl,SELF);
 
 	return 0;
 }
@@ -5488,6 +5518,46 @@ int clif_party_hp(struct party *p,struct map_session_data *sd)
 	return 0;
 }
 /*==========================================
+ * GMへ場所とHP通知
+ *------------------------------------------
+ */
+int clif_hpmeter(struct map_session_data *sd)
+{
+	struct map_session_data *md;
+	unsigned char buf[16];
+	unsigned char buf2[16];
+	int i;
+	
+	nullpo_retr(0, sd);
+
+	WBUFW(buf,0)=0x107;
+	WBUFL(buf,2)=sd->bl.id;
+	WBUFW(buf,6)=sd->bl.x;
+	WBUFW(buf,8)=sd->bl.y;
+
+	for(i=0;i<fd_max;i++){
+		if(session[i] && (md=session[i]->session_data) && md->state.auth &&
+		   md->bl.m == sd->bl.m && pc_isGM(md) && sd != md){
+			memcpy(WFIFOP(i,0),buf,packet_db[0x107].len);
+			WFIFOSET(i,packet_db[0x107].len);
+		}
+	}
+	
+	WBUFW(buf2,0)=0x106;
+	WBUFL(buf2,2)=sd->status.account_id;
+	WBUFW(buf2,6)=(sd->status.hp > 0x7fff)? 0x7fff:sd->status.hp;
+	WBUFW(buf2,8)=(sd->status.max_hp > 0x7fff)? 0x7fff:sd->status.max_hp;
+	for(i=0;i<fd_max;i++){
+		if(session[i] && (md=session[i]->session_data) && md->state.auth &&
+		   md->bl.m == md->bl.m && pc_isGM(md) && sd != md){
+			memcpy(WFIFOP(i,0),buf2,packet_db[0x106].len);
+			WFIFOSET(i,packet_db[0x106].len);
+		}
+	}
+	
+	return 0;
+}
+/*==========================================
  * パーティ場所移動（未使用）
  *------------------------------------------
  */
@@ -7058,7 +7128,7 @@ void clif_parse_GlobalMessage(int fd,struct map_session_data *sd, int cmd)
 	nullpo_retv(sd);
 
 	len=RFIFOW(fd,packet_db[cmd].pos[0]);
-	if (is_atcommand(fd, sd, RFIFOP(fd, packet_db[cmd].pos[1])) != AtCommand_None)
+	if (is_atcommand(fd, sd, RFIFOP(fd, packet_db[cmd].pos[1]),0) != AtCommand_None)
 		return;
 	if( sd->sc_data && 
 		(sd->sc_data[SC_BERSERK].timer!=-1 ||	//バーサーク時は会話も不可
@@ -8170,7 +8240,7 @@ void clif_parse_PartyMessage(int fd,struct map_session_data *sd, int cmd)
 {
 	nullpo_retv(sd);
 
-	if (is_atcommand(fd, sd, RFIFOP(fd, packet_db[cmd].pos[11])) != AtCommand_None)
+	if (is_atcommand(fd, sd, RFIFOP(fd, packet_db[cmd].pos[11]),0) != AtCommand_None)
 		return;
 	if(sd->sc_data &&
 		(sd->sc_data[SC_BERSERK].timer!=-1 ||	//バーサーク時は会話も不可
@@ -8362,7 +8432,7 @@ void clif_parse_GuildMessage(int fd,struct map_session_data *sd, int cmd)
 {
 	nullpo_retv(sd);
 
-	if (is_atcommand(fd, sd, RFIFOP(fd, packet_db[cmd].pos[1])) != AtCommand_None)
+	if (is_atcommand(fd, sd, RFIFOP(fd, packet_db[cmd].pos[1]),0) != AtCommand_None)
 		return;
 	if(sd->sc_data &&
 		(sd->sc_data[SC_BERSERK].timer!=-1 ||	//バーサーク時は会話も不可
@@ -8683,7 +8753,7 @@ void clif_parse_GMkillall(int fd,struct map_session_data *sd, int cmd)
 	nullpo_retv(sd);
 	
 	strncpy(message,sd->status.name,24);
-	is_atcommand(fd,sd,strcat(message," : @kickall"));
+	is_atcommand(fd,sd,strcat(message," : @kickall"),0);
 	return;
 }
 /*==========================================
@@ -8699,7 +8769,7 @@ void clif_parse_GMsummon(int fd,struct map_session_data *sd, int cmd)
 	strncpy(message,sd->status.name,24);
 	strcat(message," : @recall ");
 	strncat(message,RFIFOP(fd,packet_db[cmd].pos[0]),24);
-	is_atcommand(fd,sd,message);
+	is_atcommand(fd,sd,message,0);
 	return;
 }
 /*==========================================
@@ -8715,7 +8785,7 @@ void clif_parse_GMshift(int fd,struct map_session_data *sd, int cmd)
 	strncpy(message,sd->status.name,24);
 	strcat(message," : @jumpto ");
 	strncat(message,RFIFOP(fd,packet_db[cmd].pos[0]),24);
-	is_atcommand(fd,sd,message);
+	is_atcommand(fd,sd,message,0);
 	return;
 }
 /*==========================================
@@ -8756,8 +8826,11 @@ static int clif_parse(int fd)
 		if(sd && sd->state.auth)
 			clif_quitsave(fd,sd);
 		close(fd);
-		if (sd) // 追加
-			map_deliddb(&sd->bl); // 追加
+		if (sd) {
+			struct map_session_data *tmpsd = map_id2sd(sd->bl.id);
+			if (tmpsd == sd)
+				map_deliddb(&sd->bl);
+		}
 		delete_session(fd);
 		return 0;
 	}
