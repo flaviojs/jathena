@@ -1651,8 +1651,12 @@ static struct Damage battle_calc_pet_weapon_attack(
 				}
 				t_def = def2*8/10;
 				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
-				damage = damage * (100 - def1) /100
-					- t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+				if(battle_config.pet_defense_type) {
+					damage = damage - (def1 * battle_config.pet_defense_type) - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+				}
+				else{
+					damage = damage * (100 - def1) /100 - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+				}
 			}
 		}
 	}
@@ -2047,8 +2051,12 @@ static struct Damage battle_calc_mob_weapon_attack(
 						t_def += skill*3;
 
 				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
-				damage = damage * (100 - def1) /100
-					- t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+				if(battle_config.monster_defense_type) {
+					damage = damage - (def1 * battle_config.monster_defense_type) - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+				}
+				else{
+					damage = damage * (100 - def1) /100 - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+				}
 			}
 		}
 	}
@@ -2755,11 +2763,20 @@ static struct Damage battle_calc_pc_weapon_attack(
 				}
 
 				if(!idef_flag)
-					damage = damage * (100 - def1) /100
-						- t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+					if(battle_config.player_defense_type) {
+						damage = damage - (def1 * battle_config.player_defense_type) - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+					}
+					else{
+						damage = damage * (100 - def1) /100 - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+					}
 				if(!idef_flag_)
-					damage2 = damage2 * (100 - def1) /100
-						- t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+					if(battle_config.player_defense_type) {
+						damage2 = damage2 - (def1 * battle_config.player_defense_type) - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+					}
+					else{
+						damage2 = damage2 * (100 - def1) /100 - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
+					}
+				
 			}
 		}
 	}
@@ -3202,7 +3219,12 @@ struct Damage battle_calc_magic_attack(
 			}
 		}
 		if(!imdef_flag)
-			damage = (damage*(100-mdef1))/100 - mdef2;
+			if(battle_config.magic_defense_type) {
+				damage = damage - (mdef1 * battle_config.magic_defense_type) - mdef2;
+			}
+			else{
+				damage = (damage*(100-mdef1))/100 - mdef2;
+			}
 
 		if(damage<1)
 			damage=1;
@@ -3994,6 +4016,10 @@ int battle_config_read(const char *cfgName)
 		battle_config.vit_penaly_type = 0;
 		battle_config.vit_penaly_count = 3;
 		battle_config.vit_penaly_num = 0;
+		battle_config.player_defense_type = 0;
+		battle_config.monster_defense_type = 0;
+		battle_config.pet_defense_type = 0;
+		battle_config.magic_defense_type = 0;
 		battle_config.pc_skill_reiteration = 0;
 		battle_config.monster_skill_reiteration = 0;
 		battle_config.pc_skill_nofootset = 0;
@@ -4140,6 +4166,10 @@ int battle_config_read(const char *cfgName)
 			{ "vit_penaly_type",			&battle_config.vit_penaly_type			},
 			{ "vit_penaly_count",			&battle_config.vit_penaly_count			},
 			{ "vit_penaly_num",				&battle_config.vit_penaly_num			},
+			{ "player_defense_type",		&battle_config.player_defense_type		},
+			{ "monster_defense_type",		&battle_config.monster_defense_type		},
+			{ "pet_defense_type",			&battle_config.pet_defense_type			},
+			{ "magic_defense_type",			&battle_config.magic_defense_type		},
 			{ "player_skill_reiteration",	&battle_config.pc_skill_reiteration		},
 			{ "monster_skill_reiteration",	&battle_config.monster_skill_reiteration},
 			{ "player_skill_nofootset",		&battle_config.pc_skill_nofootset		},

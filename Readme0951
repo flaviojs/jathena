@@ -1,4 +1,18 @@
 --------------------
+//0952 by CG
+・confでDEFとMDEFの計算方法を選択できるように。
+
+	(conf/)
+	battle_athena.conf 変更
+	(map/)
+	battle.c 
+		battle_calc_pet_weapon_attack() 修正
+		battle_calc_mob_weapon_attack() 修正
+		battle_calc_pc_weapon_attack() 修正
+		battle_calc_magic_attack() 修正
+	battle.h 修正
+
+--------------------
 //0951 by (凸)
 ・サーバーsnapshot
 ・バグ報告スレッド part4 >>95 KAJIKENさんの修正を同梱

@@ -223,6 +223,10 @@ extern struct Battle_Config {
 	int vit_penaly_type;
 	int vit_penaly_count;
 	int vit_penaly_num;
+	int player_defense_type;
+	int monster_defense_type;
+	int pet_defense_type;
+	int magic_defense_type;
 	int pc_skill_reiteration;
 	int monster_skill_reiteration;
 	int pc_skill_nofootset;
