@@ -595,7 +595,7 @@ int parse_login(int fd)
     return 0;
   }
   if(RFIFOW(fd,0)<30000)
-	  printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
+	  printf("parse_login : %d %d %d %s\n",fd,RFIFOREST(fd),RFIFOW(fd,0),RFIFOP(fd,6));
   while(RFIFOREST(fd)>=2){
 	switch(RFIFOW(fd,0)){
 	case 0x64:		// クライアントログイン要求

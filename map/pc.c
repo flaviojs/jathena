@@ -2303,9 +2303,13 @@ int pc_dropitem(struct map_session_data *sd,int n,int amount)
 int pc_takeitem(struct map_session_data *sd,struct flooritem_data *fitem)
 {
 	int flag;
+	struct map_session_data *md = map_id2sd(fitem->item_data.first_get_id);
 
-	if((fitem->item_data.first_get_id > 0 && fitem->item_data.first_get_id != sd->bl.id)&&
-		battle_config.flooritem_lifetime+gettick()-get_timer(fitem->cleartimer)->tick < battle_config.lootitem_time)
+	if(((fitem->item_data.first_get_id > 0
+		&& fitem->item_data.first_get_id != sd->bl.id)	// 倒した本人じゃない
+		&& battle_config.flooritem_lifetime+gettick()-get_timer(fitem->cleartimer)->tick < battle_config.lootitem_time)	// 時間が早い
+		&&(md && sd->status.party_id != md->status.party_id)	// 倒したキャラとは別のパーティー
+		)
 		// ルート権限無し
 		clif_additem(sd,0,0,6);
 	else if((flag = pc_additem(sd,&fitem->item_data,fitem->item_data.amount)))

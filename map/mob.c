@@ -77,6 +77,7 @@ int mob_spawn_dataset(struct mob_data *md,const char *mobname,int class)
 	md->timer = -1;
 	md->target_id=0;
 	md->attacked_id=0;
+	md->first_attacked_id=0;
 	md->speed=mob_db[class].speed;
 
 	return 0;
@@ -1588,7 +1589,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 			printf("mob_damage : BlockError!!\n");
 		return 0;
 	}
-	if(src && src->type==BL_PC && md->first_attacked_id<=0)
+	if(src && src->type==BL_PC && md->first_attacked_id <= 0)
 		md->first_attacked_id = sd->bl.id;
 
 	if(md->state.state==MS_DEAD || md->hp<=0) {
@@ -1810,6 +1811,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 				ditem->m=md->bl.m;
 				ditem->x=md->bl.x;
 				ditem->y=md->bl.y;
+				ditem->item_data.first_get_id = md->first_attacked_id;
 				add_timer(gettick()+540+i,mob_delay_item_drop2,(int)ditem,0);
 			}
 		}
@@ -1905,6 +1907,7 @@ int mob_class_change(struct mob_data *md,int class)
 	memset(&md->state,0,sizeof(md->state));
 	md->attacked_id = 0;
 	md->target_id = 0;
+	md->first_attacked_id=0;
 	md->move_fail_count = 0;
 
 	md->speed = mob_db[md->class].speed;
