@@ -850,7 +850,7 @@ int mapif_parse_CreateGuild(int fd,int account_id,char *name,struct guild_member
 	int i;
 	
 	for(i=0;i<24 && name[i];i++){
-		if(name[i]<0x20 || name[i]==0x7f){
+		if( !(name[i]&0xe0) || name[i]==0x7f){
 			printf("int_guild: illeagal guild name [%s]\n",name);
 			mapif_guild_created(fd,account_id,NULL);
 			return 0;

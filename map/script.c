@@ -69,6 +69,8 @@ static struct Script_Config {
 	int warn_cmd_no_comma;
 	int warn_func_mismatch_paramnum;
 	int warn_cmd_mismatch_paramnum;
+	int check_cmdcount;
+	int check_gotocount;
 } script_config;
 static int parse_cmd_if=0;
 static int parse_cmd;
@@ -1364,6 +1366,8 @@ int buildin_goto(struct script_state *st)
 
 	if( st->stack->stack_data[st->start+2].type!=C_POS ){
 		printf("script: goto: not label !\n");
+		st->state=END;
+		return 0;
 	}
 
 	pos=conv_num(st,& (st->stack->stack_data[st->start+2]));
@@ -1437,6 +1441,8 @@ int buildin_menu(struct script_state *st)
 			int pos;
 			if( st->stack->stack_data[st->start+sd->npc_menu*2+1].type!=C_POS ){
 				printf("script: menu: not label !\n");
+				st->state=END;
+				return 0;
 			}
 			pos=conv_num(st,& (st->stack->stack_data[st->start+sd->npc_menu*2+1]));
 			st->pos=pos;
@@ -4446,6 +4452,12 @@ int run_func(struct script_state *st)
 	st->end=end_sp;
 
 	func=st->stack->stack_data[st->start].u.num;
+	if( st->stack->stack_data[st->start].type!=C_NAME || str_data[func].type!=C_FUNC ){
+		printf("run_func: not function and command! \n");
+		st->stack->sp=0;
+		st->state=END;
+		return 0;
+	}
 #ifdef DEBUG_RUN
 	if(battle_config.etc_log) {
 		printf("run_func : %s? (%d(%d))\n",str_buf+str_data[func].str,func,str_data[func].type);
@@ -4494,6 +4506,8 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 	int c;
 	struct script_state st;
 	int rerun_pos;
+	int cmdcount=script_config.check_cmdcount;
+	int gotocount=script_config.check_gotocount;
 
 	if(script==NULL || pos<0)
 		return -1;
@@ -4541,6 +4555,10 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 			if(st.state==GOTO){
 				rerun_pos=st.pos;
 				st.state=0;
+				if( gotocount>0 && (--gotocount)<=0 ){
+					printf("run_script: infinity loop !\n");
+					st.state=END;
+				}
 			}
 			break;
 
@@ -4581,6 +4599,10 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 				printf("unknown command : %d @ %d\n",c,pos);
 			st.state=END;
 			break;
+		}
+		if( cmdcount>0 && (--cmdcount)<=0 ){
+			printf("run_script: infinity loop !\n");
+			st.state=END;
 		}
 	}
 	switch(st.state){
@@ -4770,6 +4792,8 @@ int script_config_read(char *cfgName)
 	script_config.warn_cmd_no_comma=1;
 	script_config.warn_func_mismatch_paramnum=1;
 	script_config.warn_cmd_mismatch_paramnum=1;
+	script_config.check_cmdcount=8192;
+	script_config.check_gotocount=512;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){

@@ -1,0 +1,1580 @@
+//Translated by yoshiki
+//Athena Conversion by RoVeRT
+//============== ウィザーズギルド：カトリーヌ・メディチ ===================
+//================== 登録、試験１（アイテム収集）など =====================
+gef_tower.gat,111,37,4	script	魔術師ギルド関係者	70,{
+
+// ---------------------------------------------------------------JOBの確認
+   	if (Class == 2) goto L_PART2;
+		if (Class == 9) goto L_IsWizard;
+		if (Class == 0) goto L_IsNovice;
+		goto L_IsOther;
+		L_IsWizard:
+			if (Sex != 1) goto L_IsFemale;
+				mes "[カトリーヌ]";
+				mes "同じウィザードの君は何か御用かしら？";
+				mes "用事がないなら帰ってね。";
+				next;
+				mes "[カトリーヌ]";
+				mes "もちろんデートのお誘いなら別だけどね";
+				mes "フフッ";
+				close;
+				end;
+			L_IsFemale:
+				mes "[カトリーヌ]";
+				mes "ウィザードが私たちに何か御用かしら？";
+				mes "用事がないなら帰ってね。";
+				next;
+				mes "[カトリーヌ]";
+				mes "ボーイフレンドが出来たら連れてきてね";
+				mes "フフッ";
+				close;
+				end;
+		L_IsNovice:
+			mes "[ギルド職員]";
+			mes "あらあら、小さなノービスさんね！";
+			mes "可愛い～！　でも、ここは";
+			mes "ウィザードの転職所なのよ～！";
+			next;
+			mes "[ギルド職員]";
+			mes "もし魔法に興味があったら";
+			mes "^0000FFマジシャンギルド^000000に行ってね。";
+			goto L_OtherJobBye;
+		L_IsOther:
+			mes "[ギルド職員]";
+			mes "うん？わざわざこんなところまで";
+			mes "何の御用かしら？";
+			mes "用がなければ帰ってね。";
+			mes "ここはウィザードの転職所なの。";
+	L_OtherJobBye:
+		next;
+		mes "[ギルド職員]";
+		mes "気をつけて降りてね！";
+		close;
+		end;
+// --------------------------------------------------------------------登録
+L_PART2:
+
+	if (job_wizard_q != 0) goto L_PART3;
+		mes "[ギルド職員]";
+		mes "あら、わざわざこんなところまで";
+		mes "何の御用かしら？";
+		mes "ウィザードになりにきたのよね？";
+		next;
+		menu "もちろん！",L_BeWiz,"なんでもないです",-;
+	
+			mes "[ギルド職員]";
+			mes "え、なんでもないの？";
+			close;
+			end;
+		
+	L_BeWiz:
+		mes "[ギルド職員]";
+		mes "まあそうよね。";
+		mes "理由がないのに来るわけないか。";
+		mes "私がガイドするからね！";
+		next;
+		mes "[ギルド職員]";
+		mes "私の名前はカトリーヌ・メディチよ。";
+		mes "私も初心者ウィザードなの。";
+		mes "気軽にカトリーヌって読んでね。";
+		next;
+		mes "[カトリーヌ]";
+		mes "ウィザードの希望者は多いんだけど、";
+		mes "試験に落ちる人も多いの。";
+		next;
+		mes "[カトリーヌ]";
+		mes "転職にはジョブレベルが40以上必要よ。";
+		mes "それ未満だと、まだ十分な魔力が";
+		mes "身についていないの。";
+		next;
+		mes "[カトリーヌ]";
+		mes "じゃあ、試験について教えるよ。";
+		mes "申し込む？";
+		next;
+		menu "はい,申し込みます",L_SignUp,"もうちょっと考えます",-;
+		
+			mes "[カトリーヌ]";
+			mes "OK、じゃあ、ゆっくり考えて。";
+			mes "いつでも受け付けてるからね。";
+			close;
+			end;
+		
+	L_SignUp:
+		if (JobLevel >= 40) goto L_SkPointChk;
+			mes "[カトリーヌ]";
+			mes "あら、言ったでしょう、";
+			mes "ジョブレベルが40以上は必要だって。";
+			mes "忘れてたのかな？";
+			next;
+			mes "[カトリーヌ]";
+			mes "急がなくていいから、";
+			mes "もっと勉強してきてね。";
+			mes "ジョブレベルが40になったら";
+			mes "受けさせてあげるからね。";
+			close;
+			end;
+	L_SkPointChk:
+		if (SkillPoint == 0) goto L_StartTest;
+			mes "[カトリーヌ]";
+			mes "転職条件はいいんだけど、";
+			mes "まだスキルポイントが残ってるみたいよ";
+			mes "全て使ってからまた申し込んでね。";
+			close;
+			end;
+	L_StartTest:
+		mes "[カトリーヌ]";
+		mes "OK、申込書は確かに受け取ったよ。";
+		mes "あなたの名前は " +strcharinfo(0) + "で合ってるよね？";
+		next;
+		mes "[カトリーヌ]";
+		mes "ウィザード転職試験は3段階よ。";
+		mes "１つめは魔法アイテム収集。";
+		mes "２つめは筆記試験。";
+		mes "３つめは実技試験よ。";
+		next;
+		mes "[カトリーヌ]";
+		mes "ジョブレベル50の人は最初の試験を";
+		mes "免除されるわ。";
+		mes "もう十分に努力してるからね。";
+		next;
+		
+		if (JobLevel < 50) goto L_Under50;
+			mes "[カトリーヌ]";
+			mes "わぁ、あなたジョブレベル50!?";
+			mes "努力したのね、感動したわ。";
+			next;
+			mes "[カトリーヌ]";
+			mes "OK、ジョブレベル50と記録しておくわ。";
+			mes "最初の試験は免除されるけど、";
+			mes "まだ２つ残ってるからね。";
+			next;
+			mes "[カトリーヌ]";
+			mes "じゃあ、隅にいるおじさんに話し掛けて";
+			mes "試験を受けてね。";
+			mes "かなり難しいから十分に注意してね。";
+			set job_wizard_q,3;
+			close;
+			end;
+					
+	L_Under50:
+		mes "[カトリーヌ]";
+		mes "じゃあ、申し込みは受け付けたから";
+		mes "最初の試験について教えるわよ。";
+		mes "よく覚えてね。";
+		next;
+		mes "[カトリーヌ]";
+		mes "最初のテストは魔法アイテム収集よ。";
+		mes "メモをとるとかして覚えて！";
+		next;
+
+		set @wizard_m1,rand(2);
+		mes "[カトリーヌ]";
+		mes "あなたが集めてくるアイテムは…";
+		if (@wizard_m1 == 1) goto L_OtherItems;
+			set job_wizard_q,1;
+			mes "レッドジェムストーン、10個";
+			mes "ブルージェムストーン、10個";
+			mes "イエロージェムストーン、10個";
+			goto L_AfterItems;
+		L_OtherItems:
+			set job_wizard_q,2;
+			mes "クリスタルブルー、5個";
+			mes "イエローライブ、5個";
+			mes "レッドブラッド、5個";
+			mes "ウィンドオブヴェルデュール、5個";
+	L_AfterItems:
+		mes "そんなに難しくないわよね？";
+		next;
+		mes "[カトリーヌ]";
+		mes "じゃあ、いってきて！";
+		mes "ここで待ってるから。";
+		close;
+		end;
+//----------------------------------------------------------試験１(ジェム)
+L_PART3:
+	if (job_wizard_q != 1) goto L_PART4;
+		mes "[カトリーヌ]";
+		mes "アイテム全部もってきたの？";
+		mes "じゃあ見せて…";
+		next;
+		if ((countitem("Red_Gemstone") < 10) || (countitem("Blue_Gemstone") < 10) || (countitem("Yellow_Gemstone") < 10)) goto L_ShortItem1;
+			mes "[カトリーヌ]";
+			mes "バッチリね！よく手に入れたわ！";
+			mes "これらはギルドで有効に使うからね。";
+			next;
+			delitem "Red_Gemstone",10;
+			delitem "Blue_Gemstone",10;
+			delitem "Yellow_Gemstone",10;
+			set job_wizard_q,3;
+			mes "[カトリーヌ]";
+			mes "おめでとう、最初の試験は合格よ。";
+			mes "でも気を緩めるのは早いわよ！";
+			mes "まだ２つ残ってるんだからね！";
+			next;
+			mes "じゃあ、隅にいるおじさんに話し掛けて";
+			mes "試験を受けてね。";
+			mes "かなり難しいから十分に注意してね。";
+			close;
+			end;
+	L_ShortItem1:
+		mes "[カトリーヌ]";
+		mes "まだ揃ってないみたいね。";
+		next;
+		mes "[カトリーヌ]";
+		mes "上がってくるのは大変だったと思うけど";
+		mes "残りのアイテムを集めてきてね！";
+		next;
+		mes "[カトリーヌ]";
+		mes "レッドジェムストーン、10個";
+		mes "ブルージェムストーン、10個";
+		mes "イエロージェムストーン、10個";
+		mes "ちゃんと覚えて全部持ってきてね！";
+		close;
+		end;
+//--------------------------------------------------------試験１(属性原石)
+L_PART4:
+	if (job_wizard_q != 2) goto L_PART5;
+		mes "[カトリーヌ]";
+		mes "アイテム全部もってきたの？";
+		mes "じゃあ見せて…";
+		next;
+		if ((countitem("Crystal_Blue") < 5) || (countitem("Yellow_Live") < 5) || (countitem("Bloody_Red") < 5) && (countitem("Wind_Of_verdure") < 5)) goto L_ShortItem2;
+			mes "[カトリーヌ]";
+			mes "バッチリね！よく手に入れたわ！";
+			mes "これらはギルドで有効に使うからね。";
+			next;
+			delitem "Crystal_Blue",5;
+			delitem "Yellow_Live",5;
+			delitem "Bloody_Red",5;
+			delitem "Wind_Of_verdure",5;
+			set job_wizard_q,3;
+			mes "[カトリーヌ]";
+			mes "おめでとう、最初の試験は合格よ。";
+			mes "でも気を緩めるのは早いわよ！";
+			mes "まだ２つ残ってるんだからね！";
+			next;
+			mes "じゃあ、隅にいるおじさんに話し掛けて";
+			mes "試験を受けてね。";
+			mes "かなり難しいから十分に注意してね。";
+			close;
+			end;
+	L_ShortItem2:
+		mes "[カトリーヌ]";
+		mes "まだ揃ってないみたいね。";
+		next;
+		mes "[カトリーヌ]";
+		mes "上がってくるのは大変だったと思うけど";
+		mes "残りのアイテムを集めてきてね！";
+		next;
+		mes "[カトリーヌ]";
+		mes "クリスタルブルー、5個";
+		mes "イエローライブ、5個";
+		mes "レッドブラッド、5個";
+		mes "ウィンドオブヴェルデュール、5個";
+		mes "ちゃんと覚えて全部持ってきてね！";
+		close;
+		end;
+
+//--------------------------------------------------------------試験２の前
+L_PART5:
+	if (job_wizard_q != 3) goto L_PART6;
+		mes "[カトリーヌ]";
+		mes "あら？おじさんには会った？";
+		mes "アイテムを取ってきただけじゃあ";
+		mes "ウィザードにはなれないよ。";
+		next;
+		mes "[カトリーヌ]";
+		mes "まだ２つの試験が残ってるわよ。";
+		mes "待ってるから早く受けてきてね。";
+		close;
+		end;
+
+//--------------------------------------------------------------試験２失敗
+L_PART6:
+	if (job_wizard_q != 4) goto L_PART7;
+		mes "[カトリーヌ]";
+		mes "ええ！？試験に落ちちゃったの！？";
+		mes "ウィザードになりたいのなら、";
+		mes "あのくらいは通らないとだめよ。";
+		next;
+		mes "[カトリーヌ]";
+		mes "うーん、先輩の私がヒントを";
+		mes "あげようか？　のどが渇いたから、";
+		mes "代わりにリンゴジュースを頂戴。";
+		next;
+		menu "ヒントを下さい",L_YesHint, "一人で解いて見せます！",-;
+
+			mes "[カトリーヌ]";
+			mes "その意気よ！　ウィザードなら";
+			mes "やっぱり一人で解かなくちゃね！";
+			goto L_ContHint;
+
+		L_YesHint:
+			if (countitem("Apple_Juice") < 1) goto L_HaveJuice;
+				mes "[カトリーヌ]";
+				mes "ヒントが欲しいなら、リンゴジュースを";
+				mes "持ってきてね！";
+				mes "無いなら一人で考えて。";
+				goto L_ContHint;
+		L_HaveJuice:
+			delitem "Apple_Juice",1;
+			mes "カトリーヌ";
+			mes "ああおいしい、リンゴジュースは";
+			mes "最高ね。ズズーッ";
+			next;
+			mes "[カトリーヌ]";
+			mes "じゃあヒントを教えるよ。";
+			next;
+			mes "[カトリーヌ]";
+			mes "おじさんの出す問題は大きく分けて";
+			mes "３種類。魔法に関する問題、";
+			mes "モンスターに関する問題、そして";
+			mes "マジシャンに関する問題よ。";
+			next;
+			mes "[カトリーヌ]";
+			mes "どの問題が出題されるかはおじさんの";
+			mes "気分次第。おじさんもちゃんと髭を";
+			mes "剃って髪を切ればすれば素敵なのに。";
+			mes "絶対にしないでしょうけど…。";
+			next;
+			mes "[カトリーヌ]";
+			mes "[Cartlin]";
+			mes "えーと、魔法に関する問題は、";
+			mes "君が覚えた魔法にかかわることよ。";
+			next;
+			mes "[カトリーヌ]";
+			mes "たぶん、君が覚えてない魔法に関する";
+			mes "問題も出題されるわ。それらは";
+			mes "他のマジシャンに訊いてみて。";
+			next;
+			mes "[カトリーヌ]";
+			mes "呪文を唱えると調べられるらしいわ。";
+			mes "その呪文は… www.ragnarokonline.jp";
+			mes "ちょっと変わってるわよね。";
+			mes "どうするのか私にはよくわからないわ。";
+			mes "もっといい呪文もたくさんあるそうよ。";
+			next;
+			mes "[カトリーヌ]";
+			mes "モンスターに関する問題は、";
+			mes "直接戦ってみて経験で知るのが";
+			mes "一番いいけど、";
+			next;
+			mes "[カトリーヌ]";
+			mes "プロンテラに大きな図書館がある";
+			mes "でしょ？";
+			mes "そこにはたくさんの情報があるわ。";
+			mes "そこで勉強するのもいい方法ね。";
+			next;
+			mes "[カトリーヌ]";
+			mes "で、最後にマジシャンに関する問題。";
+			mes "これは誰も教えてくれないでしょうね…";
+			mes "だって君がマジシャンだからね。";
+			next;
+			mes "[カトリーヌ]";
+			mes "人は自分自身もよくわからないんだから";
+			mes "他人が君のことを知るのは難しい";
+			mes "でしょ。";
+	L_ContHint:
+		next;
+		mes "[カトリーヌ]";
+		mes "それじゃあ頑張って！";
+		mes "試験官のおじさんが待ってるよ！";
+		close;
+		end;
+
+//--------------------------------------------------------------試験２成功
+L_PART7:
+	if (job_wizard_q != 5) goto L_PART8;
+		mes "[カトリーヌ]";
+		mes "フフ、ここで聞いてたよ。";
+		mes "よく頑張ったね。";
+		next;
+		mes "[カトリーヌ]";
+		mes "まだ最後の試験が残ってるわ！";
+		mes "それを終わらせれば、";
+		mes "ウィザードになれるわよ！";
+		next;
+		mes "[カトリーヌ]";
+		mes "頑張って！";
+		mes "試験官のおじさんが待ってるよ！";
+		close;
+		end;
+
+//--------------------------------------------------------------試験３失敗
+L_PART8:
+	if (job_wizard_q != 6) goto L_PART9;
+		mes "[カトリーヌ]";
+		mes "テストを途中でやめちゃったの？";
+		mes "そんなに弱い人とは思って無かったよ。";
+		next;
+		if (Sex != 1) goto L_IsFemale9;
+			mes "[カトリーヌ]";
+			mes "いくら力のないマジシャンだからって";
+			mes "そんなに簡単にやられてどうするの！";
+			mes "もう一度行ってきなさい。";
+			goto L_Continue9;
+		L_IsFemale9:
+			mes "[カトリーヌ]";
+			mes "女だからって弱いふりしてちゃだめよ！";
+			mes "ウィザードになるんでしょう？";
+			next;
+			mes "[カトリーヌ]";
+			mes "私もすごく難しいと思ったけど、";
+			mes "あきらめるほどじゃなかったわよ！";
+			mes "困難にもちゃんと立ち向かって！";
+	L_Continue9:
+		next;
+		mes "[カトリーヌ]";
+		mes "頑張って！";
+		mes "試験官のおじさんが待ってるよ！";
+		close;
+
+//--------------------------------------------------------------試験３成功
+L_PART9:
+	if (job_wizard_q != 7) goto L_QuitScript;
+		if (SkillPoint == 0) goto L_NoSkPoints;
+			mes "[カトリーヌ]";
+			mes "試験は終わったのね？";
+			mes "うーん、でも、まだスキルポイントが";
+			mes "残っているわよ。";
+			mes "使い切ってからまた来てね！";
+			close;
+			end;
+	L_NoSkPoints:
+		mes "[カトリーヌ]";
+		mes "すごいわ！試験終了よ！";
+		mes "おめでとう、おめでとう、おめでとう！";
+		next;
+		mes "[カトリーヌ]";
+		mes "っと、そんなことより、";
+		mes "早く転職させてあげないとね！";
+		next;
+		set job_wizard_q,0;
+		jobchange Job_Wizard;
+		mes "[カトリーヌ]";
+		mes "もう君はウィザードよ！";
+		mes "ウィザードらしく振舞ってね！";
+		mes "私たちは強力な魔法を持ってるから、";
+		mes "使うときは気をつけないといけないの。";
+		next;
+		mes "[カトリーヌ]";
+		mes "街でいたずらに魔法を乱射しちゃだめ。";
+		mes "ラグの原因になるし、";
+		mes "魔法はモンスターに使うものだからね。";
+		next;
+		mes "[カトリーヌ]";
+		mes "他の人とパーティを組みながら";
+		mes "成長していってね。";
+		mes "ああ、それと、これはプレゼントよ！";
+		next;
+		mes "[カトリーヌ]";
+		mes "ごそごそ・・・";
+		mes "ごそごそ・・・";
+		next;
+		getitem "Blue_Potion",6;
+		mes "[カトリーヌ]";
+		mes "うまく使ってね！";
+		mes "私からのプレゼントなんだから、";
+		mes "ちゃんと全部飲んでよね！";
+		next;
+		mes "じゃあ、ウィザードとして";
+		mes "素敵に生きていってね";
+		close;
+L_QuitScript:
+	close;
+}
+
+//================= 試験官：ラウル・エクスパガラス ========================
+//=============== ミッション１、ミッション２、アリーナへ ==================
+gef_tower.gat,102,24,2	script	陰気なウィザード	735,{
+// ---------------------------------------------------------------JOBの確認
+   	if (Class == 2) goto L_PART2;
+		if (Class == 9) goto L_IsWizard;
+		if (Class == 8) goto L_IsPriest;
+		if (Class == 0) goto L_IsNovice;
+		
+		mes "[ラウル]";
+		mes "あぁ、全身が苦しい…";
+		mes "まるで氷の中にいるようだ…";
+		next;
+		mes "[ラウル]";
+		mes "何だお前は？あっちに行ってくれ。";
+		close;
+		end;
+	L_IsWizard:
+		mes "[ラウル]";
+		mes "ゴホッゴホッ、俺に何のようだ？";
+		mes "ふむ、お前も魔法を使うようだな。";
+		next;
+		mes "[ラウル]";
+		mes "遊んでばかりいると、";
+		mes "いずれ魔法を制御できなくなるだろう。";
+		if (Sex != 1) goto L_IsFemale;
+			mes "そうなりたくなければ、";
+			mes "もっと正しい使い方を学んで";
+			mes "おくんだな。";
+			next;
+			mes "[ラウル]";
+			mes "女なんかに気をとられてると、";
+			mes "いずれ廃人になるだろうな。クク。";
+			close;
+			end;
+		L_IsFemale:
+			mes "全力で学ぶんだな。それがいやなら";
+			mes "ウィザードなんてやめちまえ。";
+			next;
+			mes "[ラウル]";
+			mes "そんなに勉強したくないなら、";
+			mes "主婦でもなれ。";
+			close;
+			end;
+		
+	L_IsPriest:
+		mes "[ラウル]";
+		mes "失せろ、聖職者め！";
+		mes "魔法は神の力なんかじゃない。";
+		next;
+		mes "[ラウル]";
+		mes "そうでなくても、俺は気分がよくない。";
+		mes "さっさと失せろ！";
+		close;
+		end;
+	L_IsNovice:
+		mes "[ラウル]";
+		mes "なんでガキがこんなところにいるんだ？";
+		mes "とっとと失せろ！";
+		close;
+		warp "geffen.gat",120,110;
+
+//-------------------------------------------------------------------未登録
+L_PART2:
+	if (job_wizard_q != 0) goto L_PART3;
+		mes "[ラウル]";
+		mes "ゴホッ、誰だが知らんが、";
+		mes "お前に付き合ってる時間は無い。";
+		next;
+		mes "[ラウル]";
+		mes "あっちへいけ。";
+		close;
+		end;
+
+//-------------------------------------------------------------試験１の途中
+L_PART3:
+	if (job_wizard_q != 1 && job_wizard_q != 2) goto L_PART4;
+		mes "[ラウル]";
+		mes "フン！お前がウィザードになりに";
+		mes "来た奴か？ええ？";
+		next;
+		mes "[ラウル]";
+		mes "マジシャンのままで、こつこつと";
+		mes "生活したほうがいいぞ？";
+		next;
+		mes "[ラウル]";
+		mes "ウィザードはもっと高尚な職業だ。";
+		close;
+		end;
+
+//---------------------------------------------------------------試験２開始
+L_PART4:
+	if (job_wizard_q != 3) goto L_PART5;
+		set @wizard_r,0;
+		mes "[ラウル]";
+		mes "最初の試験に合格したようだな。";
+		mes "そう、俺が試験官のラウル・エクスパガラス様だ。";
+		next;
+		mes "[ラウル]";
+		mes "まだ遅くないぞ？  故郷に帰って";
+		mes "平和な生活を送ったらどうだ？";
+		next;
+		mes "[ラウル]";
+		mes "お前はまだ理解していないのだな。";
+		mes "魔法がどんなに危険なものなのか。";
+		next;
+		menu "平凡なのマジシャンとして生きます",-,"転職試験を続けます",L_BeWiz;
+
+			mes "[ラウル]";
+			mes "賢明な判断だな。ゴホッゴホッ";
+			mes "ウィザードは難しい職業だ。";
+			mes "魔法は本来人間が使うものではないの";
+			mes "だから。";
+			next;
+			mes "[ラウル]";
+			mes "塔を降りろ。そして振り返るな。";
+			mes "今使える魔法を使って";
+			mes "平和に生きることだ。";
+			close;
+			end;
+	L_BeWiz:
+		mes "[ラウル]";
+		mes "ハハハ、ここに馬鹿がいるぞ！";
+		mes "お前がどれだけできるか見せて貰おう。";
+		next;
+//-----------------------------------------------------------------筆記試験
+	L_M2Start:
+	mes "[ラウル]";
+	mes "それでは試験を開始しよう！";
+	mes "１つでも間違えれば脱落だからな！";
+	next;
+	mes "[ラウル]";
+	mes "10問だすから全て正解して見せろ！";
+	mes "間違えても何を間違えたかは";
+	mes "教えてやらんからな。";
+	next;
+	set @wizard_m2,rand(3);
+	set @wizard_t,0;
+	mes "[ラウル]";
+	mes "ゴホッ、それでは問題だ！";
+	next;
+
+//	-----------------筆記試験：魔法問題----------------
+	if (@wizard_m2 != 0) goto L_M2_P2_Q1;
+	L_M2_Q1:
+		mes "[ラウル]";
+		mes "1. ファイヤーウォールの";
+		mes "所得条件では無いものは？";
+		next;
+		menu "ファイヤーボルト Lv 4",L_M2_Q2, "ファイヤーボール Lv 5",L_M2_Q2, "サイト Lv 1",L_M2_Q2, "ナパームビート Lv 4",-;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_Q2:
+		mes "[ラウル]";
+		mes "2. フロストダイバで凍らせた";
+		mes "敵の属性はどうなる？";
+		next;
+		menu "水属性になる",-, "地属性になる",L_M2_Q3, "火属性になる",L_M2_Q3, "風属性になる",L_M2_Q3;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_Q3:
+		mes "[ラウル]";
+		mes "3. ナパームビートをマスターすると";
+		mes "ダメージはMATKの何倍になる？";
+		next;
+		menu "1.6倍",L_M2_Q4, "1.7倍",-, "2倍",L_M2_Q4, "20倍",L_M2_Q4;
+		set @wizard_t,@wizard_t + 10;
+	M2_Q4:
+		mes "[ラウル]";
+		mes "4. ストーンカースに必要なものは？";
+		next;
+		menu "レッドブラッド",M2_Q5, "ブルージェムストーン",M2_Q5, "イエロージェムストーン",M2_Q5, "レッドジェムストーン",-;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_Q5:
+		mes "[ラウル]";
+		mes "5. セイフティウォールをマスター";
+		mes "するために必要ではないものは？";
+		next;
+		menu "ナパームビート Lv 4",L_M2_Q6, "ソウルストライク Lv 5",L_M2_Q6, "SP回復力向上 Lv. 6",-, "セイフティウォール Lv 7",L_M2_Q6;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_Q6:
+		mes "[ラウル]";
+		mes "6. SP回復力向上Lv 7のとき、";
+		mes "10秒間に回復するint加重値なしの";
+		mes "SP回復量は？";
+		next;
+		menu "14",L_M2_Q7, "21",-, "28",L_M2_Q7, "35",L_M2_Q7;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_Q7:
+		mes "[ラウル]";
+		mes "7. SPが50%残っている場合、";
+		mes "エネルギーコートのダメージ減少量と";
+		mes "SP消費量は？";
+		next;
+		menu "ダメージ18% SP1.5%",L_M2_Q8, "ダメージ18% SP2%",-, "ダメージ24% SP1.5%",L_M2_Q8, "ダメージ24% SP2%",L_M2_Q8;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_Q8:
+		mes "[ラウル]";
+		mes "8. セイフティウォールLv6の使用SPと";
+		mes "防御回数は？";
+		next;
+		menu "SP 40, 6回",L_M2_Q9, "SP 35, 6回",L_M2_Q9, "SP 40, 7回",-, "SP 35, 7回",L_M2_Q9;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_Q9:
+		mes "[ラウル]";
+		mes "9. サンダーストームLv10の";
+		mes "SP消費量は？";
+		next;
+		menu "84",L_M2_Q10, "74",-, "64",L_M2_Q10, "54",L_M2_Q10;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_Q10:
+		mes "[ラウル]";
+		mes "10. イズルードダンジョンで效果的な";
+		mes "スキルはどれか？";
+		next;
+		menu "ライトニングボルト",-, "ファイヤーボルド",M2_End, "コールドボルト",M2_End, "サイト",M2_End;
+		set @wizard_t,@wizard_t + 10;
+		goto L_M2_End;
+//	-----------------筆記試験：モンスター問題----------------
+	L_M2_P2_Q1:
+	if (@wizard_m2 != 1) goto L_M2_P3_Q1;
+		mes "[ラウル]";
+		mes "1. スロット付きガードを落とすのは？";
+		next;
+		menu "盗蟲",L_M2_P2_Q2, "ペコペコ",L_M2_P2_Q2, "プパ",-, "鈍器コボルド",L_M2_P2_Q2;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P2_Q2:
+		mes "[ラウル]";
+		mes "2. 次のうちマジシャンが一番";
+		mes "倒しやすいモンスターは？";
+		next;
+		menu "フローラ",-, "ガイアス",L_M2_P2_Q3, "ゴーレム",L_M2_P2_Q3, "ミスト",L_M2_P2_Q3;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P2_Q3:
+		mes "[ラウル]";
+		mes "3. ストーンカースが全く通じない";
+		mes "モンスターは？";
+		next;
+		menu "エルダーウィロー",L_M2_P2_Q4, "イービルドルイド",-, "白蓮玉",L_M2_P2_Q4, "マルク",L_M2_P2_Q4;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P2_Q4:
+		mes "[ラウル]";
+		mes "風属性で水属性Lv.3モンスターを";
+		mes "攻撃する場合のダメージ補正は？";
+		next;
+		menu "125%",L_M2_P2_Q5, "150%",L_M2_P2_Q5, "175%",L_M2_P2_Q5, "200%",-;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P2_Q5:
+		mes "[ラウル]";
+		mes "5. 子デザートウルフと";
+		mes "ファーミリアが闘ったら、";
+		mes "どちらが勝つか？";
+		next;
+		menu "子デザートウルフ",-, "ファミリア",L_M2_P2_Q6, "引き分け",L_M2_P2_Q6, "わからない",L_M2_P2_Q6;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P2_Q6:
+		mes "[ラウル]";
+		mes "6. ペットに出来ないモンスターは？";
+		next;
+		menu "ポポリン",L_M2_P2_Q7, "ロッダフロッグ",-, "スモーキー",L_M2_P2_Q7, "ポイズンスポア",L_M2_P2_Q7;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P2_Q7:
+		mes "[ラウル]";
+		mes "7. 火に弱いモンスターは？.";
+		next;
+		menu "短剣ゴブリン",L_M2_P2_Q8, "鈍器ゴブリン",L_M2_P2_Q8, "鉄鎖ゴブリン",L_M2_P2_Q8, "斧ゴブリン",-;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P2_Q8:
+		mes "[ラウル]";
+		mes "8. 次のうち最も魔法防御力が";
+		mes "高いモンスターは？";
+		next;
+		menu "ホロン",L_M2_P2_Q9, "チョンチョン",L_M2_P2_Q9, "アンドレ",L_M2_P2_Q9, "キャラメル",-;
+			set @wizard_t,@wizard_t + 10;
+	L_M2_P2_Q9:
+		mes "[ラウル]";
+		mes "9. 種族の違うモンスターは？";
+		next;
+		menu "ポリン",L_M2_P2_Q10, "マスターリング",L_M2_P2_Q10, "ゴーストリング",-, "スポア",L_M2_P2_Q10;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P2_Q10:
+		mes "[ラウル]";
+		mes "10. アンデッドではないのは？";
+		next;
+		menu "ドレイク",L_M2_End, "メガロドン",L_M2_End, "デビアス",-, "カーリッツバーグ",L_M2_End;
+		set @wizard_t,@wizard_t + 10;
+		goto L_M2_End;
+
+//	-----------------筆記試験：マジシャン問題----------------
+	L_M2_P3_Q1:
+		mes "[ラウル]";
+		mes "1. マジシャンに一番重要な";
+		mes "ステータスは？";
+		next;
+		menu "INT",-, "AGI",L_M2_P3_Q2, "DEX",L_M2_P3_Q2, "VIT",L_M2_P3_Q2;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P3_Q2:
+		mes "[ラウル]";
+		mes "2. ボルト系魔法で抜けている属性は？";
+		next;
+		menu "水属性",L_M2_P3_Q3, "地属性",-, "火属性",L_M2_P3_Q3, "風属性",L_M2_P3_Q3;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P3_Q3:
+		mes "[ラウル]";
+		mes "3. マジシャンの特徴でないものは？";
+		next;
+		menu "体力が低い",L_M2_P3_Q4, "遠距離攻撃する",L_M2_P3_Q4, "お金儲けしやすい",-, "魔法防御力が高い",L_M2_P3_Q4;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P3_Q4:
+		mes "[ラウル]";
+		mes "4. マジシャンが一番多い街は？";
+		next;
+		menu "プロンテラ",L_M2_P3_Q5, "モロク",L_M2_P3_Q5, "アルベルタ",L_M2_P3_Q5, "ゲフェン",-;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P3_Q5:
+		mes "[ラウル]";
+		mes "5. INTと関係ないカードは？";
+		next;
+		menu "アンドレの幼虫カード",L_M2_P3_Q6, "兵隊アンドレカード",-, "子デザートウルフカード",L_M2_P3_Q6, "エルダーウィローカード",L_M2_P3_Q6;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P3_Q6:
+		mes "[ラウル]";
+		mes "6. マジシャンが他の職業に比べて";
+		mes "優れている点は？";
+		next;
+		menu "近接戦闘能力",L_M2_P3_Q7, "回避能力",L_M2_P3_Q7, "ダンス能力",L_M2_P3_Q7, "魔法力",-;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P3_Q7:
+		mes "[ラウル]";
+		mes "7. ジョブレベル40での";
+		mes "INTボーナスは？";
+		next;
+		menu "8",L_M2_P3_Q8, "7",L_M2_P3_Q, "6",L_M2_P3_Q, "5",-;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P3_Q8:
+		mes "[ラウル]";
+		mes "8. マジシャンが装備できないのは？";
+		next;
+		menu "ナイフ",L_M2_P3_Q9, "キャップ",-, "サンダル",L_M2_P3_Q9, "デュラハンアイ",L_M2_P3_Q9;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P3_Q9:
+		mes "[ラウル]";
+		mes "9. マジシャン転職試験で、";
+		mes "混合液3号の触媒になる鉱石は？";
+		next;
+		menu "イエロージェムストーン",-, "レッドジェムストーン",L_M2_P3_Q10, "ブルージェムストーン",L_M2_P3_Q10, "レッドブラッド",L_M2_P3_Q10;
+		set @wizard_t,@wizard_t + 10;
+	L_M2_P3_Q10:
+		mes "[ラウル]";
+		mes "10. 魔法と関係ないカードは？";
+		next;
+		menu "マルドゥークカード",L_M2_End, "白蓮玉カード",-, "ウィローカード",L_M2_End, "マヤカード",L_M2_End;
+		set @wizard_t,@wizard_t + 10;
+// ------------------試験終了--------------
+	L_M2_End:
+		mes "[ラウル]";
+		mes "ごくろう。金があるなら、";
+		mes "あとでポーションでも飲んでおけ。";
+		next;
+		mes "[ラウル]";
+		mes "おまえの得点は… " + @wizard_t + "点！";
+		if (@wizard_t < 100) goto L_Got90;
+			set job_wizard_q,5;
+			mes "上出来だ。筆記試験合格。";
+			if(@wizard_r) mes "一回で合格できなかったが、";
+			if(@wizard_r) mes "それは大目に見てやろう。";
+			next;
+			mes "[ラウル]";
+			mes "だがこれで安心するな。";
+			mes "まだ最後の試験が残っているぞ。";
+			mes "試験の準備をする間、";
+			mes "座って休んでいるがいい。";
+			close;
+	L_Got90:
+		if (@wizard_t < 90) goto L_Failed;
+			set job_wizard_q,5;
+			mes "ふむ、１問だけ間違えてるな。";
+			mes "だが見なかったことにしてやろう。";
+			if(@wizard_r) mes "一回で合格できなかったが、";
+			if(@wizard_r) mes "それも大目に見てやろう。";
+			next;
+			mes "[ラウル]";
+			mes "だがこれで安心するな。";
+			mes "まだ最後の試験が残っているぞ。";
+			mes "試験の準備をする間、";
+			mes "座って休んでいるがいい。";
+			close;
+	L_Failed:
+		set job_wizard_q,4;
+		mes "不合格だ。もっと勉強して来い。";
+		next;
+		mes "[ラウル]";
+		mes "まだまだ道は遠いな。";
+		mes "そんな低脳ではウィザードになっても";
+		mes "生き残れないだろうさ。";
+		close;
+		end;
+
+//-------------------------------------------------------------------再挑戦
+L_PART5:
+	if (job_wizard_q != 4) goto L_PART6;
+		mes "[ラウル]";
+		mes "なんだ？再挑戦するのか？";
+		next;
+		mes "[ラウル]";
+		mes "そんなに平和な生活が嫌いなのか？";
+		mes "もう一度俺がその機会を与えてやろう。";
+		next;
+		mes "[ラウル]";
+		mes "一つでも間違えれば諦める事だ。";
+		mes "それは素質が無いということだからな。";
+		next;
+		menu "平和に生きます。",-, "転職試験を続けます。",L_TryYes;
+
+			mes "[ラウル]";
+			mes "賢明な判断だな。ゴホッゴホッ";
+			mes "ウィザードは難しい職業だ。";
+			mes "魔法は本来人間が使うものではないの";
+			mes "だから。";
+			next;
+			mes "[ラウル]";
+			mes "塔を降りろ。そして振り返るな。";
+			mes "今使える魔法を使って";
+			mes "平和に生きることだ。";
+			close;
+			end;
+		L_TryYes:
+			mes "[ラウル]";
+			mes "ハハハ、ここに馬鹿がいるぞ！";
+			mes "お前がどれだけできるか見せて貰おう。";
+			next;
+			set @wizard_r,1;
+			goto L_M2Start;
+
+//-----------------------------------------------------------------最終試験
+L_PART6:
+	if (job_wizard_q != 5) goto L_PART7;
+		mes "[ラウル]";
+		mes "十分に休んだな？";
+		mes "じゃあ最後の試験を始めよう。";
+		next;
+		mes "[ラウル]";
+		mes "試験についての簡単な説明を聞くか？";
+		mes "まあ聞いても難しいことには変わりは";
+		mes "ないが。";
+		next;
+		menu "いえ、いいです。",-, "聞いてみます。",L_YesHear;
+			mes "[ラウル]";
+			mes "無謀な奴だな。まあ行って来い！";
+			mes "死んでも死体は片付けんからな。";
+			next;
+			set job_wizard_q,6;
+			savepoint "geffen.gat",120,107;
+			mes "[ラウル]";
+			mes "では願いどおり、すぐに送ってやろう。";
+			mes "好きなように暴れまわって来い！";
+			next;
+			warp "job_wiz.gat",57,154;
+			end;
+	L_YesHear:
+		mes "[ラウル]";
+		mes "マジメな奴だな。よし、説明しよう。";
+		mes "いくら難しくても、言われた通りに";
+		mes "すれば受かることができる。";
+		next;
+		mes "[ラウル]";
+		mes "試験は３段階にわけられている。";
+		mes "水の部屋、地の部屋、火の部屋という";
+		mes "順に進んでいく。";
+		next;
+		mes "[ラウル]";
+		mes "それぞれの部屋ではその部屋の属性の";
+		mes "モンスターが登場する。";
+		mes "属性に合った魔法を使えば、難なく";
+		mes "倒すことができるだろう。";
+		next;
+		mes "[ラウル]";
+		mes "制限時間以内に全てのモンスターを倒し";
+		mes "門番モンスターを倒せば、次の部屋に";
+		mes "行くことが出来る。";
+		next;
+		mes "[ラウル]";
+		mes "出口を出れば試験は終了だ。";
+		mes "成功したら魔法のマスターである";
+		mes "ウィザードにしてやろう。";
+		next;
+		mes "[ラウル]";
+		mes "恐ろしいという顔だな？";
+		mes "まだ遅くは無い。";
+		mes "今諦めれば故郷に返してやるぞ？";
+		next;
+		menu "試験を受けます。",-, "恐ろしいので帰ります。",L_Scared;
+			set job_wizard_q,6;
+			savepoint "geffen.gat",120,107;
+			mes "[ラウル]";
+			mes "勇敢な奴だな。";
+			mes "願い道理始めてやる！";
+			next;
+			warp "job_wiz.gat",57,154;
+			end;
+	L_Scared:
+		set job_wizard_q,6;
+		mes "[ラウル]";
+		mes "賢い判断だ。";
+		mes "お前にはそっちのほうがあっている。";
+		mes "平和に静かに暮らすがよい！";
+		next;
+		warp "geffen.gat",120,110;
+		end;
+//-----------------------------------------------------------最終試験再試験
+L_PART7:
+	if (job_wizard_q != 6) goto L_PART8;
+		set @wizard_t,0;
+		mes "[ラウル]";
+		mes "また試験を受けたいのか？";
+		mes "そんなに魔法がすきなのか？";
+		next;
+		mes "[ラウル]";
+		mes "お前は失敗したから、筆記試験も行う。";
+		mes "嫌なら最終試験は受けさせん。";
+		next;
+		mes "[ラウル]";
+		mes "さあ、始めるぞ。ククッ";
+		next;
+/////Waste of Time Test
+		mes "[ラウル]";
+		mes "1. 存在しないモンスターは？";
+		next;
+		menu "マンティス",L_M3_Q2, "ギザミベラ",-, "ガイアス",L_M3_Q2, "キャラメル",L_M3_Q2;
+		set @wizard_t,@wizard_t + 20;
+	L_M3_Q2:
+		mes "[ラウル]";
+		mes "2. 動物種族ではないモンスターは？";
+		next;
+		menu "ヨーヨー",L_M3_Q3, "ビッグフット",L_M3_Q3, "メタルラ",L_M3_Q3, "ゼロム",-;
+		set @wizard_t,@wizard_t + 20;
+	L_M3_Q3:
+		mes "[ラウル]";
+		mes "3. 詠唱反応でないモンスターは？";
+		next;
+		menu "マリナ",-, "ビタタ",L_M3_Q4, "スコーピオン",L_M3_Q4, "ガイアス",L_M3_Q4;
+		set @wizard_t,@wizard_t + 20;
+	L_M3_Q4:
+		mes "[ラウル]";
+		mes "4. マリンスフィアに使うなら、";
+		mes "どの魔法が一番良い？";
+		next;
+		menu "コールドボルト",L_M3_Q5, "ファイヤーボルト",L_M3_Q5, "ライトニングボルト",-, "ストーンカース",L_M3_Q5;
+		set @wizard_t,@wizard_t + 20;
+	L_M3_Q5:
+		mes "[ラウル]";
+		mes "5. 移動できるモンスターは？";
+		next;
+		menu "ヒドラ",L_M3_Q6, "マンドラゴラ",L_M3_Q6, "天下大将軍",L_M3_Q6, "フリルドラ",-;
+		set @wizard_t,@wizard_t + 20;
+	L_M3_Q6:
+		mes "[ラウル]";
+		mes "正解していれば、もう筆記試験は";
+		mes "行わない。";
+		next;
+		mes "[ラウル]";
+		mes "お前の得点は" + @wizard_t + "点だ。";
+		if (@wizard_t < 100) goto L_Got80;
+			mes "そんなに賢いのに何故試験に落ちた？";
+			next;
+			goto L_Retry3;
+	L_Got80:
+		if (@wizard_t < 80) goto L_Failed2;
+			mes "ククッ、だいたい合ってるな。";
+			mes "最終試験の再挑戦を許可しよう。";
+			goto L_Retry3;
+			next;
+	L_Failed2:
+		mes "不合格だ！もっと勉強して来い！";
+		next;
+		mes "[ラウル]";
+		mes "お前はウィザードには向かないな。";
+		mes "不合格になる理由を考えたか？";
+		close;
+		end;
+	L_Retry3:
+		menu "始めてください！",-, "もう一度試験の説明をして下さい.",L_Explain3R;
+			mes "[ラウル]";
+			mes "今度は死んでも助けてやらんからな。";
+			mes "また不合格になっても私に泣きついて";
+			mes "くるんじゃないぞ。ククッ";
+			next;
+			percentheal 100,100;
+			mes "[ラウル]";
+			mes "最終試験場に送ろう。";
+			mes "好きなように暴れて来い！";
+			next;
+			warp "job_wiz.gat",57,154;
+			end;
+	L_Explain3R:
+		mes "[ラウル]";
+		mes "ゴホッ、では説明しよう。";
+		mes "いくら難しくても、言われた通りに";
+		mes "すれば受かることができる。";
+		next;
+		mes "[ラウル]";
+		mes "試験は３段階にわけられている。";
+		mes "水の部屋、地の部屋、火の部屋という";
+		mes "順に進んでいく。";
+		next;
+		mes "[ラウル]";
+		mes "それぞれの部屋ではその部屋の属性の";
+		mes "モンスターが登場する。";
+		mes "属性に合った魔法を使えば、難なく";
+		mes "倒すことができるだろう。";
+		next;
+		mes "[ラウル]";
+		mes "制限時間以内に全てのモンスターを倒し";
+		mes "門番モンスターを倒せば、次の部屋に";
+		mes "行くことが出来る。";
+		next;
+		mes "[ラウル]";
+		mes "出口を出れば試験は終了だ。";
+		mes "成功したら魔法のマスターである";
+		mes "ウィザードにしてやろう。";
+		next;
+		mes "[ラウル]";
+		mes "恐ろしいという顔だな？";
+		mes "まだ遅くは無い。";
+		mes "今諦めれば故郷に返してやるぞ？";
+		next;
+		menu "試験を受けます。",-, "恐ろしいので帰ります。",L_Scared2;
+		
+			percentheal 100,100;
+			mes "[ラウル]";
+			mes "またお前を転送するはめにならんことを";
+			mes "祈る。合格してこい。";
+			next;
+			warp "job_wiz.gat",57,154;
+			end;
+	L_Scared2:
+		mes "[ラウル]";
+		mes "賢い判断だ。";
+		mes "お前にはそっちのほうがあっている。";
+		mes "平和に静かに暮らすがよい！";
+		next;
+		warp "geffen.gat",120,110;
+		end;
+
+//---------------------------------------------------------------------合格
+L_PART8:
+	if (job_wizard_q != 7) goto L_QuitScript;
+		mes "[ラウル]";
+		mes "何のようだ？";
+		mes "もし望むなら、また試験を";
+		mes "受けさせてやるぞ。ククッ";
+		next;
+		mes "[ラウル]";
+		mes "早く行ってウィザードになれ。";
+		mes "だが気をつけろ！";
+		mes "魔法は身を滅ぼすものだ。";
+		close;
+
+L_QuitScript:
+	end;
+}
+
+
+//================== アリーナ ==================
+
+
+//======== 戦闘進行要員
+job_wiz.gat,50,165,4	script	戦闘進行要員::jobwiz_wroom	700,{
+	mes "[戦闘進行要員]";
+	mes "ウィザード最終試験場へようこそ！";
+	mes "試験待機ルームに入ってください。";
+	next;
+	mes "[戦闘進行要員]";
+	mes "他の方が試験中の場合は、しばらく";
+	mes "お待ちください。";
+	mes "進行状況がマップ全体に報告されるので";
+	mes "終わり次第始めます。";
+	next;
+	mes "[戦闘進行要員]";
+	mes "一人当たりだいたい5分から10分程度";
+	mes "必要になります。";
+	mes "試験場から出たい場合は再接続して";
+	mes "下さい。";
+	close;
+	end;
+OnInit:
+	waitingroom "試験待機所",20,"jobwiz_wroom::OnStart",1;
+	end;
+OnStart:
+	disablewaitingroomevent;
+	warpwaitingpc "job_wiz.gat",114,169;
+	set $@jobwiz_pid,$@warpwaitingpc[0];
+	if( attachrid($@jobwiz_pid)==0 ) goto L_Error;
+		set $@jobwiz_pname$,strcharinfo(0);
+		donpcevent "jobwiz_water::OnStart";
+		end;
+L_Error:
+	enablewaitingroomevent;
+	end;
+OnEnable:
+	enablewaitingroomevent;
+	end;
+
+}
+//======== 水の部屋
+job_wiz.gat,1,1,1	script	jobwiz_water	-1,{
+
+OnStart:
+	set $@jobwiz_m,8;
+	monster "job_wiz.gat",109,174,"--ja--",1158,1,"jobwiz_water::OnKilled";
+	monster "job_wiz.gat",118,174,"--ja--",1070,1,"jobwiz_water::OnKilled";
+	monster "job_wiz.gat",109,165,"--ja--",1066,1,"jobwiz_water::OnKilled";
+	monster "job_wiz.gat",118,165,"--ja--",1067,1,"jobwiz_water::OnKilled";
+	monster "job_wiz.gat",101,157,"--ja--",1141,1,"jobwiz_water::OnKilled";
+	monster "job_wiz.gat",126,157,"--ja--",1242,1,"jobwiz_water::OnKilled";
+	monster "job_wiz.gat",98,170,"--ja--",1070,1,"jobwiz_water::OnKilled";
+	monster "job_wiz.gat",129,170,"--ja--",1044,1,"jobwiz_water::OnKilled";
+	initnpctimer;
+	end;
+
+OnReset:
+	killmonster "job_wiz.gat","jobwiz_water::OnKilled";
+	end;
+
+OnKilled:
+	set $@jobwiz_m,$@jobwiz_m-1;
+	if( $@jobwiz_m > 0 )goto L_NotWin;
+		stopnpctimer;
+		announce $@jobwiz_pname$ + "様が水の部屋のモンスターを倒しました！",9;
+		donpcevent "jobwiz_water2::OnStart";
+	L_NotWin:
+	end;
+
+OnTimer1000:
+	announce "水の部屋の試験開始",9;
+	end;
+OnTimer2000:
+	announce "制限時間は 3分",9;
+	end;
+OnTimer3000:
+	announce "制限時間内に全てのモンスターを倒せ",9;
+	end;
+OnTimer33000:
+	announce "制限時間まで後 2分30秒",9;
+	end;
+OnTimer63000:
+	announce "制限時間まで後 2分",9;
+	end;
+OnTimer93000:
+	announce "制限時間まで後 1分30秒",9;
+	end;
+OnTimer123000:
+	announce "制限時間まで後 1分",9;
+	end;
+OnTimer153000:
+	announce "制限時間まで後 30秒",9;
+	end;
+OnTimer173000:
+	announce "制限時間まで後 10秒！",9;
+	end;
+OnTimer183000:
+	announce "タイムオーバー！",9;
+	killmonster "job_wiz.gat","jobwiz_water::OnKilled";
+	end;
+OnTimer184000:
+	announce $@jobwiz_pname$ + "様が試験に失敗しました！",9;
+	areawarp "job_wiz.gat",95,150,135,190,"geffen.gat",120,110;
+	end;
+OnTimer185000:
+	announce "次の方、どうぞお入りください.",9;
+	end;
+OnTimer186000:
+	donpcevent "jobwiz_wroom::OnEnable";
+	stopnpctimer;
+	end;
+}
+
+//======== 水の部屋の門番
+job_wiz.gat,1,2,1	script	jobwiz_water2	66,{
+
+OnStart:
+	donpcevent "jobwiz_water2::OnReset";
+	set $@jobwiz_m,5;
+	monster "job_wiz.gat",114,169,"--ja--",1142,1,"jobwiz_water2::OnKilled";
+	monster "job_wiz.gat",112,169,"--ja--",1068,1,"jobwiz_water2::OnKilled";
+	monster "job_wiz.gat",116,169,"--ja--",1068,1,"jobwiz_water2::OnKilled";
+	monster "job_wiz.gat",114,171,"--ja--",1068,1,"jobwiz_water2::OnKilled";
+	monster "job_wiz.gat",114,167,"--ja--",1068,1,"jobwiz_water2::OnKilled";
+	initnpctimer;
+	end;
+OnReset:
+	killmonster "job_wiz.gat","jobwiz_water2::OnKilled";
+	end;
+OnKilled:
+	set $@jobwiz_m,$@jobwiz_m-1;
+	if( $@jobwiz_m > 0 )goto L_NotWin;
+		stopnpctimer;
+		announce $@jobwiz_pname$ + "様が水の部屋の門番モンスターを倒しました！",9;
+		areawarp "job_wiz.gat",95,150,135,190,"job_wiz.gat",116,97;
+		donpcevent "jobwiz_earth::OnStart";
+	L_NotWin:
+	end;
+OnTimer1000:
+	announce "門番モンスターが出現しました！ 制限時間は１分！",9;
+	end;
+OnTimer30000:
+	announce "制限時間まで後 30秒",9;
+	end;
+OnTimer50000:
+	announce "制限時間まで後 10秒",9;
+	end;
+OnTimer60000:
+	announce "タイムオーバー！",9;
+	killmonster "job_wiz.gat","jobwiz_water2::OnKilled";
+	end;
+OnTimer61000:
+	announce $@jobwiz_pname$ + "様が試験に失敗しました！",9;
+	areawarp "job_wiz.gat",95,150,135,190,"geffen.gat",120,110;
+	end;
+OnTimer62000:
+	announce "次の方、どうぞお入りください.",9;
+	end;
+OnTimer63000:
+	donpcevent "jobwiz_wroom::OnEnable";
+	stopnpctimer;
+	end;
+}
+
+//======== 地の部屋
+job_wiz.gat,1,3,1	script	jobwiz_earth	66,{
+OnStart:
+	if( attachrid($@jobwiz_pid)==0 ) goto L_NoHeal;
+		percentheal 100,100;
+	L_NoHeal:
+	set $@jobwiz_m,10;
+	monster "job_wiz.gat",111,102,"--ja--",1057,1,"jobwiz_earth::OnKilled";
+	monster "job_wiz.gat",120,102,"--ja--",1105,1,"jobwiz_earth::OnKilled";
+	monster "job_wiz.gat",111,102,"--ja--",1103,1,"jobwiz_earth::OnKilled";
+	monster "job_wiz.gat",120,102,"--ja--",1127,1,"jobwiz_earth::OnKilled";
+	monster "job_wiz.gat",111,93,"--ja--",1166,1,"jobwiz_earth::OnKilled";
+	monster "job_wiz.gat",120,93,"--ja--",1121,1,"jobwiz_earth::OnKilled";
+	monster "job_wiz.gat",107,98,"--ja--",1060,1,"jobwiz_earth::OnKilled";
+	monster "job_wiz.gat",124,98,"--ja--",1023,1,"jobwiz_earth::OnKilled";
+	monster "job_wiz.gat",104,86,"--ja--",1176,1,"jobwiz_earth::OnKilled";
+	monster "job_wiz.gat",127,86,"--ja--",1139,1,"jobwiz_earth::OnKilled";
+	initnpctimer;
+	end;
+OnReset:
+	killmonster "job_wiz.gat","jobwiz_earth::OnKilled";
+	end;
+OnKilled:
+	set $@jobwiz_m,$@jobwiz_m-1;
+	if( $@jobwiz_m > 0 )goto L_NotWin;
+		stopnpctimer;
+		announce $@jobwiz_pname$ + "様が地の部屋のモンスターを倒しました！",9;
+		donpcevent "jobwiz_earth2::OnStart";
+	L_NotWin:
+	end;
+OnTimer1000:
+	announce "水の部屋の試験開始",9;
+	end;
+OnTimer2000:
+	announce "制限時間は 3分",9;
+	end;
+OnTimer3000:
+	announce "制限時間内に全てのモンスターを倒せ",9;
+	end;
+OnTimer33000:
+	announce "制限時間まで後 2分30秒",9;
+	end;
+OnTimer63000:
+	announce "制限時間まで後 2分",9;
+	end;
+OnTimer93000:
+	announce "制限時間まで後 1分30秒",9;
+	end;
+OnTimer123000:
+	announce "制限時間まで後 1分",9;
+	end;
+OnTimer153000:
+	announce "制限時間まで後 30秒",9;
+	end;
+OnTimer173000:
+	announce "制限時間まで後 10秒",9;
+	end;
+OnTimer183000:
+	announce "タイムオーバー！",9;
+	killmonster "job_wiz.gat","jobwiz_earth::OnKilled";
+	end;
+OnTimer184000:
+	announce $@jobwiz_pname$ + "様が試験に失敗しました！",1;
+	areawarp "job_wiz.gat",95,75,135,120,"geffen.gat",120,110;
+	end;
+	end;
+OnTimer185000:
+	announce "次の方、どうぞお入りください.",9;
+	end;
+OnTimer186000:
+	donpcevent "jobwiz_wroom::OnEnable";
+	stopnpctimer;
+	end;
+}
+
+//======== 地の部屋の門番
+job_wiz.gat,1,4,1	script	jobwiz_earth2	66,{
+
+OnStart:
+	donpcevent "jobwiz_earth2::OnReset";
+	set $@jobwiz_m,7;
+	monster "job_wiz.gat",116,97,"--ja--",1118,1,"jobwiz_earth2::OnKilled";
+	monster "job_wiz.gat",114,95,"--ja--",1020,1,"jobwiz_earth2::OnKilled";
+	monster "job_wiz.gat",118,95,"--ja--",1020,1,"jobwiz_earth2::OnKilled";
+	monster "job_wiz.gat",114,99,"--ja--",1020,1,"jobwiz_earth2::OnKilled";
+	monster "job_wiz.gat",118,99,"--ja--",1020,1,"jobwiz_earth2::OnKilled";
+	monster "job_wiz.gat",116,94,"--ja--",1020,1,"jobwiz_earth2::OnKilled";
+	monster "job_wiz.gat",116,100,"--ja--",1020,1,"jobwiz_earth2::OnKilled";
+	initnpctimer;
+	end;
+OnReset:
+	killmonster "job_wiz.gat","jobwiz_earth2::OnKilled";
+	end;
+OnKilled:
+	set $@jobwiz_m,$@jobwiz_m-1;
+	if( $@jobwiz_m > 0 )goto L_NotWin;
+		stopnpctimer;
+		announce $@jobwiz_pname$ + "様が地の部屋の門番モンスターを倒しました！",9;
+		areawarp "job_wiz.gat",95,75,135,120,"job_wiz.gat",46,99;
+		donpcevent "jobwiz_fire::OnStart";
+	L_NotWin:
+	end;
+OnTimer1000:
+	announce "門番モンスターが出現しました！ 制限時間は１分！",9;
+	end;
+OnTimer30000:
+	announce "制限時間まで後 30秒",9;
+	end;
+OnTimer50000:
+	announce "制限時間まで後 10秒",9;
+	end;
+OnTimer60000:
+	announce "タイムオーバー！",9;
+	killmonster "job_wiz.gat","jobwiz_earth2::OnKilled";
+	end;
+OnTimer61000:
+	announce $@jobwiz_pname$ + "様が試験に失敗しました！",9;
+	areawarp "job_wiz.gat",95,75,135,120,"geffen.gat",120,110;
+	end;
+OnTimer62000:
+	announce "次の方、どうぞお入りください.",9;
+	end;
+OnTimer63000:
+	donpcevent "jobwiz_wroom::OnEnable";
+	stopnpctimer;
+	end;
+}
+
+//======== 火の部屋
+job_wiz.gat,1,5,1	script	jobwiz_fire	66,{
+OnStart:
+	if( attachrid($@jobwiz_pid)==0 ) goto L_NoHeal;
+		percentheal 100,100;
+	L_NoHeal:
+	set $@jobwiz_m,8;
+	monster "job_wiz.gat",58,110,"--ja--",1178,1,"jobwiz_fire::OnKilled";
+	monster "job_wiz.gat",33,110,"--ja--",1123,1,"jobwiz_fire::OnKilled";
+	monster "job_wiz.gat",40,103,"--ja--",1001,1,"jobwiz_fire::OnKilled";
+	monster "job_wiz.gat",51,103,"--ja--",1119,1,"jobwiz_fire::OnKilled";
+	monster "job_wiz.gat",40,92,"--ja--",1019,1,"jobwiz_fire::OnKilled";
+	monster "job_wiz.gat",51,92,"--ja--",1033,1,"jobwiz_fire::OnKilled";
+	monster "job_wiz.gat",37,89,"--ja--",1058,1,"jobwiz_fire::OnKilled";
+	monster "job_wiz.gat",54,89,"--ja--",1106,1,"jobwiz_fire::OnKilled";
+	initnpctimer;
+	end;
+OnReset:
+	killmonster "job_wiz.gat","jobwiz_fire::OnKilled";
+	end;
+OnKilled:
+	set $@jobwiz_m,$@jobwiz_m-1;
+	if( $@jobwiz_m > 0 )goto L_NotWin;
+		stopnpctimer;
+		announce $@jobwiz_pname$ + "様が火の部屋のモンスターを倒しました！",9;
+		donpcevent "jobwiz_fire2::OnStart";
+	L_NotWin:
+	end;
+OnTimer1000:
+	announce "水の部屋の試験開始",9;
+	end;
+OnTimer2000:
+	announce "制限時間は 3分",9;
+	end;
+OnTimer3000:
+	announce "制限時間内に全てのモンスターを倒せ",9;
+	end;
+OnTimer33000:
+	announce "制限時間まで後 2分30秒",9;
+	end;
+OnTimer63000:
+	announce "制限時間まで後 2分",9;
+	end;
+OnTimer93000:
+	announce "制限時間まで後 1分30秒",9;
+	end;
+OnTimer123000:
+	announce "制限時間まで後 1分",9;
+	end;
+OnTimer153000:
+	announce "制限時間まで後 30秒",9;
+	end;
+OnTimer173000:
+	announce "制限時間まで後 10秒",9;
+	end;
+OnTimer183000:
+	announce "タイムオーバー！",9;
+	killmonster "job_wiz.gat","jobwiz_fire::OnKilled";
+	end;
+OnTimer184000:
+	announce $@jobwiz_pname$ + "様が試験に失敗しました！",1;
+	areawarp "job_wiz.gat",25,75,65,120,"geffen.gat",120,110;
+	end;
+	end;
+OnTimer185000:
+	announce "次の方、どうぞお入りください.",9;
+	end;
+OnTimer186000:
+	donpcevent "jobwiz_wroom::OnEnable";
+	stopnpctimer;
+	end;
+}
+
+//======== 火の部屋の門番
+job_wiz.gat,1,6,1	script	jobwiz_fire2	66,{
+
+OnStart:
+	donpcevent "jobwiz_earth2::OnReset";
+	set $@jobwiz_m,3;
+	monster "job_wiz.gat",44,99,"--ja--",1277,1,"jobwiz_fire2::OnKilled";
+	monster "job_wiz.gat",43,99,"--ja--",1129,1,"jobwiz_fire2::OnKilled";
+	monster "job_wiz.gat",45,99,"--ja--",1129,1,"jobwiz_fire2::OnKilled";
+	initnpctimer;
+	end;
+OnReset:
+	killmonster "job_wiz.gat","jobwiz_earth2::OnKilled";
+	end;
+OnKilled:
+	set $@jobwiz_m,$@jobwiz_m-1;
+	if( $@jobwiz_m > 0 )goto L_NotWin;
+		stopnpctimer;
+		set job_wizard_q,7;
+		announce "おめでとうございます！ " + $@jobwiz_pname$ + "様が試験に合格しました！",9;
+		areawarp "job_wiz.gat",95,75,135,120,"job_wiz.gat",46,99;
+		donpcevent "jobwiz_success::OnSuccess";
+	L_NotWin:
+	end;
+OnTimer1000:
+	announce "門番モンスターが出現しました！ 制限時間は１分！",9;
+	end;
+OnTimer30000:
+	announce "制限時間まで後 30秒",9;
+	end;
+OnTimer50000:
+	announce "制限時間まで後 10秒",9;
+	end;
+OnTimer60000:
+	announce "タイムオーバー！",9;
+	killmonster "job_wiz.gat","jobwiz_earth2::OnKilled";
+	end;
+OnTimer61000:
+	announce $@jobwiz_pname$ + "様が試験に失敗しました！",9;
+	areawarp "job_wiz.gat",25,75,65,120,"geffen.gat",120,110;
+	end;
+OnTimer62000:
+	announce "次の方、どうぞお入りください.",9;
+	end;
+OnTimer63000:
+	donpcevent "jobwiz_wroom::OnEnable";
+	stopnpctimer;
+	end;
+}
+//======== 合格案内
+job_wiz.gat,1,7,1	script	jobwiz_success	66,{
+OnSuccess:
+	initnpctimer;
+	end;
+	
+OnTimer4000:
+	announce "試験は終了しました。次の方、どうぞお入りください。",9;
+	end;
+OnTimer5000:
+	areawarp "job_wiz.gat",25,75,65,120,"gef_tower.gat",110,30;
+	end;
+OnTimer7000:
+	donpcevent "jobwiz_wroom::OnEnable";
+	stopnpctimer;
+	end;
+}

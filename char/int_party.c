@@ -361,7 +361,7 @@ int mapif_parse_CreateParty(int fd,int account_id,char *name,char *nick,char *ma
 	int i;
 	
 	for(i=0;i<24 && name[i];i++){
-		if(name[i]<0x20 || name[i]==0x7f){
+		if( !(name[i]&0xe0) || name[i]==0x7f){
 			printf("int_party: illeagal party name [%s]\n",name);
 			mapif_party_created(fd,account_id,NULL);
 			return 0;

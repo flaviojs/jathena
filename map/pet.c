@@ -829,7 +829,7 @@ int pet_change_name(struct map_session_data *sd,char *name)
 		return 1;
 
 	for(i=0;i<24 && name[i];i++){
-		if(name[i]<0x20 || name[i]==0x7f)
+		if( !(name[i]&0xe0) || name[i]==0x7f)
 			return 1;
 	}
 
