@@ -1,23 +1,39 @@
 --------------------
+//1052 by
+居場所つきで検索コマンド追加。
+	GMコマンド追加
+	@who+	居場所つき検索
+
+	(conf/)
+		atcommand_athena.conf
+			who+: 1 追加
+	(/src/common/)
+		version.h
+			Ver 1051->1052 変更
+	(/src/map)
+		atcommand.c
+			ATCOMMAND_FUNC(whop);  追加
+			{ AtCommand_WhoP,"@who+",0, atcommand_whop }, 追加
+		atcommand.h
+			AtCommand_WhoP, 追加
+--------------------
 //1051 by Plala
-・ライディング習得時MAX Weightを増やせるようにしました。
-増加数はbattle_athena.confで設定可能です。
+・ペコペコ騎乗時MAX Weightを増やせるようにしました。
+battle_athena.confで設定可能です。
 
 	(conf/)
 		battle_athena.conf
 			riding_weight 追加
 	(map/)
 		battle.c
-			battle_config.riding_weight = 0; 追加
 			battle_config.riding_weight 追加
 		battle.h
 			int riding_weight; 追加
 		clif.c
-			追加の修正分
+			clif_parse_RemoveOption 変更
 		pc.c
 			int pc_calcstatus 変更
-				998にif(pc_checkskill(sd,KN_RIDING)>0) を
-				999にsd->max_weight +=battle_config.riding_weight; を追加
+				1415にsd->max_weight +=battle_config.riding_weight; を追加
 	(common/)
 		version.h
 			Ver 1050->1051 変更

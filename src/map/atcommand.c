@@ -120,6 +120,7 @@ ATCOMMAND_FUNC(snow);
 ATCOMMAND_FUNC(cherry);
 ATCOMMAND_FUNC(fog);
 ATCOMMAND_FUNC(maple);
+ATCOMMAND_FUNC(whop);
 
 /*==========================================
  *AtCommandInfo atcommand_info[]構造体の定義
@@ -215,17 +216,20 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Maintenance,			"@maintenance",		0, atcommand_maintenance },
 	{ AtCommand_Misceffect,				"@misceffect",		0, atcommand_misceffect },
 	{ AtCommand_Summon,					"@summon",			0, atcommand_summon },
-	// add here
+	//add
 	{ AtCommand_MapMove,				"@mapmove",			0, NULL },
 	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
 	{ AtCommand_LocalBroadcast,			"@local_broadcast",	0, NULL },
-	//---
-	{ AtCommand_Rain,			"@rain",	0, atcommand_rain },
-	{ AtCommand_Snow,			"@snow",	0, atcommand_snow },
-	{ AtCommand_Cherry,			"@cherry",	0, atcommand_cherry },
-	{ AtCommand_Fog,			"@fog",	0, atcommand_fog },
-	{ AtCommand_Maple,			"@maple",	0, atcommand_maple },
-	//--- by code
+	//add
+	{ AtCommand_Rain,					"@rain",			0, atcommand_rain },
+	{ AtCommand_Snow,					"@snow",			0, atcommand_snow },
+	{ AtCommand_Cherry,					"@cherry",			0, atcommand_cherry },
+	{ AtCommand_Fog,					"@fog",				0, atcommand_fog },
+	{ AtCommand_Maple,					"@maple",			0, atcommand_maple },
+	//add by code
+	{ AtCommand_WhoP,					"@who+",			0, atcommand_whop },
+	//add 1052
+	//add here
 	{ AtCommand_Unknown,				NULL,				0, NULL }
 };
 
@@ -636,6 +640,33 @@ atcommand_who(
 	const char* command, const char* message)
 {
 	map_who(fd);
+	return 0;
+}
+/*==========================================
+ * 居場所付き検索を行う
+ *------------------------------------------
+ */
+int
+atcommand_whop(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char output[200];
+	struct map_session_data *pl_sd = NULL;
+	int i = 0;
+
+	nullpo_retr(-1, sd);
+
+	for (i = 0; i < fd_max; i++) {
+		if (session[i] && (pl_sd = session[i]->session_data) &&
+			pl_sd->state.auth) {
+			if( !(battle_config.hide_GM_session && pc_isGM(pl_sd)) ){
+				snprintf(output, sizeof output, "%s %s %d %d",
+					pl_sd->status.name, pl_sd->mapname, pl_sd->bl.x, pl_sd->bl.y);
+				clif_displaymessage(fd, output);
+			}
+		}
+	}
 	return 0;
 }
 

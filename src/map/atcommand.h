@@ -103,6 +103,7 @@ enum AtCommandType {
 	AtCommand_Cherry,
 	AtCommand_Fog,
 	AtCommand_Maple,
+	AtCommand_WhoP,
 	AtCommand_Unknown,
 	AtCommand_MAX
 };
