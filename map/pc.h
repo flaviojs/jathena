@@ -127,6 +127,8 @@ int pc_readglobalreg(struct map_session_data*,char*);
 int pc_setglobalreg(struct map_session_data*,char*,int);
 int pc_readaccountreg(struct map_session_data*,char*);
 int pc_setaccountreg(struct map_session_data*,char*,int);
+int pc_readaccountreg2(struct map_session_data*,char*);
+int pc_setaccountreg2(struct map_session_data*,char*,int);
 int pc_percentrefinery(struct map_session_data *sd,struct item *item);
 
 int pc_addeventtimer(struct map_session_data *sd,int tick,const char *name);

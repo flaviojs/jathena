@@ -17,12 +17,20 @@
 
 char inter_log_filename[1024]="log/inter.log";
 
+char accreg_txt[1024]="save/accreg.txt";
+static struct dbt *accreg_db=NULL;
+
+struct accreg {
+	int account_id,reg_num;
+	struct global_reg reg[ACCOUNT_REG_NUM];
+};
+
 int party_share_level = 10;
 
 
 // 送信パケット長リスト
 int inter_send_packet_length[]={
-	-1,-1,27, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	-1,-1,27, 0, -1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	-1, 7, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	35,-1,11,15, 34,29, 7,-1,  0, 0, 0, 0,  0, 0,  0, 0,
 	10,-1,15, 0, 79,19, 7,-1,  0,-1,-1,-1, 14,67,186,-1,
@@ -34,7 +42,7 @@ int inter_send_packet_length[]={
 };
 // 受信パケット長リスト
 int inter_recv_packet_length[]={
-	-1,-1, 7, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	-1,-1, 7, 0, -1, 6, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 6,-1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	72, 6,52,14, 10,29, 6,-1, 34, 0, 0, 0,  0, 0,  0, 0,
 	-1, 6,-1, 0, 55,19, 6,-1, 14,-1,-1,-1, 14,19,186,-1,
@@ -88,6 +96,96 @@ int check_ttl_wisdata()
 
 //--------------------------------------------------------
 
+// アカウント変数を文字列へ変換
+int inter_accreg_tostr(char *str,struct accreg *reg)
+{
+	int j;
+	char *p=str;
+	p+=sprintf(p,"%d\t",reg->account_id);
+	for(j=0;j<reg->reg_num;j++){
+		p+=sprintf(p,"%s,%d ",reg->reg[j].str,reg->reg[j].value);
+	}
+	return 0;
+}
+// アカウント変数を文字列から変換
+int inter_accreg_fromstr(const char *str,struct accreg *reg)
+{
+	int j,v,n;
+	char buf[128];
+	const char *p=str;
+	if( sscanf(p,"%d\t%n",&reg->account_id,&n )!=1 || reg->account_id<=0)
+		return 1;
+	
+	for(j=0,p+=n;j<ACCOUNT_REG_NUM;j++,p+=n){
+		if( sscanf(p,"%[^,],%d %n",buf,&v,&n)!=2 )
+			break;
+		memcpy(reg->reg[j].str,buf,32);
+		reg->reg[j].value=v;
+	}
+	reg->reg_num=j;
+	return 0;
+}
+
+// アカウント変数の読み込み
+int inter_accreg_init()
+{
+	char line[8192];
+	FILE *fp;
+	int c=0;
+	struct accreg *reg;
+	
+	accreg_db=numdb_init();
+	
+	if( (fp=fopen(accreg_txt,"r"))==NULL )
+		return 1;
+	while(fgets(line,sizeof(line),fp)){
+	
+		reg=malloc(sizeof(struct accreg));
+		if(reg==NULL){
+			printf("inter: accreg: out of memory!\n");
+			exit(0);
+		}
+		if(inter_accreg_fromstr(line,reg)==0 && reg->account_id>0){
+			numdb_insert(accreg_db,reg->account_id,reg);
+		}else{
+			printf("inter: accreg: broken data [%s] line %d\n",accreg_txt,c);
+			free(reg);
+		}
+		c++;
+	}
+	fclose(fp);
+//	printf("inter: %s read done (%d)\n",accreg_txt,c);
+	return 0;
+	
+}
+// アカウント変数のセーブ用
+int inter_accreg_save_sub(void *key,void *data,va_list ap)
+{
+	char line[8192];
+	FILE *fp;
+	struct accreg *reg=(struct accreg *)data;
+	if(reg->reg_num>0){
+		inter_accreg_tostr(line,reg);
+		fp=va_arg(ap,FILE *);
+		fprintf(fp,"%s" RETCODE,line);
+	}
+	return 0;
+}
+// アカウント変数のセーブ
+int inter_accreg_save()
+{
+	FILE *fp;
+	if( (fp=fopen(accreg_txt,"w"))==NULL ){
+		printf("int_accreg: cant write [%s] !!! data is lost !!!\n",accreg_txt);
+		return 1;
+	}
+	numdb_foreach(accreg_db,inter_accreg_save_sub,fp);
+	fclose(fp);
+//	printf("inter: %s saved.\n",accreg_txt);
+	return 0;
+}
+//--------------------------------------------------------
+
 /*==========================================
  * 設定ファイルを読み込む
  *------------------------------------------
@@ -121,6 +219,9 @@ int inter_config_read(const char *cfgName)
 		}
 		else if(strcmpi(w1,"castle_txt")==0){
 			strncpy(castle_txt,w2,sizeof(castle_txt));
+		}
+		else if(strcmpi(w1,"accreg_txt")==0){
+			strncpy(accreg_txt,w2,sizeof(accreg_txt));
 		}
 		else if(strcmpi(w1,"party_share_level")==0){
 			party_share_level=atoi(w2);
@@ -157,6 +258,7 @@ int inter_save()
 	inter_party_save();
 	inter_guild_save();
 	inter_pet_save();
+	inter_accreg_save();
 
 	return 0;
 }
@@ -172,6 +274,7 @@ int inter_init(const char *file)
 	inter_party_init();
 	inter_guild_init();
 	inter_pet_init();
+	inter_accreg_init();
 
 	return 0;
 }
@@ -214,6 +317,35 @@ int mapif_wis_end(struct WisData *wd,int flag)
 	WBUFB(buf,26)=flag;
 	mapif_send(wd->fd,buf,27);
 //	printf("inter server wis_end %d\n",flag);
+	return 0;
+}
+
+// アカウント変数送信
+int mapif_account_reg(int fd,unsigned char *src)
+{
+	unsigned char buf[4096];
+	memcpy(WBUFP(buf,0),src,WBUFW(src,2));
+	WBUFW(buf, 0)=0x3804;
+	mapif_sendallwos(fd,buf,WBUFW(buf,2));
+	return 0;
+}
+// アカウント変数要求返信
+int mapif_account_reg_reply(int fd,int account_id)
+{
+	struct accreg *reg=numdb_search(accreg_db,account_id);
+	WFIFOW(fd,0)=0x3804;
+	WFIFOL(fd,4)=account_id;
+	if(reg==NULL){
+		WFIFOW(fd,2)=8;
+	}else{
+		int j,p;
+		for(j=0,p=8;j<reg->reg_num;j++,p+=36){
+			memcpy(WFIFOP(fd,p),reg->reg[j].str,32);
+			WFIFOL(fd,p+32)=reg->reg[j].value;
+		}
+		WFIFOW(fd,2)=p;
+	}
+	WFIFOSET(fd,WFIFOW(fd,2));
 	return 0;
 }
 
@@ -277,6 +409,36 @@ int mapif_parse_WisReply(int fd)
 	}
 	return 0;
 }
+
+// アカウント変数保存要求
+int mapif_parse_AccReg(int fd)
+{
+	int j,p;
+	struct accreg *reg=numdb_search(accreg_db,RFIFOL(fd,4));
+	if(reg==NULL){
+		if((reg=malloc(sizeof(struct accreg)))==NULL){
+			printf("inter: accreg: out of memory !\n");
+			exit(0);
+		}
+		reg->account_id=RFIFOL(fd,4);
+		numdb_insert(accreg_db,RFIFOL(fd,4),reg);
+	}
+	
+	for(j=0,p=8;j<ACCOUNT_REG_NUM && p<RFIFOW(fd,2);j++,p+=36){
+		memcpy(reg->reg[j].str,RFIFOP(fd,p),32);
+		reg->reg[j].value=RFIFOL(fd,p+32);
+	}
+	reg->reg_num=j;
+	mapif_account_reg(fd,RFIFOP(fd,0));	// 他のMAPサーバーに送信
+	return 0;
+}
+// アカウント変数送信要求
+int mapif_parse_AccRegRequest(int fd)
+{
+//	printf("mapif: accreg request\n");
+	return mapif_account_reg_reply(fd,RFIFOL(fd,2));
+}
+
 //--------------------------------------------------------
 
 // map server からの通信（１パケットのみ解析すること）
@@ -300,6 +462,8 @@ int inter_parse_frommap(int fd)
 	case 0x3000: mapif_parse_GMmessage(fd); break;
 	case 0x3001: mapif_parse_WisRequest(fd); break;
 	case 0x3002: mapif_parse_WisReply(fd); break;
+	case 0x3004: mapif_parse_AccReg(fd); break;
+	case 0x3005: mapif_parse_AccRegRequest(fd); break;
 	default:
 		if( inter_party_parse_frommap(fd) )
 			break;

@@ -283,7 +283,7 @@ enum {
 };
 
 /*==========================================
- *
+ * 文字列のハッシュを計算
  *------------------------------------------
  */
 static int calc_hash(unsigned char *p)
@@ -297,7 +297,7 @@ static int calc_hash(unsigned char *p)
 }
 
 /*==========================================
- *
+ * str_dataの中に名前があるか検索する
  *------------------------------------------
  */
 // 既存のであれば番号、無ければ-1
@@ -315,7 +315,7 @@ static int search_str(unsigned char *p)
 }
 
 /*==========================================
- *
+ * str_dataに名前を登録
  *------------------------------------------
  */
 // 既存のであれば番号、無ければ登録して新規番号
@@ -377,7 +377,7 @@ static int add_str(unsigned char *p)
 
 
 /*==========================================
- *
+ * スクリプトバッファサイズの確認と拡張
  *------------------------------------------
  */
 static void check_script_buf(int size)
@@ -393,7 +393,7 @@ static void check_script_buf(int size)
 }
 
 /*==========================================
- *
+ * スクリプトバッファに１バイト書き込む
  *------------------------------------------
  */
 static void add_scriptb(int a)
@@ -403,7 +403,7 @@ static void add_scriptb(int a)
 }
 
 /*==========================================
- *
+ * スクリプトバッファにデータタイプを書き込む
  *------------------------------------------
  */
 static void add_scriptc(int a)
@@ -416,7 +416,7 @@ static void add_scriptc(int a)
 }
 
 /*==========================================
- *
+ * スクリプトバッファに整数を書き込む
  *------------------------------------------
  */
 static void add_scripti(int a)
@@ -429,7 +429,7 @@ static void add_scripti(int a)
 }
 
 /*==========================================
- *
+ * スクリプトバッファにラベル/変数/関数を書き込む
  *------------------------------------------
  */
 // 最大16Mまで
@@ -466,7 +466,7 @@ static void add_scriptl(int l)
 }
 
 /*==========================================
- *
+ * ラベルを解決する
  *------------------------------------------
  */
 void set_label(int l,int pos)
@@ -486,7 +486,7 @@ void set_label(int l,int pos)
 }
 
 /*==========================================
- *
+ * スペース/コメント読み飛ばし
  *------------------------------------------
  */
 static unsigned char *skip_space(unsigned char *p)
@@ -509,7 +509,7 @@ static unsigned char *skip_space(unsigned char *p)
 }
 
 /*==========================================
- *
+ * １単語スキップ
  *------------------------------------------
  */
 static unsigned char *skip_word(unsigned char *p)
@@ -529,7 +529,7 @@ static unsigned char *startptr;
 static int startline;
 
 /*==========================================
- *
+ * エラーメッセージ出力
  *------------------------------------------
  */
 static void disp_error_message(char *mes,unsigned char *pos)
@@ -563,7 +563,7 @@ static void disp_error_message(char *mes,unsigned char *pos)
 }
 
 /*==========================================
- *
+ * 項の解析
  *------------------------------------------
  */
 unsigned char* parse_simpleexpr(unsigned char *p)
@@ -628,7 +628,7 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 }
 
 /*==========================================
- *
+ * 式の解析
  *------------------------------------------
  */
 unsigned char* parse_subexpr(unsigned char *p,int limit)
@@ -700,7 +700,7 @@ unsigned char* parse_subexpr(unsigned char *p,int limit)
 }
 
 /*==========================================
- *
+ * 式の評価
  *------------------------------------------
  */
 unsigned char* parse_expr(unsigned char *p)
@@ -724,7 +724,7 @@ unsigned char* parse_expr(unsigned char *p)
 }
 
 /*==========================================
- *
+ * 行の解析
  *------------------------------------------
  */
 unsigned char* parse_line(unsigned char *p)
@@ -755,7 +755,7 @@ unsigned char* parse_line(unsigned char *p)
 }
 
 /*==========================================
- *
+ * 組み込み関数の追加
  *------------------------------------------
  */
 static void add_buildin_func(void)
@@ -769,7 +769,7 @@ static void add_buildin_func(void)
 }
 
 /*==========================================
- *
+ * 定数データベースの読み込み
  *------------------------------------------
  */
 static void read_constdb(void)
@@ -803,7 +803,7 @@ static void read_constdb(void)
 }
 
 /*==========================================
- *
+ * スクリプトの解析
  *------------------------------------------
  */
 unsigned char* parse_script(unsigned char *src,int line)
@@ -892,6 +892,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 		exit(1);
 	}
 
+	// 未解決のラベルを解決
 	for(i=LABEL_START;i<str_num;i++){
 		if(str_data[i].type==C_NOP){
 			int j,next;
@@ -925,7 +926,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 enum {STOP=1,END,RERUNLINE,GOTO};
 
 /*==========================================
- *
+ * 変数の読み取り
  *------------------------------------------
  */
 // 変数のデータ拾いのみ
@@ -945,7 +946,10 @@ int get_val(struct script_state*st,struct script_data* data)
 		}else if(prefix=='$'){
 			data->u.num = (int)strdb_search(mapval_db,str_buf+str_data[data->u.num].str);
 		}else if(prefix=='#'){
-			data->u.num = pc_readaccountreg(sd,str_buf+str_data[data->u.num].str);
+			if( str_buf[str_data[data->u.num].str+1]=='#')
+				data->u.num = pc_readaccountreg2(sd,str_buf+str_data[data->u.num].str);
+			else
+				data->u.num = pc_readaccountreg(sd,str_buf+str_data[data->u.num].str);
 		}else{
 			data->u.num = pc_readglobalreg(sd,str_buf+str_data[data->u.num].str);
 		}
@@ -954,7 +958,7 @@ int get_val(struct script_state*st,struct script_data* data)
 }
 
 /*==========================================
- *
+ * 文字列への変換
  *------------------------------------------
  */
 char* conv_str(struct script_state *st,struct script_data *data)
@@ -981,7 +985,7 @@ char* conv_str(struct script_state *st,struct script_data *data)
 }
 
 /*==========================================
- *
+ * 数値へ変換
  *------------------------------------------
  */
 int conv_num(struct script_state *st,struct script_data *data)
@@ -999,7 +1003,7 @@ int conv_num(struct script_state *st,struct script_data *data)
 }
 
 /*==========================================
- *
+ * スタックへ数値をプッシュ
  *------------------------------------------
  */
 void push_val(struct script_stack *stack,int type,int val)
@@ -1020,7 +1024,7 @@ void push_val(struct script_stack *stack,int type,int val)
 }
 
 /*==========================================
- *
+ * スタックへ文字列をプッシュ
  *------------------------------------------
  */
 void push_str(struct script_stack *stack,int type,unsigned char *str)
@@ -1041,7 +1045,7 @@ void push_str(struct script_stack *stack,int type,unsigned char *str)
 }
 
 /*==========================================
- *
+ * スタックへ複製をプッシュ
  *------------------------------------------
  */
 void push_copy(struct script_stack *stack,int pos)
@@ -1060,7 +1064,7 @@ void push_copy(struct script_stack *stack,int pos)
 }
 
 /*==========================================
- *
+ * スタックからポップ
  *------------------------------------------
  */
 void pop_stack(struct script_stack* stack,int start,int end)
@@ -1336,9 +1340,12 @@ int buildin_input(struct script_state *st)
 				pc_setreg(sd,num,sd->npc_amount);
 			else if(prefix=='$')
 				strdb_insert(mapval_db,str_buf+str_data[num].str,sd->npc_amount);
-			else if(prefix=='#')
-				pc_setaccountreg(sd,str_buf+str_data[num].str,sd->npc_amount);
-			else
+			else if(prefix=='#'){
+				if( str_buf[str_data[num].str+1]=='#')
+					pc_setaccountreg2(sd,str_buf+str_data[num].str,sd->npc_amount);
+				else
+					pc_setaccountreg(sd,str_buf+str_data[num].str,sd->npc_amount);
+			}else
 				pc_setglobalreg(sd,str_buf+str_data[num].str,sd->npc_amount);
 		} else {
 			// ragemu互換のため
@@ -1397,7 +1404,10 @@ int buildin_set(struct script_state *st)
 	}else if(prefix=='$') {
 		strdb_insert(mapval_db,str_buf+str_data[num].str,val);
 	}else if(prefix=='#') {
-		pc_setaccountreg(sd,str_buf+str_data[num].str,val);	
+		if( str_buf[str_data[num].str+1]=='#' )
+			pc_setaccountreg2(sd,str_buf+str_data[num].str,val);	
+		else
+			pc_setaccountreg(sd,str_buf+str_data[num].str,val);	
 	}else{
 		pc_setglobalreg(sd,str_buf+str_data[num].str,val);
 	}
@@ -3195,7 +3205,7 @@ int buildin_setcastledata(struct script_state *st)
 // 実行部main
 //
 /*==========================================
- *
+ * コマンドの読み取り
  *------------------------------------------
  */
 static int unget_com_data=-1;
@@ -3219,7 +3229,7 @@ int get_com(unsigned char *script,int *pos)
 }
 
 /*==========================================
- *
+ * コマンドのプッシュバック
  *------------------------------------------
  */
 void unget_com(int c)
@@ -3232,7 +3242,7 @@ void unget_com(int c)
 }
 
 /*==========================================
- *
+ * 数値の所得
  *------------------------------------------
  */
 int get_num(unsigned char *script,int *pos)
@@ -3247,7 +3257,7 @@ int get_num(unsigned char *script,int *pos)
 }
 
 /*==========================================
- *
+ * スタックから値を取り出す
  *------------------------------------------
  */
 int pop_val(struct script_state* st)
@@ -3264,7 +3274,7 @@ int pop_val(struct script_state* st)
 #define isstr(c) ((c).type==C_STR || (c).type==C_CONSTSTR)
 
 /*==========================================
- *
+ * 加算演算子
  *------------------------------------------
  */
 void op_add(struct script_state* st)
@@ -3299,7 +3309,7 @@ void op_add(struct script_state* st)
 }
 
 /*==========================================
- *
+ * 二項演算子
  *------------------------------------------
  */
 void op_2num(struct script_state *st,int op)
@@ -3358,7 +3368,7 @@ void op_2num(struct script_state *st,int op)
 }
 
 /*==========================================
- *
+ * 単項演算子
  *------------------------------------------
  */
 void op_1num(struct script_state *st,int op)
@@ -3380,7 +3390,7 @@ void op_1num(struct script_state *st,int op)
 }
 
 /*==========================================
- *
+ * 関数の実行
  *------------------------------------------
  */
 int run_func(struct script_state *st)
@@ -3440,7 +3450,7 @@ int run_func(struct script_state *st)
 }
 
 /*==========================================
- *
+ * スクリプトの実行
  *------------------------------------------
  */
 int run_script(unsigned char *script,int pos,int rid,int oid)

@@ -73,8 +73,8 @@ struct {
 	char userid[24],pass[24],lastlogin[24];
 	int logincount;
 	int state;
-	int account_reg_num;
-	struct global_reg account_reg[ACCOUNT_REG_NUM];
+	int account_reg2_num;
+	struct global_reg account_reg2[ACCOUNT_REG2_NUM];
 } *auth_dat;
 
 int auth_num=0,auth_max=0;
@@ -249,14 +249,14 @@ int mmo_auth_init(void)
 				auth_dat[auth_num].state=0;
 
 			
-			for(j=0;j<ACCOUNT_REG_NUM;j++){
+			for(j=0;j<ACCOUNT_REG2_NUM;j++){
 				p+=n;
 				if(sscanf(p,"%[^\t,],%d %n",str,&v,&n)!=2)
 					break;
-				strcpy(auth_dat[auth_num].account_reg[j].str,str);
-				auth_dat[auth_num].account_reg[j].value=v;
+				strcpy(auth_dat[auth_num].account_reg2[j].str,str);
+				auth_dat[auth_num].account_reg2[j].value=v;
 			}
-			auth_dat[auth_num].account_reg_num=j;
+			auth_dat[auth_num].account_reg2_num=j;
 
 			auth_num++;
 			if(account_id>=account_id_count)
@@ -285,10 +285,10 @@ void mmo_auth_sync(void)
 			auth_dat[i].sex==2 ? 'S' : (auth_dat[i].sex ? 'M' : 'F'),
 			auth_dat[i].logincount,auth_dat[i].state);
 		
-		for(j=0;j<auth_dat[i].account_reg_num;j++){
+		for(j=0;j<auth_dat[i].account_reg2_num;j++){
 			fprintf(fp,"%s,%d ",
-				auth_dat[i].account_reg[j].str,
-				auth_dat[i].account_reg[j].value);
+				auth_dat[i].account_reg2[j].str,
+				auth_dat[i].account_reg2[j].value);
 		}
 		fprintf(fp,RETCODE);
 	}
@@ -315,7 +315,7 @@ int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 	auth_dat[i].sex= sex=='M';
 	auth_dat[i].logincount=0;
 	auth_dat[i].state = 0;
-	auth_dat[i].account_reg_num = 0;
+	auth_dat[i].account_reg2_num = 0;
 	auth_num++;
 	return 0;
 }
@@ -520,13 +520,13 @@ int parse_fromchar(int fd)
 		if(i<auth_num){
 			WFIFOW(fd,0)=0x2729;
 			WFIFOL(fd,4)=RFIFOL(fd,2);
-			for(p=8,j=0;j<auth_dat[i].account_reg_num;p+=36,j++){
-				memcpy(WFIFOP(fd,p),auth_dat[i].account_reg[j].str,32);
-				WFIFOL(fd,p+32)=auth_dat[i].account_reg[j].value;
+			for(p=8,j=0;j<auth_dat[i].account_reg2_num;p+=36,j++){
+				memcpy(WFIFOP(fd,p),auth_dat[i].account_reg2[j].str,32);
+				WFIFOL(fd,p+32)=auth_dat[i].account_reg2[j].value;
 			}
 			WFIFOW(fd,2)=p;
 			WFIFOSET(fd,p);
-//			printf("account_reg send : login->char (auth fifo)\n");
+//			printf("account_reg2 send : login->char (auth fifo)\n");
 		}
 	  }
 	  
@@ -621,11 +621,11 @@ int parse_fromchar(int fd)
 			}
 			if(i<auth_num){
 				unsigned char buf[4096];
-				for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG_NUM;p+=36,j++){
-					memcpy(auth_dat[i].account_reg[j].str,RFIFOP(fd,p),32);
-					auth_dat[i].account_reg[j].value=RFIFOL(fd,p+32);
+				for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG2_NUM;p+=36,j++){
+					memcpy(auth_dat[i].account_reg2[j].str,RFIFOP(fd,p),32);
+					auth_dat[i].account_reg2[j].value=RFIFOL(fd,p+32);
 				}
-				auth_dat[i].account_reg_num=j;
+				auth_dat[i].account_reg2_num=j;
 				// 他のサーバーへポスト（同垢ログインがなければ送らなくていい）
 				memcpy(WBUFP(buf,0),RFIFOP(fd,0),RFIFOW(fd,2));
 				WBUFW(buf,0)=0x2729;

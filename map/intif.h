@@ -7,6 +7,9 @@ int intif_GMmessage(char* mes,int len,int flag);
 
 int intif_wis_message(struct map_session_data *sd,char *nick,char *mes,int mes_len);
 
+int intif_saveaccountreg(struct map_session_data *sd);
+int intif_request_accountreg(struct map_session_data *sd);
+
 int intif_request_storage(int account_id);
 int intif_send_storage(int account_id);
 

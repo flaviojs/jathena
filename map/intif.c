@@ -29,7 +29,7 @@
 #endif
 
 static const int packet_len_table[]={
-	-1,-1,27, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	-1,-1,27, 0, -1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	-1, 7, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	35,-1,11,15, 34,29, 7,-1,  0, 0, 0, 0,  0, 0,  0, 0,
 	10,-1,15, 0, 79,19, 7,-1,  0,-1,-1,-1, 14,67,186,-1,
@@ -136,6 +136,29 @@ int intif_wis_replay(int id,int flag)
 	WFIFOSET(inter_fd,7);
 //	if(battle_config.etc_log)
 //		printf("intif_wis_replay %d %d\n",id,flag);
+	return 0;
+}
+
+// アカウント変数送信
+int intif_saveaccountreg(struct map_session_data *sd)
+{
+	int j,p;
+	WFIFOW(inter_fd,0) = 0x3004;
+	WFIFOL(inter_fd,4) = sd->bl.id;
+	for(j=0,p=8;j<sd->status.account_reg_num;j++,p+=36){
+		memcpy(WFIFOP(inter_fd,p),sd->status.account_reg[j].str,32);
+		WFIFOL(inter_fd,p+32)=sd->status.account_reg[j].value;
+	}
+	WFIFOW(inter_fd,2)=p;
+	WFIFOSET(inter_fd,p);
+	return 0;
+}
+// アカウント変数要求
+int intif_request_accountreg(struct map_session_data *sd)
+{
+	WFIFOW(inter_fd,0) = 0x3005;
+	WFIFOL(inter_fd,2) = sd->bl.id;
+	WFIFOSET(inter_fd,6);
 	return 0;
 }
 
@@ -492,6 +515,22 @@ int intif_parse_WisEnd(int fd)
 	return 0;
 }
 
+// アカウント変数通知
+int intif_parse_AccountReg(int fd)
+{
+	int j,p;
+	struct map_session_data *sd;
+	if( (sd=map_id2sd(RFIFOL(fd,4)))==NULL )
+		return 1;
+	
+	for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG_NUM;p+=36,j++){
+		memcpy(sd->status.account_reg[j].str,RFIFOP(fd,p),32);
+		sd->status.account_reg[j].value=RFIFOL(fd,p+32);
+	}
+	sd->status.account_reg_num=j;
+//	printf("intif: accountreg\n");
+	return 0;
+}
 // 倉庫データ受信
 int intif_parse_LoadStorage(int fd)
 {
@@ -874,6 +913,7 @@ int intif_parse(int fd)
 	case 0x3800:	clif_GMmessage(NULL,RFIFOP(fd,4),packet_len-4,0); break;
 	case 0x3801:	intif_parse_WisMessage(fd); break;
 	case 0x3802:	intif_parse_WisEnd(fd); break;
+	case 0x3804:	intif_parse_AccountReg(fd); break;
 	case 0x3810:	intif_parse_LoadStorage(fd); break;
 	case 0x3811:	intif_parse_SaveStorage(fd); break;
 	case 0x3820:	intif_parse_PartyCreated(fd); break;

@@ -559,6 +559,9 @@ int pc_authok(int id,struct mmo_charstatus *st)
 		sd->dev.val1[i] = 0;
 		sd->dev.val2[i] = 0;
 	}
+	
+	// アカウント変数の送信要求
+	intif_request_accountreg(sd);
 
 	// アイテムチェック
 	pc_setinventorydata(sd);
@@ -4523,13 +4526,13 @@ int pc_setaccountreg(struct map_session_data *sd,char *reg,int val)
 				break;
 			}
 		}
-		chrif_saveaccountreg(sd);
+		intif_saveaccountreg(sd);
 		return 0;
 	}
 	for(i=0;i<sd->status.account_reg_num;i++){
 		if(strcmp(sd->status.account_reg[i].str,reg)==0){
 			sd->status.account_reg[i].value=val;
-			chrif_saveaccountreg(sd);
+			intif_saveaccountreg(sd);
 			return 0;
 		}
 	}
@@ -4537,11 +4540,64 @@ int pc_setaccountreg(struct map_session_data *sd,char *reg,int val)
 		strcpy(sd->status.account_reg[i].str,reg);
 		sd->status.account_reg[i].value=val;
 		sd->status.account_reg_num++;
-		chrif_saveaccountreg(sd);
+		intif_saveaccountreg(sd);
 		return 0;
 	}
 	if(battle_config.error_log)
 		printf("pc_setaccountreg : couldn't set %s (ACCOUNT_REG_NUM = %d)\n", reg, ACCOUNT_REG_NUM);
+
+	return 1;
+}
+/*==========================================
+ * script用アカウント変数2の値を読む
+ *------------------------------------------
+ */
+int pc_readaccountreg2(struct map_session_data *sd,char *reg)
+{
+	int i;
+
+	for(i=0;i<sd->status.account_reg2_num;i++){
+		if(strcmp(sd->status.account_reg2[i].str,reg)==0)
+			return sd->status.account_reg2[i].value;
+	}
+
+	return 0;
+}
+/*==========================================
+ * script用アカウント変数2の値を設定
+ *------------------------------------------
+ */
+int pc_setaccountreg2(struct map_session_data *sd,char *reg,int val)
+{
+	int i;
+
+	if(val==0){
+		for(i=0;i<sd->status.account_reg2_num;i++){
+			if(strcmp(sd->status.account_reg2[i].str,reg)==0){
+				sd->status.account_reg2[i]=sd->status.account_reg2[sd->status.account_reg2_num-1];
+				sd->status.account_reg2_num--;
+				break;
+			}
+		}
+		chrif_saveaccountreg2(sd);
+		return 0;
+	}
+	for(i=0;i<sd->status.account_reg2_num;i++){
+		if(strcmp(sd->status.account_reg2[i].str,reg)==0){
+			sd->status.account_reg2[i].value=val;
+			chrif_saveaccountreg2(sd);
+			return 0;
+		}
+	}
+	if(sd->status.account_reg2_num<ACCOUNT_REG2_NUM){
+		strcpy(sd->status.account_reg2[i].str,reg);
+		sd->status.account_reg2[i].value=val;
+		sd->status.account_reg2_num++;
+		chrif_saveaccountreg2(sd);
+		return 0;
+	}
+	if(battle_config.error_log)
+		printf("pc_setaccountreg2 : couldn't set %s (ACCOUNT_REG2_NUM = %d)\n", reg, ACCOUNT_REG2_NUM);
 
 	return 1;
 }

@@ -1,4 +1,49 @@
 --------------------
+//0882 by 胡蝶蘭
+
+・スクリプトに0881相当のアカウント共有変数機能のプレフィックス変更
+	・0881のアカウント変数はプレフィックス##になりました。
+	・0881のアカウント変数は全ワールドで共有されます。
+	・変数の個数はmmo.hのACCOUNT_REG2_NUMで定義されています(16)。
+・ワールド内のアカウント共有変数機能追加
+	・変数名のプレフィックスは#です。
+	・変数の個数はmmo.hのACCOUNT_REG_NUMで定義されています(16)。
+	・0881の銀行スクリプトはこちらを使用するようになります。
+	  よって以前のデータがつかえないのであらかじめ引き出しておいてください.
+	・変数データは save/accreg.txt に保存されます。
+	  このファイル名は inter_athena.conf で変更可能です。conf_ref.txt参照。
+
+	(common/)
+	mmo.h
+		ACCOUNT_REG_NUMを16に、ACCOUNT_REG_NUM2追加
+		struct mmo_charstatusにaccount_reg2_num,account_reg2メンバ追加
+	(login/)
+	login.c
+		account_regを全てaccount_reg2に置き換え
+	(char/)
+	char.c
+		account_regを全てaccount_reg2に置き換え
+	inter.c
+		ワールド内アカウント変数機能追加。
+		inter_accreg*()追加、accreg_db追加など。
+	(map/)
+	chrif.c/chrif.h
+		account_regを全てaccount_reg2に置き換え
+		0881でのバグを修正
+	intif.c/intif.h
+		ワールド内アカウント変数機能追加。
+	pc.c/pc.h
+		pc_*accountreg()=>pc_*accountreg2()に。
+		pc_setaccountreg(),pc_readaccountreg()追加。
+	script.c
+		buildin_set(),buildin_get_val(),buildin_input()修正
+	(doc/)
+	inter_server_packet.txt
+		ワールド内アカウント変数関係
+	conf_ref.txt
+		accreg_txt追加
+	
+--------------------
 //0881 by 胡蝶蘭
 
 ・スクリプトにアカウント共有変数機能追加

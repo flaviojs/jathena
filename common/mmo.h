@@ -19,7 +19,8 @@
 #define MAX_CART 100
 #define MAX_SKILL 350
 #define GLOBAL_REG_NUM 96
-#define ACCOUNT_REG_NUM	32
+#define ACCOUNT_REG_NUM 16
+#define ACCOUNT_REG2_NUM 16
 #define DEFAULT_WALK_SPEED 150
 #define MAX_STORAGE 100
 #define MAX_PARTY 12
@@ -95,6 +96,8 @@ struct mmo_charstatus {
 	struct global_reg global_reg[GLOBAL_REG_NUM];
 	int account_reg_num;
 	struct global_reg account_reg[ACCOUNT_REG_NUM];
+	int account_reg2_num;
+	struct global_reg account_reg2[ACCOUNT_REG2_NUM];
 };
 
 struct storage {

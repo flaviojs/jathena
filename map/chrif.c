@@ -353,14 +353,14 @@ int chrif_changedsex(int fd)
  * アカウント変数保存要求
  *------------------------------------------
  */
-int chrif_saveaccountreg(struct map_session_data *sd)
+int chrif_saveaccountreg2(struct map_session_data *sd)
 {
 	int p,j;
-	for(p=8,j=0;j<sd->status.account_reg_num;j++){
-		struct global_reg *reg=&sd->status.account_reg[j];
+	for(p=8,j=0;j<sd->status.account_reg2_num;j++){
+		struct global_reg *reg=&sd->status.account_reg2[j];
 		if(reg->str[0] && reg->value!=0){
 			memcpy(WFIFOP(char_fd,p),reg->str,32);
-			WFIFOW(char_fd,p+32)=reg->value;
+			WFIFOL(char_fd,p+32)=reg->value;
 			p+=36;
 		}
 	}
@@ -374,18 +374,19 @@ int chrif_saveaccountreg(struct map_session_data *sd)
  * アカウント変数通知
  *------------------------------------------
  */
-int chrif_accountreg(int fd)
+int chrif_accountreg2(int fd)
 {
 	int j,p;
 	struct map_session_data *sd;
 	if( (sd=map_id2sd(RFIFOL(fd,4)))==NULL )
 		return 1;
 	
-	for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG_NUM;p+=36,j++){
-		memcpy(sd->status.account_reg[j].str,RFIFOP(fd,p),32);
-		sd->status.account_reg[j].value=RFIFOW(fd,p+32);
+	for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG2_NUM;p+=36,j++){
+		memcpy(sd->status.account_reg2[j].str,RFIFOP(fd,p),32);
+		sd->status.account_reg2[j].value=RFIFOL(fd,p+32);
 	}
-	printf("chrif: accountreg\n");
+	sd->status.account_reg2_num=j;
+//	printf("chrif: accountreg2\n");
 	return 0;
 }
 
@@ -439,7 +440,7 @@ int chrif_parse(int fd)
 		case 0x2b09: map_addchariddb(RFIFOL(fd,2),RFIFOP(fd,6)); break;
 		case 0x2b0b: chrif_changedgm(fd); break;
 		case 0x2b0d: chrif_changedsex(fd); break;
-		case 0x2b11: chrif_accountreg(fd); break;
+		case 0x2b11: chrif_accountreg2(fd); break;
 
 		default:
 			if(battle_config.error_log)
