@@ -1,4 +1,48 @@
 --------------------
+//0971 by (凸)
+・atcommand.hに残っていたjobchange2とかの残骸を削除
+・転生スキルをエフェクトだけいくつか追加したりチャンピオンはそれなりに追加したり
+	エフェクトのみ
+		ハイプリースト バジリカ(HP_BASILICA)
+		ホワイトスミス カートブースト(WS_CARTBOOST)
+		スナイパー トゥルーサイト(SN_SIGHT)
+		ジプシー 月明りの泉に落ちる花びら(CG_MOONLIT)
+		パラディン ゴスペル(PA_GOSPEL)
+	追加ダメージ等なし
+		ロードナイト ヘッドクラッシュ(LK_HEADCRUSH)
+		ロードナイト ジョイントビート(LK_JOINTBEAT)
+		ロードナイト スパイラルピアース(LK_SPIRALPIERCE)
+		パラディン プレッシャー(PA_PRESSURE)
+		パラディン サクリファイス(PA_SACRIFICE)
+	それなり(コンボは繋がりますがディレイは適当、ダメージ追加はあるけどそれ以外の追加効果は無し)
+		チャンピオン 猛虎硬派山(CH_PALMSTRIKE)
+		チャンピオン 伏虎拳(CH_TIGERFIST)
+		チャンピオン 連柱崩撃(CH_CHAINCRUSH)
+		チャンピオン 狂気功(CH_SOULCOLLECT)
+
+	(db/)
+	cast_db.txt
+	skill_db.txt
+	skill_require_db.txt
+	(map/)
+	atcommand.h ゴミ削除
+	battle.c
+		battle_calc_pet_weapon_attack() 変更
+		battle_calc_mob_weapon_attack() 変更
+		battle_calc_pc_weapon_attack() 変更
+	clif.c
+		clif_parse_UseSkillToId() 変更
+	skill.c
+		skill_get_unit_id() 項目追加
+		skill_attack() チャンピオンコンボ処理追加
+		skill_castend_damage_id() 変更
+		skill_castend_nodamage_id() 変更
+		skill_castend_id() 変更
+		skill_unitsetting() 変更
+		skill_check_condition() 変更
+		skill_use_id() 変更
+
+--------------------
 //0970 by (凸)
 ・ドレイクのウォーターボールが異常に痛い(121発食らう)のでLv5以上の場合は25発に制限
 ・シグナムクルシスの計算式を14+SkillLvから10+SkillLv*2変更

@@ -194,6 +194,22 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 /* 330- */
 	SC_SERVICE4U,
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,
+/* 340- */
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+/* 350- */
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+/* 360- */
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+/* 370- */
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+/* 380- */
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+/* 390- */
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+/* 400- */
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+/* 410- */
+	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 };
 
 static const int dirx[8]={0,-1,-1,-1,0,1,1,1};
@@ -312,6 +328,10 @@ int skill_get_unit_id(int id,int flag)
 	case DC_SERVICEFORYOU:	return 0xaf;				/* サービスフォーユー */
 	case RG_GRAFFITI:		return 0xb0;				/* グラフィティ */
 	case AM_DEMONSTRATION:	return 0xb1;				/* デモンストレーション */
+	case PA_GOSPEL:			return 0xb3;				/* ゴスペル */
+	case HP_BASILICA:		return 0xb4;				/* バジリカ */
+	case PF_SPIDERWEB:		return 0xb7;				/* スパイダーウェッブ */
+	
 	}
 	return 0;
 	/*
@@ -772,7 +792,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		if(skillid == MO_CHAINCOMBO) {
 			int delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src); //基本ディレイの計算
 			if(damage < battle_get_hp(bl)) { //ダメージが対象のHPより小さい場合
-				if(pc_checkskill(sd, MO_COMBOFINISH) > 0 && sd->spiritball >= 0) //猛龍拳(MO_COMBOFINISH)取得＆気球保持時は+300ms
+				if(pc_checkskill(sd, MO_COMBOFINISH) > 0 && sd->spiritball > 0) //猛龍拳(MO_COMBOFINISH)取得＆気球保持時は+300ms
 					delay += 300 * battle_config.combo_delay_rate /100; //追加ディレイをconfにより調整
 
 				skill_status_change_start(src,SC_COMBO,MO_CHAINCOMBO,skilllv,0,0,delay,0); //コンボ状態に
@@ -785,7 +805,11 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		else if(skillid == MO_COMBOFINISH) {
 			int delay = 700 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
 			if(damage < battle_get_hp(bl)) {
-				if(pc_checkskill(sd, MO_EXTREMITYFIST) > 0 && sd->spiritball >= 4 && sd->sc_data[SC_EXPLOSIONSPIRITS].timer != -1) //阿修羅覇凰拳(MO_EXTREMITYFIST)取得＆気球4個保持＆爆裂波動(MO_EXPLOSIONSPIRITS)状態時は+300ms
+				//阿修羅覇凰拳(MO_EXTREMITYFIST)取得＆気球4個保持＆爆裂波動(MO_EXPLOSIONSPIRITS)状態時は+300ms
+				//伏虎拳(CH_TIGERFIST)取得時も+300ms
+				if((pc_checkskill(sd, MO_EXTREMITYFIST) > 0 && sd->spiritball >= 4 && sd->sc_data[SC_EXPLOSIONSPIRITS].timer != -1) || 
+				(pc_checkskill(sd, CH_TIGERFIST) > 0 && sd->spiritball > 0) ||
+				(pc_checkskill(sd, CH_CHAINCRUSH) > 0 && sd->spiritball > 1))
 					delay += 300 * battle_config.combo_delay_rate /100; //追加ディレイをconfにより調整
 
 				skill_status_change_start(src,SC_COMBO,MO_COMBOFINISH,skilllv,0,0,delay,0); //コンボ状態に
@@ -793,8 +817,35 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 			sd->attackabletime = sd->canmove_tick = tick + delay;
 			clif_combo_delay(src,delay); //コンボディレイパケットの送信
 		}
-	}
 //猛龍拳(MO_COMBOFINISH)ここまで
+//伏虎拳(CH_TIGERFIST)ここから
+		else if(skillid == CH_TIGERFIST) {
+			int delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
+			if(damage < battle_get_hp(bl)) {
+				if(pc_checkskill(sd, CH_CHAINCRUSH) > 0) //連柱崩撃(CH_CHAINCRUSH)取得時は+300ms
+					delay += 300 * battle_config.combo_delay_rate /100; //追加ディレイをconfにより調整
+
+				skill_status_change_start(src,SC_COMBO,CH_TIGERFIST,skilllv,0,0,delay,0); //コンボ状態に
+			}
+			sd->attackabletime = sd->canmove_tick = tick + delay;
+			clif_combo_delay(src,delay); //コンボディレイパケットの送信
+		}
+//伏虎拳(CH_TIGERFIST)ここまで
+//連柱崩撃(CH_CHAINCRUSH)ここから
+		else if(skillid == CH_CHAINCRUSH) {
+			int delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
+			if(damage < battle_get_hp(bl)) {
+				//阿修羅覇凰拳(MO_EXTREMITYFIST)取得＆気球4個保持＆爆裂波動(MO_EXPLOSIONSPIRITS)状態時は+300ms
+				if(pc_checkskill(sd, MO_EXTREMITYFIST) > 0 && sd->spiritball >= 4 && sd->sc_data[SC_EXPLOSIONSPIRITS].timer != -1)
+					delay += 300 * battle_config.combo_delay_rate /100; //追加ディレイをconfにより調整
+
+				skill_status_change_start(src,SC_COMBO,CH_CHAINCRUSH,skilllv,0,0,delay,0); //コンボ状態に
+			}
+			sd->attackabletime = sd->canmove_tick = tick + delay;
+			clif_combo_delay(src,delay); //コンボディレイパケットの送信
+		}
+//連柱崩撃(CH_CHAINCRUSH)ここまで
+	}
 //使用者がPCの場合の処理ここまで
 //武器スキル？ここから
 	if(attack_type&BF_WEAPON && damage > 0 && src != bl && src == dsrc) { //武器スキル＆ダメージあり＆使用者と対象者が違う＆src=dsrc
@@ -1332,6 +1383,12 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case CR_HOLYCROSS:		/* ホーリークロス */
 	case CR_SHIELDCHARGE:
 	case CR_SHIELDBOOMERANG:
+	case LK_AURABLADE:		/* オーラブレード */
+	case LK_SPIRALPIERCE:	/* スパイラルピアース */
+	case LK_HEADCRUSH:	/* ヘッドクラッシュ */
+	case LK_JOINTBEAT:	/* ジョイントビート */
+	case PA_PRESSURE:	/* プレッシャー */
+	case PA_SACRIFICE:	/* サクリファイス */
 	/* 以下MOB専用 */
 	/* 単体攻撃、SP減少攻撃、遠距離攻撃、防御無視攻撃、多段攻撃 */
 	case NPC_PIERCINGATT:
@@ -1437,6 +1494,9 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		}
 		break;
 	case MO_COMBOFINISH:	/* 猛龍拳 */
+	case CH_TIGERFIST:		/* 伏虎拳 */
+	case CH_CHAINCRUSH:		/* 連柱崩撃 */
+	case CH_PALMSTRIKE:		/* 猛虎硬派山 */
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case MO_EXTREMITYFIST:	/* 阿修羅覇鳳拳 */
@@ -2008,6 +2068,8 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case SA_FROSTWEAPON:	/* フロストウェポン */
 	case SA_LIGHTNINGLOADER:/* ライトニングローダー */
 	case SA_SEISMICWEAPON:	/* サイズミックウェポン */
+	case WS_CARTBOOST:		/* カートブースト */
+	case SN_SIGHT:			/* トゥルーサイト */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
 			break;
@@ -2124,6 +2186,13 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		if(sd) {
 			clif_skill_nodamage(src,bl,skillid,skilllv,1);
 			pc_addspiritball(sd,skill_get_time(skillid,skilllv),skilllv);
+		}
+		break;
+	case CH_SOULCOLLECT:	// 狂気功
+		if(sd) {
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			sd->spiritball = 5;
+			clif_spiritball(sd);
 		}
 		break;
 	case MO_BLADESTOP:	// 白刃取り
@@ -2343,6 +2412,9 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case DC_DONTFORGETME:		/* 私を忘れないで… */
 	case DC_FORTUNEKISS:		/* 幸運のキス */
 	case DC_SERVICEFORYOU:		/* サービスフォーユー */
+	case HP_BASILICA:			/* バジリカ */
+	case PA_GOSPEL:				/* ゴスペル */
+	case CG_MOONLIT:			/* 月明りの泉に落ちる花びら */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_unitsetting(src,skillid,skilllv,src->x,src->y,0);
 		break;
@@ -2936,6 +3008,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 	struct block_list *bl;
 	int range,inf2;
 
+
 	if( (sd=map_id2sd(id))==NULL || sd->bl.prev == NULL)
 		return 0;
 
@@ -3010,7 +3083,10 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 	if(range < 0)
 		range = battle_get_range(&sd->bl) - (range + 1);
 	range += battle_config.pc_skill_add_range;
-	if(sd->skillid == MO_EXTREMITYFIST && sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH)
+	if((sd->skillid == MO_EXTREMITYFIST && sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH) ||
+	   (sd->skillid == CH_TIGERFIST && sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH) ||
+	   (sd->skillid == CH_CHAINCRUSH && sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH) ||
+	   (sd->skillid == CH_CHAINCRUSH && sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == CH_TIGERFIST))
 		range += skill_get_blewcount(MO_COMBOFINISH,sd->sc_data[SC_COMBO].val2);
 	if(!battle_config.skill_out_range_consume) {
 		if(range < distance(sd->bl.x,sd->bl.y,bl->x,bl->y)) {
@@ -3595,6 +3671,15 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		range=1;
 		target=BCT_ENEMY;
 		break;
+	case HP_BASILICA:			/* バジリカ */
+		limit=skill_get_time(skillid,skilllv);
+		val2=skilllv+1;
+		interval = -1;
+		break;
+	case PA_GOSPEL:		/* ゴスペル */
+		count=49;
+		limit=skill_get_time(skillid,skilllv);
+		break;
 	};
 
 	group=skill_initunitgroup(src,count,skillid,skilllv,
@@ -3793,6 +3878,10 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 				range=4;	/* 中心の場合は範囲を4にオーバーライド */
 			else
 				range=-1;	/* 中心じゃない場合は範囲を-1にオーバーライド */
+			break;
+		case PA_GOSPEL:		/* ゴスペル */
+			ux+=(i%7-2);
+			uy+=(i/7-2);
 			break;
 		}
 		//直上スキルの場合設置座標上にランドプロテクターがないかチェック
@@ -4548,8 +4637,14 @@ int skill_check_condition(struct map_session_data *sd,int type)
 			return 0;
 		}
 		break;
-	case MO_CALLSPIRITS:
+	case MO_CALLSPIRITS:	/* 気功 */
 		if(sd->spiritball >= lv) {
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
+		}
+		break;
+	case CH_SOULCOLLECT:	/* 狂気功 */
+		if(sd->spiritball >= 5) {
 			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
@@ -4571,8 +4666,18 @@ int skill_check_condition(struct map_session_data *sd,int type)
 		if(sd->sc_data[SC_COMBO].timer == -1 || sd->sc_data[SC_COMBO].val1 != MO_CHAINCOMBO)
 			return 0;
 		break;
+	case CH_TIGERFIST:						//伏虎拳
+		if(sd->sc_data[SC_COMBO].timer == -1 || sd->sc_data[SC_COMBO].val1 != MO_COMBOFINISH)
+			return 0;
+		break;
+	case CH_CHAINCRUSH:						//連柱崩撃
+		if(sd->sc_data[SC_COMBO].timer == -1)
+			return 0;
+		if(sd->sc_data[SC_COMBO].val1 != MO_COMBOFINISH && sd->sc_data[SC_COMBO].val1 != CH_TIGERFIST)
+			return 0;
+		break;
 	case MO_EXTREMITYFIST:					// 阿修羅覇鳳拳
-		if((sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH) || sd->sc_data[SC_BLADESTOP].timer!=-1)
+		if((sd->sc_data[SC_COMBO].timer != -1 && (sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH || sd->sc_data[SC_COMBO].val1 == CH_CHAINCRUSH)) || sd->sc_data[SC_BLADESTOP].timer!=-1)
 			spiritball--;
 		break;
 	}
@@ -4854,7 +4959,11 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		if(skill_num == ALL_RESURRECTION && !pc_isdead(target_sd))
 			return 0;
 	}
-	if((skill_num != MO_CHAINCOMBO && skill_num != MO_COMBOFINISH && skill_num != MO_EXTREMITYFIST) ||
+	if((skill_num != MO_CHAINCOMBO &&
+	    skill_num != MO_COMBOFINISH &&
+	    skill_num != MO_EXTREMITYFIST &&
+	    skill_num != CH_TIGERFIST &&
+	    skill_num != CH_CHAINCRUSH) ||
 		(skill_num == MO_EXTREMITYFIST && sd->state.skill_flag) )
 		pc_stopattack(sd);
 
@@ -4882,11 +4991,13 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		if(sd->sc_data[SC_BLADESTOP].timer!=-1)
 			target_id = ((struct block_list *)sd->sc_data[SC_BLADESTOP].val4)->id;
 		break;
-	case MO_COMBOFINISH:		/*猛龍拳*/
+	case MO_COMBOFINISH:	/*猛龍拳*/
+	case CH_TIGERFIST:		/* 伏虎拳 */
+	case CH_CHAINCRUSH:		/* 連柱崩撃 */
 		target_id = sd->attacktarget;
 		break;
 	case MO_EXTREMITYFIST:	/*阿修羅覇鳳拳*/
-		if(sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH) {
+		if(sd->sc_data[SC_COMBO].timer != -1 && (sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH || sd->sc_data[SC_COMBO].val1 == CH_CHAINCRUSH)) {
 			casttime = 0;
 			target_id = sd->attacktarget;
 		}

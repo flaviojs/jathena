@@ -1805,6 +1805,16 @@ static struct Damage battle_calc_pet_weapon_attack(
 			case MO_COMBOFINISH:	// 猛龍拳
 				damage = damage*(240+ 60*skill_lv)/100;
 				break;
+			case CH_TIGERFIST:	// 伏虎拳
+				damage = damage*(100+ 20*skill_lv)/100;
+				break;
+			case CH_CHAINCRUSH:	// 連柱崩撃
+				damage = damage*(100+ 20*skill_lv)/100;
+				div_=skill_get_num(skill_num,skill_lv);
+				break;
+			case CH_PALMSTRIKE:	// 猛虎硬派山
+				damage = damage*(50+ 100*skill_lv)/100;
+				break;
 			case BA_MUSICALSTRIKE:	// ミュージカルストライク
 				damage = damage*(100+ 50 * skill_lv)/100;
 				flag=(flag&~BF_RANGEMASK)|BF_LONG;
@@ -2209,6 +2219,16 @@ static struct Damage battle_calc_mob_weapon_attack(
 				break;
 			case MO_COMBOFINISH:	// 猛龍拳
 				damage = damage*(240+ 60*skill_lv)/100;
+				break;
+			case CH_TIGERFIST:	// 伏虎拳
+				damage = damage*(100+ 20*skill_lv)/100;
+				break;
+			case CH_CHAINCRUSH:	// 連柱崩撃
+				damage = damage*(100+ 20*skill_lv)/100;
+				div_=skill_get_num(skill_num,skill_lv);
+				break;
+			case CH_PALMSTRIKE:	// 猛虎硬派山
+				damage = damage*(50+ 100*skill_lv)/100;
 				break;
 			case BA_MUSICALSTRIKE:	// ミュージカルストライク
 				damage = damage*(100+ 50 * skill_lv)/100;
@@ -2895,6 +2915,19 @@ static struct Damage battle_calc_pc_weapon_attack(
 			case MO_COMBOFINISH:	// 猛龍拳
 				damage = damage*(240+ 60*skill_lv)/100;
 				damage2 = damage2*(240+ 60*skill_lv)/100;
+				break;
+			case CH_TIGERFIST:	// 伏虎拳
+				damage = damage*(100+ 20*skill_lv)/100;
+				damage2 = damage2*(100+ 20*skill_lv)/100;
+				break;
+			case CH_CHAINCRUSH:	// 連柱崩撃
+				damage = damage*(100+ 20*skill_lv)/100;
+				damage2 = damage2*(100+ 20*skill_lv)/100;
+				div_=skill_get_num(skill_num,skill_lv);
+				break;
+			case CH_PALMSTRIKE:	// 猛虎硬派山
+				damage = damage*(50+ 100*skill_lv)/100;
+				damage2 = damage2*(50+ 100*skill_lv)/100;
 				break;
 			case BA_MUSICALSTRIKE:	// ミュージカルストライク
 				if(!sd->state.arrow_atk && sd->arrow_atk > 0) {
