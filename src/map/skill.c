@@ -197,13 +197,23 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 /* 340- */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 /* 350- */
-	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+	-1,-1,-1,-1,-1,
+	SC_AURABLADE,
+	SC_PARRYING,
+	SC_CONCENTRATION,
+	SC_TENSIONRELAX,
+	SC_BERSERK,
 /* 360- */
-	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+	-1,
+	SC_ASSUMPTIO,-1,-1,-1,-1,-1,-1,-1,-1,
 /* 370- */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 /* 380- */
-	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+	SC_TURESIGHT,
+	-1,-1,
+	SC_WINDWALK,
+	-1,-1,-1,
+	SC_CARTBOOST,-1,-1,
 /* 390- */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 /* 400- */
@@ -2070,6 +2080,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case SA_SEISMICWEAPON:	/* サイズミックウェポン */
 	case WS_CARTBOOST:		/* カートブースト */
 	case SN_SIGHT:			/* トゥルーサイト */
+	case SN_WINDWALK:		/* ウインドウォーク */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
 			break;
@@ -2094,6 +2105,12 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case AL_RUWACH:			/* ルアフ */
 	case MO_EXPLOSIONSPIRITS:	// 爆裂波動
 	case MO_STEELBODY:		// 金剛
+	case LK_AURABLADE:		/* オーラブレード */
+	case LK_PARRYING:		/* パリイング */
+	case LK_CONCENTRATION:	/* コンセントレーション */
+	case LK_TENSIONRELAX:	/* テンションリラックス */
+	case LK_BERSERK:		/* バーサーク */
+	case HP_ASSUMPTIO:		/*  */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
 		break;
@@ -5737,6 +5754,12 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			case SC_DANCING:			/* ダンス/演奏中 */
 			case SC_RIDING:
 			case SC_BLADESTOP_WAIT:
+			case SC_AURABLADE:			/* オーラブレード */
+			case SC_PARRYING:			/* パリイング */
+			case SC_CONCENTRATION:		/* コンセントレーション */
+			case SC_TENSIONRELAX:		/* テンションリラックス */
+			case SC_BERSERK:			/* バーサーク */
+			case SC_ASSUMPTIO:			/* アシャンプティオ */
 				calc_flag = 1;
 				break;
 
@@ -6543,6 +6566,17 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_KEEPING:
 		case SC_BARRIER:
 		case SC_HALLUCINATION:
+			break;
+		case SC_AURABLADE:		/* オーラブレード */
+		case SC_PARRYING:		/* パリイング */
+		case SC_CONCENTRATION:	/* コンセントレーション */
+		case SC_TENSIONRELAX:	/* テンションリラックス */
+		case SC_BERSERK:		/* バーサーク */
+		case SC_ASSUMPTIO:		/*  */
+		case SC_TURESIGHT:		/* トゥルーサイト */
+		case SC_CARTBOOST:		/* カートブースト */
+		case SC_WINDWALK:		/* ウインドウォーク */
+			//とりあえず手抜き
 			break;
 
 		default:

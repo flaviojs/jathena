@@ -224,6 +224,21 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_FROSTWEAPON			=91,
 	SC_LIGHTNINGLOADER		=92,
 	SC_SEISMICWEAPON		=93,
+	SC_AURABLADE			=103, /* オーラブレード */
+	SC_PARRYING				=104, /* パリイング */
+	SC_CONCENTRATION		=105, /* コンセントレーション */
+	SC_TENSIONRELAX			=106, /* テンションリラックス */
+	SC_BERSERK				=108, /* バーサーク */
+	SC_ASSUMPTIO			=110, /* アシャンプティオ */
+	SC_MAGICPOWER			=113, /* 魔法力増幅 */
+	SC_TURESIGHT			=115, /* トゥルーサイト */
+	SC_WINDWALK				=116, /* ウインドウォーク */
+	SC_MELTDOWN				=117, /* メルトダウン */
+	SC_CARTBOOST			=118, /* カートブースト */
+	SC_REJECTSWORD			=120, /* リジェクトソード */
+	SC_MARIONETTE			=121, /* マリオネットコントロール */
+	SC_HEADCRUSH			=124, /* ヘッドクラッシュ */
+	SC_JOINTBEAT			=125, /* ジョイントビート */
 
 	SC_STONE				=128,
 	SC_FREEZE				=129,
@@ -272,6 +287,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_DONTFORGETME			=175,
 	SC_FORTUNE				=176,
 	SC_SERVICE4U			=177,
+	
 };
 extern int SkillStatusChangeTable[];
 

@@ -1,4 +1,29 @@
 --------------------
+//0972 by (凸)
+・転生スキルをエフェクトだけいくつか追加したり
+・状態変化はそのうち誰かが
+	エフェクト(ステータス変化アイコン含む)のみ
+		SC_AURABLADE:		/* オーラブレード */
+		SC_PARRYING:		/* パリイング */
+		SC_CONCENTRATION:	/* コンセントレーション */
+		SC_TENSIONRELAX:	/* テンションリラックス */
+		SC_BERSERK:		/* バーサーク */
+		SC_ASSUMPTIO:		/*  */
+		SC_TURESIGHT:		/* トゥルーサイト */
+		SC_CARTBOOST:		/* カートブースト */
+		SC_WINDWALK:		/* ウインドウォーク */
+
+	(db/)
+	cast_db.txt
+	(map/)
+	skill.h
+	skill.c
+		SkillStatusChangeTable[] 項目追加
+		skill_castend_nodamage_id()  項目追加
+		skill_status_change_end()  項目追加
+		skill_status_change_start()  項目追加
+		
+--------------------
 //0971 by (凸)
 ・atcommand.hに残っていたjobchange2とかの残骸を削除
 ・転生スキルをエフェクトだけいくつか追加したりチャンピオンはそれなりに追加したり
