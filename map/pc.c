@@ -89,8 +89,7 @@ static int distance(int x0,int y0,int x1,int y1)
 	return dx>dy ? dx : dy;
 }
 
-
-static int pc_ghost_timer(int tid,unsigned int tick,int id,int data)
+static int pc_invincible_timer(int tid,unsigned int tick,int id,int data)
 {
 	struct map_session_data *sd;
 
@@ -98,66 +97,30 @@ static int pc_ghost_timer(int tid,unsigned int tick,int id,int data)
 	if(sd==NULL || sd->bl.type!=BL_PC)
 		return 1;
 
-	if(sd->ghost_timer != tid){
+	if(sd->invincible_timer != tid){
 		if(battle_config.error_log)
-			printf("ghost_timer %d != %d\n",sd->ghost_timer,tid);
+			printf("invincible_timer %d != %d\n",sd->invincible_timer,tid);
 		return 0;
 	}
-	sd->ghost_timer=-1;
+	sd->invincible_timer=-1;
 
 	return 0;
 }
 
 
-int pc_setghosttimer(struct map_session_data *sd,int val)
+int pc_setinvincibletimer(struct map_session_data *sd,int val)
 {
-	if(sd->ghost_timer != -1)
-		delete_timer(sd->ghost_timer,pc_ghost_timer);
-	sd->ghost_timer = add_timer(gettick()+val,pc_ghost_timer,sd->bl.id,0);
+	if(sd->invincible_timer != -1)
+		delete_timer(sd->invincible_timer,pc_invincible_timer);
+	sd->invincible_timer = add_timer(gettick()+val,pc_invincible_timer,sd->bl.id,0);
 	return 0;
 }
 
-int pc_delghosttimer(struct map_session_data *sd)
+int pc_delinvincibletimer(struct map_session_data *sd)
 {
-	if(sd->ghost_timer != -1) {
-		delete_timer(sd->ghost_timer,pc_ghost_timer);
-		sd->ghost_timer = -1;
-	}
-	return 0;
-}
-
-static int pc_gvg_invincible_timer(int tid,unsigned int tick,int id,int data)
-{
-	struct map_session_data *sd;
-
-	sd=(struct map_session_data *)map_id2sd(id);
-	if(sd==NULL || sd->bl.type!=BL_PC)
-		return 1;
-
-	if(sd->gvg_invincible_timer != tid){
-		if(battle_config.error_log)
-			printf("gvg_invincible_timer %d != %d\n",sd->gvg_invincible_timer,tid);
-		return 0;
-	}
-	sd->gvg_invincible_timer=-1;
-
-	return 0;
-}
-
-
-int pc_setgvginvincibletimer(struct map_session_data *sd,int val)
-{
-	if(sd->gvg_invincible_timer != -1)
-		delete_timer(sd->gvg_invincible_timer,pc_gvg_invincible_timer);
-	sd->gvg_invincible_timer = add_timer(gettick()+val,pc_gvg_invincible_timer,sd->bl.id,0);
-	return 0;
-}
-
-int pc_delgvginvincibletimer(struct map_session_data *sd)
-{
-	if(sd->gvg_invincible_timer != -1) {
-		delete_timer(sd->gvg_invincible_timer,pc_gvg_invincible_timer);
-		sd->gvg_invincible_timer = -1;
+	if(sd->invincible_timer != -1) {
+		delete_timer(sd->invincible_timer,pc_invincible_timer);
+		sd->invincible_timer = -1;
 	}
 	return 0;
 }
@@ -284,7 +247,7 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 
 	if(type&2) {
 		if(!(battle_config.death_penalty_type&1) ) {
-			if(sd->status.class && !map[sd->bl.m].flag.nopenalty){
+			if(sd->status.class > 0 && !map[sd->bl.m].flag.nopenalty && !map[sd->bl.m].flag.gvg){
 				if(battle_config.death_penalty_type&2 && battle_config.death_penalty_base > 0)
 					sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
 				else if(battle_config.death_penalty_base > 0) {
@@ -560,8 +523,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->skilltimer=-1;
 	sd->skillitem=-1;
 	sd->skillitemlv=-1;
-	sd->ghost_timer=-1;
-	sd->gvg_invincible_timer=-1;
+	sd->invincible_timer=-1;
 	sd->sg_count=0;
 
 	sd->deal_locked =0;
@@ -1254,7 +1216,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if( (skill=pc_checkskill(sd,BS_WEAPONRESEARCH))>0)	// 武器研究の命中率増加
 		sd->hit += skill*2;
 	if(sd->status.option&2 && (skill = pc_checkskill(sd,RG_TUNNELDRIVE))>0 )	// トンネルドライブ	// トンネルドライブ
-		sd->speed = (sd->speed*220)/100 - skill*9;
+		sd->speed += (1.2*DEFAULT_WALK_SPEED - skill*9);
 	if (pc_iscarton(sd) && (skill=pc_checkskill(sd,MC_PUSHCART))>0)	// カートによる速度低下
 		sd->speed += (10-skill) * (DEFAULT_WALK_SPEED * 0.1);
 	else if (pc_isriding(sd))	// ペコペコ乗りによる速度増加
@@ -1352,6 +1314,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			aspd_rate += sd->sc_data[SC_DONTFORGETME].val2;
 			sd->speed= sd->speed* sd->sc_data[SC_DONTFORGETME].val3/100;
 		}
+		if(sd->sc_data[SC_CURSE].timer!=-1)
+			sd->speed += 450;
 		if(	sd->sc_data[i=SC_SPEEDPOTION2].timer!=-1 ||
 			sd->sc_data[i=SC_SPEEDPOTION1].timer!=-1 ||
 			sd->sc_data[i=SC_SPEEDPOTION0].timer!=-1)	// 増 速ポーション
@@ -1415,11 +1379,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		}
 		if(sd->sc_data[SC_ENCPOISON].timer != -1)
 			sd->addeff[4] += sd->sc_data[SC_ENCPOISON].val2;
-/*	if(sd->sc_data[SC_SPELLBREAKER].timer!=-1){	// Spellbreaker
-			skill_castcancel(&sd->bl);
-			sd->status.sp = ((skill*25-25)/sd->status.max_sp)/100;
-		}
-		*/
+
 /*		if(sd->sc_data[SC_VOLCANO].timer!=-1)	// エンチャントポイズン(属性はbattle.cで)
 			sd->addeff[2]+=sd->sc_data[SC_VOLCANO].val2;//% of granting
 		if(sd->sc_data[SC_DELUGE].timer!=-1)	// エンチャントポイズン(属性はbattle.cで)
@@ -3201,7 +3161,6 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 		}
 	}
 
-	if(map[sd->bl.m].flag.gvg && !battle_config.gvg_continuous_attack) sd->state.attack_continue = 0;
 	if(sd->state.attack_continue) {
 		sd->attacktimer=add_timer(sd->attackabletime,pc_attack_timer,sd->bl.id,0);
 	}
@@ -3578,21 +3537,18 @@ int pc_skillup(struct map_session_data *sd,int skill_num)
  */
 int pc_allskillup(struct map_session_data *sd)
 {
-	int i,flag=1;
-	
-	while(flag) {
-		flag=0;
-		for(i=0;i<MAX_SKILL;i++) {
-			if(sd->status.skill[i].id!=0 && !sd->status.skill[i].flag) {
-				while(sd->status.skill[i].lv < skill_get_max(i)) {
-					sd->status.skill[i].lv++;
-					pc_calcstatus(sd,0);
-					clif_skillup(sd,i);
-					flag=1;
-				}
+	int i;
+
+	for(i=0;i<MAX_SKILL;i++) {
+		if(sd->status.skill[i].id!=0 && !sd->status.skill[i].flag) {
+			while(sd->status.skill[i].lv < skill_get_max(i)) {
+				sd->status.skill[i].lv++;
+				pc_calcstatus(sd,0);
+				clif_skillup(sd,i);
 			}
 		}
 	}
+	pc_calcstatus(sd,0);
 
 	return 0;
 }
@@ -3729,7 +3685,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	pc_calcstatus(sd,0);
 
 	if(battle_config.death_penalty_type&1) {
-		if(sd->status.class && !map[sd->bl.m].flag.nopenalty){
+		if(sd->status.class > 0 && !map[sd->bl.m].flag.nopenalty && !map[sd->bl.m].flag.gvg){
 			if(battle_config.death_penalty_type&2 && battle_config.death_penalty_base > 0)
 				sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
 			else if(battle_config.death_penalty_base > 0) {
@@ -5382,8 +5338,7 @@ int do_init_pc(void)
 	add_timer_func_list(pc_walk,"pc_walk");
 	add_timer_func_list(pc_attack_timer,"pc_attack_timer");
 	add_timer_func_list(pc_natural_heal,"pc_natural_heal");
-	add_timer_func_list(pc_ghost_timer,"pc_ghost_timer");
-	add_timer_func_list(pc_gvg_invincible_timer,"pc_gvg_invincible_timer");
+	add_timer_func_list(pc_invincible_timer,"pc_invincible_timer");
 	add_timer_func_list(pc_eventtimer,"pc_eventtimer");
 	add_timer_func_list(pc_calc_pvprank_timer,"pc_calc_pvprank_timer");
 	add_timer_func_list(pc_autosave,"pc_autosave");

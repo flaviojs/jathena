@@ -161,7 +161,7 @@ extern struct Battle_Config {
 	int quest_skill_reset;
 	int basic_skill_check;
 	int guild_emperium_check;
-	int ghost_time;
+	int pc_invincible_time;
 	int pet_catch_rate;
 	int pet_rename;
 	int pet_friendly_rate;
@@ -211,8 +211,6 @@ extern struct Battle_Config {
 	int gvg_long_damage_rate;
 	int gvg_magic_damage_rate;
 	int gvg_misc_damage_rate;
-	int gvg_invincible_time;
-	int gvg_continuous_attack;
 	int gvg_eliminate_time;
 } battle_config;
 

@@ -296,8 +296,8 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 		if (strcmpi(command, "@alive") == 0 && gm_level >= atcommand_config.alive) {
 			sd->status.hp=sd->status.max_hp;
 			pc_setstand(sd);
-			if(battle_config.ghost_time > 0)
-				pc_setghosttimer(sd,battle_config.ghost_time);
+			if(battle_config.pc_invincible_time > 0)
+				pc_setinvincibletimer(sd,battle_config.pc_invincible_time);
 			clif_updatestatus(sd,SP_HP);
 			clif_resurrection(&sd->bl,1);
 			clif_displaymessage(fd,msg_table[16]);
@@ -899,8 +899,8 @@ z [0`4]•‚ÌF
 			if ((pl_sd=map_nick2sd(temp1))!=NULL) {
 				pl_sd->status.hp=pl_sd->status.max_hp;
 				pc_setstand(pl_sd);
-				if(battle_config.ghost_time > 0)
-					pc_setghosttimer(sd,battle_config.ghost_time);
+				if(battle_config.pc_invincible_time > 0)
+					pc_setinvincibletimer(sd,battle_config.pc_invincible_time);
 				clif_updatestatus(pl_sd,SP_HP);
 				clif_resurrection(&pl_sd->bl,1);
 				clif_displaymessage(fd,msg_table[51]);

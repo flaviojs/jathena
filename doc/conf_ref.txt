@@ -509,9 +509,11 @@ guild_emperium_check
 	エンペリウムなしでもギルドが作れます。
 	デフォルトは yesです。
 
-ghost_time
-	単囲はms(ミリ秒)。デフォルトは5000(5秒)です。
-	攻撃行動、スキル使用、アイテム使用をするとこの時間はなくなる。
+player_invincible_time
+	マップ移動やテレポート、復活した時の無敵時間を設定します。単囲は
+	ms(ミリ秒)。移動、攻撃行動、スキル使用、アイテム使用をするとこの
+	時間はなくなる。(シーズモードでは時間を2倍にして適用)
+	デフォルトは5000(5秒)です。
 	
 pet_catch_rate
 	ペットの捕獲倍率を百分率で設定します。
@@ -592,7 +594,7 @@ wedding_modifydisplay
 
 natural_healhp_interval
 	HPが自動回復するまで掛かる時間です。単位はms(ミリ秒)です。
-	デフォルトは4000でNATURAL_HEAL_INTERVAL未満にすることはできません。
+	デフォルトは6000でNATURAL_HEAL_INTERVAL未満にすることはできません。
 
 natural_healsp_interval
 	SPが自動回復するまで掛かる時間です。単位はms(ミリ秒)です。
@@ -642,27 +644,27 @@ max_cart_weight
 	デフォルトは8000です。最大は1000000で最小は100です。
 
 player_skill_log
-	プレイヤーのスキル使用を表示するかどうかです。
+	プレイヤーのスキル使用ログを表示するかどうかです。
 	デフォルトはnoです。
 
 monster_skill_log
-	モンスターのスキル使用を表示するかどうかです。
+	モンスターのスキル使用ログを表示するかどうかです。
 	デフォルトはnoです。
 
 battle_log
-	戦闘関係の物を表示するかどうかです。
+	戦闘関係のログを表示するかどうかです。
 	デフォルトはnoです。
 
 save_log
-	キャラの保存に関する物を表示するかどうか
+	キャラの保存に関するログを表示するかどうか
 	デフォルトはnoです。
 
 error_log
-	エラーを表示するかどうかです。
+	エラーログを表示するかどうかです。
 	デフォルトはyesです。
 
 etc_log
-	スキル、戦闘、キャラ保存、エラー以外の物を表示するかどうか
+	スキル、戦闘、キャラ保存、エラー以外のログを表示するかどうか
 	デフォルトはyesです。
 
 save_clothcolor
@@ -734,15 +736,6 @@ gvg_misc_attack_damage_rate
 	シーズモードで物理攻撃と魔法攻撃以外の攻撃(鷹やトラップ等)の
 	ダメージ倍率です。デフォルトは100です。
 
-gvg_invincible_time: 10000
-	シーズモードでマップ移動した後の無敵時間です。この時間中は攻撃、
-	スキル使用ができませんがどんな攻撃も受けなくなります。
-	単位はms(ミリ秒)です。デフォルトは10000です。(10秒)
-
-gvg_continuous_attack
-	シーズモードでCtrlに左クリックによる連続攻撃を許可するかどうかです。
-	デフォルトはnoです。
-
 
 < 例 >
 
@@ -793,7 +786,7 @@ quest_skill_learn: no
 quest_skill_reset: yes
 basic_skill_check: yes
 guild_emperium_check: yes
-ghost_time: 5000
+player_invincible_time: 5000
 pet_catch_rate: 100
 pet_rename: no
 pet_friendly_rate: 100
@@ -843,8 +836,6 @@ gvg_short_attack_damage_rate: 100
 gvg_long_attack_damage_rate: 100
 gvg_magic_attack_damage_rate: 100
 gvg_misc_attack_damage_rate: 100
-gvg_invincible_time: 10000
-gvg_continuous_attack: no
 
 
 =====================================================================ghos6. atcommand_athena.conf

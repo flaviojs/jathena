@@ -1,4 +1,66 @@
 --------------------
+//0785 by 死神
+
+・本鯖に合わせて修正。(韓国鞍のパッチnoticeを参考して修正しました。)
+・BBとBSのキャスティング時間を0.7秒にしてディレイは0に変更。
+・ghostの変わりにマップ移動後の無敵時間を設定。この時間の間はどんな攻撃も受けないが移動や攻撃、スキル使用、アイテム使用でこの時間はなくなります。シーズモードではこの無敵時間を2倍として適用。
+・シーズモードで死んでも経験が減らないように修正。(mapflagのnopenaltyを設定する必要はありません。)
+・スキッドで滑べる距離増加。
+・既に沈黙にかかってる対象にレックスディビーナを使うと沈黙が解除されるように変更。
+・呪いにかかると移動速度も減るように修正。
+・battle_athena.confに項目変更。
+・スキルの重ね置きを判断処理を少し変更。
+・HPの自然回復時間が4秒ではなく6秒だとわかったのでデフォルト修正とbattle_athena.conf修正。
+・その他細かい修正やバグ修正。
+・殆どテストしてません。
+	(conf/)
+	atcommand_athena.conf 修正。
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(db/)
+	cast_db.txt 修正。
+	(map/)
+	atcommand.c 修正。
+	clif.c
+		clif_mob0078()、clif_mob007b()、clif_skill_estimation() 修正。
+		clif_mob_class_change()、clif_parse_WalkToXY() 修正。
+		clif_parse_ActionRequest()、clif_parse_LoadEndAck() 修正。
+		clif_parse_UseItem()、clif_parse_UseSkillToId() 修正。
+		clif_parse_UseSkillToPos()、clif_parse_UseSkillMap() 修正。
+	mob.h 修正。
+	mob.c
+		mob_get_viewclass()、mob_attack()、mob_target() 修正。
+		mob_ai_sub_hard_activesearch()、mob_ai_sub_hard() 修正。
+		mobskill_castend_id()、mobskill_castend_pos() 修正。
+	skill.h 修正。
+	skill.c
+		skill_can_produce_mix()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_castend_id() 修正。
+		skill_castend_pos()、skill_use_id()、skill_readdb() 修正。
+		skill_check_condition()、skill_unit_onplace()、skill_unitsetting() 修正。
+		skill_additional_effect()、skill_check_unit_range() 修正。
+		skill_check_unit_range_sub()、skill_status_change_end() 修正。
+		skill_status_change_start() 修正。
+	pc.h
+	pc.c
+		pc_ghost_timer()、pc_setghosttimer()、pc_delghosttimer() 削除。
+		pc_gvg_invincible_timer() -> pc_invincible_timer()に変更。
+		pc_setgvginvincibletimer() -> pc_setinvincibletimer()に変更。
+		pc_delgvginvincibletimer() -> pc_delinvincibletimer()に変更。
+		pc_authok()、pc_attack_timer()、pc_calcstatus() 修正。
+		pc_setrestartvalue()、pc_damage()、pc_allskillup() 修正。
+		do_init_pc() 修正。
+	battle.h 修正。
+	battle.c
+		battle_config_read()、battle_weapon_attack()、battle_check_target() 修正。
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack()、battle_get_speed() 修正。
+	map.h 修正。
+	map.c
+		map_quit() 修正。
+
+--------------------
 //0784 by あゆみ
 
 ・カードスキルを覚えている状態で@allskillコマンドを使用するとmap-serverが暴走する問題を修正。

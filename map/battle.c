@@ -589,6 +589,8 @@ int battle_get_speed(struct block_list *bl)
 				speed = speed*125/100;
 			if(sc_data[SC_DEFENDER].timer!=-1)
 				speed = (speed * (155 - sc_data[SC_DEFENDER].val1*5)) / 100;
+			if(sc_data[SC_CURSE].timer!=-1)
+				speed = speed + 450;
 		}
 		if(speed < 1) speed = 1;
 		return speed;
@@ -1416,6 +1418,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 				break;
 			case KN_SPEARBOOMERANG:	// スピアブーメラン
 				damage = damage*(100+ 50*skill_lv)/100;
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
 				break;
 			case KN_BRANDISHSPEAR: // ブランディッシュスピア
 				damage = damage*(100+ 20*skill_lv)/100;
@@ -1773,6 +1776,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 				break;
 			case KN_SPEARBOOMERANG:	// スピアブーメラン
 				damage = damage*(100+ 50*skill_lv)/100;
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
 				break;
 			case KN_BRANDISHSPEAR: // ブランディッシュスピア
 				damage = damage*(100+ 20*skill_lv)/100;
@@ -2362,6 +2366,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 			case KN_SPEARBOOMERANG:	// スピアブーメラン
 				damage = damage*(100+ 50*skill_lv)/100;
 				damage2 = damage2*(100+ 50*skill_lv)/100;
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
 				break;
 			case KN_BRANDISHSPEAR: // ブランディッシュスピア
 				damage = damage*(100+ 20*skill_lv)/100;
@@ -3250,13 +3255,8 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	struct status_change *sc_data=battle_get_sc_data(target);
 	short *opt1;
 
-	if(src->type == BL_PC) {
+	if(src->type == BL_PC)
 		sd = (struct map_session_data *)src;
-		if(sd->gvg_invincible_timer != -1) {
-			battle_stopattack(src);
-			return 0;
-		}
-	}
 
 	if(src->prev == NULL || target->prev == NULL)
 		return 0;
@@ -3383,7 +3383,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	if(src->type == BL_SKILL && target->type == BL_SKILL)	// 対 象がスキルユニットなら無条件肯定
 		return -1;
 
-	if(target->type == BL_PC && ((struct map_session_data *)target)->gvg_invincible_timer != -1)
+	if(target->type == BL_PC && ((struct map_session_data *)target)->invincible_timer != -1)
 		return -1;
 
 	if(target->type == BL_SKILL) {
@@ -3580,7 +3580,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.quest_skill_reset=1;
 	battle_config.basic_skill_check=1;
 	battle_config.guild_emperium_check=1;
-	battle_config.ghost_time=5000;
+	battle_config.pc_invincible_time = 5000;
 	battle_config.pet_catch_rate=100;
 	battle_config.pet_rename=0;
 	battle_config.pet_friendly_rate=100;
@@ -3598,7 +3598,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.combo_delay_rate=100;
 	battle_config.item_check=1;
 	battle_config.wedding_modifydisplay=0;
-	battle_config.natural_healhp_interval=4000;
+	battle_config.natural_healhp_interval=6000;
 	battle_config.natural_healsp_interval=8000;
 	battle_config.natural_heal_skill_interval=10000;
 	battle_config.natural_heal_weight_rate=50;
@@ -3631,8 +3631,6 @@ int battle_config_read(const char *cfgName)
 	battle_config.gvg_long_damage_rate = 100;
 	battle_config.gvg_magic_damage_rate = 100;
 	battle_config.gvg_misc_damage_rate = 100;
-	battle_config.gvg_invincible_time = 10000;
-	battle_config.gvg_continuous_attack = 0;
 	battle_config.gvg_eliminate_time = 5000;
 
 	fp=fopen(cfgName,"r");
@@ -3692,7 +3690,7 @@ int battle_config_read(const char *cfgName)
 			{ "quest_skill_reset",		&battle_config.quest_skill_reset	},
 			{ "basic_skill_check",		&battle_config.basic_skill_check	},
 			{ "guild_emperium_check",	&battle_config.guild_emperium_check	},
-			{ "ghost_time",				&battle_config.ghost_time			},
+			{ "player_invincible_time" ,&battle_config.pc_invincible_time },
 			{ "pet_catch_rate",			&battle_config.pet_catch_rate		},
 			{ "pet_rename",				&battle_config.pet_rename		},
 			{ "pet_friendly_rate",		&battle_config.pet_friendly_rate	},
@@ -3743,8 +3741,6 @@ int battle_config_read(const char *cfgName)
 			{ "gvg_long_attack_damage_rate" ,&battle_config.gvg_long_damage_rate },
 			{ "gvg_magic_attack_damage_rate" ,&battle_config.gvg_magic_damage_rate },
 			{ "gvg_misc_attack_damage_rate" ,&battle_config.gvg_misc_damage_rate },
-			{ "gvg_invincible_time" ,&battle_config.gvg_invincible_time },
-			{ "gvg_continuous_attack" ,&battle_config.gvg_continuous_attack },
 			{ "gvg_eliminate_time" ,&battle_config.gvg_eliminate_time },
 		};
 		

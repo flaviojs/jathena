@@ -91,7 +91,7 @@ int skill_clear_unitgroup(struct block_list *src);
 int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,
 	int damage,unsigned int tick);
 
-int skill_check_unit_range(int m,int x,int y,int range);
+int skill_check_unit_range(int m,int x,int y,int range,int skillid);
 int skill_unit_out_all( struct block_list *bl,unsigned int tick,int range);
 int skill_unit_move( struct block_list *bl,unsigned int tick,int range);
 
