@@ -4405,11 +4405,11 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 			map_foreachinarea(skill_landprotector,src->m,ux,uy,ux,uy,BL_SKILL,skillid,&alive);
 
 		if(skillid==WZ_ICEWALL && alive){
-			val2=map_getcell(src->m,ux,uy,CELL_CHKTYPE);
+			val2=map_getcell(src->m,ux,uy,CELL_GETTYPE);
 			if(val2==5 || val2==1)
 				alive=0;
 			else {
-				map_setcell(src->m,ux,uy,CELL_SETNOPASS);
+				map_setcell(src->m,ux,uy,5);
 				clif_changemapcell(src->m,ux,uy,5,0);
 			}
 		}
@@ -4436,6 +4436,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	struct skill_unit_group_tickset *ts;
 	struct map_session_data *srcsd=NULL;
 	int diff,goflag,splash_count=0;
+	struct status_change *sc_data;
 
 	nullpo_retr(0, src);
 	nullpo_retr(0, bl);
@@ -4453,7 +4454,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 
 	if( bl->type!=BL_PC && bl->type!=BL_MOB )
 		return 0;
-	nullpo_retr(0, ts=skill_unitgrouptickset_search( bl, sg->group_id));
+	nullpo_retr(0, ts=skill_unitgrouptickset_search( bl, sg));
 	diff=DIFF_TICK(tick,ts->tick);
 	goflag=(diff>sg->interval || diff<0);
 	if (sg->skill_id == CR_GRANDCROSS && !battle_config.gx_allhit) // 重なっていたら3HITしない
@@ -4465,7 +4466,6 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	if(!goflag)
 		return 0;
 	ts->tick=tick;
-	ts->group_id=sg->group_id;
 
 	switch(sg->unit_id){
 	case 0x83:	/* サンクチュアリ */
@@ -4518,20 +4518,12 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		}
 		break;
 	case 0x7e:	/* セイフティウォール */
-		{
-			struct skill_unit *unit2;
-			struct status_change *sc_data=status_get_sc_data(bl);
-			int type=SC_SAFETYWALL;
-			if(sc_data && sc_data[type].timer==-1)
-				status_change_start(bl,type,sg->skill_lv,(int)src,0,0,0,0);
-			else if((unit2=(struct skill_unit *)sc_data[type].val2) && unit2 != src ){
-				if(sg->val1 < unit2->group->val1 )
-					status_change_start(bl,type,sg->skill_lv,(int)src,0,0,0,0);
-				ts->tick-=sg->interval;
-			}
+		sc_data=status_get_sc_data(bl);
+		if (sc_data) {
+			status_change_start(bl,SC_SAFETYWALL,sg->skill_lv,(int)src,0,0,0,0);
+			ts->tick-=sg->interval;
 		}
 		break;
-
 	case 0x86:	/* ロードオブヴァーミリオン(＆ストームガスト ＆グランドクロス＆闇グランドクロス) */
 		skill_attack(BF_MAGIC,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
 		break;
@@ -4890,7 +4882,7 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 			printf("skill_unit_onout: Unknown skill unit id=%d block=%d\n",sg->unit_id,bl->id);
 		break;*/
 	}
-	skill_unitgrouptickset_delete(bl,sg->group_id);
+	skill_unitgrouptickset_delete(bl,sg);
 	return 0;
 }
 /*==========================================
@@ -4943,7 +4935,7 @@ int skill_unit_ondelete(struct skill_unit *src,struct block_list *bl,unsigned in
 			printf("skill_unit_ondelete: Unknown skill unit id=%d block=%d\n",sg->unit_id,bl->id);
 		break;*/
 	}
-	skill_unitgrouptickset_delete(bl,sg->group_id);
+	skill_unitgrouptickset_delete(bl,sg);
 	return 0;
 }
 /*==========================================
@@ -4959,8 +4951,6 @@ int skill_unit_onlimit(struct skill_unit *src,unsigned int tick)
 
 	switch(sg->unit_id){
 	case 0x8d:	/* アイスウォール */
-		if(map_read_flag==1)
-			map_setcell(src->bl.m,src->bl.x,src->bl.y,CELL_SETPASS);
 		map_setcell(src->bl.m,src->bl.x,src->bl.y,src->val2);
 		clif_changemapcell(src->bl.m,src->bl.x,src->bl.y,src->val2,1);
 		break;
@@ -5090,9 +5080,6 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_CLAYMORETRAP:
 			case HT_TALKIEBOX:
 			case PF_SPIDERWEB:		/* スパイダーウェッブ */
-			case WZ_ICEWALL:
-				range = 2;
-				break;
 			case RG_GRAFFITI:		/* グラフィティ */
 				range = 1;
 				break;
@@ -7159,63 +7146,101 @@ int skill_clear_unitgroup(struct block_list *src)
 	return 0;
 }
 
+/*
+ * 設置スキルを重ね置きした場合の動作
+ */
+int skill_unit_overlap_type(int skill_id)
+{
+	switch (skill_id) {
+		case WZ_STORMGUST:
+		case WZ_VERMILION:
+			return 1;	// どちらか一方からダメージを受ける
+		default:
+			return 0;	// 両方からダメージを受ける
+	}
+}
 
 /*==========================================
  * スキルユニットグループの被影響tick検索
  *------------------------------------------
  */
 struct skill_unit_group_tickset *skill_unitgrouptickset_search(
-	struct block_list *bl,int group_id)
+	struct block_list *bl, struct skill_unit_group *sg)
 {
-	int i,j=0,k,s=group_id%MAX_SKILLUNITGROUPTICKSET;
-	struct skill_unit_group_tickset *set=NULL;
+	int i,j=-1,k,s,id;
+	struct skill_unit_group_tickset *set;
 
 	nullpo_retr(0, bl);
 
-	if(bl->type==BL_PC){
-		set=((struct map_session_data *)bl)->skillunittick;
-	}else{
-		set=((struct mob_data *)bl)->skillunittick;
-	}
-	if(set==NULL)
+	if (bl->type == BL_PC)
+		set = ((struct map_session_data *)bl)->skillunittick;
+	else if (bl->type == BL_MOB)
+		set = ((struct mob_data *)bl)->skillunittick;
+	else
 		return 0;
-	for(i=0;i<MAX_SKILLUNITGROUPTICKSET;i++)
-		if( set[(k=(i+s)%MAX_SKILLUNITGROUPTICKSET)].group_id == group_id )
-			return &set[k];
-		else if( set[k].group_id==0 )
-			j=k;
 
+	if (skill_unit_overlap_type(sg->skill_id))
+		id = s = sg->skill_id;
+	else
+		id = s = sg->group_id;
+
+	for (i=0; i<MAX_SKILLUNITGROUPTICKSET; i++) {
+		k = (i+s) % MAX_SKILLUNITGROUPTICKSET;
+		if (set[k].id == id)
+			return &set[k];
+		else if (j == -1 && set[k].id == 0)
+			j=k;
+	}
+
+	if (j == -1) {
+		if(battle_config.error_log) {
+			printf("skill_unitgrouptickset_search: tickset is full\n");
+		}
+		for (i = 0; i<MAX_SKILLUNITGROUPTICKSET; i++)
+			set[k].id = 0;
+		j = id % MAX_SKILLUNITGROUPTICKSET;
+	}
+
+	set[j].id = id;
 	return &set[j];
 }
-
 
 /*==========================================
  * スキルユニットグループの被影響tick削除
  *------------------------------------------
  */
-int skill_unitgrouptickset_delete(struct block_list *bl,int group_id)
+int skill_unitgrouptickset_delete(
+	struct block_list *bl, struct skill_unit_group *sg)
 {
-	int i,s=group_id%MAX_SKILLUNITGROUPTICKSET;
-	struct skill_unit_group_tickset *set=NULL,*ts;
+	int i, k, s, id;
+	struct skill_unit_group_tickset *set=NULL;
 
 	nullpo_retr(0, bl);
-
-	if(bl->type==BL_PC){
+	if (bl->type == BL_PC)
 		set=((struct map_session_data *)bl)->skillunittick;
-	}else{
+	else if (bl->type == BL_MOB)
 		set=((struct mob_data *)bl)->skillunittick;
+	else
+		return 0;
+
+	if (skill_unit_overlap_type(sg->skill_id))
+		id = s = sg->skill_id;
+	else
+		id = s = sg->group_id;
+
+	for(i=0; i<MAX_SKILLUNITGROUPTICKSET; i++) {
+		k = (i+s) % MAX_SKILLUNITGROUPTICKSET;
+		if (set[k].id == id) {
+			set[k].id = 0;
+			break;
+		}
 	}
+//	if (i == MAX_SKILLUNITGROUPTICKSET && battle_config.error_log) {
+//		printf("skill_unitgrouptickset_delete: tickset not found\n");
+//	}
 
-	if(set!=NULL){
-
-		for(i=0;i<MAX_SKILLUNITGROUPTICKSET;i++)
-			if( (ts=&set[(i+s)%MAX_SKILLUNITGROUPTICKSET])->group_id == group_id )
-				ts->group_id=0;
-
-	}
 	return 0;
 }
-
 
 /*==========================================
  * スキルユニットタイマー発動処理用(foreachinarea)

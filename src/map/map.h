@@ -97,7 +97,7 @@ struct skill_unit_group {
 };
 struct skill_unit_group_tickset {
 	unsigned int tick;
-	int group_id;
+	int id;
 };
 struct skill_timerskill {
 	int timer;
@@ -429,14 +429,9 @@ enum {
 	EQP_HELM		= 0x0100,		// 頭上段
 };
 
-#define MAX_CELL_TYPE 7 //今ではセルのタイプは数字的に6が最大なので7にした、
-			//MAX_CELL_TYPE+1はワープポイントなどのタッチ系に
-
 struct map_data {
 	char name[24];
 	unsigned char *gat;	// NULLなら下のmap_data_other_serverとして扱う
-	int *gat_fileused[MAX_CELL_TYPE+1+1]; //もしビットマップを使うならこちらを使う、
-						//上のgatはキャストされてgat_fileused[0]に指す
 	struct block_list **block;
 	struct block_list **block_mob;
 	int *block_count,*block_mob_count;
@@ -483,8 +478,6 @@ struct map_data_other_server {
 	unsigned long ip;
 	unsigned int port;
 };
-#define read_gat(m,x,y) (map_getcell(m,x,y,CELL_CHKTYPE))  //ビットマップ使う場合結構CPUに負担かかるので、消極的に使おう
-#define read_gatp(m,x,y) (map_getcellp(m,x,y,CELL_CHKTYPE)) //同上
 
 struct flooritem_data {
 	struct block_list bl;
@@ -538,23 +531,20 @@ enum {
 	LOOK_BASE,LOOK_HAIR,LOOK_WEAPON,LOOK_HEAD_BOTTOM,LOOK_HEAD_TOP,LOOK_HEAD_MID,LOOK_HAIR_COLOR,LOOK_CLOTHES_COLOR,LOOK_SHIELD,LOOK_SHOES
 };
 
-/*-------CELL_CHK*----------------
- * CELL_CHKPASS: セルは0,3,6のどっちかの場合は1を返す、以外は0
- * CELL_CHKNOPASS: セルは1、5のどっちかの場合は1を返す、以外は0
- * CELL_CHKWATER: セルは3の場合は1を返す、以外は0
- * CELL_CHKHIGH： セルは5の場合は1を返す、以外は0
- * CHELL_CHKTOUCH：セルはタッチ系の場合は1を返す、以外は0
- * CELL_CHKTYPE： セルのタイプを知りたい場合は1を返す、以外は0
-*/
-typedef enum { 
-	CELL_CHKPASS,CELL_CHKNOPASS,CELL_CHKWATER=3,CELL_CHKHIGH=5,CELL_CHKTOUCH,CELL_CHKTYPE
-}CELL_CHK;
-/*-------CELL_SET*---------------
- * ほとんどは上と対応、設定用
+/*
+ * map_getcell()で使用されるフラグ
  */
-typedef enum {
-	CELL_SETPASS,CELL_SETNOPASS,CELL_SETWATER=3,CELL_SETHIGH=5,CELL_SETNOHIGH,CELL_SETTOUCH
-}CELL_SET;
+typedef enum { 
+	CELL_CHKWALL=1,		// 壁(セルタイプ1)
+	CELL_CHKWATER=3,	// 水場(セルタイプ3)
+	CELL_CHKGROUND=5,	// 地面障害物(セルタイプ5)
+	CELL_CHKNPC=0x80,	// タッチタイプのNPC(セルタイプ0x80フラグ)
+	CELL_CHKPASS,		// 通過可能(セルタイプ1,5以外)
+	CELL_CHKNOPASS,		// 通過不可(セルタイプ1,5)
+	CELL_GETTYPE		// セルタイプを返す
+} cell_t;
+// map_setcell()で使用されるフラグ
+#define CELL_SETNPC	0x80	// タッチタイプのNPCをセット
 
 struct chat_data {
 	struct block_list bl;
@@ -576,11 +566,11 @@ extern int map_num;
 extern int autosave_interval;
 extern int agit_flag;
 
-//------bitmap使用とgrfファイル使用両方対応できるために追加、また、
-//セルの取得や設定は列挙型CELL_CHK*とCELL_SET*を使った方が意図がわかりやすいので変更してみた
-int map_getcell(int,int,int,CELL_CHK);
-int map_getcellp(struct map_data*,int,int,CELL_CHK);
-extern int map_read_flag;//セル情報のソース判定フラグ、0ならgrfファイル、1ならビットマップファイル
+// gat関連
+int map_getcell(int,int,int,cell_t);
+int map_getcellp(struct map_data*,int,int,cell_t);
+void map_setcell(int,int,int,int);
+extern int map_read_flag; // 0: grfファイル 1: キャッシュ 2: キャッシュ(圧縮)
 
 extern char motd_txt[];
 extern char help_txt[];
@@ -600,6 +590,7 @@ void map_foreachinmovearea(int (*)(struct block_list*,va_list),int,int,int,int,i
 int map_countnearpc(int,int,int);
 //block関連に追加
 int map_count_oncell(int m,int x,int y);
+struct skill_unit *map_find_skill_unit_oncell(int m,int x,int y,int skill_id);
 // 一時的object関連
 int map_addobject(struct block_list *);
 int map_delobject(int);
@@ -634,14 +625,13 @@ int map_foreachiddb(int (*)(void*,void*,va_list),...);
 void map_addnickdb(struct map_session_data *);
 struct map_session_data * map_nick2sd(char*);
 
-// gat関連
-int map_setcell(int,int,int,CELL_SET);
 
 // その他
 int map_check_dir(int s_dir,int t_dir);
 int map_calc_dir( struct block_list *src,int x,int y);
 
 // path.cより
+int path_search_long(int m,int x0,int y0,int x1,int y1);
 int path_search(struct walkpath_data*,int,int,int,int,int,int);
 int path_blownpos(int m,int x0,int y0,int dx,int dy,int count);
 

@@ -1,4 +1,46 @@
 --------------------
+//1092 by lizorett
+・遠距離攻撃のパス検索アルゴリズムを本鯖と同じになるよう変更
+・ストームガスト、ロードオブヴァーミリオンを重ねた場合、片方からだけダメージを
+受けるよう修正(仕様が不明なので先に見つけたユニットから攻撃するようにしています)
+・アイテムが一つしかない場合、アイテムを使用してもエフェクトが表示されない問題
+を修正
+・セーフティーウォール使用時にアドレス不正となる場合がある問題を修正
+・map_getcell/map_setcellの仕様変更
+・1085のビットマップ対応の痕跡の消去
+・1088のアイスウォールの変更を巻き戻し(本鯖に合わせる)
+・全角判断(npc.c)を修正(For English User Forum >>54)
+
+ (注意) map_athena.confのマップキャッシュ指定を行うパラメータ名を変更しています
+
+	(conf)
+		map_athena.conf	- read_map_from_bitmapをread_map_from_cache に変更
+						- map_bitmap_pathをmap_cache_fileに変更
+	(src/map)
+		map.h			- セルタイプ名称変更(CELL_CHKHIGH,CELL_CHKTYPE)、
+						削除(CELL_SET*)
+						- skill_unit_group_ticksetメンバ名変更(group_id -> id)
+						- ビットマップ関連の記述の痕跡を削除
+		map.c			- map_getcell() セルタイプ名称変更と若干のコード変更
+						- map_setcell()を1084以前の仕様に戻し、CELL_SETNPCの
+						フラグを追加
+						- map_cache関連の細かな修正
+		npc.c			- 全角判断(is_zenkaku)を正確に行うよう変更
+						- map_getcell()のセルタイプ名称変更に追従
+		pc.c			- アイテムが一つしかない場合、使用時のエフェクトが表示
+						されない問題を修正
+						- map_getcell()のセルタイプ名称変更に追従
+		skill.c			- ストームガスト、ロードオブヴァーミリオンを重ねた場合
+						片方からだけダメージを受けるよう修正
+						- セーフティーウォール使用時にアドレス不正となる場合が
+						ある問題を修正
+						- map_getcell()のセルタイプ名称変更に追従
+		skill.h			- 関数定義変更
+		path.c			- 遠距離攻撃のパス検索処理を追加(path_search_long)
+						- map_getcell()のセルタイプ名称変更に追従
+		battle.c		- 遠距離攻撃のパス検索を使用するよう変更
+
+--------------------
 //1091 by End_of_exam
 
 ＊＊　注意　＊＊

@@ -882,7 +882,7 @@ static int npc_parse_warp(char *w1,char *w2,char *w3,char *w4)
 		for(j=0;j<xs;j++) {
 			if(map_getcell(m,x-xs/2+j,y-ys/2+i,CELL_CHKNOPASS))
 				continue;
-			map_setcell(m,x-xs/2+j,y-ys/2+i,CELL_SETTOUCH);
+			map_setcell(m,x-xs/2+j,y-ys/2+i,CELL_SETNPC);
 			
 		}
 	}
@@ -1010,7 +1010,8 @@ int npc_convertlabel_db(void *key,void *data,va_list ap)
  */
 
 // 全角かどうか判定(shift_jis)
-#define is_zenkaku(x) ((x>=0x80 && x<=0x9F) || x>=0xE0)
+#define is_zenkaku(x,y) (((x>=0x80 && x<=0x9F) || (x>=0xE0 && x<=0xEF)) && \
+						 ((y>=0x40 && y<=0x7E) || (y>=0x80 && y<=0xFC)))
 
 static void npc_parse_script_line(unsigned char *p,int *curly_count,int line) {
 	int i = strlen(p),j;
@@ -1022,7 +1023,7 @@ static void npc_parse_script_line(unsigned char *p,int *curly_count,int line) {
 			} else if(p[j] == '\\') {
 				// エスケープ
 				j++;
-			} else if(is_zenkaku(p[j])) {
+			} else if(is_zenkaku(p[j],p[j+1])) {
 				// 全角文字
 				j++;
 			}
@@ -1041,7 +1042,7 @@ static void npc_parse_script_line(unsigned char *p,int *curly_count,int line) {
 			} else if(p[j] == '/' && p[j+1] == '/') {
 				// コメント
 				break;
-			} else if(is_zenkaku(p[j])) {
+			} else if(is_zenkaku(p[j],p[j+1])) {
 				// 全角文字
 				j++;
 			}
@@ -1167,7 +1168,7 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 				for(j=0;j<xs;j++) {
 					if(map_getcell(m,x-xs/2+j,y-ys/2+i,CELL_CHKNOPASS))
 						continue;
-					map_setcell(m,x-xs/2+j,y-ys/2+i,CELL_SETTOUCH);
+					map_setcell(m,x-xs/2+j,y-ys/2+i,CELL_SETNPC);
 				}
 			}
 		}

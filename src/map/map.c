@@ -71,14 +71,11 @@ struct charid2nick {
 	unsigned int port;
 };
 
-int  map_read_flag=0;
-// マップキャッシュ利用フラグ,どっちを使うかはmap_athana.conf内のread_map_from_bitmapで指定
-// 0ならば利用しない、1だと非圧縮保存、2だと圧縮して保存
+// マップキャッシュ利用フラグ(map_athana.conf内のread_map_from_cacheで指定)
+// 0:利用しない 1:非圧縮保存 2:圧縮保存
+int map_read_flag=0;
 
-int map_getcell(int,int x,int y,CELL_CHK cellchk);
-int map_getcellp(struct map_data* m,int x,int y,CELL_CHK cellchk);
-
-char map_bitmap_filename[256]="db/map.info";//ビットマップファイルのデフォルトパス
+char map_cache_file[256]="db/map.info"; // マップキャッシュファイル名
 char motd_txt[256]="conf/motd.txt";
 char help_txt[256]="conf/help.txt";
 
@@ -319,7 +316,32 @@ int map_count_oncell(int m,int x,int y)
 	if(!count) count = 1;
 	return count;
 }
+/*
+ * セル上の最初に見つけたスキルユニットを返す
+ */
+struct skill_unit *map_find_skill_unit_oncell(int m,int x,int y,int skill_id)
+{
+	int bx,by;
+	struct block_list *bl;
+	int i,c;
+	struct skill_unit *unit;
 
+	if (x < 0 || y < 0 || (x >= map[m].xs) || (y >= map[m].ys))
+		return NULL;
+	bx = x/BLOCK_SIZE;
+	by = y/BLOCK_SIZE;
+
+	bl = map[m].block[bx+by*map[m].bxs];
+	c = map[m].block_count[bx+by*map[m].bxs];
+	for(i=0;i<c && bl;i++,bl=bl->next){
+		if (bl->x != x || bl->y != y || bl->type != BL_SKILL)
+			continue;
+		unit = (struct skill_unit *) bl;
+		if (unit->alive && unit->group->skill_id == skill_id)
+			return unit;
+	}
+	return NULL;
+}
 
 /*==========================================
  * map m (x0,y0)-(x1,y1)内の全objに対して
@@ -1170,16 +1192,16 @@ int map_calc_dir( struct block_list *src,int x,int y)
  * (m,x,y)の状態を調べる
  *------------------------------------------
  */
-
-int map_getcell(int m,int x,int y,CELL_CHK cellchk)
+int map_getcell(int m,int x,int y,cell_t cellchk)
 {
 	return (m < 0 || m > MAX_MAP_PER_SERVER) ? 0 : map_getcellp(&map[m],x,y,cellchk);
 }
 
-int map_getcellp(struct map_data* m,int x,int y,CELL_CHK cellchk)
+int map_getcellp(struct map_data* m,int x,int y,cell_t cellchk)
 {
 	int j;
 	nullpo_ret(m);
+
 	if(x<0 || x>=m->xs-1 || y<0 || y>=m->ys-1)
 	{
 		if(cellchk==CELL_CHKNOPASS) return 1;
@@ -1189,55 +1211,40 @@ int map_getcellp(struct map_data* m,int x,int y,CELL_CHK cellchk)
 
 	switch(cellchk)
 	{
-		case CELL_CHKTOUCH:
-			if(m->gat[j]&0x80) return 1;return 0;
-		case CELL_CHKWATER:
-			if(m->gat[j]==3) return 1;return 0;
-		case CELL_CHKHIGH:
-			if(m->gat[j]==5) return 1;return 0;
 		case CELL_CHKPASS:
-			if(m->gat[j]!=1&&m->gat[j]!=5) return 1; return 0;
+			return (m->gat[j] != 1 && m->gat[j] != 5);
 		case CELL_CHKNOPASS:
-			if(m->gat[j]==1||m->gat[j]==5) return 1; return 0;
-		case CELL_CHKTYPE:
+			return (m->gat[j] == 1 || m->gat[j] == 5);
+		case CELL_CHKWALL:
+			return (m->gat[j] == 1);
+		case CELL_CHKNPC:
+			return (m->gat[j]&0x80);
+		case CELL_CHKWATER:
+			return (m->gat[j] == 3);
+		case CELL_CHKGROUND:
+			return (m->gat[j] == 5);
+		case CELL_GETTYPE:
 			return m->gat[j];
-		default: return 0;
+		default:
+			return 0;
 	}	
-	return 0;
 }
 
 /*==========================================
  * (m,x,y)の状態を設定する
  *------------------------------------------
  */
-int map_setcell(int m,int x,int y,CELL_SET cellset)
+void map_setcell(int m,int x,int y,int cell)
 {
-	int i,j;
-		
+	int j;
 	if(x<0 || x>=map[m].xs || y<0 || y>=map[m].ys)
-		return 0;
+		return;
 	j=x+y*map[m].xs;
-	switch(cellset)
-	{
-	case CELL_SETTOUCH:
-		return map[m].gat[j]|=0x80;
-		break;
-	case CELL_SETWATER://3
-		i=3;break;
-	case CELL_SETPASS://0
-		i=0;break;
-	case CELL_SETNOPASS://gat_fileused[0](READ_FROM_BITMAP)か1(READ_FROM_GAT)
-		i=1;break;
-	case CELL_SETHIGH://5
-		i=5;break;
-	case CELL_SETNOHIGH://5
-		i=5;break;
-	default:
-		return 0;
-	}
-	map[m].gat[j]=i;
 
-	return 1;
+	if (cell == CELL_SETNPC)
+		map[m].gat[j] |= 0x80;
+	else
+		map[m].gat[j] = cell;
 }
 
 /*==========================================
@@ -1355,10 +1362,10 @@ static void map_readwater(char *watertxt)
 *===========================================*/
 
 // マップキャッシュの最大値
-#define MAX_CAHCE_MAX 768
+#define MAX_MAP_CACHE 768
 
 //各マップごとの最小限情報を入れるもの、READ_FROM_BITMAP用
-struct MAP_CACHE_INFO {
+struct map_cache_info {
 	char fn[32];//ファイル名
 	int xs,ys; //幅と高さ
 	int water_height;
@@ -1368,14 +1375,14 @@ struct MAP_CACHE_INFO {
 }; // 56 byte
 
 struct {
-	struct MAP_CACHE_HEAD {
+	struct map_cache_head {
 		int sizeof_header;
 		int sizeof_map;
 		// 上の２つ改変不可
 		int nmaps; // マップの個数
 		int filesize;
 	} head;
-	struct MAP_CACHE_INFO *map;
+	struct map_cache_info *map;
 	FILE *fp;
 	int dirty;
 } map_cache;
@@ -1385,24 +1392,26 @@ static void map_cache_close(void);
 static int map_cache_read(struct map_data *m);
 static int map_cache_write(struct map_data *m);
 
-static int map_cache_open(char *fn) {
+static int map_cache_open(char *fn)
+{
 	atexit(map_cache_close);
 	if(map_cache.fp) {
 		map_cache_close();
 	}
 	map_cache.fp = fopen(fn,"r+b");
 	if(map_cache.fp) {
-		fread(&map_cache.head,1,sizeof(struct MAP_CACHE_HEAD),map_cache.fp);
+		fread(&map_cache.head,1,sizeof(struct map_cache_head),map_cache.fp);
 		fseek(map_cache.fp,0,SEEK_END);
 		if(
-			map_cache.head.sizeof_header == sizeof(struct MAP_CACHE_HEAD) &&
-			map_cache.head.sizeof_map    == sizeof(struct MAP_CACHE_INFO) &&
+			map_cache.head.sizeof_header == sizeof(struct map_cache_head) &&
+			map_cache.head.sizeof_map    == sizeof(struct map_cache_info) &&
+			map_cache.head.nmaps         == MAX_MAP_CACHE &&
 			map_cache.head.filesize      == ftell(map_cache.fp)
 		) {
 			// キャッシュ読み込み成功
-			map_cache.map = aMalloc(sizeof(struct MAP_CACHE_INFO) * map_cache.head.nmaps);
-			fseek(map_cache.fp,sizeof(struct MAP_CACHE_HEAD),SEEK_SET);
-			fread(map_cache.map,sizeof(struct MAP_CACHE_INFO),map_cache.head.nmaps,map_cache.fp);
+			map_cache.map = aMalloc(sizeof(struct map_cache_info) * map_cache.head.nmaps);
+			fseek(map_cache.fp,sizeof(struct map_cache_head),SEEK_SET);
+			fread(map_cache.map,sizeof(struct map_cache_info),map_cache.head.nmaps,map_cache.fp);
 			return 1;
 		}
 		fclose(map_cache.fp);
@@ -1410,14 +1419,14 @@ static int map_cache_open(char *fn) {
 	// 読み込みに失敗したので新規に作成する
 	map_cache.fp = fopen(fn,"wb");
 	if(map_cache.fp) {
-		memset(&map_cache.head,0,sizeof(struct MAP_CACHE_HEAD));
-		map_cache.map   = aCalloc(sizeof(struct MAP_CACHE_INFO),MAX_CAHCE_MAX);
-		map_cache.head.nmaps         = MAX_CAHCE_MAX;
-		map_cache.head.sizeof_header = sizeof(struct MAP_CACHE_HEAD);
-		map_cache.head.sizeof_map    = sizeof(struct MAP_CACHE_INFO);
+		memset(&map_cache.head,0,sizeof(struct map_cache_head));
+		map_cache.map   = aCalloc(sizeof(struct map_cache_info),MAX_MAP_CACHE);
+		map_cache.head.nmaps         = MAX_MAP_CACHE;
+		map_cache.head.sizeof_header = sizeof(struct map_cache_head);
+		map_cache.head.sizeof_map    = sizeof(struct map_cache_info);
 
-		map_cache.head.filesize  = sizeof(struct MAP_CACHE_HEAD);
-		map_cache.head.filesize += sizeof(struct MAP_CACHE_INFO) * map_cache.head.nmaps;
+		map_cache.head.filesize  = sizeof(struct map_cache_head);
+		map_cache.head.filesize += sizeof(struct map_cache_info) * map_cache.head.nmaps;
 
 		map_cache.dirty = 1;
 		return 1;
@@ -1425,12 +1434,13 @@ static int map_cache_open(char *fn) {
 	return 0;
 }
 
-static void map_cache_close(void) {
+static void map_cache_close(void)
+{
 	if(!map_cache.fp) { return; }
 	if(map_cache.dirty) {
 		fseek(map_cache.fp,0,SEEK_SET);
-		fwrite(&map_cache.head,1,sizeof(struct MAP_CACHE_HEAD),map_cache.fp);
-		fwrite(map_cache.map,map_cache.head.nmaps,sizeof(struct MAP_CACHE_INFO),map_cache.fp);
+		fwrite(&map_cache.head,1,sizeof(struct map_cache_head),map_cache.fp);
+		fwrite(map_cache.map,map_cache.head.nmaps,sizeof(struct map_cache_info),map_cache.fp);
 	}
 	fclose(map_cache.fp);
 	free(map_cache.map);
@@ -1438,7 +1448,8 @@ static void map_cache_close(void) {
 	return;
 }
 
-int map_cache_read(struct map_data *m) {
+int map_cache_read(struct map_data *m)
+{
 	int i;
 	if(!map_cache.fp) { return 0; }
 	for(i = 0;i < map_cache.head.nmaps ; i++) {
@@ -1494,7 +1505,8 @@ int map_cache_read(struct map_data *m) {
 	return 0;
 }
 
-static int map_cache_write(struct map_data *m) {
+static int map_cache_write(struct map_data *m)
+{
 	int i;
 	unsigned long len_new , len_old;
 	char *write_buf;
@@ -1658,7 +1670,7 @@ int map_readallmap(void)
 
 	// マップキャッシュを開く
 	if(map_read_flag) {
-		map_cache_open(map_bitmap_filename);
+		map_cache_open(map_cache_file);
 	}
 
 	/*
@@ -1831,10 +1843,10 @@ int map_config_read(char *cfgName)
 			strncpy(help_txt,w2,256);
 		} else if(strcmpi(w1,"mapreg_txt")==0){
 			strncpy(mapreg_txt,w2,256);
-		}else if(strcmpi(w1,"read_map_from_bitmap")==0){
+		}else if(strcmpi(w1,"read_map_from_cache")==0){
 			map_read_flag=atoi(w2);
-		}else if(strcmpi(w1,"map_bitmap_path")==0){
-			strncpy(map_bitmap_filename,w2,255);
+		}else if(strcmpi(w1,"map_cache_file")==0){
+			strncpy(map_cache_file,w2,255);
 		}else if(strcmpi(w1,"import")==0){
 			map_config_read(w2);
 		}
