@@ -2197,26 +2197,14 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	switch(sg->unit_id){
 	case 0x83:	/* サンクチュアリ */
 		{
-			int *list=sg->vallist;
-			int i,ei=0,race=battle_get_race(bl);
+			int element=battle_get_element(bl) % 10;
+			int race=battle_get_race(bl);
 
 			if( battle_get_hp(bl)>=battle_get_max_hp(bl) &&
-				 race!=1 && race!=6  )
+				 element!=9 && race!=6  )
 				break;
 
-			for(i=0;i<16;i++)	/* 人数制限の計算 */
-				if(list[i]==0)
-					ei=i;
-				else if(list[i]==bl->id)
-					break;
-			if(i==16){
-				list[ei]=bl->id;
-				if((sg->val1--)<=0){
-					skill_delunitgroup(sg);
-					return 0;
-				}
-			}
-			if( race!=1 && race!=6 ){
+			if( element!=9 && race!=6 ){
 				int heal=sg->val2;
 				if( bl->type==BL_PC &&
 					pc_check_equip_dcard((struct map_session_data *)bl,4128) )
@@ -2226,13 +2214,20 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 			}else
 				skill_attack(BF_MAGIC,ss,&src->bl,bl,
 					sg->skill_id,sg->skill_lv,tick,0);
+
+			if((sg->val1--)<=1){	/* 回復回数カウント */
+				skill_delunitgroup(sg);
+				return 0;
+			}
+
 		}
 		break;
 
 	case 0x84:	/* マグヌスエクソシズム */
 		{
+			int element=battle_get_element(bl) % 10;
 			int race=battle_get_race(bl);
-			if( race!=1 && race!=6 )
+			if( element!=9 && race!=6 )
 				return 0;
 			skill_attack(BF_MAGIC,ss,&src->bl,bl,
 				sg->skill_id,sg->skill_lv,tick,0);
@@ -2386,15 +2381,15 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 		return 0;
 
 	switch(sg->unit_id){
-	case 0x83:	/* サンクチュアリ */
-		{
+//	case 0x83:	/* サンクチュアリ 人数カウント不要のためいらなくなった…はず */ 
+/*		{
 			int i,*list=sg->vallist;
 			for(i=0;i<list[i];i++)
 				if(list[i]==bl->id)
 					list[i]=0;
 		}
 		break;
-
+*/
 	case 0x7e:	/* セイフティウォール */
 	case 0x85:	/* ニューマ */
 	case 0x8e:	/* クァグマイア */
