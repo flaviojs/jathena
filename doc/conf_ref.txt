@@ -1060,10 +1060,10 @@ party
 	@コマンド @party
 guild
 	@コマンド @guild
-gvgstart
-	@コマンド @gvgstart
-gvgend
-	@コマンド @gvgend
+agitstart
+	@コマンド @agitstart
+agitend
+	@コマンド @agitend
 
 
 
@@ -1141,10 +1141,11 @@ lostskill: 1
 spiritball: 1
 party: 1
 guild: 1
-gvgstart: 1
-gvgend: 1
+agitstart: 1
+agitend: 1
 
 
 ==========================================================================
 EOF
 --------------------------------------------------------------------------
+

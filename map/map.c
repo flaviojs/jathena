@@ -55,6 +55,8 @@ int map_num=0;
 
 int autosave_interval=DEFAULT_AUTOSAVE_INTERVAL;
 
+int agit_flag=0;
+
 struct charid2nick {
 	char nick[24];
 	int req_id;

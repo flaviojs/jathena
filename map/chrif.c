@@ -15,6 +15,7 @@
 #include "chrif.h"
 #include "clif.h"
 #include "intif.h"
+#include "npc.h"
 #include "pc.h"
 
 #ifdef MEMWATCH
@@ -34,7 +35,7 @@ static int char_port = 6121;
 static char userid[24],passwd[24];
 static int chrif_state;
 
-// 設定ファイル読み込み関係
+// 設定ファイ?読み?み関係
 /*==========================================
  *
  *------------------------------------------
@@ -119,7 +120,7 @@ int chrif_connect(int fd)
 }
 
 /*==========================================
- * マップ送信
+ * マップ?信
  *------------------------------------------
  */
 int chrif_sendmap(int fd)
@@ -143,7 +144,7 @@ int chrif_recvmap(int fd)
 	int i,j,ip,port;
 	unsigned char *p=(unsigned char *)&ip;
 	
-	if(chrif_state<2)	// まだ準備中
+	if(chrif_state<2)	// まだ?備?
 		return -1;
 	
 	ip=RFIFOL(fd,4);
@@ -159,7 +160,7 @@ int chrif_recvmap(int fd)
 	return 0;
 }
 /*==========================================
- * マップ鯖間移動のためのデータ準備要求
+ * マップ鯖間移動のためのデータ?備要?
  *------------------------------------------
  */
 int chrif_changemapserver(struct map_session_data *sd,char *name,int x,int y,int ip,short port)
@@ -210,6 +211,9 @@ int chrif_connectack(int fd)
 
 	chrif_sendmap(fd);
 
+	// <Agit> Run Event [AgitInit]
+	printf("NPC_Event:[OnAgitInit] do (%d) events (Agit Initialize).\n", npc_event_doall("OnAgitInit"));
+
 	return 0;
 }
 
@@ -257,7 +261,7 @@ int chrif_charselectreq(struct map_session_data *sd)
 }
 
 /*==========================================
- * キャラ名問い合わせ
+ * キ??名問い?わせ
  *------------------------------------------
  */
 int chrif_searchcharid(int char_id)
@@ -268,7 +272,7 @@ int chrif_searchcharid(int char_id)
 	return 0;
 }
 /*==========================================
- * GMに変化要求
+ * GMに変化要?
  *------------------------------------------
  */
 int chrif_changegm(int id,const char *pass,int len)
@@ -283,7 +287,7 @@ int chrif_changegm(int id,const char *pass,int len)
 	return 0;
 }
 /*==========================================
- * 性別変化要求
+ * 性別変化要?
  *------------------------------------------
  */
 int chrif_changesex(int id,int sex)
@@ -328,11 +332,12 @@ int chrif_changedgm(int fd)
 int chrif_changedsex(int fd)
 {
 	int acc;
+	struct map_session_data *sd;
 	acc=RFIFOL(fd,2);
 	if(battle_config.etc_log)
 		printf("chrif_changedsex %d \n",acc);
 
-	struct map_session_data *sd=map_id2sd(acc);
+	sd=map_id2sd(acc);
 	if(acc>0){
 		if(sd!=NULL){	// 変更による強制切断
 			clif_setwaitclose(sd->fd);			
@@ -366,10 +371,10 @@ int chrif_parse(int fd)
 		   
 		   	int r=intif_parse(fd);// intifに渡す
 		   
-			if( r==1 )	continue;	// intifで処理した
-			if( r==2 )	return 0;	// intifで処理したが、データが足りない
+			if( r==1 )	continue;	// intifで??した
+			if( r==2 )	return 0;	// intifで??したが、データが足りない
 			
-			close(fd);	// intifで処理できなかった
+			close(fd);	// intifで??できなかった
 			session[fd]->eof = 1;
 			return 0;
 		}
@@ -411,8 +416,8 @@ int chrif_parse(int fd)
  *
  *------------------------------------------
  */
-// timer関数
-// 今このmap鯖に繋がっているクライアント人数をchar鯖へ送る
+// timer関?
+// 今このmap鯖に繋がっているク?イア?ト人?をchar鯖へ?る
 int send_users_tochar(int tid,unsigned int tick,int id,int data)
 {
 	if(char_fd<=0 || session[char_fd]==NULL)
@@ -429,7 +434,7 @@ int send_users_tochar(int tid,unsigned int tick,int id,int data)
  *
  *------------------------------------------
  */
-// timer関数
+// timer関?
 // char鯖との接続を確認し、もし切れていたら再度接続する
 int check_connect_char_server(int tid,unsigned int tick,int id,int data)
 {

@@ -6,6 +6,7 @@
 #include "db.h"
 #include "timer.h"
 #include "battle.h"
+#include "npc.h"
 #include "pc.h"
 #include "map.h"
 #include "mob.h"
@@ -37,7 +38,7 @@ int guild_checkskill(struct guild *g,int id){ return g->skill[id-10000].lv; }
 
 
 int guild_payexp_timer(int tid,unsigned int tick,int id,int data);
-int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data);
+int guild_agit_eliminate_timer(int tid,unsigned int tick,int id,int data);	// <Agit>
 
 
 static int guild_read_castledb(void)
@@ -68,15 +69,14 @@ static int guild_read_castledb(void)
 			if(p) *p++=0;
 		}
 
+		gc->guild_id=0; // <Agit> Clear Data for Initialize
+		gc->economy=0; gc->defense=0; gc->triggerE=0; gc->triggerD=0; gc->nextTime=0; gc->payTime=0;
+		gc->createTime=0; gc->visibleC=0; gc->visibleG0=0; gc->visibleG1=0; gc->visibleG2=0;
+		gc->visibleG3=0; gc->visibleG4=0; gc->visibleG5=0; gc->visibleG6=0; gc->visibleG7=0;
+
 		gc->castle_id=atoi(str[0]);
-
-		memcpy(gc->m_name,str[1],24);
-		memcpy(gc->c_name,str[2],24);
-
-		gc->emp_x=atoi(str[3]);
-		gc->emp_y=atoi(str[4]);
-
-		gc->initflag=0;		//まだ問い合わせてない
+		memcpy(gc->map_name,str[1],24);
+		memcpy(gc->castle_name,str[2],24);
 
 		numdb_insert(castle_db,gc->castle_id,gc);
 
@@ -99,7 +99,7 @@ void do_init_guild(void)
 
 	guild_read_castledb();
 
-	add_timer_func_list(guild_gvg_eliminate_timer,"guild_gvg_eliminate_timer");
+	add_timer_func_list(guild_agit_eliminate_timer,"guild_agit_eliminate_timer");	// <Agit>
 	add_timer_func_list(guild_payexp_timer,"guild_payexp_timer");
 	add_timer_interval(gettick()+GUILD_PAYEXP_INVERVAL,guild_payexp_timer,0,0,GUILD_PAYEXP_INVERVAL);
 }
@@ -1096,141 +1096,47 @@ int guild_break(struct map_session_data *sd,char *name)
 }
 
 //-----------------------------
-//GvG
+// <Agit>
 //-----------------------------
 
-int guild_gvg_empelium_pos(int map,int type)
-{
-	int i,m;
-	struct guild_castle *gc;
-	for(i=0;i<MAX_GUILDCASTLE;i++){
-		gc=guild_castle_search(i);
-		if(gc==NULL){
-			continue;
-		}
-		if(!(m=map_mapname2mapid(gc->m_name))){
-			continue;
-		}
-		if(m==map && type==1){
-			return gc->emp_x;
-		}
-		if(m==map && type==2){
-			return gc->emp_y;
-		}
-	}
-	return -1;
-}
-
-int guild_gvg_eliminate_timer(int tid,unsigned int tick,int id,int data)
-{
-	int x,y;
-	x=guild_gvg_empelium_pos(id,1);
-	y=guild_gvg_empelium_pos(id,2);
-	guild_gvg_eliminate(id);
-	mob_once_spawn(NULL,map[id].name,x,y,"エンペリウム",1288,1,"");//もう一度エンペ出す
+int guild_agit_start(void)
+{	// Run All NPC_Event[OnAgitStart]
+	int c = npc_event_doall("OnAgitStart");
+	printf("NPC_Event:[OnAgitStart] Run (%d) Events by @AgitStart.\n",c);
 	return 0;
 }
 
-int guild_gvg_eliminate_sub(struct block_list *bl,va_list ap)
-{
-	struct map_session_data *sd=(struct map_session_data*)bl;
-	pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,3);
+int guild_agit_end(void)
+{	// Run All NPC_Event[OnAgitEnd]
+	int c = npc_event_doall("OnAgitEnd");
+	printf("NPC_Event:[OnAgitEnd] Run (%d) Events by @AgitEnd.\n",c);
 	return 0;
 }
 
-int guild_gvg_eliminate(int m)
-{
-	map_foreachinarea(guild_gvg_eliminate_sub,m,0,0,map[m].xs-1,map[m].ys-1,BL_PC);
+int guild_agit_eliminate_timer(int tid,unsigned int tick,int id,int data)
+{	// Run One NPC_Event[OnAgitEliminate]
+	char *evname=malloc(strlen((const char *)data)+4);
+	int c=0;
+	if(!agit_flag) return 0;	// Agit already End
+	memcpy(evname,(const char *)data,strlen((const char *)data)-5);
+	strcpy(evname+strlen((const char *)data)-5,"Eliminate");
+	c = npc_event_do(evname);
+	printf("NPC_Event:[%s] Run (%d) Events.\n",evname,c);
 	return 0;
 }
 
-int guild_gvg_init(void)
-{
-	int i,m;
-	struct guild_castle *gc;
-	for(i=0;i<MAX_GUILDCASTLE;i++){
-		gc=guild_castle_search(i);
-		if(gc==NULL){
-			printf("debug:err\n");
-			continue;
-		}
-		if(!(m=map_mapname2mapid(gc->m_name))){
-			printf("debug:err2\n");
-			continue;
-		}
-		intif_guild_castle_info(gc->castle_id);
-		guild_gvg_eliminate(m);
-		mob_once_spawn(NULL,gc->m_name,gc->emp_x,gc->emp_y,"エンペリウム",1288,1,"");
-		map[m].flag.gvg=1;
-	}
-	return 0;
-}
-int guild_gvg_final_sub(struct block_list *bl,va_list ap)
-{
-	struct mob_data *md=(struct mob_data*)bl;
-	mob_delete(md);
-	return 0;
-}
-int guild_gvg_final(void)
-{
-	int i,m;
-	struct guild_castle *gc;
-	for(i=0;i<MAX_GUILDCASTLE;i++){
-		gc=guild_castle_search(i);
-		if(gc==NULL){
-			continue;
-		}
-		if(!(m=map_mapname2mapid(gc->m_name))){
-			continue;
-		}
-		guild_gvg_eliminate(m);
-		map_foreachinarea(guild_gvg_final_sub,m,0,0,map[m].xs-1,map[m].ys-1,BL_MOB);
-		map[m].flag.gvg=0;
-	}
+int guild_agit_break(struct mob_data *md)
+{	// Run One NPC_Event[OnAgitBreak]
+	char *evname=malloc(strlen(md->npc_event)+1);
+	strcpy(evname,md->npc_event);
+// Now By User to Run [OnAgitBreak] NPC Event...
+// It's a little impossible to null point with player disconnect in this!
+// But Script will be stop, so nothing...
+// Maybe will be changed in the futher..
+//      int c = npc_event_do(evname);
+	if(!agit_flag) return 0;	// Agit already End
+	add_timer(gettick()+battle_config.agit_eliminate_time,guild_agit_eliminate_timer,md->bl.m,(int)evname);
 	return 0;
 }
 
-int guild_gvg_break_empelium(struct mob_data *md)
-{
-	int i;
-	struct guild_castle *gc=NULL;
-	struct guild *g=NULL;
-	struct map_session_data *sd=NULL;
-	struct block_list *bl=NULL;
 
-	char mes1[] = "エンペリウムが破壊されました";
-	char mes2[1024];
-	char mes2_1[] = "砦 [";
-	char mes2_2[] = "]を [";
-	char mes2_3[] = "] ギルドが占領しました";
-
-	for(i=0;i<MAX_GUILDCASTLE;i++){
-		if( (gc=guild_castle_search(i)) != NULL ){
-			if(strcmp(map[md->bl.m].name,gc->m_name)==0){//Mapnameで砦を判断
-				if((bl=map_id2bl(md->attacked_id)) == NULL){
-					printf("gvg : error! null last empelium attacker!\n");
-					return 0;
-				}
-				sd=(struct map_session_data*)bl;
-				g=guild_search(sd->status.guild_id);
-				if(g == NULL){
-					printf("gvg : error! last empelium attacker doesn't belong any guild!\n");
-					return 0;
-				}
-				strcat(mes2,mes2_1);
-				strcat(mes2,gc->c_name);
-				strcat(mes2,mes2_2);
-				strcat(mes2,g->name);
-				strcat(mes2,mes2_3);
-				clif_GMmessage(bl,mes2,strlen(mes2)+1,0x00);//全MAPに陥落告知
-				clif_GMmessage(bl,mes1,strlen(mes1)+1,0x11);//エンペリウム破壊告知は該当MAPのみ
-				g->castle_id = gc->castle_id;
-				gc->guild_id = sd->status.guild_id;
-				intif_guild_castle_change(gc->castle_id,gc->guild_id);//占領ギルド変更通知
-				add_timer(gettick()+battle_config.gvg_eliminate_time,guild_gvg_eliminate_timer,sd->bl.m,0);
-				return 0;
-			}
-		}
-	}
-	return 0;
-}

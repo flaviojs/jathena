@@ -468,6 +468,8 @@ extern struct map_data map[];
 extern int map_num;
 extern int autosave_interval;
 
+extern int agit_flag;
+
 extern char motd_txt[];
 extern char help_txt[];
 

@@ -16,7 +16,7 @@
 #define MAX_ZENY 1000000000	// 1G zeny
 #define MAX_CART 100
 #define MAX_SKILL 350
-#define GLOBAL_REG_NUM 16
+#define GLOBAL_REG_NUM 128
 #define DEFAULT_WALK_SPEED 150
 #define MAX_STORAGE 100
 #define MAX_PARTY 12
@@ -47,7 +47,7 @@ struct skill {
 	unsigned short id,lv,flag;
 };
 struct global_reg {
-	char str[16];
+	char str[32];
 	int value;
 };
 struct s_pet {
@@ -163,17 +163,27 @@ struct guild {
 	struct guild_explusion explusion[MAX_GUILDEXPLUSION];
 	struct guild_skill skill[MAX_GUILDSKILL];
 };
-struct guild_castle {
+struct guild_castle {	// <Agit>
 	int castle_id;
+	char map_name[24];
+	char castle_name[24];
 	int guild_id;
-	int emp_x,emp_y;	//エンペリウムの座標
-	char m_name[24],c_name[24];
-	int economy,eco_num;
-	int defense,def_num;
-	int kafra;
-	int guardian[7];
-	int initflag;		//内部処理用
-	
+	int economy;
+	int defense;
+	int triggerE;
+	int triggerD;
+	int nextTime;
+	int payTime;
+	int createTime;
+	int visibleC;
+	int visibleG0;
+	int visibleG1;
+	int visibleG2;
+	int visibleG3;
+	int visibleG4;
+	int visibleG5;
+	int visibleG6;
+	int visibleG7;
 };
 
 enum {

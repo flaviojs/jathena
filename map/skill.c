@@ -3087,9 +3087,9 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 
 	case 0x8e:	/* クァグマイア */
 		{
+			int type=SkillStatusChangeTable[sg->skill_id];
 			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
 				break;
-			int type=SkillStatusChangeTable[sg->skill_id];
 			if( battle_get_sc_data(bl)[type].timer==-1 )
 				skill_status_change_start(bl,type,src->group->val1,(int)src,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
 		}
@@ -4137,8 +4137,9 @@ void skill_brandishspear_dir(struct brandish *tc,int dir,int are){
 static int skill_gangster_count(struct block_list *bl,va_list ap)
 {
 	int *c;
+	struct map_session_data *sd;
 	c=va_arg(ap,int *);
-	struct map_session_data *sd=(struct map_session_data*)bl;
+	sd=(struct map_session_data*)bl;
 
 	if(pc_issit(sd) && pc_checkskill(sd,RG_GANGSTER) > 0)
 		(*c)++;

@@ -217,7 +217,7 @@ extern struct Battle_Config {
 	int gvg_long_damage_rate;
 	int gvg_magic_damage_rate;
 	int gvg_misc_damage_rate;
-	int gvg_eliminate_time;
+	int agit_eliminate_time;
 	int mob_changetarget_byskill;
 } battle_config;
 

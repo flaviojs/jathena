@@ -1,8 +1,78 @@
 --------------------
+//0800 by Michael_Huang
+
+  Added Agit NPC Script & Command.
+  Fix FreeBSD GCC compatibility.
+  Attachment Agit Demo NPCs. 
+
+	(char/)
+	int_guild.c
+		mapif_guild_castle_dataload() mapif_guild_castle_datasave()
+		int mapif_parse_GuildCastleDataLoad() int mapif_parse_GuildCastleDataSave()
+		inter_guild_parse_frommap() inter_guildcastle_tostr() inter_guildcastle_fromstr()
+	inter.c
+		inter_send_packet_length[] inter_recv_packet_length[]
+	(common/)
+	mmo.h
+		GLOBAL_REG_NUM, struct global_reg {}
+	version.h
+		Mod_Version 0799.
+	(conf/)
+	atcommand_athena.conf
+		agitstart: 1,agitend: 1
+	battle_athena.conf
+		agit_eliminate_time: 7000
+	map_athena.conf
+		conf/agit/ev_agit_*.txt
+	(doc/)
+	conf_ref.txt
+		battle_athena.cnf
+	agitdb_ref.txt
+	(login/)
+	login.c
+		parse_login()
+	(map/)
+	atcommand.h
+		agitster, agitend
+
+	atcommand.c
+		@agitstart, @agitend
+	battle.h
+		battle_config.agit_eliminate_time
+	battle.c
+		battle_config_read()
+	chrif.c
+		chrif_changedsex() chrif_connectack()
+	guild.h
+		guild_agit_start() guild_agit_end() guild_agit_break()
+	guild.c
+		guild_read_castledb() do_init_guild()
+		guild_agit_start() guild_agit_end() guild_agit_eliminate_timer() guild_agit_break()
+	intif.h
+		intif_guild_castle_dataload() intif_guild_castle_datasave()
+	intif.c
+		packet_len_table[] intif_guild_castle_dataload() intif_guild_castle_datasave()
+		intif_parse_GuildCastleDataLoad() intif_parse_GuildCastleDataSave() intif_parse()
+	map.h
+		agit_flag
+	map.c
+		agit_flag
+	npc.h
+		npc_event_doall() npc_event_do()
+	npc.c
+		npc_event_do_sub() npc_event_do()
+	script.c
+		buildin_maprespawnguildid() buildin_agitstart() buildin_agitend()
+		buildin_getcastlename() buildin_getcastledata()	buildin_setcastledata()
+	skill.c
+		skill_unit_onplace()
+		skill_gangster_count()
+
+--------------------
 //0799 by ‚Ò‚´‚Ü‚ñ
 
-EGvGŽÀ‘•‚Ìˆ×‚Éinter-mapŠÔ‚Ì’ÊMŽd—l•ÏX
-E0798‚ÌƒRƒ“ƒpƒCƒ‹ƒGƒ‰[C³(byƒoƒO•ñƒXƒŒ82Ž)
+EGvGŽÀ?‚Ìˆ×‚Éinter-mapŠÔ‚Ì’ÊMŽd—l•ÏX
+E0798‚ÌƒR?ƒpƒC?ƒG?[C³(byƒoƒO•ñ?ƒX?82?)
 	(login/)
 	login.c
 		parse_login() C³B
@@ -30,33 +100,33 @@
 	version.h C³B
 
 --------------------
-//0798 by ŒÓ’±—–
+//0798 by ŒÓ’±?
 
-Elogin-server‚ÌƒƒOƒCƒ“Ž¸”sƒpƒPƒbƒg‚Ì’·‚³‚ª‚¨‚©‚µ‚©‚Á‚½‚Ì‚ðC³
-Elogin-server‚ÉƒAƒNƒZƒXƒRƒ“ƒgƒ[ƒ‹‹@”\’Ç‰Á
+Elogin-server‚Ì?ƒOƒC?Ž¸”sƒpƒPƒbƒg‚Ì’·‚³‚ª‚¨‚©‚µ‚©‚Á‚½‚Ì‚ðC³
+Elogin-server‚ÉƒAƒNƒZƒXƒR?ƒg?[?‹@”\’Ç‰Á
 	Elogin_athena.cnf‚Éorder,allow,deny‚ð‹Lq‚·‚é‚±‚Æ‚ÅA
 	  IP’PˆÊ(‘O•ûˆê’v)‚ÅƒAƒNƒZƒX‚ð‹ÖŽ~‚·‚é‹@”\B
 	EŽw’è•û–@‚Í doc/conf_ref.txt ‚ðŽQÆ
 	
 	(doc/)
 	conf_ref.txt
-		login_athena.cnf‚Ì•”•ªC³
+		login_athena.cnf‚Ì?•ªC³
 	(login/)
 	login.c
-		ƒOƒ[ƒoƒ‹•Ï” access_* ’Ç‰Á
+		ƒO?[ƒo?•Ï? access_* ’Ç‰Á
 		parse_login()C³,check_ip()’Ç‰Á
 
-EƒAƒJƒEƒ“ƒgì¬—pCGIƒXƒNƒŠƒvƒg’Ç‰Á
-	EŽ©ŒÈÓ”C•Ú×‚È‰ðà–³‚µAŽ¿–â‚³‚ê‚Ä‚àƒXƒ‹[‚·‚é‰Â”\«—L‚è
+EƒAƒJƒE?ƒgì¬—pCGIƒXƒN?ƒvƒg’Ç‰Á
+	EŽ©ŒÈÓ”C?Ú×‚È‰ðà–³‚µAŽ¿–â‚³‚ê‚Ä‚àƒX?[‚·‚é‰Â”\«—L‚è
 	EƒGƒfƒBƒ^‚ÅŠJ‚¢‚½‚ç­‚µà–¾—L‚è
 	ECGIÝ’u‚ÌŠî–{‚³‚¦‚í‚©‚ê‚Î–â‘è‚È‚¢‚Í‚¸
-	EƒƒbƒZ[ƒW‚Í‰pŒêA“ú–{Œê—¼‘Î‰ž
+	E?ƒbƒZ[ƒW‚Í‰pŒêA“ú–{Œê—¼‘Î?
 	  iAccept-Language‚ªja‚È‚ç“ú–{Œê‚É•ÏŠ·‚µ‚Ü‚·j
-	EŠÇ—ŽÒƒpƒXƒ[ƒh‚È‚µ‚Å“®‚­‚Ì‚ÅƒZƒLƒ…ƒŠƒeƒB‚É‚Í’ˆÓ(.htaccess‚È‚Ç„§)
+	EŠÇ?ŽÒƒpƒX?[ƒh‚È‚µ‚Å“®‚­‚Ì‚ÅƒZƒL??ƒeƒB‚É‚Í?ˆÓ(.htaccess‚È‚Ç?§)
 
 	(tool/cgi/)
 	addaccount.cgi
-		ƒAƒJƒEƒ“ƒgì¬—pCGIB
+		ƒAƒJƒE?ƒgì¬—pCGIB
 
 E‚»‚Ì‘¼
 	(tool/)
@@ -64,21 +134,21 @@
 		castle.txt‚àƒoƒbƒNƒAƒbƒv‚·‚é‚æ‚¤‚É
 
 --------------------
-//0797 by Ž€_
+//0797 by ?_
 
 E­‚µC³B
-Ebattle_athena.conf‚Ì€–Ú•ÏXB(lootitem_time íœAitem_first_get_timeA
+Ebattle_athena.conf‚Ì?–Ú•ÏXB(lootitem_time í?Aitem_first_get_timeA
 item_second_get_timeAitem_third_get_timeAmvp_item_first_get_timeA
 mvp_item_second_get_timeAmvp_item_third_get_time ’Ç‰ÁB)
-EƒAƒCƒeƒ€ƒ‹[ƒgŒ ŒÀ‚ð³‚µ‚­ŽÀ‘•BÅ‰UŒ‚‚Å‚Í‚È‚­—^‚¦‚½ƒ_ƒ[ƒW‚Ì
-—Ê‚É‚æ‚Á‚ÄŽû“¾Œ ŒÀ‚ð—^‚¦‚é‚æ‚¤‚É•ÏXB(Å‰Žû“¾Œ ŒÀ‚Ì‚ÝƒeƒXƒg)
-ƒp[ƒeƒB‚Ìê‡ƒp[ƒeƒB‚ÌÝ’è‚É‡‚í‚¹‚é•K—v‚ª‚ ‚è‚Ü‚·‚ª‚Ü‚¾ƒpƒPƒbƒg‚ª
-•s–¾‚ÈŠ‚ª‚ ‚éˆ×“¯‚¶ƒp[ƒeƒB‚È‚çŽû“¾‚Å‚«‚é‚æ‚¤‚É‚È‚Á‚Ä‚¢‚Ü‚·B
-Eƒ{ƒEƒŠƒ“ƒOƒoƒbƒVƒ…‚ÌƒoƒOC³B(‘½•ªC³‚³‚ê‚½‚Í‚¸...)
-E‘•”õƒXƒNƒŠƒvƒgbonus‚ÉbSplashRange‚ÆbSplashAddRange’Ç‰ÁB
-bSplashRange‚ÆbSplashAddRange‚Í•Ší‚Åƒ_ƒ[ƒW‚ð—^‚¦‚½Žž‚Ì‚Ý”­“®A’Êí‚Ì•ŠíUŒ‚ˆµ‚¢‚È‚Ì‚Å”ð‚¯‚ç‚ê‚é‚ª(Flee2‚É‚æ‚éŠ®‘S‰ñ”ð‚Í•s‰Â”\)ƒNƒŠ‚Ío‚È‚¢‚æ‚¤‚É‚È‚Á‚Ä‚¢‚Ä•Ší‚É‚æ‚éó‘ÔˆÙí‚Í”­¶‚µ‚Ü‚¹‚ñB–{ŽIŽd—l‚È‚ñ‚Ä’m‚è‚Ü‚¹‚ñB
-EƒXƒLƒ‹‚Ìd‚Ë’u‚«ˆ—‚ð–{ŽI‚É‡‚í‚¹‚ÄC³B
-Emapflag‚Ìgvg‚Í‚¢‚Â‚à‚È‚Á‚Ä‚¢‚é‚í‚¯‚¶‚á‚È‚¢‚Ì‚ÅíœB
+EƒAƒCƒe??[ƒg?ŒÀ‚ð³‚µ‚­ŽÀ?BÅ?U?‚Å‚Í‚È‚­—^‚¦‚½ƒ_?[ƒW‚Ì
+—Ê‚É‚æ‚Á‚ÄŽû“¾?ŒÀ‚ð—^‚¦‚é‚æ‚¤‚É•ÏXB(Å?Žû“¾?ŒÀ‚Ì‚ÝƒeƒXƒg)
+ƒp[ƒeƒB‚Ìê?ƒp[ƒeƒB‚ÌÝ’è‚É?‚í‚¹‚é•K—v‚ª?‚è‚Ü‚·‚ª‚Ü‚¾ƒpƒPƒbƒg‚ª
+•s–¾‚È?‚ª?‚éˆ×“¯‚¶ƒp[ƒeƒB‚È‚çŽû“¾‚Å‚«‚é‚æ‚¤‚É‚È‚Á‚Ä‚¢‚Ü‚·B
+Eƒ{ƒE??ƒOƒoƒbƒV?‚ÌƒoƒOC³B(‘½•ªC³‚³‚ê‚½‚Í‚¸...)
+E?”õƒXƒN?ƒvƒgbonus‚ÉbSplashRange‚ÆbSplashAddRange’Ç‰ÁB
+bSplashRange‚ÆbSplashAddRange‚Í?Ší‚Åƒ_?[ƒW‚ð—^‚¦‚½?‚Ì‚Ý”­“®A’Êí‚Ì?ŠíU?ˆµ‚¢‚È‚Ì‚Å”ð‚¯‚ç‚ê‚é‚ª(Flee2‚É‚æ‚éŠ®‘S‰ñ”ð‚Í•s‰Â”\)ƒN?‚Ío‚È‚¢‚æ‚¤‚É‚È‚Á‚Ä‚¢‚Ä?Ší‚É‚æ‚éó‘ÔˆÙí‚Í”­¶‚µ‚Ü‚¹‚ñB–{ŽIŽd—l‚È‚ñ‚Ä’m‚è‚Ü‚¹‚ñB
+EƒXƒL?‚Ìd‚Ë’u‚«??‚ð–{ŽI‚É?‚í‚¹‚ÄC³B
+Emapflag‚Ìgvg‚Í‚¢‚Â‚à‚È‚Á‚Ä‚¢‚é‚í‚¯‚¶‚á‚È‚¢‚Ì‚Åí?B
 E‚»‚Ì‘¼×‚©‚¢C³B
 	athena-start C³B
 	(common/)
@@ -140,29 +210,29 @@ bSplashRange‚ÆbSplashAddRange‚Í•Ší‚Åƒ_ƒ[ƒW‚ð—^‚¦‚½Žž‚Ì‚Ý”­“®A’Êí‚Ì•ŠíUŒ‚ˆ
 	@nosave‚Í‚µ‚Ä‚¢‚Ü‚¹‚ñ
 
 Emap_athena.conf‚ÌC³
-	@umbala niflheim“™‚Ì’Ç‰Á
-	@ƒRƒƒ“ƒgƒAƒEƒg‚µ‚Ä‚ ‚è‚Ü‚·B
+	@umbala niflheim?‚Ì’Ç‰Á
+	@ƒR??ƒgƒAƒEƒg‚µ‚Ä?‚è‚Ü‚·B
 
-EƒoƒŒƒ“ƒ^ƒCƒ“ƒXƒNƒŠƒvƒg’Ç‰Á
+Eƒo??ƒ^ƒC?ƒXƒN?ƒvƒg’Ç‰Á
 	conf/npc/npc_event_valentine.txt
-	@ƒ`ƒ‡ƒR’B‚ÌDrop‚Í˜M‚Á‚Ä‚¢‚Ü‚¹‚ñB‚¨D‚Ý‚Å‚Ç‚¤‚¼
-	@®AŽèì‚èƒ`ƒ‡ƒR‚ðH‚×‚½‚Æ‚«‚ÌƒGƒtƒFƒNƒg‚Í
-	@ÅVƒNƒ‰ƒCƒAƒ“ƒg‚É‚·‚ê‚ÎŒ©‚¦‚Ü‚·B
+	@ƒ`?ƒR’B‚ÌDrop‚Í˜M‚Á‚Ä‚¢‚Ü‚¹‚ñB‚¨D‚Ý‚Å‚Ç‚¤‚¼
+	@®AŽèì‚èƒ`?ƒR‚ðH‚×‚½‚Æ‚«‚ÌƒGƒtƒFƒNƒg‚Í
+	@ÅVƒN?ƒCƒA?ƒg‚É‚·‚ê‚ÎŒ©‚¦‚Ü‚·B
 
 EGVGScript’Ç‰Á
 	conf/gvg/ˆÈ‰º
-	@WeissŽž‘ã‚Éì¬‚µ‚½‚à‚Ì‚ðAthena—p‚ÉƒRƒ“ƒo[ƒg&‘äŽŒC³
+	@Weiss?‘ã‚Éì¬‚µ‚½‚à‚Ì‚ðAthena—p‚ÉƒR?ƒo[ƒg&‘ä?C³
 	@prtg_cas01ˆÈŠO‚ÍŠø‚Ì‚Ý‚Å‚·B
 	@GVGDATA‚ÍŽIÄ‹N“®‚ÅÁ–Å‚µ‚Ü‚·B
-	@ƒGƒ‰[‚ªo‚é‚æ‚¤‚È‚çƒRƒƒ“ƒgƒAƒEƒg‚µ‚Ä‚­‚¾‚³‚¢B
-	@MobDataAŽ·Ž–Script‚àprtg_cas01‚Ì‚Ý‚Å‚·B(TestScript)
-	@‚ ‚­‚Ü‚ÅƒeƒXƒgƒXƒNƒŠƒvƒg‚Å‚·BGVGŽÀ‘•‚ÌŽQl‚É‚Ç‚¤‚¼
+	@ƒG?[‚ªo‚é‚æ‚¤‚È‚çƒR??ƒgƒAƒEƒg‚µ‚Ä‚­‚¾‚³‚¢B
+	@MobDataAŽ·?Script‚àprtg_cas01‚Ì‚Ý‚Å‚·B(TestScript)
+	@?‚­‚Ü‚ÅƒeƒXƒgƒXƒN?ƒvƒg‚Å‚·BGVGŽÀ?‚ÌŽQl‚É‚Ç‚¤‚¼
 
 --------------------
 //0794 by DRG
 
-Eskillused‚ÅŽw’è‚µ‚½IW,QM‚È‚Ç‚É‚Ì‚Á‚Ä‚éŠÔMOBƒXƒLƒ‹‚ðŽg—p‚·‚é‚æ‚¤‚É•ÏX
-EƒAƒbƒvƒXƒŒ‚R‚Ì7‚Ìathena-start‚ðˆê‰žŠÜ‚ß‚Æ‚«‚Ü‚µ‚½
+Eskillused‚ÅŽw’è‚µ‚½IW,QM‚È‚Ç‚É‚Ì‚Á‚Ä‚éŠÔMOBƒXƒL?‚ðŽg—p‚·‚é‚æ‚¤‚É•ÏX
+EƒAƒbƒvƒX?‚R‚Ì7‚Ìathena-start‚ðˆê?ŠÜ‚ß‚Æ‚«‚Ü‚µ‚½
 
 	athena-start
 	(map/)
@@ -173,11 +243,11 @@ bSplashRange‚ÆbSplashAddRange‚Í•Ší‚Åƒ_ƒ[ƒW‚ð—^‚¦‚½Žž‚Ì‚Ý”­“®A’Êí‚Ì•ŠíUŒ‚ˆ
 //0793 by huge
 
 EƒT[ƒo[snapshot
-EƒT[ƒo[‚ªƒNƒ‰ƒbƒVƒ…‚·‚éƒoƒO‚ðC³
-E”­“®‚¹‚¸‚Éã©‚ªÁ‚¦‚½‚çAÝ’u—pƒgƒ‰ƒbƒv‚ª•Ô‚Á‚Ä‚­‚é‚æ‚¤‚ÉC³B
-Eƒ‹[ƒgŒ ŒÀ‚ÅA“¯‚¶ƒp[ƒeƒB[‚ÌƒLƒƒƒ‰‚Í‚·‚®E‚¦‚é‚æ‚¤‚ÉC³B
-EƒoƒO•ñƒXƒŒ‚R >>54 ‚ÌƒoƒOC³B
-EƒƒOƒCƒ“Žž‚ÉƒT[ƒo[‘¤‚ÉID‚ð•\Ž¦‚·‚é‚æ‚¤‚É‚µ‚Ü‚µ‚½B
+EƒT[ƒo[‚ªƒN?ƒbƒV?‚·‚éƒoƒO‚ðC³
+E”­“®‚¹‚¸‚Éã©‚ªÁ‚¦‚½‚çAÝ’u—pƒg?ƒbƒv‚ª•Ô‚Á‚Ä‚­‚é‚æ‚¤‚ÉC³B
+E?[ƒg?ŒÀ‚ÅA“¯‚¶ƒp[ƒeƒB[‚ÌƒL??‚Í‚·‚®E‚¦‚é‚æ‚¤‚ÉC³B
+EƒoƒO•ñ?ƒX?‚R >>54 ‚ÌƒoƒOC³B
+E?ƒOƒC??‚ÉƒT[ƒo[‘¤‚ÉID‚ð•\Ž¦‚·‚é‚æ‚¤‚É‚µ‚Ü‚µ‚½B
 	(login/)
 	login.c
 		parse_login() C³B
@@ -203,27 +273,27 @@ bSplashRange‚ÆbSplashAddRange‚Í•Ší‚Åƒ_ƒ[ƒW‚ð—^‚¦‚½Žž‚Ì‚Ý”­“®A’Êí‚Ì•ŠíUŒ‚ˆ
      http://project-yare.de/
 
 1. Athena(ƒAƒeƒi)‚É‚Â‚¢‚Ä
-2. ‚±‚ÌƒŠƒŠ[ƒX‚É‚Â‚¢‚Ä
+2. ‚±‚Ì??[ƒX‚É‚Â‚¢‚Ä
 3. •K—v‚È•¨
 4. Žg‚¢•û
 5. Œ»Ý‚ÌŽd—l
 6. jŽ«
-7. –ÆÓŽ–€
+7. –ÆÓ??
 8. •åW
 9. English
 
 
 1. ƒAƒeƒi‚É‚Â‚¢‚Ä
-    ƒAƒeƒi‚Æ‚Í2003”N1ŒŽ”¼‚Î‚É‚Å‚½0052.lzh‚ðƒx[ƒX‚Æ‚µ‚Äì‚ç‚ê‚Ä‚¢‚éƒGƒ~ƒ…ƒŒ[ƒ^‚Ìˆê‚Â‚Å‚·B
-    Šî–{“I‚Èƒ‰ƒCƒZƒ“ƒX‚ÍƒIƒŠƒWƒiƒ‹‚ªGPL‚Ì‰º‚É”z•z‚³‚ê‚Ä‚¢‚éˆ×A
-    ‚±‚ê‚É]‚¢GPL‚Ì‰º”z•z‚ð‹–‰Â‚µ‚Ü‚·B
+    ƒAƒeƒi‚Æ‚Í2003”N1?”¼‚Î‚É‚Å‚½0052.lzh‚ðƒx[ƒX‚Æ‚µ‚Äì‚ç‚ê‚Ä‚¢‚éƒGƒ~??[ƒ^‚Ìˆê‚Â‚Å‚·B
+    Šî–{“I‚È?ƒCƒZ?ƒX‚ÍƒI?ƒWƒi?‚ªGPL‚Ì‰º‚É”z•z‚³‚ê‚Ä‚¢‚éˆ×A
+    ‚±‚ê‚É]‚¢GPL‚Ì‰º”z•z‚ð?‰Â‚µ‚Ü‚·B
     /*
-        ‰ü—Ç”Å‚ð”z•z‚·‚éê‡‚Í•K‚¸‚±‚ÌREADME‚ð‘‚«Š·‚¦‚Ä‚­‚¾‚³‚¢B
-        ‰½ˆ‚ð‰ü—Ç‚µ‚½‚Ì‚©•ñ(athena@project-yare.de‚Ü‚Å)‚µ‚Ä–á‚¦‚é‚Æ•‚©‚è‚Ü‚·B
-        ƒoƒCƒiƒŠ‚Ì‚Ý‚Ì”z•z‚ÍGPLˆá”½‚Å‚·‚Ì‚Å"•K‚¸"ƒ\[ƒX‚à“Y•t‚µ‚Ä‚­‚¾‚³‚¢B
+        ‰ü—Ç”Å‚ð”z•z‚·‚éê?‚Í•K‚¸‚±‚ÌREADME‚ð?‚«Š·‚¦‚Ä‚­‚¾‚³‚¢B
+        ‰½?‚ð‰ü—Ç‚µ‚½‚Ì‚©•ñ?(athena@project-yare.de‚Ü‚Å)‚µ‚Ä–á‚¦‚é‚Æ?‚©‚è‚Ü‚·B
+        ƒoƒCƒi?‚Ì‚Ý‚Ì”z•z‚ÍGPLˆá”½‚Å‚·‚Ì‚Å"•K‚¸"ƒ\[ƒX‚à“Y•t‚µ‚Ä‚­‚¾‚³‚¢B
      */
     “®ì‚ÌŠm”F‚ÍˆÈ‰º‚Ì’Ê‚è‚Ì‚Ýs‚Á‚Ä‚¢‚Ü‚·B
-    // ‚½‚¾‚µŠ®àø‚É“®‚­Ž–‚ð•ÛØ‚·‚é‚à‚Ì‚Å‚ ‚è‚Ü‚¹‚ñ
+    // ‚½‚¾‚µŠ®àø‚É“®‚­?‚ð•ÛØ‚·‚é‚à‚Ì‚Å?‚è‚Ü‚¹‚ñ
     ‘ÎÛCPU: Intel PentiumŒn   // PentiumIIˆÈã‚ÅŠm”F.
         FreeBSD 4.8R, 4.6.2R
         Linux RedHat 7.3
@@ -231,101 +301,101 @@ bSplashRange‚ÆbSplashAddRange‚Í•Ší‚Åƒ_ƒ[ƒW‚ð—^‚¦‚½Žž‚Ì‚Ý”­“®A’Êí‚Ì•ŠíUŒ‚ˆ
     ŠJ”­Œ³URL: http://project-yare.de/
 
 
-2. ‚±‚ÌƒŠƒŠ[ƒX‚É‚Â‚¢‚Ä
-    ¡‰ñ‚ÌƒŠƒŠ[ƒX‚Í‘O‰ñ(V2.1)“¯—lŠJ”­”Å‚ÌƒŠƒŠ[ƒX‚Ì‚Ý‚Å‚·B
+2. ‚±‚Ì??[ƒX‚É‚Â‚¢‚Ä
+    ¡‰ñ‚Ì??[ƒX‚Í‘O‰ñ(V2.1)“¯—lŠJ”­”Å‚Ì??[ƒX‚Ì‚Ý‚Å‚·B
     2.1‚É”ä‚×‰º‹L‚Ì“_‚ªC³‚³‚ê‚Ä‚¢‚Ü‚·B
-        map‚ÌƒfƒtƒHƒ‹ƒgÝ’è‚ªŠØ‘data.grf‚Ì‚Ý³í‚É“®ì‚·‚é‚æ‚¤‚É‚È‚Á‚Ä‚¢‚½“_
+        map‚ÌƒfƒtƒH?ƒgÝ’è‚ªŠØ?data.grf‚Ì‚Ý³í‚É“®ì‚·‚é‚æ‚¤‚É‚È‚Á‚Ä‚¢‚½“_
         common/timer.c‚âmap/script.c‚ÌŠô‚Â‚©‚ÌƒoƒO
 
-    v‘¬‚ÉUpdate‚ð‹­‚­„§‚·‚é‚à‚Ì‚Å‚Í‚ ‚è‚Ü‚¹‚ñ‚ªŠeŽ©‚Ì”»’f‚Ås‚Á‚Ä‰º‚³‚¢B
+    v‘¬‚ÉUpdate‚ð‹­‚­?§‚·‚é‚à‚Ì‚Å‚Í?‚è‚Ü‚¹‚ñ‚ªŠeŽ©‚Ì”»’f‚Ås‚Á‚Ä‰º‚³‚¢B
 
 
 3. •K—v‚È•¨
-    data.grf      //sdata.grf‚Í•K—v‚É‰ž‚¶‚Ä
-    account.txt   //‘¶Ý‚µ‚È‚¢ê‡athena.sh‚ªŽ©“®¶¬‚µ‚Ü‚·
-    conf/*.cnf    //Map—p‚ÆChar—p‚Ì“ñŽí—Þ‚ ‚è‚Ü‚·
-    conf/npc*.txt //npcÝ’è—pƒtƒ@ƒCƒ‹‚Å‚·B•¡”‚Ìƒtƒ@ƒCƒ‹‚É•ª‚¯‚é‚±‚Æ‚ª‰Â”\‚Å‚·B
-    db/*.txt      //ƒAƒCƒeƒ€Ajobî•ñ‚È‚Ç
+    data.grf      //sdata.grf‚Í•K—v‚É?‚¶‚Ä
+    account.txt   //‘¶Ý‚µ‚È‚¢ê?athena.sh‚ªŽ©“®¶¬‚µ‚Ü‚·
+    conf/*.cnf    //Map—p‚ÆChar—p‚Ì“ñŽí—Þ?‚è‚Ü‚·
+    conf/npc*.txt //npcÝ’è—pƒtƒ@ƒC?‚Å‚·B•¡?‚Ìƒtƒ@ƒC?‚É•ª‚¯‚é‚±‚Æ‚ª‰Â”\‚Å‚·B
+    db/*.txt      //ƒAƒCƒe?Ajobî•ñ‚È‚Ç
 
 
 4. Žg‚¢•û
     > tar xvfz athena-d?.?.tar.gz
     > cd athena-d?.?.tar.gz
     > make
-    > vi conf/char_athena.cnf       //IP(127.0.0.1)‚Ì•”•ª‚ðŠÂ‹«‚É‡‚í‚¹‚Ä•ÏX‚µ‚Ä‚­‚¾‚³‚¢
-    > vi conf/map_athena.cnf        //“¯ãA‚Ü‚½mapÝ’è‚È‚Ç‚ÍA‚±‚Ìƒtƒ@ƒCƒ‹‚Ås‚¢‚Ü‚·B
+    > vi conf/char_athena.cnf       //IP(127.0.0.1)‚Ì?•ª‚ðŠÂ‹«‚É?‚í‚¹‚Ä•ÏX‚µ‚Ä‚­‚¾‚³‚¢
+    > vi conf/map_athena.cnf        //“¯ãA‚Ü‚½mapÝ’è‚È‚Ç‚ÍA‚±‚Ìƒtƒ@ƒC?‚Ås‚¢‚Ü‚·B
     > ./athena.sh
     ã‹L‚ðs‚¦‚Î"‚½‚Ô‚ñ"‹N“®‚µ‚Ü‚·B
 
     •â‘«:
-    conf/npc_sampleJ.txt‚É‚ÍƒXƒNƒŠƒvƒg‚Ì‘‚«•û‚É‚Â‚¢‚ÄFX‚Èà–¾‚ª‹LÚ‚³‚ê‚Ä‚¢‚Ü‚·B
-    ‚à‚µA“ÆŽ©‚ÌMapÝ’è‚ðs‚Á‚Ä‚Ý‚½‚¢l‚âAƒXƒNƒŠƒvƒg‚ð˜M‚è‚½‚¢•û‚ÍŽQl‚É‚µ‚Ä‚­‚¾‚³‚¢B
-    ‚½‚¾‚µAŠJ”­’†‚Ì‚½‚ßƒXƒNƒŠƒvƒg‚ÌŽd—l‚ª•ÏX‚³‚ê‚é‰Â”\«‚ª‚‚¢‚Å‚·B
-    command.txt‚É‚ÍŽÀ‘•Ï‚Ý‚Ì“ÁŽêƒRƒ}ƒ“ƒh‚É‚Â‚¢‚Ä‚Ìà–¾‚ð‹LÚ‚µ‚Ä‚¢‚Ü‚·B
+    conf/npc_sampleJ.txt‚É‚ÍƒXƒN?ƒvƒg‚Ì?‚«•û‚É‚Â‚¢‚ÄFX‚Èà–¾‚ª‹LÚ‚³‚ê‚Ä‚¢‚Ü‚·B
+    ‚à‚µA“ÆŽ©‚ÌMapÝ’è‚ðs‚Á‚Ä‚Ý‚½‚¢l‚âAƒXƒN?ƒvƒg‚ð˜M‚è‚½‚¢•û‚ÍŽQl‚É‚µ‚Ä‚­‚¾‚³‚¢B
+    ‚½‚¾‚µAŠJ”­?‚Ì‚½‚ßƒXƒN?ƒvƒg‚ÌŽd—l‚ª•ÏX‚³‚ê‚é‰Â”\«‚ª?‚¢‚Å‚·B
+    command.txt‚É‚ÍŽÀ?Ï‚Ý‚Ì“ÁŽêƒRƒ}?ƒh‚É‚Â‚¢‚Ä‚Ìà–¾‚ð‹LÚ‚µ‚Ä‚¢‚Ü‚·B
 
 
 5. Œ»Ý‚ÌŽd—l
-    –{ŽI‚Æ”ä‚×‚Ä‚¨‚©‚µ‚¢(—á‚¦‚Îƒvƒo‚ª•à‚­Aƒ|ƒŠƒ“‚ªƒAƒCƒeƒ€‚ðE‚í‚È‚¢‚È‚Ç)“_‚ÍA
-    ‘S‚ÄŒ»ÝŠJ”­’†‚Éˆö‚é‚à‚Ì‚Å‚·B
-    Œ»ó‚Æ‚µ‚ÄƒLƒƒƒ‰ƒNƒ^Œn‹y‚Ñƒ‚ƒ“ƒXƒ^[Œn‚ÌƒoƒO•ñ‚Í–³Ž‹‚³‚ê‚é‰Â”\«‚ª‚‚¢‚Å‚·B
+    –{ŽI‚Æ”ä‚×‚Ä‚¨‚©‚µ‚¢(—á‚¦‚Îƒvƒo‚ª•à‚­Aƒ|??‚ªƒAƒCƒe?‚ðE‚í‚È‚¢‚È‚Ç)“_‚ÍA
+    ‘S‚ÄŒ»ÝŠJ”­?‚Éˆö‚é‚à‚Ì‚Å‚·B
+    Œ»ó‚Æ‚µ‚ÄƒL??ƒNƒ^Œn‹y‚Ñ??ƒXƒ^[Œn‚ÌƒoƒO•ñ?‚Í–³?‚³‚ê‚é‰Â”\«‚ª?‚¢‚Å‚·B
 
-    ƒoƒO•ñ‚É‚Â‚¢‚Ä•K‚¸”­¶ðŒ‚ð‚¨‘‚«‰º‚³‚¢B
-    ‰º‚É‚ ‚é•ñ—pƒeƒ“ƒvƒŒ[ƒg‚ðŽg‚Á‚Ä•ñ‚µ‚Ä’¸‚­‚Æ•‚©‚è‚Ü‚·B
-    •ñæ‚ÍƒGƒ~ƒ…”Â‚ÌŠJ”­ƒXƒŒ‚É‚Å‚àB
+    ƒoƒO•ñ?‚É‚Â‚¢‚Ä•K‚¸”­¶ð?‚ð‚¨?‚«‰º‚³‚¢B
+    ‰º‚É?‚é•ñ?—pƒe?ƒv?[ƒg‚ðŽg‚Á‚Ä•ñ?‚µ‚Ä’¸‚­‚Æ?‚©‚è‚Ü‚·B
+    •ñ?æ‚ÍƒGƒ~?”Â‚ÌŠJ”­ƒX?‚É‚Å‚àB
     ---- Athena v 2.0 (stable or develop) ----
-    ygcc verzgcc -v‚ðŽÀsŽž‚É•\Ž¦‚³‚ê‚é“à—e
-    y“®ìƒVƒXƒeƒ€zFreeBSD, Linux(ƒfƒBƒXƒgƒŠƒrƒ…[ƒWƒ‡ƒ“‚à), cygwin‚È‚Ç
-    y”­¶“à—ezmap‚ª—Ž‚¿‚Ä‚µ‚Ü‚Á‚½Žž‚Ì•\Ž¦‚³‚ê‚Ä‚¢‚½ƒfƒoƒbƒOî•ñ‚È‚Ç‹ï‘Ì“I‚É‘‚¢‚Ä‚­‚¾‚³‚¢B
-    y‘€ì“à—ez‹ï‘Ì“I‚É‚Ç‚ñ‚È‘€ì‚ðs‚Á‚½‚©‚ð‘‚¢‚Ä‚­‚¾‚³‚¢B
+    ygcc verzgcc -v‚ðŽÀs?‚É•\Ž¦‚³‚ê‚é“à—e
+    y“®ìƒVƒXƒe?zFreeBSD, Linux(ƒfƒBƒXƒg?ƒr?[ƒW??‚à), cygwin‚È‚Ç
+    y”­¶“à—ezmap‚ª?‚¿‚Ä‚µ‚Ü‚Á‚½?‚Ì•\Ž¦‚³‚ê‚Ä‚¢‚½ƒfƒoƒbƒOî•ñ‚È‚Ç‹ï‘Ì“I‚É?‚¢‚Ä‚­‚¾‚³‚¢B
+    y?ì“à—ez‹ï‘Ì“I‚É‚Ç‚ñ‚È?ì‚ðs‚Á‚½‚©‚ð?‚¢‚Ä‚­‚¾‚³‚¢B
     ------------------ END -------------------
-    —‘z‚Íƒeƒ“ƒvƒŒ‚É‰Á‚¦‚Ämap.core‚È‚Çcoreƒtƒ@ƒCƒ‹‚ðUploader‚ÉƒAƒbƒv‚µ‚Ä’¸‚­‚±‚Æ‚Å‚·‚ª
-    –â‘è‚ÌMap‚¾‚¯‚Ìó‘Ô‚É‚µcore‚Ì“f‚­—e—Ê‚É’ˆÓ‚µ‚Ä‚­‚¾‚³‚¢B
+    ?‘z‚Íƒe?ƒv?‚É‰Á‚¦‚Ämap.core‚È‚Çcoreƒtƒ@ƒC?‚ðUploader‚ÉƒAƒbƒv‚µ‚Ä’¸‚­‚±‚Æ‚Å‚·‚ª
+    –â‘è‚ÌMap‚¾‚¯‚Ìó‘Ô‚É‚µcore‚Ì“f‚­—e—Ê‚É?ˆÓ‚µ‚Ä‚­‚¾‚³‚¢B
     /*
-        Šm”F‚µ‚½ŒÀ‚è‚Å‚Í324ŒÂ‚Ù‚Çmapƒf[ƒ^‚ð“Ç‚Ýž‚Ü‚¹‚é‚ÆA
-         40MB‹ß‚¢coreƒtƒ@ƒCƒ‹‚ð“f‚«o‚µ‚Ü‚· @FreeBSD
-         cygwin‚Ìê‡‚Ístackdump‚Æ‚¢‚¤ƒtƒ@ƒCƒ‹‚É‚È‚é‚»‚¤‚Å‚·B
-        ‚µ‚©‚µAcoreƒtƒ@ƒCƒ‹‚È‚Ç‚ðgzipˆ³k‚È‚Ç‚·‚ê‚Î‘å•‚É¬‚³‚­‚È‚è‚Ü‚·B
-         ‘å–}30MB‚Ìcoreƒtƒ@ƒCƒ‹‚ª2.9MB‚Ù‚Ç‚É‚È‚é‚æ‚¤‚Å‚·B
-        ‚Å‚·‚Ì‚ÅA‚à‚µƒAƒbƒvƒ[ƒh‚·‚éê‡‚Ígzipˆ³k‚È‚ÇŠeŽ©s‚Á‚Ä‚­‚¾‚³‚¢B
+        Šm”F‚µ‚½ŒÀ‚è‚Å‚Í324ŒÂ‚Ù‚Çmapƒf[ƒ^‚ð“Ç‚Ý?‚Ü‚¹‚é‚ÆA
+         40MB‹ß‚¢coreƒtƒ@ƒC?‚ð“f‚«o‚µ‚Ü‚· @FreeBSD
+         cygwin‚Ìê?‚Ístackdump‚Æ‚¢‚¤ƒtƒ@ƒC?‚É‚È‚é‚»‚¤‚Å‚·B
+        ‚µ‚©‚µAcoreƒtƒ@ƒC?‚È‚Ç‚ðgzipˆ³k‚È‚Ç‚·‚ê‚Î‘å?‚É¬‚³‚­‚È‚è‚Ü‚·B
+         ‘å–}30MB‚Ìcoreƒtƒ@ƒC?‚ª2.9MB‚Ù‚Ç‚É‚È‚é‚æ‚¤‚Å‚·B
+        ‚Å‚·‚Ì‚ÅA‚à‚µƒAƒbƒv?[ƒh‚·‚éê?‚Ígzipˆ³k‚È‚ÇŠeŽ©s‚Á‚Ä‚­‚¾‚³‚¢B
      */
 
-    ¡‰ñ‚ÌƒŠƒŠ[ƒX‚¾‚¯‚Å‚È‚­HISTORY‚ðì¬‚·‚é‚Æ‘å—Ê‚É‹Lq‚ª•K—v‚Èˆ×È—ª‚µ‚Ä‚¢‚Ü‚·B
-    // ‘½‚¢“ú‚¾‚Æ–{“–‚ÉŒ‹\‚ ‚è‚Ü‚·‚Ì‚ÅddB
+    ¡‰ñ‚Ì??[ƒX‚¾‚¯‚Å‚È‚­HISTORY‚ðì¬‚·‚é‚Æ‘å—Ê‚É‹Lq‚ª•K—v‚Èˆ×È—ª‚µ‚Ä‚¢‚Ü‚·B
+    // ‘½‚¢“ú‚¾‚Æ–{?‚É?\?‚è‚Ü‚·‚Ì‚ÅddB
 
 
 6. jŽ«
-    ¡‰ñ‚±‚ÌAthenaŠJ”­”Å‚ðo‚·‚É“–‚½‚Á‚ÄŠ´ŽÓ‚µ‚½‚¢•ûX(‡”Ô•s“¯)
-        LemmingŽ (Project YARE)
-        0052Ž (Uploader)
-        35Ž (ƒGƒ~ƒ…ŠJ”­ƒXƒŒ)
-        Johan LindhŽ(Author of memwatch)
+    ¡‰ñ‚±‚ÌAthenaŠJ”­”Å‚ðo‚·‚É?‚½‚Á‚ÄŠ´ŽÓ‚µ‚½‚¢•ûX(?”Ô•s“¯)
+        Lemming? (Project YARE)
+        0052? (Uploader)
+        35? (ƒGƒ~?ŠJ”­ƒX?)
+        Johan Lindh?(Author of memwatch)
         YARE forum‚ÌNPCî•ñ‚ðì¬‚µ‚½•ûX
-        weissŒ¤‹†‰ïBBS‚Ì—lX‚Èî•ñƒtƒ@ƒCƒ‹‚ðì¬‚µ‚½•ûX
-        ÅŒã‚ÉA.coreƒtƒ@ƒCƒ‹’B
+        weissŒ¤?‰ïBBS‚Ì—lX‚Èî•ñƒtƒ@ƒC?‚ðì¬‚µ‚½•ûX
+        ÅŒã‚ÉA.coreƒtƒ@ƒC?’B
 
 
-7. –ÆÓŽ–€
-    Athena Project‚ÍˆêØAthena‚Ì“®ì‚ÉŠÖ‚·‚é•ÛØ“™‚Ís‚¢‚Ü‚¹‚ñB
+7. –ÆÓ??
+    Athena Project‚ÍˆêØAthena‚Ì“®ì‚ÉŠÖ‚·‚é•ÛØ?‚Ís‚¢‚Ü‚¹‚ñB
     ‚Â‚Ü‚èAAthena‚Í–³•ÛØ‚Å‚·B
-    athena@project-yare.de‚É“®ìE‘€ì“™‚ÉŠÖ‚·‚éŽ¿–â‚È‚Ç‚ð‘—‚ç‚ê‚Ä‚àˆêØ‚¨“š‚¦‚Å‚«‚Ü‚¹‚ñB
-    –”Athena‚ð—p‚¢‚½‚±‚Æ‚É‚æ‚è¶‚¶‚½”íŠQE–â‘è“™‚ÌÓ”C‚ÍˆêØAthena Project‚Í•‰‚¢‚Ü‚¹‚ñB
+    athena@project-yare.de‚É“®ìE?ì?‚ÉŠÖ‚·‚éŽ¿–â‚È‚Ç‚ð?‚ç‚ê‚Ä‚àˆêØ‚¨?‚¦‚Å‚«‚Ü‚¹‚ñB
+    ?Athena‚ð—p‚¢‚½‚±‚Æ‚É‚æ‚è¶‚¶‚½”íŠQE–â‘è?‚ÌÓ”C‚ÍˆêØAthena Project‚Í?‚¢‚Ü‚¹‚ñB
 
 
 8. •åW
-    athena‚ÌŠJ”­‚ÉŽQ‰Á‚µ‚½‚¢//‹»–¡‚ª‚ ‚é‚Æ‚¢‚¤•û‚²˜A—‰º‚³‚¢B
+    athena‚ÌŠJ”­‚ÉŽQ‰Á‚µ‚½‚¢//‹»–¡‚ª?‚é‚Æ‚¢‚¤•û‚²˜A?‰º‚³‚¢B
     ‰äX‚Í‹M•û‚ÌŽQ‰Á‚ð‚¨‘Ò‚¿‚µ‚Ä‚¢‚Ü‚·B
     // ÅV”Å‚ª—~‚µ‚¢‚¾‚¯‚Å‰½‚ç‹¦—Í‚µ‚Ä’¸‚¯‚È‚¢‚Æ‚¢‚¤•û‚Í‚¨’f‚è‚Å‚·;-)
-    [•åW—v€: ƒvƒƒOƒ‰ƒ}(2-3l)]
+    [•åW—v?: ƒv?ƒO?ƒ}(2-3l)]
         ”N—î: •s–â
         «•Ê: •s–â
-        Œ¾Œê: “ú–{Œê‚ª—‰ð‰Â”\
-        “à—e: CŒ¾Œê‚à‚µ‚­‚ÍC++‚É‚æ‚éŠJ”­B(“Á‚Éƒlƒbƒgƒ[ƒN‚âDB‚ÌŒoŒ±‚ª—L‚é•û‘å•åW!)
-    [•åW—v€: –|–ó(?l)]
+        Œ¾Œê: “ú–{Œê‚ª?‰ð‰Â”\
+        “à—e: CŒ¾Œê‚à‚µ‚­‚ÍC++‚É‚æ‚éŠJ”­B(“Á‚Éƒlƒbƒg?[ƒN‚âDB‚ÌŒoŒ±‚ª—L‚é•û‘å•åW!)
+    [•åW—v?: –|–ó(?l)]
         ”N—î: •s–â
         «•Ê: •s–â
-        Œ¾Œê: “ú–{ŒêA‰pŒê‚ª—‰ð‰Â”\
-        “à—e: •§—–¼ŒêA“ÆˆíŒêA¼”Ç‰åŒêAˆÉ‘¾—˜ˆŸŒêA‘×(ƒ^ƒC)ŒêA’©‘NŒêA’†‘Œê‚Ö•¶Œ£AƒTƒCƒg‚È‚Ç‚Ì–|–ó
-    ˜A—æ: athena@project-yare.de ŽG–±’S“–‚Ü‚ÅB
+        Œ¾Œê: “ú–{ŒêA‰pŒê‚ª?‰ð‰Â”\
+        “à—e: •§?¼ŒêA“ÆˆíŒêA¼”Ç‰åŒêAˆÉ‘¾??ŒêA‘×(ƒ^ƒC)ŒêA’©‘NŒêA??Œê‚Ö•¶Œ£AƒTƒCƒg‚È‚Ç‚Ì–|–ó
+    ˜A?æ: athena@project-yare.de ŽG–±’S?‚Ü‚ÅB
 
 
 9. English

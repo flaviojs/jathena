@@ -33,7 +33,7 @@ static const int packet_len_table[]={
 	-1, 7, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	35,-1,11,15, 34,29, 7,-1,  0, 0, 0, 0,  0, 0,  0, 0,
 	10,-1,15, 0, 79,19, 7,-1,  0,-1,-1,-1, 14,67,186,-1,
-	22, 8, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	 9, 9, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
@@ -437,24 +437,26 @@ int intif_guild_emblem(int guild_id,int len,const char *data)
 	return 0;
 }
 //現在のギルド城占領ギルドを調べる
-int intif_guild_castle_info(int castle_id)
+int intif_guild_castle_dataload(int castle_id,int index)
 {
 	WFIFOW(inter_fd,0)=0x3040;
-	
 	WFIFOW(inter_fd,2)=castle_id;
-	WFIFOSET(inter_fd,4);
+	WFIFOB(inter_fd,4)=index;
+	WFIFOSET(inter_fd,5);
 	return 0;
 }
 
 //ギルド城占領ギルド変更要求
-int intif_guild_castle_change(int castle_id,int guild_id)
+int intif_guild_castle_datasave(int castle_id,int index, int value)
 {
-	WFIFOW(inter_fd,0)=0x3041;
-	WFIFOW(inter_fd,2)=castle_id;
-	WFIFOL(inter_fd,4)=guild_id;
-	WFIFOSET(inter_fd,8);
-	return 0;
+        WFIFOW(inter_fd,0)=0x3041;
+        WFIFOW(inter_fd,2)=castle_id;
+        WFIFOB(inter_fd,4)=index;
+        WFIFOL(inter_fd,5)=value;
+        WFIFOSET(inter_fd,9);
+        return 0;
 }
+
 //-----------------------------------------------------------------
 // inter serverから受信
 
@@ -774,41 +776,76 @@ int intif_parse_DeletePetOk(int fd)
 
 	return 0;
 }
-int intif_parse_GuildCastleInfo(int fd)
+
+int intif_parse_GuildCastleDataLoad(int fd)
 {
 	int c_id=RFIFOW(fd,2);
+	int index=RFIFOB(fd,4);
+	int value=RFIFOL(fd,5);
+	struct guild_castle *gc=guild_castle_search(c_id);
+
+		if(gc==NULL){
+		return 0;
+	}
+	switch(index){
+	case 1: gc->guild_id = value; break;
+	case 2: gc->economy = value; break;
+	case 3: gc->defense = value; break;
+	case 4: gc->triggerE = value; break;
+	case 5: gc->triggerD = value; break;
+	case 6: gc->nextTime = value; break;
+	case 7: gc->payTime = value; break;
+	case 8: gc->createTime = value; break;
+	case 9: gc->visibleC = value; break;
+	case 10: gc->visibleG0 = value; break;
+	case 11: gc->visibleG1 = value; break;
+	case 12: gc->visibleG2 = value; break;
+	case 13: gc->visibleG3 = value; break;
+	case 14: gc->visibleG4 = value; break;
+	case 15: gc->visibleG5 = value; break;
+	case 16: gc->visibleG6 = value; break;
+	case 17: gc->visibleG7 = value; break;
+	default:
+		printf("intif_parse_GuildCastleDataLoad ERROR!! (Not found index=%d)\n", index);
+		return 0;
+	}
+	return 1;
+}
+
+int intif_parse_GuildCastleDataSave(int fd)
+{
+	int c_id=RFIFOW(fd,2);
+	int index=RFIFOB(fd,4);
+	int value=RFIFOL(fd,5);
 	struct guild_castle *gc=guild_castle_search(c_id);
 	if(gc==NULL){
 		return 0;
 	}
-	gc->guild_id = RFIFOL(fd,4);
-	gc->economy = RFIFOB(fd,8);
-	gc->eco_num = RFIFOW(fd,9);
-	gc->defense = RFIFOB(fd,11);
-	gc->def_num = RFIFOW(fd,12);
-	gc->kafra = RFIFOB(fd,14);
-	gc->guardian[0] = RFIFOB(fd,15);
-	gc->guardian[1] = RFIFOB(fd,16);
-	gc->guardian[2] = RFIFOB(fd,17);
-	gc->guardian[3] = RFIFOB(fd,18);
-	gc->guardian[4] = RFIFOB(fd,19);
-	gc->guardian[5] = RFIFOB(fd,20);
-	gc->guardian[6] = RFIFOB(fd,21);
-
-	gc->initflag=1;//interへの情報取得完了
-
-	return 0;
+	switch(index){
+	case 1: gc->guild_id = value; break;
+	case 2: gc->economy = value; break;
+	case 3: gc->defense = value; break;
+	case 4: gc->triggerE = value; break;
+	case 5: gc->triggerD = value; break;
+	case 6: gc->nextTime = value; break;
+	case 7: gc->payTime = value; break;
+	case 8: gc->createTime = value; break;
+	case 9: gc->visibleC = value; break;
+	case 10: gc->visibleG0 = value; break;
+	case 11: gc->visibleG1 = value; break;
+	case 12: gc->visibleG2 = value; break;
+	case 13: gc->visibleG3 = value; break;
+	case 14: gc->visibleG4 = value; break;
+	case 15: gc->visibleG5 = value; break;
+	case 16: gc->visibleG6 = value; break;
+	case 17: gc->visibleG7 = value; break;
+	default:
+		printf("intif_parse_GuildCastleDataSave ERROR!! (Not found index=%d)\n", index);
+		return 0;
+	}
+	return 1;
 }
 
-int intif_parse_GuildCastleChangeErr(int fd)
-{
-/*
-	int c_id=RFIFOW(fd,2);
-	int g_id=RFIFOL(fd,4);
-*/
-	printf("intif: Error Packet Returned! : Castle change Error\n");
-	return 0;
-}
 //-----------------------------------------------------------------
 // inter serverからの通信
 // エラーがあれば0(false)を返すこと
@@ -864,8 +901,8 @@ int intif_parse(int fd)
 	case 0x383d:	intif_parse_GuildAlliance(fd); break;
 	case 0x383e:	intif_parse_GuildNotice(fd); break;
 	case 0x383f:	intif_parse_GuildEmblem(fd); break;
-	case 0x3840:	intif_parse_GuildCastleInfo(fd); break;
-	case 0x3841:	intif_parse_GuildCastleChangeErr(fd); break;
+	case 0x3840:	intif_parse_GuildCastleDataLoad(fd); break;
+	case 0x3841:	intif_parse_GuildCastleDataSave(fd); break;
 	case 0x3880:	intif_parse_CreatePet(fd); break;
 	case 0x3881:	intif_parse_RecvPetData(fd); break;
 	case 0x3882:	intif_parse_SavePetOk(fd); break;

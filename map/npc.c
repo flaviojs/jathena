@@ -165,6 +165,31 @@ int npc_event_doall(const char *name)
 	strdb_foreach(ev_db,npc_event_doall_sub,&c,buf);
 	return c;	
 }
+
+int npc_event_do_sub(void *key,void *data,va_list ap)
+{
+	char *p=(char *)key;
+	struct event_data *ev=(struct event_data *)data;
+	int *c=va_arg(ap,int *);
+	const char *name=va_arg(ap,const char *);
+
+	if(p && strcasecmp(name,p)==0 ){
+		run_script(ev->nd->u.scr.script,ev->pos,0,ev->nd->bl.id);
+		(*c)++;
+	}
+
+	return 0;
+}
+int npc_event_do(const char *name)
+{
+	int c=0;
+	char buf[64]="";
+
+	strcpy(buf,name);
+	strdb_foreach(ev_db,npc_event_do_sub,&c,buf);
+	return c;
+}
+
 /*==========================================
  * 時計イベント実行
  *------------------------------------------

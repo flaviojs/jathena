@@ -57,10 +57,10 @@ static struct dbt *mapval_db;
 static struct dbt *scriptlabel_db=NULL;
 struct dbt* script_get_label_db(){ return scriptlabel_db; }
 static int scriptlabel_final(void *k,void *d,va_list ap){ return 0; }
-static char pos[11][100] = {"頭","体","左手","右手","ローブ","靴","アクセサリー1","アクセサリー2","頭2","頭3","装着していない"};
+static char pos[11][100] = {"頭","体","左手","右手","?ーブ","靴","アクセサ?ー1","アクセサ?ー2","頭2","頭3","??していない"};
 
 /*==========================================
- * ローカルプロトタイプ宣言 (必要な物のみ)
+ * ?ーカ?プ?トタイプ宣言 (必要な物のみ)
  *------------------------------------------
  */
 unsigned char* parse_subexpr(unsigned char *,int);
@@ -153,6 +153,12 @@ int buildin_pvpoff(struct script_state *st);
 int buildin_gvgon(struct script_state *st);
 int buildin_gvgoff(struct script_state *st);
 int buildin_emotion(struct script_state *st);
+int buildin_maprespawnguildid(struct script_state *st);
+int buildin_agitstart(struct script_state *st);		// <Agit>
+int buildin_agitend(struct script_state *st);
+int buildin_getcastlename(struct script_state *st);
+int buildin_getcastledata(struct script_state *st);
+int buildin_setcastledata(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -248,9 +254,15 @@ struct {
 	{buildin_removemapflag,"removemapflag","si"},
 	{buildin_pvpon,"pvpon","s"},
 	{buildin_pvpoff,"pvpoff","s"},
-	{buildin_pvpon,"gvgon","s"},
-	{buildin_pvpoff,"gvgoff","s"},
+	{buildin_gvgon,"gvgon","s"},
+	{buildin_gvgoff,"gvgoff","s"},
 	{buildin_emotion,"emotion","i"},
+	{buildin_maprespawnguildid,"maprespawnguildid","sii"},
+	{buildin_agitstart,"agitstart",""},	// <Agit>
+	{buildin_agitend,"agitend",""},
+	{buildin_getcastlename,"getcastlename","s"},
+	{buildin_getcastledata,"getcastledata","si"},
+	{buildin_setcastledata,"setcastledata","sii"},
 	{NULL,NULL,NULL}
 };
 enum {
@@ -278,7 +290,7 @@ static int calc_hash(unsigned char *p)
  *
  *------------------------------------------
  */
-// 既存のであれば番号、無ければ-1
+// 既存ので?れば番?、無ければ-1
 static int search_str(unsigned char *p)
 {
 	int i;
@@ -296,7 +308,7 @@ static int search_str(unsigned char *p)
  *
  *------------------------------------------
  */
-// 既存のであれば番号、無ければ登録して新規番号
+// 既存ので?れば番?、無ければ登録して新規番?
 static int add_str(unsigned char *p)
 {
 	int i;
@@ -423,7 +435,7 @@ static void add_scriptl(int l)
 		add_scriptb(str_data[l].label>>16);
 		break;
 	case C_NOP:
-		// ラベルの可能性があるのでbackpatch用データ埋め込み
+		// ?ベ?の可能性が?るのでbackpatch用データ?め?み
 		add_scriptc(C_NAME);
 		str_data[l].backpatch=script_pos;
 		add_scriptb(backpatch);
@@ -434,7 +446,7 @@ static void add_scriptl(int l)
 		add_scripti(str_data[l].val);
 		break;
 	default:
-		// もう他の用途と確定してるので数字をそのまま
+		// もう他の用途と確定してるので??をそのまま
 		add_scriptc(C_NAME);
 		add_scriptb(l);
 		add_scriptb(l>>8);
@@ -493,7 +505,7 @@ static unsigned char *skip_space(unsigned char *p)
 static unsigned char *skip_word(unsigned char *p)
 {
 	if(*p=='@') p++;	// like weiss
-	if(*p=='$') p++;	// MAP鯖内共有変数用
+	if(*p=='$') p++;	// MAP鯖内共有変?用
 	while(isalnum(*p)||*p=='_'|| *p>=0x81)
 		if(*p>=0x81 && p[1]){
 			p+=2;
@@ -710,7 +722,7 @@ unsigned char* parse_line(unsigned char *p)
 	if(*p==';')
 		return p;
 
-	// 最初は関数名
+	// 最?は関?名
 	p=parse_simpleexpr(p);
 	p=skip_space(p);
 
@@ -718,7 +730,7 @@ unsigned char* parse_line(unsigned char *p)
 	while(p && *p && *p!=';'){
 		p=parse_expr(p);
 		p=skip_space(p);
-		// 引数区切りの,は有っても無くても良し
+		// 引?区切りの,は有っても無くても良し
 		if(*p==',') p++;
 		p=skip_space(p);
 	}
@@ -812,7 +824,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 		}
 	}
 
-	// 外部用label dbの初期化
+	// 外?用label dbの?期化
 	if(scriptlabel_db!=NULL)
 		strdb_final(scriptlabel_db,scriptlabel_final);
 	scriptlabel_db=strdb_init(50);
@@ -829,7 +841,7 @@ unsigned char* parse_script(unsigned char *src,int line)
 	}
 	for(p++;p && *p && *p!='}';){
 		p=skip_space(p);
-		// labelだけ特殊処理
+		// labelだけ特殊??
 		tmpp=skip_space(skip_word(p));
 		if(*tmpp==':'){
 			int l,c;
@@ -843,13 +855,13 @@ unsigned char* parse_script(unsigned char *src,int line)
 				exit(1);
 			}
 			set_label(l,script_pos);
-			strdb_insert(scriptlabel_db,p,script_pos);	// 外部用label db登録
+			strdb_insert(scriptlabel_db,p,script_pos);	// 外?用label db登録
 			*skip_word(p)=c;
 			p=tmpp+1;
 			continue;
 		}
 
-		// 他は全部一緒くた
+		// 他は全?一?くた
 		p=parse_line(p);
 		p=skip_space(p);
 		add_scriptc(C_EOL);
@@ -905,7 +917,7 @@ enum {STOP=1,END,RERUNLINE,GOTO};
  *
  *------------------------------------------
  */
-// 変数のデータ拾いのみ
+// 変?のデータ拾いのみ
 int get_val(struct script_state*st,struct script_data* data)
 {
 	struct map_session_data *sd;
@@ -946,7 +958,7 @@ char* conv_str(struct script_state *st,struct script_data *data)
 		data->u.str=buf;
 #if 1
 	} else if(data->type==C_NAME){
-		// テンポラリ。本来無いはず
+		// テ?ポ??。本?無いはず
 		data->type=C_CONSTSTR;
 		data->u.str=str_buf+str_data[data->u.num].str;
 #endif
@@ -1052,7 +1064,7 @@ void pop_stack(struct script_stack* stack,int start,int end)
 }
 
 //
-// 埋め込み関数
+// ?め?み関?
 //
 /*==========================================
  *
@@ -1191,7 +1203,7 @@ int buildin_warp(struct script_state *st)
 	if(strcmp(str,"Random")==0)
 		pc_randomwarp(sd,3);
 	else if(strcmp(str,"SavePoint")==0){
-		if(map[sd->bl.m].flag.noteleport)	// テレポ禁止
+		if(map[sd->bl.m].flag.noteleport)	// テ?ポ禁止
 			return 0;
 
 		pc_setpos(sd,sd->status.save_point.map,
@@ -1201,7 +1213,7 @@ int buildin_warp(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * エリア指定ワープ
+ * エ?ア指定?ープ
  *------------------------------------------
  */
 int buildin_areawarp_sub(struct block_list *bl,va_list ap)
@@ -1303,7 +1315,7 @@ int buildin_input(struct script_state *st)
 	sd=map_id2sd(st->rid);
 	if(sd->state.menu_or_input){
 		sd->state.menu_or_input=0;
-		if(st->end>st->start+2){ // 引数1個
+		if(st->end>st->start+2){ // 引?1個
 			int num=st->stack->stack_data[st->start+2].u.num;
 			if(str_buf[str_data[num].str]=='@' || str_buf[str_data[num].str]=='l')
 				pc_setreg(sd,num,sd->npc_amount);
@@ -1335,11 +1347,11 @@ int buildin_if(struct script_state *st)
 	if(!sel)
 		return 0;
 
-	// 関数名をコピー
+	// 関?名をコピー
 	push_copy(st->stack,st->start+3);
-	// 間に引数マーカを入れて
+	// 間に引?マーカを入れて
 	push_val(st->stack,C_ARG,0);
-	// 残りの引数をコピー
+	// 残りの引?をコピー
 	for(i=st->start+4;i<st->end;i++){
 		push_copy(st->stack,i);
 	}
@@ -1483,7 +1495,7 @@ int buildin_getitem(struct script_state *st)
 	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
-	if(nameid<0) { // ランダム
+	if(nameid<0) { // ??ダ?
 		nameid=itemdb_searchrandomid(-nameid);
 		flag = 1;
 	}
@@ -1548,7 +1560,7 @@ int buildin_readparam(struct script_state *st)
 	return 0;
 }
 /*==========================================
- *キャラ関係のID取得
+ *キ??関係のID取得
  *------------------------------------------
  */
 int buildin_getcharid(struct script_state *st)
@@ -1601,7 +1613,7 @@ int buildin_getpartyname(struct script_state *st)
 	return 0;
 }
 /*==========================================
- *指定IDのギルド名取得
+ *指定IDのギ?ド名取得
  *------------------------------------------
  */
 char *buildin_getguildname_sub(int guild_id)
@@ -1634,7 +1646,7 @@ int buildin_getguildname(struct script_state *st)
 }
 
 /*==========================================
- * キャラクタの名前
+ * キ??クタの名前
  *------------------------------------------
  */
 int buildin_strcharinfo(struct script_state *st)
@@ -1673,7 +1685,7 @@ int buildin_strcharinfo(struct script_state *st)
 unsigned int equip[10]={0x0100,0x0010,0x0020,0x0002,0x0004,0x0040,0x0008,0x0080,0x0200,0x0001};
 
 /*==========================================
- * 装備名文字列（精錬メニュー用）
+ * ?備名文?列（精錬?ニ?ー用）
  *------------------------------------------
  */
 int buildin_getequipname(struct script_state *st)
@@ -1706,7 +1718,7 @@ int buildin_getequipname(struct script_state *st)
 }
 
 /*==========================================
- * 装備チェック
+ * ?備チェック
  *------------------------------------------
  */
 int buildin_getequipisequiped(struct script_state *st)
@@ -1727,7 +1739,7 @@ int buildin_getequipisequiped(struct script_state *st)
 }
 
 /*==========================================
- * 装備品精錬可能チェック
+ * ?備品精錬可能チェック
  *------------------------------------------
  */
 int buildin_getequipisenableref(struct script_state *st)
@@ -1751,7 +1763,7 @@ int buildin_getequipisenableref(struct script_state *st)
 }
 
 /*==========================================
- * 装備品鑑定チェック
+ * ?備品鑑定チェック
  *------------------------------------------
  */
 int buildin_getequipisidentify(struct script_state *st)
@@ -1771,7 +1783,7 @@ int buildin_getequipisidentify(struct script_state *st)
 }
 
 /*==========================================
- * 装備品精錬度
+ * ?備品精錬度
  *------------------------------------------
  */
 int buildin_getequiprefinerycnt(struct script_state *st)
@@ -1791,7 +1803,7 @@ int buildin_getequiprefinerycnt(struct script_state *st)
 }
 
 /*==========================================
- * 装備品武器LV
+ * ?備品?器LV
  *------------------------------------------
  */
 int buildin_getequipweaponlv(struct script_state *st)
@@ -1811,7 +1823,7 @@ int buildin_getequipweaponlv(struct script_state *st)
 }
 
 /*==========================================
- * 装備品精錬成功率
+ * ?備品精錬成功率
  *------------------------------------------
  */
 int buildin_getequippercentrefinery(struct script_state *st)
@@ -1913,7 +1925,7 @@ int buildin_statusup2(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * 装備品による能力値ボーナス
+ * ?備品による能力値ボーナス
  *------------------------------------------
  */
 int buildin_bonus(struct script_state *st)
@@ -1929,7 +1941,7 @@ int buildin_bonus(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * 装備品による能力値ボーナス
+ * ?備品による能力値ボーナス
  *------------------------------------------
  */
 int buildin_bonus2(struct script_state *st)
@@ -1946,7 +1958,7 @@ int buildin_bonus2(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * 装備品による能力値ボーナス
+ * ?備品による能力値ボーナス
  *------------------------------------------
  */
 int buildin_bonus3(struct script_state *st)
@@ -1964,7 +1976,7 @@ int buildin_bonus3(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * スキル所得
+ * スキ??得
  *------------------------------------------
  */
 int buildin_skill(struct script_state *st)
@@ -1982,7 +1994,7 @@ int buildin_skill(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * スキルレベル所得
+ * スキ??ベ??得
  *------------------------------------------
  */
 int buildin_getskilllv(struct script_state *st)
@@ -2100,7 +2112,7 @@ int buildin_setriding(struct script_state *st)
 }
 
 /*==========================================
- *	セーブポイントの保存
+ *	セーブポイ?トの保存
  *------------------------------------------
  */
 int buildin_savepoint(struct script_state *st)
@@ -2117,7 +2129,7 @@ int buildin_savepoint(struct script_state *st)
 }
 
 /*==========================================
- * カプラ倉庫を開く
+ * カプ?倉庫を開く
  *------------------------------------------
  */
 int buildin_openstorage(struct script_state *st)
@@ -2126,7 +2138,7 @@ int buildin_openstorage(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * アイテムによるスキル発動
+ * アイテ?によるスキ?発動
  *------------------------------------------
  */
 int buildin_itemskill(struct script_state *st)
@@ -2144,7 +2156,7 @@ int buildin_itemskill(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * アイテム作成
+ * アイテ?作成
  *------------------------------------------
  */
 int buildin_produce(struct script_state *st)
@@ -2157,7 +2169,7 @@ int buildin_produce(struct script_state *st)
 }
 
 /*==========================================
- * モンスター発生
+ * ??スター発生
  *------------------------------------------
  */
 int buildin_monster(struct script_state *st)
@@ -2179,7 +2191,7 @@ int buildin_monster(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * モンスター発生
+ * ??スター発生
  *------------------------------------------
  */
 int buildin_areamonster(struct script_state *st)
@@ -2203,7 +2215,7 @@ int buildin_areamonster(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * モンスター削除
+ * ??スター削?
  *------------------------------------------
  */
 int buildin_killmonster_sub(struct block_list *bl,va_list ap)
@@ -2228,7 +2240,7 @@ int buildin_killmonster(struct script_state *st)
 }
 
 /*==========================================
- * イベント実行
+ * イベ?ト実行
  *------------------------------------------
  */
 int buildin_doevent(struct script_state *st)
@@ -2239,7 +2251,7 @@ int buildin_doevent(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * イベントタイマー追加
+ * イベ?トタイマー追加
  *------------------------------------------
  */
 int buildin_addtimer(struct script_state *st)
@@ -2252,7 +2264,7 @@ int buildin_addtimer(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * イベントタイマー削除
+ * イベ?トタイマー削?
  *------------------------------------------
  */
 int buildin_deltimer(struct script_state *st)
@@ -2263,7 +2275,7 @@ int buildin_deltimer(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * イベントタイマーのカウント値追加
+ * イベ?トタイマーのカウ?ト値追加
  *------------------------------------------
  */
 int buildin_addtimercount(struct script_state *st)
@@ -2277,7 +2289,7 @@ int buildin_addtimercount(struct script_state *st)
 }
 
 /*==========================================
- * 天の声アナウンス
+ * 天の声アナウ?ス
  *------------------------------------------
  */
 int buildin_announce(struct script_state *st)
@@ -2295,7 +2307,7 @@ int buildin_announce(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * 天の声アナウンス（特定マップ）
+ * 天の声アナウ?ス（特定マップ）
  *------------------------------------------
  */
 int buildin_mapannounce_sub(struct block_list *bl,va_list ap)
@@ -2324,7 +2336,7 @@ int buildin_mapannounce(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * 天の声アナウンス（特定エリア）
+ * 天の声アナウ?ス（特定エ?ア）
  *------------------------------------------
  */
 int buildin_areaannounce(struct script_state *st)
@@ -2349,7 +2361,7 @@ int buildin_areaannounce(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * ユーザー数所得
+ * ?ーザー??得
  *------------------------------------------
  */
 int buildin_getusers(struct script_state *st)
@@ -2365,7 +2377,7 @@ int buildin_getusers(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * マップ指定ユーザー数所得
+ * マップ指定?ーザー??得
  *------------------------------------------
  */
 int buildin_getmapusers(struct script_state *st)
@@ -2381,7 +2393,7 @@ int buildin_getmapusers(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * エリア指定ユーザー数所得
+ * エ?ア指定?ーザー??得
  *------------------------------------------
  */
 int buildin_getareausers_sub(struct block_list *bl,va_list ap)
@@ -2472,7 +2484,7 @@ int buildin_debugmes(struct script_state *st)
 }
 
 /*==========================================
- *捕獲アイテム使用
+ *捕獲アイテ?使用
  *------------------------------------------
  */
 int buildin_catchpet(struct script_state *st)
@@ -2486,7 +2498,7 @@ int buildin_catchpet(struct script_state *st)
 }
 
 /*==========================================
- *携帯卵孵化機使用
+ *携帯?孵化機使用
  *------------------------------------------
  */
 int buildin_birthpet(struct script_state *st)
@@ -2498,7 +2510,7 @@ int buildin_birthpet(struct script_state *st)
 }
 
 /*==========================================
- * ステータスリセット
+ * ステータス?セット
  *------------------------------------------
  */
 int buildin_resetstatus(struct script_state *st)
@@ -2510,7 +2522,7 @@ int buildin_resetstatus(struct script_state *st)
 }
 
 /*==========================================
- * スキルリセット
+ * スキ??セット
  *------------------------------------------
  */
 int buildin_resetskill(struct script_state *st)
@@ -2535,7 +2547,7 @@ int buildin_changebase(struct script_state *st)
 		return 0;
 	
 	if(vclass==22)
-				pc_unequipitem(sd,sd->equip_index[9],1);	// 装備外し
+				pc_unequipitem(sd,sd->equip_index[9],1);	// ?備外し
 		
 	sd->view_class = vclass;
 	
@@ -2571,7 +2583,7 @@ int buildin_changesex(struct script_state *st)
 
 
 /*==========================================
- * npcチャット作成
+ * npcチ?ット作成
  *------------------------------------------
  */
 int buildin_waitingroom(struct script_state *st)
@@ -2587,7 +2599,7 @@ int buildin_waitingroom(struct script_state *st)
 	return 0;
 }
 /*==========================================
- * チャットメンバー全員ワープ
+ * チ?ット??バー全員?ープ
  *------------------------------------------
  */
 int buildin_warpwaitingpc(struct script_state *st)
@@ -2610,7 +2622,7 @@ int buildin_warpwaitingpc(struct script_state *st)
 		if(strcmp(str,"Random")==0)
 			pc_randomwarp(sd,3);
 		else if(strcmp(str,"SavePoint")==0){
-			if(map[sd->bl.m].flag.noteleport)	// テレポ禁止
+			if(map[sd->bl.m].flag.noteleport)	// テ?ポ禁止
 				return 0;
 	
 			pc_setpos(sd,sd->status.save_point.map,
@@ -2734,7 +2746,7 @@ int buildin_pvpon(struct script_state *st)
 	if(m >= 0 && !map[m].flag.pvp) {
 		map[m].flag.pvp = 1;
 		clif_send0199(m,1);
-		for(i=0;i<fd_max;i++){	//人数分ループ
+		for(i=0;i<fd_max;i++){	//人?分?ープ
 			if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
 				if(m == pl_sd->bl.m && pl_sd->pvp_timer == -1) {
 					pl_sd->pvp_timer=add_timer(gettick()+200,pc_calc_pvprank_timer,pl_sd->bl.id,0);
@@ -2760,7 +2772,7 @@ int buildin_pvpoff(struct script_state *st)
 	if(m >= 0 && map[m].flag.pvp) {
 		map[m].flag.pvp = 0;
 		clif_send0199(m,0);
-		for(i=0;i<fd_max;i++){	//人数分ループ
+		for(i=0;i<fd_max;i++){	//人?分?ープ
 			if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
 				if(m == pl_sd->bl.m) {
 					clif_pvpset(pl_sd,0,0,2);
@@ -2805,7 +2817,7 @@ int buildin_gvgoff(struct script_state *st)
 	return 0;
 }
 /*==========================================
- *	NPCエモーション
+ *	NPCエ?ーシ??
  *------------------------------------------
  */
 
@@ -2819,8 +2831,154 @@ int buildin_emotion(struct script_state *st)
 	return 0;
 }
 
+int buildin_maprespawnguildid_sub(struct block_list *bl,va_list ap)
+{
+	int g_id=va_arg(ap,int);
+	int flag=va_arg(ap,int);
+
+	struct map_session_data *sd=(struct map_session_data*)bl;
+	if((sd->status.guild_id == g_id) && (flag))
+		pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,3);
+	else if((sd->status.guild_id != g_id) && (!flag))
+		pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,3);
+
+	return 0;
+}
+int buildin_maprespawnguildid(struct script_state *st)
+{
+	char *mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	int g_id=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	int flag=conv_num(st,& (st->stack->stack_data[st->start+4]));
+
+	int m=map_mapname2mapid(mapname);
+
+	if(m) map_foreachinarea(buildin_maprespawnguildid_sub,m,0,0,map[m].xs-1,map[m].ys-1,BL_PC,g_id,flag);
+	return 0;
+}
+
+int buildin_agitstart(struct script_state *st)
+{
+	if(agit_flag==1) return 1;      // Agit already Start.
+	agit_flag=1;
+	guild_agit_start();
+	return 0;
+}
+
+int buildin_agitend(struct script_state *st)
+{
+	if(agit_flag==0) return 1;      // Agit already End.
+	agit_flag=0;
+	guild_agit_end();
+	return 0;
+}
+
+int buildin_getcastlename(struct script_state *st)
+{
+	char *mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	struct guild_castle *gc;
+	int i;
+	char *buf=malloc(24);
+	if(buf==NULL){
+		if(battle_config.error_log)
+			printf("out of memory : buildin_getcastlename\n");
+		exit(1);
+	}
+	strcpy(buf,"");
+	for(i=0;i<MAX_GUILDCASTLE;i++){
+		if( (gc=guild_castle_search(i)) != NULL ){
+			if(strcmp(mapname,gc->map_name)==0){
+				strcpy(buf,gc->castle_name);
+				break;
+			}
+		}
+	}
+	push_str(st->stack,C_STR,buf);
+	return 0;
+}
+
+int buildin_getcastledata(struct script_state *st)
+{
+	char *mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	int index=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	struct guild_castle *gc;
+	int i,j;
+
+	for(i=0;i<MAX_GUILDCASTLE;i++){
+		if( (gc=guild_castle_search(i)) != NULL ){
+			if(strcmp(mapname,gc->map_name)==0){
+				switch(index){
+				case 0: for(j=1;j<18;j++) intif_guild_castle_dataload(gc->castle_id,j); break;  // Initialize[AgitInit]
+				case 1: push_val(st->stack,C_INT,gc->guild_id); break;
+				case 2: push_val(st->stack,C_INT,gc->economy); break;
+				case 3: push_val(st->stack,C_INT,gc->defense); break;
+				case 4: push_val(st->stack,C_INT,gc->triggerE); break;
+				case 5: push_val(st->stack,C_INT,gc->triggerD); break;
+				case 6: push_val(st->stack,C_INT,gc->nextTime); break;
+				case 7: push_val(st->stack,C_INT,gc->payTime); break;
+				case 8: push_val(st->stack,C_INT,gc->createTime); break;
+				case 9: push_val(st->stack,C_INT,gc->visibleC); break;
+				case 10: push_val(st->stack,C_INT,gc->visibleG0); break;
+				case 11: push_val(st->stack,C_INT,gc->visibleG1); break;
+				case 12: push_val(st->stack,C_INT,gc->visibleG2); break;
+				case 13: push_val(st->stack,C_INT,gc->visibleG3); break;
+				case 14: push_val(st->stack,C_INT,gc->visibleG4); break;
+				case 15: push_val(st->stack,C_INT,gc->visibleG5); break;
+				case 16: push_val(st->stack,C_INT,gc->visibleG6); break;
+				case 17: push_val(st->stack,C_INT,gc->visibleG7); break;
+				default:
+					push_val(st->stack,C_INT,0); break;
+				}
+				return 0;
+			}
+		}
+	}
+	push_val(st->stack,C_INT,0);
+	return 0;
+}
+
+int buildin_setcastledata(struct script_state *st)
+{
+	char *mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	int index=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	int value=conv_num(st,& (st->stack->stack_data[st->start+4]));
+	struct guild_castle *gc;
+	int i;
+
+	for(i=0;i<MAX_GUILDCASTLE;i++){
+		if( (gc=guild_castle_search(i)) != NULL ){
+			if(strcmp(mapname,gc->map_name)==0){
+				// Save Data byself First
+				switch(index){
+				case 1: gc->guild_id = value; break;
+				case 2: gc->economy = value; break;
+				case 3: gc->defense = value; break;
+				case 4: gc->triggerE = value; break;
+				case 5: gc->triggerD = value; break;
+				case 6: gc->nextTime = value; break;
+				case 7: gc->payTime = value; break;
+				case 8: gc->createTime = value; break;
+				case 9: gc->visibleC = value; break;
+				case 10: gc->visibleG0 = value; break;
+				case 11: gc->visibleG1 = value; break;
+				case 12: gc->visibleG2 = value; break;
+				case 13: gc->visibleG3 = value; break;
+				case 14: gc->visibleG4 = value; break;
+				case 15: gc->visibleG5 = value; break;
+				case 16: gc->visibleG6 = value; break;
+				case 17: gc->visibleG7 = value; break;
+				default: return 0;
+				}
+				intif_guild_castle_datasave(gc->castle_id,index,value);
+				return 0;
+			}
+		}
+	}
+	return 0;
+}
+
+
 //
-// 実行部main
+// 実行?main
 //
 /*==========================================
  *
@@ -3237,7 +3395,7 @@ int script_config_read(char *cfgName)
 }
 
 /*==========================================
- * 初期化
+ * ?期化
  *------------------------------------------
  */
 int do_init_script()

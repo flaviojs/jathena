@@ -1664,8 +1664,8 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 
 	// ----- Ç±Ç±Ç©ÇÁéÄñSèàóù -----
 
-	if(md->class == 1288 && map[md->bl.m].flag.gvg)
-		guild_gvg_break_empelium(md);
+//	if(md->class == 1288 && map[md->bl.m].flag.gvg)
+//		guild_gvg_break_empelium(md);
 
 	map_freeblock_lock();
 	mob_changestate(md,MS_DEAD,0);
@@ -1853,6 +1853,14 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 			break;
 		}
 	}
+
+	// <Agit> NPC Event [OnAgitBreak]
+	if(md->npc_event[0] && strcmp(((md->npc_event)+strlen(md->npc_event)-13),"::OnAgitBreak") == 0) {
+		printf("MOB.C: Run NPC_Event[OnAgitBreak].\n");
+		if (agit_flag == 1) //Call to Run NPC_Event[OnAgitBreak]
+			guild_agit_break(md);
+	}
+
 
 	if(md->npc_event[0]){	// SCRIPTé¿çs
 //		if(battle_config.battle_log)

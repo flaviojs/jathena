@@ -64,10 +64,9 @@ int guild_skillupack(int guild_id,int skill_num,int account_id);
 int guild_break(struct map_session_data *sd,char *name);
 int guild_broken(int guild_id,int flag);
 
-int guild_gvg_eliminate(int m);
-int guild_gvg_init(void);
-int guild_gvg_final(void);
-int guild_gvg_break_empelium(struct mob_data *md);
+int guild_agit_start(void);
+int guild_agit_end(void);
+int guild_agit_break(struct mob_data *md);
 
 
 #endif
