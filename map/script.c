@@ -120,6 +120,7 @@ int buildin_setfalcon(struct script_state *st);
 int buildin_setriding(struct script_state *st);
 int buildin_savepoint(struct script_state *st);
 int buildin_openstorage(struct script_state *st);
+int buildin_guildstorage(struct script_state *st);
 int buildin_itemskill(struct script_state *st);
 int buildin_produce(struct script_state *st);
 int buildin_monster(struct script_state *st);
@@ -228,6 +229,7 @@ struct {
 	{buildin_setriding,"setriding",""},
 	{buildin_savepoint,"savepoint","sii"},
 	{buildin_openstorage,"openstorage",""},
+	{buildin_guildstorage,"guildstorage",""},
 	{buildin_itemskill,"itemskill","iis"},
 	{buildin_produce,"produce","i"},
 	{buildin_monster,"monster","siisii*"},
@@ -1239,7 +1241,10 @@ int buildin_areawarp_sub(struct block_list *bl,va_list ap)
 	map=va_arg(ap, char *);
 	x=va_arg(ap,int);
 	y=va_arg(ap,int);
-	pc_setpos((struct map_session_data *)bl,map,x,y,0);
+	if(strcmp(map,"Random")==0)
+		pc_randomwarp((struct map_session_data *)bl,3);
+	else
+		pc_setpos((struct map_session_data *)bl,map,x,y,0);
 	return 0;
 }
 int buildin_areawarp(struct script_state *st)
@@ -2285,10 +2290,20 @@ int buildin_savepoint(struct script_state *st)
  */
 int buildin_openstorage(struct script_state *st)
 {
-	storage_storageopen(map_id2sd(st->rid));
+	struct map_session_data *sd=map_id2sd(st->rid);
+	sd->state.storage_flag=0;
+	storage_storageopen(sd);
 	return 0;
 }
-
+int buildin_guildstorage(struct script_state *st)
+{
+	struct map_session_data *sd=map_id2sd(st->rid);
+	if(!sd->status.guild_id)
+		return 0;
+	sd->state.storage_flag=1;
+	storage_storageopen(sd);
+	return 0;
+}
 /*==========================================
  * アイテムによるスキル発動
  *------------------------------------------

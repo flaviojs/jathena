@@ -17,6 +17,10 @@ char stor_txt[]="storage.txt";
 struct storage *storage;
 int storage_num;
 
+char bank_txt[]="save/bank.txt";
+struct bank *bank;
+int bank_num;
+
 int do_init_storage(void) // map.c::do_init()から呼ばれる
 {
 /*	char line[65536];
@@ -65,6 +69,9 @@ void do_final_storage(void) // map.c::do_final()から呼ばれる
 int account2storage(int account_id)
 {
 	int i;
+	struct map_session_data *sd=map_id2sd(account_id);
+	if(sd && sd->state.storage_flag)
+		account_id=sd->status.guild_id;
 	for(i=0;i<storage_num;i++)
 		if(account_id==storage[i].account_id)
 			return i;
@@ -85,9 +92,15 @@ int account2storage(int account_id)
  */
 int storage_storageopen(struct map_session_data *sd)
 {
-	int i;
+	int i,account_id;
+	if(sd->state.storage_flag)
+		account_id=sd->status.guild_id;
+	else
+		account_id=sd->status.account_id;
 	for(i=0;i<storage_num;i++){
-		if(sd->status.account_id == storage[i].account_id) {
+		if(account_id == storage[i].account_id) {
+				if(storage[i].storage_status)
+					return 0;
 			storage[i].storage_status=1;
 			clif_storageitemlist(sd,&storage[i]);
 			clif_storageequiplist(sd,&storage[i]);
@@ -320,6 +333,7 @@ int storage_storageclose(struct map_session_data *sd)
 
 	stor=&storage[account2storage(sd->status.account_id)];
 	stor->storage_status=0;
+	sd->state.storage_flag=0;
 	clif_storageclose(sd);
 //	do_final_storage(); // map.exeが落ちたときのために、念のためセーブ
 	return 0;
@@ -352,5 +366,13 @@ int storage_storage_save(struct map_session_data *sd)
 			break;
 		}
 	}
+	sd->state.storage_flag=1;
+	for(i=0;i<storage_num;i++){
+		if(sd->status.guild_id==storage[i].account_id) {
+			intif_send_storage(sd->status.guild_id);
+			break;
+		}
+	}
+	sd->state.storage_flag=0;
 	return 0;
 }

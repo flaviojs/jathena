@@ -126,6 +126,7 @@ struct map_session_data {
 		unsigned produce_flag : 1;
 		unsigned make_arrow_flag : 1;
 		unsigned potionpitcher_flag : 1;
+		unsigned storage_flag : 1;
 	} state;
 	struct {
 		unsigned restart_full_recover : 1;

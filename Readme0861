@@ -1,4 +1,43 @@
 --------------------
+//0885 by huge
+
+・ギルド共有倉庫の実装。guildstorageで開けます。
+    自分の鯖で実験はしてみましたが、過疎地なので多人数ギルドになるとどう動くか分かりません。
+    (念のためバックアップは必ず取っておいて下さい)
+・areawarpで、対象マップ名を"Random"にすると、同マップ内でランダムに飛ぶように修正。
+・GMコマンドで生き返したときにSPも全回復するように修正。
+・ディボーションの条件をちょっと修正。
+
+	(char/)
+	int_storage.c
+		mapif_load_storage() 修正。
+		mapif_parse_SaveStorage() 修正。
+	inter.c
+		inter_send_packet_length[] 修正。
+		inter_recv_packet_length[] 修正。
+	(map/)
+	atcommand.c
+		@alive,@raise,@raisemap 修正。
+	intif.c
+		packet_len_table[] 修正。
+		intif_request_storage() 修正。
+		intif_send_storage() 修正。
+		intif_parse_LoadStorage() 修正。
+
+	map.h
+		map_session_data stateにstorage_flag 追加。
+	script.c
+		buildin_areawarp_sub() 修正。
+		buildin_openstorage() 修正。
+		buildin_guildstorage() 追加。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+	storage.c
+		account2storage() 修正。
+		storage_storageopen() 修正。
+		storage_storage_save() 修正。
+
+--------------------
 //0884 by 死神
 
 ・細かいバグ修正。

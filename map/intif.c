@@ -165,18 +165,24 @@ int intif_request_accountreg(struct map_session_data *sd)
 // 倉庫データ要求
 int intif_request_storage(int account_id)
 {
+	struct map_session_data *sd=map_id2sd(account_id);
 	WFIFOW(inter_fd,0) = 0x3010;
 	WFIFOL(inter_fd,2) = account_id;
-	WFIFOSET(inter_fd,6);
+	if(sd->state.storage_flag)
+		WFIFOL(inter_fd,6) = sd->status.guild_id;
+	else
+		WFIFOL(inter_fd,6) = account_id;
+	WFIFOSET(inter_fd,10);
 	return 0;
 }
 // 倉庫データ送信
 int intif_send_storage(int account_id)
 {
 	WFIFOW(inter_fd,0) = 0x3011;
-	WFIFOW(inter_fd,2) = sizeof(struct storage)+8;
+	WFIFOW(inter_fd,2) = sizeof(struct storage)+12;
 	WFIFOL(inter_fd,4) = account_id;
-	memcpy( WFIFOP(inter_fd,8),
+	WFIFOL(inter_fd,8) = account_id;
+	memcpy( WFIFOP(inter_fd,12),
 		 &storage[ account2storage(account_id) ], sizeof(struct storage) );
 	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
 	return 0;
@@ -536,10 +542,10 @@ int intif_parse_LoadStorage(int fd)
 {
 	struct storage *stor;
 	struct map_session_data *sd;
-	stor=&storage[account2storage( RFIFOL(fd,4) )];
-	if( RFIFOW(fd,2)-8 != sizeof(struct storage) ){
+	stor=&storage[account2storage( RFIFOL(fd,8) )];
+	if( RFIFOW(fd,2)-12 != sizeof(struct storage) ){
 		if(battle_config.error_log)
-			printf("intif_parse_LoadStorage: data size error %d %d\n",RFIFOW(fd,2)-8 , sizeof(struct storage));
+			printf("intif_parse_LoadStorage: data size error %d %d\n",RFIFOW(fd,2)-12 , sizeof(struct storage));
 		return 1;
 	}
 	sd=map_id2sd( RFIFOL(fd,4) );
@@ -550,7 +556,7 @@ int intif_parse_LoadStorage(int fd)
 	}
 	if(battle_config.save_log)
 		printf("intif_openstorage: %d\n",RFIFOL(fd,4) );
-	memcpy(stor,RFIFOP(fd,8),sizeof(struct storage));
+	memcpy(stor,RFIFOP(fd,12),sizeof(struct storage));
 	stor->storage_status=1;
 	clif_storageitemlist(sd,stor);
 	clif_storageequiplist(sd,stor);

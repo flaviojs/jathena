@@ -11,10 +11,12 @@
 // ファイル名のデフォルト
 // inter_config_read()で再設定される
 char storage_txt[1024]="save/storage.txt";
-
+char bank_txt[1024]="save/bank.txt";
 
 struct storage *storage=NULL;
 int storage_num=0;
+struct bank *bank=NULL;
+int bank_num=0;
 
 // 倉庫データを文字列に変換
 int storage_tostr(char *str,struct storage *p)
@@ -135,7 +137,6 @@ int inter_storage_save()
 	char line[65536];
 	int i;
 	FILE *fp;
-
 	fp=fopen(storage_txt,"w");
 	if(fp==NULL)
 		return 0;
@@ -154,11 +155,16 @@ int inter_storage_save()
 // 倉庫データの送信
 int mapif_load_storage(int fd,int account_id)
 {
-	int i=account2storage(account_id);
+	int i,account_sub=RFIFOL(fd,6);
+	if(account_id==account_sub)
+		i=account2storage(account_id);
+	else
+		i=account2storage(account_sub);
 	WFIFOW(fd,0)=0x3810;
-	WFIFOW(fd,2)=sizeof(struct storage)+8;
+	WFIFOW(fd,2)=sizeof(struct storage)+12;
 	WFIFOL(fd,4)=account_id;
-	memcpy(WFIFOP(fd,8),&storage[i],sizeof(struct storage));
+	WFIFOL(fd,8)=account_sub;
+	memcpy(WFIFOP(fd,12),&storage[i],sizeof(struct storage));
 	WFIFOSET(fd,WFIFOW(fd,2));
 	return 0;
 }
@@ -184,14 +190,14 @@ int mapif_parse_LoadStorage(int fd)
 // 倉庫データ受信＆保存
 int mapif_parse_SaveStorage(int fd)
 {
-	int account_id=RFIFOL(fd,4);
+	int account_id=RFIFOL(fd,8);
 	int len=RFIFOW(fd,2);
 	int i;
-	if(sizeof(struct storage)!=len-8){
-		printf("inter storage: data size error %d %d\n",sizeof(struct storage),len-8);
+	if(sizeof(struct storage)!=len-12){
+		printf("inter storage: data size error %d %d\n",sizeof(struct storage),len-12);
 	}else{
 		i=account2storage(account_id);
-		memcpy(&storage[i],RFIFOP(fd,8),sizeof(struct storage));
+		memcpy(&storage[i],RFIFOP(fd,12),sizeof(struct storage));
 		mapif_save_storage_ack(fd,account_id);
 	}
 	return 0;
@@ -212,4 +218,3 @@ int inter_storage_parse_frommap(int fd)
 	}
 	return 1;
 }
-

@@ -300,10 +300,12 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 //[@alive]‚Æ“ü—Í‚·‚é
 		if (strcmpi(command, "@alive") == 0 && gm_level >= atcommand_config.alive) {
 			sd->status.hp=sd->status.max_hp;
+			sd->status.sp=sd->status.max_sp;
 			pc_setstand(sd);
 			if(battle_config.pc_invincible_time > 0)
 				pc_setinvincibletimer(sd,battle_config.pc_invincible_time);
 			clif_updatestatus(sd,SP_HP);
+			clif_updatestatus(sd,SP_SP);
 			clif_resurrection(&sd->bl,1);
 			clif_displaymessage(fd,msg_table[16]);
 			return 1;
@@ -1138,8 +1140,10 @@ z [0`4]•‚ÌF
 			if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth
 				 && pc_isdead(pl_sd)){
 				pl_sd->status.hp=pl_sd->status.max_hp;
+				pl_sd->status.sp=pl_sd->status.max_sp;
 				pc_setstand(pl_sd);
 				clif_updatestatus(pl_sd,SP_HP);
+				clif_updatestatus(pl_sd,SP_SP);
 				clif_resurrection(&pl_sd->bl,1);
 				clif_displaymessage(pl_sd->fd,msg_table[63]);
 			}
@@ -1156,8 +1160,10 @@ z [0`4]•‚ÌF
 			if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
 				if(sd->bl.m == pl_sd->bl.m && pc_isdead(pl_sd)){
 					pl_sd->status.hp=pl_sd->status.max_hp;
+					pl_sd->status.sp=pl_sd->status.max_sp;
 					pc_setstand(pl_sd);
 					clif_updatestatus(pl_sd,SP_HP);
+					clif_updatestatus(pl_sd,SP_SP);
 					clif_resurrection(&pl_sd->bl,1);
 					clif_displaymessage(pl_sd->fd,msg_table[63]);
 				}
