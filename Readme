@@ -1,4 +1,14 @@
 --------------
+//0573 by Jazz
+
+・mapの penalty, nomemo, noteleport, nobranchの optionを設定。
+・map サーバーが cpuを無限占有することを検査するための script 添付. cygwin環境で作成と実験をしました.
+	(/conf)
+	mapflag.txt 追加。
+	(/tool)
+	mapcheck.sh 追加。
+
+--------------
 //0572 by 引退人
 ・"conf/npc_water.txt"の第4列で水場高さ設定
 　（ちゃんとした水場判定が実装されるまでのつなぎとして・・・）
