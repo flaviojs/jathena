@@ -598,7 +598,7 @@ int pet_data_init(struct map_session_data *sd)
 		return 1;
 	}
 	sd->petDB = &pet_db[i];
-	sd->pd = pd = malloc(sizeof(struct pet_data));
+	sd->pd = pd = calloc(sizeof(struct pet_data), 1);
 	if(pd==NULL){
 		printf("out of memory : pet_data_init\n");
 		exit(1);
@@ -1114,7 +1114,7 @@ int read_petdb()
 	int i;
 	int j=0;
 	char *filename[]={"db/pet_db.txt","db/pet_db2.txt"};
-
+	
 	memset(pet_db,0,sizeof(pet_db));
 	for(i=0;i<2;i++){
 		fp=fopen(filename[i],"r");
@@ -1145,7 +1145,7 @@ int read_petdb()
 			nameid=atoi(str[0]);
 			if(nameid<=0 || nameid>2000)
 				continue;
-
+		
 			//MobID,Name,JName,ItemID,EggID,AcceID,FoodID,"Fullness (1回の餌での満腹度増加率%)","HungryDeray (/min)","R_Hungry (空腹時餌やり親密度増加率%)","R_Full (とても満腹時餌やり親密度減少率%)","Intimate (捕獲時親密度%)","Die (死亡時親密度減少率%)","Capture (捕獲率%)",(Name)
 			pet_db[j].class = nameid;
 			memcpy(pet_db[j].name,str[1],24);

@@ -89,8 +89,6 @@ OnInit:
 	waitingroom "入ってください!!",1,"控室管理者::Onwarp";
 	end;
 Onwarp:
-	set @addmon,0;
-	set @kengaku,0;
 	warpwaitingpc "gon_test.gat",44,86;
 	KillMonster "gon_test.gat","All";
 	initnpctimer "gontimer";
@@ -136,7 +134,7 @@ L3:
 	set @kengaku,1;
 	warp "gon_test.gat",25,99;
 	end;
-L4:
+	L4:
 	mes "[ソン フィヨン]";
 	mes "ありがとうございました。";
 	mes "是非、次回もご利用下さい。";
@@ -346,6 +344,7 @@ OnReturn:
 	stopnpctimer "gontimer";
 	warp "gon_test.gat",44,4;
 	enablenpc "控室管理者";
+	set @addmon,0;
 	end;
 }
 

@@ -1,4 +1,19 @@
 --------------------
+//0921 by RR
+・スクリプトバグ修正(ご迷惑をおかけしました)
+	(conf/npc/)
+	npc_event_tougijou.txt
+
+・steal率修正(自DEX - 敵DEX + SLv*3 +10の部分で一度判定をしていたので)
+・0918で0914以前に巻き戻ってしまっていた部分を元に戻した
+	(map/)
+	pc.c
+		pc_steal_item() 修正
+	itemdb.c
+	pet.c
+	skill.c 修正
+
+--------------------
 //0920 by 獅子o^.^o
 ・ Steal率 = Drop率 * (自DEX - 敵DEX + SLv*3 +10) /100
 	(map/)
@@ -16,7 +31,9 @@
 		guild_gvg_eliminate_timer()修正
 	pc.c
 		pc_setreg(),pc_setregstr()修正
-
+	(login/)
+	login.c 
+		parse_login()修正
 --------------------
 //0918 by 聖
 ・item_db自体がオーバーライド可能になったので、class_equip_db.txtの廃止。

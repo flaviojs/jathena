@@ -2678,7 +2678,7 @@ int pc_steal_item(struct map_session_data *sd,struct block_list *bl)
 		if(!md->state.steal_flag && mob_db[md->class].mexp <= 0 && !(mob_db[md->class].mode&0x20) &&
 			md->sc_data[SC_STONE].timer == -1 && md->sc_data[SC_FREEZE].timer == -1) {
 			skill = sd->paramc[4] - mob_db[md->class].dex + pc_checkskill(sd,TF_STEAL) * 3 + 10;
-			if(rand()%100 < skill) {
+			if(0 < skill) {
 				for(i=0;i<8;i++) {
 					itemid = mob_db[md->class].dropitem[i].nameid;
 					if(itemid > 0 && itemdb_type(itemid) != 6) {
@@ -4466,7 +4466,9 @@ int pc_setreg(struct map_session_data *sd,int reg,int val)
 		printf("out of memory : pc_setreg\n");
 		exit(1);
 	}
-
+/*	memset(sd->reg + (sd->reg_num - 1) * sizeof(*(sd->reg)), 0,
+		sizeof(*(sd->reg)));
+*/
 	sd->reg[i].index = reg;
 	sd->reg[i].data = val;
 
@@ -4512,7 +4514,9 @@ int pc_setregstr(struct map_session_data *sd,int reg,char *str)
 		printf("out of memory : pc_setreg\n");
 		exit(1);
 	}
-
+/*	memset(sd->reg + (sd->reg_num - 1) * sizeof(*(sd->reg)), 0,
+		sizeof(*(sd->reg)));
+*/
 	sd->regstr[i].index=reg;
 	strcpy(sd->regstr[i].data,str);
 
