@@ -5,6 +5,7 @@
 #include "char.h"
 #include "socket.h"
 #include "db.h"
+#include "lock.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -448,21 +449,22 @@ int inter_castle_save_sub(void *key,void *data,va_list ap)
 int inter_guild_save()
 {
 	FILE *fp;
-	if( (fp=fopen(guild_txt,"w"))==NULL ){
+	int lock;
+	if( (fp=lock_fopen(guild_txt,&lock))==NULL ){
 		printf("int_guild: cant write [%s] !!! data is lost !!!\n",guild_txt);
 		return 1;
 	}
 	numdb_foreach(guild_db,inter_guild_save_sub,fp);
 //	fprintf(fp,"%d\t%%newid%%\n",guild_newid);
-	fclose(fp);
+	lock_fclose(fp,guild_txt,&lock);
 //	printf("int_guild: %s saved.\n",guild_txt);
 
-	if( (fp=fopen(castle_txt,"w"))==NULL ){
+	if( (fp=lock_fopen(castle_txt,&lock))==NULL ){
 		printf("int_guild: cant write [%s] !!! data is lost !!!\n",castle_txt);
 		return 1;
 	}
 	numdb_foreach(castle_db,inter_castle_save_sub,fp);
-	fclose(fp);
+	lock_fclose(fp,castle_txt,&lock);
 
 	return 0;
 }

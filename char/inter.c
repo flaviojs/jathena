@@ -11,6 +11,7 @@
 #include "int_guild.h"
 #include "int_storage.h"
 #include "int_pet.h"
+#include "lock.h"
 
 #define WISDATA_TTL		(60*1000)	// Wisデータの生存時間(60秒)
 #define WISDELLIST_MAX	128			// Wisデータ削除リストの要素数
@@ -175,12 +176,13 @@ int inter_accreg_save_sub(void *key,void *data,va_list ap)
 int inter_accreg_save()
 {
 	FILE *fp;
-	if( (fp=fopen(accreg_txt,"w"))==NULL ){
+	int  lock;
+	if( (fp=lock_fopen(accreg_txt,&lock))==NULL ){
 		printf("int_accreg: cant write [%s] !!! data is lost !!!\n",accreg_txt);
 		return 1;
 	}
 	numdb_foreach(accreg_db,inter_accreg_save_sub,fp);
-	fclose(fp);
+	lock_fclose(fp,accreg_txt,&lock);
 //	printf("inter: %s saved.\n",accreg_txt);
 	return 0;
 }

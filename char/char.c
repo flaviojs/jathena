@@ -25,6 +25,8 @@
 #include "inter.h"
 #include "int_pet.h"
 
+#include "lock.h"
+
 #ifdef MEMWATCH
 #include "memwatch.h"
 #endif
@@ -75,7 +77,8 @@ struct point start_point={"new_1-1.gat",53,111};
 int mmo_char_tostr(char *str,struct mmo_charstatus *p)
 {
   int i;
-  sprintf(str,"%d\t%d,%d\t%s\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
+  char *str_p = str;
+  str_p += sprintf(str_p,"%d\t%d,%d\t%s\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
 	  "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
 	  "\t%s,%d,%d\t%s,%d,%d",
 	  p->char_id,p->account_id,p->char_num,p->name, //
@@ -91,36 +94,36 @@ int mmo_char_tostr(char *str,struct mmo_charstatus *p)
 	  p->last_point.map,p->last_point.x,p->last_point.y, //
 	  p->save_point.map,p->save_point.x,p->save_point.y
 	  );
-  strcat(str,"\t");
+  strcat(str_p,"\t"); str_p++;
   for(i=0;i<10;i++)
     if(p->memo_point[i].map[0]){
-      sprintf(str+strlen(str),"%s,%d,%d",p->memo_point[i].map,p->memo_point[i].x,p->memo_point[i].y);
+      str_p += sprintf(str_p,"%s,%d,%d",p->memo_point[i].map,p->memo_point[i].x,p->memo_point[i].y);
     }      
-  strcat(str,"\t");
+  strcat(str_p,"\t"); str_p++;
   for(i=0;i<MAX_INVENTORY;i++)
     if(p->inventory[i].nameid){
-      sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+      str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
 	      p->inventory[i].id,p->inventory[i].nameid,p->inventory[i].amount,p->inventory[i].equip,
 	      p->inventory[i].identify,p->inventory[i].refine,p->inventory[i].attribute,
 	      p->inventory[i].card[0],p->inventory[i].card[1],p->inventory[i].card[2],p->inventory[i].card[3]);
-    }      
-  strcat(str,"\t");
+    }
+  strcat(str_p,"\t"); str_p++;
   for(i=0;i<MAX_CART;i++)
     if(p->cart[i].nameid){
-      sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+      str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
 	      p->cart[i].id,p->cart[i].nameid,p->cart[i].amount,p->cart[i].equip,
 	      p->cart[i].identify,p->cart[i].refine,p->cart[i].attribute,
 	      p->cart[i].card[0],p->cart[i].card[1],p->cart[i].card[2],p->cart[i].card[3]);
     }      
-  strcat(str,"\t");
+  strcat(str_p,"\t"); str_p++;
   for(i=0;i<MAX_SKILL;i++)
     if(p->skill[i].id && p->skill[i].flag!=1){
-      sprintf(str+strlen(str),"%d,%d ",p->skill[i].id,(p->skill[i].flag==0)?p->skill[i].lv:p->skill[i].flag-2);
+      str_p += sprintf(str_p,"%d,%d ",p->skill[i].id,(p->skill[i].flag==0)?p->skill[i].lv:p->skill[i].flag-2);
     }      
-  strcat(str,"\t");
+  strcat(str_p,"\t"); str_p++;
   for(i=0;i<p->global_reg_num;i++)
-    sprintf(str+strlen(str),"%s,%d ",p->global_reg[i].str,p->global_reg[i].value);
-  strcat(str,"\t");
+    str_p += sprintf(str_p,"%s,%d ",p->global_reg[i].str,p->global_reg[i].value);
+  strcat(str_p,"\t"); str_p++;
   return 0;
 }
 
@@ -333,17 +336,17 @@ int mmo_char_init(void)
 void mmo_char_sync(void)
 {
   char line[65536];
-  int i;
+  int i,lock;
   FILE *fp;
 
-  fp=fopen(char_txt,"w");
+  fp=lock_fopen(char_txt,&lock);
   if(fp==NULL)
     return;
   for(i=0;i<char_num;i++){
     mmo_char_tostr(line,&char_dat[i]);
     fprintf(fp,"%s" RETCODE,line);
   }
-  fclose(fp);
+  lock_fclose(fp,char_txt,&lock);
 }
 int mmo_char_sync_timer(int tid,unsigned int tick,int id,int data)
 {

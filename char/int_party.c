@@ -4,6 +4,7 @@
 #include "char.h"
 #include "socket.h"
 #include "db.h"
+#include "lock.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -134,13 +135,14 @@ int inter_party_save_sub(void *key,void *data,va_list ap)
 int inter_party_save()
 {
 	FILE *fp;
-	if( (fp=fopen(party_txt,"w"))==NULL ){
+	int  lock;
+	if( (fp=lock_fopen(party_txt,&lock))==NULL ){
 		printf("int_party: cant write [%s] !!! data is lost !!!\n",party_txt);
 		return 1;
 	}
 	numdb_foreach(party_db,inter_party_save_sub,fp);
 //	fprintf(fp,"%d\t%%newid%%\n",party_newid);
-	fclose(fp);
+	lock_fclose(fp,party_txt,&lock);
 //	printf("int_party: %s saved.\n",party_txt);
 	return 0;
 }

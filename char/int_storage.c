@@ -5,6 +5,7 @@
 #include "char.h"
 #include "socket.h"
 #include "db.h"
+#include "lock.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -21,19 +22,20 @@ static struct dbt *guild_storage_db;
 int storage_tostr(char *str,struct storage *p)
 {
 	int i,f=1;
-	sprintf(str,"%d,%d",p->account_id,p->storage_amount);
+	char *str_p = str;
+	str_p += sprintf(str_p,"%d,%d",p->account_id,p->storage_amount);
 
-	strcat(str,"\t");
+	strcat(str_p,"\t"); str_p++;
 	for(i=0;i<MAX_STORAGE;i++)
 	if( (p->storage[i].nameid) && (p->storage[i].amount) ){
 		f=0;
-		sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+		str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
 		  p->storage[i].id,p->storage[i].nameid,p->storage[i].amount,p->storage[i].equip,
 		  p->storage[i].identify,p->storage[i].refine,p->storage[i].attribute,
 		  p->storage[i].card[0],p->storage[i].card[1],p->storage[i].card[2],p->storage[i].card[3]);
 	}
 
-	strcat(str,"\t");
+	strcat(str_p,"\t"); str_p++;
 
 	if(f)
 		str[0]=0;
@@ -260,12 +262,13 @@ int inter_storage_save_sub(void *key,void *data,va_list ap)
 int inter_storage_save()
 {
 	FILE *fp;
-	if( (fp=fopen(storage_txt,"w"))==NULL ){
+	int lock;
+	if( (fp=lock_fopen(storage_txt,&lock))==NULL ){
 		printf("int_storage: cant write [%s] !!! data is lost !!!\n",storage_txt);
 		return 1;
 	}
 	numdb_foreach(storage_db,inter_storage_save_sub,fp);
-	fclose(fp);
+	lock_fclose(fp,storage_txt,&lock);
 //	printf("int_storage: %s saved.\n",storage_txt);
 	return 0;
 }
@@ -286,12 +289,13 @@ int inter_guild_storage_save_sub(void *key,void *data,va_list ap)
 int inter_guild_storage_save()
 {
 	FILE *fp;
-	if( (fp=fopen(guild_storage_txt,"w"))==NULL ){
+	int  lock;
+	if( (fp=lock_fopen(guild_storage_txt,&lock))==NULL ){
 		printf("int_storage: cant write [%s] !!! data is lost !!!\n",guild_storage_txt);
 		return 1;
 	}
 	numdb_foreach(guild_storage_db,inter_guild_storage_save_sub,fp);
-	fclose(fp);
+	lock_fclose(fp,guild_storage_txt,&lock);
 //	printf("int_storage: %s saved.\n",guild_storage_txt);
 	return 0;
 }

@@ -3,7 +3,7 @@ all: char-server
 COMMON_OBJ = ../common/core.o ../common/socket.o ../common/timer.o ../common/db.o
 COMMON_H = ../common/core.h ../common/socket.h ../common/timer.h ../common/mmo.h ../common/version.h ../common/db.h
 char-server: char.o inter.o int_party.o int_guild.o int_storage.o int_pet.o lock.o $(COMMON_OBJ)
-	$(CC) -o ../$@ $>
+	$(CC) -o ../$@ $^
 
 char.o: char.c char.h inter.h int_pet.h $(COMMON_H)
 inter.o: inter.c inter.h int_party.h int_guild.h int_storage.h int_pet.h char.h $(COMMON_H)

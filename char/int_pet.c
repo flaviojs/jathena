@@ -4,6 +4,7 @@
 #include "char.h"
 #include "socket.h"
 #include "db.h"
+#include "lock.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -120,12 +121,13 @@ int inter_pet_save_sub(void *key,void *data,va_list ap)
 int inter_pet_save()
 {
 	FILE *fp;
-	if( (fp=fopen(pet_txt,"w"))==NULL ){
+	int lock;
+	if( (fp=lock_fopen(pet_txt,&lock))==NULL ){
 		printf("int_pet: cant write [%s] !!! data is lost !!!\n",pet_txt);
 		return 1;
 	}
 	numdb_foreach(pet_db,inter_pet_save_sub,fp);
-	fclose(fp);
+	lock_fclose(fp,pet_txt,&lock);
 //	printf("int_pet: %s saved.\n",pet_txt);
 	return 0;
 }
