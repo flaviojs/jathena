@@ -1738,6 +1738,9 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	unsigned int tick = gettick();
 	struct map_session_data *mvp_sd=sd ,*second_sd = NULL,*third_sd = NULL;
 	double dmg_rate,tdmg,temp;
+	struct item item;
+	int ret;
+	int drop_rate;
 
 	if(src && src->type == BL_PC) {
 		sd = (struct map_session_data *)src;
@@ -2041,9 +2044,6 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		pc_gainexp(mvp_sd,mexp,0);
 		for(j=0;j<3;j++){
 			i = rand() % 3;
-			struct item item;
-			int ret;
-			int drop_rate;
 			if(mob_db[md->class].mvpitem[i].nameid <= 0)
 				continue;
 			drop_rate = mob_db[md->class].mvpitem[i].p;

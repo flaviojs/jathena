@@ -2762,21 +2762,22 @@ static struct Damage battle_calc_pc_weapon_attack(
 						idef_flag_ = 1;
 				}
 
-				if(!idef_flag)
+				if(!idef_flag){
 					if(battle_config.player_defense_type) {
 						damage = damage - (def1 * battle_config.player_defense_type) - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
 					}
 					else{
 						damage = damage * (100 - def1) /100 - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
 					}
-				if(!idef_flag_)
+				}
+				if(!idef_flag_){
 					if(battle_config.player_defense_type) {
 						damage2 = damage2 - (def1 * battle_config.player_defense_type) - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
 					}
 					else{
 						damage2 = damage2 * (100 - def1) /100 - t_def - ((vitbonusmax < 1)?0: rand()%(vitbonusmax+1) );
 					}
-				
+				}
 			}
 		}
 	}
@@ -3218,13 +3219,14 @@ struct Damage battle_calc_magic_attack(
 					imdef_flag = 1;
 			}
 		}
-		if(!imdef_flag)
+		if(!imdef_flag){
 			if(battle_config.magic_defense_type) {
 				damage = damage - (mdef1 * battle_config.magic_defense_type) - mdef2;
 			}
 			else{
 				damage = (damage*(100-mdef1))/100 - mdef2;
 			}
+		}
 
 		if(damage<1)
 			damage=1;

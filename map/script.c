@@ -1835,13 +1835,12 @@ int buildin_deletearray(struct script_state *st)
 	char *name=str_buf+str_data[num&0x00ffffff].str;
 	char prefix=*name;
 	char postfix=name[strlen(name)-1];
-
 	int count=1;
+	int i,sz=getarraysize(st,num,postfix)-(num>>24)-count+1;
+
 	
 	if( (st->end > st->start+3) )
 		count=conv_num(st,& (st->stack->stack_data[st->start+3]));
-	
-	int i,sz=getarraysize(st,num,postfix)-(num>>24)-count+1;
 	
 	if( prefix!='$' && prefix!='@' ){
 		printf("buildin_deletearray: illeagal scope !\n");
@@ -4090,6 +4089,7 @@ int buildin_getequipcardcnt(struct script_state *st)
 {
 	int i,num;
 	struct map_session_data *sd;
+	int c=4;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=script_rid2sd(st);
@@ -4098,7 +4098,6 @@ int buildin_getequipcardcnt(struct script_state *st)
 		push_val(st->stack,C_INT,0);
 		return 0;
 	}
-	int c=4;
 	do{
 		if( (sd->status.inventory[i].card[c-1] > 4000) &&
 			(sd->status.inventory[i].card[c-1] < 5000)){
@@ -4120,6 +4119,7 @@ int buildin_successremovecards(struct script_state *st)
 	int i,num,cardflag=0,flag;
 	struct map_session_data *sd;
 	struct item item_tmp;
+	int c=4;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sd=script_rid2sd(st);
@@ -4127,7 +4127,6 @@ int buildin_successremovecards(struct script_state *st)
 	if(sd->status.inventory[i].card[0]==0x00ff){ // »‘¢•Ší‚Íˆ—‚µ‚È‚¢
 		return 0;
 	}
-	int c=4;
 	do{
 		if( (sd->status.inventory[i].card[c-1] > 4000) &&
 			(sd->status.inventory[i].card[c-1] < 5000)){ 
@@ -4172,6 +4171,7 @@ int buildin_failedremovecards(struct script_state *st)
 	int i,num,cardflag=0,flag,typefail;
 	struct map_session_data *sd;
 	struct item item_tmp;
+	int c=4;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	typefail=conv_num(st,& (st->stack->stack_data[st->start+3]));
@@ -4180,7 +4180,6 @@ int buildin_failedremovecards(struct script_state *st)
 	if(sd->status.inventory[i].card[0]==0x00ff){ // »‘¢•Ší‚Íˆ—‚µ‚È‚¢
 		return 0;
 	}
-	int c=4;
 	do{
 		if(( sd->status.inventory[i].card[c-1] > 4000) &&
 			 (sd->status.inventory[i].card[c-1] < 5000)){

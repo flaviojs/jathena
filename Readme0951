@@ -1,4 +1,42 @@
 --------------------
+//0953 by (凸)
+・mob_skill_db.txtの条件値に0以外入っていなかったのを訂正
+・gcc 2.95でコンパイルできるように訂正(by バグスレpart5 >>2 茜さん)
+・↑やLinuxなどを考慮してstartやMakefileなどの改行をLFに変更
+・0952で出たコンパイル警告を出ないように修正
+・0952で更新されなかったconf_ref.txtを修正
+
+	(/)
+	start 改行コード変更
+	athena-start 改行コード変更
+	(db/)
+	mob_skill_db.txt 修正
+	(doc/)
+	conf_ref.txt 修正
+	(login/)
+	Makefile 改行コード変更
+	(map/)
+	Makefile 改行コード変更
+	atcommand.c
+		atcommand() 宣言位置修正
+		atcommand_where() 宣言位置修正
+	battle.c 
+		battle_calc_pet_weapon_attack() 修正
+		battle_calc_mob_weapon_attack() 修正
+		battle_calc_pc_weapon_attack() 修正
+		battle_calc_magic_attack() 修正
+	clif.c
+		clif_skill_fail() 宣言位置修正
+	guild.c
+		guild_gvg_eliminate_timer() 宣言位置修正
+	mob.c
+		mob_damage() 宣言位置修正
+	script.c
+		buildin_deletearray() 宣言位置修正
+		buildin_getequipcardcnt() 宣言位置修正
+		buildin_successremovecards() 宣言位置修正
+
+--------------------
 //0952 by CG
 ・confでDEFとMDEFの計算方法を選択できるように。
 

@@ -916,6 +916,18 @@ vit_penaly_num
 	vitペナルティによって減る回避の量を設定します。
 	デフォルトは0です。
 
+player_defense_type
+	プレイヤーが対象に攻撃する時のDEFの計算方法。0で本鯖仕様、1以上で減算(DEF*値)。
+
+monster_defense_type
+	モンスターが対象に攻撃する時のDEFの計算方法。0で本鯖仕様、1以上で減算(DEF*値)。
+
+pet_defense_type
+	ペットが対象に攻撃する時のDEFの計算方法。0で本鯖仕様、1以上で減算(DEF*値)。
+
+magic_defense_type
+	MDEFの計算方法。0で本鯖仕様、1以上で減算(MDEF*値)
+
 player_skill_reiteration
 	プレイヤーが使う一部の地面スキルの重ね置きを許可するかどうかです。
 	これをyesにするとSWやニューマ、トラップを重ねて置くことができます。
@@ -1150,6 +1162,10 @@ agi_penaly_num: 0
 vit_penaly_type: 0
 vit_penaly_count: 3
 vit_penaly_num: 0
+player_defense_type: 0
+monster_defense_type: 0
+pet_defense_type: 0
+magic_defense_type: 0
 player_skill_reiteration: no
 monster_skill_reiteration: no
 player_skill_nofootset: no

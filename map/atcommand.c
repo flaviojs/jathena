@@ -26,9 +26,7 @@
 
 static char msg_table[200][1024];	/* Server message */
 
-#define ATCOMMAND_FUNC(x) int atcommand_ ## x \
-	(const int fd, struct map_session_data* sd, \
-	 const char* command, const char* message)
+#define ATCOMMAND_FUNC(x) int atcommand_ ## x (const int fd, struct map_session_data* sd, const char* command, const char* message)
 //ATCOMMAND_FUNC(broadcast);
 //ATCOMMAND_FUNC(localbroadcast);
 ATCOMMAND_FUNC(rurap);
@@ -216,6 +214,7 @@ is_atcommand(const int fd, struct map_session_data* sd, const char* message)
 	const char* str = message;
 	int s_flag = 0;
 	AtCommandInfo info;
+	AtCommandType type;
 	
 	if (!message || !*message)
 		return AtCommand_None;
@@ -228,7 +227,7 @@ is_atcommand(const int fd, struct map_session_data* sd, const char* message)
 	}
 	if (!*str)
 		return AtCommand_None;
-	AtCommandType type = atcommand(pc_isGM(sd), str, &info);
+	type = atcommand(pc_isGM(sd), str, &info);
 	if (type != AtCommand_None) {
 		char command[25];
 		char output[100];
@@ -458,12 +457,12 @@ atcommand_where(
 {
 	char character[100];
 	char output[200];
+	struct map_session_data *pl_sd = map_nick2sd(character);
 	
 	if (!message || !*message)
 		return -1;
 	memset(character, '\0', sizeof character);
 	sscanf(message, "%99[^\n]", character);
-	struct map_session_data *pl_sd = map_nick2sd(character);
 	if (pl_sd == NULL) {
 		snprintf(output, sizeof output, "%s %d %d",
 			sd->mapname, sd->bl.x, sd->bl.y);
