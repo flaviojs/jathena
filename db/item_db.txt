@@ -1,4 +1,4 @@
-//FROM AthenaDBProject 2004-02-19-2125
+//item_db.txt＠AthenaDB計画 2004/02/23 04:26:09 +0900 (JST)
 //ID,Name,Jname,Type,Price,Sell,Weight,ATK,DEF,Range,Slot,Job,Gender,Loc,wLV,eLV,View,{UseScript},{EquipScript}
 501,Red_Potion,赤ポーション,0,50,,70,,,,,10477567,2,,,,,{ itemheal rand(45,64),0; },{}
 502,Orange_Potion,紅ポーション,0,200,,100,,,,,10477567,2,,,,,{ itemheal rand(105,144),0; },{}
@@ -45,12 +45,12 @@
 545,Red_Slim_Potion,レッドスリムポーション,0,,,20,,,,,10477567,2,,,,,{ itemheal rand(45,64),0; },{}
 546,Yellow_Slim_Potion,イエロースリムポーション,0,,,30,,,,,10477567,2,,,,,{ itemheal rand(175,234),0; },{}
 547,White_Slim_Potion,ホワイトスリムポーション,0,,,50,,,,,10477567,2,,,,,{ itemheal rand(325,404),0; },{}
-548,Cheese,チーズ,0,2800,,50,,,,,10477567,2,,,,,{},{}
+548,Cheese,チーズ,0,2800,,50,,,,,10477567,2,,,,,{ itemheal 0,rand(10,14); },{}
 549,Chestnut_Sweet_Potato,おいしい焼き芋,0,180,,80,,,,,10477567,2,,,,,{ itemheal rand(50,99),0; },{}
 550,Popped_Rice,お米のお菓子,0,,,10,,,,,10477567,2,,,,,{ itemheal rand(10,14),0; },{}
 551,Sushi,お寿司,0,,,50,,,,,10477567,2,,,,,{ itemheal rand(50,60),0; },{}
 552,KETUPAT,KETUPAT,0,,,10,,,,,10477567,2,,,,,{},{}
-553,,小包子,0,,,50,,,,,10477567,2,,,,,{},{}
+553,,小包子,0,,,50,,,,,10477567,2,,,,,{ itemheal rand(39,68),0; },{}
 554,,おもち,0,100,,80,,,,,10477567,2,,,,,{ itemheal rand(105,144),0; },{}
 555,,おはぎ,0,,,20,,,,,10477567,2,,,,,{},{}
 556,,ガレートク,0,,,10,,,,,,,,,,,{},{}
@@ -591,7 +591,7 @@
 1555,Book_of_Blazing_Sun,燃える太陽の書,4,35000,,750,90,,1,0,65792,2,2,3,27,15,{},{ bonus bAtkEle,3; }
 1556,Book_of_Gust_of_Wind,乾いてる風の書,4,35000,,750,90,,1,0,65792,2,2,3,27,15,{},{ bonus bAtkEle,4; }
 1557,Book_of_the_Apocalypse,黙示録,4,35000,,800,120,,1,0,65792,2,2,4,40,15,{},{ bonus bAtkEle,7; bonus2 bSubEle,6,-5; bonus2 bAddEle,1,7; bonus2 bAddEle,2,7; bonus2 bAddEle,3,7; bonus2 bAddEle,4,7; }
-1558,Girl's_Diary,少女の日記,4,20,,300,60,,1,1,65792,2,2,4,40,15,{},{ bonus2 bAddDamageClass,1188,50; }
+1558,Girl's_Diary,少女の日記,4,20,,300,60,,1,1,65792,2,2,4,40,15,{},{ bonus2 bAddDamageClass,1188,150; }
 1599,Angra_Manyu,アーリマン,,,,,,,,,,,,,,,{},{}
 1601,Rod,ロッド,4,50,,400,15,,1,3,8487701,2,2,1,1,10,{},{ bonus bMatkRate,15; }
 1602,Rod_,ロッド,4,50,,400,15,,1,4,8487701,2,2,1,1,10,{},{ bonus bMatkRate,15; }
@@ -626,7 +626,7 @@
 1716,Kakkung_,角弓,4,42000,,1100,100,,5,2,1706056,2,34,3,33,11,{},{}
 1718,Hunter_Bow,ハンターボウ,4,64000,,1500,125,,5,0,2048,2,34,3,33,11,{},{}
 1719,Bow_of_Roguemaster,盗賊の弓,4,20,,500,75,,11,0,64,2,34,4,48,11,{},{}
-1720,Bow_of_Rudra,ルドラの弓,4,20,,1300,120,,5,0,1705992,2,34,4,48,11,{},{ bonus bAtkEle,6; bonus bInt,5; skill 35,1; skill 28,1; bonus2 bResEff,Eff_Poison,5000; bonus2 bResEff,Eff_Curse,5000; bonus2 bResEff,Eff_Silence,5000; bonus2 bResEff,Eff_Confusion,5000; bonus2 bResEff,Eff_Blind,5000; }
+1720,Bow_of_Rudra,ルドラの弓,4,20,,1200,150,,5,0,1705992,2,34,4,48,11,{},{ bonus bAtkEle,6; bonus bInt,5; skill 35,1; skill 28,1; bonus2 bResEff,Eff_Poison,5000; bonus2 bResEff,Eff_Curse,5000; bonus2 bResEff,Eff_Silence,5000; bonus2 bResEff,Eff_Confusion,5000; bonus2 bResEff,Eff_Blind,5000; }
 1721,Repeating_Crossbow,連弩,4,89000,,2000,95,,9,1,133184,2,34,3,65,11,{},{}
 1722,Ballista,バリスタ,4,20,,3500,145,,5,0,1574912,2,34,4,77,11,{},{}
 1750,Arrow,矢,10,1,,1,25,,,,1706056,2,32768,,1,,{},{}
@@ -690,7 +690,7 @@
 1961,Whip_,ホイップ,4,38000,,700,120,,2,2,1048576,2,2,3,30,14,{},{}
 1962,Lariat,ラリエット,4,20,,400,100,,2,0,1048576,2,2,4,44,14,{},{ bonus bDex,5; bonus bAgi,1; }
 1963,Rapture_Rose,ラプチャーローズ,4,20,,300,115,,2,0,1048576,2,2,4,44,14,{},{ bonus bAtkEle,5; bonus2 bAddEff,Eff_Poison,5000; }
-1964,Chemeti,シュメティ,4,20,,700,135,,2,0,1048576,2,2,4,44,14,{},{ bonus bCritical,5; bonus bFlee,10; bonus bFlee2,2; }
+1964,Chemeti,シュメティ,4,20,,700,150,,2,0,1048576,2,2,4,44,14,{},{ bonus bCritical,5; bonus bFlee,10; bonus bFlee2,2; }
 2101,Guard,ガード,5,500,,300,,3,,0,10477567,2,32,,0,1,{},{}
 2102,Guard_,ガード,5,500,,300,,3,,1,10477567,2,32,,0,1,{},{}
 2103,Buckler,バックラー,5,14000,,600,,4,,0,2020850,2,32,,0,2,{},{}

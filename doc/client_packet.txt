@@ -730,8 +730,9 @@ R 0187 <account ID>.l
 	alive信号?
 R 0188 <fail?>.w <index>.w <val>.w
 	武器精錬。結果+val武器に
-R 0189 ?.w
-	謎。テレポ失敗?
+R 0189 <fail?>.w
+	謎。テレポ(ワープポータルmemo)失敗?
+	1 memo禁止地域
 S 018a ?.w
 	ゲーム終了
 R 018b <fail>.w

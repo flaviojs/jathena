@@ -2798,8 +2798,14 @@ int pc_memo(struct map_session_data *sd,int i)
 		clif_skill_memo(sd,2);
 		return 0;
 	}
-	if(skill<2 || i<-1 || i>2 || map[sd->bl.m].flag.nomemo){
+
+	if(skill<2 || i<-1 || i>2){
 		clif_skill_memo(sd,1);
+		return 0;
+	}
+
+	if(map[sd->bl.m].flag.nomemo){
+		clif_skill_teleportmessage(sd,1);
 		return 0;
 	}
 
