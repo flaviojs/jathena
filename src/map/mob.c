@@ -3405,8 +3405,48 @@ static int mob_readdb(void)
 			mob_db[class].dmotion=atoi(str[28]);
 
 			for(i=0;i<8;i++){
+			int itemdrop = atoi(str[30+i*2]);
 				mob_db[class].dropitem[i].nameid=atoi(str[29+i*2]);
-				mob_db[class].dropitem[i].p=atoi(str[30+i*2])*battle_config.item_rate/100;
+				if (battle_config.item_rate_details==1) {	//ドロップレート詳細項目が1の時 レート=x/100倍
+					if (itemdrop < 10)
+						mob_db[class].dropitem[i].p=itemdrop*battle_config.item_rate_1/100;
+					if (itemdrop >= 10 && itemdrop < 100)
+						mob_db[class].dropitem[i].p=itemdrop*battle_config.item_rate_10/100;
+					if (itemdrop >= 100 && itemdrop < 1000)
+						mob_db[class].dropitem[i].p=itemdrop*battle_config.item_rate_100/100;
+					else mob_db[class].dropitem[i].p=itemdrop*battle_config.item_rate_1000/100;
+				}
+				if (battle_config.item_rate_details==2) {	//ドロップレート詳細項目が2の時　レート=x/100倍 min max 指定
+					if (itemdrop >= 1 && itemdrop < 10) {
+						if (itemdrop*battle_config.item_rate_1/100 < battle_config.item_rate_1_min)
+							mob_db[class].dropitem[i].p=battle_config.item_rate_1_min;
+						if (itemdrop*battle_config.item_rate_1/100 > battle_config.item_rate_1_max)
+							mob_db[class].dropitem[i].p=battle_config.item_rate_1_max;
+						else mob_db[class].dropitem[i].p=itemdrop*battle_config.item_rate_1/100;
+					}
+					if (itemdrop >= 10 && itemdrop < 100) {
+						if (itemdrop*battle_config.item_rate_10/100 < battle_config.item_rate_10_min)
+							mob_db[class].dropitem[i].p=battle_config.item_rate_10_min;
+						if (itemdrop*battle_config.item_rate_10/100 > battle_config.item_rate_10_max)
+							mob_db[class].dropitem[i].p=battle_config.item_rate_10_max;
+						else mob_db[class].dropitem[i].p=itemdrop*battle_config.item_rate_10/100;
+					}
+					if (itemdrop >= 100 && itemdrop < 1000) {
+						if (itemdrop*battle_config.item_rate_100/100 < battle_config.item_rate_100_min)
+							mob_db[class].dropitem[i].p=battle_config.item_rate_100_min;
+						if (itemdrop*battle_config.item_rate_100/100 > battle_config.item_rate_100_max)
+							mob_db[class].dropitem[i].p=battle_config.item_rate_100_max;
+						else mob_db[class].dropitem[i].p=itemdrop*battle_config.item_rate_100/100;
+					}
+					if (itemdrop >= 1000 && itemdrop <= 10000) {
+						if (itemdrop*battle_config.item_rate_1000/100 < battle_config.item_rate_1000_min)
+							mob_db[class].dropitem[i].p=battle_config.item_rate_1000_min;
+						if (itemdrop*battle_config.item_rate_1000/100 > battle_config.item_rate_1000_max)
+							mob_db[class].dropitem[i].p=battle_config.item_rate_1000_max;
+						else mob_db[class].dropitem[i].p=itemdrop*battle_config.item_rate_1000/100;
+					}
+				}
+				else mob_db[class].dropitem[i].p=itemdrop*battle_config.item_rate/100;
 			}
 			// Item1,Item2
 			mob_db[class].mexp=atoi(str[47]);

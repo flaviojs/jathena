@@ -4884,6 +4884,19 @@ int battle_config_read(const char *cfgName)
 		battle_config.gm_can_drop_lv = 0;
 		battle_config.disp_hpmeter = 0;
 		battle_config.bone_drop = 0;
+		battle_config.item_rate_details = 0;
+		battle_config.item_rate_1 = 100;
+		battle_config.item_rate_10 = 100;
+		battle_config.item_rate_100 = 100;
+		battle_config.item_rate_1000 = 100;
+		battle_config.item_rate_1_min = 1;
+		battle_config.item_rate_1_max = 9;
+		battle_config.item_rate_10_min = 10;
+		battle_config.item_rate_10_max = 99;
+		battle_config.item_rate_100_min = 100;
+		battle_config.item_rate_100_max = 999;
+		battle_config.item_rate_1000_min = 1000;
+		battle_config.item_rate_1000_max = 10000;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -5064,6 +5077,19 @@ int battle_config_read(const char *cfgName)
 			{ "gm_can_drop_lv",				&battle_config.gm_can_drop_lv			},
 			{ "disp_hpmeter",				&battle_config.disp_hpmeter				},
 			{ "bone_drop",					&battle_config.bone_drop				},
+			{ "item_rate_details",					&battle_config.item_rate_details				},
+			{ "item_rate_1",					&battle_config.item_rate_1				},
+			{ "item_rate_10",					&battle_config.item_rate_10				},
+			{ "item_rate_100",					&battle_config.item_rate_100				},
+			{ "item_rate_1000",					&battle_config.item_rate_1000				},
+			{ "item_rate_1_min",					&battle_config.item_rate_1_min				},
+			{ "item_rate_1_max",					&battle_config.item_rate_1_max				},
+			{ "item_rate_10_min",					&battle_config.item_rate_10_min				},
+			{ "item_rate_10_max",					&battle_config.item_rate_10_max				},
+			{ "item_rate_100_min",					&battle_config.item_rate_100_min				},
+			{ "item_rate_100_max",					&battle_config.item_rate_100_max				},
+			{ "item_rate_1000_min",					&battle_config.item_rate_1000_min				},
+			{ "item_rate_1000_max",					&battle_config.item_rate_1000_max				},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

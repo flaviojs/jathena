@@ -1435,7 +1435,12 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	bl=sd->status.base_level;
 
-	sd->status.max_hp += (3500 + bl*hp_coefficient2[s_class.job] + hp_sigma_val[s_class.job][(bl > 0)? bl-1:0])/100 * (100 + sd->paramc[2])/100 + (sd->parame[2] - sd->paramcard[2]);
+	//Å‘åHPŒvŽZ
+	//“]¶2ŽŸE‚Ìê‡Å‘åHP25%UP
+	if(b_class >= PC_CLASS_BASE2 && b_class < PC_CLASS_BASE3 && s_class.job > 6 && s_class.job < 23)
+		sd->status.max_hp += ((3500 + bl*hp_coefficient2[s_class.job] + hp_sigma_val[s_class.job][(bl > 0)? bl-1:0])/100 * (100 + sd->paramc[2])/100 + (sd->parame[2] - sd->paramcard[2])) * 125/100;
+		else sd->status.max_hp += (3500 + bl*hp_coefficient2[s_class.job] + hp_sigma_val[s_class.job][(bl > 0)? bl-1:0])/100 * (100 + sd->paramc[2])/100 + (sd->parame[2] - sd->paramcard[2]);
+
 	if(sd->hprate!=100)
 		sd->status.max_hp = sd->status.max_hp*sd->hprate/100;
 
@@ -1451,7 +1456,11 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->status.max_hp = battle_config.max_hp;
 
 	// Å‘åSPŒvŽZ
-	sd->status.max_sp += ((sp_coefficient[s_class.job] * bl) + 1000)/100 * (100 + sd->paramc[3])/100 + (sd->parame[3] - sd->paramcard[3]);
+	//“]¶2ŽŸE‚Ìê‡Å‘åSP25%UP
+	if(b_class >= PC_CLASS_BASE2 && b_class < PC_CLASS_BASE3 && s_class.job > 6 && s_class.job < 23)
+		sd->status.max_sp += (((sp_coefficient[s_class.job] * bl) + 1000)/100 * (100 + sd->paramc[3])/100 + (sd->parame[3] - sd->paramcard[3])) * 125/100;
+		else sd->status.max_sp += ((sp_coefficient[s_class.job] * bl) + 1000)/100 * (100 + sd->paramc[3])/100 + (sd->parame[3] - sd->paramcard[3]);
+
 	if(sd->sprate!=100)
 		sd->status.max_sp = sd->status.max_sp*sd->sprate/100;
 

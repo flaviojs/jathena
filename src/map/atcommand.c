@@ -3897,7 +3897,11 @@ atcommand_weather(
 		map_id = sd->bl.m;
 
 	if(!atoi(weather)){
-		if(!strcmp(weather,"rain"))
+		if(!strcmp(weather,"day"))
+			type=0;
+		else if(!strcmp(weather,"0"))
+			type=0;
+		else if(!strcmp(weather,"rain"))
 			type=1;
 		else if(!strcmp(weather,"snow"))
 			type=2;
@@ -3918,12 +3922,16 @@ atcommand_weather(
 
 	switch(type){
 		case 0:
+			if(map[map_id].flag.rain==1)
+				effno=410;
 			map[map_id].flag.rain=0;
 			map[map_id].flag.snow=0;
 			map[map_id].flag.sakura=0;
 			map[map_id].flag.fog=0;
 			map[map_id].flag.leaves=0;
-			return 0;
+			snprintf(output, sizeof output ,msg_table[112]);
+			clif_displaymessage(fd, output);
+			break;
 		case 1:
 			if(!map[map_id].flag.rain){
 				effno=161;

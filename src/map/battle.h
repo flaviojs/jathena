@@ -185,6 +185,7 @@ extern struct Battle_Config {
 	int pet_friendly_rate;
 	int pet_hungry_delay_rate;
 	int pet_hungry_friendly_decrease;
+	int pet_skill_use;
 	int pet_str;
 	int pet_status_support;
 	int pet_attack_support;
@@ -283,6 +284,15 @@ extern struct Battle_Config {
 	int disp_experience;
 	int castle_defense_rate;
 	int riding_weight;
+	int hp_rate;
+	int sp_rate;
+	int gm_can_drop_lv;
+	int disp_hpmeter;
+	int bone_drop;
+
+	int item_rate_details,item_rate_1,item_rate_10,item_rate_100,item_rate_1000;	//ドロップレート詳細
+	int item_rate_1_min,item_rate_10_min,item_rate_100_min,item_rate_1000_min;	//ドロップレート詳細min
+	int item_rate_1_max,item_rate_10_max,item_rate_100_max,item_rate_1000_max;	//ドロップレート詳細max
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"
