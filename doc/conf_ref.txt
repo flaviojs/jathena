@@ -376,9 +376,35 @@ flooritem_lifetime
 	床に落ちたアイテムが消えるまでかかる時間です。単位はms(ミリ秒)です。
 	デフォルトは60000(60秒)で最小は1000(1秒)です。1000未満ならデフォルトにセットされます。
 
-lootitem_time
-	モンスターに最初にダメージを与えた人以外が、ドロップアイテムを拾えるようになるまでの時間です。単位はms(ミリ秒)です。
-	デフォルトは10000(10秒)で最小は1000(1秒)です。1000未満ならデフォルトにセットされます。
+item_first_get_time
+	モンスターに一番ダメージを多く与えたキャラ以外がそのモンスターの
+	ドロップアイテムを取れるようになるまでの時間です。
+	単位はms(ミリ秒)です。デフォルトは10000(10秒)です。
+
+item_second_get_time
+	item_first_get_timeの後モンスターに二番目にダメージを多く与えた
+	キャラ以外がそのモンスターのドロップアイテムを取れるようになるまでの
+	時間です。単位はms(ミリ秒)です。デフォルトは7000(7秒)です。
+
+item_third_get_time
+	item_second_get_timeの後モンスターに三番目にダメージを多く与えた
+	ャラ以外がそのモンスターのドロップアイテムを取れるようになるまでの
+	時間です。単位はms(ミリ秒)です。デフォルトは5000(5秒)です。
+
+mvp_item_first_get_time
+	モンスターに一番ダメージを多く与えたキャラ以外がそのモンスターの
+	MVPアイテムを取れるようになるまでの時間です。
+	単位はms(ミリ秒)です。デフォルトは10000(10秒)です。
+
+mvp_item_second_get_time
+	mvp_item_first_get_timeの後モンスターに二番目にダメージを多く与えた
+	キャラ以外がそのモンスターのMVPアイテムを取れるようになるまでの
+	時間です。単位はms(ミリ秒)です。デフォルトは10000(10秒)です。
+
+mvp_item_third_get_time
+	mvp_item_second_get_timeの後モンスターに三番目にダメージを多く与えた
+	キャラ以外がそのモンスターのMVPアイテムを取れるようになるまでの
+	時間です。単位はms(ミリ秒)です。デフォルトは2000(2秒)です。
 
 item_rate
 	アイテムドロップ率を百分率で調整します。
@@ -763,6 +789,12 @@ defunit_not_enemy: yes
 random_monster_checklv: yes
 attribute_recover: yes
 flooritem_lifetime: 60000
+item_first_get_time: 10000
+item_second_get_time: 7000
+item_third_get_time: 5000
+mvp_item_first_get_time: 10000
+mvp_item_second_get_time: 10000
+mvp_item_third_get_time: 2000
 item_rate: 100
 drop_rate0item: no
 base_exp_rate: 100

@@ -562,7 +562,7 @@ int pet_return_egg(struct map_session_data *sd)
 		tmp_item.card[3] = sd->pet.rename_flag;
 		if((flag = pc_additem(sd,&tmp_item,1))) {
 			clif_additem(sd,0,0,flag);
-			map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
+			map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 		}
 		if(battle_config.pet_status_support && sd->pet.intimate > 0) {
 			if(sd->bl.prev != NULL)
@@ -791,7 +791,7 @@ int pet_get_egg(int account_id,int pet_id,int flag)
 			tmp_item.card[3] = sd->pet.rename_flag;
 			if((ret = pc_additem(sd,&tmp_item,1))) {
 				clif_additem(sd,0,0,ret);
-				map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
+				map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 			}
 		}
 		else
@@ -880,7 +880,7 @@ int pet_unequipitem(struct map_session_data *sd)
 	tmp_item.identify = 1;
 	if((flag = pc_additem(sd,&tmp_item,1))) {
 		clif_additem(sd,0,0,flag);
-		map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
+		map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 	}
 
 	return 0;

@@ -1,4 +1,58 @@
 --------------------
+//0797 by 死神
+
+・少し修正。
+・battle_athena.confの項目変更。(lootitem_time 削除、item_first_get_time、
+item_second_get_time、item_third_get_time、mvp_item_first_get_time、
+mvp_item_second_get_time、mvp_item_third_get_time 追加。)
+・アイテムルート権限を正しく実装。最初攻撃ではなく与えたダメージの
+量によって収得権限を与えるように変更。(最初収得権限のみテスト)
+パーティの場合パーティの設定に合わせる必要がありますがまだパケットが
+不明な所がある為同じパーティなら収得できるようになっています。
+・ボウリングバッシュのバグ修正。(多分修正されたはず...)
+・装備スクリプトbonusにbSplashRangeとbSplashAddRange追加。
+bSplashRangeとbSplashAddRangeは武器でダメージを与えた時のみ発動、通常の武器攻撃扱いなので避けられるが(Flee2による完全回避は不可能)クリは出ないようになっていて武器による状態異常は発生しません。本鯖仕様なんて知りません。
+・スキルの重ね置き処理を本鯖に合わせて修正。
+・mapflagのgvgはいつもなっているわけじゃないので削除。
+・その他細かい修正。
+	athena-start 修正。
+	(common/)
+	mmo.h 修正。
+	(conf/)
+	mapflag.txt 修正。
+	battle_athena.conf 修正。
+	(db/)
+	const.txt 修正。
+	item_db.txt 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	item_bonus.txt 修正。
+	(map/)
+	mob.c
+		mob_spawn()、mob_damage()、mob_class_change()、mob_warp() 修正。
+		mob_delay_item_drop()、mob_delay_item_drop2() 修正。
+		mobskill_castend_pos() 修正。
+	pc.c
+		pc_takeitem()、pc_dropitem()、pc_equipitem() 修正。
+		pc_calcstatus()、pc_bonus() 修正。
+	skill.c
+		skill_attack()、skill_additional_effect()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_produce_mix() 修正。
+		skill_arrow_create()、skill_unit_timer_sub()、skill_castend_pos() 修正。
+	map.h 修正。
+	map.c
+		map_addflooritem() 修正。
+	script.c
+		buildin_getitem() 修正。
+	pet.c
+		pet_return_egg()、pet_get_egg()、pet_unequipitem() 修正。
+	battle.h 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack() 修正。
+		battle_weapon_attack()、battle_config_read() 修正。
+
+--------------------
 //0796 by huge
 
 ・細かい修正
@@ -71,7 +125,7 @@
 		mob_spawn_dataset() 修正。
 		mob_damage() 修正。
 	pc.c
-		pc_takeitem() 修正。
+		pc_additem() 修正。
 
 --------------------
 

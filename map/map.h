@@ -209,6 +209,7 @@ struct map_session_data {
 	short monster_drop_itemid[10];
 	int monster_drop_race[10],monster_drop_itemrate[10];
 	int double_add_rate,speed_add_rate,aspd_add_rate,perfect_hit_add,get_zeny_add_num;
+	short splash_range,splash_add_range;
 	short spiritball, spiritball_old;
 	int spirit_timer[MAX_SKILL_LEVEL];
 
@@ -295,7 +296,7 @@ struct mob_data {
 	short to_x,to_y;
 	short speed;
 	int hp;
-	int target_id,attacked_id,first_attacked_id;
+	int target_id,attacked_id;
 	struct walkpath_data walkpath;
 	unsigned int next_walktime;
 	unsigned int attackabletime;
@@ -391,6 +392,8 @@ struct flooritem_data {
 	struct block_list bl;
 	short subx,suby;
 	int cleartimer;
+	int first_get_id,second_get_id,third_get_id;
+	unsigned int first_get_tick,second_get_tick,third_get_tick;
 	struct item item_data;
 };
 
@@ -421,6 +424,7 @@ enum {
 	SP_ADD_DAMAGE_CLASS,SP_ADD_MAGIC_DAMAGE_CLASS,SP_ADD_DEF_CLASS,SP_ADD_MDEF_CLASS, // 1043-1046
 	SP_ADD_MONSTER_DROP_ITEM,SP_DEF_RATIO_ATK_ELE,SP_DEF_RATIO_ATK_RACE,SP_ADD_SPEED, // 1047-1050
 	SP_HIT_RATE,SP_FLEE_RATE,SP_FLEE2_RATE,SP_DEF_RATE,SP_DEF2_RATE,SP_MDEF_RATE,SP_MDEF2_RATE, // 1051-1057
+	SP_SPLASH_RANGE,SP_SPLASH_ADD_RANGE, // 1058-
 
 	SP_RESTART_FULL_RECORVER=2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
 	SP_NO_CASTCANCEL2,SP_INFINITE_ENDURE, // 2006-2007
@@ -444,7 +448,7 @@ struct chat_data {
 	char npc_event[50];
 };
 
-struct mons_data {
+/*struct mons_data {
 	int type;
 	int max_hp;
 	int npc_num;
@@ -457,7 +461,7 @@ struct mons_data {
 	struct {
 		int nameid,p;
 	} dropitem[16];
-};
+};*/
 
 
 extern struct map_data map[];
@@ -495,7 +499,7 @@ int map_addnpc(int,struct npc_data *);
 // 床アイテム関連
 int map_clearflooritem_timer(int,unsigned int,int,int);
 #define map_clearflooritem(id) map_clearflooritem_timer(0,0,id,1)
-int map_addflooritem(struct item *,int,int,int,int);
+int map_addflooritem(struct item *,int,int,int,int,struct map_session_data *,struct map_session_data *,struct map_session_data *,int);
 
 // キャラid＝＞キャラ名 変換関連
 void map_addchariddb(int charid,char *name);

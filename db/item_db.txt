@@ -1042,7 +1042,7 @@
 4144,Osiris_Card,オシリスカード,6,20,,10,,,,,,,136,,,,{},{ bonus bRestartFullRecover,0; }
 4145,Berzebub_Card,ヴェルゼブブカード,6,20,,10,,,,,,,136,,,,{},{ bonus bCastrate,-30; }
 4146,Maya_Card,マヤーカード,6,20,,10,,,,,,,32,,,,{},{}
-4147,Baphomet_Card,バフォメットカード,6,20,,10,,,,,,,2,,,,{},{ bonus bHit,-10; }
+4147,Baphomet_Card,バフォメットカード,6,20,,10,,,,,,,2,,,,{},{ bonus bHit,-10; bonus bSplashRange,1; }
 4148,Pharaoh_Card,ファラオカード,6,20,,10,,,,,,,769,,,,{},{ bonus bUseSPrate,-30; }
 5001,Headset,ヘッドフォン,5,20,,200,,3,,0,2088958,2,256,,0,87,{},{ bonus2 bResEff,Eff_Curse,1000; }
 5002,Gemmed_Crown,ジュエルクラウン,5,20,,600,,4,,0,414946,2,256,,60,88,{},{ bonus bMdef,3; bonus bInt,2; bonus bLuk,1; }

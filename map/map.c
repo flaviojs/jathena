@@ -624,9 +624,11 @@ int map_searchrandfreecell(int m,int x,int y,int range)
  * item_data‚ÍamountˆÈŠO‚ðcopy‚·‚é
  *------------------------------------------
  */
-int map_addflooritem(struct item *item_data,int amount,int m,int x,int y)
+int map_addflooritem(struct item *item_data,int amount,int m,int x,int y,struct map_session_data *first_sd,
+	struct map_session_data *second_sd,struct map_session_data *third_sd,int type)
 {
 	int xy,r;
+	unsigned int tick;
 	struct flooritem_data *fitem;
 
 	if((xy=map_searchrandfreecell(m,x,y,1))<0)
@@ -643,6 +645,12 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y)
 	fitem->bl.m=m;
 	fitem->bl.x=xy&0xffff;
 	fitem->bl.y=(xy>>16)&0xffff;
+	fitem->first_get_id = 0;
+	fitem->first_get_tick = 0;
+	fitem->second_get_id = 0;
+	fitem->second_get_tick = 0;
+	fitem->third_get_id = 0;
+	fitem->third_get_tick = 0;
 
 	fitem->bl.id = map_addobject(&fitem->bl);
 	if(fitem->bl.id==0){
@@ -650,12 +658,34 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y)
 		return 0;
 	}
 
+	tick = gettick();
+	if(first_sd) {
+		fitem->first_get_id = first_sd->bl.id;
+		if(type)
+			fitem->first_get_tick = tick + battle_config.mvp_item_first_get_time;
+		else
+			fitem->first_get_tick = tick + battle_config.item_first_get_time;
+	}
+	if(second_sd) {
+		fitem->second_get_id = second_sd->bl.id;
+		if(type)
+			fitem->second_get_tick = tick + battle_config.mvp_item_first_get_time + battle_config.mvp_item_second_get_time;
+		else
+			fitem->second_get_tick = tick + battle_config.item_first_get_time + battle_config.item_second_get_time;
+	}
+	if(third_sd) {
+		fitem->third_get_id = third_sd->bl.id;
+		if(type)
+			fitem->third_get_tick = tick + battle_config.mvp_item_first_get_time + battle_config.mvp_item_second_get_time + battle_config.mvp_item_third_get_time;
+		else
+			fitem->third_get_tick = tick + battle_config.item_first_get_time + battle_config.item_second_get_time + battle_config.item_third_get_time;
+	}
+
 	memcpy(&fitem->item_data,item_data,sizeof(*item_data));
 	fitem->item_data.amount=amount;
 	fitem->subx=(r&3)*3+3;
 	fitem->suby=((r>>2)&3)*3+3;
 	fitem->cleartimer=add_timer(gettick()+battle_config.flooritem_lifetime,map_clearflooritem_timer,fitem->bl.id,0);
-	fitem->item_data.first_get_id = item_data->first_get_id;
 
 	map_addblock(&fitem->bl);
 	clif_dropflooritem(fitem);

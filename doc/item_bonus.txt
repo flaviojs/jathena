@@ -72,6 +72,8 @@ bonus bDefRate,n;		防御率+n%(装備)
 bonus bDef2Rate,n;		防御率+n%(vitによる物)
 bonus bMdefRate,n;		魔法防御率+n%(装備)
 bonus bMdef2Rate,n;		魔法防御率+n%(intによる物)
+bonus bSplashRange,n;	通常の武器攻撃でターゲットの周辺nセルにダメージを与える(nは高い物だけ適用、1なら3*3、2なら5*5)
+bonus bSplashAddRange,n;	通常の武器攻撃でターゲットの周辺nセルにダメージを与える(nは+される)
 
 bonus bInfiniteEndure,n;	無限インデュア(nは無意味)
 bonus bRestartFullRecover,n;	復活した時HPとSPを全て回復(nは無意味)

@@ -129,6 +129,8 @@ bDefRate	1054
 bDef2Rate	1055
 bMdefRate	1056
 bMdef2Rate	1057
+bSplashRange	1058
+bSplashAddRange	1059
 bRestartFullRecover	2000
 bNoCastCancel	2001
 bNoSizeFix	2002

@@ -1361,7 +1361,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	if(t_sc_data != NULL && t_sc_data[SC_SLEEP].timer!=-1 )
 		cri <<=1;
 
-	if(skill_num==0 && battle_config.enemy_critical && (rand() % 1000) < cri)
+	if(skill_num == 0 && skill_lv >= 0 && battle_config.enemy_critical && (rand() % 1000) < cri)
 	{
 		damage += atkmax;
 		type = 0x0a;
@@ -1451,7 +1451,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 				break;
 			// 以下MOB
 			case NPC_COMBOATTACK:	// 多段攻撃
-				div_=skill_get_num(171,skill_lv);
+				div_=skill_get_num(skill_num,skill_lv);
 				damage *= div_;
 				break;
 			case NPC_RANDOMATTACK:	// ランダムATK攻撃
@@ -1584,7 +1584,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 
 	// 完全回避の判定
 	if(battle_config.enemy_perfect_flee) {
-		if( skill_num==0 && tmd!=NULL && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
+		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
 			damage=0;
 			type=0x0b;
 		}
@@ -1716,7 +1716,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if(tsd && tsd->critical_def)
 		cri = cri * (100 - tsd->critical_def);
 
-	if((skill_num == 0 || skill_num == KN_AUTOCOUNTER) && battle_config.enemy_critical && (rand() % 1000) < cri) 	// 判定（スキルの場合は無視）
+	if((skill_num == 0 || skill_num == KN_AUTOCOUNTER) && skill_lv >= 0 && battle_config.enemy_critical && (rand() % 1000) < cri) 	// 判定（スキルの場合は無視）
 			// 敵の判定
 	{
 		damage += atkmax;
@@ -1797,6 +1797,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 					hitrate += 20;
 				else
 					hitrate = 1000000;
+				flag=(flag&~BF_SKILLMASK)|BF_NORMAL;
 				break;
 			case AS_SONICBLOW:	// ソニックブロウ
 				damage = damage*(300+ 50*skill_lv)/100;
@@ -1815,7 +1816,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 				break;
 			// 以下MOB
 			case NPC_COMBOATTACK:	// 多段攻撃
-				div_=skill_get_num(171,skill_lv);
+				div_=skill_get_num(skill_num,skill_lv);
 				damage *= div_;
 				break;
 			case NPC_RANDOMATTACK:	// ランダムATK攻撃
@@ -1973,13 +1974,13 @@ static struct Damage battle_calc_mob_weapon_attack(
 	}
 
 	// 完全回避の判定
-	if( skill_num==0 && tsd!=NULL && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
+	if(skill_num == 0 && skill_lv >= 0 && tsd!=NULL && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
 		damage=0;
 		type=0x0b;
 	}
 
 	if(battle_config.enemy_perfect_flee) {
-		if( skill_num==0 && tmd!=NULL && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
+		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
 			damage=0;
 			type=0x0b;
 		}
@@ -2150,16 +2151,16 @@ static struct Damage battle_calc_pc_weapon_attack(
 
 	//ダブルアタック判定
 	if(sd->weapontype1 == 0x01) {
-		if( skill_num==0 && (skill = pc_checkskill(sd,TF_DOUBLE)) > 0)
+		if(skill_num == 0 && skill_lv >= 0 && (skill = pc_checkskill(sd,TF_DOUBLE)) > 0)
 			da = (rand()%100 < (skill*5)) ? 1:0;
 	}
 
 	//三段掌
-	if(skill_num==0 && (skill = pc_checkskill(sd,MO_TRIPLEATTACK)) > 0 && sd->status.weapon <= 16 && !sd->state.arrow_atk) {
+	if(skill_num == 0 && skill_lv >= 0 && (skill = pc_checkskill(sd,MO_TRIPLEATTACK)) > 0 && sd->status.weapon <= 16 && !sd->state.arrow_atk) {
 			da = (rand()%100 < (30 - skill)) ? 2:0;
 	}
 
-	if(sd->double_rate > 0 && da == 0 && skill_num == 0)
+	if(sd->double_rate > 0 && da == 0 && skill_num == 0 && skill_lv >= 0)
 		da = (rand()%100 < sd->double_rate) ? 1:0;
 
  	// 過剰精錬ボーナス
@@ -2193,7 +2194,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	if(tsd && tsd->critical_def)
 		cri = cri * (100-tsd->critical_def);
 
-	if(da == 0 && (skill_num==0 || skill_num == KN_AUTOCOUNTER) && //ダブルアタックが発動していない
+	if(da == 0 && (skill_num==0 || skill_num == KN_AUTOCOUNTER) && skill_lv >= 0 && //ダブルアタックが発動していない
 		(rand() % 1000) < cri) 	// 判定（スキルの場合は無視）
 	{
 		damage += atkmax;
@@ -2396,6 +2397,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 					hitrate += 20;
 				else
 					hitrate = 1000000;
+				flag=(flag&~BF_SKILLMASK)|BF_NORMAL;
 				break;
 			case AS_SONICBLOW:	// ソニックブロウ
 				damage = damage*(300+ 50*skill_lv)/100;
@@ -2809,13 +2811,13 @@ static struct Damage battle_calc_pc_weapon_attack(
 	}
 
 	// 完全回避の判定
-	if( skill_num==0 && tsd!=NULL && div_ < 255 && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
+	if(skill_num == 0 && skill_lv >= 0 && tsd!=NULL && div_ < 255 && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
 		damage=damage2=0;
 		type=0x0b;
 	}
 
 	if(battle_config.enemy_perfect_flee) {
-		if( skill_num==0 && tmd!=NULL && div_ < 255 && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ) {
+		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && div_ < 255 && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ) {
 			damage=damage2=0;
 			type=0x0b;
 		}
@@ -3320,6 +3322,8 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				clif_damage(src,target,tick+10, wd.amotion, wd.dmotion,0, 1, 0, 0);
 		}
 		map_freeblock_lock();
+		if(sd && sd->splash_range > 0 && (wd.damage > 0 || wd.damage2 > 0) )
+			skill_castend_damage_id(src,target,0,-1,tick,0);
 		battle_damage(src,target,(wd.damage+wd.damage2));
 		if(!(target->prev == NULL || (target->type == BL_PC && pc_isdead((struct map_session_data *)target) ) ) ) {
 			if(wd.damage > 0 || wd.damage2 > 0)
@@ -3551,7 +3555,12 @@ int battle_config_read(const char *cfgName)
 	battle_config.random_monster_checklv=1;
 	battle_config.attr_recover=1;
 	battle_config.flooritem_lifetime=LIFETIME_FLOORITEM*1000;
-	battle_config.lootitem_time=10000;
+	battle_config.item_first_get_time=10000;
+	battle_config.item_second_get_time=7000;
+	battle_config.item_third_get_time=5000;
+	battle_config.mvp_item_first_get_time=10000;
+	battle_config.mvp_item_second_get_time=10000;
+	battle_config.mvp_item_third_get_time=2000;
 	battle_config.item_rate=100;
 	battle_config.drop_rate0item=0;
 	battle_config.base_exp_rate=100;
@@ -3663,7 +3672,12 @@ int battle_config_read(const char *cfgName)
 			{ "random_monster_checklv",		&battle_config.random_monster_checklv	},
 			{ "attribute_recover",		&battle_config.attr_recover			},
 			{ "flooritem_lifetime",		&battle_config.flooritem_lifetime	},
-			{ "lootitem_time",		&battle_config.lootitem_time	},
+			{ "item_first_get_time", &battle_config.item_first_get_time },
+			{ "item_second_get_time", &battle_config.item_second_get_time },
+			{ "item_third_get_time", &battle_config.item_third_get_time },
+			{ "mvp_item_first_get_time", &battle_config.mvp_item_first_get_time },
+			{ "mvp_item_second_get_time", &battle_config.mvp_item_second_get_time },
+			{ "mvp_item_third_get_time", &battle_config.mvp_item_third_get_time },
 			{ "item_rate",				&battle_config.item_rate			},
 			{ "drop_rate0item",				&battle_config.drop_rate0item			},
 			{ "base_exp_rate",			&battle_config.base_exp_rate		},
@@ -3761,8 +3775,6 @@ int battle_config_read(const char *cfgName)
 
 	if(battle_config.flooritem_lifetime < 1000)
 		battle_config.flooritem_lifetime = LIFETIME_FLOORITEM*1000;
-	if(battle_config.lootitem_time < 1000)
-		battle_config.lootitem_time = 10000;
 	if(battle_config.restart_hp_rate < 0)
 		battle_config.restart_hp_rate = 0;
 	else if(battle_config.restart_hp_rate > 100)

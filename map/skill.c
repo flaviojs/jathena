@@ -317,6 +317,8 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 
 	int sc_def_mdef,sc_def_vit,sc_def_int,sc_def_luk;
 
+	if(skilllv < 0) return 0;
+
 	if(src->type==BL_PC)
 		sd=(struct map_session_data *)src;
 	else if(bl->type==BL_MOB)
@@ -671,7 +673,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 
 	type=-1;
 	lv=(flag>>20)&0xf;
-	dmg=battle_calc_attack(attack_type, src,bl, skillid,skilllv, flag&0xff );
+	dmg=battle_calc_attack(attack_type,src,bl,skillid,skilllv,flag&0xff );
 
 	damage = dmg.damage + dmg.damage2;
 
@@ -723,7 +725,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	}
 
 	clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
-		damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
+		damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, (skillid==0)? 5:type );
 	if(dmg.blewcount > 0 && !map[src->m].flag.gvg) {	/* 吹き飛ばし処理とそのパケット */
 		skill_blown(dsrc,bl,dmg.blewcount);
 		if(bl->type == BL_MOB)
@@ -736,7 +738,8 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 
 	map_freeblock_lock();
 	/* 実際にダメージ処理を行う */
-	battle_damage(src,bl,damage);
+	if(skillid != KN_BOWLINGBASH || flag != 0)
+		battle_damage(src,bl,damage);
 	if(skillid == RG_INTIMIDATE && damage > 0 && battle_get_mexp(bl) <= 0 && !(battle_get_mode(bl)&0x20) && !map[src->m].flag.gvg ) {
 		int s_lv = battle_get_lv(src),t_lv = battle_get_lv(bl);
 		int rate = 50 + skilllv * 5;
@@ -1278,16 +1281,12 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			if(bl->id!=skill_area_temp[1])
 				skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0x0500);
 		}
-		else { /*ボウリングバッシュを仮実装してみる（吹き飛ばしはここでやる） */
-			struct Damage dmg;
-			struct status_change *sc_data = battle_get_sc_data(bl);
-			int damage,ar = 1,type = -1;
-			dmg=battle_calc_attack(BF_WEAPON, src,bl, skillid,skilllv, flag&0xff);
-			damage = dmg.damage + dmg.damage2;
-			if( flag&0xff00 ) type=(flag&0xff00)>>8;
+		else {
+			int damage;
+			map_freeblock_lock();
+			damage = skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0);
 			if(damage > 0) {
 				int i,c;	/* 他人から聞いた動きなので間違ってる可能性大＆効率が悪いっす＞＜ */
-
 				c = ((skilllv-1)>>1) + 1;
 				if(map[bl->m].flag.gvg) c = 0;
 				for(i=0;i<c;i++){
@@ -1310,40 +1309,14 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				skill_area_temp[3]=bl->y;
 				/* その後ターゲット以外の範囲内の敵全体に処理を行う */
 				map_foreachinarea(skill_area_sub,
-					bl->m,bl->x-ar,bl->y-ar,bl->x+ar,bl->y+ar,0,
+					bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
 					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
 					skill_castend_damage_id);
 			}
-			clif_skill_damage(src,bl,tick,dmg.amotion,dmg.dmotion,
-				damage, dmg.div_, skillid, skilllv, type );
-			map_freeblock_lock();
 			battle_damage(src,bl,damage);
-			if(!(bl->prev == NULL || (bl->type == BL_PC && pc_isdead((struct map_session_data *)bl) ) ) ) {
-				if(damage > 0)
-					skill_additional_effect(src,bl,skillid,skilllv,BF_WEAPON,tick);
-				if(bl->type==BL_MOB && src!=bl)	/* スキル使用条件のMOBスキル */
-				{
-						if(battle_config.mob_changetarget_byskill == 1)
-						{
-							int target=((struct mob_data *)bl)->target_id;
-							if(src->type == BL_PC)
-								((struct mob_data *)bl)->target_id=src->id;
-							mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(skillid<<16));
-							((struct mob_data *)bl)->target_id=target;
-						}
-						else
-							mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(skillid<<16));
-				}
-			}
-				if(sc_data && sc_data[SC_AUTOCOUNTER].timer != -1 && sc_data[SC_AUTOCOUNTER].val4 > 0) {
-				if(sc_data[SC_AUTOCOUNTER].val3 == src->id)
-					battle_weapon_attack(bl,src,tick,0x8000|sc_data[SC_AUTOCOUNTER].val1);
-				skill_status_change_end(bl,SC_AUTOCOUNTER,-1);
-			}
 			map_freeblock_unlock();
 		}
 		break;
-
 
 	/* 魔法系スキル */
 	case MG_SOULSTRIKE:			/* ソウルストライク */
@@ -1491,6 +1464,22 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			if( heal > 0 ){
 				clif_skill_nodamage(src,src,AL_HEAL,heal,1);
 				battle_heal(NULL,src,heal,0);
+			}
+		}
+		break;
+	case 0:
+		if(sd) {
+			if(flag&3){
+				if(bl->id!=skill_area_temp[1])
+					skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0x0500);
+			}
+			else{
+				int ar=sd->splash_range;
+				skill_area_temp[1]=bl->id;
+				map_foreachinarea(skill_area_sub,
+					bl->m,bl->x-ar,bl->y-ar,bl->x+ar,bl->y+ar,0,
+					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
+					skill_castend_damage_id);
 			}
 		}
 		break;
@@ -2022,7 +2011,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			eflag = pc_additem(sd,&item_tmp,1);
 			if(eflag) {
 				clif_additem(sd,0,0,eflag);
-				map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y);
+				map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 			}
 		}
 		break;
@@ -3379,10 +3368,6 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 		range = -1;
 		switch(sd->skillid) {
 			case MG_SAFETYWALL:
-				range = 0;
-				break;
-			case AL_PNEUMA:
-			case AL_WARP:
 			case WZ_FIREPILLAR:
 			case HT_SKIDTRAP:
 			case HT_LANDMINE:
@@ -3394,6 +3379,10 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_BLASTMINE:
 			case HT_CLAYMORETRAP:
 			case HT_TALKIEBOX:
+				range = 0;
+				break;
+			case AL_PNEUMA:
+			case AL_WARP:
 				range = 1;
 				break;
 		}
@@ -5528,7 +5517,7 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 			memset(&item_tmp,0,sizeof(item_tmp));
 			item_tmp.nameid=1065;
 			item_tmp.identify=1;
-			map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y);	// 罠返還
+			map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y,NULL,NULL,NULL,0);	// 罠返還
 		}
 		skill_delunit(unit);
 	}
@@ -5855,7 +5844,7 @@ int skill_produce_mix( struct map_session_data *sd,
 
 		if((flag = pc_additem(sd,&tmp_item,1))) {
 			clif_additem(sd,0,0,flag);
-			map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
+			map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 		}
 	}
 	else {
@@ -5898,7 +5887,7 @@ int skill_arrow_create( struct map_session_data *sd,int nameid)
 			continue;
 		if((flag = pc_additem(sd,&tmp_item,tmp_item.amount))) {
 			clif_additem(sd,0,0,flag);
-			map_addflooritem(&tmp_item,tmp_item.amount,sd->bl.m,sd->bl.x,sd->bl.y);
+			map_addflooritem(&tmp_item,tmp_item.amount,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 		}
 	}
 

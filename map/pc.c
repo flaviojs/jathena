@@ -612,7 +612,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 		char buf[256];
 		FILE *fp;
 		if(	(fp = fopen(motd_txt, "r"))!=NULL){
-//			clif_displaymessage(sd->fd,"< Message of the Day >");
+			clif_displaymessage(sd->fd,"< Message of the Day >");
 			while (fgets(buf, 250, fp) != NULL){
 				int i;
 				for( i=0; buf[i]; i++){
@@ -624,7 +624,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 				clif_displaymessage(sd->fd,buf);
 			}
 			fclose(fp);
-//			clif_displaymessage(sd->fd,"< End of MOTD >");
+			clif_displaymessage(sd->fd,"< End of MOTD >");
 		}
 	}
 
@@ -949,6 +949,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(sd->monster_drop_itemrate,0,sizeof(sd->monster_drop_itemrate));
 	sd->speed_add_rate = sd->aspd_add_rate = 100;
 	sd->double_add_rate = sd->perfect_hit_add = sd->get_zeny_add_num = 0;
+	sd->splash_range = sd->splash_add_range = 0;
 
 	for(i=0;i<10;i++) {
 		index = sd->equip_index[i];
@@ -1086,6 +1087,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->double_rate += sd->double_add_rate;
 	sd->perfect_hit += sd->perfect_hit_add;
 	sd->get_zeny_num += sd->get_zeny_add_num;
+	sd->splash_range += sd->splash_add_range;
 	if(sd->speed_add_rate != 100)
 		sd->speed_rate += sd->speed_add_rate - 100;
 	if(sd->aspd_add_rate != 100)
@@ -1723,7 +1725,7 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		break;
 	case SP_GET_ZENY_NUM:
 		if(sd->state.lr_flag != 2 && sd->get_zeny_num < val)
-				sd->get_zeny_num = val;
+			sd->get_zeny_num = val;
 		break;
 	case SP_ADD_GET_ZENY_NUM:
 		if(sd->state.lr_flag != 2)
@@ -1800,6 +1802,14 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 	case SP_INFINITE_ENDURE:
 		if(sd->state.lr_flag != 2)
 			sd->special_state.infinite_endure = 1;
+		break;
+	case SP_SPLASH_RANGE:
+		if(sd->state.lr_flag != 2 && sd->splash_range < val)
+			sd->splash_range = val;
+		break;
+	case SP_SPLASH_ADD_RANGE:
+		if(sd->state.lr_flag != 2)
+			sd->splash_add_range += val;
 		break;
 	default:
 		if(battle_config.error_log)
@@ -2285,11 +2295,9 @@ int pc_delitem(struct map_session_data *sd,int n,int amount,int type)
  */
 int pc_dropitem(struct map_session_data *sd,int n,int amount)
 {
-	if(sd->status.inventory[n].nameid==0 ||
-	   sd->status.inventory[n].amount<amount)
+	if(sd->status.inventory[n].nameid <=0 || sd->status.inventory[n].amount < amount)
 		return 1;
-	sd->status.inventory[n].first_get_id=0;
-	map_addflooritem(&sd->status.inventory[n],amount,sd->bl.m,sd->bl.x,sd->bl.y);
+	map_addflooritem(&sd->status.inventory[n],amount,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
 	pc_delitem(sd,n,amount,0);
 
 	return 0;
@@ -2303,23 +2311,46 @@ int pc_dropitem(struct map_session_data *sd,int n,int amount)
 int pc_takeitem(struct map_session_data *sd,struct flooritem_data *fitem)
 {
 	int flag;
-	struct map_session_data *md = map_id2sd(fitem->item_data.first_get_id);
-
-	if(((fitem->item_data.first_get_id > 0
-		&& fitem->item_data.first_get_id != sd->bl.id)	// 倒した本人じゃない
-		&& battle_config.flooritem_lifetime+gettick()-get_timer(fitem->cleartimer)->tick < battle_config.lootitem_time)	// 時間が早い
-		&&(md && md->status.party_id && sd->status.party_id != md->status.party_id)	// 倒したキャラとは別のパーティー
-		)
-		// ルート権限無し
-		clif_additem(sd,0,0,6);
-	else if((flag = pc_additem(sd,&fitem->item_data,fitem->item_data.amount)))
+	unsigned int tick = gettick();
+	struct map_session_data *first_sd = NULL,*second_sd = NULL,*third_sd = NULL;
+	
+	if(fitem->first_get_id > 0) {
+		first_sd = map_id2sd(fitem->first_get_id);
+		if(tick < fitem->first_get_tick) {
+			if(fitem->first_get_id != sd->bl.id && !(first_sd && first_sd->status.party_id == sd->status.party_id)) {
+				clif_additem(sd,0,0,6);
+				return 0;
+			}
+		}
+		else if(fitem->second_get_id > 0) {
+			second_sd = map_id2sd(fitem->second_get_id);
+			if(tick < fitem->second_get_tick) {
+				if(fitem->first_get_id != sd->bl.id && fitem->second_get_id != sd->bl.id &&
+					!(first_sd && first_sd->status.party_id == sd->status.party_id) && !(second_sd && second_sd->status.party_id == sd->status.party_id)) {
+					clif_additem(sd,0,0,6);
+					return 0;
+				}
+			}
+			else if(fitem->third_get_id > 0) {
+				third_sd = map_id2sd(fitem->third_get_id);
+				if(tick < fitem->third_get_tick) {
+					if(fitem->first_get_id != sd->bl.id && fitem->second_get_id != sd->bl.id && fitem->third_get_id != sd->bl.id &&
+						!(first_sd && first_sd->status.party_id == sd->status.party_id) && !(second_sd && second_sd->status.party_id == sd->status.party_id) &&
+						!(third_sd && third_sd->status.party_id == sd->status.party_id)) {
+						clif_additem(sd,0,0,6);
+						return 0;
+					}
+				}
+			}
+		}
+	}
+	if((flag = pc_additem(sd,&fitem->item_data,fitem->item_data.amount)))
 		// 重量overで取得失敗
 		clif_additem(sd,0,0,flag);
 	else {
 		/* 取得成功 */
 		if(sd->attacktimer != -1)
 			pc_stopattack(sd);
-		fitem->item_data.first_get_id=0;
 		clif_takeitem(&sd->bl,&fitem->bl);
 		map_clearflooritem(fitem->bl.id);
 	}
@@ -4424,11 +4455,12 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 {
 	int i,nameid;
 	struct item_data *id;
-	nameid=sd->status.inventory[n].nameid;
-	id=sd->inventory_data[n];
+	nameid = sd->status.inventory[n].nameid;
+	id = sd->inventory_data[n];
+	pos = pc_equippoint(sd,n);
 	if(battle_config.battle_log)
 		printf("equip %d(%d) %x:%x\n",nameid,n,id->equip,pos);
-	if(!pc_isequip(sd,n)) {
+	if(!pc_isequip(sd,n) || !pos) {
 		clif_equipitemack(sd,n,0,0);	// fail
 		return 0;
 	}

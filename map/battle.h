@@ -137,7 +137,12 @@ extern struct Battle_Config {
 	int random_monster_checklv;
 	int attr_recover;
 	int flooritem_lifetime;
-	int lootitem_time;
+	int item_first_get_time;
+	int item_second_get_time;
+	int item_third_get_time;
+	int mvp_item_first_get_time;
+	int mvp_item_second_get_time;
+	int mvp_item_third_get_time;
 	int item_rate,base_exp_rate,job_exp_rate;
 	int drop_rate0item;
 	int death_penalty_type;
