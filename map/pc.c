@@ -637,11 +637,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	// 装備品によるステータス変化はここで実行
 	for(i=0;i<MAX_INVENTORY;i++){
-		int nameid=sd->status.inventory[i].nameid,ep;
+		int nameid=sd->status.inventory[i].nameid,ep=sd->status.inventory[i].equip;
 
-		if(nameid==0 || (ep=sd->status.inventory[i].equip)==0)
+		if(nameid==0 || ep==0 || itemdb_type(nameid)==10)	// 矢は考慮外
 			continue;
-
 		sd->watk += itemdb_atk(nameid);
 		sd->def += itemdb_def(nameid);
 		run_script(itemdb_equipscript(nameid),0,sd->bl.id,0);
@@ -702,13 +701,17 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 			// 精錬防御力
 			sd->def += sd->status.inventory[i].refine*refinebonus[0][0];
-		} else if(itemdb_type(nameid)==10){ // 矢
-			if(atk_ele == 0)		//まだ属性が入っていない
-				atk_ele = sd->atk_ele;	//矢の属性を優先とする
 		}
 	}
 	for(i=0;i<6;i++)
 		sd->parame[i] = sd->paramb[i];
+
+	if(sd->status.weapon==11 && pc_checkequip(sd,0x8000)!=0){ // 矢
+		if(atk_ele == 0){		//まだ属性が入っていない
+		run_script(itemdb_equipscript(pc_checkequip(sd,0x8000)),0,sd->bl.id,0);
+			atk_ele = sd->atk_ele;	//矢の属性を適用
+		}
+	}
 
 	sd->atk_ele = atk_ele;		//右手属性を入れる
 
@@ -3306,12 +3309,11 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	struct item_data *id;
 	nameid=sd->status.inventory[n].nameid;
 	id=itemdb_search(nameid);
-	printf("equip %d %x:%x\n",n,itemdb_equip(nameid),pos);
+	printf("equip %d(%d) %x:%x\n",nameid,n,itemdb_equip(nameid),pos);
 	if((itemdb_equip(nameid)&pos)==0
 	 || (id->sex!=2 && sd->sex!=id->sex)
 	 || sd->status.base_level<id->elv
 	 || ((1<<sd->status.class)&id->class)==0
-	 || (pos==0x8000 && (sd->status.weapon != 11))	//矢は弓装備時のみ
 	  ){
 		clif_equipitemack(sd,n,0,0);	// fail
 		return 0;
@@ -3367,12 +3369,10 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
  */
 int pc_unequipitem(struct map_session_data *sd,int n)
 {
-	int arrow=pc_search_inventory(sd,pc_checkequip(sd,0x8000));
 	//printf("unequip %d %x:%x\n",n,itemdb_equippoint(sd->status.inventory[n].nameid),sd->status.inventory[n].equip);
 	if(sd->status.inventory[n].equip){
 		clif_unequipitemack(sd,n,sd->status.inventory[n].equip,1);
 		sd->status.inventory[n].equip=0;
-		clif_unequipitemack(sd,arrow,sd->status.inventory[arrow].equip,1);	// 矢も外す
 	} else {
 		clif_unequipitemack(sd,n,0,0);
 	}
