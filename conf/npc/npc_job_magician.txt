@@ -1,0 +1,54 @@
+pay_arche.gat,121,100,0	script	…—n‰tƒAƒ‹ƒoƒCƒg	88,{
+	mes "[–‚ptƒMƒ‹ƒhŠÖŒWÒ]";
+	mes "…—n‰t‚ğ”ƒ‚¢‚Ü‚·‚©H";
+	mes "50 Zeny‚Æ‹ó‚ÌŒ±ŠÇˆê‚ÂˆÈã‚ª";
+	mes "•K—v‚Å‚·B";
+	next;
+	menu "…—n‰t‚ğ”ƒ‚¤",-,"‚â‚ß‚é",Lclose;
+	if (countitem(1092) >= 1) goto Lok;
+		mes "[–‚ptƒMƒ‹ƒhŠÖŒWÒ]";
+		mes "…—n‰t‚ğ‚Ç‚¤‚â‚Á‚Ä";
+		mes "‚Á‚Ä‚¢‚«‚Ü‚·‚©H";
+		mes "‹ó‚ÌŒ±ŠÇ‚ğ‚Á‚Ä‚«‚Ä‰º‚³‚¢B";
+		close;
+Lok:
+	if (Zeny >= 50) goto Lok2;
+		mes "[–‚ptƒMƒ‹ƒhŠÖŒWÒ]";
+		mes "‚¨‹à‚ª‘«‚è‚Ü‚¹‚ñ‚æB";
+		close;
+Lok2:
+	set Zeny,Zeny-50;
+	delitem 1092,1;
+	getitem 1089,1;
+	mes "[–‚ptƒMƒ‹ƒhŠÖŒWÒ]";
+	mes "‚ ‚è‚ª‚Æ‚¤‚²‚´‚¢‚Ü‚µ‚½B";
+Lclose:
+	close;
+}
+moc_ruins.gat,91,150,0	script	…—n‰tƒAƒ‹ƒoƒCƒg	93,{
+	mes "[–‚ptƒMƒ‹ƒhŠÖŒWÒ]";
+	mes "…—n‰t‚ğ”ƒ‚¢‚Ü‚·‚©H";
+	mes "50 Zeny‚Æ‹ó‚ÌŒ±ŠÇ1‚ÂˆÈã‚ª";
+	mes "•K—v‚Å‚·B";
+	next;
+	menu "…—n‰t‚ğ”ƒ‚¤",-,"‚â‚ß‚é",Lclose;
+	if (countitem(1092) >= 1) goto Lok;
+		mes "[–‚ptƒMƒ‹ƒhŠÖŒWÒ]";
+		mes "…—n‰t‚ğ‚Ç‚¤‚â‚Á‚Ä";
+		mes "‚Á‚Ä‚¢‚«‚Ü‚·‚©H";
+		mes "‹ó‚ÌŒ±ŠÇ‚ğ‚Á‚Ä‚«‚Ä‰º‚³‚¢B";
+		close;
+Lok:
+	if (Zeny >= 50) goto Lok2;
+		mes "[–‚ptƒMƒ‹ƒhŠÖŒWÒ]";
+		mes "‚¨‹à‚ª‘«‚è‚Ü‚¹‚ñ‚æB";
+		close;
+Lok2:
+	set Zeny,Zeny-50;
+	delitem 1092,1;
+	getitem 1088,1;
+	mes "[–‚ptƒMƒ‹ƒhŠÖŒWÒ]";
+	mes "‚ ‚è‚ª‚Æ‚¤‚²‚´‚¢‚Ü‚µ‚½B";
+Lclose:
+	close;
+}
