@@ -6064,10 +6064,10 @@ static int clif_parse(int fd)
 	if(RFIFOREST(fd)<packet_len)
 		return 0;	// まだ1パケット分データが揃ってない
 
-	if(sd->state.waitingdisconnect)	
-		// 切断待ちの場合パケットを処理しない
-		return 0;
-	else if(clif_parse_func_table[cmd]){
+	if(sd && sd->state.auth==1 &&
+		sd->state.waitingdisconnect==1 ){// 切断待ちの場合パケットを処理しない
+		
+	}else if(clif_parse_func_table[cmd]){
 		// パケット処理
 		//printf("clif_parse : %d %d %x\n",fd,packet_len,cmd);
 		clif_parse_func_table[cmd](fd,sd);
