@@ -1,3 +1,12 @@
+//1035 by Michael
+ÅEí«â¡ GVG Script NPC edit from Aegis NPC(Chinese-big5 version), Please someone translate to Japanese.
+ÅEèCê≥ NPC Script Command - buildin_getgdskilllv()
+  getgdskilllv(Guild_ID, Skill_ID);
+ 
+	(map/)
+	script.c
+		buildin_getgdskilllv() èCê≥
+
 ----------------------------------------
 //1034 by (Pepermint)
 	FIX NPC Script Command - buildin_getgdskilllv()

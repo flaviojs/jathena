@@ -1,0 +1,207 @@
+// edit by Michael
+
+payg_cas01.gat,139,139,0	script	Agit_C01	-1,{
+OnInterIfInit:
+	GetCastleData "payg_cas01.gat",0,"::OnRecvCastleF01";
+	End;
+OnRecvCastleF01:
+	RequestGuildInfo GetCastleData("payg_cas01.gat",1);
+	End;
+OnAgitStart:
+	set $@vMap_AgitFlag_F01,1;
+	MapRespawnGuildID "payg_cas01.gat",GetCastleData("payg_cas01.gat",1),2;
+	Monster "payg_cas01.gat",139,139,"華麗金屬",1288,1,"Agit_C01::OnAgitBreak";
+	GvgOn "payg_cas01.gat";
+	End;
+OnAgitBreak:
+	set @GIDf1,getcharid(2);
+	if (@GIDf1 <= 0) end;
+	SetCastleData "payg_cas01.gat",1,@GIDf1;
+	Announce "秘密基地 [" + GetCastleName("payg_cas01.gat") + "]被 [" + GetGuildName(@GIDf1) + "] 工會佔領了",0;
+	MapAnnounce "payg_cas01.gat","華麗金屬被破壞了",17;
+	set @Economy,GetCastleData("payg_cas01.gat",2);
+	if (@Economy < 5) set @Economy,0;
+	if (@Economy >= 5) set @Economy,@Economy-5;
+	SetCastleData "payg_cas01.gat",2,@Economy;
+	set @Deffence,GetCastleData("payg_cas01.gat",3);
+	if (@Deffence < 5) set @Deffence,0;
+	if (@Deffence >= 5) set @Deffence,@Deffence-5;
+	SetCastleData "payg_cas01.gat",3,@Deffence;
+	GetCastleData "payg_cas01.gat",0,"::OnRecvCastleF01";
+	End;
+OnAgitEliminate:
+	MapRespawnGuildID "payg_cas01.gat",GetCastleData("payg_cas01.gat",1),6;
+	Monster "payg_cas01.gat",139,139,"華麗金屬",1288,1,"Agit_C01::OnAgitBreak";
+	End;
+OnAgitEnd:
+	set $@vMap_AgitFlag_F01,0;
+	MapRespawnGuildID "payg_cas01.gat",GetCastleData("payg_cas01.gat",1),4;
+	KillMonster "payg_cas01.gat","Agit_C01::OnAgitBreak";
+	GvgOff "payg_cas01.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------
+payg_cas02.gat,39,25,0	script	Agit_C02	-1,{
+OnInterIfInit:
+	GetCastleData "payg_cas02.gat",0,"::OnRecvCastleF02";
+	End;
+OnRecvCastleF02:
+	RequestGuildInfo GetCastleData("payg_cas02.gat",1);
+	End;
+OnAgitStart:
+	set $@vMap_AgitFlag_F02,1;
+	MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),2;
+	Monster "payg_cas02.gat",39,25,"華麗金屬",1288,1,"Agit_C02::OnAgitBreak";
+	GvgOn "payg_cas02.gat";
+	End;
+OnAgitBreak:
+	set @GIDf2,getcharid(2);
+	if (@GIDf2 <= 0) end;
+	SetCastleData "payg_cas02.gat",1,@GIDf2;
+	Announce "秘密基地 [" + GetCastleName("payg_cas02.gat") + "]被 [" + GetGuildName(@GIDf2) + "] 工會佔領了",0;
+	MapAnnounce "payg_cas02.gat","華麗金屬被破壞了",17;
+	set @Economy,GetCastleData("payg_cas02.gat",2);
+	if (@Economy < 5) set @Economy,0;
+	if (@Economy >= 5) set @Economy,@Economy-5;
+	SetCastleData "payg_cas02.gat",2,@Economy;
+	set @Deffence,GetCastleData("payg_cas02.gat",3);
+	if (@Deffence < 5) set @Deffence,0;
+	if (@Deffence >= 5) set @Deffence,@Deffence-5;
+	SetCastleData "payg_cas02.gat",3,@Deffence;
+	GetCastleData "payg_cas02.gat",0,"::OnRecvCastleF02";
+	End;
+OnAgitEliminate:
+	MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),6;
+	Monster "payg_cas02.gat",39,25,"華麗金屬",1288,1,"Agit_C02::OnAgitBreak";
+	End;
+OnAgitEnd:
+	set $@vMap_AgitFlag_F02,0;
+	MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),4;
+	KillMonster "payg_cas02.gat","Agit_C02::OnAgitBreak";
+	GvgOff "payg_cas02.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------
+payg_cas03.gat,269,265,0	script	Agit_C03	-1,{
+OnInterIfInit:
+	GetCastleData "payg_cas03.gat",0,"::OnRecvCastleF03";
+	End;
+OnRecvCastleF03:
+	RequestGuildInfo GetCastleData("payg_cas03.gat",1);
+	End;
+OnAgitStart:
+	set $@vMap_AgitFlag_F03,1;
+	MapRespawnGuildID "payg_cas03.gat",GetCastleData("payg_cas03.gat",1),2;
+	Monster "payg_cas03.gat",269,265,"華麗金屬",1288,1,"Agit_C03::OnAgitBreak";
+	GvgOn "payg_cas03.gat";
+	End;
+OnAgitBreak:
+	set @GIDf3,getcharid(2);
+	if (@GIDf3 <= 0) end;
+	SetCastleData "payg_cas03.gat",1,@GIDf3;
+	Announce "秘密基地 [" + GetCastleName("payg_cas03.gat") + "]被 [" + GetGuildName(@GIDf3) + "] 工會佔領了",0;
+	MapAnnounce "payg_cas03.gat","華麗金屬被破壞了",17;
+	set @Economy,GetCastleData("payg_cas03.gat",2);
+	if (@Economy < 5) set @Economy,0;
+	if (@Economy >= 5) set @Economy,@Economy-5;
+	SetCastleData "payg_cas03.gat",2,@Economy;
+	set @Deffence,GetCastleData("payg_cas03.gat",3);
+	if (@Deffence < 5) set @Deffence,0;
+	if (@Deffence >= 5) set @Deffence,@Deffence-5;
+	SetCastleData "payg_cas03.gat",3,@Deffence;
+	GetCastleData "payg_cas03.gat",0,"::OnRecvCastleF03";
+	End;
+OnAgitEliminate:
+	MapRespawnGuildID "payg_cas03.gat",GetCastleData("payg_cas03.gat",1),6;
+	Monster "payg_cas03.gat",269,265,"華麗金屬",1288,1,"Agit_C03::OnAgitBreak";
+	End;
+OnAgitEnd:
+	set $@vMap_AgitFlag_F03,0;
+	MapRespawnGuildID "payg_cas03.gat",GetCastleData("payg_cas03.gat",1),4;
+	KillMonster "payg_cas03.gat","Agit_C03::OnAgitBreak";
+	GvgOff "payg_cas03.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------
+payg_cas04.gat,271,29,0	script	Agit_C04	-1,{
+OnInterIfInit:
+	GetCastleData "payg_cas04.gat",0,"::OnRecvCastleF04";
+	End;
+OnRecvCastleF04:
+	RequestGuildInfo GetCastleData("payg_cas04.gat",1);
+	End;
+OnAgitStart:
+	set $@vMap_AgitFlag_F04,1;
+	MapRespawnGuildID "payg_cas04.gat",GetCastleData("payg_cas04.gat",1),2;
+	Monster "payg_cas04.gat",271,29,"華麗金屬",1288,1,"Agit_C04::OnAgitBreak";
+	GvgOn "payg_cas04.gat";
+	End;
+OnAgitBreak:
+	set @GIDf4,getcharid(2);
+	if (@GIDf4 <= 0) end;
+	SetCastleData "payg_cas04.gat",1,@GIDf4;
+	Announce "秘密基地 [" + GetCastleName("payg_cas04.gat") + "]被 [" + GetGuildName(@GIDf4) + "] 工會佔領了",0;
+	MapAnnounce "payg_cas04.gat","華麗金屬被破壞了",17;
+	set @Economy,GetCastleData("payg_cas04.gat",2);
+	if (@Economy < 5) set @Economy,0;
+	if (@Economy >= 5) set @Economy,@Economy-5;
+	SetCastleData "payg_cas04.gat",2,@Economy;
+	set @Deffence,GetCastleData("payg_cas04.gat",3);
+	if (@Deffence < 5) set @Deffence,0;
+	if (@Deffence >= 5) set @Deffence,@Deffence-5;
+	SetCastleData "payg_cas04.gat",3,@Deffence;
+	GetCastleData "payg_cas04.gat",0,"::OnRecvCastleF04";
+	End;
+OnAgitEliminate:
+	MapRespawnGuildID "payg_cas04.gat",GetCastleData("payg_cas04.gat",1),6;
+	Monster "payg_cas04.gat",271,29,"華麗金屬",1288,1,"Agit_C04::OnAgitBreak";
+	End;
+OnAgitEnd:
+	set $@vMap_AgitFlag_F04,0;
+	MapRespawnGuildID "payg_cas04.gat",GetCastleData("payg_cas04.gat",1),4;
+	KillMonster "payg_cas04.gat","Agit_C04::OnAgitBreak";
+	GvgOff "payg_cas04.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------
+payg_cas05.gat,30,30,0	script	Agit_C05	-1,{
+OnInterIfInit:
+	GetCastleData "payg_cas05.gat",0,"::OnRecvCastleF05";
+	End;
+OnRecvCastleF05:
+	RequestGuildInfo GetCastleData("payg_cas05.gat",1);
+	End;
+OnAgitStart:
+	set $@vMap_AgitFlag_F05,1;
+	MapRespawnGuildID "payg_cas05.gat",GetCastleData("payg_cas05.gat",1),2;
+	Monster "payg_cas05.gat",30,30,"華麗金屬",1288,1,"Agit_C05::OnAgitBreak";
+	GvgOn "payg_cas05.gat";
+	End;
+OnAgitBreak:
+	set @GIDf5,getcharid(2);
+	if (@GIDf5 <= 0) end;
+	SetCastleData "payg_cas05.gat",1,@GIDf5;
+	Announce "秘密基地 [" + GetCastleName("payg_cas05.gat") + "]被 [" + GetGuildName(@GIDf5) + "] 工會佔領了",0;
+	MapAnnounce "payg_cas05.gat","華麗金屬被破壞了",17;
+	set @Economy,GetCastleData("payg_cas05.gat",2);
+	if (@Economy < 5) set @Economy,0;
+	if (@Economy >= 5) set @Economy,@Economy-5;
+	SetCastleData "payg_cas05.gat",2,@Economy;
+	set @Deffence,GetCastleData("payg_cas05.gat",3);
+	if (@Deffence < 5) set @Deffence,0;
+	if (@Deffence >= 5) set @Deffence,@Deffence-5;
+	SetCastleData "payg_cas05.gat",3,@Deffence;
+	GetCastleData "payg_cas05.gat",0,"::OnRecvCastleF05";
+	End;
+OnAgitEliminate:
+	MapRespawnGuildID "payg_cas05.gat",GetCastleData("payg_cas05.gat",1),6;
+	Monster "payg_cas05.gat",30,30,"華麗金屬",1288,1,"Agit_C05::OnAgitBreak";
+	End;
+OnAgitEnd:
+	set $@vMap_AgitFlag_F05,0;
+	MapRespawnGuildID "payg_cas05.gat",GetCastleData("payg_cas05.gat",1),4;
+	KillMonster "payg_cas05.gat","Agit_C05::OnAgitBreak";
+	GvgOff "payg_cas05.gat";
+	End;
+}
+//--------------------------------------------------------------------------------------------------------------------------

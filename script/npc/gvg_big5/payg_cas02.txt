@@ -1,0 +1,1204 @@
+// edit by Michael
+
+//npc "pay_gld" "旗幟" GUILD_FLAG 292 112 6 5 5
+pay_gld.gat,292,112,6	script	紅樓#f2-1	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	if (GetCharID(2) == @GIDf2) goto L_Member;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+L_Member:
+	mes "[ 響亮的嗓音 ]";
+	mes "勇敢的人們...";
+	mes "要回到您的名譽之地嗎?";
+	next;
+	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+	close;
+	end;
+L_Warp:
+	warp "payg_cas02.gat",22,275;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+//npc "pay_gld" "旗幟" GUILD_FLAG 292 120 6 5 5
+pay_gld.gat,292,120,6	script	紅樓#f2-2	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	if (GetCharID(2) == @GIDf2) goto L_Member;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+L_Member:
+	mes "[ 響亮的嗓音 ]";
+	mes "勇敢的人們...";
+	mes "要回到您的名譽之地嗎?";
+	next;
+	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+	close;
+	end;
+L_Warp:
+	warp "payg_cas02.gat",22,275;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+//npc "pay_gld" "旗幟" GUILD_FLAG 291 135 6 5 5
+pay_gld.gat,291,135,6	script	紅樓#f2-3	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	if (GetCharID(2) == @GIDf2) goto L_Member;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+L_Member:
+	mes "[ 響亮的嗓音 ]";
+	mes "勇敢的人們...";
+	mes "要回到您的名譽之地嗎?";
+	next;
+	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+	close;
+	end;
+L_Warp:
+	warp "payg_cas02.gat",22,275;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+//npc "pay_gld" "旗幟" GUILD_FLAG 271 163 0 5 5
+pay_gld.gat,271,163,0	script	紅樓#f2-4	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	if (GetCharID(2) == @GIDf2) goto L_Member;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+L_Member:
+	mes "[ 響亮的嗓音 ]";
+	mes "勇敢的人們...";
+	mes "要回到您的名譽之地嗎?";
+	next;
+	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+	close;
+	end;
+L_Warp:
+	warp "payg_cas02.gat",22,275;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+//npc "payg_cas02" "旗幟" GUILD_FLAG 254 40 6 5 5
+payg_cas02.gat,254,40,6	script	紅樓#f2-5	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+//npc "payg_cas02" "旗幟" GUILD_FLAG 254 48 6 5 5
+payg_cas02.gat,254,48,6	script	紅樓#f2-6	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+//npc "payg_cas02" "旗幟" GUILD_FLAG 202 49 0 5 5
+payg_cas02.gat,202,49,0	script	紅樓#f2-7	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+//npc "payg_cas02" "旗幟" GUILD_FLAG 209 49 0 5 5
+payg_cas02.gat,209,49,0	script	紅樓#f2-8	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+//npc "payg_cas02" "旗幟" GUILD_FLAG 59 282 4 5 5
+payg_cas02.gat,59,282,4	script	紅樓#f2-9	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+//npc "payg_cas02" "旗幟" GUILD_FLAG 70 282 4 5 5
+payg_cas02.gat,70,282,4	script	紅樓#f2-10	722,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "   把這裡公佈為，沒有正式所有權的";
+	mes "   旗幟";
+	mes " ";
+	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+	mes "   給破壞華麗金屬的人";
+	mes "   國王會賜予";
+	mes "   經國王認證的";
+	mes "   秘密基地所有權";
+	close;
+	end;
+L_Guild:
+	mes "       [ 普隆德拉王國  公告令 ]";
+	mes " ";
+	mes "1. 根據這裡的，普隆德拉王國令";
+	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+	mes "    私有物";
+	mes " ";
+	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+	mes "    對這件事情有意見者";
+	mes "    請你舉起您的劍，提高自己的名譽吧";
+	close;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+
+
+
+
+
+
+
+
+
+
+//npc "payg_cas02" " " HIDDEN_NPC 141 141 0 5 5
+//payg_cas02.gat,141,141,0	script	　	111,{
+payg_cas02.gat,149,149,0	script	　	111,{
+	mes " ";
+	mes "有小的拉桿 ，你要往下拉嗎? ";
+	next;
+	menu "我要拉 ",L_Yes,"我不要拉 ",L_No;
+L_Yes:
+	warp "payg_cas02.gat",22,261;
+	end;
+L_No:
+	close;
+	end;
+}
+
+//npc "payg_cas02" " " HIDDEN_NPC 278 247 0 5 5
+payg_cas02.gat,278,247,0	script	　	111,{
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 > 0) goto L_Guild;
+	mes " [ 響亮的聲音 ] ";
+	mes " ' 通過考驗成為勇氣的主人 ... 再去尋找其它考驗的路' ";
+	close;
+	end;
+L_Guild:
+	mes "[ 響亮的聲音 ]";
+	mes " ' 只有勇氣的主人，才能接受考驗啊'";
+	next;
+	mes " ";
+	mes "有小的拉桿 ，你要往下拉嗎? ";
+	next;
+	menu "我要拉 ",L_Yes,"我不要拉 ",L_No;
+L_Yes:
+	if (GetCharID(2) != @GIDf2) goto L_NotMember;
+	warp "gld_dun01.gat",54,165;
+	end;
+L_NotMember:
+	mes " ";
+	mes " 沒有發生任何事情 ";
+	close;
+	end;
+L_No:
+	close;
+	end;
+}
+
+
+
+//npc "payg_cas02" "卡普拉 職員" 4_F_KAFRA1 22 275 5 5 5
+payg_cas02.gat,22,275,5	script	卡普拉 職員#pay2	117,{
+//OnClick:
+	cutin "kafra_01.bmp",2;
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 == GetCharID(2)) goto L_Member;
+	mes "[卡普拉 職員]";
+	mes "我已簽訂契約專為^ff0000" + GetGuildName(@GIDf2) + "^000000 會員服務 ，請使用我們其它地方的卡普拉職員 ，如有不便之處敬請見諒";
+	cutin "kafra_01.bmp",255;
+	close;
+	end;
+L_Member:
+	mes " [卡普拉 職員]";
+	mes "歡迎光臨 ^ff0000" + GetGuildName(@GIDf2) + "^000000 會員們 ";
+	mes "卡普拉服務(有限公司) ，永遠在各位身邊為您服務";
+	next;
+	menu "使用倉庫服務",L_M1,"使用空間移動服務",L_M2,"使用手推車服務 ",L_M3,"結束",L_M4;
+	L_M1:
+		if (getskilllv(1) < 6) goto L_M1_A;
+		mes "[卡普拉 職員]";
+		mes "要打開倉庫了";
+		mes "謝謝您的使用。";
+		cutin "kafra_01.bmp",255;
+		openstorage;
+		close;
+		end;
+		L_M1_A://Basic Skill < 6
+			mes "[卡普拉 職員]";
+			mes "想要使用倉庫的話 ，初學者技能等級要6以上才行";
+			cutin "kafra_01.bmp",255;
+			close;
+			end;
+	L_M2:
+		mes "[卡普拉 職員]";
+		mes "請說出目的地吧";
+		next;
+		menu "斐揚  -> 200 z",L_M2_M1," 取消 ",L_M2_M2;
+		L_M2_M1:
+			if (Zeny < 200) goto L_M2_M1_A;
+			set Zeny,Zeny-200;
+//			set kf_10_pit,kf_10_pit+2;
+			warp "payon.gat",82,128;
+			end;
+			L_M2_M1_A:
+				mes "[卡普拉 職員]";
+				mes "會員先生/小姐 ，你所支付的金額不足 ，請重新確認";
+				cutin "kafra_01.bmp",255;
+				close;
+				end;
+		L_M2_M2:
+			cutin "kafra_01.bmp",255;
+			close;
+			end;
+	L_M3:
+		if ((Class != 5) && (Class != 10)) goto L_M3_A;
+		if (checkcart != 0) goto L_M3_B;
+		mes "[卡普拉 職員]";
+		mes "手推車使用費是 800 金幣 ，請問你要使用嗎?";
+		next;
+		menu "使用 ",L_M3_M1,"取消 ",L_M3_M2;
+		L_M3_M1:
+			if (Zeny < 800) goto L_M3_M1_A;
+//			set kf_10_pit,kf_10_pit+8;
+			set Zeny,Zeny-800;
+			setcart;
+			cutin "kafra_01.bmp",255;
+			close;
+			end;
+			L_M3_M1_A:
+				mes "[卡普拉 職員]";
+				mes "顧客 ，你所支付的金額不足 ，手推車使用費是800 金幣";
+				cutin "kafra_01.bmp",255;
+				close;
+				end;
+		L_M3_M2:
+			cutin "kafra_01.bmp",255;
+			close;
+			end;
+		L_M3_A:
+			mes "[卡普拉 職員]";
+			mes "對不起 ，手推車是商人和鐵匠，專用的服務";
+			cutin "kafra_01.bmp",255;
+			close;
+			end;
+		L_M3_B:
+			mes "[卡普拉 職員]";
+			mes "顧客你現在已經，裝備手推車了";
+			cutin "kafra_01.bmp",255;
+			close;
+			end;
+	L_M4:
+		mes "[卡普拉 職員]";
+		mes "我們卡普拉服務(有限公司)會提供更完美的服務 ，和嚴格的業務管理 ，讓各位顧客安心便利的使用，為最大的目標";
+		mes "感謝你使用 ，卡普拉服務(有限公司) ";
+		cutin "kafra_01.bmp",255;
+		close;
+		end;
+OnInit:
+	disablenpc "卡普拉 職員#pay2";
+	End;
+}
+
+
+//npc "payg_cas02" "蔡麗歐絲" 1_M_JOBTESTER 22 260 7 5 5
+payg_cas02.gat,22,260,7	script	蔡麗歐絲	55,{
+//OnClick:
+	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+	if (@GIDf2 == 0) goto L_Waiting;
+	if (strcharinfo(0) != GetGuildMaster(@GIDf2)) goto L_Member;
+	goto L_Castle;
+	end;
+// -------工會主人 都不在的時候------------------------------------------
+L_Waiting:
+	mes "[管理人蔡麗歐絲]";
+	mes "  我將依據我的命運 ，在等待我的主人";
+	mes "勇士啊...試驗一下你的命運吧 ...";
+	close;
+	end;
+// -----------------------------------------------------------------------------
+// --------是我的 工會主人嗎? -----------------------------------------------
+L_Member:
+	mes "[管理人蔡麗歐絲]";
+	mes "不管你們怎麼威脅我 ，我只願意追隨我的主人 ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ! 監護人你們在那裡呀! 趕快把這些無理的傢伙們趕走吧!";
+	close;
+	end;
+//-----------------------------------------------------------------------------
+L_Castle:
+	mes "[管理人蔡麗歐絲]";
+	mes "歡迎光臨 ， 我的主人^ff0000" + GetGuildMaster(@GIDf2) + "^000000先生/小姐...";
+	mes "請儘管吩咐 ，我將忠誠地為你完成任務";
+	next;
+//	choose menu "查看秘密基地狀況" "投資商業發展度" "投資防禦度" "設置監護人 " "雇用 / 解雇 倉庫職員" "進入主人房間" "讓出秘密基地"
+	menu "查看秘密基地狀況",L_M1,"投資商業發展度",L_M2,"投資防禦度",L_M3,"設置監護人 ",L_M4,"雇用 / 解雇 倉庫職員",L_M5,"進入主人房間",L_M6;
+// ---------查看秘密基地狀況---------------------------------------------------
+	L_M1:
+		mes "[管理人蔡麗歐絲]";
+		mes "現在向你報告秘密基地的狀況";
+		mes "^0000ff ";
+		mes "   現在商業發展度是" + GetCastleData("payg_cas02.gat",2) +  " ";
+		if (GetCastleData("payg_cas02.gat",4) > 0 ) mes "   - 在過去一天之內，投資了 " + GetCastleData("payg_cas02.gat",4) + " 次 ";
+		mes "   現在的防禦度是" + GetCastleData("payg_cas02.gat",3) +  " ";
+		if (GetCastleData("payg_cas02.gat",5) > 0 ) mes "   - 在過去一天之內，投資了 " + GetCastleData("payg_cas02.gat",5) + " 次 ";
+		mes "^000000 ";
+		mes "報告完畢";
+		close;
+		end;
+// ---------投資商業發展度
+	L_M2:
+		mes "[管理人蔡麗歐絲]";
+		mes "提高商業發展度的話 ，在工會裡生產的物品數量會增加，為了以後著想的話，不能不投資啊";
+		mes " ";
+		mes "照原先的方式，一天只能投資一次 ，假如多付一點金錢的話 ，一天可以投資兩次";
+		set @TriggerE,GetCastleData("payg_cas02.gat",4);
+		set @Economy,GetCastleData("payg_cas02.gat",2);
+		if (@Economy >= 100) goto L_M2_A;
+		if (@TriggerE > 1) goto L_M2_B;
+		if (@TriggerE == 0) goto L_M2_C;
+		goto L_M2_D;
+		L_M2_A://economyOK == 0
+			mes " ";
+			mes "^ff0000因為由於 ，秘密基地的商業發展度，已經是最高值100% 了，所以不需要投資 ，主人果真你是擁有獨具的慧眼啊^000000";
+			close;
+			end;
+		L_M2_B://economyOK == 1
+			mes " ";
+			mes "^ff0000可是你已經，在今天之內投資了兩次，再不能投資了.^000000讓發展度趕快上升，期待著富貴的日子囉";
+			close;
+			end;
+//		gold = AgitGet AGIT_E_FUND 
+		L_M2_C://economyOK == 2
+//第一次投資所需金額
+			if ((@Economy >= 0) && (@Economy <= 4)) set @gold,5000;
+			if ((@Economy >= 5) && (@Economy <= 9)) set @gold,10000;
+			if ((@Economy >= 10) && (@Economy <= 14)) set @gold,20000;
+			if ((@Economy >= 15) && (@Economy <= 19)) set @gold,35000;
+			if ((@Economy >= 20) && (@Economy <= 24)) set @gold,55000;
+			if ((@Economy >= 25) && (@Economy <= 29)) set @gold,80000;
+			if ((@Economy >= 30) && (@Economy <= 34)) set @gold,110000;
+			if ((@Economy >= 35) && (@Economy <= 39)) set @gold,145000;
+			if ((@Economy >= 40) && (@Economy <= 44)) set @gold,185000;
+			if ((@Economy >= 45) && (@Economy <= 49)) set @gold,230000;
+			if ((@Economy >= 50) && (@Economy <= 54)) set @gold,280000;
+			if ((@Economy >= 55) && (@Economy <= 59)) set @gold,335000;
+			if ((@Economy >= 60) && (@Economy <= 64)) set @gold,395000;
+			if ((@Economy >= 65) && (@Economy <= 69)) set @gold,460000;
+			if ((@Economy >= 70) && (@Economy <= 74)) set @gold,530000;
+			if ((@Economy >= 75) && (@Economy <= 79)) set @gold,605000;
+			if ((@Economy >= 80) && (@Economy <= 84)) set @gold,685000;
+			if ((@Economy >= 85) && (@Economy <= 89)) set @gold,770000;
+			if ((@Economy >= 90) && (@Economy <= 94)) set @gold,860000;
+			if ((@Economy >= 95) && (@Economy <= 99)) set @gold,995000;
+			mes " ";
+			mes "現在需要的投資金額是 ^ff0000" + @gold + "^000000 金幣 ，請問你要投資嗎?";
+			goto L_M2_Go;
+		L_M2_D://economyOK == else
+//第二次投資所需金額
+			if ((@Economy >= 0) && (@Economy <= 4)) set @gold,20000;
+			if ((@Economy >= 5) && (@Economy <= 9)) set @gold,40000;
+			if ((@Economy >= 10) && (@Economy <= 14)) set @gold,80000;
+			if ((@Economy >= 15) && (@Economy <= 19)) set @gold,140000;
+			if ((@Economy >= 20) && (@Economy <= 24)) set @gold,220000;
+			if ((@Economy >= 25) && (@Economy <= 29)) set @gold,320000;
+			if ((@Economy >= 30) && (@Economy <= 34)) set @gold,440000;
+			if ((@Economy >= 35) && (@Economy <= 39)) set @gold,580000;
+			if ((@Economy >= 40) && (@Economy <= 44)) set @gold,740000;
+			if ((@Economy >= 45) && (@Economy <= 49)) set @gold,920000;
+			if ((@Economy >= 50) && (@Economy <= 54)) set @gold,1120000;
+			if ((@Economy >= 55) && (@Economy <= 59)) set @gold,1340000;
+			if ((@Economy >= 60) && (@Economy <= 64)) set @gold,1580000;
+			if ((@Economy >= 65) && (@Economy <= 69)) set @gold,1840000;
+			if ((@Economy >= 70) && (@Economy <= 74)) set @gold,2120000;
+			if ((@Economy >= 75) && (@Economy <= 79)) set @gold,2420000;
+			if ((@Economy >= 80) && (@Economy <= 84)) set @gold,2740000;
+			if ((@Economy >= 85) && (@Economy <= 89)) set @gold,3080000;
+			if ((@Economy >= 90) && (@Economy <= 94)) set @gold,3440000;
+			if ((@Economy >= 95) && (@Economy <= 99)) set @gold,3820000;
+			mes " ";
+			mes "現在你已經投資了一次... 還要再投資嗎? 還需要追加^ff0000" + @gold + "^000000  金幣噢";
+			goto L_M2_Go;
+		L_M2_Go:
+		next;
+		menu "對商業發展度投資",L_M2_Go_M1,"取消 ",L_M2_Go_M2;
+		L_M2_Go_M1:
+			if (Zeny < @gold) goto L_M2_Go_M1_A;
+			set Zeny,Zeny-@gold;
+//			AgitFunc AF_INVEST_E 0 0
+			SetCastleData "payg_cas02.gat",4,@TriggerE+1;
+			SetCastleData "payg_cas02.gat",2,@Economy+1;
+			mes "[管理人蔡麗歐絲]";
+			mes "順利地完成投資了! 期待著我們往後要面臨的未來 ，明天的話發展度會上升 ";
+			close;
+			end;
+			L_M2_Go_M1_A:
+				mes "[管理人蔡麗歐絲]";
+				mes "主人真可惜啊 ，工會內儲蓄的錢，達不到足以投資的金額 ，所以投資失敗了";
+				close;
+				end;
+		L_M2_Go_M2:
+			mes "[管理人蔡麗歐絲]";
+			mes "我將依照你的吩咐去執行 ，是我的主人 ... 不須要太著急 ，我們會做得很好 ";
+			close;
+			end;
+// ---------投資 防禦度  ---------------------------------------------------
+	L_M3:
+		mes "[管理人蔡麗歐絲]";
+		mes "提高防禦力的話 ，監護人和華麗金屬的耐久度會增加 ，考慮到往後的戰爭 ，不得不投資啊";
+		mes " ";
+		mes "照原先的方式，一天只能投資一次 ，假如多付一點金錢的話 ，一天可以投資兩次";
+		set @TriggerD,GetCastleData("payg_cas02.gat",5);
+		set @Deffence,GetCastleData("payg_cas02.gat",3);
+		if (@Deffence >= 100) goto L_M3_A;
+		if (@TriggerD > 1) goto L_M3_B;
+		if (@TriggerD == 0) goto L_M3_C;
+		goto L_M3_D;
+		L_M3_A://if defenseOK == 0
+			mes " ";
+			mes "^ff0000因為由於 ，秘密基地的商業發展度，已經是最高值100% 了，所以不需要投資 ，主人果真你是擁有獨具的慧眼啊^000000";
+			close;
+			end;
+		L_M3_B://if defenseOK == 1
+			mes " ";
+			mes "^ff0000可是你已經，在今天之內投資了兩次，再不能投資了.^000000讓發展度趕快上升，期待著富貴的日子囉";
+			close;
+			end;
+//		gold = AgitGet AGIT_D_FUND 
+		L_M3_C://if defenseOK == 2
+//第一次投資所需金額
+			if ((@Deffence >= 0) && (@Deffence <= 4)) set @gold,10000;
+			if ((@Deffence >= 5) && (@Deffence <= 9)) set @gold,20000;
+			if ((@Deffence >= 10) && (@Deffence <= 14)) set @gold,40000;
+			if ((@Deffence >= 15) && (@Deffence <= 19)) set @gold,70000;
+			if ((@Deffence >= 20) && (@Deffence <= 24)) set @gold,110000;
+			if ((@Deffence >= 25) && (@Deffence <= 29)) set @gold,160000;
+			if ((@Deffence >= 30) && (@Deffence <= 34)) set @gold,220000;
+			if ((@Deffence >= 35) && (@Deffence <= 39)) set @gold,290000;
+			if ((@Deffence >= 40) && (@Deffence <= 44)) set @gold,370000;
+			if ((@Deffence >= 45) && (@Deffence <= 49)) set @gold,460000;
+			if ((@Deffence >= 50) && (@Deffence <= 54)) set @gold,560000;
+			if ((@Deffence >= 55) && (@Deffence <= 59)) set @gold,670000;
+			if ((@Deffence >= 60) && (@Deffence <= 64)) set @gold,790000;
+			if ((@Deffence >= 65) && (@Deffence <= 69)) set @gold,920000;
+			if ((@Deffence >= 70) && (@Deffence <= 74)) set @gold,1060000;
+			if ((@Deffence >= 75) && (@Deffence <= 79)) set @gold,1210000;
+			if ((@Deffence >= 80) && (@Deffence <= 84)) set @gold,1370000;
+			if ((@Deffence >= 85) && (@Deffence <= 89)) set @gold,1540000;
+			if ((@Deffence >= 90) && (@Deffence <= 94)) set @gold,1720000;
+			if ((@Deffence >= 95) && (@Deffence <= 99)) set @gold,1910000;
+			mes " ";
+			mes "現在需要的投資金額是 ^ff0000" + @gold + "^000000 金幣 ，請問你要投資嗎?";
+			goto L_M3_Go;
+		L_M3_D://else
+//第二次投資所需金額
+			if ((@Deffence >= 0) && (@Deffence <= 4)) set @gold,40000;
+			if ((@Deffence >= 5) && (@Deffence <= 9)) set @gold,80000;
+			if ((@Deffence >= 10) && (@Deffence <= 14)) set @gold,160000;
+			if ((@Deffence >= 15) && (@Deffence <= 19)) set @gold,280000;
+			if ((@Deffence >= 20) && (@Deffence <= 24)) set @gold,440000;
+			if ((@Deffence >= 25) && (@Deffence <= 29)) set @gold,640000;
+			if ((@Deffence >= 30) && (@Deffence <= 34)) set @gold,880000;
+			if ((@Deffence >= 35) && (@Deffence <= 39)) set @gold,1160000;
+			if ((@Deffence >= 40) && (@Deffence <= 44)) set @gold,1480000;
+			if ((@Deffence >= 45) && (@Deffence <= 49)) set @gold,1840000;
+			if ((@Deffence >= 50) && (@Deffence <= 54)) set @gold,2240000;
+			if ((@Deffence >= 55) && (@Deffence <= 59)) set @gold,2680000;
+			if ((@Deffence >= 60) && (@Deffence <= 64)) set @gold,3160000;
+			if ((@Deffence >= 65) && (@Deffence <= 69)) set @gold,3680000;
+			if ((@Deffence >= 70) && (@Deffence <= 74)) set @gold,4240000;
+			if ((@Deffence >= 75) && (@Deffence <= 79)) set @gold,4840000;
+			if ((@Deffence >= 80) && (@Deffence <= 84)) set @gold,5480000;
+			if ((@Deffence >= 85) && (@Deffence <= 89)) set @gold,6160000;
+			if ((@Deffence >= 90) && (@Deffence <= 94)) set @gold,6880000;
+			if ((@Deffence >= 95) && (@Deffence <= 99)) set @gold,7640000;
+			mes " ";
+			mes "現在你已經投資了一次... 還要再投資嗎? 還需要追加^ff0000" + @gold + "^000000  金幣噢";
+			goto L_M3_Go;
+		L_M3_Go:
+		next;
+		menu "對防禦度 投資",L_M3_Go_M1,"取消",L_M3_Go_M2;
+		L_M3_Go_M1:
+			if (Zeny < @gold) goto L_M3_Go_M1_A;
+			set Zeny,Zeny-@gold;
+//			AgitFunc AF_INVEST_D 0 0                  
+			SetCastleData "payg_cas02.gat",5,@TriggerD+1;
+			SetCastleData "payg_cas02.gat",3,@Deffence+1;
+			mes "[管理人蔡麗歐絲]";
+			mes "順利地完成投資了! 期待著我們往後要面臨的未來 ，明天的話防禦度會上升 ";
+			close;
+			end;
+			L_M3_Go_M1_A:
+				mes "[管理人蔡麗歐絲]";
+				mes "主人真可惜啊 ，工會內儲蓄的錢，達不到足以投資的金額 ，所以投資失敗了";
+				close;
+				end;
+		L_M3_Go_M2:
+			mes "[管理人蔡麗歐絲]";
+			mes "我將依照你的吩咐去執行 ，是我的主人 ... 不須要太著急 ，我們會做得很好 ";
+			close;
+			end;
+// ---------設置 監護人---------------------------------------------------
+	L_M4:
+		mes "[管理人蔡麗歐絲]";
+		mes "請問你要設置監護人嗎? 監護人即將成為，我們秘密基地的忠誠守護者 ";
+		mes " 請選擇要設置的監護人";
+		next;
+//		if (GetCastleData("payg_cas02.gat",3) >= 1200) menu "衛兵 1",L_M4_M1,"衛兵 2",L_M4_M2,"弓箭手 1",L_M4_M3,"弓箭手 2",L_M4_M4,"弓箭手 3",L_M4_M5,"騎士 1",L_M4_M6,"騎士 2",L_M4_M7,"騎士 3",L_M4_M8;
+//		if (GetCastleData("payg_cas02.gat",3) >= 600) menu "衛兵 1",L_M4_M1,"衛兵 2",L_M4_M2,"弓箭手 1",L_M4_M3,"弓箭手 2",L_M4_M4,"弓箭手 3",L_M4_M5;
+//		menu "衛兵 1",L_M4_M1,"衛兵 2",L_M4_M2;
+		set @GD1$,"外城 弓箭手 監護人";
+		set @GD2$,"外城 弓箭手 監護人";
+		set @GD3$,"外城 弓箭手 監護人";
+		set @GD4$,"內城 弓箭手 監護人";
+		set @GD5$,"內城 弓箭手 監護人";
+		set @GD6$,"內城 弓箭手 監護人";
+		set @GD7$,"內城 弓箭手 監護人";
+		set @GD8$,"首領 監護人";
+		if (GetCastleData("payg_cas02.gat",10) > 0) set @GD1$,@GD1$+" - 已設置 (237 , 54)";
+		if (GetCastleData("payg_cas02.gat",10) == 0) set @GD1$,@GD1$+" - 沒設置";
+		if (GetCastleData("payg_cas02.gat",11) > 0) set @GD2$,@GD2$+" - 已設置 (228 , 72)";
+		if (GetCastleData("payg_cas02.gat",11) == 0) set @GD2$,@GD2$+" - 沒設置";
+		if (GetCastleData("payg_cas02.gat",12) > 0) set @GD3$,@GD3$+" - 已設置 (210 , 41)";
+		if (GetCastleData("payg_cas02.gat",12) == 0) set @GD3$,@GD3$+" - 沒設置";
+		if (GetCastleData("payg_cas02.gat",13) > 0) set @GD4$,@GD4$+" - 已設置 (57 , 241)";
+		if (GetCastleData("payg_cas02.gat",13) == 0) set @GD4$,@GD4$+" - 沒設置";
+		if (GetCastleData("payg_cas02.gat",14) > 0) set @GD5$,@GD5$+" - 已設置 (42 , 241)";
+		if (GetCastleData("payg_cas02.gat",14) == 0) set @GD5$,@GD5$+" - 沒設置";
+		if (GetCastleData("payg_cas02.gat",15) > 0) set @GD6$,@GD6$+" - 已設置 (287 , 257)";
+		if (GetCastleData("payg_cas02.gat",15) == 0) set @GD6$,@GD6$+" - 沒設置";
+		if (GetCastleData("payg_cas02.gat",16) > 0) set @GD7$,@GD7$+" - 已設置 (264 , 272)";
+		if (GetCastleData("payg_cas02.gat",16) == 0) set @GD7$,@GD7$+" - 沒設置";
+		if (GetCastleData("payg_cas02.gat",17) > 0) set @GD8$,@GD8$+" - 已設置 (27 , 20)";
+		if (GetCastleData("payg_cas02.gat",17) == 0) set @GD8$,@GD8$+" - 沒設置";
+		menu @GD1$,L_M4_M1,@GD2$,L_M4_M2,@GD3$,L_M4_M3,@GD4$,L_M4_M4,@GD5$,L_M4_M5,@GD6$,L_M4_M6,@GD7$,L_M4_M7,@GD8$,L_M4_M8;
+		L_M4_M1:
+			set @GDnum,10;
+			goto L_M4_MC;
+		L_M4_M2:
+			set @GDnum,11;
+			goto L_M4_MC;
+		L_M4_M3:
+			set @GDnum,12;
+			goto L_M4_MC;
+		L_M4_M4:
+			set @GDnum,13;
+			goto L_M4_MC;
+		L_M4_M5:
+			set @GDnum,14;
+			goto L_M4_MC;
+		L_M4_M6:
+			set @GDnum,15;
+			goto L_M4_MC;
+		L_M4_M7:
+			set @GDnum,16;
+			goto L_M4_MC;
+		L_M4_M8:
+			set @GDnum,17;
+			goto L_M4_MC;
+		L_M4_MC:
+		mes "[管理人蔡麗歐絲]";
+		mes "確定要設置已選擇的監護人嗎? 設置時需要 10000 金幣.";
+		next;
+		menu "要設置 ",L_M4_MC_M1,"取消 ",L_M4_MC_M2;
+		L_M4_MC_M1:
+//			npcStatus = AgitNpcGet no AN_VISIBLE
+//			skLevel = AgitGet AGIT_GUARDIAN_SKILL
+//------工會技能 ，有沒有製作 ，監護人的研究呢?-----------------
+			set @Guardian_Skill,getgdskilllv(@GIDf2,3);
+			if (@Guardian_Skill == 0) goto L_M4_MC_M1_A;
+			if (GetCastleData("payg_cas02.gat",@GDnum) != 0) goto L_M4_MC_M1_B;
+			if (Zeny < 10000) goto L_M4_MC_M1_C;
+			set Zeny,Zeny-10000;
+//			AgitNpcSet no AN_VISIBLE 1
+			setcastledata "payg_cas02.gat",@GDnum,1;
+			mes "[管理人蔡麗歐絲]";
+			mes "完成設置監護人了 ，現在開始已經有了，保護我們秘密基地的強壯我軍了";
+			close;
+			end;
+			L_M4_MC_M1_A:
+				mes "[管理人蔡麗歐絲]";
+				mes "主人 ，有關設置監護人的研究知識 ，我們全然不知唷 ，想要累積設置監護人知識的話 ，必須要學習工會技能中的^ff0000監護人製作研究^000000. 要不然就是 ，監護人設置失敗";
+				close;
+				end;
+			L_M4_MC_M1_B:
+				mes "[管理人蔡麗歐絲]";
+				mes "主人... 那監護人已經是主人設置的監護人了，不能再設置了";
+				close;
+				end;
+			L_M4_MC_M1_C:
+				mes "[管理人蔡麗歐絲]";
+				mes "設置監護人的資金不足啊 ，很抱歉... 設置監護人失敗了";
+				close;
+				end;
+		L_M4_MC_M2:
+			mes "[管理人蔡麗歐絲]";
+			mes "我已經按照你的吩咐做了 ，假如有點資金上寬裕的話，一定要設置監護人，是較好的方案";
+			close;
+			end;
+//倉庫職員  雇用 / 解雇
+	L_M5:
+//		npcStatus = AgitNpcGet AGIT_NPC_CONTAINER AN_VISIBLE 
+		if (GetCastleData("payg_cas02.gat",9) == 1) goto L_M5_A;
+		goto L_M5_B;
+		L_M5_A://if npcStatus == 1
+			mes "[管理人蔡麗歐絲]";
+			mes "現在已經是 ，雇用卡普拉職員的狀態囉... 你要解雇卡普拉職員嗎 ?";
+			next;
+			menu "要解雇 ",L_M5_A_M1,"取消 ",L_M5_A_M2;
+			L_M5_A_M1:
+				cutin "kafra_01.bmp",2;
+				mes "[ 雇用的 卡普拉職員 ]";
+				mes "過去我那麼用心的工作了... 你真的要把我解雇嗎?... 請主人發揮最大的雅量再給一次機會...請你再考慮一次好嗎 ...";
+				next;
+				menu "要解雇 ",L_M5_A_M1_M1,"取消 ",L_M5_A_M1_M2;
+				L_M5_A_M1_M1:
+					mes "[ 雇用的  卡普拉職員 ]";
+					mes "嗚哇啊! 太過份了! 怎麼可以這樣啊 ~";
+					next;
+					cutin "kafra_01.bmp",255;
+//					AgitNpcSet AGIT_NPC_CONTAINER AN_VISIBLE 0
+					disablenpc "卡普拉 職員#pay2";
+					setcastledata "payg_cas02.gat",9,0;
+					mes "[管理人蔡麗歐絲]";
+					mes "....";
+					mes "已經把卡普拉職員解雇了... 不過 ，還有什麼地方不滿意嗎?";
+					close;
+					end;
+				L_M5_A_M1_M2:
+					mes "[ 雇用的  卡普拉職員 ]";
+					mes "我會努力的... 謝謝 ";
+					close;
+					end;
+			L_M5_A_M2:
+				mes "[管理人蔡麗歐絲]";
+				mes "依我看，卡普拉職員非常努力的工作 ，為了其它會員們著想，就繼續留著她吧";
+				close;
+				end;
+		L_M5_B://else(雇用)
+			mes "[管理人蔡麗歐絲]";
+			mes "和卡普拉總公司訂契約後 ，想要在秘密基地裡面 ，雇用卡普拉職員嗎 ?";
+			mes "^ff0000 想要雇用的話，需要 10000金幣... ";
+			next;
+			menu "要雇用 ",L_M5_B_M1,"取消 ",L_M5_B_M2;
+			L_M5_B_M1:
+//				skLevel = AgitGet AGIT_KAFRA_SKILL
+// -----工會技能 ，有和卡普拉訂契約的技能嗎? --------------------
+				set @Kafra_Skill,getgdskilllv(@GIDf2,2);
+				if (@Kafra_Skill == 0) goto L_M5_B_M1_A;
+				if (Zeny < 10000) goto L_M5_B_M1_B;
+				set Zeny,Zeny-10000;
+//				AgitNpcSet AGIT_NPC_CONTAINER AN_VISIBLE 1
+//				AgitFunc AF_SET_PAY_TIME 0 0
+				enablenpc "卡普拉 職員#pay2";
+				setcastledata "payg_cas02.gat",9,1;
+				mes "[管理人蔡麗歐絲]";
+				mes "成功的和卡普拉總公司訂契約了，你已經雇用卡普拉職員了";
+				next;
+				cutin "kafra_01.bmp",2;
+				mes "[ 雇用的 卡普拉職員 ]";
+				mes "您好 ，我是總公司派來的卡普拉職員";
+				mes "我不會讓工會的名譽沾上污點 ，所以我會努力的工作";
+				next;
+				cutin "kafra_01.bmp",255;
+				mes "[管理人蔡麗歐絲]";
+				mes "雇用的卡普拉職員 ，有一個月的契約期間 ，過了一個月後，在續繳金額";
+				mes "現在開始，會員們的辛勞會慢慢的減輕了 ";
+				close;
+				end;
+				L_M5_B_M1_A:
+					mes "[管理人蔡麗歐絲]";
+					mes "主人 ，如今還沒跟卡普拉總公司訂契約的狀況，所以還不能雇用卡普拉職員 ，假如想要跟卡普拉總公司簽訂契約的話 ，先學會工會技能中 ^ff0000和卡普拉訂契約^000000 的技能吧";
+					close;
+					end;
+				L_M5_B_M1_B://if v[VAR_MONEY] <  10000
+					mes "[管理人蔡麗歐絲]";
+					mes "很抱歉... 現在工會裡的儲蓄 ，不夠所需的金額，所以雇用卡普拉職員失敗 .";
+					close;
+					end;
+			L_M5_B_M2:
+				mes "[管理人蔡麗歐絲]";
+				mes "我已經按照你的吩咐做了 ，不過也要為了辛苦的會員著想，早日雇用卡普拉職員為上策啊";
+				close;
+				end;
+	L_M6:
+		mes "[管理人蔡麗歐絲]";
+		mes "要到我們生產品囤積的，真貴物品房間嗎?";
+		mes "那個地方是為了我們的主人，的專屬於你的地方... 除了你之外，其它人都不能其門而入";
+		next;
+		menu "要進入主人的房間",L_M6_M1,"取消",L_M6_M2;
+		L_M6_M1:
+			mes "[管理人蔡麗歐絲]";
+			mes "我將為你服務到祕密通道那裡，請跟我來 ";
+			mes "回來的時候，按下秘密按鈕即可 ";
+			next;
+			warp "payg_cas02.gat",141,149;
+			end;
+		L_M6_M2:
+			mes "[管理人蔡麗歐絲]";
+			mes "生產品一天只生產一次 . . .   假如沒有即時收走的話，下一次就不能進來了";
+			mes "所以說為了我們工會的發展，盡量花點時間去收取啊";
+			close;
+			end;
+// 讓出秘密基地
+//~	L_M7:
+//~	mes "[管理人蔡麗歐絲]";
+//~	mes "主人!!";
+//~	mes "你說真的要放棄，讓我們用鮮血換來的秘密基地嗎?!";
+//~	mes "假如真的要結束的話，在這些日子以來，我們所流的血，到底有什麼意義呢!";
+//~	mes "請再做考慮考慮吧! 主人!!";
+//~	next;
+//~	menu "讓出秘密基地",L_M7_M1,"取消",L_M7_M2;
+//~	L_M7_M1:
+//~		mes "[管理人蔡麗歐絲]";
+//~		mes "主人!!請三思而後行啊 ，主人!!";
+//~		mes "這期間所流的血!! 想到那些犧牲你不能這樣做啊!!";
+//~		next;
+//~		menu "取消",L_M7_M1_M1,"讓出秘密基地",L_M7_M2_M2;
+//~		L_M7_M1_M1:
+//~			mes "[管理人蔡麗歐絲]";
+//~			mes "我就知道你會這樣做的 ，主人!!";
+//~			mes "拜託你了  ，即時是開玩笑，請你下一次不要講這種話";
+//~			close;
+//~			end;
+//~		L_M7_M1_M2:
+//~			mes "[管理人蔡麗歐絲]";
+//~			mes "主人!!.....";
+//~			mes "......主 .....主人 ......";
+//~//			AgitSet AGIT_GUILD 0 
+//~			close;
+//~			setcastledata "payg_cas02.gat",1,0;
+//~			setcastledata "payg_cas02.gat",2,0;
+//~			setcastledata "payg_cas02.gat",3,0;
+//~			setcastledata "payg_cas02.gat",4,0;
+//~			setcastledata "payg_cas02.gat",5,0;
+//~			setcastledata "payg_cas02.gat",6,0;
+//~			setcastledata "payg_cas02.gat",7,0;
+//~			setcastledata "payg_cas02.gat",8,0;
+//~			setcastledata "payg_cas02.gat",9,0;
+//~			setcastledata "payg_cas02.gat",10,0;
+//~			setcastledata "payg_cas02.gat",11,0;
+//~			setcastledata "payg_cas02.gat",12,0;
+//~			setcastledata "payg_cas02.gat",13,0;
+//~			setcastledata "payg_cas02.gat",14,0;
+//~			setcastledata "payg_cas02.gat",15,0;
+//~			setcastledata "payg_cas02.gat",16,0;
+//~			setcastledata "payg_cas02.gat",17,0;
+//~			Announce "秘密基地[" + GetCastleName("payg_cas02.gat") + "]被[" + GetGuildName(@GIDf2) + "]工會出讓了",0;
+//~			MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),7;
+//~			end;
+//~	L_M7_M2:
+//~		mes "[管理人蔡麗歐絲]";
+//~		mes "我就知道你會這樣做的 ，主人!!";
+//~		mes "拜託你了  ，即時是開玩笑，請你下一次不要講這種話";
+//~		close;
+//~		end;
+
+OnClock0000://重新致能每天能投資2點數值
+	SetCastleData "payg_cas02.gat",4,0;
+	SetCastleData "payg_cas02.gat",5,0;
+	end;
+
+OnAgitStart:
+	disablenpc "卡普拉 職員#pay2";
+	End;
+OnRecvCastleF02:
+	if ($@vMap_AgitFlag_F02 >= 1) end;
+OnAgitEnd:
+	if (getcastledata("payg_cas02.gat",9) != 0) enablenpc "卡普拉 職員#pay2";
+	End;
+}
+
+payg_cas02.gat,1,1,1	script	GDpay02	-1,{
+OnAgitStart:
+//OnRecvCastleF02:
+// 當工會裡空無人時，可以召喚魔物以測點名.
+	if (GetCastleData("payg_cas02.gat",1) == 0) goto L_Mob;
+	if (GetCastleData("payg_cas02.gat",1) != 0) goto L_Guardian;
+	end;
+
+L_Mob:
+	monster "payg_cas02.gat",0,0,"將軍魔碑",1117,9;
+	monster "payg_cas02.gat",0,0,"邪骸浪人",1208,10;
+	monster "payg_cas02.gat",0,0,"半龍人",1262,5;
+	monster "payg_cas02.gat",0,0,"巫婆",1102,5;
+	monster "payg_cas02.gat",0,0,"月夜貓",1150,1;
+	monster "payg_cas02.gat",0,0,"虎王",1115,1;
+	monster "payg_cas02.gat",0,0,"鬼火",1129,11;
+	monster "payg_cas02.gat",0,0,"幽靈弓箭手",1276,5;
+	monster "payg_cas02.gat",0,0,"犬妖弓箭手",1282,4;
+	monster "payg_cas02.gat",0,0,"蝙蝠弓箭手",1253,5;
+	monster "payg_cas02.gat",38,25,"月夜貓",1150,1;
+	monster "payg_cas02.gat",38,25,"虎王",1115,1;
+	monster "payg_cas02.gat",38,25,"邪骸浪人",1208,6;
+	monster "payg_cas02.gat",38,25,"幽靈弓箭手",1176,5;
+	end;
+
+L_Guardian:
+	if (GetCastleData("payg_cas02.gat",10) != 0) monster "payg_cas02.gat",237,54,"外城 弓箭手 監護人",1285,1,"GDpay02::OnGD1Dead";
+	if (GetCastleData("payg_cas02.gat",11) != 0) monster "payg_cas02.gat",228,72,"外城 弓箭手 監護人",1285,1,"GDpay02::OnGD2Dead";
+	if (GetCastleData("payg_cas02.gat",12) != 0) monster "payg_cas02.gat",210,41,"外城 弓箭手 監護人",1285,1,"GDpay02::OnGD3Dead";
+	if (GetCastleData("payg_cas02.gat",13) != 0) monster "payg_cas02.gat",57,241,"內城 弓箭手 監護人",1285,1,"GDpay02::OnGD4Dead";
+	if (GetCastleData("payg_cas02.gat",14) != 0) monster "payg_cas02.gat",42,241,"內城 弓箭手 監護人",1285,1,"GDpay02::OnGD5Dead";
+	if (GetCastleData("payg_cas02.gat",15) != 0) monster "payg_cas02.gat",287,257,"內城 弓箭手 監護人",1285,1,"GDpay02::OnGD6Dead";
+	if (GetCastleData("payg_cas02.gat",16) != 0) monster "payg_cas02.gat",264,272,"內城 弓箭手 監護人",1285,1,"GDpay02::OnGD7Dead";
+	if (GetCastleData("payg_cas02.gat",17) != 0) monster "payg_cas02.gat",27,20,"首領 監護人",1286,1,"GDpay02::OnGD8Dead";
+	end;
+
+OnGD1Dead:
+	setcastledata "payg_cas02.gat",10,0;
+//	MapAnnounce "payg_cas02.gat","工會守護者『戰士』01 被破壞了",17;
+//	set @Deffence,GetCastleData("payg_cas02.gat",3);
+//	if (@Deffence < 100) End;
+//	set @Deffence,@Deffence-100;
+//	SetCastleData "payg_cas02.gat",3,@Deffence;
+	end;
+
+OnGD2Dead:
+	SetCastleData "payg_cas02.gat",11,0;
+//	MapAnnounce "payg_cas02.gat","工會守護者『戰士』02 被破壞了, 防禦度下降",17;
+	end;
+
+OnGD3Dead:
+	SetCastleData "payg_cas02.gat",12,0;
+//	MapAnnounce "payg_cas02.gat","工會守護者『弓箭手』01 被破壞了, 防禦度下降",17;
+	end;
+
+OnGD4Dead:
+	SetCastleData "payg_cas02.gat",13,0;
+//	MapAnnounce "payg_cas02.gat","工會守護者『弓箭手』02 被破壞了, 防禦度下降",17;
+	end;
+
+OnGD5Dead:
+	SetCastleData "payg_cas02.gat",14,0;
+//	MapAnnounce "payg_cas02.gat","工會守護者『弓箭手』03 被破壞了, 防禦度下降",17;
+	end;
+
+OnGD6Dead:
+	SetCastleData "payg_cas02.gat",15,0;
+//	MapAnnounce "payg_cas02.gat","工會守護者『騎士』01 被破壞了, 防禦度下降",17;
+	end;
+
+OnGD7Dead:
+	SetCastleData "payg_cas02.gat",16,0;
+//	MapAnnounce "payg_cas02.gat","工會守護者『騎士』02 被破壞了, 防禦度下降",17;
+	end;
+
+OnGD8Dead:
+	SetCastleData "payg_cas02.gat",17,0;
+//	MapAnnounce "payg_cas02.gat","工會守護者『騎士』03 被破壞了, 防禦度下降",17;
+	end;
+
+OnAgitEnd:
+	KillMonster "payg_cas02.gat","GDpay02::OnGD1Dead";
+	KillMonster "payg_cas02.gat","GDpay02::OnGD2Dead";
+	KillMonster "payg_cas02.gat","GDpay02::OnGD3Dead";
+	KillMonster "payg_cas02.gat","GDpay02::OnGD4Dead";
+	KillMonster "payg_cas02.gat","GDpay02::OnGD5Dead";
+	KillMonster "payg_cas02.gat","GDpay02::OnGD6Dead";
+	KillMonster "payg_cas02.gat","GDpay02::OnGD7Dead";
+	KillMonster "payg_cas02.gat","GDpay02::OnGD8Dead";
+	end;
+}
+
+payg_cas02.gat,141,149,0	script	主人房的寶箱#pay2	-1,{
+OnClock0010:
+	killmonster "payg_cas02.gat","T_Box_F02";
+	end;
+OnClock0030:
+	if (GetCastleData("payg_cas02.gat",1) == 0) end;
+	set $@vMap_Economy_F02,GetCastleData("payg_cas02.gat",2);
+	//Basic T_Box
+	monster "payg_cas02.gat",143,146,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	monster "payg_cas02.gat",146,146,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	monster "payg_cas02.gat",146,143,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	monster "payg_cas02.gat",143,143,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	//Economy T_Box
+	if ($@vMap_Economy_F02 >=  5) monster "payg_cas02.gat",142,147,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 10) monster "payg_cas02.gat",143,147,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 15) monster "payg_cas02.gat",144,147,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 20) monster "payg_cas02.gat",145,147,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 25) monster "payg_cas02.gat",146,147,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 30) monster "payg_cas02.gat",147,147,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 35) monster "payg_cas02.gat",147,146,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 40) monster "payg_cas02.gat",147,145,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 45) monster "payg_cas02.gat",147,144,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 50) monster "payg_cas02.gat",147,143,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 55) monster "payg_cas02.gat",147,142,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 60) monster "payg_cas02.gat",146,142,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 65) monster "payg_cas02.gat",145,142,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 70) monster "payg_cas02.gat",144,142,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 75) monster "payg_cas02.gat",143,142,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 80) monster "payg_cas02.gat",142,142,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 85) monster "payg_cas02.gat",142,143,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 90) monster "payg_cas02.gat",142,144,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >= 95) monster "payg_cas02.gat",142,145,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	if ($@vMap_Economy_F02 >  99) monster "payg_cas02.gat",142,146,"寶箱",rand(1346,1347),1,"T_Box_F02";
+	end;
+
+}

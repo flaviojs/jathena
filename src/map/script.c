@@ -287,8 +287,7 @@ struct {
 	{buildin_bonus3,"bonus3","iiii"},
 	{buildin_skill,"skill","ii*"},
 	{buildin_getskilllv,"getskilllv","i"},
-//	{buildin_getgdskilllv,"getgdskilllv","ii"},
-	{buildin_getgdskilllv,"getgdskilllv","i"},  // add
+	{buildin_getgdskilllv,"getgdskilllv","ii"},
 	{buildin_basicskillcheck,"basicskillcheck","*"},
 	{buildin_getgmlevel,"getgmlevel","*"},
 	{buildin_end,"end",""},
@@ -2834,13 +2833,12 @@ int buildin_getskilllv(struct script_state *st)
  */                                                
 int buildin_getgdskilllv(struct script_state *st)  
 {                                                  
-/*      int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
-        int skill_id=conv_num(st,& (st->stack->stack_data[st->start+3]));
-        struct guild *g=guild_search(guild_id);
-        if (g == NULL) push_val(st->stack,C_INT, 0);
-        if (g != NULL) push_val(st->stack,C_INT, guild_checkskill(g,skill_id+9999) );
-        return 0; 
-*/
+	int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	int skill_id=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	struct guild *g=guild_search(guild_id);
+	push_val(st->stack,C_INT, (g==NULL)?-1:guild_checkskill(g,skill_id+9999) );
+	return 0; 
+/*
 	struct map_session_data *sd=NULL;
 	struct guild *g=NULL;
 	int skill_id;
@@ -2854,6 +2852,7 @@ int buildin_getgdskilllv(struct script_state *st)
 		push_val(st->stack,C_INT,-1);
 	}
 	return 0;
+*/
 }
 /*==========================================
  *

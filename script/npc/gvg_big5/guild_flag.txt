@@ -1,0 +1,1226 @@
+//工會旗幟(傳送)	下午 04:15 2003/6/25
+
+//npc "prontera" "旗幟" GUILD_FLAG 155 190 4 5 5
+prontera.gat,155,190,4	script	克林希特#prtm1	722,{
+//	set @GIDp1,GetCastleData("prtg_cas01.gat",1);
+//	if (@GIDp1 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDp1) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDp1) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDp1) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDp1) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "prtg_cas01.gat",96,173;
+	end;
+
+OnRecvCastleP01:
+	FlagEmblem GetCastleData("prtg_cas01.gat",1);
+	end;
+}
+
+
+//npc "prontera" "旗幟" GUILD_FLAG 146 194 3 5 5
+prontera.gat,146,194,3	script	斯般希特#prtm2	722,{
+//	set @GIDp2,GetCastleData("prtg_cas02.gat",1);
+//	if (@GIDp2 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDp2) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDp2) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDp2) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDp2) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "prtg_cas02.gat",71,36;
+	end;
+
+OnRecvCastleP02:
+	FlagEmblem GetCastleData("prtg_cas02.gat",1);
+	end;
+}
+
+
+//npc "prontera" "旗幟" GUILD_FLAG 143 203 2 5 5
+prontera.gat,143,203,2	script	拉茲立克斯#prtm3	722,{
+//	set @GIDp3,GetCastleData("prtg_cas03.gat",1);
+//	if (@GIDp3 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDp3) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDp3) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDp3) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDp3) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "prtg_cas03.gat",181,215;
+	end;
+
+OnRecvCastleP03:
+	FlagEmblem GetCastleData("prtg_cas03.gat",1);
+	end;
+}
+
+
+//npc "prontera" "旗幟" GUILD_FLAG 167 203 6 5 5
+prontera.gat,167,203,6	script	司葵古#prtm4	722,{
+//	set @GIDp4,GetCastleData("prtg_cas04.gat",1);
+//	if (@GIDp4 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDp4) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDp4) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDp4) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDp4) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "prtg_cas04.gat",258,247;
+	end;
+
+OnRecvCastleP04:
+	FlagEmblem GetCastleData("prtg_cas04.gat",1);
+	end;
+}
+
+
+//npc "prontera" "旗幟" GUILD_FLAG 165 194 5 5 5
+prontera.gat,165,194,5	script	關德#prtm5	722,{
+//	set @GIDp5,GetCastleData("prtg_cas05.gat",1);
+//	if (@GIDp5 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDp5) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDp5) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDp5) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDp5) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "prtg_cas05.gat",52,41;
+	end;
+
+OnRecvCastleP05:
+	FlagEmblem GetCastleData("prtg_cas05.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 79 31 4 5 5
+payon.gat,79,31,4	script	明亭#paym1a	722,{
+//	set @GIDf1,GetCastleData("payg_cas01.gat",1);
+//	if (@GIDf1 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf1) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf1) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf1) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf1) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas01.gat",212,108;
+	end;
+
+OnRecvCastleF01:
+	FlagEmblem GetCastleData("payg_cas01.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 79 35 4 5 5
+payon.gat,79,35,4	script	紅樓#paym2a	722,{
+//	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+//	if (@GIDf2 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf2) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas02.gat",22,275;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 79 39 4 5 5
+payon.gat,79,39,4	script	竹林岐#paym3a	722,{
+//	set @GIDf3,GetCastleData("payg_cas03.gat",1);
+//	if (@GIDf3 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf3) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf3) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf3) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf3) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas03.gat",9,263;
+	end;
+
+OnRecvCastleF03:
+	FlagEmblem GetCastleData("payg_cas03.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 79 43 4 5 5
+payon.gat,79,43,4	script	天壇#paym4a	722,{
+//	set @GIDf4,GetCastleData("payg_cas04.gat",1);
+//	if (@GIDf4 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf4) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf4) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf4) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf4) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas04.gat",40,235;
+	end;
+
+OnRecvCastleF04:
+	FlagEmblem GetCastleData("payg_cas04.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 79 47 4 5 5
+payon.gat,79,47,4	script	佛影#paym5a	722,{
+//	set @GIDf5,GetCastleData("payg_cas05.gat",1);
+//	if (@GIDf5 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf5) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf5) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf5) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf5) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas05.gat",276,227;
+	end;
+
+OnRecvCastleF05:
+	FlagEmblem GetCastleData("payg_cas05.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 89 155 4 5 5
+payon.gat,89,155,4	script	明亭#paym1b	722,{
+//	set @GIDf1,GetCastleData("payg_cas01.gat",1);
+//	if (@GIDf1 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf1) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf1) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf1) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf1) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas01.gat",212,108;
+	end;
+
+OnRecvCastleF01:
+	FlagEmblem GetCastleData("payg_cas01.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 82 155 4 5 5
+payon.gat,82,155,4	script	紅樓#paym2b	722,{
+//	set @GIDf2,GetCastleData("payg_cas02.gat",1);
+//	if (@GIDf2 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf2) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf2) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf2) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf2) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas02.gat",22,275;
+	end;
+
+OnRecvCastleF02:
+	FlagEmblem GetCastleData("payg_cas02.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 97 155 4 5 5
+payon.gat,97,155,4	script	竹林岐#paym3b	722,{
+//	set @GIDf3,GetCastleData("payg_cas03.gat",1);
+//	if (@GIDf3 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf3) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf3) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf3) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf3) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas03.gat",9,263;
+	end;
+
+OnRecvCastleF03:
+	FlagEmblem GetCastleData("payg_cas03.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 103 155 4 5 5
+payon.gat,103,155,4	script	天壇#paym4b	722,{
+//	set @GIDf4,GetCastleData("payg_cas04.gat",1);
+//	if (@GIDf4 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf4) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf4) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf4) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf4) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas04.gat",40,235;
+	end;
+
+OnRecvCastleF04:
+	FlagEmblem GetCastleData("payg_cas04.gat",1);
+	end;
+}
+
+
+//npc "payon" "旗幟" GUILD_FLAG 75 155 4 5 5
+payon.gat,75,155,4	script	佛影#paym5b	722,{
+//	set @GIDf5,GetCastleData("payg_cas05.gat",1);
+//	if (@GIDf5 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDf5) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDf5) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDf5) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDf5) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "payg_cas05.gat",276,227;
+	end;
+
+OnRecvCastleF05:
+	FlagEmblem GetCastleData("payg_cas05.gat",1);
+	end;
+}
+
+
+//npc "aldebaran" "旗幟" GUILD_FLAG 152 97 4 5 5
+aldebaran.gat,152,97,4	script	娜易修番斯塔引#aldm1	722,{
+//	set @GIDa1,GetCastleData("aldeg_cas01.gat",1);
+//	if (@GIDa1 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDa1) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDa1) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDa1) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDa1) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "aldeg_cas01.gat",218,170;
+	end;
+
+OnRecvCastleA01:
+	FlagEmblem GetCastleData("aldeg_cas01.gat",1);
+	end;
+}
+
+
+//npc "aldebaran" "旗幟" GUILD_FLAG 149 97 4 5 5
+aldebaran.gat,149,97,4	script	乎汗修番佳烏#aldm2	722,{
+//	set @GIDa2,GetCastleData("aldeg_cas02.gat",1);
+//	if (@GIDa2 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDa2) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDa2) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDa2) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDa2) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "aldeg_cas02.gat",84,74;
+	end;
+
+OnRecvCastleA02:
+	FlagEmblem GetCastleData("aldeg_cas02.gat",1);
+	end;
+}
+
+
+//npc "aldebaran" "旗幟" GUILD_FLAG 134 97 4 5 5
+aldebaran.gat,134,97,4	script	紐藍貝勒克#aldm3	722,{
+//	set @GIDa3,GetCastleData("aldeg_cas03.gat",1);
+//	if (@GIDa3 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDa3) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDa3) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDa3) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDa3) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "aldeg_cas03.gat",118,76;
+	end;
+
+OnRecvCastleA03:
+	FlagEmblem GetCastleData("aldeg_cas03.gat",1);
+	end;
+}
+
+
+//npc "aldebaran" "旗幟" GUILD_FLAG 131 97 4 5 5
+aldebaran.gat,131,97,4	script	布勒刺布勒克#aldm4	722,{
+//	set @GIDa4,GetCastleData("aldeg_cas04.gat",1);
+//	if (@GIDa4 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDa4) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDa4) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDa4) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDa4) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "aldeg_cas04.gat",45,88;
+	end;
+
+OnRecvCastleA04:
+	FlagEmblem GetCastleData("aldeg_cas04.gat",1);
+	end;
+}
+
+
+//npc "aldebaran" "旗幟" GUILD_FLAG 128 97 4 5 5
+aldebaran.gat,128,97,4	script	羅探布勒克#aldm5	722,{
+//	set @GIDa5,GetCastleData("aldeg_cas05.gat",1);
+//	if (@GIDa5 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDa5) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDa5) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDa5) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDa5) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "aldeg_cas05.gat",31,190;
+	end;
+
+OnRecvCastleA05:
+	FlagEmblem GetCastleData("aldeg_cas05.gat",1);
+	end;
+}
+
+
+//npc "geffen" "旗幟" GUILD_FLAG 109 123 2 5 5
+geffen.gat,109,123,2	script	易司那普#gefm1	722,{
+//	set @GIDg1,getcastledata("gefg_cas01.gat",1);
+//	if (@GIDg1 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDg1) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDg1) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDg1) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDg1) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "gefg_cas01.gat",83,47;
+	end;
+
+OnRecvCastleG01:
+	FlagEmblem GetCastleData("gefg_cas01.gat",1);
+	end;
+}
+
+
+//npc "geffen" "旗幟" GUILD_FLAG 112 129 1 5 5
+geffen.gat,112,129,1	script	培勒格#gefm2	722,{
+//	set @GIDg2,getcastledata("gefg_cas02.gat",1);
+//	if (@GIDg2 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDg2) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDg2) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDg2) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDg2) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "gefg_cas02.gat",23,66;
+	end;
+
+OnRecvCastleG02:
+	FlagEmblem GetCastleData("gefg_cas02.gat",1);
+	end;
+}
+
+
+//npc "geffen" "旗幟" GUILD_FLAG 120 132 8 5 5
+geffen.gat,120,132,8	script	雷普立溫#gefm3	722,{
+//	set @GIDg3,getcastledata("gefg_cas03.gat",1);
+//	if (@GIDg3 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDg3) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDg3) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDg3) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDg3) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "gefg_cas03.gat",116,89;
+	end;
+
+OnRecvCastleG03:
+	FlagEmblem GetCastleData("gefg_cas03.gat",1);
+	end;
+}
+
+
+//npc "geffen" "旗幟" GUILD_FLAG 127 130 7 5 5
+geffen.gat,127,130,7	script	耀布立格#gefm4	722,{
+//	set @GIDg4,getcastledata("gefg_cas04.gat",1);
+//	if (@GIDg4 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDg4) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDg4) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDg4) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDg4) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "gefg_cas04.gat",59,70;
+	end;
+
+OnRecvCastleG04:
+	FlagEmblem GetCastleData("gefg_cas04.gat",1);
+	end;
+}
+
+
+//npc "geffen" "旗幟" GUILD_FLAG 131 123 6 5 5
+geffen.gat,131,123,6	script	眉撒絲達刺#gefm5	722,{
+//	set @GIDg5,getcastledata("gefg_cas05.gat",1);
+//	if (@GIDg5 > 0) goto L_Guild;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "   把這裡公佈為，沒有正式所有權的";
+//	mes "   旗幟";
+//	mes " ";
+//	mes "2. 戰勝守在這裡的，可怕的考驗之後";
+//	mes "   給破壞華麗金屬的人";
+//	mes "   國王會賜予";
+//	mes "   經國王認證的";
+//	mes "   秘密基地所有權";
+//	close;
+//	end;
+//L_Guild:
+//	if (GetCharID(2) == @GIDg5) goto L_Member;
+//	mes "       [ 普隆德拉王國  公告令 ]";
+//	mes " ";
+//	mes "1. 根據這裡的，普隆德拉王國令";
+//	mes "    這裡被認定為 ^ff0000" + GetGuildName(@GIDg5) + "^000000工會的";
+//	mes "    私有物";
+//	mes " ";
+//	mes "2. ^ff0000" + GetGuildName(@GIDg5) + "^000000 工會的主人是";
+//	mes "    ^ff0000" + GetGuildMaster(@GIDg5) + "^000000 ， 無論是誰";
+//	mes "    對這件事情有意見者";
+//	mes "    請你舉起您的劍，提高自己的名譽吧";
+//	close;
+//	end;
+//L_Member:
+//	mes "[ 響亮的聲音 ]";
+//	mes "勇士們啊...";
+//	mes "你還想要回到榮譽感嗎?";
+//	next;
+//	menu "回到秘密基地 ",L_Warp,"放棄 ",-;
+//	close;
+//	end;
+//L_Warp:
+//	warp "gefg_cas05.gat",61,52;
+	end;
+
+OnRecvCastleG05:
+	FlagEmblem GetCastleData("gefg_cas05.gat",1);
+	end;
+}
+
