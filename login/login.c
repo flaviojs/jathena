@@ -36,8 +36,9 @@ int server_num;
 int new_account_flag = 0;
 int login_port = 6900;
 
-char account_filename[1024] = "account.txt";
+char account_filename[1024] = "save/account.txt";
 char GM_account_filename[1024] = "conf/GM_account.txt";
+char login_log_filename[1024] = "log/login.log";
 
 struct mmo_char_server server[MAX_SERVERS];
 int server_fd[MAX_SERVERS];
@@ -89,7 +90,7 @@ int login_log(char *fmt,...)
 	va_list ap;
 	va_start(ap,fmt);
 	
-	logfp=fopen("login.log","a");
+	logfp=fopen(login_log_filename,"a");
 	if(logfp){
 		vfprintf(logfp,fmt,ap);
 		fclose(logfp);
@@ -659,8 +660,12 @@ int parse_login(int fd)
     delete_session(fd);
     return 0;
   }
-  if(RFIFOW(fd,0)<30000)
-	  printf("parse_login : %d %d %d %s\n",fd,RFIFOREST(fd),RFIFOW(fd,0),RFIFOP(fd,6));
+  if(RFIFOW(fd,0)<30000) {
+  	if(RFIFOW(fd,0) == 0x64 || RFIFOW(fd,0) == 0x01dd)
+		  printf("parse_login : %d %d %d %s\n",fd,RFIFOREST(fd),RFIFOW(fd,0),RFIFOP(fd,6));
+		else
+		  printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
+	}
   while(RFIFOREST(fd)>=2){
 	switch(RFIFOW(fd,0)){
 	case 0x64:		// クライアントログイン要求
@@ -768,7 +773,7 @@ int parse_login(int fd)
 		if(RFIFOREST(fd)<76)
 			return 0;
 		{
-			FILE *logfp=fopen("login.log","a");
+			FILE *logfp=fopen(login_log_filename,"a");
 			if(logfp){
 				unsigned char *p=(unsigned char *)&session[fd]->client_addr.sin_addr;
 				fprintf(logfp,"server connection request %s @ %d.%d.%d.%d:%d (%d.%d.%d.%d)" RETCODE,
@@ -928,6 +933,9 @@ int login_config_read(const char *cfgName)
 				access_deny[(access_denynum++)*ACO_STRSIZE]=0;
 			else if(w2[0])
 				strcpy( access_deny+(access_denynum++)*ACO_STRSIZE,w2 );
+		}
+		else if(strcmpi(w1,"login_log_filename")==0){
+			strcpy(login_log_filename,w2);
 		}
 	}
 	fclose(fp);

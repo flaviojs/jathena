@@ -114,13 +114,20 @@ int storage_storageopen(struct map_session_data *sd)
  */
 int storage_additem(struct map_session_data *sd,struct storage *stor,struct item *item_data,int amount)
 {
+	struct item_data *data;
 	int i;
-	
+
+	if(item_data->nameid <= 0 || amount <= 0)
+		return 1;
+	data = itemdb_search(item_data->nameid);
+
 	i=MAX_STORAGE;
-	if(!itemdb_isequip(item_data->nameid)){
+	if(!itemdb_isequip2(data)){
 		// 装備品ではないので、既所有品なら個数のみ変化させる
 		for(i=0;i<MAX_STORAGE;i++){
-			if(stor->storage[i].nameid==item_data->nameid){
+			if(stor->storage[i].nameid == item_data->nameid &&
+				stor->storage[i].card[0] == item_data->card[0] && stor->storage[i].card[1] == item_data->card[1] &&
+				stor->storage[i].card[2] == item_data->card[2] && stor->storage[i].card[3] == item_data->card[3]){
 				if(stor->storage[i].amount+amount > MAX_AMOUNT)
 					return 1;
 				stor->storage[i].amount+=amount;
@@ -129,15 +136,14 @@ int storage_additem(struct map_session_data *sd,struct storage *stor,struct item
 			}
 		}
 	}
-	if(i==MAX_STORAGE){
+	if(i>=MAX_STORAGE){
 		// 装備品か未所有品だったので空き欄へ追加
-		for(i=MAX_STORAGE-1;i>=0;i--){
-			if(stor->storage[i].nameid==0 &&
-			   (i==0 || stor->storage[i-1].nameid)){
+		for(i=0;i<MAX_STORAGE;i++){
+			if(stor->storage[i].nameid==0){
 				memcpy(&stor->storage[i],item_data,sizeof(stor->storage[0]));
 				stor->storage[i].amount=amount;
 				stor->storage_amount++;
-				
+
 				clif_storageitemadded(sd,stor,i,amount);
 				clif_updatestorageamount(sd,stor);
 				break;

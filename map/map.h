@@ -123,6 +123,8 @@ struct map_session_data {
 		unsigned attack_type : 3;
 		unsigned skill_flag : 1;
 		unsigned gangsterparadise : 1;
+		unsigned produce_flag : 1;
+		unsigned make_arrow_flag : 1;
 	} state;
 	struct {
 		unsigned restart_full_recover : 1;

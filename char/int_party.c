@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-char party_txt[1024]="party.txt";
+char party_txt[1024]="save/party.txt";
 
 static struct dbt *party_db;
 static int party_newid=100;

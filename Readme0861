@@ -1,4 +1,55 @@
 --------------------
+//0871 by 死神
+
+・0869のバグ修正。
+・char_athena.confとlogin_athena.confに項目追加。(キャラ鯖とログイン鯖のログファイルを変えることができるようにしました。デフォルトでlog/フォルダーに入るのでlogフォルダーを作る必要があります。)
+・エナジーコートの処理を少し修正。モンスターが使った場合はスキルレベル*6%の物理ダメージを減らすように変更。
+・武器以外の物でも製造者名前を表示するように変更。(本鯖ではプレゼントボックスと手作りチョコレット以外は表示されませんがパケットはあることだし入れてみました。)
+・その他スキル関係の細かい修正。
+・@コマンド一つとスクリプト一つを追加しましたが説明は後のパッチで書きます。
+	(conf/)
+	char_athena.conf 修正。
+	login_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(login/)
+	login.c
+		parse_login()、login_config_read()、login_log() 修正。
+	(char/)
+	char.h 修正。
+	char.c
+		char_config_read()、make_new_char()、parse_char() 修正。
+	int_party.c 修正。
+	int_storage.c 修正。
+	int_guild.c 修正。
+	int_pet.c 修正。
+	(map/)
+	map.h 修正。
+	skill.c
+		skill_status_change_start()、skill_additional_effect() 修正。
+		skill_castend_nodamage_id()、skill_check_condition() 修正。
+		skill_status_change_clear()、skill_produce_mix() 修正。
+		skill_status_change_timer() 修正。
+	pc.c
+		pc_calcstatus()、pc_insert_card()、pc_additem()、pc_cart_additem() 修正。
+	storage.c
+		storage_additem() 修正。
+	battle.c
+		battle_get_adelay()、battle_get_amotion()、battle_calc_damage() 修正。
+	clif.c
+		clif_additem()、clif_equiplist()、clif_storageequiplist() 修正。
+		clif_tradeadditem()、clif_storageitemadded()、clif_use_card() 修正。
+		clif_cart_additem()、clif_cart_equiplist()、clif_vendinglist() 修正。
+		clif_openvending()、clif_arrow_create_list() 修正。
+		clif_skill_produce_mix_list()、clif_parse_SelectArrow() 修正。
+		clif_parse_ProduceMix() 修正。
+	script.c
+		buildin_produce() 修正。
+		buildin_getitem2() 追加。
+	atcommand.c
+		atcommand() 修正。
+
+--------------------
 //0870 by shuto
 
 ・mapflagの攻城戦MAPにnomemo追加

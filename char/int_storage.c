@@ -10,7 +10,7 @@
 #define STORAGE_MEMINC	16
 // ファイル名のデフォルト
 // inter_config_read()で再設定される
-char storage_txt[1024]="storage.txt";
+char storage_txt[1024]="save/storage.txt";
 
 
 struct storage *storage=NULL;

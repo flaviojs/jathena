@@ -59,7 +59,7 @@ new_account
 
 account_filename
 	アカウントセーブファイルを指定します。
-	省略可能で、デフォルトはaccount.txtです。
+	省略可能で、デフォルトはsave/account.txtです。
 
 gm_account_filename
 	GMアカウントファイルを指定します。
@@ -93,18 +93,23 @@ deny
 	アクセスコントロールで禁止するホストを指定します。
 	表記の仕方はallowと同じです。
 
+login_log_filename
+	ログインサーバーのログファイルを指定します。
+	省略可能で、デフォルトはlog/login.logです。
+
 < 例 >
 
 login_port: 6900
 admin_pass: admin
 gm_pass: gm
 new_account: 1
-account_filename: account.txt
+account_filename: save/account.txt
 gm_account_filename: conf_GM_account.txt
 order: deny,allow
 deny: all
 allow: 192.168.
 allow: 127.0.0.1
+login_log_filename: log/login.log
 
 ==========================================================================
 2. conf/char_athena.conf
@@ -180,6 +185,18 @@ party_share_level
 	公平分配パーティの制限レベルを設定します。
 	省略可能で、デフォルトは10です。
 
+start_zeny
+	新しいキャラを作った時初めから持っているゼニの量を設定します。
+	省略可能で、デフォルトは500です。
+
+unknown_char_name
+	キャラクターサーバーに存在しないキャラの名前要請された時返す名前を
+	設定します。省略可能で、デフォルトはUnknownです。
+
+char_log_filename
+	キャラクターサーバーのログファイルを指定します。
+	省略可能で、デフォルトはlog/char.logです。
+
 
 < 例 >
 userid: s1
@@ -189,13 +206,16 @@ login_ip: 127.0.0.1
 login_port: 6900
 char_ip: 127.0.0.1
 char_port: 6121
-char_txt: athena.txt
+char_txt: save/athena.txt
 max_connect_user: 0
 autosave_time: 300
 char_maintenance: 0
 char_new: 0
 start_point: new_,150,120
 party_share_level: 10
+start_zeny: 500
+unknown_char_name: Unknown
+char_log_filename: log/char.log
 
 
 ==========================================================================
@@ -213,25 +233,31 @@ party_share_level: 10
 
 storage_txt
 	倉庫データを格納するファイル名です。
-	省略可能で、デフォルトは storage.txt です。
+	省略可能で、デフォルトは save/storage.txt です。
 
 party_txt
 	パーティデータを格納するファイル名です。
-	省略可能で、デフォルトは party.txt です。
+	省略可能で、デフォルトは save/party.txt です。
 
 guild_txt
 	ギルドデータを格納するファイル名です。
-	省略可能で、デフォルトは guild.txt です。
+	省略可能で、デフォルトは save/guild.txt です。
 
 pet_txt
 	ペットデータを格納するファイル名です。
-	省略可能で、デフォルトは pet.txt です。
+	省略可能で、デフォルトは save/pet.txt です。
+
+castle_txt
+	ギルドの城データを格納するファイル名です。
+	省略可能で、デフォルトは save/castle.txt です。
+
 
 < 例 >
-storage_txt: storage.txt
-party_txt: party.txt
-guild_txt: guild.txt
-pet_txt: pet.txt
+storage_txt: save/storage.txt
+party_txt: save/party.txt
+guild_txt: save/guild.txt
+pet_txt: save/pet.txt
+castle_txt: save/castle.txt
 
 
 ==========================================================================
@@ -1051,7 +1077,7 @@ kami
 heal
 	@コマンド @heal
 item
-	@コマンド @item
+	@コマンド @item、@item2
 itemreset
 	@コマンド @itemreset
 itemcheck

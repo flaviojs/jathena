@@ -5,8 +5,6 @@
 
 #define CHAR_CONF_NAME	"conf/char_athena.conf"
 
-#define UNKNOWN_CHAR_NAME "Unknown"
-
 #define DEFAULT_AUTOSAVE_INTERVAL 300*1000
 
 struct mmo_map_server{

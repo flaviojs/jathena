@@ -9,7 +9,7 @@
 #include <string.h>
 
 
-char pet_txt[1024]="pet.txt";
+char pet_txt[1024]="save/pet.txt";
 
 static struct dbt *pet_db;
 static int pet_newid = 100;

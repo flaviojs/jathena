@@ -81,6 +81,7 @@ int buildin_setlook(struct script_state *st);
 int buildin_set(struct script_state *st);
 int buildin_if(struct script_state *st);
 int buildin_getitem(struct script_state *st);
+int buildin_getitem2(struct script_state *st);
 int buildin_delitem(struct script_state *st);
 int buildin_viewpoint(struct script_state *st);
 int buildin_countitem(struct script_state *st);
@@ -183,6 +184,7 @@ struct {
 	{buildin_set,"set","ii"},
 	{buildin_if,"if","igi"},
 	{buildin_getitem,"getitem","ii"},
+	{buildin_getitem2,"getitem2","iiiiiiiii"},
 	{buildin_delitem,"delitem","ii"},
 	{buildin_cutin,"cutin","si"},
 	{buildin_viewpoint,"viewpoint","iiiii"},
@@ -1524,6 +1526,69 @@ int buildin_getitem(struct script_state *st)
  *
  *------------------------------------------
  */
+int buildin_getitem2(struct script_state *st)
+{
+	int nameid,amount,flag = 0;
+	int iden,ref,attr,c1,c2,c3,c4;
+	struct item_data *item_data;
+	struct item item_tmp;
+	struct map_session_data *sd;
+
+	sd = map_id2sd(st->rid);
+	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	iden=conv_num(st,& (st->stack->stack_data[st->start+4]));
+	ref=conv_num(st,& (st->stack->stack_data[st->start+5]));
+	attr=conv_num(st,& (st->stack->stack_data[st->start+6]));
+	c1=conv_num(st,& (st->stack->stack_data[st->start+7]));
+	c2=conv_num(st,& (st->stack->stack_data[st->start+8]));
+	c3=conv_num(st,& (st->stack->stack_data[st->start+9]));
+	c4=conv_num(st,& (st->stack->stack_data[st->start+10]));
+
+	if(nameid<0) { // ƒ‰ƒ“ƒ_ƒ€
+		nameid=itemdb_searchrandomid(-nameid);
+		flag = 1;
+	}
+
+	if(nameid > 0) {
+		memset(&item_tmp,0,sizeof(item_tmp));
+		item_data=itemdb_search(nameid);
+		if(item_data->type==4 || item_data->type==5){
+			if(ref > 10) ref = 10;
+		}
+		else if(item_data->type==7) {
+			iden = 1;
+			ref = 0;
+		}
+		else {
+			iden = 1;
+			ref = attr = 0;
+		}
+
+		item_tmp.nameid=nameid;
+		if(!flag)
+			item_tmp.identify=iden;
+		else if(item_data->type==4 || item_data->type==5)
+			item_tmp.identify=0;
+		item_tmp.refine=ref;
+		item_tmp.attribute=attr;
+		item_tmp.card[0]=c1;
+		item_tmp.card[1]=c2;
+		item_tmp.card[2]=c3;
+		item_tmp.card[3]=c4;
+		if((flag = pc_additem(sd,&item_tmp,amount))) {
+			clif_additem(sd,0,0,flag);
+			map_addflooritem(&item_tmp,amount,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
+		}
+	}
+
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
 int buildin_delitem(struct script_state *st)
 {
 	int nameid,amount,i;
@@ -2232,6 +2297,8 @@ int buildin_produce(struct script_state *st)
 {
 	int trigger;
 	struct map_session_data *sd=map_id2sd(st->rid);
+
+	if(	sd->state.produce_flag == 1) return 0;
 	trigger=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	clif_skill_produce_mix_list(sd,trigger);
 	return 0;

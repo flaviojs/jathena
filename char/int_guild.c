@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char guild_txt[1024]="guild.txt";
-char castle_txt[1024]="castle.txt";
+char guild_txt[1024]="save/guild.txt";
+char castle_txt[1024]="save/castle.txt";
 
 
 static struct dbt *guild_db;

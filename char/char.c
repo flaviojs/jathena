@@ -45,6 +45,8 @@ int char_port = 6121;
 int char_maintenance;
 int char_new;
 char char_txt[1024];
+char unknown_char_name[1024]="Unknown";
+char char_log_filename[1024]="log/char.log";
 
 #define CHAR_STATE_WAITAUTH 0
 #define CHAR_STATE_AUTHOK 1
@@ -66,6 +68,7 @@ int char_num,char_max;
 int max_connect_user=0;
 int autosave_interval=DEFAULT_AUTOSAVE_INTERVAL;
 int party_share_level = 10;
+int start_zeny = 500;
 
 // 初期位置（confファイルから再設定可能）
 struct point start_point={"new_1-1.gat",53,111};
@@ -350,7 +353,7 @@ int make_new_char(int fd,unsigned char *dat)
      dat[30]>=9 ||
      dat[33]==0 || dat[33]>=20 ||
      dat[31]>=9){
-    logfp=fopen("char.log","a");
+    logfp=fopen(char_log_filename,"a");
     if(logfp){
       fprintf(logfp,"make new char error %d-%d %s %d,%d,%d,%d,%d,%d %d,%d" RETCODE,
 	      fd,dat[30],dat,dat[24],dat[25],dat[26],dat[27],dat[28],dat[29],dat[33],dat[31]);
@@ -358,7 +361,7 @@ int make_new_char(int fd,unsigned char *dat)
     }
     return -1;
   }
-  logfp=fopen("char.log","a");
+  logfp=fopen(char_log_filename,"a");
   if(logfp){
     fprintf(logfp,"make new char %d-%d %s" RETCODE,fd,dat[30],dat);
     fclose(logfp);
@@ -386,7 +389,7 @@ int make_new_char(int fd,unsigned char *dat)
   char_dat[i].job_level=1;
   char_dat[i].base_exp=0;
   char_dat[i].job_exp=0;
-  char_dat[i].zeny=500;
+  char_dat[i].zeny=start_zeny;
   char_dat[i].str=dat[24];
   char_dat[i].agi=dat[25];
   char_dat[i].vit=dat[26];
@@ -859,7 +862,7 @@ int parse_frommap(int fd)
 			if(i!=char_num)
 				memcpy(WFIFOP(fd,6),char_dat[i].name,24);
 			else
-				memcpy(WFIFOP(fd,6),UNKNOWN_CHAR_NAME,24);
+				memcpy(WFIFOP(fd,6),unknown_char_name,24);
 			WFIFOSET(fd,30);
 			
 			RFIFOSKIP(fd,6);
@@ -1006,7 +1009,7 @@ int parse_char(int fd)
 			if(ch!=9){
 				FILE *logfp;
 
-				logfp=fopen("char.log","a");
+				logfp=fopen(char_log_filename,"a");
 				if(logfp){
 					fprintf(logfp,"char select %d-%d %s" RETCODE,sd->account_id,RFIFOB(fd,2),char_dat[sd->found_char[ch]].name);
 					fclose(logfp);
@@ -1357,6 +1360,17 @@ int char_config_read(const char *cfgName)
 		else if(strcmpi(w1,"party_share_level")==0){
 			party_share_level=atoi(w2);
 			if(party_share_level < 0) party_share_level = 0;
+		}
+		else if(strcmpi(w1,"start_zeny")==0){
+			start_zeny=atoi(w2);
+			if(start_zeny < 0) start_zeny = 0;
+		}
+		else if(strcmpi(w1,"unknown_char_name")==0){
+			strcpy(unknown_char_name,w2);
+			unknown_char_name[24] = 0;
+		}
+		else if(strcmpi(w1,"char_log_filename")==0){
+			strcpy(char_log_filename,w2);
 		}
 	}
 	fclose(fp);

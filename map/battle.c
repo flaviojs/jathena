@@ -629,7 +629,7 @@ int battle_get_adelay(struct block_list *bl)
 				aspd_rate -= 30;
 			if(sc_data[SC_ADRENALINE].timer != -1 && sc_data[SC_TWOHANDQUICKEN].timer == -1 &&
 				sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1) {	// アドレナリンラッシュ
-				if(sc_data[SC_ADRENALINE].val3 || !battle_config.party_skill_penaly)
+				if(sc_data[SC_ADRENALINE].val2 || !battle_config.party_skill_penaly)
 					aspd_rate -= 30;
 				else
 					aspd_rate -= 25;
@@ -672,7 +672,7 @@ int battle_get_amotion(struct block_list *bl)
 				aspd_rate -= 30;
 			if(sc_data[SC_ADRENALINE].timer != -1 && sc_data[SC_TWOHANDQUICKEN].timer == -1 &&
 				sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1) {	// アドレナリンラッシュ
-				if(sc_data[SC_ADRENALINE].val3 || !battle_config.party_skill_penaly)
+				if(sc_data[SC_ADRENALINE].val2 || !battle_config.party_skill_penaly)
 					aspd_rate -= 30;
 				else
 					aspd_rate -= 25;
@@ -1108,14 +1108,16 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 			if(sd){
 				if(sd->status.sp>0){
 					int per = sd->status.sp * 5 / (sd->status.max_sp + 1);
-					sd->status.sp -= damage * (per * 5 + 10) / 1000;
-					if( sd->status.sp <0 ) sd->status.sp=0;
-					damage -= damage * (per * 6) / 100;
+					sd->status.sp -= sd->status.sp * (per * 5 + 10) / 1000;
+					if( sd->status.sp < 0 ) sd->status.sp = 0;
+					damage -= damage * ((per+1) * 6) / 100;
 					clif_updatestatus(sd,SP_SP);
 				}
 				if(sd->status.sp<=0)
 					skill_status_change_end( bl,SC_ENERGYCOAT,-1 );
 			}
+			else
+				damage -= damage * (sc_data[SC_ENERGYCOAT].val1 * 6) / 100;
 		}
 
 		if(sc_data[SC_KYRIE].timer!=-1 && damage > 0){	// キリエエレイソン
