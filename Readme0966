@@ -1,4 +1,22 @@
 --------------------
+//0970 by (凸)
+・ドレイクのウォーターボールが異常に痛い(121発食らう)のでLv5以上の場合は25発に制限
+・シグナムクルシスの計算式を14+SkillLvから10+SkillLv*2変更
+・ソースの気が向いたところに落書き
+・DB関係をまとめて同梱
+
+	(map/)
+	battle.c コメント＿〆(。。)ｶｷｶｷ
+	skill.c skill_status_change_start()
+	(db/)
+	cast_db.txt
+	item_db.txt
+	mob_skill_db.txt
+	skill_db.txt
+	skill_require_db.txt
+	skill_tree.txt
+
+--------------------
 //0969 by ぴざまん
 
 ・白刃取り状態で片方が死亡した場合、片方の白刃取りが解除されない問題修正

@@ -266,12 +266,12 @@ int skill_get_unit_id(int id,int flag)
 	case PR_SANCTUARY:		return 0x83;				/* サンクチュアリ */
 	case PR_MAGNUS:			return 0x84;				/* マグヌスエクソシズム */
 	case AL_PNEUMA:			return 0x85;				/* ニューマ */
-	case MG_THUNDERSTORM:	return 0x86;		/* サンダーストーム */
-	case WZ_HEAVENDRIVE:	return 0x86;		/* ヘヴンズドライブ */
-	case WZ_SIGHTRASHER:	return 0x86;
+	case MG_THUNDERSTORM:	return 0x86;				/* サンダーストーム */
+	case WZ_HEAVENDRIVE:	return 0x86;				/* ヘヴンズドライブ */
+	case WZ_SIGHTRASHER:	return 0x86;				/* サイトラッシャー */
 	case WZ_METEOR:			return 0x86;				/* メテオストーム */
 	case WZ_VERMILION:		return 0x86;				/* ロードオブヴァーミリオン */
-	case WZ_FROSTNOVA:		return 0x86;			/* フロストノヴァ */
+	case WZ_FROSTNOVA:		return 0x86;				/* フロストノヴァ */
 	case WZ_STORMGUST:		return 0x86;				/* ストームガスト(とりあえずLoVと同じで処理) */
 	case CR_GRANDCROSS:		return 0x86;				/* グランドクロス */
 	case WZ_FIREPILLAR:		return (flag==0)?0x87:0x88;	/* ファイアーピラー */
@@ -288,14 +288,14 @@ int skill_get_unit_id(int id,int flag)
 	case HT_FLASHER:		return 0x96;				/* フラッシャー */
 	case HT_FREEZINGTRAP:	return 0x97;				/* フリージングトラップ */
 	case HT_CLAYMORETRAP:	return 0x98;				/* クレイモアートラップ */
-	case SA_VOLCANO:	return 0x9a;					/* ボルケーノ */
+	case SA_VOLCANO:		return 0x9a;				/* ボルケーノ */
 	case SA_DELUGE:			return 0x9b;				/* デリュージ */
-	case SA_VIOLENTGALE:	return 0x9c;					/* バイオレントゲイル */
-	case SA_LANDPROTECTOR:	return 0x9d;					/* ランドプロテクター */
+	case SA_VIOLENTGALE:	return 0x9c;				/* バイオレントゲイル */
+	case SA_LANDPROTECTOR:	return 0x9d;				/* ランドプロテクター */
 	case BD_LULLABY:		return 0x9e;				/* 子守歌 */
 	case BD_RICHMANKIM:		return 0x9f;				/* ニヨルドの宴 */
 	case BD_ETERNALCHAOS:	return 0xa0;				/* 永遠の混沌 */
-	case BD_DRUMBATTLEFIELD:return 0xa1;					/* 戦太鼓の響き */
+	case BD_DRUMBATTLEFIELD:return 0xa1;				/* 戦太鼓の響き */
 	case BD_RINGNIBELUNGEN:	return 0xa2;				/* ニーベルングの指輪 */
 	case BD_ROKISWEIL:		return 0xa3;				/* ロキの叫び */
 	case BD_INTOABYSS:		return 0xa4;				/* 深淵の中に */
@@ -311,7 +311,7 @@ int skill_get_unit_id(int id,int flag)
 	case DC_FORTUNEKISS:	return 0xae;				/* 幸運のキス */
 	case DC_SERVICEFORYOU:	return 0xaf;				/* サービスフォーユー */
 	case RG_GRAFFITI:		return 0xb0;				/* グラフィティ */
-	case AM_DEMONSTRATION:		return 0xb1;				/* デモンストレーション */
+	case AM_DEMONSTRATION:	return 0xb1;				/* デモンストレーション */
 	}
 	return 0;
 	/*
@@ -795,6 +795,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		}
 	}
 //猛龍拳(MO_COMBOFINISH)ここまで
+//使用者がPCの場合の処理ここまで
 //武器スキル？ここから
 	if(attack_type&BF_WEAPON && damage > 0 && src != bl && src == dsrc) { //武器スキル＆ダメージあり＆使用者と対象者が違う＆src=dsrc
 		if(dmg.flag&BF_SHORT) { //近距離攻撃時？※
@@ -822,6 +823,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		if(rdamage > 0)
 			clif_damage(src,src,tick, dmg.amotion,0,rdamage,1,4,0);
 	}
+//武器スキル？ここまで
 
 	if(skillid == WZ_SIGHTRASHER)
 		clif_skill_damage(src,bl,tick,dmg.amotion,dmg.dmotion,
@@ -6074,7 +6076,8 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_SIGNUMCRUCIS:		/* シグナムクルシス */
 			calc_flag = 1;
-			val2 = 14 + val1;
+//			val2 = 14 + val1;
+			val2 = 10 + val1*2;
 			tick = 600*1000;
 			clif_emotion(bl,4);
 			break;
@@ -6396,7 +6399,10 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		/* ウォーターボール */
 		case SC_WATERBALL:
 			tick=150;
-			val3= (val1|1)*(val1|1)-1;
+			if(val1>5) //レベルが5以上の場合は25発に制限(1発目はすでに打ってるので-1)
+				val3=5*5-1;
+			else
+				val3= (val1|1)*(val1|1)-1;
 			break;
 
 		/* スキルじゃない/時間に関係しない */

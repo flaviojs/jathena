@@ -20,6 +20,11 @@ int attr_fix_table[4][10][10];
 
 struct Battle_Config battle_config;
 
+/*==========================================
+ * 二点間の距離を返す
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 static int distance(int x0,int y0,int x1,int y1)
 {
 	int dx,dy;
@@ -29,8 +34,11 @@ static int distance(int x0,int y0,int x1,int y1)
 	return dx>dy ? dx : dy;
 }
 
-// 各種パラメータ所得
-
+/*==========================================
+ * 自分をロックしている対象の数を返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_counttargeted(struct block_list *bl,struct block_list *src)
 {
 	if(bl->type == BL_PC)
@@ -39,7 +47,11 @@ int battle_counttargeted(struct block_list *bl,struct block_list *src)
 		return mob_counttargeted((struct mob_data *)bl,src);
 	return 0;
 }
-
+/*==========================================
+ * 対象のClassを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_class(struct block_list *bl)
 {
 	if(bl->type==BL_MOB)
@@ -51,6 +63,11 @@ int battle_get_class(struct block_list *bl)
 	else
 		return 0;
 }
+/*==========================================
+ * 対象の方向を返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_dir(struct block_list *bl)
 {
 	if(bl->type==BL_MOB)
@@ -62,6 +79,11 @@ int battle_get_dir(struct block_list *bl)
 	else
 		return 0;
 }
+/*==========================================
+ * 対象のレベルを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_lv(struct block_list *bl)
 {
 	if(bl->type==BL_MOB)
@@ -73,6 +95,11 @@ int battle_get_lv(struct block_list *bl)
 	else
 		return 0;
 }
+/*==========================================
+ * 対象の射程を返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_range(struct block_list *bl)
 {
 	if(bl->type==BL_MOB)
@@ -84,6 +111,11 @@ int battle_get_range(struct block_list *bl)
 	else
 		return 0;
 }
+/*==========================================
+ * 対象のHPを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_hp(struct block_list *bl)
 {
 	if(bl->type==BL_MOB)
@@ -93,6 +125,11 @@ int battle_get_hp(struct block_list *bl)
 	else
 		return 1;
 }
+/*==========================================
+ * 対象のMHPを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_max_hp(struct block_list *bl)
 {
 	if(bl->type==BL_PC)
@@ -132,6 +169,11 @@ int battle_get_max_hp(struct block_list *bl)
 	}
 	return 1;
 }
+/*==========================================
+ * 対象のStrを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_str(struct block_list *bl)
 {
 	int str=0;
@@ -156,6 +198,12 @@ int battle_get_str(struct block_list *bl)
 	if(str < 0) str = 0;
 	return str;
 }
+/*==========================================
+ * 対象のAgiを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
+
 int battle_get_agi(struct block_list *bl)
 {
 	int agi=0;
@@ -185,6 +233,11 @@ int battle_get_agi(struct block_list *bl)
 	if(agi < 0) agi = 0;
 	return agi;
 }
+/*==========================================
+ * 対象のVitを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_vit(struct block_list *bl)
 {
 	int vit=0;
@@ -200,6 +253,11 @@ int battle_get_vit(struct block_list *bl)
 	if(vit < 0) vit = 0;
 	return vit;
 }
+/*==========================================
+ * 対象のIntを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_int(struct block_list *bl)
 {
 	int int_=0;
@@ -225,6 +283,11 @@ int battle_get_int(struct block_list *bl)
 	if(int_ < 0) int_ = 0;
 	return int_;
 }
+/*==========================================
+ * 対象のDexを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_dex(struct block_list *bl)
 {
 	int dex=0;
@@ -253,6 +316,11 @@ int battle_get_dex(struct block_list *bl)
 	if(dex < 0) dex = 0;
 	return dex;
 }
+/*==========================================
+ * 対象のLukを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_luk(struct block_list *bl)
 {
 	int luk=0;
@@ -275,6 +343,11 @@ int battle_get_luk(struct block_list *bl)
 	return luk;
 }
 
+/*==========================================
+ * 対象のFleeを返す(汎用)
+ * 戻りは整数で1以上
+ *------------------------------------------
+ */
 int battle_get_flee(struct block_list *bl)
 {
 	int flee=1;
@@ -295,6 +368,11 @@ int battle_get_flee(struct block_list *bl)
 	if(flee < 1) flee = 1;
 	return flee;
 }
+/*==========================================
+ * 対象のHitを返す(汎用)
+ * 戻りは整数で1以上
+ *------------------------------------------
+ */
 int battle_get_hit(struct block_list *bl)
 {
 	int hit=1;
@@ -315,6 +393,11 @@ int battle_get_hit(struct block_list *bl)
 	if(hit < 1) hit = 1;
 	return hit;
 }
+/*==========================================
+ * 対象の完全回避を返す(汎用)
+ * 戻りは整数で1以上
+ *------------------------------------------
+ */
 int battle_get_flee2(struct block_list *bl)
 {
 	int flee2=1;
@@ -335,6 +418,11 @@ int battle_get_flee2(struct block_list *bl)
 	if(flee2 < 1) flee2 = 1;
 	return flee2;
 }
+/*==========================================
+ * 対象のクリティカルを返す(汎用)
+ * 戻りは整数で1以上
+ *------------------------------------------
+ */
 int battle_get_critical(struct block_list *bl)
 {
 	int critical=1;
@@ -357,29 +445,37 @@ int battle_get_critical(struct block_list *bl)
 	if(critical < 1) critical = 1;
 	return critical;
 }
-
+/*==========================================
+ * base_atkの取得
+ * 戻りは整数で1以上
+ *------------------------------------------
+ */
 int battle_get_baseatk(struct block_list *bl)
 {
 	struct status_change *sc_data=battle_get_sc_data(bl);
 	int batk=1;
-	if(bl->type == BL_PC)
-		batk = ((struct map_session_data *)bl)->base_atk;
-	else {
+	if(bl->type == BL_PC) //PCなら
+		batk = ((struct map_session_data *)bl)->base_atk; //設定されているbase_atk
+	else { //それ以外なら
 		int str,dstr;
-		str = battle_get_str(bl);
+		str = battle_get_str(bl); //STR
 		dstr = str/10;
-		batk = dstr*dstr + str;
+		batk = dstr*dstr + str; //base_atkを計算する
 	}
-	if(sc_data) {
-		if(sc_data[SC_PROVOKE].timer!=-1 && bl->type != BL_PC)
-			batk = batk*(100+2*sc_data[SC_PROVOKE].val1)/100;
-		if(sc_data[SC_CURSE].timer!=-1 )
-			batk -= batk*25/100;
+	if(sc_data) { //状態異常あり
+		if(sc_data[SC_PROVOKE].timer!=-1 && bl->type != BL_PC) //PCでプロボック(SM_PROVOKE)状態
+			batk = batk*(100+2*sc_data[SC_PROVOKE].val1)/100; //base_atk増加
+		if(sc_data[SC_CURSE].timer!=-1 ) //呪われていたら
+			batk -= batk*25/100; //base_atkが25%減少
 	}
-	if(batk < 1) batk = 1;
+	if(batk < 1) batk = 1; //base_atkは最低でも1
 	return batk;
 }
-
+/*==========================================
+ * 対象のAtkを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_atk(struct block_list *bl)
 {
 	struct status_change *sc_data=battle_get_sc_data(bl);
@@ -400,6 +496,11 @@ int battle_get_atk(struct block_list *bl)
 	if(atk < 0) atk = 0;
 	return atk;
 }
+/*==========================================
+ * 対象の左手Atkを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_atk_(struct block_list *bl)
 {
 	if(bl->type==BL_PC){
@@ -412,6 +513,11 @@ int battle_get_atk_(struct block_list *bl)
 	else
 		return 0;
 }
+/*==========================================
+ * 対象のAtk2を返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_atk2(struct block_list *bl)
 {
 	if(bl->type==BL_PC)
@@ -442,6 +548,11 @@ int battle_get_atk2(struct block_list *bl)
 	}
 	return 0;
 }
+/*==========================================
+ * 対象の左手Atk2を返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_atk_2(struct block_list *bl)
 {
 	if(bl->type==BL_PC)
@@ -449,6 +560,11 @@ int battle_get_atk_2(struct block_list *bl)
 	else
 		return 0;
 }
+/*==========================================
+ * 対象のMAtk1を返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_matk1(struct block_list *bl)
 {
 	if(bl->type==BL_MOB){
@@ -466,6 +582,11 @@ int battle_get_matk1(struct block_list *bl)
 	else
 		return 0;
 }
+/*==========================================
+ * 対象のMAtk2を返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_matk2(struct block_list *bl)
 {
 	if(bl->type==BL_MOB){
@@ -483,6 +604,11 @@ int battle_get_matk2(struct block_list *bl)
 	else
 		return 0;
 }
+/*==========================================
+ * 対象のDefを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_def(struct block_list *bl)
 {
 	struct status_change *sc_data=battle_get_sc_data(bl);
@@ -503,23 +629,32 @@ int battle_get_def(struct block_list *bl)
 
 	if(def < 1000000) {
 		if(sc_data) {
+			//キーピング時はDEF100
 			if( sc_data[SC_KEEPING].timer!=-1)
 				def = 100;
+			//プロボック時は減算
 			if( sc_data[SC_PROVOKE].timer!=-1 && bl->type != BL_PC)
 				def = (def*(100 - 6*sc_data[SC_PROVOKE].val1)+50)/100;
+			//戦太鼓の響き時は加算
 			if( sc_data[SC_DRUMBATTLE].timer!=-1 && bl->type != BL_PC)
 				def += sc_data[SC_DRUMBATTLE].val3;
+			//毒にかかっている時は減算
 			if(sc_data[SC_POISON].timer!=-1 && bl->type != BL_PC)
 				def = def*75/100;
+			//ストリップシールド時は減算
 			if(sc_data[SC_STRIPSHIELD].timer!=-1 && bl->type != BL_PC)
 				def = def*85/100;
+			//シグナムクルシス時は減算
 			if(sc_data[SC_SIGNUMCRUCIS].timer!=-1 && bl->type != BL_PC)
 				def = def * (100 - sc_data[SC_SIGNUMCRUCIS].val2)/100;
+			//永遠の混沌時はDEF0になる
 			if(sc_data[SC_ETERNALCHAOS].timer!=-1 && bl->type != BL_PC)
 				def = 0;
+			//凍結、石化時は右シフト
 			if(sc_data[SC_FREEZE].timer != -1 || (sc_data[SC_STONE].timer != -1 && sc_data[SC_STONE].val2 == 0))
 				def >>= 1;
 		}
+		//詠唱中は詠唱時減算率に基づいて減算
 		if(skilltimer != -1) {
 			int def_rate = skill_get_castdef(skillid);
 			if(def_rate != 0)
@@ -529,6 +664,11 @@ int battle_get_def(struct block_list *bl)
 	if(def < 0) def = 0;
 	return def;
 }
+/*==========================================
+ * 対象のMDefを返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_mdef(struct block_list *bl)
 {
 	struct status_change *sc_data=battle_get_sc_data(bl);
@@ -543,8 +683,10 @@ int battle_get_mdef(struct block_list *bl)
 
 	if(mdef < 1000000) {
 		if(sc_data) {
+			//バリアー状態時はMDEF100
 			if(sc_data[SC_BARRIER].timer != -1)
 				mdef = 100;
+			//凍結、石化時は1.25倍
 			if(sc_data[SC_FREEZE].timer != -1 || (sc_data[SC_STONE].timer != -1 && sc_data[SC_STONE].val2 == 0))
 				mdef = mdef*125/100;
 		}
@@ -552,6 +694,11 @@ int battle_get_mdef(struct block_list *bl)
 	if(mdef < 0) mdef = 0;
 	return mdef;
 }
+/*==========================================
+ * 対象のDef2を返す(汎用)
+ * 戻りは整数で1以上
+ *------------------------------------------
+ */
 int battle_get_def2(struct block_list *bl)
 {
 	struct status_change *sc_data=battle_get_sc_data(bl);
@@ -575,6 +722,11 @@ int battle_get_def2(struct block_list *bl)
 	if(def2 < 1) def2 = 1;
 	return def2;
 }
+/*==========================================
+ * 対象のMDef2を返す(汎用)
+ * 戻りは整数で0以上
+ *------------------------------------------
+ */
 int battle_get_mdef2(struct block_list *bl)
 {
 	if(bl->type==BL_MOB)
@@ -586,6 +738,12 @@ int battle_get_mdef2(struct block_list *bl)
 	else
 		return 0;
 }
+/*==========================================
+ * 対象のSpeed(移動速度)を返す(汎用)
+ * 戻りは整数で1以上
+ * Speedは小さいほうが移動速度が速い
+ *------------------------------------------
+ */
 int battle_get_speed(struct block_list *bl)
 {
 	if(bl->type == BL_PC)
@@ -600,20 +758,28 @@ int battle_get_speed(struct block_list *bl)
 			speed = ((struct pet_data *)bl)->msd->petDB->speed;
 
 		if(sc_data) {
+			//速度増加時は25%減算
 			if(sc_data[SC_INCREASEAGI].timer!=-1 && sc_data[SC_DONTFORGETME].timer == -1)
 				speed -= speed*25/100;
+			//速度減少時は25%加算
 			if(sc_data[SC_DECREASEAGI].timer!=-1)
 				speed = speed*125/100;
+			//クァグマイア時は50%加算
 			if(sc_data[SC_QUAGMIRE].timer!=-1)
 				speed = speed*3/2;
+			//私を忘れないで…時は加算
 			if(sc_data[SC_DONTFORGETME].timer!=-1)
 				speed = speed*(100+sc_data[SC_DONTFORGETME].val1*2 + sc_data[SC_DONTFORGETME].val2 + (sc_data[SC_DONTFORGETME].val3&0xffff))/100;
+			//金剛時は25%加算
 			if(sc_data[SC_STEELBODY].timer!=-1)
 				speed = speed*125/100;
+			//ディフェンダー時は加算
 			if(sc_data[SC_DEFENDER].timer!=-1)
 				speed = (speed * (155 - sc_data[SC_DEFENDER].val1*5)) / 100;
+			//踊り状態は4倍遅い
 			if(sc_data[SC_DANCING].timer!=-1 )
 				speed*=4;
+			//呪い時は450加算
 			if(sc_data[SC_CURSE].timer!=-1)
 				speed = speed + 450;
 		}
@@ -623,6 +789,11 @@ int battle_get_speed(struct block_list *bl)
 
 	return 1000;
 }
+/*==========================================
+ * 対象のaDelay(攻撃時ディレイ)を返す(汎用)
+ * aDelayは小さいほうが攻撃速度が速い
+ *------------------------------------------
+ */
 int battle_get_adelay(struct block_list *bl)
 {
 	if(bl->type == BL_PC)
@@ -636,28 +807,38 @@ int battle_get_adelay(struct block_list *bl)
 			adelay = mob_db[((struct pet_data *)bl)->class].adelay;
 
 		if(sc_data) {
+			//ツーハンドクイッケン使用時でクァグマイアでも私を忘れないで…でもない時は3割減算
 			if(sc_data[SC_TWOHANDQUICKEN].timer != -1 && sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1)	// 2HQ
 				aspd_rate -= 30;
+			//アドレナリンラッシュ使用時でツーハンドクイッケンでもクァグマイアでも私を忘れないで…でもない時は
 			if(sc_data[SC_ADRENALINE].timer != -1 && sc_data[SC_TWOHANDQUICKEN].timer == -1 &&
 				sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1) {	// アドレナリンラッシュ
+				//使用者とパーティメンバーで格差が出る設定でなければ3割減算
 				if(sc_data[SC_ADRENALINE].val2 || !battle_config.party_skill_penaly)
 					aspd_rate -= 30;
+				//そうでなければ2.5割減算
 				else
 					aspd_rate -= 25;
 			}
+			//スピアクィッケン時は減算
 			if(sc_data[SC_SPEARSQUICKEN].timer != -1 && sc_data[SC_ADRENALINE].timer == -1 &&
 				sc_data[SC_TWOHANDQUICKEN].timer == -1 && sc_data[SC_QUAGMIRE].timer == -1 && sc_data[SC_DONTFORGETME].timer == -1)	// スピアクィッケン
 				aspd_rate -= sc_data[SC_SPEARSQUICKEN].val2;
+			//夕日のアサシンクロス時は減算
 			if(sc_data[SC_ASSNCROS].timer!=-1 && // 夕陽のアサシンクロス
 				sc_data[SC_TWOHANDQUICKEN].timer==-1 && sc_data[SC_ADRENALINE].timer==-1 && sc_data[SC_SPEARSQUICKEN].timer==-1 &&
 				sc_data[SC_DONTFORGETME].timer == -1)
 				aspd_rate -= 5+sc_data[SC_ASSNCROS].val1+sc_data[SC_ASSNCROS].val2+sc_data[SC_ASSNCROS].val3;
+			//私を忘れないで…時は加算
 			if(sc_data[SC_DONTFORGETME].timer!=-1)		// 私を忘れないで
 				aspd_rate += sc_data[SC_DONTFORGETME].val1*3 + sc_data[SC_DONTFORGETME].val2 + (sc_data[SC_DONTFORGETME].val3>>16);
+			//金剛時25%加算
 			if(sc_data[SC_STEELBODY].timer!=-1)	// 金剛
 				aspd_rate += 25;
+			//増速ポーション使用時は減算
 			if(	sc_data[i=SC_SPEEDPOTION2].timer!=-1 || sc_data[i=SC_SPEEDPOTION1].timer!=-1 || sc_data[i=SC_SPEEDPOTION0].timer!=-1)
 				aspd_rate -= sc_data[i].val2;
+			//ディフェンダー時は加算
 			if(sc_data[SC_DEFENDER].timer != -1)
 				adelay += (1100 - sc_data[SC_DEFENDER].val1*100);
 		}
@@ -2169,7 +2350,11 @@ static struct Damage battle_calc_mob_weapon_attack(
 
 	return wd;
 }
-
+/*
+ * =========================================================================
+ * PCの武器による攻撃
+ *-------------------------------------------------------------------------
+ */
 static struct Damage battle_calc_pc_weapon_attack(
 	struct block_list *src,struct block_list *target,int skill_num,int skill_lv,int wflag)
 {
@@ -2193,84 +2378,86 @@ static struct Damage battle_calc_pc_weapon_attack(
 	int idef_flag=0,idef_flag_=0;
 
 	// アタッカー
-	s_race=battle_get_race(src);
-	s_ele=battle_get_attack_element(src);
-	s_ele_=battle_get_attack_element2(src);
-	sc_data=battle_get_sc_data(src);
-	sc_count=battle_get_sc_count(src);
-	option=battle_get_option(src);
-	opt1=battle_get_opt1(src);
-	opt2=battle_get_opt2(src);
+	s_race=battle_get_race(src); //種族
+	s_ele=battle_get_attack_element(src); //属性
+	s_ele_=battle_get_attack_element2(src); //左手属性
+	sc_data=battle_get_sc_data(src); //ステータス異常
+	sc_count=battle_get_sc_count(src); //ステータス異常の数
+	option=battle_get_option(src); //鷹とかペコとかカートとか
+	opt1=battle_get_opt1(src); //石化、凍結、スタン、睡眠、暗闇
+	opt2=battle_get_opt2(src); //毒、呪い、沈黙、暗闇？
 
-	if(skill_num != CR_GRANDCROSS)
-		sd->state.attack_type = BF_WEAPON;
+	if(skill_num != CR_GRANDCROSS) //グランドクロスでないなら
+		sd->state.attack_type = BF_WEAPON; //攻撃タイプは武器攻撃
 
 	// ターゲット
-	if(target->type==BL_PC)
-		tsd=(struct map_session_data *)target;
-	else if(target->type==BL_MOB)
-		tmd=(struct mob_data *)target;
-	t_ele=battle_get_elem_type(target);
-	t_race=battle_get_race( target );
-	t_size=battle_get_size( target );
-	t_mode=battle_get_mode( target );
-	t_sc_data=battle_get_sc_data( target );
+	if(target->type==BL_PC) //対象がPCなら
+		tsd=(struct map_session_data *)target; //tsdに代入(tmdはNULL)
+	else if(target->type==BL_MOB) //対象がMobなら
+		tmd=(struct mob_data *)target; //tmdに代入(tsdはNULL)
+	t_race=battle_get_race( target ); //対象の種族
+	t_ele=battle_get_elem_type(target); //対象の属性
+	t_size=battle_get_size( target ); //対象のサイズ
+	t_mode=battle_get_mode( target ); //対象のMode
+	t_sc_data=battle_get_sc_data( target ); //対象のステータス異常
 
+//オートカウンター処理ここから
 	if((skill_num == 0 || (target->type == BL_PC && battle_config.pc_auto_counter_type&2) ||
 		(target->type == BL_MOB && battle_config.monster_auto_counter_type&2)) && skill_lv >= 0) {
-		if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) {
+		if(skill_num != CR_GRANDCROSS && t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1) { //グランドクロスでなく、対象がオートカウンター状態の場合
 			int dir = map_calc_dir(src,target->x,target->y),t_dir = battle_get_dir(target);
 			int dist = distance(src->x,src->y,target->x,target->y);
-			if(dist <= 0 || map_check_dir(dir,t_dir) ) {
+			if(dist <= 0 || map_check_dir(dir,t_dir) ) { //対象との距離が0以下、または対象の正面？
 				memset(&wd,0,sizeof(wd));
 				t_sc_data[SC_AUTOCOUNTER].val3 = 0;
 				t_sc_data[SC_AUTOCOUNTER].val4 = 1;
-				if(sc_data && sc_data[SC_AUTOCOUNTER].timer == -1) {
+				if(sc_data && sc_data[SC_AUTOCOUNTER].timer == -1) { //自分がオートカウンター状態
 					int range = battle_get_range(target);
-					if((target->type == BL_PC && ((struct map_session_data *)target)->status.weapon != 11 && dist <= range+1) ||
-						(target->type == BL_MOB && range <= 3 && dist <= range+1) )
+					if((target->type == BL_PC && ((struct map_session_data *)target)->status.weapon != 11 && dist <= range+1) || //対象がPCで武器が弓矢でなく射程内
+						(target->type == BL_MOB && range <= 3 && dist <= range+1) ) //または対象がMobで射程が3以下で射程内
 						t_sc_data[SC_AUTOCOUNTER].val3 = src->id;
 				}
-				return wd;
+				return wd; //ダメージ構造体を返して終了
 			}
 			else ac_flag = 1;
 		}
 	}
+//オートカウンター処理ここまで
 
 	flag=BF_SHORT|BF_WEAPON|BF_NORMAL;	// 攻撃の種類の設定
 
 	// 回避率計算、回避判定は後で
 	flee = battle_get_flee(target);
-	if(battle_config.agi_penaly_type > 0 || battle_config.vit_penaly_type > 0)
-		target_count += battle_counttargeted(target,src);
+	if(battle_config.agi_penaly_type > 0 || battle_config.vit_penaly_type > 0) //AGI、VITペナルティ設定が有効
+		target_count += battle_counttargeted(target,src); //対象の数を算出
 	if(battle_config.agi_penaly_type > 0) {
-		if(target_count >= battle_config.agi_penaly_count) {
-			if(battle_config.agi_penaly_type == 1)
+		if(target_count >= battle_config.agi_penaly_count) { //ペナルティ設定より対象が多い
+			if(battle_config.agi_penaly_type == 1) //回避率がagi_penaly_num%ずつ減少
 				flee = (flee * (100 - (target_count - (battle_config.agi_penaly_count - 1))*battle_config.agi_penaly_num))/100;
-			else if(battle_config.agi_penaly_type == 2)
+			else if(battle_config.agi_penaly_type == 2) //回避率がagi_penaly_num分減少
 				flee -= (target_count - (battle_config.agi_penaly_count - 1))*battle_config.agi_penaly_num;
-			if(flee < 1) flee = 1;
+			if(flee < 1) flee = 1; //回避率は最低でも1
 		}
 	}
-	hitrate=battle_get_hit(src) - flee + 80;
+	hitrate=battle_get_hit(src) - flee + 80; //命中率計算
 
 	type=0;	// normal
 	div_ = 1; // single attack
 
-	dex=battle_get_dex(src);
-	luk=battle_get_luk(src);
-	watk = battle_get_atk(src);
-	watk_ = battle_get_atk_(src);
+	dex=battle_get_dex(src); //DEX
+	luk=battle_get_luk(src); //LUK
+	watk = battle_get_atk(src); //ATK
+	watk_ = battle_get_atk_(src); //ATK左手
 
-	damage = damage2 = battle_get_baseatk(&sd->bl);
-	atkmin = atkmin_ = dex;
-	sd->state.arrow_atk = 0;
-	if(sd->status.weapon == 11) {
-		atkmin = watk * ((dex<watk)? dex:watk);
-		flag=(flag&~BF_RANGEMASK)|BF_LONG;
-		if(sd->arrow_ele > 0)
+	damage = damage2 = battle_get_baseatk(&sd->bl); //damega,damega2初登場、base_atkの取得
+	atkmin = atkmin_ = dex; //最低ATKはDEXで初期化？
+	sd->state.arrow_atk = 0; //arrow_atk初期化
+	if(sd->status.weapon == 11) { //武器が弓矢の場合
+		atkmin = watk * ((dex<watk)? dex:watk); //最低ATK再計算
+		flag=(flag&~BF_RANGEMASK)|BF_LONG; //遠距離攻撃フラグを有効
+		if(sd->arrow_ele > 0) //属性矢なら属性を矢の属性に変更
 			s_ele = sd->arrow_ele;
-		sd->state.arrow_atk = 1;
+		sd->state.arrow_atk = 1; //arrow_atk有効化
 	}
 	if(sd->equip_index[9] >= 0 && sd->inventory_data[sd->equip_index[9]])
 		atkmin = atkmin*(80 + sd->inventory_data[sd->equip_index[9]]->wlv*20)/100;
@@ -2853,45 +3040,48 @@ static struct Damage battle_calc_pc_weapon_attack(
 		damage+= skill*2;
 		damage2+= skill*2;
 	}
-	// カード・ダメージUP修正 両手持ちの場合左手のカードも右手に適用,左手はカードによる補正はなし
+//スキルによるダメージ補正ここまで
+
+//カードによるダメージ追加処理ここから
 	cardfix=100;
-	if(!sd->state.arrow_atk) {
-		if(!battle_config.left_cardfix_to_right) {
+	if(!sd->state.arrow_atk) { //弓矢以外
+		if(!battle_config.left_cardfix_to_right) { //左手カード補正設定無し
 			cardfix=cardfix*(100+sd->addrace[t_race])/100;	// 種族によるダメージ修正
-			cardfix=cardfix*(100+sd->addele[t_ele])/100;	// 属 性によるダメージ修正
+			cardfix=cardfix*(100+sd->addele[t_ele])/100;	// 属性によるダメージ修正
 			cardfix=cardfix*(100+sd->addsize[t_size])/100;	// サイズによるダメージ修正
 		}
 		else {
-			cardfix=cardfix*(100+sd->addrace[t_race]+sd->addrace_[t_race])/100;	// 種族によるダメージ修正
-			cardfix=cardfix*(100+sd->addele[t_ele]+sd->addele_[t_ele])/100;	// 属 性によるダメージ修正
-			cardfix=cardfix*(100+sd->addsize[t_size]+sd->addsize_[t_size])/100;	// サイズによるダメージ修正
+			cardfix=cardfix*(100+sd->addrace[t_race]+sd->addrace_[t_race])/100;	// 種族によるダメージ修正(左手による追加あり)
+			cardfix=cardfix*(100+sd->addele[t_ele]+sd->addele_[t_ele])/100;	// 属性によるダメージ修正(左手による追加あり)
+			cardfix=cardfix*(100+sd->addsize[t_size]+sd->addsize_[t_size])/100;	// サイズによるダメージ修正(左手による追加あり)
 		}
 	}
-	else {
-		cardfix=cardfix*(100+sd->addrace[t_race]+sd->arrow_addrace[t_race])/100;	// 種族によるダメージ修正
-		cardfix=cardfix*(100+sd->addele[t_ele]+sd->arrow_addele[t_ele])/100;	// 属 性によるダメージ修正
-		cardfix=cardfix*(100+sd->addsize[t_size]+sd->arrow_addsize[t_size])/100;	// サイズによるダメージ修正
+	else { //弓矢
+		cardfix=cardfix*(100+sd->addrace[t_race]+sd->arrow_addrace[t_race])/100;	// 種族によるダメージ修正(弓矢による追加あり)
+		cardfix=cardfix*(100+sd->addele[t_ele]+sd->arrow_addele[t_ele])/100;	// 属性によるダメージ修正(弓矢による追加あり)
+		cardfix=cardfix*(100+sd->addsize[t_size]+sd->arrow_addsize[t_size])/100;	// サイズによるダメージ修正(弓矢による追加あり)
 	}
-	if(t_mode & 0x20) {
-		if(!sd->state.arrow_atk) {
-			if(!battle_config.left_cardfix_to_right)
-				cardfix=cardfix*(100+sd->addrace[10])/100;
-			else
-				cardfix=cardfix*(100+sd->addrace[10]+sd->addrace_[10])/100;
+	if(t_mode & 0x20) { //ボス
+		if(!sd->state.arrow_atk) { //弓矢攻撃以外なら
+			if(!battle_config.left_cardfix_to_right) //左手カード補正設定無し
+				cardfix=cardfix*(100+sd->addrace[10])/100; //ボスモンスターに追加ダメージ
+			else //左手カード補正設定あり
+				cardfix=cardfix*(100+sd->addrace[10]+sd->addrace_[10])/100; //ボスモンスターに追加ダメージ(左手による追加あり)
 		}
+		else //弓矢攻撃
+			cardfix=cardfix*(100+sd->addrace[10]+sd->arrow_addrace[10])/100; //ボスモンスターに追加ダメージ(弓矢による追加あり)
+	}
+	else { //ボスじゃない
+		if(!sd->state.arrow_atk) { //弓矢攻撃以外
+			if(!battle_config.left_cardfix_to_right) //左手カード補正設定無し
+				cardfix=cardfix*(100+sd->addrace[11])/100; //ボス以外モンスターに追加ダメージ
+			else //左手カード補正設定あり
+				cardfix=cardfix*(100+sd->addrace[11]+sd->addrace_[11])/100; //ボス以外モンスターに追加ダメージ(左手による追加あり)
+	}
 		else
-			cardfix=cardfix*(100+sd->addrace[10]+sd->arrow_addrace[10])/100;
+			cardfix=cardfix*(100+sd->addrace[11]+sd->arrow_addrace[11])/100; //ボス以外モンスターに追加ダメージ(弓矢による追加あり)
 	}
-	else {
-		if(!sd->state.arrow_atk) {
-			if(!battle_config.left_cardfix_to_right)
-				cardfix=cardfix*(100+sd->addrace[11])/100;
-			else
-				cardfix=cardfix*(100+sd->addrace[11]+sd->addrace_[11])/100;
-		}
-		else
-			cardfix=cardfix*(100+sd->addrace[11]+sd->arrow_addrace[11])/100;
-	}
+	//特定Class用補正処理(少女の日記→ボンゴン用？)
 	t_class = battle_get_class(target);
 	for(i=0;i<sd->add_damage_class_count;i++) {
 		if(sd->add_damage_classid[i] == t_class) {
@@ -2899,34 +3089,40 @@ static struct Damage battle_calc_pc_weapon_attack(
 			break;
 		}
 	}
-	damage=damage*cardfix/100;
+	damage=damage*cardfix/100; //カード補正によるダメージ増加
+//カードによるダメージ増加処理ここまで
 
+//カードによるダメージ追加処理(左手)ここから
 	cardfix=100;
-	if(!battle_config.left_cardfix_to_right) {
-		cardfix=cardfix*(100+sd->addrace_[t_race])/100;	// 種族によるダメージ修正
-		cardfix=cardfix*(100+sd->addele_[t_ele])/100;	// 属 性によるダメージ修正
-		cardfix=cardfix*(100+sd->addsize_[t_size])/100;	// サイズによるダメージ修正
-		if(t_mode & 0x20)
-			cardfix=cardfix*(100+sd->addrace_[10])/100;
+	if(!battle_config.left_cardfix_to_right) {  //左手カード補正設定無し
+		cardfix=cardfix*(100+sd->addrace_[t_race])/100;	// 種族によるダメージ修正左手
+		cardfix=cardfix*(100+sd->addele_[t_ele])/100;	// 属 性によるダメージ修正左手
+		cardfix=cardfix*(100+sd->addsize_[t_size])/100;	// サイズによるダメージ修正左手
+		if(t_mode & 0x20) //ボス
+			cardfix=cardfix*(100+sd->addrace_[10])/100; //ボスモンスターに追加ダメージ左手
 		else
-			cardfix=cardfix*(100+sd->addrace_[11])/100;
+			cardfix=cardfix*(100+sd->addrace_[11])/100; //ボス以外モンスターに追加ダメージ左手
 	}
+	//特定Class用補正処理左手(少女の日記→ボンゴン用？)
 	for(i=0;i<sd->add_damage_class_count_;i++) {
 		if(sd->add_damage_classid_[i] == t_class) {
 			cardfix=cardfix*(100+sd->add_damage_classrate_[i])/100;
 			break;
 		}
 	}
-	damage2=damage2*cardfix/100;
+	damage2=damage2*cardfix/100; //カード補正による左手ダメージ増加
+//カードによるダメージ増加処理(左手)ここまで
 
-	if( target->type==BL_PC ){
+//カードによるダメージ減衰処理ここから
+	if( target->type==BL_PC ){ //対象がPCの場合
 		cardfix=100;
 		cardfix=cardfix*(100-tsd->subrace[s_race])/100;	// 種族によるダメージ耐性
-		cardfix=cardfix*(100-tsd->subele[s_ele])/100;	// 属 性によるダメージ耐性
+		cardfix=cardfix*(100-tsd->subele[s_ele])/100;	// 属性によるダメージ耐性
 		if(battle_get_mode(src) & 0x20)
-			cardfix=cardfix*(100-tsd->subrace[10])/100;
+			cardfix=cardfix*(100-tsd->subrace[10])/100; //ボスからの攻撃はダメージ減少
 		else
-			cardfix=cardfix*(100-tsd->subrace[11])/100;
+			cardfix=cardfix*(100-tsd->subrace[11])/100; //ボス以外からの攻撃はダメージ減少
+		//特定Class用補正処理左手(少女の日記→ボンゴン用？)
 		for(i=0;i<tsd->add_def_class_count;i++) {
 			if(tsd->add_def_classid[i] == sd->status.class) {
 				cardfix=cardfix*(100-tsd->add_def_classrate[i])/100;
@@ -2934,31 +3130,32 @@ static struct Damage battle_calc_pc_weapon_attack(
 			}
 		}
 		if(flag&BF_LONG)
-			cardfix=cardfix*(100-tsd->long_attack_def_rate)/100;
+			cardfix=cardfix*(100-tsd->long_attack_def_rate)/100; //遠距離攻撃はダメージ減少(ホルンCとか)
 		if(flag&BF_SHORT)
-			cardfix=cardfix*(100-tsd->near_attack_def_rate)/100;
-		damage=damage*cardfix/100;
-		damage2=damage2*cardfix/100;
+			cardfix=cardfix*(100-tsd->near_attack_def_rate)/100; //近距離攻撃はダメージ減少(該当無し？)
+		damage=damage*cardfix/100; //カード補正によるダメージ減少
+		damage2=damage2*cardfix/100; //カード補正による左手ダメージ減少
 	}
-	if(t_sc_data) {
+//カードによるダメージ減衰処理ここまで
+//ディフェンダーによるダメージ減衰処理ここから
+	if(t_sc_data) { //ターゲットのステータスに変化がある場合sc_data
 		cardfix=100;
-		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG)
-			cardfix=cardfix*(100-t_sc_data[SC_DEFENDER].val2)/100;
+		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG) //ディフェンダー状態で遠距離攻撃
+			cardfix=cardfix*(100-t_sc_data[SC_DEFENDER].val2)/100; //ディフェンダーによる減衰
 		if(cardfix != 100) {
-			damage=damage*cardfix/100;
-			damage2=damage2*cardfix/100;
+			damage=damage*cardfix/100; //ディフェンダー補正によるダメージ減少
+			damage2=damage2*cardfix/100; //ディフェンダー補正による左手ダメージ減少
 		}
 	}
+//ディフェンダーによるダメージ減衰処理ここまで
 	if(damage < 0) damage = 0;
 	if(damage2 < 0) damage2 = 0;
 
 	// 属 性の適用
-	if(skill_num != 0 || s_ele != 0 || !battle_config.pc_attack_attr_none)
 		damage=battle_attr_fix(damage,s_ele, battle_get_element(target) );
-	if(skill_num != 0 || s_ele != 0 || !battle_config.pc_attack_attr_none)
 		damage2=battle_attr_fix(damage2,s_ele_, battle_get_element(target) );
 
-	// 星のかけらの適用
+	// 星のかけら、気球の適用
 	damage += sd->star;
 	damage2 += sd->star_;
 	damage += sd->spiritball*3;
@@ -2970,6 +3167,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	// map_session_data に左手武器(atk,atk2,ele,star,atkmods)追加して
 	// pc_calcstatus()でデータを入力しています
 
+	//左手のみ武器装備
 	if(sd->weapontype1 == 0 && sd->weapontype2 > 0) {
 		damage = damage2;
 		damage2 = 0;
@@ -2986,7 +3184,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		damage2 = damage2 * (30 + (skill * 10))/100;
 		if(dmg2 > 0 && damage2 < 1) damage2 = 1;
 	}
-	else
+	else //二刀流でなければ左手ダメージは0
 		damage2 = 0;
 
 		// 右手,短剣のみ
@@ -3017,6 +3215,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		type=0x0b;
 	}
 
+	// 対象が完全回避をする設定がONなら
 	if(battle_config.enemy_perfect_flee) {
 		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && div_ < 255 && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ) {
 			damage=damage2=0;
@@ -3024,7 +3223,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		}
 	}
 
-//	if(def1 >= 1000000) {
+	//MobのModeに頑強フラグが立っているときの処理
 	if(t_mode&0x40){
 		if(damage > 0)
 			damage = 1;
@@ -3032,6 +3231,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 			damage2 = 1;
 	}
 
+	//bNoWeaponDamage(設定アイテム無し？)でグランドクロスじゃない場合はダメージが0
 	if( tsd && tsd->special_state.no_weapon_damage && skill_num != CR_GRANDCROSS)
 		damage = damage2 = 0;
 
