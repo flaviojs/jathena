@@ -799,7 +799,10 @@ int map_quit(struct map_session_data *sd)
 
 	pc_cleareventtimer(sd);	// イベントタイマを破棄する
 
-	storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
+	if(sd->state.storage_flag)
+		storage_guild_storage_quit(sd,0);
+	else
+		storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
 
 	skill_castcancel(&sd->bl,0);	// 詠唱を中断する
 	skill_status_change_clear(&sd->bl,1);	// ステータス異常を解除する
@@ -1384,9 +1387,9 @@ int do_init(int argc,char *argv[])
 	do_init_script();
 	do_init_npc();
 	do_init_pc();
-	do_init_storage();
 	do_init_party();
 	do_init_guild();
+	do_init_storage();
 	do_init_skill();
 	do_init_pet();
 	npc_event_do_oninit();	// npcのOnInitイベント実行

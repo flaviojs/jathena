@@ -2722,7 +2722,10 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		chat_leavechat(sd);
 	if(sd->trade_partner)	// 取引を中断する
 		trade_tradecancel(sd);
-	storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
+	if(sd->state.storage_flag)
+		storage_guild_storage_quit(sd,0);
+	else
+		storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
 
 	if(sd->party_invite>0)	// パーティ勧誘を拒否する
 		party_reply_invite(sd,sd->party_invite_account,0);
@@ -4371,7 +4374,8 @@ int pc_setcart(struct map_session_data *sd,int type)
 			clif_cart_equiplist(sd);
 			clif_updatestatus(sd,SP_CARTINFO);
 			clif_status_change(&sd->bl,0x0c,0);
-		}else{
+		}
+		else{
 			pc_setoption(sd,cart[type]);
 		}
 	}

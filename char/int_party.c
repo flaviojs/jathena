@@ -96,6 +96,7 @@ int inter_party_init()
 			printf("int_party: out of memory!\n");
 			exit(0);
 		}
+		memset(p,0,sizeof(struct party));
 		if(inter_party_fromstr(line,p)==0 && p->party_id>0){
 			if( p->party_id >= party_newid)
 				party_newid=p->party_id+1;
@@ -104,6 +105,7 @@ int inter_party_init()
 		}
 		else{
 			printf("int_party: broken data [%s] line %d\n",party_txt,c);
+			free(p);
 		}
 		c++;
 	}

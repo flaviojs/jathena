@@ -30,7 +30,7 @@
 
 static const int packet_len_table[]={
 	-1,-1,27, 0, -1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
-	-1, 7, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	-1, 7, 0, 0,  0, 0, 0, 0, -1,11, 0, 0,  0, 0,  0, 0,
 	35,-1,11,15, 34,29, 7,-1,  0, 0, 0, 0,  0, 0,  0, 0,
 	10,-1,15, 0, 79,19, 7,-1,  0,-1,-1,-1, 14,67,186,-1,
 	 9, 9, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
@@ -165,25 +165,37 @@ int intif_request_accountreg(struct map_session_data *sd)
 // 倉庫データ要求
 int intif_request_storage(int account_id)
 {
-	struct map_session_data *sd=map_id2sd(account_id);
 	WFIFOW(inter_fd,0) = 0x3010;
 	WFIFOL(inter_fd,2) = account_id;
-	if(sd->state.storage_flag)
-		WFIFOL(inter_fd,6) = sd->status.guild_id;
-	else
-		WFIFOL(inter_fd,6) = account_id;
-	WFIFOSET(inter_fd,10);
+	WFIFOSET(inter_fd,6);
 	return 0;
 }
 // 倉庫データ送信
-int intif_send_storage(int account_id)
+int intif_send_storage(struct storage *stor)
 {
 	WFIFOW(inter_fd,0) = 0x3011;
-	WFIFOW(inter_fd,2) = sizeof(struct storage)+12;
+	WFIFOW(inter_fd,2) = sizeof(struct storage)+8;
+	WFIFOL(inter_fd,4) = stor->account_id;
+	memcpy( WFIFOP(inter_fd,8),stor, sizeof(struct storage) );
+	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
+	return 0;
+}
+
+int intif_request_guild_storage(int account_id,int guild_id)
+{
+	WFIFOW(inter_fd,0) = 0x3018;
+	WFIFOL(inter_fd,2) = account_id;
+	WFIFOL(inter_fd,6) = guild_id;
+	WFIFOSET(inter_fd,10);
+	return 0;
+}
+int intif_send_guild_storage(int account_id,struct guild_storage *gstor)
+{
+	WFIFOW(inter_fd,0) = 0x3019;
+	WFIFOW(inter_fd,2) = sizeof(struct guild_storage)+12;
 	WFIFOL(inter_fd,4) = account_id;
-	WFIFOL(inter_fd,8) = account_id;
-	memcpy( WFIFOP(inter_fd,12),
-		 &storage[ account2storage(account_id) ], sizeof(struct storage) );
+	WFIFOL(inter_fd,8) = gstor->guild_id;
+	memcpy( WFIFOP(inter_fd,12),gstor, sizeof(struct guild_storage) );
 	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
 	return 0;
 }
@@ -542,10 +554,10 @@ int intif_parse_LoadStorage(int fd)
 {
 	struct storage *stor;
 	struct map_session_data *sd;
-	stor=&storage[account2storage( RFIFOL(fd,8) )];
-	if( RFIFOW(fd,2)-12 != sizeof(struct storage) ){
+	stor=account2storage( RFIFOL(fd,4) );
+	if( RFIFOW(fd,2)-8 != sizeof(struct storage) ){
 		if(battle_config.error_log)
-			printf("intif_parse_LoadStorage: data size error %d %d\n",RFIFOW(fd,2)-12 , sizeof(struct storage));
+			printf("intif_parse_LoadStorage: data size error %d %d\n",RFIFOW(fd,2)-8 , sizeof(struct storage));
 		return 1;
 	}
 	sd=map_id2sd( RFIFOL(fd,4) );
@@ -556,8 +568,9 @@ int intif_parse_LoadStorage(int fd)
 	}
 	if(battle_config.save_log)
 		printf("intif_openstorage: %d\n",RFIFOL(fd,4) );
-	memcpy(stor,RFIFOP(fd,12),sizeof(struct storage));
+	memcpy(stor,RFIFOP(fd,8),sizeof(struct storage));
 	stor->storage_status=1;
+	sd->state.storage_flag = 0;
 	clif_storageitemlist(sd,stor);
 	clif_storageequiplist(sd,stor);
 	clif_updatestorageamount(sd,stor);
@@ -568,6 +581,48 @@ int intif_parse_SaveStorage(int fd)
 {
 	if(battle_config.save_log)
 		printf("intif_savestorage: done %d %d\n",RFIFOL(fd,2),RFIFOB(fd,6) );
+	return 0;
+}
+
+int intif_parse_LoadGuildStorage(int fd)
+{
+	struct guild_storage *gstor;
+	struct map_session_data *sd;
+	int guild_id = RFIFOL(fd,8);
+	if(guild_id) {
+		gstor=guild2storage(guild_id);
+		if(!gstor) {
+			if(battle_config.error_log)
+				printf("intif_parse_LoadGuildStorage: error guild_id %d not exist\n",guild_id);
+			return 1;
+		}
+		if( RFIFOW(fd,2)-12 != sizeof(struct guild_storage) ){
+			if(battle_config.error_log)
+				printf("intif_parse_LoadGuildStorage: data size error %d %d\n",RFIFOW(fd,2)-12 , sizeof(struct guild_storage));
+			return 1;
+		}
+		sd=map_id2sd( RFIFOL(fd,4) );
+		if(sd==NULL){
+			if(battle_config.error_log)
+				printf("intif_parse_LoadGuildStorage: user not found %d\n",RFIFOL(fd,4));
+			return 1;
+		}
+		if(battle_config.save_log)
+			printf("intif_open_guild_storage: %d\n",RFIFOL(fd,4) );
+		memcpy(gstor,RFIFOP(fd,12),sizeof(struct guild_storage));
+		gstor->storage_status = 1;
+		sd->state.storage_flag = 1;
+		clif_guildstorageitemlist(sd,gstor);
+		clif_guildstorageequiplist(sd,gstor);
+		clif_updateguildstorageamount(sd,gstor);
+	}
+	return 0;
+}
+int intif_parse_SaveGuildStorage(int fd)
+{
+	if(battle_config.save_log) {
+		printf("intif_save_guild_storage: done %d %d %d\n",RFIFOL(fd,2),RFIFOL(fd,6),RFIFOB(fd,10) );
+	}
 	return 0;
 }
 
@@ -922,6 +977,8 @@ int intif_parse(int fd)
 	case 0x3804:	intif_parse_AccountReg(fd); break;
 	case 0x3810:	intif_parse_LoadStorage(fd); break;
 	case 0x3811:	intif_parse_SaveStorage(fd); break;
+	case 0x3818:	intif_parse_LoadGuildStorage(fd); break;
+	case 0x3819:	intif_parse_SaveGuildStorage(fd); break;
 	case 0x3820:	intif_parse_PartyCreated(fd); break;
 	case 0x3821:	intif_parse_PartyInfo(fd); break;
 	case 0x3822:	intif_parse_PartyMemberAdded(fd); break;
@@ -960,6 +1017,3 @@ int intif_parse(int fd)
 	
 	return 1;
 }
-
-
-

@@ -27,7 +27,11 @@ struct Atcommand_Config atcommand_config;
 
 static int atkillmonster_sub(struct block_list *bl,va_list ap)
 {
-	mob_damage(NULL,(struct mob_data *)bl,((struct mob_data *)bl)->hp,2);
+	int flag = va_arg(ap,int);
+	if(flag)
+		mob_damage(NULL,(struct mob_data *)bl,((struct mob_data *)bl)->hp,2);
+	else
+		mob_delete((struct mob_data *)bl);
 	return 0;
 }
 
@@ -305,7 +309,6 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			if(battle_config.pc_invincible_time > 0)
 				pc_setinvincibletimer(sd,battle_config.pc_invincible_time);
 			clif_updatestatus(sd,SP_HP);
-			clif_updatestatus(sd,SP_SP);
 			clif_resurrection(&sd->bl,1);
 			clif_displaymessage(fd,msg_table[16]);
 			return 1;
@@ -706,7 +709,18 @@ z [0`4]•‚ÌF
 			}
 			if((x=map_mapname2mapid(temp0)) < 0 )
 				x = sd->bl.m;
-			map_foreachinarea(atkillmonster_sub,x,0,0,map[x].xs,map[x].ys,BL_MOB);
+			map_foreachinarea(atkillmonster_sub,x,0,0,map[x].xs,map[x].ys,BL_MOB,1);
+			return 1;
+		}
+// @killmonster2
+		if (strcmpi(command, "@killmonster2") == 0 && gm_level >= atcommand_config.killmonster) {
+			sscanf(message, "%s%s", command, temp0);
+			if(strstr(temp0,".gat")==NULL && strlen(temp0)<16){
+				strcat(temp0,".gat");
+			}
+			if((x=map_mapname2mapid(temp0)) < 0 )
+				x = sd->bl.m;
+			map_foreachinarea(atkillmonster_sub,x,0,0,map[x].xs,map[x].ys,BL_MOB,0);
 			return 1;
 		}
 // ¸˜B @refine ‘•”õêŠID +”’l
@@ -1143,7 +1157,6 @@ z [0`4]•‚ÌF
 				pl_sd->status.sp=pl_sd->status.max_sp;
 				pc_setstand(pl_sd);
 				clif_updatestatus(pl_sd,SP_HP);
-				clif_updatestatus(pl_sd,SP_SP);
 				clif_resurrection(&pl_sd->bl,1);
 				clif_displaymessage(pl_sd->fd,msg_table[63]);
 			}
@@ -1163,7 +1176,6 @@ z [0`4]•‚ÌF
 					pl_sd->status.sp=pl_sd->status.max_sp;
 					pc_setstand(pl_sd);
 					clif_updatestatus(pl_sd,SP_HP);
-					clif_updatestatus(pl_sd,SP_SP);
 					clif_resurrection(&pl_sd->bl,1);
 					clif_displaymessage(pl_sd->fd,msg_table[63]);
 				}

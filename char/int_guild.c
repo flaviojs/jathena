@@ -329,6 +329,7 @@ int inter_guild_init()
 			printf("int_guild: out of memory!\n");
 			exit(0);
 		}
+		memset(g,0,sizeof(struct guild));
 		if(inter_guild_fromstr(line,g)==0 && g->guild_id>0){
 			if( g->guild_id >= guild_newid)
 				guild_newid=g->guild_id+1;
@@ -337,6 +338,7 @@ int inter_guild_init()
 			guild_calcinfo(g);
 		}else{
 			printf("int_guild: broken data [%s] line %d\n",guild_txt,c);
+			free(g);
 		}
 		c++;
 	}
@@ -355,10 +357,12 @@ int inter_guild_init()
 			printf("int_guild: out of memory!\n");
 			exit(0);
 		}
+		memset(gc,0,sizeof(struct guild_castle));
 		if(inter_guildcastle_fromstr(line,gc)==0){
 			numdb_insert(castle_db,gc->castle_id,gc);
 		}else{
 			printf("int_guild: broken data [%s] line %d\n",castle_txt,c);
+			free(gc);
 		}
 		c++;
 	}
@@ -372,6 +376,7 @@ int inter_guild_init()
 				printf("int_guild: out of memory!\n");
 				exit(0);
 			}
+			memset(gc,0,sizeof(struct guild_castle));
 			gc->castle_id=i;
 			gc->guild_id=0;
 			gc->economy=0;
@@ -399,6 +404,15 @@ int inter_guild_init()
 	fclose(fp);
 
 	return 0;
+}
+
+struct guild *inter_guild_search(int guild_id)
+{
+	struct guild *g;
+
+	g=numdb_search(guild_db,guild_id);
+
+	return g;
 }
 
 // ギルドデータのセーブ用

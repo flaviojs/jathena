@@ -91,12 +91,14 @@ int inter_pet_init()
 			printf("int_pet: out of memory!\n");
 			exit(0);
 		}
+		memset(p,0,sizeof(struct s_pet));
 		if(inter_pet_fromstr(line,p)==0 && p->pet_id>0){
 			if( p->pet_id >= pet_newid)
 				pet_newid=p->pet_id+1;
 			numdb_insert(pet_db,p->pet_id,p);
 		}else{
 			printf("int_pet: broken data [%s] line %d\n",pet_txt,c);
+			free(p);
 		}
 		c++;
 	}

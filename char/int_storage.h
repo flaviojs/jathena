@@ -3,9 +3,11 @@
 
 int inter_storage_init();
 int inter_storage_save();
+int inter_guild_storage_save();
 
 int inter_storage_parse_frommap(int fd);
 
 extern char storage_txt[1024];
+extern char guild_storage_txt[1024];
 
 #endif

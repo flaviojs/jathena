@@ -235,7 +235,7 @@ struct {
 	{buildin_monster,"monster","siisii*"},
 	{buildin_areamonster,"areamonster","siiiisii*"},
 	{buildin_killmonster,"killmonster","ss"},
-	{buildin_killmonsterall,"killmonster","s"},
+	{buildin_killmonsterall,"killmonsterall","s"},
 	{buildin_doevent,"doevent","s"},
 	{buildin_addtimer,"addtimer","is"},
 	{buildin_deltimer,"deltimer","s"},
@@ -2290,20 +2290,19 @@ int buildin_savepoint(struct script_state *st)
  */
 int buildin_openstorage(struct script_state *st)
 {
-	struct map_session_data *sd=map_id2sd(st->rid);
-	sd->state.storage_flag=0;
-	storage_storageopen(sd);
+	storage_storageopen(map_id2sd(st->rid));
 	return 0;
 }
+
 int buildin_guildstorage(struct script_state *st)
 {
 	struct map_session_data *sd=map_id2sd(st->rid);
-	if(!sd->status.guild_id)
+	if(sd->status.guild_id <= 0)
 		return 0;
-	sd->state.storage_flag=1;
-	storage_storageopen(sd);
+	storage_guild_storageopen(sd);
 	return 0;
 }
+
 /*==========================================
  * アイテムによるスキル発動
  *------------------------------------------

@@ -23,6 +23,7 @@
 #define ACCOUNT_REG2_NUM 16
 #define DEFAULT_WALK_SPEED 150
 #define MAX_STORAGE 100
+#define MAX_GUILD_STORAGE 1000
 #define MAX_PARTY 12
 #define MAX_GUILD 36
 #define MAX_GUILDPOSITION 20
@@ -105,6 +106,13 @@ struct storage {
 	short storage_status;
 	short storage_amount;
 	struct item storage[MAX_STORAGE];
+};
+
+struct guild_storage {
+	int guild_id;
+	short storage_status;
+	short storage_amount;
+	struct item storage[MAX_GUILD_STORAGE];
 };
 
 struct map_session_data;

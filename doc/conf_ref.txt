@@ -248,6 +248,10 @@ castle_txt
 	ギルドの城データを格納するファイル名です。
 	省略可能で、デフォルトは save/castle.txt です。
 
+guild_storage_txt
+	ギルド倉庫データを格納するファイル名です。
+	省略可能で、デフォルトはsave/g_storage.txt です。
+
 accreg_txt
 	ワールド内アカウント共有変数データを格納するファイル名です。
 	省略可能で、デフォルトは save/accreg.txt です。
@@ -267,6 +271,8 @@ party_txt: save/party.txt
 guild_txt: save/guild.txt
 pet_txt: save/pet.txt
 castle_txt: save/castle.txt
+guild_storage_txt: save/g_storage.txt
+accreg_txt: save/accreg.txt
 party_share_level: 10
 inter_log_file: log/inter.log
 
@@ -1178,7 +1184,7 @@ go
 monster
 	@コマンド @monster
 killmonster
-	@コマンド @killmonster
+	@コマンド @killmonster、@killmonster2
 refine
 	@コマンド @refine
 produce

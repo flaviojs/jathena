@@ -1,5 +1,84 @@
 --------------------
+//0888 by 死神
+
+・設計から間違っていたギルド倉庫修正。(ただ複数人の使用によるバグがある可能性はまだあります。)
+・細かいバグ修正。
+	(doc/)
+	inter_server_packet.txt 修正。
+	conf_ref.txt 修正。
+	(conf/)
+	inter_athena.conf 修正。
+	help.txt 修正。
+	(common/)
+	mmo.h 修正。
+	(char/)
+	makefile 修正。
+	int_storage.h 修正。
+	int_storage.c
+		account2storage()、inter_storage_init()、storage_fromstr() 修正。
+		inter_storage_save()、mapif_load_storage() 修正。
+		mapif_parse_SaveStorage() 修正。
+		guild_storage_fromstr()、guild_storage_tostr() 追加。
+		inter_storage_save_sub()、inter_guild_storage_save_sub() 追加。
+		inter_guild_storage_save()、mapif_parse_LoadGuildStorage() 追加。
+		mapif_parse_SaveGuildStorage()、mapif_load_guild_storage() 追加。
+		mapif_save_guild_storage_ack()、guild2storage() 追加。
+	int_party.c
+		inter_party_init() 修正。
+	int_guild.h 修正。
+	int_guild.c
+		inter_guild_init() 修正。
+		inter_guild_search() 追加。
+	int_pet.c
+		inter_pet_init() 修正。
+	inter.c
+		inter_init()、inter_save()、inter_config_read() 修正。
+	(map/)
+	makefile 修正。
+	map.h 修正。
+	map.c
+		map_quit()、do_init() 修正。
+	pc.c
+		pc_setpos() 修正。
+	storage.h 修正。
+	storage.c
+		do_init_storage()、do_final_storage()、account2storage() 修正。
+		storage_storageopen()、storage_storageadd()、storage_storageget() 修正。
+		storage_storageaddfromcart()、storage_storagegettocart() 修正。
+		storage_storageclose()、storage_storage_quit() 修正。
+		storage_storage_save() 修正。
+		guild2storage()、storage_guild_storageopen() 追加。
+		guild_storage_additem() 、guild_storage_delitem() 追加。
+		storage_guild_storageadd()、storage_guild_storageget() 追加。
+		storage_guild_storageaddfromcart()、storage_guild_storagegettocart() 追加。
+		storage_guild_storageclose()、storage_guild_storage_quit() 追加。
+	intif.h 修正。
+	intif.c
+		intif_send_storage()、intif_parse_LoadStorage()、intif_parse() 修正。
+		intif_request_guild_storage()、intif_send_guild_storage() 追加。
+		intif_parse_SaveGuildStorage()、intif_parse_LoadGuildStorage() 追加。
+	clif.h 修正。
+	clif.c
+		clif_additem()、clif_parse_MoveToKafra() 修正。
+		clif_parse_MoveFromKafra()、clif_parse_MoveToKafraFromCart() 修正。
+		clif_parse_MoveFromKafraToCart()、clif_parse_CloseKafra() 修正。
+		clif_parse_LoadEndAck() 修正。
+		clif_guildstorageitemlist()、clif_guildstorageequiplist() 追加。
+		clif_updateguildstorageamount()、clif_guildstorageitemadded() 追加。
+	guild.c
+		guild_broken() 修正。
+	script.c
+		buildin_openstorage()、buildin_guildstorage() 修正。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+	mob.c
+		mob_summonslave()、mob_damage() 修正。
+	atcommand.c
+		atkillmonster_sub()、atcommand() 修正。
+
+--------------------
 //0887 by 獅子o^.^o
+
 ・(db/)
 	skill_tree.txt 修正
 

@@ -3,87 +3,47 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "db.h"
 #include "itemdb.h"
 #include "clif.h"
 #include "intif.h"
 #include "pc.h"
 #include "storage.h"
+#include "guild.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
 #endif
 
-char stor_txt[]="storage.txt";
-struct storage *storage;
-int storage_num;
-
-char bank_txt[]="save/bank.txt";
-struct bank *bank;
-int bank_num;
+static struct dbt *storage_db;
+static struct dbt *guild_storage_db;
 
 int do_init_storage(void) // map.c::do_init()から呼ばれる
 {
-/*	char line[65536];
-	int i=0,set,tmp_int[2];
-	FILE *fp;
-	fp=fopen(stor_txt,"r");
-	if(fp==NULL)
-		return 0;
-	while(fgets(line,65535,fp)){
-		set=sscanf(line,"%d,%d",&tmp_int[0],&tmp_int[1]);
-		if(set==2) {
-			if(i==0){
-				storage_num=1;
-				storage=malloc(sizeof(struct storage));
-			}else{
-				storage=realloc(storage,sizeof(struct storage)*(++storage_num));
-			}
-			memset(&storage[i],0,sizeof(struct storage));
-			storage[i].account_id=tmp_int[0];
-			storage_fromstr(line,&storage[i]);
-			i++;
-		}
-	}
-	fclose(fp);*/
-	storage_num=0;
-	storage=NULL;
+	storage_db=numdb_init();
+	guild_storage_db=numdb_init();
 	return 1;
 }
 
 void do_final_storage(void) // map.c::do_final()から呼ばれる
 {
-/*	char line[65536];
-	int i;
-	FILE *fp;
-
-	fp=fopen(stor_txt,"w");
-	if(fp==NULL)
-		return;
-	for(i=0;i<storage_num;i++){
-		storage_tostr(line,&storage[i]);
-		fprintf(fp,"%s%c\n",line,0x0d);
-	}
-	fclose(fp);*/
 }
 
-int account2storage(int account_id)
+struct storage *account2storage(int account_id)
 {
-	int i;
-	struct map_session_data *sd=map_id2sd(account_id);
-	if(sd && sd->state.storage_flag)
-		account_id=sd->status.guild_id;
-	for(i=0;i<storage_num;i++)
-		if(account_id==storage[i].account_id)
-			return i;
-	if(i==0){
-		storage=malloc(sizeof(struct storage));
-		storage_num=1;
-	}else{
-		storage=realloc(storage,sizeof(struct storage)*(++storage_num));
+	struct storage *stor;
+	stor=numdb_search(storage_db,account_id);
+	if(stor == NULL) {
+		stor = malloc(sizeof(struct storage));
+		if(stor == NULL){
+			printf("storage: out of memory!\n");
+			exit(0);
+		}
+		memset(stor,0,sizeof(struct storage));
+		stor->account_id=account_id;
+		numdb_insert(storage_db,stor->account_id,stor);
 	}
-	memset(&storage[i],0,sizeof(struct storage));
-	storage[i].account_id=account_id;
-	return i;
+	return stor;
 }
 
 /*==========================================
@@ -92,32 +52,18 @@ int account2storage(int account_id)
  */
 int storage_storageopen(struct map_session_data *sd)
 {
-	int i,account_id;
-	if(sd->state.storage_flag)
-		account_id=sd->status.guild_id;
-	else
-		account_id=sd->status.account_id;
-	for(i=0;i<storage_num;i++){
-		if(account_id == storage[i].account_id) {
-				if(storage[i].storage_status)
-					return 0;
-			storage[i].storage_status=1;
-			clif_storageitemlist(sd,&storage[i]);
-			clif_storageequiplist(sd,&storage[i]);
-			clif_updatestorageamount(sd,&storage[i]);
-			return 0;
-		}
-	}
-	intif_request_storage(sd->status.account_id);
-/*
 	struct storage *stor;
+	if((stor = numdb_search(storage_db,sd->status.account_id)) != NULL) {
+		stor->storage_status = 1;
+		sd->state.storage_flag = 0;
+		clif_storageitemlist(sd,stor);
+		clif_storageequiplist(sd,stor);
+		clif_updatestorageamount(sd,stor);
+		return 0;
+	}
+	else
+		intif_request_storage(sd->status.account_id);
 
-	stor=&storage[account2storage(sd->status.account_id)];
-	stor->storage_status=1;
-	clif_storageitemlist(sd,stor);
-	clif_storageequiplist(sd,stor);
-	clif_updatestorageamount(sd,stor);
-*/
 	return 0;
 }
 
@@ -156,7 +102,6 @@ int storage_additem(struct map_session_data *sd,struct storage *stor,struct item
 				memcpy(&stor->storage[i],item_data,sizeof(stor->storage[0]));
 				stor->storage[i].amount=amount;
 				stor->storage_amount++;
-
 				clif_storageitemadded(sd,stor,i,amount);
 				clif_updatestorageamount(sd,stor);
 				break;
@@ -173,8 +118,7 @@ int storage_additem(struct map_session_data *sd,struct storage *stor,struct item
  */
 int storage_delitem(struct map_session_data *sd,struct storage *stor,int n,int amount)
 {
-	if(stor->storage[n].nameid==0 ||
-	   stor->storage[n].amount<amount)
+	if(stor->storage[n].nameid==0 || stor->storage[n].amount<amount)
 		return 1;
 
 	stor->storage[n].amount-=amount;
@@ -193,50 +137,15 @@ int storage_delitem(struct map_session_data *sd,struct storage *stor,int n,int a
  */
 int storage_storageadd(struct map_session_data *sd,int index,int amount)
 {
-//	int i;
 	struct storage *stor;
 
-	stor=&storage[account2storage(sd->status.account_id)];
+	stor=account2storage(sd->status.account_id);
 	if( (stor->storage_amount <= MAX_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
 		if(index>=0 && index<MAX_INVENTORY) { // valid index
 			if( (amount <= sd->status.inventory[index].amount) && (amount > 0) ) { //valid amount
-/*				int ep=0; // used for a check
-				if(!itemdb_isequip(sd->status.inventory[index].nameid)){
-					for(i=0;i<MAX_STORAGE;i++) {
-						if(stor->storage[i].nameid == sd->status.inventory[index].nameid)
-							break;
-					}
-					if(i<MAX_STORAGE)
-						goto found;
-				}
-				for(i=0;i<MAX_STORAGE;i++) {
-					if(stor->storage[i].amount==0)
-						break;
-				}
-				if(i>=MAX_STORAGE)
-					return 1;
-				found:
-				// add item to storage
-				if(stor->storage[i].amount < 1) {
-					stor->storage[i] = sd->status.inventory[index];
-					stor->storage[i].amount = amount;
-				}
-				else {
-					stor->storage[i].amount += amount;
-					ep=1; // item type was already in storage -> dont raise storage amount
-				}*/
 				if(storage_additem(sd,stor,&sd->status.inventory[index],amount)==0)
 				// remove item from inventory
 					pc_delitem(sd,index,amount,0);
-				// send packet
-/*				clif_storageitemadded(sd,stor,i,amount);
-				if(ep!=1) { // item type was not already in storage
-					// update vars
-					stor->storage_amount++;
-					clif_updatestorageamount(sd,stor);
-				}
-				do_final_storage(); // map.exeが落ちたときのために、念のためセーブ
-				*/
 			} // valid amount
 		}// valid index
 	}// storage not full & storage open
@@ -253,24 +162,12 @@ int storage_storageget(struct map_session_data *sd,int index,int amount)
 	struct storage *stor;
 	int flag;
 
-	stor=&storage[account2storage(sd->status.account_id)];
+	stor=account2storage(sd->status.account_id);
 	if(stor->storage_status == 1) { //  storage open
 		if(index>=0 && index<MAX_STORAGE) { // valid index
 			if( (amount <= stor->storage[index].amount) && (amount > 0) ) { //valid amount
-				if((flag = pc_additem(sd,&stor->storage[index],amount)) == 0){
-/*					stor->storage[index].amount -= amount; // new amount of item in storage
-					// send packet
-					clif_storageitemremoved(sd,index,amount);
-					if(stor->storage[index].amount < 1) { // no item left in storage
-						// update vars
-						stor->storage[index].nameid=0;
-						stor->storage_amount--;
-						clif_updatestorageamount(sd,stor);
-					}
-					do_final_storage(); // map.exeが落ちたときのために、念のためセーブ
-*/
+				if((flag = pc_additem(sd,&stor->storage[index],amount)) == 0)
 					storage_delitem(sd,stor,index,amount);
-				}
 				else
 					clif_additem(sd,0,0,flag);
 			} // valid amount
@@ -287,7 +184,7 @@ int storage_storageaddfromcart(struct map_session_data *sd,int index,int amount)
 {
 	struct storage *stor;
 
-	stor=&storage[account2storage(sd->status.account_id)];
+	stor=account2storage(sd->status.account_id);
 	if( (stor->storage_amount <= MAX_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
 		if(index>=0 && index<MAX_INVENTORY) { // valid index
 			if( (amount <= sd->status.cart[index].amount) && (amount > 0) ) { //valid amount
@@ -308,7 +205,7 @@ int storage_storagegettocart(struct map_session_data *sd,int index,int amount)
 {
 	struct storage *stor;
 
-	stor=&storage[account2storage(sd->status.account_id)];
+	stor=account2storage(sd->status.account_id);
 	if(stor->storage_status == 1) { //  storage open
 		if(index>=0 && index<MAX_STORAGE) { // valid index
 			if( (amount <= stor->storage[index].amount) && (amount > 0) ) { //valid amount
@@ -331,11 +228,11 @@ int storage_storageclose(struct map_session_data *sd)
 {
 	struct storage *stor;
 
-	stor=&storage[account2storage(sd->status.account_id)];
+	stor=account2storage(sd->status.account_id);
 	stor->storage_status=0;
-	sd->state.storage_flag=0;
+	sd->state.storage_flag = 0;
 	clif_storageclose(sd);
-//	do_final_storage(); // map.exeが落ちたときのために、念のためセーブ
+
 	return 0;
 }
 
@@ -345,34 +242,220 @@ int storage_storageclose(struct map_session_data *sd)
  */
 int storage_storage_quit(struct map_session_data *sd)
 {
-	int i,account_id=sd->status.account_id;
-	for(i=0;i<storage_num;i++){
-		if(account_id==storage[i].account_id){
-			if(storage[i].storage_status) {
-				storage[i].storage_status=0;
-				break;
-			}
-		}
-	}
+	struct storage *stor;
+
+	stor = numdb_search(storage_db,sd->status.account_id);
+	if(stor) stor->storage_status = 0;
+
 	return 0;
 }
 
 int storage_storage_save(struct map_session_data *sd)
 {
-	int i,account_id=sd->status.account_id;
-	for(i=0;i<storage_num;i++){
-		if(account_id==storage[i].account_id) {
-			intif_send_storage(account_id);
-			break;
+	struct storage *stor;
+
+	stor=numdb_search(storage_db,sd->status.account_id);
+	if(stor) intif_send_storage(stor);
+
+	return 0;
+}
+
+struct guild_storage *guild2storage(int guild_id)
+{
+	struct guild_storage *gs = NULL;
+	if(guild_search(guild_id) != NULL) {
+		gs=numdb_search(guild_storage_db,guild_id);
+		if(gs == NULL) {
+			gs = malloc(sizeof(struct guild_storage));
+			if(gs==NULL){
+				printf("storage: out of memory!\n");
+				exit(0);
+			}
+			memset(gs,0,sizeof(struct guild_storage));
+			gs->guild_id=guild_id;
+			numdb_insert(guild_storage_db,gs->guild_id,gs);
 		}
 	}
-	sd->state.storage_flag=1;
-	for(i=0;i<storage_num;i++){
-		if(sd->status.guild_id==storage[i].account_id) {
-			intif_send_storage(sd->status.guild_id);
-			break;
+	return gs;
+}
+
+int storage_guild_storageopen(struct map_session_data *sd)
+{
+	struct guild_storage *gstor;
+	if((gstor = numdb_search(guild_storage_db,sd->status.guild_id)) != NULL) {
+		gstor->storage_status = 1;
+		sd->state.storage_flag = 1;
+		clif_guildstorageitemlist(sd,gstor);
+		clif_guildstorageequiplist(sd,gstor);
+		clif_updateguildstorageamount(sd,gstor);
+		return 0;
+	}
+	else
+		intif_request_guild_storage(sd->status.account_id,sd->status.guild_id);
+
+	return 0;
+}
+
+int guild_storage_additem(struct map_session_data *sd,struct guild_storage *stor,struct item *item_data,int amount)
+{
+	struct item_data *data;
+	int i;
+
+	if(item_data->nameid <= 0 || amount <= 0)
+		return 1;
+	data = itemdb_search(item_data->nameid);
+
+	i=MAX_GUILD_STORAGE;
+	if(!itemdb_isequip2(data)){
+		// 装備品ではないので、既所有品なら個数のみ変化させる
+		for(i=0;i<MAX_GUILD_STORAGE;i++){
+			if(stor->storage[i].nameid == item_data->nameid &&
+				stor->storage[i].card[0] == item_data->card[0] && stor->storage[i].card[1] == item_data->card[1] &&
+				stor->storage[i].card[2] == item_data->card[2] && stor->storage[i].card[3] == item_data->card[3]){
+				if(stor->storage[i].amount+amount > MAX_AMOUNT)
+					return 1;
+				stor->storage[i].amount+=amount;
+				clif_guildstorageitemadded(sd,stor,i,amount);
+				break;
+			}
 		}
 	}
-	sd->state.storage_flag=0;
+	if(i>=MAX_GUILD_STORAGE){
+		// 装備品か未所有品だったので空き欄へ追加
+		for(i=0;i<MAX_GUILD_STORAGE;i++){
+			if(stor->storage[i].nameid==0){
+				memcpy(&stor->storage[i],item_data,sizeof(stor->storage[0]));
+				stor->storage[i].amount=amount;
+				stor->storage_amount++;
+				clif_guildstorageitemadded(sd,stor,i,amount);
+				clif_updateguildstorageamount(sd,stor);
+				break;
+			}
+		}
+		if(i>=MAX_GUILD_STORAGE)
+			return 1;
+	}
+	return 0;
+}
+
+int guild_storage_delitem(struct map_session_data *sd,struct guild_storage *stor,int n,int amount)
+{
+	if(stor->storage[n].nameid==0 || stor->storage[n].amount<amount)
+		return 1;
+
+	stor->storage[n].amount-=amount;
+	if(stor->storage[n].amount==0){
+		memset(&stor->storage[n],0,sizeof(stor->storage[0]));
+		stor->storage_amount--;
+		clif_updateguildstorageamount(sd,stor);
+	}
+	clif_storageitemremoved(sd,n,amount);
+
+	return 0;
+}
+
+int storage_guild_storageadd(struct map_session_data *sd,int index,int amount)
+{
+	struct guild_storage *stor;
+
+	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
+		if( (stor->storage_amount <= MAX_GUILD_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
+			if(index>=0 && index<MAX_INVENTORY) { // valid index
+				if( (amount <= sd->status.inventory[index].amount) && (amount > 0) ) { //valid amount
+					if(guild_storage_additem(sd,stor,&sd->status.inventory[index],amount)==0)
+					// remove item from inventory
+						pc_delitem(sd,index,amount,0);
+				} // valid amount
+			}// valid index
+		}// storage not full & storage open
+	}
+
+	return 0;
+}
+
+int storage_guild_storageget(struct map_session_data *sd,int index,int amount)
+{
+	struct guild_storage *stor;
+	int flag;
+
+	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
+		if(stor->storage_status == 1) { //  storage open
+			if(index>=0 && index<MAX_GUILD_STORAGE) { // valid index
+				if( (amount <= stor->storage[index].amount) && (amount > 0) ) { //valid amount
+					if((flag = pc_additem(sd,&stor->storage[index],amount)) == 0)
+						guild_storage_delitem(sd,stor,index,amount);
+					else
+						clif_additem(sd,0,0,flag);
+				} // valid amount
+			}// valid index
+		}// storage open
+	}
+
+	return 0;
+}
+
+int storage_guild_storageaddfromcart(struct map_session_data *sd,int index,int amount)
+{
+	struct guild_storage *stor;
+
+	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
+		if( (stor->storage_amount <= MAX_GUILD_STORAGE) && (stor->storage_status == 1) ) { // storage not full & storage open
+			if(index>=0 && index<MAX_INVENTORY) { // valid index
+				if( (amount <= sd->status.cart[index].amount) && (amount > 0) ) { //valid amount
+					if(guild_storage_additem(sd,stor,&sd->status.cart[index],amount)==0)
+						pc_cart_delitem(sd,index,amount,0);
+				} // valid amount
+			}// valid index
+		}// storage not full & storage open
+	}
+
+	return 0;
+}
+
+int storage_guild_storagegettocart(struct map_session_data *sd,int index,int amount)
+{
+	struct guild_storage *stor;
+
+	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
+		if(stor->storage_status == 1) { //  storage open
+			if(index>=0 && index<MAX_GUILD_STORAGE) { // valid index
+				if( (amount <= stor->storage[index].amount) && (amount > 0) ) { //valid amount
+					if(pc_cart_additem(sd,&stor->storage[index],amount)==0){
+						guild_storage_delitem(sd,stor,index,amount);
+					}
+				} // valid amount
+			}// valid index
+		}// storage open
+	}
+
+	return 0;
+}
+
+int storage_guild_storageclose(struct map_session_data *sd)
+{
+	struct guild_storage *stor;
+
+	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
+		intif_send_guild_storage(sd->status.account_id,stor);
+		stor->storage_status = 0;
+		sd->state.storage_flag = 0;
+	}
+	clif_storageclose(sd);
+
+	return 0;
+}
+
+int storage_guild_storage_quit(struct map_session_data *sd,int flag)
+{
+	struct guild_storage *stor;
+
+	stor = numdb_search(guild_storage_db,sd->status.guild_id);
+	if(stor) {
+		if(!flag)
+			intif_send_guild_storage(sd->status.account_id,stor);
+		stor->storage_status = 0;
+		sd->state.storage_flag = 0;
+	}
+
 	return 0;
 }

@@ -1648,6 +1648,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	int mvp_damage,max_hp = battle_get_max_hp(&md->bl);
 	unsigned int tick = gettick();
 	struct map_session_data *mvp_sd=sd ,*second_sd = NULL,*third_sd = NULL;
+	double dmg_rate,tdmg;
 
 	if(src && src->type == BL_PC) {
 		sd = (struct map_session_data *)src;
@@ -1760,7 +1761,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	// map外に消えた人は計算から除くので
 	// overkill分は無いけどsumはmax_hpとは違う
 
-
+	tdmg = 0;
 	for(i=0,count=0,mvp_damage=0;i<DAMAGELOG_SIZE;i++){
 		if(md->dmglog[i].id==0)
 			continue;
@@ -1771,6 +1772,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		if(tmpsd[i]->bl.m != md->bl.m || pc_isdead(tmpsd[i]))
 			continue;
 
+		tdmg += (double)md->dmglog[i].dmg;
 		if(mvp_damage<md->dmglog[i].dmg){
 			third_sd = second_sd;
 			second_sd = mvp_sd;
@@ -1778,20 +1780,22 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 			mvp_damage=md->dmglog[i].dmg;
 		}
 	}
+	if((double)max_hp < tdmg)
+		dmg_rate = ((double)max_hp) / tdmg;
+	else dmg_rate = 1;
 
 	// 経験値の分配
 	for(i=0;i<DAMAGELOG_SIZE;i++){
-		int per,pid,base_exp,job_exp,flag=1;
+		int pid,base_exp,job_exp,flag=1;
+		double per;
 		struct party *p;
 		if(tmpsd[i]==NULL || tmpsd[i]->bl.m != md->bl.m)
 			continue;
 
-		per=md->dmglog[i].dmg*256*(9+((count > 6)? 6:count))/10/max_hp;
-		if(per>512) per=512;
-		if(per<1) per=1;
-		base_exp=mob_db[md->class].base_exp*per/256;
+		per=((double)md->dmglog[i].dmg)*(9.+(double)((count > 6)? 6:count))/10./((double)max_hp);
+		base_exp=(int)((double)mob_db[md->class].base_exp * per * dmg_rate);
 		if(base_exp < 1) base_exp = 1;
-		job_exp=mob_db[md->class].job_exp*per/256;
+		job_exp=(int)((double)mob_db[md->class].job_exp * per * dmg_rate);
 		if(job_exp < 1) job_exp = 1;
 
 		if((pid=tmpsd[i]->status.party_id)>0){	// パーティに入っている
@@ -2208,6 +2212,7 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,int flag)
 			md->bl.type=BL_MOB;
 			map_addiddb(&md->bl);
 			mob_spawn(md->bl.id);
+			clif_skill_nodamage(&md->bl,&md->bl,(flag)? NPC_SUMMONSLAVE:NPC_SUMMONMONSTER,-1,1);
 
 			if(flag)
 				md->master_id=md2->bl.id;

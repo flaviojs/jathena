@@ -31,7 +31,7 @@ int party_share_level = 10;
 // 送信パケット長リスト
 int inter_send_packet_length[]={
 	-1,-1,27, 0, -1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
-	-1, 7, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	-1, 7, 0, 0,  0, 0, 0, 0, -1,11, 0, 0,  0, 0,  0, 0,
 	35,-1,11,15, 34,29, 7,-1,  0, 0, 0, 0,  0, 0,  0, 0,
 	10,-1,15, 0, 79,19, 7,-1,  0,-1,-1,-1, 14,67,186,-1,
 	 9, 9, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
@@ -43,7 +43,7 @@ int inter_send_packet_length[]={
 // 受信パケット長リスト
 int inter_recv_packet_length[]={
 	-1,-1, 7, 0, -1, 6, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
-	10,-1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	 6,-1, 0, 0,  0, 0, 0, 0, 10,-1, 0, 0,  0, 0,  0, 0,
 	72, 6,52,14, 10,29, 6,-1, 34, 0, 0, 0,  0, 0,  0, 0,
 	-1, 6,-1, 0, 55,19, 6,-1, 14,-1,-1,-1, 14,19,186,-1,
 	 5, 9, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
@@ -223,6 +223,9 @@ int inter_config_read(const char *cfgName)
 		else if(strcmpi(w1,"accreg_txt")==0){
 			strncpy(accreg_txt,w2,sizeof(accreg_txt));
 		}
+		else if(strcmpi(w1,"guild_storage_txt")==0){
+			strncpy(guild_storage_txt,w2,sizeof(guild_storage_txt));
+		}
 		else if(strcmpi(w1,"party_share_level")==0){
 			party_share_level=atoi(w2);
 			if(party_share_level < 0) party_share_level = 0;
@@ -254,9 +257,10 @@ int inter_log(char *fmt,...)
 // セーブ
 int inter_save()
 {
-	inter_storage_save();
 	inter_party_save();
 	inter_guild_save();
+	inter_storage_save();
+	inter_guild_storage_save();
 	inter_pet_save();
 	inter_accreg_save();
 
@@ -270,9 +274,9 @@ int inter_init(const char *file)
 
 	wis_db = numdb_init();
 
-	inter_storage_init();
 	inter_party_init();
 	inter_guild_init();
+	inter_storage_init();
 	inter_pet_init();
 	inter_accreg_init();
 

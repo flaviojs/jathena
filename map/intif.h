@@ -11,8 +11,9 @@ int intif_saveaccountreg(struct map_session_data *sd);
 int intif_request_accountreg(struct map_session_data *sd);
 
 int intif_request_storage(int account_id);
-int intif_send_storage(int account_id);
-
+int intif_send_storage(struct storage *stor);
+int intif_request_guild_storage(int account_id,int guild_id);
+int intif_send_guild_storage(int account_id,struct guild_storage *gstor);
 
 int intif_create_party(struct map_session_data *sd,char *name);
 int intif_request_partyinfo(int party_id);
