@@ -259,6 +259,7 @@ int pc_setnewpc(struct map_session_data *sd,int account_id,int char_id,int login
 	sd->state.auth   = 0;
 	sd->bl.type      = BL_PC;
 	sd->canmove_tick = gettick();
+	sd->state.waitingdisconnect=0;
 
 	return 0;
 }
@@ -1709,16 +1710,22 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 
 	memcpy(mapname,mapname_org,16);
 	mapname[16]=0;
-	m=map_mapname2mapid(mapname);
-	if(m<0){
+	if(strstr(mapname,".gat")==NULL && strlen(mapname)<11){
 		strcat(mapname,".gat");
-		m=map_mapname2mapid(mapname);
 	}
+	m=map_mapname2mapid(mapname);
 	if(m<0){
 		if(sd->mapname[0]){
 			int ip,port;
 			if(map_mapname2ipport(mapname,&ip,&port)==0){
-				clif_changemapserver(sd,mapname,x,y,ip,port);
+				clif_clearchar_area(&sd->bl,clrtype&0xffff);
+				map_delblock(&sd->bl);
+				memcpy(sd->mapname,mapname,16);
+				sd->bl.x=x;
+				sd->bl.y=y;
+				sd->state.waitingdisconnect=1;
+				chrif_save(sd);
+				chrif_changemapserver(sd,mapname,x,y,ip,port);
 				return 0;
 			}
 		}

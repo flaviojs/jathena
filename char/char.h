@@ -17,6 +17,7 @@ struct mmo_map_server{
 };
 
 int mapif_sendall(unsigned char *buf,unsigned int len);
+int mapif_sendallwos(int fd,unsigned char *buf,unsigned int len);
 int mapif_send(int fd,unsigned char *buf,unsigned int len);
 
 extern int autosave_interval;

@@ -22,7 +22,7 @@
 
 static const int packet_len_table[0x20]={
 	60, 3,-1, 3,14,-1, 7, 6,		// 2af8-2aff
-	 6,-1,10, 7, 0, 0, 0, 0,		// 2b00-2b07
+	 6,-1,10, 7,-1,41,40, 0,		// 2b00-2b07
 	 6,30,-1,10,					// 2b08-2b0b
 };
 
@@ -116,7 +116,7 @@ int chrif_connect(int fd)
 }
 
 /*==========================================
- *
+ * マップ送信
  *------------------------------------------
  */
 int chrif_sendmap(int fd)
@@ -131,7 +131,66 @@ int chrif_sendmap(int fd)
 
 	return 0;
 }
+/*==========================================
+ * マップ受信
+ *------------------------------------------
+ */
+int chrif_recvmap(int fd)
+{
+	int i,j,ip,port;
+	unsigned char *p=(unsigned char *)&ip;
+	
+	if(chrif_state<2)	// まだ準備中
+		return -1;
+	
+	ip=RFIFOL(fd,4);
+	port=RFIFOW(fd,8);
+	for(i=12,j=0;i<RFIFOW(fd,2);i+=16,j++){
+		map_setipport(RFIFOP(fd,i),ip,port);
+//		printf("recv map %d %s\n",j,RFIFOP(fd,i));
+	}
+	printf("recv map on %d.%d.%d.%d:%d (%d maps)\n",
+		p[0],p[1],p[2],p[3],port,j);
 
+	return 0;
+}
+/*==========================================
+ * マップ鯖間移動のためのデータ準備要求
+ *------------------------------------------
+ */
+int chrif_changemapserver(struct map_session_data *sd,char *name,int x,int y,int ip,short port)
+{
+	WFIFOW(char_fd,0)=0x2b05;
+	WFIFOL(char_fd,2)=sd->bl.id;
+	WFIFOL(char_fd,6)=sd->login_id1;
+	WFIFOL(char_fd,10)=sd->status.char_id;
+	memcpy(WFIFOP(char_fd,14),name,16);
+	WFIFOW(char_fd,30)=x;
+	WFIFOW(char_fd,32)=y;
+	WFIFOL(char_fd,34)=ip;
+	WFIFOL(char_fd,38)=port;
+	WFIFOB(char_fd,40)=sd->status.sex;
+	WFIFOSET(char_fd,41);
+	return 0;
+}
+/*==========================================
+ * マップ鯖間移動ack
+ *------------------------------------------
+ */
+int chrif_changemapserverack(int fd)
+{
+	struct map_session_data *sd=map_id2sd(RFIFOL(fd,2));
+	if(sd==NULL || sd->status.char_id!=RFIFOL(fd,10) )
+		return -1;
+	if(RFIFOL(fd,6)==1){
+		printf("map server change failed.\n");
+		pc_authfail(sd->fd);
+		return 0;
+	}
+	clif_changemapserver(sd,RFIFOP(fd,14),RFIFOW(fd,30),RFIFOW(fd,32),
+		RFIFOL(fd,34),RFIFOW(fd,38));
+	return 0;
+}
 /*==========================================
  *
  *------------------------------------------
@@ -150,7 +209,7 @@ int chrif_connectack(int fd)
 }
 
 /*==========================================
- *
+ * 
  *------------------------------------------
  */
 int chrif_sendmapack(int fd)
@@ -286,6 +345,8 @@ int chrif_parse(int fd)
 		case 0x2afe: pc_authfail(RFIFOL(fd,4)); break;
 		case 0x2b00: map_setusers(RFIFOL(fd,2)); break;
 		case 0x2b03: clif_charselectok(RFIFOL(fd,2)); break;
+		case 0x2b04: chrif_recvmap(fd); break;
+		case 0x2b06: chrif_changemapserverack(fd); break;
 		case 0x2b09: map_addchariddb(RFIFOL(fd,2),RFIFOP(fd,6)); break;
 		case 0x2b0b: chrif_changedgm(fd); break;
 

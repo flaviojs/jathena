@@ -1,4 +1,41 @@
 --------------
+//0520 by 胡蝶蘭
+
+・charサーバーログの「set map X.Y HOGE.gat」が表示されなくなりました
+	変わりに、「set map M from XX.YY.ZZ.WW:PP (CC maps)」
+	というふうに何個のマップをセットしたかだけを表示するようになります。
+
+	char/char.c
+		parse_frommap修正
+
+・複数mapサーバーに仮対応
+	・NPCのマップサーバー変数は鯖間では共有されません。共有すべき変数を
+	  持つNPCがいるマップ同士は同じmapサーバーで動かすべきです。
+	  おそらくPCのグローバル変数は共有できると思います(未テスト)
+	・暫定的に動くようにしただけなので、不都合があるかもしれません。
+	  特に、パーティ/ギルド/倉庫/ペット/Wisなどのinterサーバーを使う機能が
+	  正しく作動するか全くチェックしていません。
+	・「recv map on XX.YY.ZZ.WW:PP (CC maps)」というログが表示されます。
+	  これは他のmapサーバーが担当するマップのリストが、このmapサーバーに
+	  正常に受信されたという意味です。
+
+	(char/)
+	char.c/char.h
+		parse_frommap()修正
+		mapif_sendallwos()追加
+	(map/)
+	map.c/map.h
+		map_setipport()を修正
+		struct map_session_dataのstateメンバにwaitingdisconnect追加
+	chrif.c/chrif.h
+		色々追加
+	clif.c
+		waitingdisconnectが１ならパケットを無視するようにした
+	pc.c
+		pc_setpos()修正（マップサーバー変更処理など）
+		pc_setnewpc()修正
+
+--------------
 //0519 by 死神
 
 ・サーバーsnapshotと色々修正。
@@ -599,7 +636,7 @@ conf/mpc_warp.txt
 //0486 by 獅子o^.^o
 
 db/class_equip_db.txt修正
-裂けた大地の書、燃える太陽の書、乾いてる風の書、默示録、プリーストは装備することができない問題修正    
+裂けた大地の書、燃える太陽の書、乾いてる風の書、默示録、プリーストは装備することができない問題修正
 
 --------------
 //0485 by hoenny

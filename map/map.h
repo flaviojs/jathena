@@ -112,6 +112,7 @@ struct map_session_data {
 		unsigned menu_or_input : 1;
 		unsigned dead_sit : 2;
 		unsigned skillcastcancel : 1;
+		unsigned waitingdisconnect : 1;
 	} state;
 	int char_id,login_id1,login_id2,sex;
 	struct mmo_charstatus status;
@@ -420,6 +421,7 @@ struct map_session_data * map_id2sd(int);
 struct block_list * map_id2bl(int);
 int map_mapname2mapid(char*);
 int map_mapname2ipport(char*,int*,int*);
+int map_setipport(char *name,unsigned long ip,int port);
 void map_addiddb(struct block_list *);
 void map_deliddb(struct block_list *bl);
 int map_foreachiddb(int (*)(void*,void*,va_list),...);

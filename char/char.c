@@ -642,15 +642,51 @@ int parse_frommap(int fd)
 				return 0;
 			for(i=4,j=0;i<RFIFOW(fd,2);i+=16,j++){
 				memcpy(server[id].map[j],RFIFOP(fd,i),16);
-				printf("set map %d.%d : %s\n",id,j,server[id].map[j]);
+			//	printf("set map %d.%d : %s\n",id,j,server[id].map[j]);
+			}
+			i=server[id].ip;
+			{
+				unsigned char *p=(unsigned char *)&i;
+				printf("set map %d from %d.%d.%d.%d:%d (%d maps)\n",
+					id,p[0],p[1],p[2],p[3],server[id].port,j);
 			}
 			server[id].map[j][0]=0;
 			RFIFOSKIP(fd,RFIFOW(fd,2));
 			WFIFOW(fd,0)=0x2afb;
 			WFIFOW(fd,2)=0;
 			WFIFOSET(fd,3);
+			{	// 他のマップサーバーに担当マップ情報を送信
+				unsigned char buf[16384];
+				int x;
+				WBUFW(buf,0)=0x2b04;
+				WBUFW(buf,2)=j*16+12;
+				WBUFL(buf,4)=server[id].ip;
+				WBUFW(buf,8)=server[id].port;
+				WBUFW(buf,10)=i;
+				for(i=0;i<j;i++){
+					memcpy(WBUFP(buf,12+i*16),server[id].map[i],16);
+				}
+				mapif_sendallwos(fd,buf,WBUFW(buf,2));
+				// 他のマップサーバーの担当マップを送信
+				for(x=0;x<MAX_MAP_SERVERS;x++){
+					if(server_fd[x]>=0 && x!=id){
+						WFIFOW(fd,0)=0x2b04;
+						WFIFOL(fd,4)=server[x].ip;
+						WFIFOW(fd,8)=server[x].port;
+						for(i=0,j=0;i<MAX_MAP_PER_SERVER;i++){
+							if(server[x].map[i][0]>0)
+								memcpy(WFIFOP(fd,12+(j++)*16),server[x].map[i],16);
+						}
+						if(j>0){
+							WFIFOW(fd,10)=j;
+							WFIFOW(fd,2)=j*16+12;
+							WFIFOSET(fd,WFIFOW(fd,2));
+						}
+					}
+				}
+			}
 			break;
-		// ？？認証：キャラデータ検索？？
+		// 認証要求
 		case 0x2afc:
 			if(RFIFOREST(fd)<14)
 				return 0;
@@ -669,6 +705,7 @@ int parse_frommap(int fd)
 				WFIFOW(fd,2)=RFIFOL(fd,2);
 				WFIFOB(fd,6)=0;
 				WFIFOSET(fd,7);
+				printf("auth_fifo search error!\n");
 			} else {
 				WFIFOW(fd,0)=0x2afd;
 				WFIFOW(fd,2)=12+sizeof(char_dat[0]);
@@ -701,7 +738,7 @@ int parse_frommap(int fd)
 			}
 			RFIFOSKIP(fd,RFIFOW(fd,2));
 			break;
-		// ？？認証：？？
+		// キャラセレ要求
 		case 0x2b02:
 			if(RFIFOREST(fd)<10)
 				return 0;
@@ -725,7 +762,46 @@ int parse_frommap(int fd)
 			RFIFOSKIP(fd,10);
 			
 			break;
-		
+		// マップサーバー間移動要求
+		case 0x2b05:
+			if(RFIFOREST(fd)<41)
+				return 0;
+
+			if(auth_fifo_pos>=AUTH_FIFO_SIZE){
+				auth_fifo_pos=0;
+			}
+			memcpy(WFIFOP(fd,2),RFIFOP(fd,2),38);
+			WFIFOW(fd,0)=0x2b06;
+
+			printf("auth_fifo set %d - %08x %08x\n",auth_fifo_pos,RFIFOL(fd,2),RFIFOL(fd,6));
+			auth_fifo[auth_fifo_pos].account_id=RFIFOL(fd,2);
+			auth_fifo[auth_fifo_pos].char_id=RFIFOL(fd,10);
+			auth_fifo[auth_fifo_pos].login_id1=RFIFOL(fd,6);
+			auth_fifo[auth_fifo_pos].delflag=0;
+			auth_fifo[auth_fifo_pos].sex=RFIFOB(fd,40);
+			{
+				int i=0;
+				for(i=0;i<char_num;i++){
+					if(	char_dat[i].account_id==RFIFOL(fd,2) &&
+						char_dat[i].char_id==RFIFOL(fd,10) )
+					break;
+				}
+				if(i==char_num){
+					WFIFOW(fd,6)=1;
+					WFIFOSET(fd,40);
+					RFIFOSKIP(fd,41);
+					break;
+				}
+				auth_fifo[auth_fifo_pos].char_pos=i;
+			}
+			auth_fifo_pos++;
+			
+			WFIFOL(fd,6)=0;
+			WFIFOSET(fd,40);
+			RFIFOSKIP(fd,41);
+			
+			break;
+			
 		// キャラ名検索
 		case 0x2b08:
 			if(RFIFOREST(fd)<6)
@@ -777,22 +853,22 @@ int parse_frommap(int fd)
 
 int search_mapserver(char *map)
 {
-  int i,j,k;
-  printf("search_mapserver %s\n",map);
-  for(i=0;i<MAX_MAP_SERVERS;i++){
-    if(server_fd[i]<0)
-      continue;
-    for(j=0;server[i].map[j][0];j++){
-      //printf("%s : %s = %d\n",server[i].map[j],map,strcmp(server[i].map[j],map));
-      if((k=strcmp(server[i].map[j],map))==0){
-	printf("search_mapserver success %s -> %d\n",map,i);
-	return i;
-      }
-      //printf("%s : %s = %d\n",server[i].map[j],map,k);
-    }
-  }
-  printf("search_mapserver failed\n");
-  return -1;
+	int i,j,k;
+	printf("search_mapserver %s\n",map);
+	for(i=0;i<MAX_MAP_SERVERS;i++){
+		if(server_fd[i]<0)
+			continue;
+		for(j=0;server[i].map[j][0];j++){
+			//printf("%s : %s = %d\n",server[i].map[j],map,strcmp(server[i].map[j],map));
+			if((k=strcmp(server[i].map[j],map))==0){
+				printf("search_mapserver success %s -> %d\n",map,i);
+				return i;
+			}
+			//printf("%s : %s = %d\n",server[i].map[j],map,k);
+		}
+	}
+	printf("search_mapserver failed\n");
+	return -1;
 }
 
 int parse_char(int fd)
@@ -814,7 +890,7 @@ int parse_char(int fd)
 	sd=session[fd]->session_data;
 	while(RFIFOREST(fd)>=2){
 		switch(RFIFOW(fd,0)){
-		case 0x65:
+		case 0x65:	// 接続要求
 			if(RFIFOREST(fd)<17)
 				return 0;
 			if(sd==NULL){
@@ -861,7 +937,7 @@ int parse_char(int fd)
 
 			RFIFOSKIP(fd,17);
 			break;
-		case 0x66:
+		case 0x66:	// キャラ選択
 			if(RFIFOREST(fd)<3)
 				return 0;
 			for(ch=0;ch<9;ch++)
@@ -904,7 +980,7 @@ int parse_char(int fd)
 			}
 			RFIFOSKIP(fd,3);
 			break;
-		case 0x67:
+		case 0x67:	// 作成
 			if(RFIFOREST(fd)<37)
 				return 0;
 			i=make_new_char(fd,RFIFOP(fd,2));
@@ -963,7 +1039,7 @@ int parse_char(int fd)
 					break;
 				}
 			}
-		case 0x68:
+		case 0x68:	// 削除
 			if(RFIFOREST(fd)<46)
 				return 0;
 			for(i=0;i<9;i++){
@@ -997,7 +1073,7 @@ int parse_char(int fd)
 			}
 			RFIFOSKIP(fd,46);
 			break;
-		case 0x2af8:
+		case 0x2af8:	// マップサーバーログイン
 			if(RFIFOREST(fd)<60)
 				return 0;
 			WFIFOW(fd,0)=0x2af9;
@@ -1022,7 +1098,7 @@ int parse_char(int fd)
 				return 0;
 			}
 			break;
-		case 0x187:
+		case 0x187:	// Alive信号？
 			if (RFIFOREST(fd) < 6) {
 				return 0;
 			}
@@ -1063,6 +1139,20 @@ int mapif_sendall(unsigned char *buf,unsigned int len)
 	for(i=0,c=0;i<MAX_MAP_SERVERS;i++){
 		int fd;
 		if((fd=server_fd[i])>0){
+			memcpy(WFIFOP(fd,0),buf,len);
+			WFIFOSET(fd,len);
+			c++;
+		}
+	}
+	return c;
+}
+// 自分以外の全てのMAPサーバーにデータ送信（送信したmap鯖の数を返す）
+int mapif_sendallwos(int sfd,unsigned char *buf,unsigned int len)
+{
+	int i,c;
+	for(i=0,c=0;i<MAX_MAP_SERVERS;i++){
+		int fd;
+		if((fd=server_fd[i])>0 && fd!=sfd){
 			memcpy(WFIFOP(fd,0),buf,len);
 			WFIFOSET(fd,len);
 			c++;

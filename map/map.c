@@ -942,7 +942,7 @@ int map_setipport(char *name,unsigned long ip,int port)
 		mdos->gat  = NULL;
 		mdos->ip   = ip;
 		mdos->port = port;
-		strdb_insert(map_db,name,mdos);
+		strdb_insert(map_db,mdos->name,mdos);
 	} else {
 		if(md->gat){ // local -> check data
 			if(ip!=clif_getip() || port!=clif_getport()){
