@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########################################################################
-# Athenaのログインサーバー保守ツール Ver.1.00
+# Athenaのログインサーバー保守ツール Ver.1.02
 #
 # 　起動中のAthenaのlogin.exeに接続してアカウントの保守を行うツール.
 # 　アカウントの追加、削除、パスワードの変更、リスト表示ができます.
@@ -37,6 +37,9 @@
 #
 #	passwd	userid newpassword	アカウントパスワード変更
 #
+#	state	userid newstate		アカウントのバン状態変更
+#		newstateがbならバン、uまたはnならバン解除です
+#
 #	help				簡単なヘルプテキスト表示
 #
 #-------------------------------------------------------------------------
@@ -49,6 +52,7 @@
 #	--list		start_id end_id		アカウントリスト表示(-l)
 #	--search	keyword			アカウント検索(-s)
 #	--search	--expr keyword		アカウント正規表現検索(-s)
+#	--state		userid newstate		バン状態変更(-t)
 #	<例> ./ladmin --addaccount testname Male testpass
 #
 #-------------------------------------------------------------------------
@@ -63,6 +67,7 @@
 #	listaccount	start_id end_id		アカウントリスト表示
 #	searchaccount	keyword			アカウント検索
 #	searchaccount	--expr keyword		アカウント正規表現検索
+#	stateaccount	userid newstate		バン状態変更
 #	<例> ./addaccount testname Male testpass
 #
 ##########################################################################
@@ -85,7 +90,7 @@ $connecttimeout=10;	# 接続タイムアウト(秒)
 
 use IO::Socket;
 
-$ver="1.01";
+$ver="1.02";
 
 
 print "Athena login-server administration tool Ver.$ver\n";
@@ -96,6 +101,7 @@ if( $ARGV[0] eq "--makesymlink" ){
 	symlink "ladmin","passwdaccount";
 	symlink "ladmin","listaccount";
 	symlink "ladmin","searchaccount";
+	symlink "ladmin","stateaccount";
 	print "Symbolic link created.\n";
 	exit(0);
 }
@@ -151,16 +157,23 @@ if( $0=~/addaccount$/ ||
 	my($r)=searchaccount($ARGV[0],$ARGV[1]);
 	quit();
 	exit($r);
+}elsif( $0=~/stateaccount$/||
+    (($ARGV[0] eq "-t" || $ARGV[0] eq "--state") && ((shift @ARGV),1)) ){
+	my($r)=changestate($ARGV[0],$ARGV[1]);
+	quit();
+	exit($r);
 }
 
 # ログインできたのでプロンプトのループ
 while(1){
 	# プロンプト表示と入力
-	print "ALadmin> ";
+	print "ladmin> ";
 	$cmd=<STDIN>;
 	chomp $cmd;
 	$cmd=~s/[\x00-\x1f]//g;
 	my(@cmdlist)=split / /,$cmd;
+	
+	$cmdlist[0]="help" if( $cmdlist[0] eq "?" );
 	
 	if( eval{ ""=~/$cmdlist[0]/; }, $@ ){
 		print "Command Error: Regular-Expression compiling failed.\n";
@@ -175,6 +188,9 @@ while(1){
   del username                 -- delete account
   passwd username new_password -- change password of account
   list [start_id [end_id] ]    -- list account
+  search expr                  -- search account
+  search -e expr               -- search account by regular-expression
+  state username newstate      -- change status of account (bann)
   help                         -- this help
   quit                         -- quit
 EOD
@@ -186,10 +202,12 @@ EOD
 			delaccount($cmdlist[1]);
 		}elsif("passwd"=~/^$cmdlist[0]/){
 			changepasswd($cmdlist[1],$cmdlist[2]);
-		}elsif("list"=~/^$cmdlist[0]/){
+		}elsif("list"=~/^$cmdlist[0]/ || $cmdlist[0] eq "ls"){
 			listaccount(int($cmdlist[1]),int($cmdlist[2]));
 		}elsif("search"=~/^$cmdlist[0]/){
 			searchaccount($cmdlist[1],$cmdlist[2]);
+		}elsif("state"=~/^$cmdlist[0]/){
+			changestate($cmdlist[1],$cmdlist[2]);
 		}elsif($cmdlist[0]){
 			print "Unknown command [".$cmdlist[0]."]\n";
 		}
@@ -220,14 +238,15 @@ sub listaccount(){
 		exit(10);
 	}
 	#      0123456789 012345678901234567890123 012345 
-	print "account_id user_id                  Gender Login-count\n";
-	print "------------------------------------------------------\n";
+	print "account_id user_id                  gender count state\n";
+	print "-------------------------------------------------------\n";
 	my($i);
 	my($len)=unpack("x2v",$buf);
-	for($i=4;$i<$len;$i+=57){
-		my(@dat)=unpack("Va24ca24V",readso(57));
-		printf "%10d %-24s %s %d\n",$dat[0],$dat[1],
-			("Female","Male  ","Server")[$dat[2]],$dat[4];
+	for($i=4;$i<$len;$i+=61){
+		my(@dat)=unpack("Va24ca24VV",readso(61));
+		printf "%10d %-24s %-6s%6d %-6s\n",$dat[0],$dat[1],
+			("Female","Male","Server")[$dat[2]],$dat[4],
+			("Normal","Banned")[$dat[5]?1:0];
 	}
 	return 0;
 }
@@ -323,7 +342,7 @@ sub changepasswd(){
 # アカウント検索
 sub searchaccount(){
 	my($p1,$p2)= @_;
-	my($exp,$st)=("",0);
+	my($exp,$st,$n)=("",0,0);
 	if($p1 eq"-e" || $p1 eq"--expr"){
 		$exp=$p2;
 	}else{
@@ -336,8 +355,8 @@ sub searchaccount(){
 		return 141;
 	}
 	#      0123456789 012345678901234567890123 012345 
-	print "account_id user_id                  Gender Login-count\n";
-	print "------------------------------------------------------\n";
+	print "account_id user_id                  gender count state\n";
+	print "-------------------------------------------------------\n";
 	while(1){
 		print $so pack("vV2c",0x7920,$st,0,0);
 		$so->flush();
@@ -349,15 +368,47 @@ sub searchaccount(){
 		my($i);
 		my($len)=unpack("x2v",$buf);
 		last if($len<=4);
-		for($i=4;$i<$len;$i+=57){
-			my(@dat)=unpack("Va24ca24V",readso(57));
+		for($i=4;$i<$len;$i+=61){
+			my(@dat)=unpack("Va24ca24VV",readso(61));
 			$st=$dat[0]+1;
 			next if( $dat[1]!~/$exp/ );
-			printf "%10d %-24s %s %d\n",$dat[0],$dat[1],
-				("Female","Male  ","Server")[$dat[2]],$dat[4];
+			printf "%10d %-24s %-6s%6d %-6s\n",$dat[0],$dat[1],
+				("Female","Male","Server")[$dat[2]],$dat[4],
+				("Normal","Banned")[$dat[5]?1:0];
+			$n++;
 		}
 	}
+	print "$n account(s) found.\n";
 	return 0;
+}
+# バン状態変更要求
+sub changestate {
+	my($userid,$s)= @_;
+	my(%p)=("n"=>0,"u"=>0,"b"=>1);
+	if($s eq ""){
+		print "Please input new state [b] or [n].\n";
+		return 151;
+	}
+	$s=lc(substr($s,0,1));
+	if(exists $p{$s}){ $s=$p{$s}; }
+	else{ $s=int($s); }
+	print $so pack("vva24V",0x7936,32,$userid,$s);
+	$so->flush();
+	$buf=readso(2);
+	if(unpack("v",$buf)!=0x7937){
+		print "Packet error.\n";
+		return 152;
+	}
+	$buf=readso(30);
+	my(@dat)=unpack("va24V",$buf);
+	if($dat[0]==0){
+		print "account [$userid] is successfully ".
+		( ("Unbanned","Banned")[$dat[2]?1:0]).".\n";
+	}else{
+		print "account [$userid] state changing failed. (".
+			(( "Normal","Banned" )[$dat[2]?1:0]) .")\n";
+	}
+
 }
 # 切断要求
 sub quit(){

@@ -34,7 +34,7 @@ R 791f
 S 7920 <start_id>.l <end_id>.l <flag>.B
 	アカウントリスト所得要求
 	flag=0固定
-R 7921 <len>.w { <account_id>.l <account_name>.24B <sex>.B <dummy>.24B <count>.l }.57B*
+R 7921 <len>.w { <account_id>.l <account_name>.24B <sex>.B <dummy>.24B <count>.l state.l }.61B*
 	アカウントリスト送信
 S 7930 <len>.w <account_name>.24B <password>.24B <sex>.B
 	アカウント作成
@@ -48,3 +48,8 @@ S 7934 <len>.w <account_name>.24B <password>.24B
 	アカウントのパスワード変更
 R 7935 <flag>.w <account_name>.24B
 	アカウントのパスワード変更可否 flag=0成功/1存在しない
+S 7936 <len>.w <account_name>.24B <state>.l
+	アカウントのバン状態変更
+R 7937 <flag>.w <account_name>.24B <state>.l
+	アカウントのバン状態変更可否 flag=0成功/1=存在しない
+

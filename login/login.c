@@ -474,7 +474,8 @@ int parse_admin(int fd)
 						memcpy(WFIFOP(fd,len+4),auth_dat[i].userid,24);
 						WFIFOB(fd,len+28)=auth_dat[i].sex;
 						WFIFOL(fd,len+53)=auth_dat[i].logincount;
-						len+=57;
+						WFIFOL(fd,len+57)=auth_dat[i].state;
+						len+=61;
 					}
 				}
 				WFIFOW(fd,2)=len;
@@ -531,7 +532,21 @@ int parse_admin(int fd)
 			WFIFOSET(fd,28);
 			RFIFOSKIP(fd,RFIFOW(fd,2));
 			break;
-			
+		case 0x7936:	// ÉoÉìèÛë‘ïœçX
+			WFIFOW(fd,0)=0x7937;
+			WFIFOW(fd,2)=1;
+			memcpy(WFIFOP(fd,4),RFIFOP(fd,4),24);
+			for(i=0;i<auth_num;i++){
+				if( strncmp(auth_dat[i].userid,RFIFOP(fd,4),24)==0 ){
+					auth_dat[i].state=RFIFOL(fd,28);
+					WFIFOW(fd,2)=0;
+					break;
+				}
+			}
+			WFIFOL(fd,28)=auth_dat[i].state;
+			WFIFOSET(fd,32);
+			RFIFOSKIP(fd,RFIFOW(fd,2));
+			break;			
 		default:
 			close(fd);
 			session[fd]->eof=1;
