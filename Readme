@@ -1,13 +1,13 @@
--------------
-//0576 by V&S 
-・ゴーストリングカードとバースリーカードの効果が逆になっていたのを修正
-	{ bonus bDefEle,7; }→ゴーストリングカード(念)
-	{ bonus bDefEle,8; }→バースリーカード(闇)
-	↑だったのを↓に修正
-	{ bonus bDefEle,7; }→バースリーカード(闇)
-	{ bonus bDefEle,8; }→ゴーストリングカード(念)
+--------------
+//0576 by るるる
+・@コマンドを追加＆修正
+	atcommand.c
+		atcommand()		@itemresetコマンド追加  @goコマンド修正（アマツ・コンロンを追加）
+		atcommand_config_read()	上に合わせてitemreset使用レベル指定を追加
 
-	鋼鉄の重量を修正
+	doc/conf_ref.txt
+	conf/atcommand_athena.conf	itemreset使用レベル指定を追加
+	help.txt			@itemresetの説明追加と@goの修正
 
 --------------
 //0575 by 引退人

@@ -353,6 +353,16 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			}
 			return 1;
 		}
+//所持アイテムリセット
+//「@itemreset」と入力　パラメータ無し（無視)
+		if (strcmpi(command, "@itemreset") == 0 && gm_level >= atcommand_config.itemreset) {
+			for(i=0;i<MAX_INVENTORY;i++) {
+				if (sd->status.inventory[i].amount && sd->status.inventory[i].equip ==0)
+					pc_delitem(sd,i,sd->status.inventory[i].amount,0);
+			}
+			clif_displaymessage(fd,"全アイテム破棄しました(´∀｀) ");
+			return 1;
+		}
 //Lvアップコマンド
 //「@Lvup 増加値」と入力
 		if (strcmpi(command, "@lvup") == 0 && gm_level >= atcommand_config.lvup) {
@@ -548,8 +558,8 @@ z [0～4]服の色
 		if (strcmpi(command, "@go") == 0 && gm_level >= atcommand_config.go) {
 			struct { char map[16]; int x,y; } data[] = {
 				{	"prontera.gat",	156, 191	},	//	0=プロンテラ
-				{	"morocc.gat",	156,  96	},	//	1=モロク
-				{	"geffen.gat",	119,  60	},	//	2=ゲフェン
+				{	"morocc.gat",	156,  93	},	//	1=モロク
+				{	"geffen.gat",	119,  59	},	//	2=ゲフェン
 				{	"payon.gat",	 89, 122	},	//	3=フェイヨン
 				{	"alberta.gat",	192, 147	},	//	4=アルベルタ
 				{	"izlude.gat",	128, 114	},	//	5=イズルード
@@ -557,6 +567,8 @@ z [0～4]服の色
 				{	"xmas.gat",		147, 134	},	//	7=ルティエ
 				{	"comodo.gat",	209, 143	},	//	8=コモド
 				{	"yuno.gat",		157,  51	},	//	9=ジュノー
+				{	"amatsu.gat",	198,  84	},	//	10=アマツ
+				{	"gonryun.gat",	160, 120	},	//	11=ゴンリュン
 
 			};
 			sscanf(message, "%s%d", command, &x);
@@ -1213,6 +1225,7 @@ int atcommand_config_read(const char *cfgName)
 				{ "kami",&atcommand_config.kami },
 				{ "heal",&atcommand_config.heal },
 				{ "item",&atcommand_config.item },
+				{ "itemreset",&atcommand_config.itemreset },
 				{ "lvup",&atcommand_config.lvup },
 				{ "joblvup",&atcommand_config.joblvup },
 				{ "help",&atcommand_config.help },

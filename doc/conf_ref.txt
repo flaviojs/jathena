@@ -656,6 +656,8 @@ spiritball
 	@コマンド @spiritball
 party
 	@コマンド @party
+itemreset
+	@コマンド @itemreset
 
 < 例 >
 
@@ -727,6 +729,7 @@ questskill: 1
 lostskill: 1
 spiritball: 1
 party: 0
+itemreset: 1
 
 ==========================================================================
 EOF
