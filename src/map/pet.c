@@ -760,6 +760,10 @@ int pet_catch_process2(struct map_session_data *sd,int target_id)
 	int i,pet_catch_rate;
 
 	md=(struct mob_data*)map_id2bl(target_id);
+	if(!md){
+		clif_pet_rulet(sd,0);
+		return 1;
+	}
 
 	i = search_petDB_index(md->class,PET_CLASS);
 	if(md == NULL || md->bl.type != BL_MOB || md->bl.prev == NULL || i < 0 || sd->catch_target_class != md->class) {

@@ -3091,11 +3091,14 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case PF_HPCONVERSION:			/* ライフ置き換え */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		if(sd){
-			i=sd->status.hp/10; //基本はHPの10%
-			sd->status.hp -= i; //HPを減らす
-			i=i*20*skilllv/100;
-			sd->status.sp += i; //SPを増やす
-			clif_heal(sd->fd,SP_SP,i);
+			int conv_hp=0,conv_sp=0;
+			conv_hp=sd->status.hp/10; //基本はHPの10%
+			sd->status.hp -= conv_hp; //HPを減らす
+			conv_sp=conv_hp*20*skilllv/100;
+			conv_sp=(sd->status.sp+conv_sp>sd->status.max_sp)?sd->status.max_sp-sd->status.sp:conv_sp;
+			sd->status.sp += conv_sp; //SPを増やす
+			pc_heal(sd,-conv_hp,conv_sp);
+			clif_heal(sd->fd,SP_SP,conv_sp);
 		}
 		break;
 	default:
