@@ -704,14 +704,52 @@ static int clif_set007b(struct map_session_data *sd,unsigned char *buf)
  */
 int clif_mob_class_change(struct mob_data *md,int class)
 {
-	char buf[16];
+	int level;
+	//char buf[16];
+	char buf2[60];
+	
+	/*if(mob_get_viewclass(md->class) > 23)
+	{
+		WBUFW(buf,0)=0x1b0;
+		WBUFL(buf,2)=md->bl.id;
+		WBUFB(buf,6)=1;
+		WBUFL(buf,7)=mob_get_viewclass(class);
 
-	WBUFW(buf,0)=0x1b0;
-	WBUFL(buf,2)=md->bl.id;
-	WBUFB(buf,6)=1;
-	WBUFL(buf,7)=mob_get_viewclass(class);
-
-	clif_send(buf,packet_len_table[0x1b0],&md->bl,AREA);
+		clif_send(buf,packet_len_table[0x1b0],&md->bl,AREA);
+	}
+	if(mob_get_viewclass(md->class) < 24)
+	{*/
+		WBUFW(buf2,0)=0x7b;
+		WBUFL(buf2,2)=md->bl.id;
+		WBUFW(buf2,6)=battle_get_speed(&md->bl);
+		WBUFW(buf2,8)=md->opt1;
+		WBUFW(buf2,10)=md->opt2;
+		WBUFW(buf2,12)=md->option;
+		WBUFW(buf2,14)=mob_get_viewclass(md->class);
+		WBUFW(buf2,16)=mob_get_hair(md->class);
+		if(mob_get_viewclass(md->class) != 22)
+			WBUFW(buf2,18)=mob_get_weapon(md->class);
+		else
+			WBUFW(buf2,18)=0;
+		WBUFW(buf2,20)=mob_get_head_buttom(md->class);
+		WBUFL(buf2,22)=gettick();
+		WBUFW(buf2,26)=mob_get_shield(md->class);
+		WBUFW(buf2,28)=mob_get_head_top(md->class);
+		WBUFW(buf2,30)=mob_get_head_mid(md->class);
+		WBUFW(buf2,32)=mob_get_hair_color(md->class);
+		WBUFW(buf2,34)=0;
+		WBUFW(buf2,36)|=md->dir&0x0f;
+		WBUFL(buf2,38)=0;
+		WBUFL(buf2,42)=0;
+		WBUFW(buf2,46)=0;
+		WBUFB(buf2,48)=0;
+		WBUFB(buf2,49)=mob_get_sex(md->class);
+		WBUFPOS2(buf2,50,md->bl.x,md->bl.y,md->bl.x,md->bl.y);
+		WBUFB(buf2,55)=0;
+		WBUFB(buf2,56)=5;
+		WBUFB(buf2,57)=5;
+		WBUFW(buf2,58)=((level = battle_get_lv(&md->bl))>99)? 99:level;
+	//}
 	return 0;
 }
 
