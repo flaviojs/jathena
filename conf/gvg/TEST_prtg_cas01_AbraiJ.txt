@@ -374,19 +374,25 @@ prontera.gat,151,187,4	script	テストギルドフラッグ	722,{
 		mes "認定するアジト所有権が附与される";
 		close;
 LStartg:
+		if (getcharid(2) == @GIDp1) goto LStartg2;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";
 		mes "こちらはルーンミッドガッツ王国に";
 		mes "よって";
-		mes "ギルド ^ff0000 " + GetGuildName(@GID) + " ^000000の";
+		mes "ギルド ^ff0000 " + GetGuildName(@GIDp1) + " ^000000の";
 		mes "所有であることを認められている。";
 		next;
 		mes " ";
 		mes "2.";
-		mes "^ff0000 " + GetGuildName(@GID) + " ^000000 のマスターは";
-		mes "^ff0000 " + getguildmaster(@GID) + " ^000000である。";
+		mes "^ff0000 " + GetGuildName(@GIDp1) + " ^000000 のマスターは";
+		mes "^ff0000 " + getguildmaster(@GIDp1) + " ^000000である。";
 		mes "これに異議のある者は、剣を取り";
 		mes "力を以って名誉を勝ち取りなさい。";
 		close;
+LStartg2:
+		mes "[ ルーンミッドガッツ王国領 ]";
+		mes "ギルドアジトに戻ります";
+		next;
+		warp "prtg_cas01.gat",97,174;end;
 }
