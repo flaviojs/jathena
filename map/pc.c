@@ -2839,8 +2839,8 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 
 	memcpy(sd->mapname,mapname,24);
 	sd->bl.m = m;
-	sd->bl.x = x;
-	sd->bl.y = y;
+	sd->bl.x = sd->to_x = x;
+	sd->bl.y = sd->to_y = y;
 
 	if(sd->status.pet_id > 0 && sd->pd && sd->pet.intimate > 0) {
 		sd->pd->bl.m = m;

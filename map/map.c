@@ -1168,6 +1168,9 @@ static int map_readmap(int m,char *fn)
 	if(gat==NULL)
 		return -1;
 
+	printf("\rmap reading [%d/%d]",m,map_num);
+	fflush(stdout);
+
 	map[m].m=m;
 	xs=map[m].xs=*(int*)(gat+6);
 	ys=map[m].ys=*(int*)(gat+10);
@@ -1226,7 +1229,8 @@ static int map_readmap(int m,char *fn)
 	memset(map[m].block_mob_count,0,map[m].bxs*map[m].bys*sizeof(int));
 
 	strdb_insert(map_db,map[m].name,&map[m]);
-	printf("%s read done\n",fn);
+	
+//	printf("%s read done\n",fn);
 
 	return 0;
 }
@@ -1254,6 +1258,7 @@ int map_readallmap(void)
 		map_readmap(i,fn);
 	}
 	free(waterlist);
+	printf("\rmap read done. (%d map)    \n",map_num);
 	return 0;
 }
 

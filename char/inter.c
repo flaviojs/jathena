@@ -436,6 +436,8 @@ int mapif_parse_AccReg(int fd)
 		reg->reg[j].value=RFIFOL(fd,p+32);
 	}
 	reg->reg_num=j;
+	
+	inter_accreg_save();	// 保存
 	mapif_account_reg(fd,RFIFOP(fd,0));	// 他のMAPサーバーに送信
 	return 0;
 }

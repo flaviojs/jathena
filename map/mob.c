@@ -1007,7 +1007,7 @@ static int mob_ai_sub_hard_mastersearch(struct block_list *bl,va_list ap)
 
 	// 直前まで主が近くにいたのでテレポートして追いかける
 	if( old_dist<10 && md->master_dist>18){
-		mob_warp(md,mmd->bl.x,mmd->bl.y,3);
+		mob_warp(md,-1,mmd->bl.x,mmd->bl.y,3);
 		md->state.master_check = 1;
 		return 0;
 	}
@@ -1499,7 +1499,7 @@ static int mob_ai_sub_lazy(void * key,void * data,va_list app)
 		
 			// 召喚MOBでない場合、時々移動する（歩行ではなくワープで処理軽減）
 			if( md->x0<=0 && rand()%1000<MOB_LAZYWARPPERC )
-				mob_warp(md,-1,-1,-1);
+				mob_warp(md,-1,-1,-1,-1);
 		}
 	
 		md->next_walktime = tick+rand()%10000+5000;
@@ -2084,11 +2084,13 @@ int mob_heal(struct mob_data *md,int heal)
  * mobワープ
  *------------------------------------------
  */
-int mob_warp(struct mob_data *md,int x,int y,int type)
+int mob_warp(struct mob_data *md,int m,int x,int y,int type)
 {
-	int m,i=0,c,xs=0,ys=0,bx=x,by=y;
+	int i=0,c,xs=0,ys=0,bx=x,by=y;
 	if( md==NULL || md->bl.prev==NULL )
 		return 0;
+
+	if( m<0 ) m=md->bl.m;
 
 	if(type >= 0) {
 		if(map[md->bl.m].flag.monster_noteleport)
@@ -2097,7 +2099,6 @@ int mob_warp(struct mob_data *md,int x,int y,int type)
 	}
 	skill_unit_out_all(&md->bl,gettick(),1);
 	map_delblock(&md->bl);
-	m=md->bl.m;
 
 	if(bx>0 && by>0){	// 位置指定の場合周囲９セルを探索
 		xs=ys=9;
@@ -2114,9 +2115,11 @@ int mob_warp(struct mob_data *md,int x,int y,int type)
 	}
 	md->dir=0;
 	if(i<1000){
-		md->bl.x=x;
-		md->bl.y=y;
+		md->bl.x=md->to_x=x;
+		md->bl.y=md->to_y=y;
+		md->bl.m=m;
 	}else {
+		m=md->bl.m;
 		if(battle_config.error_log)
 			printf("MOB %d warp failed, class = %d\n",md->bl.id,md->class);
 	}
@@ -2124,8 +2127,8 @@ int mob_warp(struct mob_data *md,int x,int y,int type)
 	md->target_id=0;	// タゲを解除する
 	md->state.targettype=NONE_ATTACKABLE;
 	md->attacked_id=0;
-	md->state.state=MS_IDLE;
 	md->state.skillstate=MSS_IDLE;
+	mob_changestate(md,MS_IDLE,0);
 
 	if(type>0 && i==1000) {
 		if(battle_config.battle_log)

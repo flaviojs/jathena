@@ -1130,12 +1130,12 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 						if(target->type == BL_PC && !pc_isdead((struct map_session_data *)target))
 							pc_setpos((struct map_session_data *)target,map[sd->bl.m].name,x,y,3);
 						else if(target->type == BL_MOB)
-							mob_warp((struct mob_data *)target,x,y,3);
+							mob_warp((struct mob_data *)target,-1,x,y,3);
 					}
 				}
 				else if(src->type == BL_MOB && !map[src->m].flag.monster_noteleport) {
 					int x,y,i,j,c;  
-					mob_warp(md,-1,-1,3);
+					mob_warp(md,-1,-1,-1,3);
 					for(i=0;i<16;i++) {
 						j = rand()%8;
 						x = md->bl.x + dirx[j];
@@ -1151,7 +1151,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 						if(target->type == BL_PC && !pc_isdead((struct map_session_data *)target))
 							pc_setpos((struct map_session_data *)target,map[md->bl.m].name,x,y,3);
 						else if(target->type == BL_MOB)
-							mob_warp((struct mob_data *)target,x,y,3);
+							mob_warp((struct mob_data *)target,-1,x,y,3);
 					}
 				}
 				break;
@@ -2302,7 +2302,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 					sd->status.save_point.map,"","");
 			}
 		}else if( bl->type==BL_MOB )
-			mob_warp((struct mob_data *)bl,-1,-1,3);
+			mob_warp((struct mob_data *)bl,-1,-1,-1,3);
 		break;
 
 	case AL_HOLYWATER:			/* アクアベネディクタ */
@@ -2994,27 +2994,29 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case AM_CANNIBALIZE:	// バイオプラント
 		if(sd){
 			int mx,my,id=0;
+			struct mob_data *md;
 
 			mx = x + (rand()%10 - 5);
 			my = y + (rand()%10 - 5);
 			id=mob_once_spawn(sd,"this",mx,my,"フローラ",1118,1,"");
-
-			add_timer(gettick()+30000+skilllv*10000,mob_timer_delete,id,0);
+			if( (md=(struct mob_data *)map_id2bl(id)) !=NULL ){
+				md->master_id=sd->bl.id;
+				add_timer(gettick()+30000+skilllv*10000,mob_timer_delete,id,0);
+			}
 		}
 		break;
 	case AM_SPHEREMINE:	// スフィアーマイン
 		if(sd){
 			int mx,my,id=0;
-			struct mob_data *mb;
-			struct block_list *mbl;
+			struct mob_data *md;
 
 			mx = x + (rand()%10 - 5);
 			my = y + (rand()%10 - 5);
 			id=mob_once_spawn(sd,"this",mx,my,"イクラ",1142,1,"");
-
-			mbl= map_id2bl(id);
-			mb = (struct mob_data *)mbl;
-			add_timer(gettick()+30000,mob_timer_delete,id,0);
+			if( (md=(struct mob_data *)map_id2bl(id)) !=NULL ){
+				md->master_id=sd->bl.id;
+				add_timer(gettick()+30000,mob_timer_delete,id,0);
+			}
 		}
 		break;
 	}
@@ -3136,7 +3138,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 
 	case AL_WARP:				/* ワープポータル */
 		target=BCT_ALL;
-		val1=skillid+6;
+		val1=skilllv+6;
 		if(flag==0)
 			limit=2000;
 		else
@@ -3715,11 +3717,16 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		if(bl->type==BL_PC){
 			struct map_session_data *sd = (struct map_session_data *)bl;
 			if(src->bl.m == bl->m && src->bl.x == bl->x && src->bl.y == bl->y && src->bl.x == sd->to_x && src->bl.y == sd->to_y) {
-				if((sg->val1--)>0){
-					pc_setpos(sd,sg->valstr,sg->val2>>16,sg->val2&0xffff,3);
-				}else
-					skill_delunitgroup(sg);
+				if( battle_config.chat_warpportal || !sd->chatID ){
+					if((sg->val1--)>0){
+						pc_setpos(sd,sg->valstr,sg->val2>>16,sg->val2&0xffff,3);
+					}else
+						skill_delunitgroup(sg);
+				}
 			}
+		}else if(bl->type==BL_MOB && battle_config.mob_warpportal){
+			int m=map_mapname2mapid(sg->valstr);
+			mob_warp((struct mob_data *)bl,m,sg->val2>>16,sg->val2&0xffff,3);
 		}
 		break;
 

@@ -1,5 +1,5 @@
 ==========================================================================
- Athena dev 2.1.1 mod0763 現在のconfのリファレンス＋α
+ Athena dev 2.1.1 mod0893 現在のconfのリファレンス＋α
 --------------------------------------------------------------------------
 
 < このファイルは何？ >
@@ -16,7 +16,7 @@
  inter_athena.conf	inter-serverの設定
  map_athena.conf	map-serverの設定
  battle_athena.conf	map-serverの設定(特殊ルールなどの設定)
- atcommand_athena.conf	GMコマンドや@コマンドの設定
+ atcommand_athena.conf	map-serverの設定(GMコマンドや@コマンドの設定)
 
 
 < 基本的な設定方法 >
@@ -1010,6 +1010,14 @@ display_delay_skill_fail
 	スキル使用のディレイ中に「スキル使用の後は、しばらくお待ちください」を表示するかどうか。
 	デフォルトはyesです。
 
+chat_warpportal
+	チャット中のPCをワープポータルで飛ばせるかどうかです。
+	デフォルトはnoです。
+	
+mob_warpportal
+	MOBをワープポータルで飛ばせるかどうかです。
+	デフォルトはnoです。
+
 import
 	その行を別ファイルの中身と置き換えます。
 
@@ -1140,8 +1148,12 @@ produce_potion_name_input: yes
 making_arrow_name_input: yes
 holywater_name_input: yes
 display_delay_skill_fail: yes
+chat_warpportal: no
+mob_warpportal: no
 
-=====================================================================ghos6. atcommand_athena.conf
+
+==========================================================================
+6. atcommand_athena.conf
 --------------------------------------------------------------------------
 
 < このファイルは何？ >

@@ -1,5 +1,39 @@
 --------------------
-//0889 by 胡蝶蘭
+//0893 by 胡蝶蘭
+
+・他マップからポータルの上にワープしてきたPCがワープしない問題を修正
+・チャット中のPCをワープポータルで飛ばすかどうか設定可能に
+・MOBをワープポータルで飛ばすかどうか設定可能に
+	MOBのワープポータルを許可すると、テロが簡単にできるので注意。
+
+・アカウント変数変更と同時にファイルに書き出すように修正
+・マップデータのロード部分のログ表示はあまり重要じゃないと思うので変更。
+
+	(char/)
+	inter.c
+		mapif_parse_AccReg()でinter_accreg_save()を呼ぶように修正
+	(map/)
+	mob.c/mob.h
+		mob_warp()の引数変更と修正
+	battle.c/battle.h
+		mob_warp()呼び出しの引数修正
+		battle_config関連
+	map.c
+		map_readallmap(),map_readmap()修正
+	pc.c
+		pc_setpos()修正
+	skill.c
+		mob_warp()呼び出しの引数修正
+		skill_unit_onplace()修正
+	(conf/)
+	battle_athena.conf
+		chat_warpportal,mob_warpportalの追加
+	(doc/)
+	conf_ref.txt
+		chat_warpportal,mob_warpportalの追加
+
+--------------------
+//0892 by 胡蝶蘭
 
 ・各種confファイルで別ファイルをインポートできるようにした
 	・自分のサーバー用の設定を別ファイルに記述できるようになります。

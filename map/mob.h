@@ -111,7 +111,7 @@ int mob_deleteslave(struct mob_data *md);
 int mob_counttargeted(struct mob_data *md,struct block_list *src);
 
 int mob_class_change(struct mob_data *md,int *value);
-int mob_warp(struct mob_data *md,int x,int y,int type);
+int mob_warp(struct mob_data *md,int m,int x,int y,int type);
 
 int mobskill_use(struct mob_data *md,unsigned int tick,int event);
 int mobskill_event(struct mob_data *md,int flag);
