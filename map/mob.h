@@ -11,7 +11,7 @@ struct mob_skill {
 	short cancel;
 	short cond1,cond2;
 	short target;
-	short val1;
+	int val[5];
 };
 
 struct mob_db {
@@ -102,13 +102,13 @@ int mob_timer_delete(int tid, unsigned int tick, int id, int data);
 
 int mob_counttargeted(struct mob_data *md,struct block_list *src);
 
-int mob_class_change(struct mob_data *md,int class);
+int mob_class_change(struct mob_data *md,int *value);
 int mob_warp(struct mob_data *md,int x,int y,int type);
 
 int mobskill_use(struct mob_data *md,unsigned int tick,int event);
 int mobskill_event(struct mob_data *md,int flag);
 int mobskill_castend_id( int tid, unsigned int tick, int id,int data );
 int mobskill_castend_pos( int tid, unsigned int tick, int id,int data );
-int mob_summonslave(struct mob_data *md2,int class,int amount,int flag);
+int mob_summonslave(struct mob_data *md2,int *value,int amount,int flag);
 
 #endif

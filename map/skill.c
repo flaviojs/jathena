@@ -1298,6 +1298,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case NPC_DARKBREATH:
+		clif_emotion(src,7);
 		skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case KN_BRANDISHSPEAR:		/* ブランディッシュスピア */
@@ -2535,7 +2536,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case NPC_PROVOCATION:
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		clif_pet_performance(src,1);
+		clif_pet_performance(src,mob_db[md->class].skill[md->skillidx].val[0]);
 		break;
 
 	case NPC_HALLUCINATION:
@@ -2594,19 +2595,18 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case NPC_SUMMONSLAVE:		/* 手下召喚 */
 	case NPC_SUMMONMONSTER:		/* MOB召喚 */
 		if(md)
-			mob_summonslave(md,mob_db[md->class].skill[md->skillidx].val1,
-				skilllv,(skillid==NPC_SUMMONSLAVE)?1:0);
+			mob_summonslave(md,mob_db[md->class].skill[md->skillidx].val,skilllv,(skillid==NPC_SUMMONSLAVE)?1:0);
 		break;
 
 	case NPC_TRANSFORMATION:
 	case NPC_METAMORPHOSIS:
 		if(md)
-			mob_class_change(md,mob_db[md->class].skill[md->skillidx].val1);
+			mob_class_change(md,mob_db[md->class].skill[md->skillidx].val);
 		break;
 
 	case NPC_EMOTION:			/* エモーション */
 		if(md)
-			clif_emotion(&md->bl,mob_db[md->class].skill[md->skillidx].val1);
+			clif_emotion(&md->bl,mob_db[md->class].skill[md->skillidx].val[0]);
 		break;
 
 	case NPC_DEFENDER:
