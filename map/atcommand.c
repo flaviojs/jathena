@@ -443,7 +443,7 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 		if ((strcmpi(command, "@h") == 0 || strcmpi(command, "@help") == 0) && gm_level >= atcommand_config.help) {
 			char moji[400];
 			FILE *file;
-			if(	(file = fopen("help.txt", "r"))!=NULL){
+			if(	(file = fopen(help_txt, "r"))!=NULL){
 				clif_displaymessage(fd,msg_table[26]);
 				while (fgets(moji, 380, file) != NULL) {
 					{

@@ -60,6 +60,10 @@ struct charid2nick {
 	int req_id;
 };
 
+
+char motd_txt[256]="conf/motd.txt";
+char help_txt[256]="conf/help.txt";
+
 /*==========================================
  * ‘SmapI‘Œv‚Å‚ÌÚ‘±”İ’è
  * (charI‚©‚ç‘—‚ç‚ê‚Ä‚­‚é)
@@ -1293,6 +1297,10 @@ int map_config_read(char *cfgName)
 			autosave_interval=atoi(w2)*1000;
 			if(autosave_interval <= 0)
 				autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
+		} else if(strcmpi(w1,"motd_txt")==0){
+			strcpy(motd_txt,w2);
+		} else if(strcmpi(w1,"help_txt")==0){
+			strcpy(help_txt,w2);
 		}
 	}
 	fclose(fp);

@@ -609,7 +609,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	{
 		char buf[256];
 		FILE *fp;
-		if(	(fp = fopen("motd.txt", "r"))!=NULL){
+		if(	(fp = fopen(motd_txt, "r"))!=NULL){
 			clif_displaymessage(sd->fd,"< Message of the Day >");
 			while (fgets(buf, 250, fp) != NULL){
 				int i;
