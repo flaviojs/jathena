@@ -45,6 +45,8 @@ static int first_free_object_id,last_object_id;
 static void *block_free[block_free_max];
 static int block_free_count=0,block_free_lock=0;
 
+#define block_list_max 4096
+
 struct map_data map[MAX_MAP_PER_SERVER];
 int map_num=0;
 
@@ -245,7 +247,6 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 	int bx,by;
 	struct block_list *bl;
 	va_list ap;
-	const size_t block_list_max=4096;
 	struct block_list *list[block_list_max];
 	int blockcount=0,i;
 
@@ -304,7 +305,6 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 	int bx,by;
 	struct block_list *bl;
 	va_list ap;
-	const size_t block_list_max=4096;
 	struct block_list *list[block_list_max];
 	int blockcount=0,i;
 
@@ -478,7 +478,6 @@ void map_foreachobject(int (*func)(struct block_list*,va_list),int type,...)
 {
 	int i;
 	int block_list_count=0;
-	const size_t block_list_max=4096;
 	struct block_list *list[block_list_max];
 	va_list ap;
 

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
 
 #include "map.h"
 #include "npc.h"
@@ -427,7 +428,7 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 		pc_gainexp(sd,0,z);
 	}*/
 	if(battle_config.shop_exp > 0 && z > 0 && pc_checkskill(sd,MC_DISCOUNT)) {
-		z = z/battle_config.shop_exp;
+		z = (int)(log((double)z) * (double)battle_config.shop_exp/100.);
 		if(z <= 0)
 			z = 1;
 		pc_gainexp(sd,0,z);
@@ -471,7 +472,7 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 		pc_gainexp(sd,0,z);
 	}*/
 	if(battle_config.shop_exp > 0 && z > 0 && pc_checkskill(sd,MC_OVERCHARGE)) {
-		z = z/battle_config.shop_exp;
+		z = (int)(log((double)z) * (double)battle_config.shop_exp/100.);
 		if(z <= 0)
 			z = 1;
 		pc_gainexp(sd,0,z);

@@ -1,4 +1,29 @@
 --------------
+//0542 by 死神
+
+・オートブリッツバグ修正。(今度こそ大丈夫のはず...)
+・自分に使ったヒールでは経験が入らないように変更。
+・店NPCを利用によるジョブ経験値獲得計算式変更。
+	獲得ジョブ経験値 = ln(金) * shop_exp / 100
+になります。
+logを使うことで金が多くても入る経験値が多く入らないように変更しました。
+	(/map)
+	battle.c
+		battle_damage() 修正。
+	skill.c
+		skill_attack()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id 修正。
+	npc.c
+		npc_buylist()、npc_selllist() 修正。
+	map.c
+		map_foreachinarea()、map_foreachinmovearea()、map_foreachobject()
+		修正。(大した修正ではないです。)
+	(/conf)
+	battle_athena.conf 修正。
+	(/doc)
+	conf_ref.txt 修正。
+
+--------------
 //0541 by huge
 
 ・矢をまとめて持てるように修正。

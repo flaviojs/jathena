@@ -516,8 +516,11 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 	if(damage==0)
 		return 0;
 
+	if(target->prev == NULL)
+		return 0;
+
 	if(bl) {
-		if(bl->prev==NULL || target->prev==NULL)
+		if(bl->prev==NULL)
 			return 0;
 
 		if(bl->type==BL_PC)
@@ -910,7 +913,7 @@ struct Damage battle_calc_weapon_attack(
 		 (*option&0x06 && t_race!=4 && t_race!=6)
 		) )	// ƒXƒLƒ‹‚É‚æ‚é–WŠQ
 		battle_stopattack(src);*/
-
+	
 	flag=BF_SHORT|BF_WEAPON|BF_NORMAL;	// UŒ‚‚Ìí—Ş‚Ìİ’è
 	
 	// ‰ñ”ğ—¦ŒvZA‰ñ”ğ”»’è‚ÍŒã‚Å
@@ -1703,6 +1706,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		return 0;
 	if(target->type == BL_PC && pc_isdead((struct map_session_data *)target))
 		return 0;
+
 	// ‹|‚Ìê‡
 	if(itemdb_look(pc_checkequip(sd,2)) == 11) {
 //		// –î‚ª‘•”õ‚³‚ê‚Ä‚¢‚È‚¢

@@ -521,11 +521,13 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	struct Damage dmg;
 	int type,lv;
 
-	if(src->prev == NULL || dsrc->prev == NULL)
+	if(src->prev == NULL || dsrc->prev == NULL || bl->prev == NULL)
 		return 0;
 	if(src->type == BL_PC && pc_isdead((struct map_session_data *)src))
 		return 0;
 	if(dsrc->type == BL_PC && pc_isdead((struct map_session_data *)dsrc))
+		return 0;
+	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
 		return 0;
 
 	type=-1;
@@ -764,9 +766,16 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 {
 	struct map_session_data *sd=NULL;
 	int i;
-	
+
 	if(src->type==BL_PC)
 		sd=(struct map_session_data *)src;
+	if(sd && pc_isdead(sd))
+		return 0;
+
+	if(bl == NULL || bl->prev == NULL)
+		return 0;
+	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
+		return 0;
 
 	switch(skillid)
 	{
@@ -1132,7 +1141,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			heal_get_jobexp = battle_heal(NULL,bl,heal,0);
 			
 			// JOBŒoŒ±’lŠl“¾
-			if( bl->type==BL_PC && heal > 0){
+			if(src->type == BL_PC && bl->type==BL_PC && heal > 0 && src != bl){
 				heal_get_jobexp = heal_get_jobexp * battle_config.heal_exp / 100;
 				if(heal_get_jobexp <= 0)
 					heal_get_jobexp = 1;
