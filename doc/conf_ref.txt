@@ -721,6 +721,19 @@ monster_skill_reiteration
 	これをyesにするとSWやニューマ、トラップを重ねて置くことができます。
 	デフォルトはnoです。
 
+gvg_short_attack_damage_rate
+	シーズモードで近距離物理攻撃のダメージ倍率です。デフォルトは100です。
+
+gvg_long_attack_damage_rate
+	シーズモードで遠距離物理攻撃のダメージ倍率です。デフォルトは100です。
+
+gvg_magic_attack_damage_rate
+	シーズモードで魔法攻撃のダメージ倍率です。デフォルトは100です。
+
+gvg_misc_attack_damage_rate
+	シーズモードで物理攻撃と魔法攻撃以外の攻撃(鷹やトラップ等)の
+	ダメージ倍率です。デフォルトは100です。
+
 
 
 < 例 >
@@ -818,6 +831,10 @@ vit_penaly_count: 3
 vit_penaly_num: 0
 player_skill_reiteration: no
 monster_skill_reiteration: no
+gvg_short_attack_damage_rate: 100
+gvg_long_attack_damage_rate: 100
+gvg_magic_attack_damage_rate: 100
+gvg_misc_attack_damage_rate: 100
 
 
 =====================================================================ghos6. atcommand_athena.conf

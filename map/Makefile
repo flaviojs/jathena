@@ -19,7 +19,7 @@ script.o: script.c itemdb.h map.h pc.h mob.h clif.h intif.h npc.h script.h stora
 storage.o: storage.c itemdb.h pc.h clif.h intif.h storage.h ../common/mmo.h
 skill.o: skill.c skill.h map.h clif.h pc.h mob.h battle.h itemdb.h ../common/timer.h ../common/mmo.h
 atcommand.o: atcommand.c atcommand.h itemdb.h pc.h map.h skill.h clif.h mob.h intif.h battle.h storage.h guild.h pet.h ../common/socket.h ../common/timer.h ../common/mmo.h
-battle.o: battle.c battle.h skill.h map.h mob.h pc.h pet.h ../common/timer.h ../common/mmo.h
+battle.o: battle.c battle.h skill.h map.h mob.h pc.h pet.h guild.h ../common/timer.h ../common/mmo.h
 intif.o: intif.c intif.h chrif.h clif.h party.h guild.h storage.h map.h battle.h pet.h ../common/socket.h ../common/mmo.h
 trade.o: trade.c trade.h clif.h itemdb.h map.h pc.h npc.h ../common/mmo.h
 party.o: party.c party.h clif.h intif.h pc.h map.h battle.h ../common/db.h ../common/socket.h ../common/timer.h ../common/mmo.h

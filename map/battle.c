@@ -1028,13 +1028,13 @@ int battle_attr_fix(int damage,int atk_elem,int def_elem)
  * ダメージ最終計算
  *------------------------------------------
  */
-int battle_calc_damage(struct block_list *bl,int damage,int skill_num,int skill_lv,int flag)
+int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,int skill_num,int skill_lv,int flag)
 {
 	struct map_session_data *sd=NULL;
 	struct mob_data *md=NULL;
 	struct status_change *sc_data,*sc;
 	short *sc_count;
-	int i;
+	int i,class = battle_get_class(bl);
 
 	if(bl->type==BL_MOB) md=(struct mob_data *)bl;
 	else sd=(struct map_session_data *)bl;
@@ -1099,7 +1099,32 @@ int battle_calc_damage(struct block_list *bl,int damage,int skill_num,int skill_
 					((struct mob_data *)bl)->canmove_tick = gettick() + 300;
 			}
 		}
+	}
 
+	if(class == 1288) {
+		if(flag&BF_SKILL)
+			damage=0;
+		if(src->type == BL_PC) {
+			struct guild *g=guild_search(((struct map_session_data *)src)->status.guild_id);
+			if(g == NULL)
+				damage=0;//ギルド未加入ならダメージ無し
+			else if(guild_checkskill(g,GD_APPROVAL) <= 0)
+				damage=0;//正規ギルド承認がないとダメージ無し
+		}
+		else damage = 0;
+	}
+	if(map[bl->m].flag.gvg && damage > 0) { //GvG
+		if(flag&BF_WEAPON) {
+			if(flag&BF_SHORT)
+				damage=damage*battle_config.gvg_short_damage_rate/100;
+			if(flag&BF_LONG)
+				damage=damage*battle_config.gvg_long_damage_rate/100;
+		}
+		if(flag&BF_MAGIC)
+			damage = damage*battle_config.gvg_magic_damage_rate/100;
+		if(flag&BF_MISC)
+			damage=damage*battle_config.gvg_misc_damage_rate/100;
+		if(damage < 1) damage  = 1;
 	}
 
 	if(	damage>0 && sc_data!=NULL && (
@@ -1111,28 +1136,6 @@ int battle_calc_damage(struct block_list *bl,int damage,int skill_num,int skill_
 
 	if( md!=NULL && md->hp>0 && damage > 0 )	// 反撃などのMOBスキル判定
 		mobskill_event(md,flag);
-
-	if(md){
-		if(map[md->bl.m].flag.gvg){//GvGのダメージ補正
-			if(flag&BF_MAGIC)
-				damage=damage/2;	//魔法は50%
-			if(flag&BF_WEAPON && flag&BF_LONG)
-				damage=damage*75/100;	//遠距離攻撃は75%
-			if(skill_num==HT_LANDMINE || skill_num==HT_BLASTMINE || skill_num==HT_CLAYMORETRAP || skill_num==HT_FREEZINGTRAP)
-				damage=damage*60/100;	//罠は60%
-			if(md && md->class == 1288 && flag&BF_SKILL)
-				damage=0;		//エンペリウムにはスキル無効
-		}
-	}else if(sd){
-		if(map[sd->bl.m].flag.gvg){
-			if(flag&BF_MAGIC)
-				damage=damage/2;
-			if(flag&BF_WEAPON && flag&BF_LONG)
-				damage=damage*75/100;
-			if(skill_num==HT_LANDMINE || skill_num==HT_BLASTMINE || skill_num==HT_CLAYMORETRAP || skill_num==HT_FREEZINGTRAP)
-				damage=damage*60/100;
-		}
-	}
 
 	return damage;
 }
@@ -1581,7 +1584,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	}
 
 	if(skill_num != CR_GRANDCROSS)
-		damage=battle_calc_damage(target,damage,skill_num,skill_lv,flag);
+		damage=battle_calc_damage(src,target,damage,skill_num,skill_lv,flag);
 
 	wd.damage=damage;
 	wd.damage2=0;
@@ -1980,7 +1983,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		damage = 0;
 
 	if(skill_num != CR_GRANDCROSS)
-		damage=battle_calc_damage(target,damage,skill_num,skill_lv,flag);
+		damage=battle_calc_damage(src,target,damage,skill_num,skill_lv,flag);
 
 	wd.damage=damage;
 	wd.damage2=0;
@@ -2814,14 +2817,14 @@ static struct Damage battle_calc_pc_weapon_attack(
 
 	if(skill_num != CR_GRANDCROSS && (damage > 0 || damage2 > 0) ) {
 		if(damage2<1)		// ダメージ最終修正
-			damage=battle_calc_damage(target,damage,skill_num,skill_lv,flag);
+			damage=battle_calc_damage(src,target,damage,skill_num,skill_lv,flag);
 		else if(damage<1)	// 右手がミス？
-			damage2=battle_calc_damage(target,damage2,skill_num,skill_lv,flag);
+			damage2=battle_calc_damage(src,target,damage2,skill_num,skill_lv,flag);
 		else {	// 両 手/カタールの場合はちょっと計算ややこしい
 			int d1=damage+damage2,d2=damage2;
-			damage=battle_calc_damage(target,damage+damage2,skill_num,skill_lv,flag);
+			damage=battle_calc_damage(src,target,damage+damage2,skill_num,skill_lv,flag);
 			damage2=(d2*100/d1)*damage/100;
-			if(damage2<1) damage2=1;
+			if(damage > 1 && damage2 < 1) damage2=1;
 			damage-=damage2;
 		}
 	}
@@ -2847,13 +2850,6 @@ struct Damage battle_calc_weapon_attack(
 	struct block_list *src,struct block_list *target,int skill_num,int skill_lv,int wflag)
 {
 	struct Damage wd;
-	struct map_session_data *sd=NULL;
-	struct mob_data *md=NULL;
-
-	if(src->type == BL_PC)
-		sd=(struct map_session_data*)src;
-	if(target->type == BL_MOB)
-		md=(struct mob_data*)target;
 
 	if(target->type == BL_PET)
 		memset(&wd,0,sizeof(wd));
@@ -2865,19 +2861,6 @@ struct Damage battle_calc_weapon_attack(
 		wd = battle_calc_pet_weapon_attack(src,target,skill_num,skill_lv,wflag);
 	else
 		memset(&wd,0,sizeof(wd));
-
-	//GvGの正規ギルド承認はここで処理
-	if(sd && md){
-		struct guild *g=NULL;
-		if(md->class == 1288 && map[sd->bl.m].flag.gvg){
-
-			if((g=guild_search(sd->status.guild_id))==NULL)
-				wd.damage=0;//ギルド未加入ならダメージ無し
-
-			if(guild_checkskill(g,GD_APPROVAL)!=1)
-				wd.damage=0;//正規ギルド承認がないとダメージ無し
-		}
-	}
 
 	return wd;
 }
@@ -3106,7 +3089,7 @@ struct Damage battle_calc_magic_attack(
 	if( target->type==BL_PC && ((struct map_session_data *)target)->special_state.no_magic_damage)
 		damage=0;	// 黄 金蟲カード（魔法ダメージ０）
 
-	damage=battle_calc_damage(target,damage,skill_num,skill_lv,aflag);	// 最終修正
+	damage=battle_calc_damage(bl,target,damage,skill_num,skill_lv,aflag);	// 最終修正
 
 	md.damage=damage;
 	md.div_=div_;
@@ -3216,7 +3199,7 @@ struct Damage  battle_calc_misc_attack(
 		damage = div_;
 	}
 
-	damage=battle_calc_damage(target,damage,skill_num,skill_lv,aflag);	// 最終修正
+	damage=battle_calc_damage(bl,target,damage,skill_num,skill_lv,aflag);	// 最終修正
 
 	md.damage=damage;
 	md.div_=div_;
@@ -3270,11 +3253,6 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		return 0;
 	if(target->type == BL_PC && pc_isdead((struct map_session_data *)target))
 		return 0;
-	if(map[src->m].flag.gvg){
-		if(src->type == BL_PC && target->type == BL_PC
-			&& (sd->ghost_timer!=-1 || ((struct map_session_data *)target)->ghost_timer!=-1))
-			return 0;
-	}
 
 	opt1=battle_get_opt1(src);
 	if(opt1 && *opt1 > 0) {
@@ -3458,12 +3436,13 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			return 0;
 		}
 		if(map[src->m].flag.gvg) {
-			int i;
-			struct guild *g=guild_search(s_g);
-
+			struct guild *g=NULL;
 			if( s_g > 0 && s_g == t_g)
 				return 1;
-			if (g){
+			if(map[src->m].flag.gvg_noparty && s_p > 0 && t_p > 0 && s_p == t_p)
+				return 1;
+			if((g = guild_search(s_g))) {
+				int i;
 				for(i=0;i<MAX_GUILDALLIANCE;i++){
 					if(g->alliance[i].guild_id > 0){
 						if(g->alliance[i].opposition && g->alliance[i].guild_id == t_g)
@@ -3473,9 +3452,6 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 					}
 				}
 			}
-			if(map[src->m].flag.gvg_noparty && s_p > 0 && t_p > 0 && s_p == t_p)
-				return 1;
-
 			return 0;
 		}
 	}
@@ -3634,6 +3610,10 @@ int battle_config_read(const char *cfgName)
 	battle_config.vit_penaly_num = 0;
 	battle_config.pc_skill_reiteration = 0;
 	battle_config.monster_skill_reiteration = 0;
+	battle_config.gvg_short_damage_rate = 100;
+	battle_config.gvg_long_damage_rate = 100;
+	battle_config.gvg_magic_damage_rate = 100;
+	battle_config.gvg_misc_damage_rate = 100;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -3739,6 +3719,10 @@ int battle_config_read(const char *cfgName)
 			{ "vit_penaly_num", &battle_config.vit_penaly_num },
 			{ "player_skill_reiteration", &battle_config.pc_skill_reiteration },
 			{ "monster_skill_reiteration", &battle_config.monster_skill_reiteration },
+			{ "gvg_short_attack_damage_rate" ,&battle_config.gvg_short_damage_rate },
+			{ "gvg_long_attack_damage_rate" ,&battle_config.gvg_short_damage_rate },
+			{ "gvg_magic_attack_damage_rate" ,&battle_config.gvg_short_damage_rate },
+			{ "gvg_misc_attack_damage_rate" ,&battle_config.gvg_short_damage_rate },
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

@@ -1412,12 +1412,12 @@ int buildin_cutin(struct script_state *st)
  */
 int buildin_viewpoint(struct script_state *st)
 {
-	int id,x,y,type,color;
+	int type,x,y,id,color;
 
-	id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	x=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	y=conv_num(st,& (st->stack->stack_data[st->start+4]));
-	type=(conv_num(st,& (st->stack->stack_data[st->start+5]))==1)?1:2;
+	id=conv_num(st,& (st->stack->stack_data[st->start+5]));
 	color=conv_num(st,& (st->stack->stack_data[st->start+6]));
 
 	clif_viewpoint(map_id2sd(st->rid),st->oid,type,x,y,id,color);
@@ -2813,7 +2813,7 @@ int buildin_emotion(struct script_state *st)
 {
 	int type;
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	if(type < 0 || type > 33)
+	if(type < 0 || type > 100)
 		return 0;
 	clif_emotion(map_id2bl(st->oid),type);
 	return 0;

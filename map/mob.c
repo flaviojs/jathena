@@ -1688,7 +1688,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		if(tmpsd[i]==NULL || tmpsd[i]->bl.m != md->bl.m)
 			continue;
 
-		per=md->dmglog[i].dmg*256*(9+((count > 5)? 5:count))/10/max_hp;
+		per=md->dmglog[i].dmg*256*(9+((count > 6)? 6:count))/10/max_hp;
 		if(per>512) per=512;
 		if(per<1) per=1;
 		base_exp=mob_db[md->class].base_exp*per/256;
@@ -2203,7 +2203,11 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	if( md->opt1>0 || md->option&6 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
 		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
 		return 0;
-	
+
+	if(map[md->bl.m].flag.gvg && (skill_id == SM_ENDURE || skill_id == AL_TELEPORT || skill_id == AL_WARP ||
+		skill_id == WZ_ICEWALL || skill_id == TF_BACKSLIDING))
+		return 0;
+
 	// 射程と障害物チェック
 	range = skill_get_range(skill_id,skill_lv);
 	if(range < 0)
@@ -2276,6 +2280,10 @@ int mobskill_use_pos( struct mob_data *md,
 	if( md->opt1>0 || md->option&6 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
 		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
 		return 0;	// 異常や沈黙など
+
+	if(map[md->bl.m].flag.gvg && (skill_id == SM_ENDURE || skill_id == AL_TELEPORT || skill_id == AL_WARP ||
+		skill_id == WZ_ICEWALL || skill_id == TF_BACKSLIDING))
+		return 0;
 
 	// 射程と障害物チェック
 	bl.type = BL_NUL;

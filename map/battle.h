@@ -31,7 +31,7 @@ struct Damage  battle_calc_misc_attack(
 int battle_attr_fix(int damage,int atk_elem,int def_elem);
 
 // ダメージ最終計算
-int battle_calc_damage(struct block_list *bl,int damage,int skillnum,int skilllv,int flag);
+int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,int skill_num,int skill_lv,int flag);
 enum {	// 最終計算のフラグ
 	BF_WEAPON	= 0x0001,
 	BF_MAGIC	= 0x0002,
@@ -207,6 +207,10 @@ extern struct Battle_Config {
 	int vit_penaly_num;
 	int pc_skill_reiteration;
 	int monster_skill_reiteration;
+	int gvg_short_damage_rate;
+	int gvg_long_damage_rate;
+	int gvg_magic_damage_rate;
+	int gvg_misc_damage_rate;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

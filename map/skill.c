@@ -1072,12 +1072,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		return 0;
 	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
 		return 0;
-	//こっちは範囲攻撃用
-	if(sd && map[sd->bl.m].flag.gvg){
-		if(sd->ghost_timer!=-1 || ((struct map_session_data *)bl)->ghost_timer!=-1)
-			return 0;
-	}
-
 	switch(skillid)
 	{
 	/* 武器攻撃系スキル */
@@ -1204,7 +1198,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case AC_SHOWER:			/* アローシャワー */
 	case SM_MAGNUM:			/* マグナムブレイク */
 	case AS_GRIMTOOTH:		/* グリムトゥース */
-	case KN_BOWLINGBASH:	/* ボウリングバッシュ */
 	case KN_BRANDISHSPEAR:	/*ブランディッシュスピア*/
 	case MC_CARTREVOLUTION:	/* カートレヴォリューション */
 	case NPC_SPLASHATTACK:	/* スプラッシュアタック */
@@ -1230,9 +1223,32 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				ar=2;
 			else if(skillid==NPC_SPLASHATTACK)	/* スプラッシュアタックは範囲7*7 */
 				ar=3;
-			else if(skillid==KN_BOWLINGBASH){/*ボウリングバッシュを仮実装してみる（吹き飛ばしはここでやる） */
+			skill_area_temp[1]=bl->id;
+			skill_area_temp[2]=x;
+			skill_area_temp[3]=y;
+			/* まずターゲットに攻撃を加える */
+			skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0);
+			/* その後ターゲット以外の範囲内の敵全体に処理を行う */
+			map_foreachinarea(skill_area_sub,
+				bl->m,x-ar,y-ar,x+ar,y+ar,0,
+				src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
+				skill_castend_damage_id);
+		}
+		break;
+
+	case KN_BOWLINGBASH:	/* ボウリングバッシュ */
+		if(flag&3){
+			/* 個別にダメージを与える */
+			if(bl->id!=skill_area_temp[1])
+				skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0x0500);
+		}
+		else { /*ボウリングバッシュを仮実装してみる（吹き飛ばしはここでやる） */
+			int ar = 1;
+			map_freeblock_lock();
+			if(skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0) > 0 && bl->prev != NULL) {
 				int i,c;	/* 他人から聞いた動きなので間違ってる可能性大＆効率が悪いっす＞＜ */
 				c = ((skilllv-1)>>1) + 1;
+				if(map[bl->m].flag.gvg) c = 0;
 				for(i=0;i<c;i++){
 					skill_blown(src,bl,1);
 					if(bl->type == BL_MOB)
@@ -1246,23 +1262,20 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 						bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
 						src,skillid,skilllv,tick, flag|BCT_ENEMY ,
 						skill_area_sub_count);
-					if(skill_area_temp[0]>1)break;
+					if(skill_area_temp[0]>1) break;
 				}
-			/*	if(i==4)break; */
-				x=bl->x;y=bl->y;
+				skill_area_temp[1]=bl->id;
+				skill_area_temp[2]=bl->x;
+				skill_area_temp[3]=bl->y;
+				map_foreachinarea(skill_area_sub,
+					bl->m,bl->x-ar,bl->y-ar,bl->x+ar,bl->y+ar,0,
+					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
+					skill_castend_damage_id);
 			}
-			skill_area_temp[1]=bl->id;
-			skill_area_temp[2]=x;
-			skill_area_temp[3]=y;
-			/* まずターゲットに攻撃を加える */
-			skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0);
-			/* その後ターゲット以外の範囲内の敵全体に処理を行う */
-			map_foreachinarea(skill_area_sub,
-				bl->m,x-ar,y-ar,x+ar,y+ar,0,
-				src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
-				skill_castend_damage_id);
+			map_freeblock_unlock();
 		}
 		break;
+
 
 	/* 魔法系スキル */
 	case MG_SOULSTRIKE:			/* ソウルストライク */
@@ -2099,9 +2112,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
  */
 int skill_castend_id( int tid, unsigned int tick, int id,int data )
 {
-	struct map_session_data *sd=NULL,*tsd=NULL;
-	struct mob_data	*tmd=NULL;
-
+	struct map_session_data* sd=NULL/*,*target_sd=NULL*/;
 	struct block_list *bl;
 	int range;
 
@@ -2117,20 +2128,11 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 	if(sd->skillid != SA_CASTCANCEL)
 		sd->skilltimer=-1;
 	bl=map_id2bl(sd->skilltarget);
-	if(bl->type == BL_PC)
-		tsd=(struct map_session_data *)bl;
-	else if(bl->type == BL_MOB)
-		tmd=(struct mob_data *)bl;
-
 	if(bl==NULL || bl->prev==NULL)
 		return 0;
 	if(sd->bl.m != bl->m || pc_isdead(sd))
 		return 0;
-	//ID指定攻撃用。範囲攻撃はkill_castend_damage_id()で
-	if(map[sd->bl.m].flag.gvg && tsd){
-		if(sd->ghost_timer!=-1 || tsd->ghost_timer!=-1)
-			return 0;
-	}
+
 	range = skill_get_range(sd->skillid,sd->skilllv);
 	if(range < 0)
 		range = battle_get_range(&sd->bl) - (range + 1);
@@ -2778,10 +2780,6 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		return 0;
 	if( bl->type!=BL_PC && bl->type!=BL_MOB)
 		return 0;
-	//スキルユニット用
-	if(map[bl->m].flag.gvg && ss->type == BL_PC && bl->type == BL_PC
-		&& ( ((struct map_session_data *)bl)->ghost_timer!=-1 || ((struct map_session_data *)ss)->ghost_timer!=-1) )
-		return 0;
 
 	if(ss==NULL)
 		return 0;
@@ -2879,8 +2877,9 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 
 	case 0x90:	/* スキッドトラップ */
 		{
-			int i;
-			for(i=0;i<sg->skill_lv;i++)
+			int i,c = sg->skill_lv;
+			if(map[bl->m].flag.gvg) c = 0;
+			for(i=0;i<c;i++)
 				skill_blown(&src->bl,bl,1|0x30000);
 			sg->unit_id = 0x8c;
 			clif_changelook(&src->bl,LOOK_BASE,sg->unit_id);
@@ -3187,9 +3186,9 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 
 	if( (sd=map_id2sd(id))==NULL )
 		return 0;
+	
 	if( sd->skilltimer != tid )	/* タイマIDの確認 */
 		return 0;
-
 	if(sd->skilltimer != -1 && pc_checkskill(sd,SA_FREECAST) > 0) {
 		sd->speed = sd->prev_speed;
 		clif_updatestatus(sd,SP_SPEED);
@@ -3323,18 +3322,6 @@ int skill_check_condition( struct map_session_data *sd )
 			case CR_DEFENDER:
 				if(sd->sc_data[SkillStatusChangeTable[skill]].timer!=-1)
 					return 1;			/* 解除する場合はSP消費しない */
-				break;
-
-			case SM_ENDURE:
-			case AL_TELEPORT:
-			case AL_WARP:
-			case WZ_ICEWALL:
-			case TF_BACKSLIDING:
-/*			case RG_INTIMIDATE:	インティミはskill_attack()で処理*/
-				if(map[sd->bl.m].flag.gvg){
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
 				break;
 
 			case MO_CALLSPIRITS:
@@ -3580,6 +3567,11 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	if( sd->opt1>0 ||  sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1 ||
 		sd->sc_data[SC_AUTOCOUNTER].timer != -1 || sd->sc_data[SC_STEELBODY].timer != -1)
 		return 0;
+
+	if(map[sd->bl.m].flag.gvg && (skill_num == SM_ENDURE || skill_num == AL_TELEPORT || skill_num == AL_WARP ||
+		skill_num == WZ_ICEWALL || skill_num == TF_BACKSLIDING))
+		return 0;
+
 	if(pc_ishiding(sd)) {
 		if( (sd->status.option&4) && skill_num==AS_CLOAKING );	/* クローキング中 */
 		else if( (sd->status.option&2) && (skill_num==TF_HIDING || skill_num==AS_GRIMTOOTH || skill_num==RG_BACKSTAP || skill_num==RG_RAID ));	/* ハイディング中 */
@@ -3725,6 +3717,9 @@ int skill_use_pos( struct map_session_data *sd,
 	if( sd->opt1>0 || pc_ishiding(sd) || sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1 ||
 		sd->sc_data[SC_AUTOCOUNTER].timer != -1 || sd->sc_data[SC_STEELBODY].timer != -1)
 		return 0;	/* 異常や沈黙など */
+	if(map[sd->bl.m].flag.gvg && (skill_num == SM_ENDURE || skill_num == AL_TELEPORT || skill_num == AL_WARP ||
+		skill_num == WZ_ICEWALL || skill_num == TF_BACKSLIDING))
+		return 0;
 
 	/* 演奏/ダンス中かチェック */
 	if( sd->sc_data[SC_DANCING].timer!=-1 )
@@ -5396,25 +5391,6 @@ int skill_can_produce_mix( struct map_session_data *sd, int nameid, int trigger 
 				return 0;
 		}
 	}
-	/* 製造の書 確認 */
-	if(trigger==32){
-		int bookid=0;
-		if	(nameid < 510)	bookid=7144;
-		else if	(nameid < 550)	bookid=7133;
-		else if	(nameid== 970)	bookid=7127;
-//		else	bookid=nameid-7;
-		else if	(nameid==7135)	bookid=7128;
-		else if	(nameid==7136)	bookid=7129;
-		else if	(nameid==7137)	bookid=7130;
-		else if	(nameid==7138)	bookid=7131;
-		else if	(nameid==7139)	bookid=7132;
-		else return 0;
-
-
-		if(pc_search_inventory(sd,bookid) < 0)
-			return 0;
-	}
-
 	return i+1;
 }
 

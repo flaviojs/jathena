@@ -1,4 +1,38 @@
 --------------------
+//0769 by 死神
+
+・シーズモード修正。
+・無敵時間の方はghost_timer以外の方法で実装するつもりなので今は削除しています。
+・スクリプトviewpointが正しく動作しない問題修正。
+・produce_db.txtを修正。(乳鉢はskill_require_db.txtで処理しています。そしてアイテムの数を0にすれば消耗はされないけど作る時必要なアイテムになります。)
+・その他細かい修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(db/)
+	produce_db.txt 修正。
+	(map/)
+	battle.h 修正。
+	battle.c
+		battle_calc_damage()、battle_calc_weapon_attack() 修正。
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack()、battle_calc_magic_attack() 修正。
+		battle_calc_misc_attack()、battle_check_target()、battle_config_read() 修正。
+	skill.c
+		skill_unit_onplace()、skill_castend_damage_id()、skill_castend_id() 修正。
+		skill_use_id()、skill_use_pos()、skill_check_condition() 修正。
+		skill_can_produce_mix() 修正。
+	pc.c
+		pc_attack_timer()、pc_attack()、pc_isUseitem()、pc_delitem() 修正。
+		pc_damage() 修正。
+	mob.c
+		mob_damage()、mobskill_use_id()、mobskill_use_pos() 修正。
+	script.c
+		buildin_viewpoint()、buildin_emotion() 修正。
+	makefile 修正。
+
+--------------------
 //0768 by ぴざまん
 
 ・シーズモード下で、以下の点を修正
