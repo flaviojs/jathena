@@ -1452,7 +1452,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	if(sd->sc_data && sd->sc_data[SC_BERSERK].timer!=-1){	// バーサーク
 		sd->status.max_hp = sd->status.max_hp * 3;
-		sd->status.hp = sd->status.hp * 3;
 	}
 	if(s_class.job == 23 && sd->status.base_level >= 99){
 		sd->status.max_hp = sd->status.max_hp + 2000;

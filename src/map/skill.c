@@ -5091,6 +5091,9 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 			case HT_CLAYMORETRAP:
 			case HT_TALKIEBOX:
 			case PF_SPIDERWEB:		/* スパイダーウェッブ */
+			case WZ_ICEWALL:
+				range = 2;
+				break;
 			case RG_GRAFFITI:		/* グラフィティ */
 				range = 1;
 				break;

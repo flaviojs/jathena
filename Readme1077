@@ -1,4 +1,13 @@
 --------------------
+//1088 by Sapientia
+・ウィザドスキル Icewall このキャラクターやモンスター足もとに設置されることを防止
+・ロードナイトスキル Berserk 使用の時 HPが 1/3になれば回復するバグ修正
+
+	(src/map)
+		pc.c	Berserk 修正
+		skill.c	Icewall 修正
+
+--------------------
 //1087 by End_of_exam
 
 ・マップキャッシュに圧縮機能を追加(1MB程に縮まるようです)
@@ -408,3 +417,5 @@
 
 
 (c) 2003 Athena Project.
+
+-->>J2KWorkBench<<--
