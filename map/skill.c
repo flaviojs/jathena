@@ -48,7 +48,7 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	-1,-1,-1,-1,
 /* 50- */
 	-1,
-	SC_HIDDING,			/* ハイディング */
+	SC_HIDING,			/* ハイディング */
 	-1,-1,-1,-1,-1,-1,-1,-1,
 /* 60- */
 	SC_TWOHANDQUICKEN,	/* 2HQ */
@@ -791,7 +791,7 @@ int skill_area_sub( struct block_list *bl,va_list ap )
 int skill_check_unit_sub( struct block_list *bl,va_list ap )
 {
 	struct skill_unit *unit;
-	int *c;
+	int *c,range;
 
 	if(bl->prev == NULL || bl->type != BL_SKILL)
 		return 0;
@@ -800,10 +800,14 @@ int skill_check_unit_sub( struct block_list *bl,va_list ap )
 
 	if(!unit->alive) return 0;
 
+	range = va_arg(ap,int);
 	c = va_arg(ap,int *);
 
 	switch(unit->group->unit_id) {
 		case 0x7e:
+			if(range == 0)
+				(*c)++;
+			break;
 		case 0x80:
 		case 0x81:
 		case 0x85:
@@ -818,7 +822,8 @@ int skill_check_unit_sub( struct block_list *bl,va_list ap )
 		case 0x97:
 		case 0x98:
 		case 0x99:
-			(*c)++;
+			if(range == 1)
+				(*c)++;
 			break;
 	}
 	return 0;
@@ -1098,8 +1103,8 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			int dist = distance(src->x,src->y,bl->x,bl->y);
 			if((dist > 0 && !map_check_dir(dir,t_dir)) || bl->type == BL_SKILL) {
 				struct status_change *sc_data = battle_get_sc_data(src);
-				if(sc_data && sc_data[SC_HIDDING].timer != -1)
-					skill_status_change_end(src, SC_HIDDING, -1);	// ハイディング解除
+				if(sc_data && sc_data[SC_HIDING].timer != -1)
+					skill_status_change_end(src, SC_HIDING, -1);	// ハイディング解除
 				skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 			}
 			else if(src->type == BL_PC)
@@ -1627,7 +1632,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
 				skill_castend_damage_id);
 		}
-		skill_status_change_end(src, SC_HIDDING, -1);	// ハイディング解除
+		skill_status_change_end(src, SC_HIDING, -1);	// ハイディング解除
 		break;
 
 	/* パーティスキル */
@@ -2119,7 +2124,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 		skill_castend_damage_id(&sd->bl,bl,sd->skillid,sd->skilllv,tick,0);
 		break;
 	case 1:/* 支援系 */
-		if( (sd->skillid==AL_HEAL || sd->skillid==ALL_RESURRECTION) && battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)))
+		if( (sd->skillid==AL_HEAL || (sd->skillid==ALL_RESURRECTION && bl->type != BL_PC)) && battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)))
 			skill_castend_damage_id(&sd->bl,bl,sd->skillid,sd->skilllv,tick,0);
 		else
 			skill_castend_nodamage_id(&sd->bl,bl,sd->skillid,sd->skilllv,tick,0);
@@ -2263,10 +2268,14 @@ int skill_castend_map( struct map_session_data *sd,int skill_num, const char *ma
 	if( sd==NULL || sd->bl.prev == NULL || pc_isdead(sd))
 		return 0;
 
-	if( sd->opt1>0 || sd->status.option&6 ||
-		sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1)
+	if( sd->opt1>0 || pc_ishiding(sd) || sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1 ||
+		sd->sc_data[SC_AUTOCOUNTER].timer != -1 || sd->sc_data[SC_STEELBODY].timer != -1)
 		return 0;	/* 異常や沈黙など */
-	
+
+	/* 演奏/ダンス中かチェック */
+	if( sd->sc_data[SC_DANCING].timer!=-1 )
+		return 0;
+
 	if( skill_num != sd->skillid)	/* 不正パケットらしい */
 		return 0;
 
@@ -3137,7 +3146,6 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 		return 0;
 
 	switch(sd->skillid) {
-		case MG_SAFETYWALL:
 		case AL_PNEUMA:
 		case AL_WARP:
 		case WZ_FIREPILLAR:
@@ -3152,7 +3160,19 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 		case HT_CLAYMORETRAP:
 		case HT_TALKIEBOX:
 			c = 0;
-			map_foreachinarea(skill_check_unit_sub,sd->bl.m,sd->skillx-2,sd->skilly-2,sd->skillx+2,sd->skilly+2,BL_SKILL,&c);
+			map_foreachinarea(skill_check_unit_sub,sd->bl.m,sd->skillx-2,sd->skilly-2,sd->skillx+2,sd->skilly+2,BL_SKILL,1,&c);
+			map_foreachinarea(skill_check_unit_sub,sd->bl.m,sd->skillx-1,sd->skilly-1,sd->skillx+1,sd->skilly+1,BL_SKILL,0,&c);
+			if(c > 0) {
+				clif_skill_fail(sd,sd->skillid,0,0);
+				sd->canact_tick = tick;
+				sd->canmove_tick = tick;
+				return 0;
+			}
+			break;
+		case MG_SAFETYWALL:
+			c = 0;
+			map_foreachinarea(skill_check_unit_sub,sd->bl.m,sd->skillx-1,sd->skilly-1,sd->skillx+1,sd->skilly+1,BL_SKILL,1,&c);
+			map_foreachinarea(skill_check_unit_sub,sd->bl.m,sd->skillx,sd->skilly,sd->skillx,sd->skilly,BL_SKILL,0,&c);
 			if(c > 0) {
 				clif_skill_fail(sd,sd->skillid,0,0);
 				sd->canact_tick = tick;
@@ -3542,7 +3562,7 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 
 	if(bl->type==BL_PC) {
 		target_sd=(struct map_session_data*)bl;
-		if(skill_num == ALL_RESURRECTION && pc_isdead(target_sd))
+		if(skill_num == ALL_RESURRECTION && !pc_isdead(target_sd))
 			return 0;
 	}
 	if((skill_num != MO_CHAINCOMBO && skill_num != MO_COMBOFINISH && skill_num != MO_EXTREMITYFIST) ||
@@ -3560,7 +3580,7 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 			forcecast=1;	/* ヒールアタックなら詠唱エフェクト有り */
 		break;
 	case ALL_RESURRECTION:	/* リザレクション */
-		if(battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl))){	/* 敵がアンデッドなら */
+		if(bl->type != BL_PC && battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl))){	/* 敵がアンデッドなら */
 			forcecast=1;	/* ターンアンデットと同じ詠唱時間 */
 			casttime=skill_castfix(&sd->bl, skill_get_cast(PR_TURNUNDEAD,skill_lv) );
 		}
@@ -3853,7 +3873,7 @@ int skill_status_change_timer_sub(struct block_list *bl, va_list ap )
 	case SC_SIGHT:	/* サイト */
 	case SC_RUWACH:	/* ルアフ */
 		if( (*battle_get_option(bl))&6 ){
-			skill_status_change_end( bl, SC_HIDDING, -1);
+			skill_status_change_end( bl, SC_HIDING, -1);
 			skill_status_change_end( bl, SC_CLOAKING, -1);
 			if( type==SC_RUWACH && battle_check_target( src,bl, BCT_ENEMY ) > 0)
 				skill_attack(BF_MAGIC,src,src,bl,type,1,tick,0);
@@ -3913,6 +3933,9 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 				calc_flag = 1;
 				break;
 			case SC_DECREASEAGI:		/* 速度減少 */
+				calc_flag = 1;
+				break;
+			case SC_HIDING:
 				calc_flag = 1;
 				break;
 			case SC_TWOHANDQUICKEN:		/* 2HQ */
@@ -4034,9 +4057,9 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			opt_flag=1;
 			break;
 
-		case SC_HIDDING:
+		case SC_HIDING:
 		case SC_CLOAKING:
-			*option&=~((type==SC_HIDDING)?2:4);
+			*option&=~((type==SC_HIDING)?2:4);
 			opt_flag =1 ;
 			break;
 
@@ -4102,7 +4125,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 		}
 		break;
 
-	case SC_HIDDING:		/* ハイディング */
+	case SC_HIDING:		/* ハイディング */
 		if(sd){		/* SPがあって、時間制限の間は持続 */
 			if( sd->status.sp > 0 && (--sc_data[type].val2)>0 ){
 				if(sc_data[type].val2 % (sc_data[type].val1+3) ==0 ){
@@ -4298,7 +4321,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 	if(sc_data == NULL || sc_count == NULL || option == NULL || opt1 == NULL || opt2 == NULL)
 		return 0;
 
-	if(type == SC_AETERNA && (sc_data[SC_STONE].timer != -1 || md->sc_data[SC_FREEZE].timer != -1) )
+	if(type == SC_AETERNA && (sc_data[SC_STONE].timer != -1 || sc_data[SC_FREEZE].timer != -1) )
 		return 0;
 	if(bl->type==BL_MOB){
 		md=(struct mob_data *)bl;
@@ -4610,7 +4633,8 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 
 		/* option */
-		case SC_HIDDING:		/* ハイディング */
+		case SC_HIDING:		/* ハイディング */
+			calc_flag = 1;
 			val2 = tick / 1000;		/* 持続時間 */
 			tick = 1000;
 			break;
@@ -4696,9 +4720,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			*opt2|= 1<<(type-SC_POISON);
 			opt_flag = 1;
 			break;
-		case SC_HIDDING:	case SC_CLOAKING:
+		case SC_HIDING:	case SC_CLOAKING:
 			battle_stopattack(bl);	/* 攻撃停止 */
-			*option|= ((type==SC_HIDDING)?2:4);
+			*option|= ((type==SC_HIDING)?2:4);
 			opt_flag =1 ;
 			break;
 		case SC_SIGHT:

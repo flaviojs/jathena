@@ -1215,7 +1215,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if( (skill=pc_checkskill(sd,BS_WEAPONRESEARCH))>0)	// 武器研究の命中率増加
 		sd->hit += skill*2;
 	if(sd->status.option&2 && (skill = pc_checkskill(sd,RG_TUNNELDRIVE))>0 )	// トンネルドライブ	// トンネルドライブ
-		sd->speed += sd->speed*(214 - skill*6)/100;
+		sd->speed += sd->speed*(218 - skill*10)/100;
 	if (pc_iscarton(sd) && (skill=pc_checkskill(sd,MC_PUSHCART))>0)	// カートによる速度低下
 		sd->speed += (10-skill) * (DEFAULT_WALK_SPEED * 0.1);
 	else if (pc_isriding(sd))	// ペコペコ乗りによる速度増加

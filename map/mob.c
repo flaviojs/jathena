@@ -2110,7 +2110,7 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 		skill_castend_damage_id(&md->bl,bl,md->skillid,md->skilllv,tick,0);
 		break;
 	case 1:// x‰‡Œn
-		if( (md->skillid==28 || md->skillid==54)&& battle_get_elem_type(bl)==9 )
+		if( (md->skillid==AL_HEAL || (md->skillid==ALL_RESURRECTION && bl->type != BL_PC)) && battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) )
 			skill_castend_damage_id(&md->bl,bl,md->skillid,md->skilllv,tick,0);
 		else
 			skill_castend_nodamage_id(&md->bl,bl,md->skillid,md->skilllv,tick,0);
@@ -2143,7 +2143,6 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 		return 0;
 
 	switch(md->skillid) {
-		case MG_SAFETYWALL:
 		case AL_PNEUMA:
 		case AL_WARP:
 		case WZ_FIREPILLAR:
@@ -2158,7 +2157,14 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 		case HT_CLAYMORETRAP:
 		case HT_TALKIEBOX:
 			c = 0;
-			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx-2,md->skilly-2,md->skillx+2,md->skilly+2,BL_SKILL,&c);
+			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx-2,md->skilly-2,md->skillx+2,md->skilly+2,BL_SKILL,1,&c);
+			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx-1,md->skilly-1,md->skillx+1,md->skilly+1,BL_SKILL,0,&c);
+			if(c > 0) return 0;
+			break;
+		case MG_SAFETYWALL:
+			c = 0;
+			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx-1,md->skilly-1,md->skillx+1,md->skilly+1,BL_SKILL,1,&c);
+			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx,md->skilly,md->skillx,md->skilly,BL_SKILL,0,&c);
 			if(c > 0) return 0;
 			break;
 	}

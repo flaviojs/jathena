@@ -164,7 +164,7 @@ enum {	// struct map_session_data ÇÃ status_changeÇÃî‘çÜÉeÅ[ÉuÉã
 	SC_SIGHT				=150,
 	SC_ENERGYCOAT			=31,
 	SC_CONCENTRATE			= 3,
-	SC_HIDDING				= 4,
+	SC_HIDING				= 4,
 	SC_LOUD					=30,
 	SC_RUWACH				=151,
 	SC_INCREASEAGI			=12,

@@ -1,7 +1,34 @@
 --------------
+//0755 by 死神
+
+・バグ修正と説明追加。(報告されたのは多分全て修正されたのかと...)
+・0751でスキルの最大レベルを100まで設定できるようにしました。
+・cast_db.txtに入っている状態異常の維持時間は自分が適度に入れた物です。本鯖の仕様なんて知りませんので。
+	(doc/)
+	db_ref.txt 修正。
+	(db/)
+	cast_db.txt 修正。
+	skill_db.txt 修正。
+	(map/)
+	skill.h 修正。
+	skill.c
+		skill_check_unit_sub()、skill_castend_id()、skill_use_id() 修正。
+		skill_status_change_end()、skill_status_change_start() 修正。
+		skill_castend_map() 修正。
+	mob.c
+		mobskill_castend_id()、mobskill_castend_pos() 修正。
+	pc.c
+		pc_calcstatus() 修正。
+	battle.c
+		battle_calc_pc_weapon_attack()
+		battle_calc_mob_weapon_attack()
+		battle_calc_magic_attack()
+
+--------------
 //0754 by 獅子o^.^o
 (db/)
 	cast_db.txt 修正
+
 --------------
 //0753 by 聖
 
@@ -44,7 +71,7 @@
 --------------
 //0751 by 死神
 
-・skill_db.txtとcastdb.txtの変更とskill_require_db.txtの追加。
+・skill_db.txtとcast_db.txtの変更とskill_require_db.txtの追加。
 ・毒にかかるとHPが減るように変更。HPは1秒に最大HPの1%減ります。(未テスト)
 ・石化を進行中の物と完全な物に分けてHPが減るように変更。(1秒に最大HPの1%)ブレッシングで完全石化だけ治せるように修正。(未テスト)
 ・ハンターのトラップにエフェクト実装。ただランドマインとショックウェーブは爆発エフェクトが出ないようです。ランドマインはファイアピラーの爆発エフェクトが出るように変えています。
