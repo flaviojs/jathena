@@ -7183,24 +7183,9 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd, int cmd)
 	case 0x07:	// continuous attack
 		{
 			struct block_list *bl=map_id2bl(target_id);
-			struct mob_data *md;
 			if(sd->vender_id != 0) return;
-			if( sd->status.guild_id &&
-				bl &&
-				bl->type == BL_MOB &&
-				(md = (struct mob_data *)bl) &&
-				(md->class == 1288 || md->class == 1287 || md->class == 1286 || md->class == 1285))
-			{
-				struct guild_castle *gc=guild_mapname2gc(map[sd->bl.m].name);
-				struct guild *g=guild_search(sd->status.guild_id);
-
-				if(g == NULL)
-					return ;//ギルド未加入ならダメージ無し
-				else if(gc != NULL && g->guild_id == gc->guild_id)
-					return ;//自占領ギルドのエンペならダメージ無し
-				else if(guild_checkskill(g,GD_APPROVAL) <= 0)
-					return ;//正規ギルド承認がないとダメージ無し
-			}
+			if(bl && mob_gvmobcheck(sd,bl)==0)
+				return;
 	
 			if(!battle_config.sdelay_attack_enable && pc_checkskill(sd,SA_FREECAST) <= 0 ) {
 				if(DIFF_TICK(tick , sd->canact_tick) < 0) {
@@ -7699,6 +7684,7 @@ void clif_parse_UseSkillToId(int fd,struct map_session_data *sd, int cmd)
 {
 	int skillnum,skilllv,lv,target_id;
 	unsigned int tick=gettick();
+	struct block_list *bl;
 
 	nullpo_retv(sd);
 
@@ -7709,6 +7695,10 @@ void clif_parse_UseSkillToId(int fd,struct map_session_data *sd, int cmd)
 	skilllv = RFIFOW(fd,packet_db[cmd].pos[0]);
 	skillnum = RFIFOW(fd,packet_db[cmd].pos[1]);
 	target_id = RFIFOL(fd,packet_db[cmd].pos[2]);
+
+	bl=map_id2bl(target_id);
+	if(bl && mob_gvmobcheck(sd,bl)==0)
+		return;
 
 	if(sd->skilltimer != -1) {
 		if(skillnum != SA_CASTCANCEL)

@@ -4,13 +4,14 @@
 #include <string.h>
 
 #include "db.h"
+#include "malloc.h"
+#include "nullpo.h"
 #include "itemdb.h"
 #include "clif.h"
 #include "intif.h"
 #include "pc.h"
 #include "storage.h"
 #include "guild.h"
-#include "nullpo.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -61,9 +62,26 @@ int do_init_storage(void) // map.c::do_init()‚©‚çŒÄ‚Î‚ê‚é
 	guild_storage_db=numdb_init();
 	return 1;
 }
-
+/*==========================================
+ * I—¹
+ *------------------------------------------
+ */
+static int storage_db_final(void *key,void *data,va_list ap)
+{
+	free(data);
+	return 0;
+}
+static int guild_storage_db_final(void *key,void *data,va_list ap)
+{
+	free(data);
+	return 0;
+}
 void do_final_storage(void) // map.c::do_final()‚©‚çŒÄ‚Î‚ê‚é
 {
+	if(storage_db)
+		numdb_final(storage_db,storage_db_final);
+	if(guild_storage_db)
+		numdb_final(guild_storage_db,guild_storage_db_final);
 }
 
 struct storage *account2storage(int account_id)
@@ -71,12 +89,7 @@ struct storage *account2storage(int account_id)
 	struct storage *stor;
 	stor=numdb_search(storage_db,account_id);
 	if(stor == NULL) {
-		stor = calloc(sizeof(struct storage), 1);
-		if(stor == NULL){
-			printf("storage: out of memory!\n");
-			exit(0);
-		}
-		memset(stor,0,sizeof(struct storage));
+		stor = aCalloc(1,sizeof(struct storage));
 		stor->account_id=account_id;
 		numdb_insert(storage_db,stor->account_id,stor);
 	}
@@ -338,11 +351,7 @@ struct guild_storage *guild2storage(int guild_id)
 	if(guild_search(guild_id) != NULL) {
 		gs=numdb_search(guild_storage_db,guild_id);
 		if(gs == NULL) {
-			gs = calloc(sizeof(struct guild_storage), 1);
-			if(gs==NULL){
-				printf("storage: out of memory!\n");
-				exit(0);
-			}
+			gs = aCalloc(1,sizeof(struct guild_storage));
 			gs->guild_id=guild_id;
 			numdb_insert(guild_storage_db,gs->guild_id,gs);
 		}

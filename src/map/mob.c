@@ -3224,6 +3224,36 @@ int mobskill_event(struct mob_data *md,int flag)
 	return 0;
 }
 /*==========================================
+ * Mobがエンペリウムなどの場合の判定
+ *------------------------------------------
+ */
+int mob_gvmobcheck(struct map_session_data *sd, struct block_list *bl)
+{
+	struct mob_data *md=NULL;
+	
+	nullpo_retr(0,sd);
+	nullpo_retr(0,bl);
+	
+	if(bl->type==BL_MOB && (md=(struct mob_data *)bl) &&
+		(md->class == 1288 || md->class == 1287 || md->class == 1286 || md->class == 1285))
+	{
+		struct guild_castle *gc=guild_mapname2gc(map[sd->bl.m].name);
+		struct guild *g=guild_search(sd->status.guild_id);
+
+		if(g == NULL && md->class == 1288)
+			return 0;//ギルド未加入ならダメージ無し
+		else if(gc != NULL && !map[sd->bl.m].flag.gvg)
+			return 0;//砦内でGvじゃないときはダメージなし
+		else if(g && gc != NULL && g->guild_id == gc->guild_id)
+			return 0;//自占領ギルドのエンペならダメージ無し
+		else if(g && guild_checkskill(g,GD_APPROVAL) <= 0 && md->class == 1288)
+			return 0;//正規ギルド承認がないとダメージ無し
+
+	}
+	
+	return 1;
+}
+/*==========================================
  * スキル用タイマー削除
  *------------------------------------------
  */

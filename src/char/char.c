@@ -1193,7 +1193,7 @@ int parse_frommap(int fd)
 				WFIFOL(fd,34)=0;
 				WFIFOW(fd,38)=0;
 			}
-			WFIFOSET(fd,36);
+			WFIFOSET(fd,40);
 			
 			RFIFOSKIP(fd,6);
 			break;

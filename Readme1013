@@ -1,4 +1,26 @@
 --------------------
+//1047 by SVN
+・製造アイテムの製作者の名前を引くmap←→charのパケットが間違っていたのを修正
+・二重ログインをした時にchar-serverが落ちる可能性があったのを修正
+・ガーディアンをGv時間外に殴れた、ID指定のスキルが当たった、skill_unitなスキル攻撃が当たったのを修正
+・グラフィティのRangeをとりあえず3にしてみた
+	(db/)
+		skill_db.txt
+	(char/)
+	char.c
+		parse_frommap()
+	(map/)
+	clif.c
+		clif_parse_ActionRequest() 変更
+		clif_parse_UseSkillToId() 変更
+	mob.c
+		mob_gvmobcheck() 追加
+	mob.h
+		mob_gvmobcheck() 定義追加
+	skill.c
+		skill_attack() 変更
+
+--------------------
 //1046 by SVN
 ※db/packet_db.txtは2004-09-06aSakexe用なので、jROクライアントで使用する際は「//jROはここまで」以下をコメントアウトするか削除してください
 

@@ -871,6 +871,9 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		return 0;
 	if(dsrc->type == BL_PC && ((struct map_session_data *)dsrc)->chatID) //pŽÒ‚ªPC‚Åƒ`ƒƒƒbƒg’†‚È‚ç‰½‚à‚µ‚È‚¢
 		return 0;
+	if(src->type == BL_PC && bl && mob_gvmobcheck(((struct map_session_data *)src),bl)==0)
+		return 0;
+
 //‰½‚à‚µ‚È‚¢”»’è‚±‚±‚Ü‚Å
 
 	type=-1;
