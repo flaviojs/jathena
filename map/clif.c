@@ -2752,6 +2752,8 @@ int clif_damage(struct block_list *src,struct block_list *dst,unsigned int tick,
 	unsigned char buf[256];
 	struct status_change *sc_data = battle_get_sc_data(dst);
 
+	if(type != 4 && dst->type == BL_PC && ((struct map_session_data *)dst)->special_state.infinite_endure)
+		type = 9;
 	if(sc_data) {
 		if(type != 4 && sc_data[SC_ENDURE].timer != -1)
 			type = 9;
@@ -3232,6 +3234,8 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,
 	unsigned char buf[64];
 	struct status_change *sc_data = battle_get_sc_data(dst);
 
+	if(type != 5 && dst->type == BL_PC && ((struct map_session_data *)dst)->special_state.infinite_endure)
+		type = 9;
 	if(sc_data) {
 		if(type != 5 && sc_data[SC_ENDURE].timer != -1)
 			type = 9;
@@ -3278,6 +3282,8 @@ int clif_skill_damage2(struct block_list *src,struct block_list *dst,
 	unsigned char buf[64];
 	struct status_change *sc_data = battle_get_sc_data(dst);
 
+	if(type != 5 && dst->type == BL_PC && ((struct map_session_data *)dst)->special_state.infinite_endure)
+		type = 9;
 	if(sc_data) {
 		if(type != 5 && sc_data[SC_ENDURE].timer != -1)
 			type = 9;
@@ -5453,9 +5459,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	clif_changeoption(&sd->bl);
 	if(sd->sc_data[SC_TRICKDEAD].timer != -1)
 		skill_status_change_end(&sd->bl,SC_TRICKDEAD,-1);
-	if(sd->special_state.infinite_endure && sd->sc_data[SC_ENDURE].timer == -1)
-		skill_status_change_start(&sd->bl,SC_ENDURE,10,1,0,0,0,0);
-	if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,battle_get_elem_type(&sd->bl)))
+	if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,sd->def_ele))
 		skill_status_change_end(&sd->bl,SC_SIGNUMCRUCIS,-1);
 
 	map_foreachinarea(clif_getareachar,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,0,sd);

@@ -1,4 +1,64 @@
 --------------------
+//0873 by 死神
+
+・@コマンドitem2とkillmonster 追加。
+・スクリプトgetitem2とkillmonsterall 追加。
+・矢作成で作られた矢も製造者の名前が付くように修正。
+・battle_athena.confにmonster_class_change_full_recover追加。
+・装備スクリプトにbWeaponComaEleとbWeaponComaRace 追加。
+・少し間違いがあったダメージ計算式修正。
+・bInfiniteEndureの処理をインデュア表示なしで内部処理するように変更。
+・オートスペルでcastend_nodamage_id()を呼ぶスキルも使用できるように修正。
+・その他細かい修正とバグ修正。
+・ほとんど未テストなのでバグがあったら報告お願いします。
+	(conf/)
+	help.txt 修正。
+	atcommand_athena.conf 修正。
+	battle_athena.conf 修正。
+	char_athena.conf 修正。
+	(db/)
+	const.txt 修正。
+	item_db.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	script_ref.txt 修正。
+	conf_ref.txt 修正。
+	(map/)
+	map.h 修正。
+	map.c
+		map_quit() 修正。
+	skill.h 修正。
+	skill.c
+		skill_castend_nodamage_id()、skill_status_change_clear() 修正。
+		skill_castend_id()、skill_castend_pos()、skill_arrow_create() 修正。
+		skill_status_change_timer() 修正。
+	pc.c
+		pc_calcstatus()、pc_bonus2()、pc_equipitem() 修正。
+		pc_unequipitem()、pc_damage() 修正。
+	battle.h 修正。
+	battle.c
+		battle_get_dmotion()、battle_weapon_attack() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_calc_magic_attack()、battle_config_read() 修正。
+	clif.c
+		clif_parse_LoadEndAck()、clif_damage()、clif_skill_damage() 修正。
+		clif_skill_damage2() 修正。
+	itemdb.h 修正。
+	itemdb.c
+		itemdb_isequip3() 追加。
+	mob.h 修正。
+	mob.c
+		mob_delay_item_drop()、mob_damage()、mob_changestate() 修正。
+		mob_class_change()、mob_delete()、mob_catch_delete() 修正。
+	script.c
+		buildin_getitem() 修正。
+		buildin_killmonsterall_sub()、buildin_killmonsterall() 追加。
+	atcommand.h 修正。
+	atcommand.c
+		atcommand() 修正。
+		atkillmonster_sub() 追加。
+
+--------------------
 //0872 by ElFinLazz
 
 ・スキルポーションピッチャー修正
@@ -25,7 +85,7 @@
 ・0869のバグ修正。
 ・char_athena.confとlogin_athena.confに項目追加。(キャラ鯖とログイン鯖のログファイルを変えることができるようにしました。デフォルトでlog/フォルダーに入るのでlogフォルダーを作る必要があります。)
 ・エナジーコートの処理を少し修正。モンスターが使った場合はスキルレベル*6%の物理ダメージを減らすように変更。
-・武器以外の物でも製造者名前を表示するように変更。(本鯖ではプレゼントボックスと手作りチョコレット以外は表示されませんがパケットはあることだし入れてみました。)
+・武器以外の物でも製造者の名前を表示するように変更。(本鯖ではプレゼントボックスと手作りチョコレット以外は表示されませんがパケットはあることだし入れてみました。)
 ・その他スキル関係の細かい修正。
 ・@コマンド一つとスクリプト一つを追加しましたが説明は後のパッチで書きます。
 	(conf/)

@@ -182,6 +182,17 @@ int itemdb_isequip2(struct item_data *data)
 	}
 	return 0;
 }
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int itemdb_isequip3(int nameid)
+{
+	int type=itemdb_type(nameid);
+	if(type==4 || type==5)
+		return 1;
+	return 0;
+}
 
 //
 // ‰Šú‰»

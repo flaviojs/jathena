@@ -106,6 +106,8 @@ int mob_delete(struct mob_data *md);
 int mob_catch_delete(struct mob_data *md);
 int mob_timer_delete(int tid, unsigned int tick, int id, int data);
 
+int mob_deleteslave(struct mob_data *md);
+
 int mob_counttargeted(struct mob_data *md,struct block_list *src);
 
 int mob_class_change(struct mob_data *md,int *value);

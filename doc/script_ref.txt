@@ -299,6 +299,21 @@ AthenaNPCScript
 			itemid,num	数値
 			
 			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分入手します。
+
+		getitem2命令
+			getitem <itemid>,<num>,<identify>,<refine>,<attribute>,<card1>,
+			<card2>,<card3>,<card4>
+			
+			itemid,num,identify,refine,attribute,card1,card2,card3,card4	数値
+			
+			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分入手します。
+			<identify> 鑑定状態(0で未鑑定、1で鑑定)
+			<refine> 精錬値
+			<attribute> アイテムの状態
+			<card1> 差さているカード、製造武器なら255で装備以外のアイテムでキャラの名前を入れたい時は254
+			<card2> 差さているカード、製造武器なら属性と星のかけらの数を設定。星のかけらの数(範囲:0~3)*5*256 + 属性(無:0、火:3、水:1、風:4、土:2)
+			<card3> 差さているカード、製造武器やキャラの名前が入るアイテムはキャラIDの下の2バイト
+			<card4> 差さているカード、製造武器やキャラの名前が入るアイテムはキャラIDの上の2バイト
 			
 		delitem命令
 			delitem <itemid>,<num>;
@@ -444,7 +459,15 @@ AthenaNPCScript
 			event		文字列、省略可
 			
 			<gatname>に存在するモンスターをすべて殺します。
-			<event>によって呼び出されたモンスターのみ殺すことも可能です。
+			<event>によって呼び出されたモンスターのみ殺すことも可能です。<event>をAllにするとそのマップにある一時的に召喚されたモンスターを全て殺します。
+
+		killmonsterall命令
+			killmonsterall <gatname>
+			
+			gatname		文字列
+			
+			<gatname>に存在するモンスターをすべて殺します。killmonsterとは違ってそのマップに始めから配置されていたモンスターまで全て殺すことができます。
+
 			
 		addtimer命令
 			addtimer <ms>,<event>;

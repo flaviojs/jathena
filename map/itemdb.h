@@ -53,7 +53,6 @@ struct item_data* itemdb_exists(int nameid);
 #define	itemdb_available(n) (itemdb_exists(n) && itemdb_search(n)->flag.available)
 #define	itemdb_viewid(n) (itemdb_search(n)->view_id)
 
-
 int itemdb_searchrandomid(int flags);
 
 #define itemdb_value_buy(n) itemdb_search(n)->value_buy
@@ -62,6 +61,7 @@ int itemdb_searchrandomid(int flags);
 #define itemdb_value_notoc(n) itemdb_search(n)->flag.value_notoc
 int itemdb_isequip(int);
 int itemdb_isequip2(struct item_data *);
+int itemdb_isequip3(int);
 // itemdb_equipマクロとitemdb_equippointとの違いは
 // 前者が鯖側dbで定義された値そのものを返すのに対し
 // 後者はsessiondataを考慮した鞍側での装備可能場所

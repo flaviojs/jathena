@@ -904,6 +904,13 @@ party_skill_penaly
 	アドレナリンラッシュ、ウエポンパーフェクション、オーバートラストのみです。
 	デフォルトはyesです。
 
+monster_class_change_full_recover
+	モンスターがメタモルフォーシスとトランスフォーメーション等によって
+	他のモンスターに変わった時そのモンスターのHPを最大なで回復させるか
+	どうかです。これをyesにすると変わったモンスターの最大HPまで
+	回復します。noなら変わる前のHPと最大HPの比率の分のHPになります。
+	デフォルトはnoです。
+
 
 < 例 >
 
@@ -1022,6 +1029,7 @@ player_undead_nofreeze: no
 player_land_skill_limit: yes
 monster_land_skill_limit: yes
 party_skill_penaly: yes
+monster_class_change_full_recover: no
 
 
 =====================================================================ghos6. atcommand_athena.conf
@@ -1104,6 +1112,8 @@ go
 	@コマンド @go
 monster
 	@コマンド @monster
+killmonster
+	@コマンド @killmonster
 refine
 	@コマンド @refine
 produce
@@ -1221,6 +1231,7 @@ gvgon: 1
 model: 1
 go: 1
 monster: 1
+killmonster: 1
 refine: 1
 produce: 1
 memo: 1

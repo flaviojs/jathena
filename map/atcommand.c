@@ -25,6 +25,12 @@ static char msg_table[200][1024];	/* Server message */
 
 struct Atcommand_Config atcommand_config;
 
+static int atkillmonster_sub(struct block_list *bl,va_list ap)
+{
+	mob_damage(NULL,(struct mob_data *)bl,((struct mob_data *)bl)->hp,2);
+	return 0;
+}
+
 int atcommand(int fd,struct map_session_data *sd,char *message)
 {
 	int gm_level = pc_isGM(sd);
@@ -689,6 +695,17 @@ z [0`4]•ž‚ÌF
 			}
 			return 1;
 		}
+// @killmonster
+		if (strcmpi(command, "@killmonster") == 0 && gm_level >= atcommand_config.killmonster) {
+			sscanf(message, "%s%s", command, temp0);
+			if(strstr(temp0,".gat")==NULL && strlen(temp0)<16){
+				strcat(temp0,".gat");
+			}
+			if((x=map_mapname2mapid(temp0)) < 0 )
+				x = sd->bl.m;
+			map_foreachinarea(atkillmonster_sub,x,0,0,map[x].xs,map[x].ys,BL_MOB);
+			return 1;
+		}
 // ¸˜B @refine ‘•”õêŠID +”’l
 // ‰EŽè=2 ¶Žè=32 —¼Žè=34 “ª=256/257/768/769 ‘Ì=16 Œ¨=4 ‘«=64
 		if(strcmpi(command,"@refine")==0 && gm_level >= atcommand_config.refine){
@@ -1307,6 +1324,24 @@ z [0`4]•ž‚ÌF
 			return 1;
 		}
 
+		if(strcmpi(command, "@test") == 0){
+			sscanf(message, "%s %d %d %d", command, &x, &y, &z);
+			clif_skill_nodamage(&sd->bl,&sd->bl,x,y,z);
+			return 1;
+		}
+
+		if(strcmpi(command, "@test2") == 0){
+			sscanf(message, "%s %d", command, &x);
+			clif_skill_damage(&sd->bl,&sd->bl,gettick(),battle_get_amotion(&sd->bl),battle_get_dmotion(&sd->bl),100,1,x,10,6);
+			return 1;
+		}
+
+		if(strcmpi(command, "@test3") == 0){
+			sscanf(message, "%s %d", command, &x);
+			clif_emotion(&sd->bl,x);
+			return 1;
+		}
+
 	}
 
 	return 0;
@@ -1394,6 +1429,7 @@ int atcommand_config_read(const char *cfgName)
 				{ "model",&atcommand_config.model },
 				{ "go",&atcommand_config.go },
 				{ "monster",&atcommand_config.monster },
+				{ "killmonster",&atcommand_config.killmonster },
 				{ "refine",&atcommand_config.refine },
 				{ "produce",&atcommand_config.produce },
 				{ "memo",&atcommand_config.memo },

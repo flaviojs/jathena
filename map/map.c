@@ -802,7 +802,7 @@ int map_quit(struct map_session_data *sd)
 	storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
 
 	skill_castcancel(&sd->bl,0);	// 詠唱を中断する
-	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
+	skill_status_change_clear(&sd->bl,1);	// ステータス異常を解除する
 	skill_clear_unitgroup(&sd->bl);	// スキルユニットグループの削除
 	skill_cleartimerskill(&sd->bl);
 	pc_stop_walking(sd,0);

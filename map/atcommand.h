@@ -41,6 +41,7 @@ extern struct Atcommand_Config {
 	int model;
 	int go;
 	int monster;
+	int killmonster;
 	int refine;
 	int produce;
 	int memo;

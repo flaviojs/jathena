@@ -1828,19 +1828,16 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		}
 		break;
 	case SA_COMA:
-		{
-			clif_skill_nodamage(src,bl,skillid,skilllv,1);
-			if(bl->type==BL_PC){
-				dstsd->status.hp=1;
-				if(skilllv!=0) {
-					dstsd->status.sp=1;
-					clif_updatestatus(dstsd,SP_SP);
-				}
-				clif_updatestatus(dstsd,SP_HP);
-			}
-			if(bl->type==BL_MOB)
-				dstmd->hp=1;
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
+			break;
+		if(dstsd){
+			dstsd->status.hp=1;
+			dstsd->status.sp=1;
+			clif_updatestatus(dstsd,SP_HP);
+			clif_updatestatus(dstsd,SP_SP);
 		}
+		if(dstmd) dstmd->hp=1;
 		break;
 	case AL_INCAGI:			/* 速度増加 */
 	case AL_BLESSING:		/* ブレッシング */
@@ -2711,10 +2708,14 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 	if(sd->skillid != SA_CASTCANCEL)
 		sd->skilltimer=-1;
 	bl=map_id2bl(sd->skilltarget);
-	if(bl==NULL || bl->prev==NULL)
+	if(bl==NULL || bl->prev==NULL) {
+		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
-	if(sd->bl.m != bl->m || pc_isdead(sd))
+	}
+	if(sd->bl.m != bl->m || pc_isdead(sd)) {
+		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
+	}
 
 	if(sd->skillid == PR_LEXAETERNA) {
 		struct status_change *sc_data = battle_get_sc_data(bl);
@@ -2722,6 +2723,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 			clif_skill_fail(sd,sd->skillid,0,0);
 			sd->canact_tick = tick;
 			sd->canmove_tick = tick;
+			sd->skillitem = sd->skillitemlv = -1;
 			return 0;
 		}
 	}
@@ -2732,6 +2734,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 			clif_skill_fail(sd,sd->skillid,0,0);
 			sd->canact_tick = tick;
 			sd->canmove_tick = tick;
+			sd->skillitem = sd->skillitemlv = -1;
 			return 0;
 		}
 	}
@@ -2747,14 +2750,17 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 			clif_skill_fail(sd,sd->skillid,0,0);
 			sd->canact_tick = tick;
 			sd->canmove_tick = tick;
+			sd->skillitem = sd->skillitemlv = -1;
 			return 0;
 		}
 	}
 	if(!skill_check_condition(sd,1)) {		/* 使用条件チェック */
 		sd->canact_tick = tick;
 		sd->canmove_tick = tick;
+		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
 	}
+	sd->skillitem = sd->skillitemlv = -1;
 	if(battle_config.skill_out_range_consume) {
 		if(range < distance(sd->bl.x,sd->bl.y,bl->x,bl->y)) {
 			clif_skill_fail(sd,sd->skillid,0,0);
@@ -3891,7 +3897,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 	struct map_session_data* sd=NULL/*,*target_sd=NULL*/;
 	int range,maxcount;
 
-	if( (sd=map_id2sd(id))==NULL )
+	if( (sd=map_id2sd(id))==NULL || sd->bl.prev == NULL)
 		return 0;
 
 	if( sd->skilltimer != tid )	/* タイマIDの確認 */
@@ -3901,8 +3907,10 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 		clif_updatestatus(sd,SP_SPEED);
 	}
 	sd->skilltimer=-1;
-	if(pc_isdead(sd))
+	if(pc_isdead(sd)) {
+		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
+	}
 
 	if(battle_config.pc_skill_reiteration == 0) {
 		range = -1;
@@ -3931,6 +3939,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 				clif_skill_fail(sd,sd->skillid,0,0);
 				sd->canact_tick = tick;
 				sd->canmove_tick = tick;
+				sd->skillitem = sd->skillitemlv = -1;
 				return 0;
 			}
 		}
@@ -3960,6 +3969,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 				clif_skill_fail(sd,sd->skillid,0,0);
 				sd->canact_tick = tick;
 				sd->canmove_tick = tick;
+				sd->skillitem = sd->skillitemlv = -1;
 				return 0;
 			}
 		}
@@ -3977,6 +3987,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 				clif_skill_fail(sd,sd->skillid,0,0);
 				sd->canact_tick = tick;
 				sd->canmove_tick = tick;
+				sd->skillitem = sd->skillitemlv = -1;
 				return 0;
 			}
 		}
@@ -3991,14 +4002,17 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 			clif_skill_fail(sd,sd->skillid,0,0);
 			sd->canact_tick = tick;
 			sd->canmove_tick = tick;
+			sd->skillitem = sd->skillitemlv = -1;
 			return 0;
 		}
 	}
 	if(!skill_check_condition(sd,1)) {		/* 使用条件チェック */
 		sd->canact_tick = tick;
 		sd->canmove_tick = tick;
+		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
 	}
+	sd->skillitem = sd->skillitemlv = -1;
 	if(battle_config.skill_out_range_consume) {
 		if(range < distance(sd->bl.x,sd->bl.y,sd->skillx,sd->skilly)) {
 			clif_skill_fail(sd,sd->skillid,0,0);
@@ -5252,14 +5266,6 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 		}
 		break;
 
-	case SC_ENDURE:	/* インデュア */
-		if(sd && sd->special_state.infinite_endure) {
-			sc_data[type].timer=add_timer( 1000*600+tick,skill_status_change_timer, bl->id, data );
-			sc_data[type].val2=1;
-			return 0;
-		}
-		break;
-
 	case SC_DISSONANCE:	/* 不協和音 */
 		if( (--sc_data[type].val2)>0){
 			struct skill_unit *unit=
@@ -5894,7 +5900,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
  * ステータス異常全解除
  *------------------------------------------
  */
-int skill_status_change_clear(struct block_list *bl)
+int skill_status_change_clear(struct block_list *bl,int type)
 {
 	struct status_change* sc_data;
 	short *sc_count, *option, *opt1, *opt2;
@@ -5913,7 +5919,7 @@ int skill_status_change_clear(struct block_list *bl)
 			delete_timer(sc_data[i].timer, skill_status_change_timer);
 			sc_data[i].timer = -1;
 
-			if(bl->type==BL_PC && i<SC_SENDMAX)
+			if(!type && i<SC_SENDMAX)
 				clif_status_change(bl,i,0);	/* アイコン消去 */
 		}
 	}
@@ -5922,7 +5928,7 @@ int skill_status_change_clear(struct block_list *bl)
 	*opt2 = 0;
 	*option &= OPTION_MASK;
 
-	if( bl->type==BL_PC )
+	if(!type)
 		clif_changeoption(bl);
 
 	return 0;
@@ -6659,11 +6665,14 @@ int skill_arrow_create( struct map_session_data *sd,int nameid)
 		return 1;
 
 	pc_delitem(sd,j,1,0);
-	memset(&tmp_item,0,sizeof(tmp_item));
-	tmp_item.identify = 1;
 	for(i=0;i<5;i++) {
+		memset(&tmp_item,0,sizeof(tmp_item));
+		tmp_item.identify = 1;
 		tmp_item.nameid = skill_arrow_db[index].cre_id[i];
 		tmp_item.amount = skill_arrow_db[index].cre_amount[i];
+		tmp_item.card[0]=0x00fe;
+		tmp_item.card[1]=0;
+		*((unsigned long *)(&tmp_item.card[2]))=sd->char_id;	/* キャラID */
 		if(tmp_item.nameid <= 0 || tmp_item.amount <= 0)
 			continue;
 		if((flag = pc_additem(sd,&tmp_item,tmp_item.amount))) {

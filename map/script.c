@@ -125,6 +125,7 @@ int buildin_produce(struct script_state *st);
 int buildin_monster(struct script_state *st);
 int buildin_areamonster(struct script_state *st);
 int buildin_killmonster(struct script_state *st);
+int buildin_killmonsterall(struct script_state *st);
 int buildin_doevent(struct script_state *st);
 int buildin_addtimer(struct script_state *st);
 int buildin_deltimer(struct script_state *st);
@@ -232,6 +233,7 @@ struct {
 	{buildin_monster,"monster","siisii*"},
 	{buildin_areamonster,"areamonster","siiiisii*"},
 	{buildin_killmonster,"killmonster","ss"},
+	{buildin_killmonsterall,"killmonster","s"},
 	{buildin_doevent,"doevent","s"},
 	{buildin_addtimer,"addtimer","is"},
 	{buildin_deltimer,"deltimer","s"},
@@ -1512,7 +1514,7 @@ int buildin_getitem(struct script_state *st)
 		if(!flag)
 			item_tmp.identify=1;
 		else
-			item_tmp.identify=!itemdb_isequip(nameid);
+			item_tmp.identify=!itemdb_isequip3(nameid);
 		if((flag = pc_additem(sd,&item_tmp,amount))) {
 			clif_additem(sd,0,0,flag);
 			map_addflooritem(&item_tmp,amount,sd->bl.m,sd->bl.x,sd->bl.y,NULL,NULL,NULL,0);
@@ -2383,6 +2385,24 @@ int buildin_killmonster(struct script_state *st)
 		return 0;
 	map_foreachinarea(buildin_killmonster_sub,
 		m,0,0,map[m].xs,map[m].ys,BL_MOB, event ,allflag);
+	return 0;
+}
+
+int buildin_killmonsterall_sub(struct block_list *bl,va_list ap)
+{
+	mob_delete((struct mob_data *)bl);
+	return 0;
+}
+int buildin_killmonsterall(struct script_state *st)
+{
+	char *mapname;
+	int m;
+	mapname=conv_str(st,& (st->stack->stack_data[st->start+2]));
+
+	if( (m=map_mapname2mapid(mapname))<0 )
+		return 0;
+	map_foreachinarea(buildin_killmonsterall_sub,
+		m,0,0,map[m].xs,map[m].ys,BL_MOB);
 	return 0;
 }
 

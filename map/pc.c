@@ -917,7 +917,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(sd->addeff,0,sizeof(sd->addeff));
 	memset(sd->reseff,0,sizeof(sd->reseff));
 	memset(&sd->special_state,0,sizeof(sd->special_state));
-	memset(sd->weapon_coma,0,sizeof(sd->weapon_coma));
+	memset(sd->weapon_coma_ele,0,sizeof(sd->weapon_coma_ele));
+	memset(sd->weapon_coma_race,0,sizeof(sd->weapon_coma_race));
 
 	sd->watk_ = 0;			//二刀流用(仮)
 	sd->watk_2 = 0;
@@ -2035,9 +2036,13 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 			sd->sp_drain_per_ += val;
 		}
 		break;
-	case SP_WEAPON_COMA:
+	case SP_WEAPON_COMA_ELE:
 		if(sd->state.lr_flag != 2)
-			sd->weapon_coma[type2]=val;
+			sd->weapon_coma_ele[type2] += val;
+		break;
+	case SP_WEAPON_COMA_RACE:
+		if(sd->state.lr_flag != 2)
+			sd->weapon_coma_race[type2] += val;
 		break;
 	default:
 		if(battle_config.error_log)
@@ -3899,7 +3904,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	skill_castcancel(&sd->bl,0);	// 詠唱の中止
 	clif_clearchar_area(&sd->bl,1);
 	skill_unit_out_all(&sd->bl,gettick(),1);
-	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
+	skill_status_change_clear(&sd->bl,0);	// ステータス異常を解除する
 	clif_updatestatus(sd,SP_HP);
 	pc_calcstatus(sd,0);
 
@@ -4717,16 +4722,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	pc_checkallowskill(sd);	// 装備品でスキルか解除されるかチェック
 	pc_calcstatus(sd,0);
 
-	if(sd->special_state.infinite_endure) {
-		if(sd->sc_data[SC_ENDURE].timer == -1)
-			skill_status_change_start(&sd->bl,SC_ENDURE,10,1,0,0,0,0);
-	}
-	else {
-		if(sd->sc_data[SC_ENDURE].timer != -1 && sd->sc_data[SC_ENDURE].val2)
-			skill_status_change_end(&sd->bl,SC_ENDURE,-1);
-	}
-
-	if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,battle_get_elem_type(&sd->bl)))
+	if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,sd->def_ele))
 		skill_status_change_end(&sd->bl,SC_SIGNUMCRUCIS,-1);
 
 	return 0;
@@ -4783,9 +4779,7 @@ int pc_unequipitem(struct map_session_data *sd,int n,int type)
 	}
 	if(!type) {
 		pc_calcstatus(sd,0);
-		if(!sd->special_state.infinite_endure && sd->sc_data[SC_ENDURE].timer != -1 && sd->sc_data[SC_ENDURE].val2)
-			skill_status_change_end(&sd->bl,SC_ENDURE,-1);
-		if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,battle_get_elem_type(&sd->bl)))
+		if(sd->sc_data[SC_SIGNUMCRUCIS].timer != -1 && !battle_check_undead(7,sd->def_ele))
 			skill_status_change_end(&sd->bl,SC_SIGNUMCRUCIS,-1);
 	}
 

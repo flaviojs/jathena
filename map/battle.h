@@ -232,6 +232,7 @@ extern struct Battle_Config {
 	int pc_land_skill_limit;
 	int monster_land_skill_limit;
 	int party_skill_penaly;
+	int monster_class_change_full_recover;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

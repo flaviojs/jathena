@@ -126,7 +126,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 int skill_status_change_timer(int tid, unsigned int tick, int id, int data);
 int skill_encchant_eremental_end(struct block_list *bl, int type);
 int skill_status_change_end( struct block_list* bl , int type,int tid );
-int skill_status_change_clear(struct block_list *bl);
+int skill_status_change_clear(struct block_list *bl,int type);
 
 
 // ƒAƒCƒeƒ€ì¬
