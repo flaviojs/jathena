@@ -2540,6 +2540,7 @@ int clif_getareachar_skillunit(struct map_session_data *sd,struct skill_unit *un
 	WFIFOB(fd,15)=0;
 	WFIFOSET(fd,packet_len_table[0x11f]);
 #else
+	memset(WFIFOP(fd,0),0,packet_len_table[0x1c9]);
 	WFIFOW(fd, 0)=0x1c9;
 	WFIFOL(fd, 2)=unit->bl.id;
 	WFIFOL(fd, 6)=unit->group->src_id;
@@ -2547,7 +2548,6 @@ int clif_getareachar_skillunit(struct map_session_data *sd,struct skill_unit *un
 	WFIFOW(fd,12)=unit->bl.y;
 	WFIFOB(fd,14)=unit->group->unit_id;
 	WFIFOB(fd,15)=0;
-	memset(WFIFOP(fd,16),packet_len_table[0x1c9]-16,0);
 	WFIFOSET(fd,packet_len_table[0x1c9]);
 #endif
 	if(unit->group->skill_id == WZ_ICEWALL)
@@ -3011,6 +3011,7 @@ int clif_skill_setunit(struct skill_unit *unit)
 	WBUFB(buf,15)=0;
 	clif_send(buf,packet_len_table[0x11f],&unit->bl,AREA);
 #else
+	memset(WBUFP(buf, 0),0,packet_len_table[0x1c9]);
 	WBUFW(buf, 0)=0x1c9;
 	WBUFL(buf, 2)=unit->bl.id;
 	WBUFL(buf, 6)=unit->group->src_id;
@@ -3018,7 +3019,6 @@ int clif_skill_setunit(struct skill_unit *unit)
 	WBUFW(buf,12)=unit->bl.y;
 	WBUFB(buf,14)=unit->group->unit_id;
 	WBUFB(buf,15)=0;
-	memset(&buf[16],packet_len_table[0x1c9]-16,0);
 	clif_send(buf,packet_len_table[0x1c9],&unit->bl,AREA);
 #endif
 	return 0;
@@ -4254,7 +4254,7 @@ int clif_guild_belonginfo(struct map_session_data *sd,struct guild *g)
 	int fd=sd->fd;
 	int ps=guild_getposition(sd,g);
 
-	memset(WFIFOP(fd,0),0,13);
+	memset(WFIFOP(fd,0),0,packet_len_table[0x16c]);
 	WFIFOW(fd,0)=0x16c;
 	WFIFOL(fd,2)=g->guild_id;
 	WFIFOL(fd,6)=g->emblem_id;

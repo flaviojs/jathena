@@ -2885,7 +2885,7 @@ struct Damage  battle_calc_misc_attack(
 		break;
 
 	case NPC_SELFDESTRUCTION:	// Ž©”š
-		damage=battle_get_hp(bl)-((bl==target)?1:0);
+		damage=battle_get_hp(bl);
 		damagefix=0;
 		break;
 

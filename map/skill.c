@@ -1193,6 +1193,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 					src,skillid,skilllv,tick, flag|BCT_ENEMY ,
 					skill_area_sub_count);
 			}else{
+				skill_area_temp[0]=0;
 				skill_area_temp[2]=bl->x;
 				skill_area_temp[3]=bl->y;
 			}
@@ -1204,7 +1205,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				bl->m,bl->x-ar,bl->y-ar,bl->x+ar,bl->y+ar,0,
 				src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
 				skill_castend_damage_id);
-			break;
 		}
 		break;
 
@@ -1235,7 +1235,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
 				src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
 				skill_castend_damage_id);
-			break;
 		}
 		break;
 
@@ -1258,34 +1257,31 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		if(flag&1){
 			/* 個別にダメージを与える */
 			if(src->type==BL_MOB){
-				struct mob_data *md=(struct mob_data *)src;
-				md->hp=skill_area_temp[0];
 				if(bl->id!=skill_area_temp[1])
 					skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
-				md->hp=1;
 			}
 		}else{
-			skill_area_temp[0]=battle_get_hp(src);
 			skill_area_temp[1]=bl->id;
-			/* まずターゲットに攻撃を加える */
-			skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
-			/* その後ターゲット以外の範囲内の敵全体に処理を行う */
+			/* まずターゲット以外の範囲内の敵全体に処理を行う */
 			map_foreachinarea(skill_area_sub,
 				bl->m,bl->x-5,bl->y-5,bl->x+5,bl->y+5,0,
 				src,skillid,skilllv,tick, flag|BCT_ALL|1,
 				skill_castend_damage_id);
-			battle_damage(src,src,1);
-			break;
+			/* その後ターゲットに攻撃を加える */
+			skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
 		}
 		break;
 
 	/* HP吸収/HP吸収魔法 */
 	case NPC_BLOODDRAIN:
 	case NPC_ENERGYDRAIN:
-		battle_heal(NULL,src,
-			skill_attack( (skillid==NPC_BLOODDRAIN)?BF_WEAPON:BF_MAGIC,
-				src,src,bl,skillid,skilllv,tick,flag), 0 );
-		break;
+		{
+			int heal;
+			heal = skill_attack((skillid==NPC_BLOODDRAIN)?BF_WEAPON:BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
+			clif_skill_nodamage(bl,src,AL_HEAL,heal,1);
+			battle_heal(NULL,src,heal,0);
+			break;
+		}
 	}
 
 	return 0;

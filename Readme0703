@@ -1,4 +1,18 @@
 --------------
+//0739 by 聖
+・ファイアーウォール等の設置系スキルが正しく表示されない問題を修正。
+・マリンスフィアが自爆するとサンダーストーム等のダメージが表示されなくなる問題を修正。
+・HP吸収系スキルで敵が回復してるエフェクトが出るよう修正。
+	(map/)
+	skill.c
+		skill_castend_damage_id() 修正。
+	battle.c
+		battle_calc_misc_attack() 修正。
+	clif.c
+		clif_getareachar_skillunit() 修正。
+		clif_skill_setunit() 修正。
+
+--------------
 //0738 by ぴざまん
 ・ストームガストを完全に本鯖仕様に修正(3回で絶対凍結＆凍結状態の敵はSGをくらわない)
 ・サフラギウムが自分にかけられるバグ修正
@@ -7,6 +21,7 @@
 		skill_additional_effect()、skill_attack()修正
 		skill_castend_nodamage_id()修正
 	map.h 修正
+
 --------------
 //0737 by ぽぽぽ
 ・アンクルが歩いている敵に効かない&複数の敵に効くのを修正。
