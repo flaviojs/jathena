@@ -507,8 +507,16 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	if( flag&0xff00 )
 		type=(flag&0xff00)>>8;
 
+	if(dmg.damage <= 0 && dmg.damage2 <= 0)
+		dmg.blewcount = 0;
+
 	if( dmg.blewcount ){	/* 吹き飛ばし処理とそのパケット */
 		skill_blown(dsrc,bl,dmg.blewcount);
+		if(dsrc->type == BL_MOB)
+			mob_stop_walking((struct mob_data *)dsrc);
+		else if(dsrc->type == BL_PC)
+			pc_stop_walking((struct map_session_data *)dsrc);
+
 		clif_skill_damage2(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 			dmg.damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
 	} else			/* スキルのダメージパケット */
@@ -641,6 +649,8 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case NPC_DARKNESSATTACK:
 	case NPC_TELEKINESISATTACK:
 	case NPC_LICK:
+		if(skillid == MO_EXTREMITYFIST)
+			skill_status_change_end(src, SC_EXPLOSIONSPIRITS, -1);
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 
@@ -991,7 +1001,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			if(sd == dstsd || map[sd->bl.m].flag&MF_PVP) {
 				if(dstsd->spiritball > 0) {
 					clif_skill_nodamage(src,bl,skillid,0,1);
-					i = dstsd->spiritball * 7;
+					i = dstsd->spiritball * (skill_get_sp(MO_CALLSPIRITS,1)>>1);
 					pc_delspiritball(dstsd,dstsd->spiritball,0);
 					if(i > 0x7FFF)
 						i = 0x7FFF;
@@ -2547,24 +2557,22 @@ int skill_check_condition( struct map_session_data *sd )
 			if( sd->sc_data[SC_EXPLOSIONSPIRITS].timer == -1) {
 				clif_skill_fail(sd,sd->skillid,0,0);
 				return 0;
-			} else {
-				delete_timer(sd->sc_data[SC_EXPLOSIONSPIRITS].timer,skill_status_change_timer);
-				sd->sc_data[SC_EXPLOSIONSPIRITS].timer = -1;	// 爆裂波動解除
-				spiritball = 5;									// 氣球
 			}
+			else
+				spiritball = 5;									// 氣球
 			break;
 
 		case MO_FINGEROFFENSIVE:	//指弾
-				spiritball = sd->skilllv;							// 氣球
-				if (sd->spiritball != 0 && sd->spiritball < spiritball) {
-					spiritball = sd->spiritball;
-					sd->spiritball_old = sd->spiritball;	
-				}
-				else sd->spiritball_old = sd->skilllv;	
+			spiritball = sd->skilllv;							// 氣球
+			if (sd->spiritball > 0 && sd->spiritball < spiritball) {
+				spiritball = sd->spiritball;
+				sd->spiritball_old = sd->spiritball;	
+			}
+			else sd->spiritball_old = sd->skilllv;	
 			break;
 		case MO_INVESTIGATE:		//発勁
 		case MO_COMBOFINISH:
-				spiritball = 1;									// 氣球
+			spiritball = 1;									// 氣球
 			break;
 
 		case MO_BODYRELOCATION:
@@ -2764,7 +2772,7 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		}
 	}
 
-	if( casttime==0 )	/* 詠唱の無いものはキャンセルされない */
+	if( casttime<=0 )	/* 詠唱の無いものはキャンセルされない */
 		sd->skillcastcancel=0;
 
 	sd->skilltarget	= target_id;
@@ -2821,7 +2829,7 @@ int skill_use_pos( struct map_session_data *sd,
 		clif_skillcasting( &sd->bl,
 			sd->bl.id, 0, skill_x,skill_y, skill_num,casttime);
 
-	if( casttime==0 )	/* 詠唱の無いものはキャンセルされない */
+	if( casttime<=0 )	/* 詠唱の無いものはキャンセルされない */
 		sd->skillcastcancel=0;
 
 
@@ -2860,7 +2868,7 @@ int skill_castcancel( struct block_list *bl )
 			else
 				delete_timer( sd->skilltimer, skill_castend_id );
 			sd->skilltimer=-1;
-			clif_skillcasting( bl, bl->id, 0, 0,0, sd->skillid,0);	/* キャンセルパケ */
+			clif_skillcastcancel(bl);
 		}
 
 		return 0;
@@ -2872,7 +2880,7 @@ int skill_castcancel( struct block_list *bl )
 			else
 				delete_timer( md->skilltimer, mobskill_castend_id );
 			md->skilltimer=-1;
-			clif_skillcasting( bl, bl->id, 0, 0,0, md->skillid,0);	/* キャンセルパケ */
+			clif_skillcastcancel(bl);
 		}
 		return 0;
 	}
@@ -2950,10 +2958,9 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 		sc_data[type].timer=-1;
 		(*sc_count)--;
 
-		if(bl->type==BL_PC && type<64)	/* アイコン消去 */
+		if(bl->type==BL_PC && (type<64 || type == SC_EXPLOSIONSPIRITS))	/* アイコン消去 */
 			clif_status_change(bl,type,0);
 
-		
 		switch(type){	/* 正常に戻るときなにか処理が必要 */
 		case SC_STONE:
 		case SC_FREEZE:
@@ -3129,6 +3136,8 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			/* ボスには効かない */
 			return 0;
 		}
+		if(type==SC_STONE || type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
+			mob_stop_walking(md);
 	}else if(bl->type==BL_PC){
 		sd=(struct map_session_data *)bl;
 		
@@ -3138,6 +3147,8 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 				return 0;
 			}
 		}
+		if(type==SC_STONE || type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
+			pc_stop_walking(sd);
 	}else{
 		printf("skill_status_change_start: neither MOB nor PC !\n");
 		return 0;
@@ -3392,7 +3403,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			return 0;
 	}
 
-	if(bl->type==BL_PC && type<64)	/* アイコン表示パケット */
+	if(bl->type==BL_PC && (type<64 || type == SC_EXPLOSIONSPIRITS))	/* アイコン表示パケット */
 		clif_status_change(bl,type,1);
 
 	/* optionの変更 */

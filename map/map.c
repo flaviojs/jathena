@@ -736,7 +736,7 @@ int map_quit(struct map_session_data *sd)
 	skill_clear_unitgroup(&sd->bl);	// スキルユニットグループの削除
 	pc_stopattack(sd);
 	pc_delghosttimer(sd);
-	pc_delspiritball(sd,10,1);
+	pc_delspiritball(sd,sd->spiritball,1);
 
 	storage_storage_quitsave(sd);	// 倉庫を開いてるなら保存する
 

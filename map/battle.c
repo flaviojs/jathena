@@ -793,8 +793,11 @@ int battle_addmastery(struct map_session_data *sd,struct block_list *target,int 
 			break;
 		}
 		case 0x09:	// なし?
+			break;
 		case 0x0a:	// 杖
+			break;
 		case 0x0b:	// 弓
+			break;
 		case 0x0c:	// Knuckles
 		{
 			// 鉄 拳(+3 ～ +30) 素手,ナックル
@@ -1050,52 +1053,52 @@ struct Damage battle_calc_weapon_attack(
 			
 			flag=(flag&~BF_SKILLMASK)|BF_SKILL;
 			switch( skill_num ){
-			case 5:		// バッシュ
+			case SM_BASH:		// バッシュ
 				damage = damage*(100+ 30*skill_lv)/100;
 				hitrate+=(skill_lv<6)?10:20;
 				break;
-			case 7:		// マグナムブレイク
+			case SM_MAGNUM:		// マグナムブレイク
 				damage = damage*(5*skill_lv +(wflag)?65:115 )/100;
 				blewcount=2;
 				break;
-			case 42:	// メマーナイト
+			case MC_MAMMONITE:	// メマーナイト
 				damage = damage*(100+ 50*skill_lv)/100;
 				break;
-			case 46:	// ダブルストレイフィング
+			case AC_DOUBLE:	// ダブルストレイフィング
 				damage = damage*(180+ 20*skill_lv)/100;
 				div_=2;
 				break;
-			case 47:	// アローシャワー
+			case AC_SHOWER:	// アローシャワー
 				damage = damage*(75 + 5*skill_lv)/100;
 				break;
-			case 56:	// ピアース
+			case KN_PIERCE:	// ピアース
 				damage = damage*(100+ 10*skill_lv)/100;
 				hitrate=hitrate*(100+5*skill_lv)/100;
 				div_=t_size+1;
 				damage*=div_;
 				break;
-			case 58:	// スピアスタブ
+			case KN_SPEARSTAB:	// スピアスタブ
 				damage = damage*(100+ 15*skill_lv)/100;
 				blewcount=4;
 				break;
-			case 59:	// スピアブーメラン
+			case KN_SPEARBOOMERANG:	// スピアブーメラン
 				damage = damage*(100+ 50*skill_lv)/100;
 				break;
-			case 62:	// ボウリングバッシュ
+			case KN_BOWLINGBASH:	// ボウリングバッシュ
 				damage = damage*(100+ 50*skill_lv)/100;
 				//blewcount=4;skill.cで吹き飛ばしやってみた
 				break;
-			case 136:	// ソニックブロウ
+			case AS_SONICBLOW:	// ソニックブロウ
 				damage = damage*(300+ 50*skill_lv)/100;
 				div_=8;
 				break;
-			case 148:	// チャージアロー
+			case AC_CHARGEARROW:	// チャージアロー
 				blewcount=6;
 				break;
-			case 149:	// 砂まき
+			case TF_SPRINKLESAND:	// 砂まき
 				damage = damage*125/100;
 				break;
-			case 153:	// カートレボリューション
+			case MC_CARTREVOLUTION:	// カートレボリューション
 				if(sd->cart_max_weight > 0 && sd->cart_weight > 0)
 						damage = (damage*(150 + pc_checkskill(sd,BS_WEAPONRESEARCH) + (sd->cart_weight*100/sd->cart_max_weight) ) )/100;
 					else
@@ -1103,77 +1106,83 @@ struct Damage battle_calc_weapon_attack(
 				blewcount=2;
 				break;
 			// 以下MOB
-			case 171:	// 多段攻撃
+			case NPC_COMBOATTACK:	// 多段攻撃
 				div_=skill_get_num(171,skill_lv);
 				damage *= div_;
 				break;
-			case 183:	// ランダムATK攻撃
+			case NPC_RANDOMATTACK:	// ランダムATK攻撃
 				damage = damage*(50+rand()%150)/100;
 				break;
 			// 属性攻撃（適当）
-			case 184:	case 185:	case 186:	case 187:
-			case 188:	case 189:	case 190:	case 191:
+			case NPC_WATERATTACK:
+			case NPC_GROUNDATTACK:
+			case NPC_FIREATTACK:
+			case NPC_WINDATTACK:
+			case NPC_POISONATTACK:
+			case NPC_HOLYATTACK:
+			case NPC_DARKNESSATTACK:
+			case NPC_TELEKINESISATTACK:
 				damage = damage*(100+25*skill_lv)/100;
 				break;
-			case 214:	// サプライズアタック
+			case RG_RAID:	// サプライズアタック
 				damage = damage*(100+ 40*skill_lv)/100;
 				break;
-			case 219:	// インティミデイト
+			case RG_INTIMIDATE:	// インティミデイト
 				damage = damage*(100+ 30*skill_lv)/100;
 				break;
-			case 250:	// シールドチャージ
+			case CR_SHIELDCHARGE:	// シールドチャージ
 				damage = damage*(100+ 20*skill_lv)/100;
 				blewcount=4+skill_lv;
 				break;
-			case 251:	// シールドブーメラン
+			case CR_SHIELDBOOMERANG:	// シールドブーメラン
 				damage = damage*(100+ 30*skill_lv)/100;
 				break;
-			case 254:	// グランドクロス
+			case CR_GRANDCROSS:	// グランドクロス
 				damage = damage*(100+ 40*skill_lv)/100;
 //				md->hp = mob_db[md->class].max_hp/75;
-				break;
-			case 266:	// 発 勁
-				damage = damage*(100+ 75*skill_lv)/100 * (battle_get_def(target) + battle_get_def2(target))/100;
-				hitrate = 100;
-				s_ele = 0;
-				s_ele_ = 0;
 				break;
 			case MO_FINGEROFFENSIVE:	//指弾
 				damage = damage * (100 + 50 * skill_lv) / 100 * sd->spiritball_old;
 				div_ = sd->spiritball_old;
 				break;
+			case MO_INVESTIGATE:	// 発 勁
+				damage = damage*(100+ 75*skill_lv)/100 * (battle_get_def(target) + battle_get_def2(target))/100;
+				hitrate = 100000;
+				s_ele = 0;
+				s_ele_ = 0;
+				break;
 			case MO_EXTREMITYFIST:	// 阿修羅覇鳳拳
 				damage = damage * (8 + ((sd->status.sp)/10)) + 250 + (skill_lv * 150);
 				sd->status.sp = 0;
 				clif_updatestatus(sd,SP_SP);
-				hitrate = 100;
+				hitrate = 100000;
 				s_ele = 0;
 				s_ele_ = 0;
 				break;
-			case 272:	// 連打掌
+			case MO_CHAINCOMBO:	// 連打掌
 				damage = damage*(150+ 50*skill_lv)/100;
 				div_=4;
 				break;
-			case 273:	// 猛龍拳
+			case MO_COMBOFINISH:	// 猛龍拳
 				blewcount=5;
 				damage = damage*(240+ 60*skill_lv)/100;
 				break;
-			case 316:	// ミュージカルストライク
+			case BA_MUSICALSTRIKE:	// ミュージカルストライク
 				damage = damage*(100+ 50 * skill_lv)/100;
 				break;
-			case 317:	// 不協和音
+			case BA_DISSONANCE:	// 不協和音
 				damage = skill_lv*20+30;
 				break;
-			case 324:	// 矢撃ち
+			case DC_THROWARROW:	// 矢撃ち
 				damage = damage*(100+ 50 * skill_lv)/100;
 				break;
 			}
 		}
 		
-		if( skill_num!=170 ){
+		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( !(skill_num == 266 || skill_num == MO_EXTREMITYFIST)) {	//DEF, VIT無視
+			if ( !(skill_num == MO_INVESTIGATE || skill_num == MO_EXTREMITYFIST)) {	//DEF, VIT無視
 				t_vit = battle_get_def2(target);
 				if( src->type==BL_MOB && (s_race==1 || s_race==6) )
 					if(target->type==BL_PC && (skill=pc_checkskill(tsd,AL_DP)) > 0 )
@@ -1188,7 +1197,7 @@ struct Damage battle_calc_weapon_attack(
 		}
 	}
 	// 精錬ダメージの追加
-	if( !(skill_num == 266 || skill_num == MO_EXTREMITYFIST)) {			//DEF, VIT無視
+	if( !(skill_num == MO_INVESTIGATE || skill_num == MO_EXTREMITYFIST)) {			//DEF, VIT無視
 		if( src->type==BL_PC && (item_id = pc_checkequip(sd,2)) != -1)
 			damage += battle_get_atk2(src) - sd->watk_2;
 		if( src->type==BL_PC)
@@ -1207,17 +1216,17 @@ struct Damage battle_calc_weapon_attack(
 
 	// スキル修正２（修練系）
 	// 修練ダメージ(右手のみ) ソニックブロー時は別処理（1撃に付き1/8適応)
-	if( !(skill_num == 266 || skill_num == MO_EXTREMITYFIST)) {			//修練ダメージ無視
+	if( !(skill_num == MO_INVESTIGATE || skill_num == MO_EXTREMITYFIST)) {			//修練ダメージ無視
 		if( src->type==BL_PC )
 			damage = battle_addmastery(sd,target,damage);
 	}
 
 	// 回避修正
-	if( src->type==BL_PC )
+	if( src->type==BL_PC && hitrate < 100000)
 		hitrate = ((hitrate<5)?5:hitrate);
-	else
+	else if(hitrate < 1000)
 		hitrate = ((hitrate>95)?95: ((hitrate<5)?5:hitrate) );
-	if( skill_num==172 ||					// 必中攻撃
+	if( skill_num==NPC_GUIDEDATTACK || hitrate >= 100000 ||					// 必中攻撃
 		t_sc_data[SC_SLEEP].timer!=-1 ||	// 睡眠は必中
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
 		t_sc_data[SC_FREEZE].timer!=-1 )	// 凍結は必中
@@ -1401,16 +1410,18 @@ struct Damage  battle_calc_magic_attack(
 	
 	switch(skill_num){	// 基本ダメージ計算(スキルごとに処理)
 				// ヒールor聖体
-	case 28:	case 69:
+	case AL_HEAL:
+	case PR_BENEDICTIO:
 		damage = skill_calc_heal(bl,skill_lv)/2;
 		normalmagic_flag=0;
 		break;
-	case 70:	// サンクチュアリ
+	case PR_SANCTUARY:	// サンクチュアリ
 		damage = (skill_lv>6)?388:skill_lv*50;
 		normalmagic_flag=0;
 		blewcount=3|0x10000;
 		break;
-	case 54:	case 77:	// 攻撃リザレクションとターンアンデッド
+	case ALL_RESURRECTION:
+	case PR_TURNUNDEAD:	// 攻撃リザレクションとターンアンデッド
 		if( battle_get_elem_type(target)==9){
 			int hp = 0, mhp = 0, thres = 0;
 			hp = battle_get_hp(target);
@@ -1427,14 +1438,14 @@ struct Damage  battle_calc_magic_attack(
 		normalmagic_flag=0;
 		break;
 
-	case 11:	// ナパームビート（分散計算込み）
+	case MG_NAPALMBEAT:	// ナパームビート（分散計算込み）
 		MATK_FIX(70+ skill_lv*10,100);
 		if(flag>0){
 			MATK_FIX(1,flag);
 		}else
 			printf("battle_calc_magic_attack(): napam enemy count=0 !\n");
 		break;
-	case 17:	// ファイヤーボール
+	case MG_FIREBALL:	// ファイヤーボール
 		{
 			const int drate[]={100,90,70};
 			if(flag>2)
@@ -1443,7 +1454,7 @@ struct Damage  battle_calc_magic_attack(
 				MATK_FIX( (95+skill_lv*5)*drate[flag] ,10000 );
 		}
 		break;
-	case 18:	// ファイヤーウォール
+	case MG_FIREWALL:	// ファイヤーウォール
 		{
 			int ele=battle_get_elem_type(target);
 			if( ele!=3 && ele!=9 )
@@ -1451,36 +1462,36 @@ struct Damage  battle_calc_magic_attack(
 			MATK_FIX( 1,2 );
 		}
 		break;
-	case 21:	// サンダーストーム
+	case MG_THUNDERSTORM:	// サンダーストーム
 		MATK_FIX( 80,100 );
 		break;
-	case 15:	// フロストダイバ
+	case MG_FROSTDIVER:	// フロストダイバ
 		MATK_FIX( 100+skill_lv*10, 100);
 		break;
-	case 80:	// ファイヤーピラー
+	case WZ_FIREPILLAR:	// ファイヤーピラー
 		mdef1=mdef2=0;	// MDEF無視
 		MATK_FIX( 1,5 );
 		matk1+=50;
 		matk2+=50;
 		break;
-	case 83:
+	case WZ_METEOR:
 		MATK_FIX( skill_lv*30+80, 100 );
 		break;
-	case 84:	// ユピテルサンダー
+	case WZ_JUPITEL:	// ユピテルサンダー
 		blewcount=(skill_lv>6)?6:skill_lv;
 		break;
-	case 85:	// ロードオブバーミリオン
+	case WZ_VERMILION:	// ロードオブバーミリオン
 		MATK_FIX( skill_lv*20+80, 100 );
 		break;
-	case 86:	// ウォーターボール
+	case WZ_WATERBALL:	// ウォーターボール
 		matk1+= skill_lv*30;
 		matk2+= skill_lv*30;
 		break;
-	case 89:	// ストームガスト
+	case WZ_STORMGUST:	// ストームガスト
 		MATK_FIX( skill_lv*40+100 ,100 );
 		blewcount=2|0x10000;
 		break;
-	case 156:	// ホーリーライト
+	case AL_HOLYLIGHT:	// ホーリーライト
 		MATK_FIX( 125,100 );
 		break;
 	
@@ -1648,7 +1659,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(src,target,0,0,0);
 		if (wd.div_ == 255)	//三段掌
-			clif_skill_damage3(src , target , tick , wd.amotion , wd.dmotion , 
+			clif_skill_damage(src , target , tick , wd.amotion , wd.dmotion , 
 				wd.damage , 3 , MO_TRIPLEATTACK, pc_checkskill(sd,MO_TRIPLEATTACK) , wd.type );
 		else
 			clif_damage(src,target,tick, wd.amotion, wd.dmotion, 

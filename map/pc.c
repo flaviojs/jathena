@@ -126,6 +126,8 @@ static int pc_spiritball_timer(int tid,unsigned int tick,int id,int data)
 		sd->spirit_timer[i] = -1;
 	}
 	sd->spiritball--;
+	if(sd->spiritball < 0)
+		sd->spiritball = 0;
 	clif_spiritball(sd);
 
 	return 0;
@@ -165,10 +167,16 @@ int pc_delspiritball(struct map_session_data *sd,int count,int type)
 {
 	int i;
 
-	if(count > 10)
-		count = 10;
+	if(sd->spiritball <= 0) {
+		sd->spiritball = 0;
+		return 0;
+	}
+
 	if(count > sd->spiritball)
 		count = sd->spiritball;
+	sd->spiritball -= count;
+	if(count > 10)
+		count = 10;
 
 	for(i=0;i<count;i++) {
 		if(sd->spirit_timer[i] != -1) {
@@ -181,8 +189,7 @@ int pc_delspiritball(struct map_session_data *sd,int count,int type)
 		sd->spirit_timer[i] = -1;
 	}
 
-	sd->spiritball -= count;
-	if(type == 0)
+	if(!type)
 		clif_spiritball(sd);
 
 	return 0;
@@ -1128,7 +1135,8 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 		return 0;
 	}
 	if(!flag || sd->status.skill[id].id!=id){	// 覚 えてないスキルなら
-		sd->status.skill[id].id=id;
+		if(flag)
+			sd->status.skill[id].id=id;
 		sd->status.skill[id].lv=level;
 		sd->status.skill[id].flag=flag;	// cardスキルとする
 	}
@@ -2522,15 +2530,15 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		pc_stop_walking(sd);
 
 	sd->status.hp-=damage;
-	if(sd->status.hp>=0){
+	if(sd->status.hp>0){
 		// まだ生きているならHP更新
 		clif_updatestatus(sd,SP_HP);
 		
-		if(sd->status.hp<sd->status.max_hp/4 && pc_checkskill(sd,SM_AUTOBERSERK)>0 &&
+		if(sd->status.hp<sd->status.max_hp>>2 && pc_checkskill(sd,SM_AUTOBERSERK)>0 &&
 			(sd->sc_data[SC_PROVOKE].timer==-1 || sd->sc_data[SC_PROVOKE].val2==0 ))
 			// オートバーサーク発動
 			skill_status_change_start(&sd->bl,SC_PROVOKE,10,1);
-		
+
 		return 0;
 	}
 	//-----------------------

@@ -87,7 +87,7 @@ static const int packet_len_table[0x200]={
     3,  3, 35,  5, 11, 26, -1,  4,   4,  6, 10, 12,  6, -1,  4,  4,
    11,  7, -1, 67, 12, 18,114,  6,   3,  6, 26, 26, 26, 26,  2,  3,
 
-    2, 14, 10, -1, 22, 22,  0,  0,  13,  0,  0,  0,  0,  0,  0,  0,
+    2, 14, 10, -1, 22, 22,  0,  0,  13, 97,  0,  0,  0,  0,  0,  0,
     8,  0, 10,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0, 33,  0,
     0,  8,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
@@ -606,9 +606,9 @@ int clif_spawnpc(struct map_session_data *sd)
  */
 int clif_spawnnpc(struct npc_data *nd)
 {
-	unsigned char buf[128];
+	unsigned char buf[64];
 
-	memset(buf,0,128);
+	memset(buf,0,64);
 
 	WBUFW(buf,0)=0x7c;
 	WBUFL(buf,2)=nd->bl.id;
@@ -628,9 +628,9 @@ int clif_spawnnpc(struct npc_data *nd)
  */
 int clif_spawnmob(struct mob_data *md)
 {
-	unsigned char buf[128];
+	unsigned char buf[64];
 
-	memset(buf,0,128);
+	memset(buf,0,64);
 
 	WBUFW(buf,0)=0x7c;
 	WBUFL(buf,2)=md->bl.id;
@@ -695,9 +695,9 @@ static int clif_pet007b(struct npc_data *nd,unsigned char *buf)
  */
 int clif_spawnpet(struct npc_data *nd)
 {
-	unsigned char buf[128];
+	unsigned char buf[64];
 
-	memset(buf,0,128);
+	memset(buf,0,64);
 
 	WBUFW(buf,0)=0x7c;
 	WBUFL(buf,2)=nd->bl.id;
@@ -2121,7 +2121,7 @@ int clif_fixmobpos(struct mob_data *md)
 {
 	unsigned char buf[256];
 
-	if(md->bl.x != md->to_x || md->bl.y != md->to_y){
+	if(md->state.state == MS_WALK){
 		clif_mob007b(md,buf);
 		clif_send(buf,packet_len_table[0x7b],&md->bl,AREA);
 	} else {
@@ -2138,7 +2138,7 @@ int clif_fixpcpos(struct map_session_data *sd)
 {
 	unsigned char buf[256];
 
-	if(sd->bl.x != sd->to_x || sd->bl.y != sd->to_y){
+	if(sd->walktimer != -1){
 		clif_set007b(sd,buf);
 		clif_send(buf,packet_len_table[0x7b],&sd->bl,AREA);
 	} else {
@@ -2156,7 +2156,7 @@ int clif_fixpetpos(struct npc_data *nd)
 {
 	unsigned char buf[256];
 
-	if(nd->bl.x != nd->to_x || nd->bl.y != nd->to_y){
+	if(nd->state.state == MS_WALK){
 		clif_pet007b(nd,buf);
 		clif_send(buf,packet_len_table[0x7b],&nd->bl,AREA);
 	} else {
@@ -2251,6 +2251,7 @@ void clif_getareachar_item(struct map_session_data* sd,struct flooritem_data* fi
 int clif_getareachar_skillunit(struct map_session_data *sd,struct skill_unit *unit)
 {
 	int fd=sd->fd;
+#if PACKETVER < 3
 	WFIFOW(fd, 0)=0x11f;
 	WFIFOL(fd, 2)=unit->bl.id;
 	WFIFOL(fd, 6)=unit->group->src_id;
@@ -2259,6 +2260,17 @@ int clif_getareachar_skillunit(struct map_session_data *sd,struct skill_unit *un
 	WFIFOB(fd,14)=unit->group->unit_id;
 	WFIFOB(fd,15)=0;
 	WFIFOSET(fd,packet_len_table[0x11f]);
+#else
+	WFIFOW(fd, 0)=0x1c9;
+	WFIFOL(fd, 2)=unit->bl.id;
+	WFIFOL(fd, 6)=unit->group->src_id;
+	WFIFOW(fd,10)=unit->bl.x;
+	WFIFOW(fd,12)=unit->bl.y;
+	WFIFOB(fd,14)=unit->group->unit_id;
+	WFIFOB(fd,15)=0;
+	memset(WFIFOP(fd,16),packet_len_table[0x1c9]-16,0);
+	WFIFOSET(fd,packet_len_table[0x1c9]);
+#endif
 	return 0;
 }
 /*==========================================
@@ -2505,7 +2517,7 @@ int clif_skillup(struct map_session_data *sd,int skill_num)
 	WFIFOW(fd,6) = skill_get_sp(skill_num,sd->status.skill[skill_num].lv);
 	WFIFOW(fd,8) = skill_get_range(skill_num);
 	WFIFOB(fd,10) = 1;
-	WFIFOSET(fd,11);
+	WFIFOSET(fd,packet_len_table[0x10e]);
 	return 0;
 }
 
@@ -2525,7 +2537,20 @@ int clif_skillcasting(struct block_list* bl,
 	WBUFW(buf,14) = skill_num;//魔法詠唱スキル
 	WBUFL(buf,16) = skill_get_pl(skill_num);//属性
 	WBUFL(buf,20) = casttime;//skill詠唱時間
-	clif_send(buf,24, bl, AREA);
+	clif_send(buf,packet_len_table[0x13e], bl, AREA);
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int clif_skillcastcancel(struct block_list* bl)
+{
+	unsigned char buf[16];
+	WBUFW(buf,0) = 0x1b9;
+	WBUFL(buf,2) = bl->id;
+	clif_send(buf,packet_len_table[0x1b9], bl, AREA);
 	return 0;
 }
 
@@ -2542,7 +2567,7 @@ int clif_skill_fail(struct map_session_data *sd,int skill_id,int type,int btype)
 	WFIFOW(fd,6) = 0;
 	WFIFOB(fd,8) = 0;
 	WFIFOB(fd,9) = type;
-	WFIFOSET(fd,10);
+	WFIFOSET(fd,packet_len_table[0x110]);
 	return 0;
 }
 
@@ -2562,6 +2587,7 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,
 			type = 9;
 	}
 
+#if PACKETVER < 3
 	WBUFW(buf,0)=0x114;
 	WBUFW(buf,2)=skill_id;
 /*	
@@ -2579,6 +2605,20 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,
 	WBUFW(buf,28)=div;
 	WBUFB(buf,30)=(type>0)?type:skill_get_hit(skill_id);
 	clif_send(buf,packet_len_table[0x114],src,AREA);
+#else
+	WBUFW(buf,0)=0x1de;
+	WBUFW(buf,2)=skill_id;
+	WBUFL(buf,4)=src->id;
+	WBUFL(buf,8)=dst->id;
+	WBUFL(buf,12)=tick;
+	WBUFL(buf,16)=sdelay;
+	WBUFL(buf,20)=ddelay;
+	WBUFL(buf,24)=damage;
+	WBUFW(buf,28)=skill_lv;
+	WBUFW(buf,30)=div;
+	WBUFB(buf,32)=(type>0)?type:skill_get_hit(skill_id);
+	clif_send(buf,packet_len_table[0x1de],src,AREA);
+#endif
 	return 0;
 }
 /*==========================================
@@ -2611,36 +2651,7 @@ int clif_skill_damage2(struct block_list *src,struct block_list *dst,
 	WBUFW(buf,32)=div;
 	WBUFB(buf,34)=(type>0)?type:skill_get_hit(skill_id);
 	clif_send(buf,packet_len_table[0x115],src,AREA);
-	return 0;
-}
-/*==========================================
- * スキル攻撃エフェクト＆ダメージ(三段掌etc.?)
- *------------------------------------------
- */
-int clif_skill_damage3(struct block_list *src,struct block_list *dst,
-	unsigned int tick,int sdelay,int ddelay,int damage,int div,int skill_id,int skill_lv,int type)
-{
-	unsigned char buf[64];
-	struct map_session_data *sd;
 
-	if(dst->type==BL_PC) {
-		sd=(struct map_session_data *)dst;
-		if(sd->sc_data[SC_ENDURE].timer >= 0)
-			type = 9;
-	}
-
-	WBUFW(buf,0)=0x1de;
-	WBUFW(buf,2)=skill_id;
-	WBUFL(buf,4)=src->id;
-	WBUFL(buf,8)=dst->id;
-	WBUFL(buf,12)=tick;
-	WBUFL(buf,16)=sdelay;
-	WBUFL(buf,20)=ddelay;
-	WBUFL(buf,24)=damage;
-	WBUFW(buf,28)=skill_lv;
-	WBUFW(buf,30)=div;
-	WBUFB(buf,32)=(type>0)?type:skill_get_hit(skill_id);
-	clif_send(buf,packet_len_table[0x1de],src,AREA);
 	return 0;
 }
 /*==========================================
@@ -2650,7 +2661,7 @@ int clif_skill_damage3(struct block_list *src,struct block_list *dst,
 int clif_skill_nodamage(struct block_list *src,struct block_list *dst,
 	int skill_id,int heal,int fail)
 {
-	unsigned char buf[16];
+	unsigned char buf[32];
 
 	WBUFW(buf,0)=0x11a;
 	WBUFW(buf,2)=skill_id;
@@ -2684,7 +2695,8 @@ int clif_skill_poseffect(struct block_list *src,int skill_id,int val,int x,int y
  */
 int clif_skill_setunit(struct skill_unit *unit)
 {
-	unsigned char buf[16];
+	unsigned char buf[128];
+#if PACKETVER < 3
 	WBUFW(buf, 0)=0x11f;
 	WBUFL(buf, 2)=unit->bl.id;
 	WBUFL(buf, 6)=unit->group->src_id;
@@ -2693,6 +2705,17 @@ int clif_skill_setunit(struct skill_unit *unit)
 	WBUFB(buf,14)=unit->group->unit_id;
 	WBUFB(buf,15)=0;
 	clif_send(buf,packet_len_table[0x11f],&unit->bl,AREA);
+#else
+	WBUFW(buf, 0)=0x1c9;
+	WBUFL(buf, 2)=unit->bl.id;
+	WBUFL(buf, 6)=unit->group->src_id;
+	WBUFW(buf,10)=unit->bl.x;
+	WBUFW(buf,12)=unit->bl.y;
+	WBUFB(buf,14)=unit->group->unit_id;
+	WBUFB(buf,15)=0;
+	memset(&buf[16],packet_len_table[0x1c9]-16,0);
+	clif_send(buf,packet_len_table[0x1c9],&unit->bl,AREA);
+#endif
 	return 0;
 }
 /*==========================================
@@ -2744,7 +2767,7 @@ int clif_skill_memo(struct map_session_data *sd,int flag)
 int clif_skill_estimation(struct map_session_data *sd,struct block_list *dst)
 {
 	struct mob_data *md;
-	unsigned char buf[32];
+	unsigned char buf[64];
 	int i;
 	
 	if(dst->type!=BL_MOB)
@@ -3551,7 +3574,7 @@ int clif_party_hp(struct party *p,struct map_session_data *sd)
  */
 int clif_party_move(struct party *p,struct map_session_data *sd,int online)
 {
-	unsigned char buf[64];
+	unsigned char buf[128];
 	WBUFW(buf, 0)=0x104;
 	WBUFL(buf, 2)=sd->status.account_id;
 	WBUFL(buf, 6)=0;
@@ -3761,7 +3784,7 @@ int clif_spiritball(struct map_session_data *sd)
  */
 int clif_mvp_effect(struct map_session_data *sd)
 {
-	unsigned char buf[8];
+	unsigned char buf[16];
 	WBUFW(buf,0)=0x10c;
 	WBUFL(buf,2)=sd->bl.id;
 	clif_send(buf,packet_len_table[0x10c],&sd->bl,AREA);
@@ -3995,7 +4018,7 @@ int clif_guild_positioninfolist(struct map_session_data *sd)
 int clif_guild_positionchanged(struct guild *g,int idx)
 {
 	struct map_session_data *sd;
-	unsigned char buf[64];
+	unsigned char buf[128];
 	WBUFW(buf, 0)=0x174;
 	WBUFW(buf, 2)=44;
 	WBUFL(buf, 4)=idx;

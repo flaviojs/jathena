@@ -1,5 +1,59 @@
 --------------
+//0512 by 死神
+
+・問題になりそうな部分の修正と新しいパケットの対応がメインです。後バグも少し治しました。(動けない状態異常になっても動く問題の修正等です。)
+	athena.sh 修正。(いつも鯖を個別に実行していたので気がつきませんでした。)
+	makefile
+		DPACKETVERを2から3 に修正。ジューノ以後の蔵を使うのなら3にして使ってください。(その以前なら2か1)
+	clif.c
+		DPACKETVER=3に対応(今の所0x114を0x1deに変換と0x11fを01c9に変換するのみ対応)
+		clif_skill_damage3() 削除。
+		clif_skillcastcancel() 追加。
+		clif_skill_damage()、clif_getareachar_skillunit()、clif_skill_setunit() 修正。
+		clif_fixmobpos()、clif_fixpetpos()、clif_fixpcpos() 修正。
+		他に少し修正。
+	clif.h
+		clif_skill_damage3() 削除。
+		clif_skillcastcancel() 追加。
+	battle.c
+		battle_calc_weapon_attack() 修正。
+		hitrateを10000以上にすれば必中になるように変更。(今の仕様ではモンスターの必中攻撃以外は必中になりません。)
+		他に少し修正。
+	client_packet.txt
+		新しいパケット情報追加。
+	pc.c
+		pc_spiritball_timer()、pc_delspiritball() 修正。
+		pc_damage()、pc_skill() 修正。
+	skill.h
+		SC_EXPLOSIONSPIRITSを89から86に変更。(86 = 0x56)
+		SC_DELUGEを86から89に変更。
+	skill.c
+		skill_castcancel()、skill_use_id()、skill_use_pos() 修正。
+		skill_check_condition() 修正。
+		skill_castend_damage_id()、skill_castend_nodamage_id 修正。
+		skill_status_change_end()、skill_status_change_start() 修正。
+	skill_db.txt
+		気功の消費SPを修正。(前の15が本鯖にあっているみたいですので...)
+	mob.c
+		mobskill_use_id()、mobskill_use_pos() 修正。
+	map.c
+		map_quit() 修正。
+	atcommand.h
+	atcommand.c
+		@コマンド@spiritball追加。(機能は使えばわかります。ただ1000以上は入れない方がいいです。蔵がパンクしますので...)
+	atcommand_athena.conf
+		修正。
+	conf_ref.txt
+		修正。
+・0x196パケットに新しい物が追加されているので状態変化に直接に関係ないSC_xxxxの番号を調整する必要があります。(今はSC_EXPLOSIONSPIRITSにだけ対応しました。) それとskill_status_change_end()、skill_status_change_start()でclif_status_change()を呼ぶtypeの範囲が64(0x40)未満になっているがそれも追加されている物に合わせて修正する必要がありますが追加されている物が全てわかったわけでもないのでSC_EXPLOSIONSPIRITSにだけ対応しました。今度からは爆裂波動の解除が正確に見えます。金剛はデータを見つけられませんでした。
+※新しいパケットに対応する作業をしていますが情報が不足です。
+イグドラシルの実やイグドラシルの種のエフェクトが出るようにする為に01c8を使ってみましたが駄目でした。client_packet.txtのデータでは何も起こらないので何方が本鯖でイグドラシルの実やイグドラシルの種を使った時のパケットを提供してくれませんか？S 00a7の後00a8が来るのかそれとも01c8が来るのかの確認と00a8の後に01c8が来るのかの確認ができれば何とかなると思いますが...
+それと01c9の後に来る?.81bがわかればアイスウゥールを摺り抜る問題も解決できると思いますが...
+情報提供をお願いします。
+
+--------------
 //0511 by Diex
+
 ・指弾の攻撃回数修正。
 ・阿修羅覇鳳拳、発勁が修練を無視し、無属性になるように修正。
 ・金剛使用時、MDEFが正しく表示されてなかったバグを修正。
@@ -15,6 +69,7 @@
 
 --------------
 //0510 by Diex
+
 ・三段掌の表示バグ修正
 ・指弾が気弾が無くても撃てるバグを修正
 	map.h
@@ -28,6 +83,11 @@
 
 --------------
 //0509 by 
+
+・npc_warp.txt
+	プロ城→プロフィールドになっていたのを、
+	プロ城→ヴァルキリーレルムに修正。
+	プロフィールド→プロ城になっていたのをプロフィールド→ヴァルキリーレルムに修正
 
 --------------
 //0508 by 死神

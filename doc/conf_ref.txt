@@ -563,6 +563,8 @@ questskill
 	@コマンド @questskil
 lostskill
 	@コマンド @lostskill
+spiritball
+	@コマンド @spiritball
 
 < 例 >
 
@@ -630,6 +632,7 @@ charjlvl: 1
 kick: 1
 questskill: 1
 lostskill: 1
+spiritball: 1
 
 ==========================================================================
 EOF
