@@ -4718,6 +4718,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.unit_movement_type = 0;
 		battle_config.invite_request_check = 1;
 		battle_config.skill_removetrap_type = 0;
+		battle_config.disp_experience = 0;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4886,6 +4887,7 @@ int battle_config_read(const char *cfgName)
 			{ "unit_movement_type",			&battle_config.unit_movement_type		},
 			{ "invite_request_check",		&battle_config.invite_request_check		},
 			{ "skill_removetrap_type",		&battle_config.skill_removetrap_type	},
+			{ "disp_experience",			&battle_config.disp_experience			},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

@@ -3906,6 +3906,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
  */
 int pc_gainexp(struct map_session_data *sd,int base_exp,int job_exp)
 {
+	char output[128];
 	nullpo_retr(0, sd);
 
 	if(sd->bl.prev == NULL || pc_isdead(sd))
@@ -3935,10 +3936,15 @@ int pc_gainexp(struct map_session_data *sd,int base_exp,int job_exp)
 	while(pc_checkjoblevelup(sd)) ;
 
 	clif_updatestatus(sd,SP_JOBEXP);
+	
+	if(battle_config.disp_experience){
+		snprintf(output, sizeof output,
+			"Base:%d Job:%d の経験値を獲得",base_exp,job_exp);
+		clif_disp_onlyself(sd,output,strlen(output));
+	}
 
 	return 0;
 }
-
 
 /*==========================================
  * base level側必要経験値計算

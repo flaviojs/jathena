@@ -6261,6 +6261,21 @@ void clif_sitting(int fd, struct map_session_data *sd)
 	WFIFOB(fd,26)=2;
 	clif_send(WFIFOP(fd,0),packet_len_table[0x8a],&sd->bl,AREA);
 }
+/*==========================================
+ * 
+ *------------------------------------------
+ */
+int clif_disp_onlyself(struct map_session_data *sd,char *mes,int len)
+{
+	unsigned char buf[len+32];
+
+	WBUFW(buf, 0)=0x17f;
+	WBUFW(buf, 2)=len+8;
+	memcpy(WBUFP(buf,4),mes,len+4);
+
+	clif_send(buf,WBUFW(buf,2),&sd->bl,SELF);
+	return 0;
+}
 
 /*==========================================
  *

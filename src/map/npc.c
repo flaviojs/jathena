@@ -9,6 +9,7 @@
 #include "map.h"
 #include "npc.h"
 #include "clif.h"
+#include "intif.h"
 #include "pc.h"
 #include "itemdb.h"
 #include "script.h"
@@ -678,7 +679,13 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 	if (z > MAX_ZENY) z = MAX_ZENY;
 	pc_getzeny(sd,(int)z);
 	for(i=0;i<n;i++) {
-		pc_delitem(sd,item_list[i*2]-2,item_list[i*2+1],0);
+		int item_id=item_list[i*2]-2;
+		if(	sd->status.inventory[item_id].nameid>0 && sd->inventory_data[item_id] != NULL &&
+			sd->inventory_data[item_id]->type==7 && sd->status.inventory[item_id].amount>0 &&
+			sd->status.inventory[item_id].card[0] == (short)0xff00)
+				if(search_petDB_index(sd->status.inventory[item_id].nameid, PET_EGG) >= 0)
+					intif_delete_petdata((*(long *)(&sd->status.inventory[item_id].card[1])));
+		pc_delitem(sd,item_id,item_list[i*2+1],0);
 	}
 
 	//è§êlåoå±íl

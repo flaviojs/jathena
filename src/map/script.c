@@ -214,7 +214,8 @@ int buildin_failedremovecards(struct script_state *st);
 int buildin_marriage(struct script_state *st);
 int buildin_wedding_effect(struct script_state *st);
 int buildin_divorce(struct script_state *st);
-int buildin_getitemname(struct script_state *st);
+int buildin_makepet(struct script_state *st);
+int buildin_getexp(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -359,7 +360,8 @@ struct {
 	{buildin_marriage,"marriage","s"},
 	{buildin_wedding_effect,"wedding",""},
 	{buildin_divorce,"divorce",""},
-	{buildin_getitemname,"getitemname","i"},
+	{buildin_makepet,"makepet","i"},
+	{buildin_getexp,"getexp","ii"},
 	{NULL,NULL,NULL}
 };
 enum {
@@ -2259,6 +2261,21 @@ int buildin_delitem(struct script_state *st)
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
 	sd=script_rid2sd(st);
+	
+	for(i=0;i<MAX_INVENTORY;i++){
+		if(sd->status.inventory[i].nameid<=0 || sd->inventory_data[i] == NULL ||
+		   sd->inventory_data[i]->type!=7 ||
+	  	 sd->status.inventory[i].amount<=0)
+			continue;
+		if(sd->status.inventory[i].nameid == nameid){
+			if(sd->status.inventory[i].card[0] == (short)0xff00){
+				if(search_petDB_index(nameid, PET_EGG) >= 0){
+					intif_delete_petdata(*((long *)(&sd->status.inventory[i].card[1])));
+					break;
+				}
+			}
+		}
+	}
 	for(i=0;i<MAX_INVENTORY;i++){
 		if(sd->status.inventory[i].nameid==nameid){
 			if(sd->status.inventory[i].amount>amount){
@@ -2977,6 +2994,54 @@ int buildin_produce(struct script_state *st)
 	if(	sd->state.produce_flag == 1) return 0;
 	trigger=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	clif_skill_produce_mix_list(sd,trigger);
+	return 0;
+}
+/*==========================================
+ * NPCでペット作る
+ *------------------------------------------
+ */
+int buildin_makepet(struct script_state *st)
+{
+	struct map_session_data *sd = script_rid2sd(st);
+	struct script_data *data;
+	int id,pet_id;
+
+	data=&(st->stack->stack_data[st->start+2]);
+	get_val(st,data);
+
+	id=conv_num(st,data);
+
+	pet_id = search_petDB_index(id, PET_CLASS);
+
+	if (pet_id < 0)
+		pet_id = search_petDB_index(id, PET_EGG);
+	if (pet_id >= 0 && sd) {
+		sd->catch_target_class = pet_db[pet_id].class;
+		intif_create_pet(
+			sd->status.account_id, sd->status.char_id,
+			pet_db[pet_id].class, mob_db[pet_db[pet_id].class].lv,
+			pet_db[pet_id].EggID, 0, pet_db[pet_id].intimate,
+			100, 0, 1, pet_db[pet_id].jname);
+	}
+
+	return 0;
+}
+/*==========================================
+ * NPCで経験値上げる
+ *------------------------------------------
+ */
+int buildin_getexp(struct script_state *st)
+{
+	struct map_session_data *sd = script_rid2sd(st);
+	int base=0,job=0;
+
+	base=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	job =conv_num(st,& (st->stack->stack_data[st->start+3]));
+	if(base<0 || job<0)
+		return 0;
+	if(sd)
+		pc_gainexp(sd,base,job);
+	
 	return 0;
 }
 
@@ -4374,34 +4439,6 @@ int buildin_divorce(struct script_state *st)
 		return 0;
 	}
 	push_val(st->stack,C_INT,1);
-	return 0;
-}
-
-
-/*==========================================
- * IDからItem名
- *------------------------------------------
- */
-int buildin_getitemname(struct script_state *st)
-{
-	int item_id;
-	struct item_data *i_data;
-	char *item_name;
-
-	item_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
-
-	i_data = NULL;
-	i_data = itemdb_search(item_id);
-	item_name=calloc(24, 1);
-
-	if(i_data==NULL){
-		if(battle_config.error_log)
-			printf("out of memory : buildin_getitemname\n");
-		exit(1);
-	}
-
-	strncpy(item_name,i_data->jname,23);
-	push_str(st->stack,C_STR,item_name);
 	return 0;
 }
 

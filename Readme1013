@@ -1,3 +1,38 @@
+----------------------------------------
+//1031 by huge
+・NPCのscriptに、makepetを追加。
+    makepet 卵ID; で、ペットを作成します。
+・NPCのscriptに、getexpを追加。
+    getexp Base,Job; で、それぞれの経験値を増やします。
+・ペットの卵をNPCのdelitemで消したりshopで売った時、ペットセーブデータから削除するよう修正。
+・ディボーション成功条件修正。(未確認)
+・経験値表示を可能にしてみました。confにて設定してください。
+
+	(conf/)
+	battle_athena.conf 修正
+	(doc/)
+	conf_ref.txt 修正
+	script_ref.txt 修正
+	(map/)
+	battle.c
+	battle.h
+		disp_experience 追加
+	clif.c
+	clif.h
+		clif_disp_onlyself() 追加
+	pc.c
+		pc_gainexp() 修正
+	script.c
+		buildin_delitem() 修正
+		buildin_makepet() 追加
+		buildin_getexp() 追加
+	npc.c
+		#include 修正
+		npc_selllist() 修正
+	skill.c
+		skill_castend_nodamage_id() 修正
+
+
 --------------------
 //1030 by (凸)
 ・map_athena.confに新婚島ザワイをコメントアウトして追加

@@ -2362,7 +2362,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			 ||(lv > 10)			// レベル差±10まで
 			 ||(!sd->status.party_id && !sd->status.guild_id)	// PTにもギルドにも所属無しはだめ
 			 ||((sd->status.party_id != dstsd->status.party_id)	// 同じパーティーか、
-			  ||(sd->status.guild_id != dstsd->status.guild_id))	// 同じギルドじゃないとだめ
+			  &&(sd->status.guild_id != dstsd->status.guild_id))	// 同じギルドじゃないとだめ
 			 ||(dst_s_class.job==14||dst_s_class.job==21)){	// クルセだめ
 				clif_skill_fail(sd,skillid,0,0);
 				map_freeblock_unlock();

@@ -475,6 +475,23 @@ AthenaNPCScript
 			
 			<itemid>に指定されたアイテムIDを持つアイテムを<num>個分失います。
 			
+		getexp命令
+			getexp <base_exp>,<job_exp>;
+			
+			base_exp	数値
+			job_exp		数値
+			
+			<base_exp>に指定された数だけBaseに経験値が入ります。
+			<job_exp>に指定された数だけJobに経験値が入ります。
+			マイナスの数字は適応されません。
+
+		makepet命令
+			makepet <petid>;
+			
+			petid	数値
+			
+			<petid>に指定されたアイテムIDを持つペットの卵を作成します。
+			
 		viewpoint命令
 			viewpoint <type>,<x>,<y>,<id>,<color>;
 			

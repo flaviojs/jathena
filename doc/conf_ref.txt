@@ -1111,6 +1111,10 @@ skill_removetrap_type
 	リムーブトラップの仕様を選択します。
 	0:本鯖仕様で罠1個を取得する
 	1:Athena仕様で使ったアイテムを使った個数を取得する
+disp_experience
+	経験値を表示するかどうかです。
+	yesにすると、敵を倒した時など経験値が入った時に本人にのみ表示されます。
+	デフォルトはnoです。
 
 import
 	その行を別ファイルの中身と置き換えます。
@@ -1262,6 +1266,7 @@ player_skill_partner_check: yes
 hide_GM_session: no
 invite_request_check: yes
 unit_movement_type: 0
+disp_experience: no
 
 ==========================================================================
 6. atcommand_athena.conf
