@@ -879,9 +879,11 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		sd->combo_delay3 = tick + sd->combo_delay2 - 300;
 		break;
 	case MO_EXTREMITYFIST:	/* 阿修羅覇鳳拳 */
+	{
+		int dx,dy;
 		skill_status_change_end(src, SC_EXPLOSIONSPIRITS, -1);
-		int dx = ((sd->bl.x - bl->x)>0?-4:4);
-		int dy = ((sd->bl.y - bl->y)>0?-4:4);
+		dx = ((sd->bl.x - bl->x)>0?-4:4);
+		dy = ((sd->bl.y - bl->y)>0?-4:4);
 		dx = ((sd->bl.x - bl->x)!=0?dx:0);
 		dy = ((sd->bl.y - bl->y)!=0?dy:0);
 		sd->bl.x = bl->x;
@@ -898,6 +900,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		pc_walktoxy(sd, sd->to_x, sd->to_y);
 		break;
+	}
 	/* 武器系範囲攻撃スキル */
 	case AC_SHOWER:			/* アローシャワー */
 	case SM_MAGNUM:			/* マグナムブレイク */

@@ -1,4 +1,25 @@
 --------------
+//0561 by 引退人
+
+・Linuxでもコンパイルできるように
+	(/map)
+	skill.c
+		skill_castend_damage_id()	変数dx,dyの宣言位置変更
+	Makefile
+		LIBS に -lm 追加
+
+・@jobcange での♀バード＆♂ダンサーによる鞍落ち防止。 by (no name)さん
+	atcommand.c
+		@jobchange,@charjobに性別チェック追加
+
+// ナナスさん修正
+・clif.c内でatcommand.hを２度includeしていたので一つ削除。
+・パーティー会話、ギルド会話でも@コマンドをチェックするように修正。
+	(/map)
+	clif.c
+		clif_parse_PartyMessage()、clif_parse_GuildMessage 修正。
+
+--------------
 //0560 by パイン
 
 ・0559 の athena-start を Unix Like OS でも動くようにリファイン。

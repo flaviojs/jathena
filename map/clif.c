@@ -34,7 +34,6 @@
 #include "guild.h"
 #include "vending.h"
 #include "pet.h"
-#include "atcommand.h"
 #include "version.h"
 
 #ifdef MEMWATCH
@@ -5597,6 +5596,7 @@ void clif_parse_PartyChangeOption(int fd,struct map_session_data *sd)
  */
 void clif_parse_PartyMessage(int fd,struct map_session_data *sd)
 {
+	if(atcommand(fd,sd,RFIFOP(fd,4))) return;
 	party_send_message(sd,RFIFOP(fd,4),RFIFOW(fd,2)-4);
 }
 
@@ -5771,6 +5771,7 @@ void clif_parse_GuildExplusion(int fd,struct map_session_data *sd)
  */
 void clif_parse_GuildMessage(int fd,struct map_session_data *sd)
 {
+	if(atcommand(fd,sd,RFIFOP(fd,4))) return;
 	guild_send_message(sd,RFIFOP(fd,4),RFIFOW(fd,2)-4);
 }
 /*==========================================
