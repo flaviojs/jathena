@@ -1,4 +1,4 @@
-// $Id: pc.h,v 1.12 2003/06/26 05:31:23 lemit Exp $
+// $Id: pc.h 120 2004-04-29 14:57:15Z (凸) $
 
 #ifndef _PC_H_
 #define _PC_H_
@@ -142,6 +142,7 @@ int pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick)
 int pc_calc_pvprank(struct map_session_data *sd);
 int pc_calc_pvprank_timer(int tid,unsigned int tick,int id,int data);
 
+int pc_calc_base_job(int b_class);//転生や養子職の元の職業を返す
 
 int pc_read_gm_account(void);
 int pc_setinvincibletimer(struct map_session_data *sd,int);

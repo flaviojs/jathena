@@ -1139,13 +1139,14 @@ atcommand_joblevelup(
 	const char* command, const char* message)
 {
 	int up_level = 50, level = 0;
-	
+	int s_class=pc_calc_base_job(sd->status.class);
+
 	if (!message || !*message)
 		return -1;
 	level = atoi(message);
-	if (sd->status.class == 0)
+	if (s_class == 0)
 		up_level -= 40;
-	if (sd->status.class == 23) //ƒXƒpƒmƒr‚ÍJobƒŒƒxƒ‹‚ÌÅ‚‚ª70
+	if ((s_class == 23) || (sd->status.class >= 4001 + 7 && sd->status.class < 4023)) //ƒXƒpƒmƒr‚Æ“]¶“ñŽŸE‚ÍJobƒŒƒxƒ‹‚ÌÅ‚‚ª70
 		up_level += 20;
 	if (sd->status.job_level == up_level) {
 		clif_displaymessage(fd, msg_table[23]);
@@ -2441,6 +2442,7 @@ atcommand_character_joblevel(
 	struct map_session_data *pl_sd = NULL;
 	char character[100];
 	int max_level = 50, level = 0;
+	int pl_s_class=0;
 	
 	if (!message || !*message)
 		return -1;
@@ -2448,10 +2450,11 @@ atcommand_character_joblevel(
 	if (sscanf(message, "%d %99[^\n]", &level, character) < 2)
 		return -1;
 	if ((pl_sd = map_nick2sd(character)) != NULL) {
+		pl_s_class = pc_calc_base_job(pl_sd->status.class);
 		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
-			if (pl_sd->status.class == 0)
+			if (pl_s_class == 0)
 				max_level -= 40;
-			if (pl_sd->status.class == 23) //ƒXƒpƒmƒr‚ÍJobƒŒƒxƒ‹‚ÌÅ‚‚ª70
+			if ((pl_s_class == 23) || (pl_sd->status.class >= 4001 + 7 && pl_sd->status.class < 4023)) //ƒXƒpƒmƒr‚Æ“]¶E‚ÍJobƒŒƒxƒ‹‚ÌÅ‚‚ª70
 				max_level += 20;
 			if (pl_sd->status.job_level == max_level) {
 				clif_displaymessage(fd, msg_table[67]);

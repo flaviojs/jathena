@@ -1760,6 +1760,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	struct mob_data *dstmd=NULL;
 	int i,abra_skillid=0,abra_skilllv;
 	int sc_def_vit,sc_def_mdef,strip_fix,strip_time,strip_per;
+
 	//クラスチェンジ用ボスモンスターID
 	int changeclass[]={1038,1039,1046,1059,1086,1087,1112,1115
 				,1157,1159,1190,1272,1312,1373,1492};
@@ -2079,6 +2080,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case CR_DEVOTION:		/* ディボーション */
 		if(sd && dstsd){
+			int dst_s_class=pc_calc_base_job(dstsd->status.class);
 			int lv = sd->status.base_level-dstsd->status.base_level;
 			lv = (lv<0)?-lv:lv;
 			if((dstsd->bl.type!=BL_PC)	// 相手はPCじゃないとだめ
@@ -2087,7 +2089,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			 ||(!sd->status.party_id && !sd->status.guild_id)	// PTにもギルドにも所属無しはだめ
 			 ||((sd->status.party_id != dstsd->status.party_id)	// 同じパーティーか、
 			  ||(sd->status.guild_id != dstsd->status.guild_id))	// 同じギルドじゃないとだめ
-			 ||(dstsd->status.class==14||dstsd->status.class==21)){	// クルセだめ
+			 ||(dst_s_class==14||dst_s_class==21)){	// クルセだめ
 				clif_skill_fail(sd,skillid,0,0);
 				map_freeblock_unlock();
 				return 1;

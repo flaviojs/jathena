@@ -1,4 +1,3 @@
-// $Id: script.c,v 1.18 2003/07/04 01:11:38 lemit Exp $
 //#define DEBUG_FUNCIN
 //#define DEBUG_DISP
 //#define DEBUG_RUN
@@ -3440,19 +3439,23 @@ int buildin_changebase(struct script_state *st)
 int buildin_changesex(struct script_state *st)
 {
 	struct map_session_data *sd=NULL;
+	int s_class=0;
 	sd=script_rid2sd(st);
+
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	s_class = pc_calc_base_job(sd->status.class);
 
 	if(sd->status.sex==0){
 		sd->status.sex=1;
 		sd->sex=1;
-		if(sd->status.class == 20)
-			sd->status.class = 19;
+		if(s_class == 20)
+			sd->status.class -= 1;
 		chrif_changesex(sd->status.account_id,1);
 	}else if(sd->status.sex==1){
 		sd->status.sex=0;
 		sd->sex=0;
-		if(sd->status.class == 19)
-			sd->status.class = 20;
+		if(s_class == 19)
+			sd->status.class += 1;
 		chrif_changesex(sd->status.account_id,0);
 
 	}

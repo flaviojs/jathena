@@ -215,6 +215,11 @@ int pc_delspiritball(struct map_session_data *sd,int count,int type)
 
 int pc_setrestartvalue(struct map_session_data *sd,int type)
 {
+	int s_class=0;
+
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	s_class = pc_calc_base_job(sd->status.class);
+
 	//-----------------------
 	// €–S‚µ‚½
 	if(sd->special_state.restart_full_recover) {	// ƒIƒVƒŠƒXƒJ[ƒh
@@ -222,7 +227,7 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 		sd->status.sp=sd->status.max_sp;
 	}
 	else {
-		if(sd->status.class == 0 && battle_config.restart_hp_rate < 50) {	// ƒm[ƒrƒX
+		if(s_class == 0 && battle_config.restart_hp_rate < 50) { //ƒmƒr‚Í”¼•ª‰ñ•œ
 			sd->status.hp=(sd->status.max_hp)/2;
 		}
 		else {
@@ -246,8 +251,8 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 		clif_updatestatus(sd,SP_SP);
 
 	if(type&2) {
-		if(!(battle_config.death_penalty_type&1) ) {
-			if(sd->status.class > 0 && !map[sd->bl.m].flag.nopenalty && !map[sd->bl.m].flag.gvg){
+		if(!(battle_config.death_penalty_type&1) ) { //ƒfƒXƒyƒi
+			if((s_class != 0) && !map[sd->bl.m].flag.nopenalty && !map[sd->bl.m].flag.gvg){
 				if(battle_config.death_penalty_type&2 && battle_config.death_penalty_base > 0)
 					sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
 				else if(battle_config.death_penalty_base > 0) {
@@ -387,10 +392,14 @@ int pc_setnewpc(struct map_session_data *sd,int account_id,int char_id,int login
 int pc_equippoint(struct map_session_data *sd,int n)
 {
 	int ep = 0;
+	int s_class=0;
+
+	s_class = pc_calc_base_job(sd->status.class);
+
 	if(sd && sd->inventory_data[n]) {
 		ep = sd->inventory_data[n]->equip;
 		if(sd->inventory_data[n]->look == 1 || sd->inventory_data[n]->look == 2 || sd->inventory_data[n]->look == 6) {
-			if(ep == 2 && (pc_checkskill(sd,AS_LEFT) > 0 || sd->status.class == 12) )
+			if(ep == 2 && (pc_checkskill(sd,AS_LEFT) > 0 || s_class == 12))
 				return 34;
 		}
 	}
@@ -479,6 +488,10 @@ int pc_isequip(struct map_session_data *sd,int n)
 {
 	struct item_data *item = sd->inventory_data[n];
 	struct status_change *sc_data = battle_get_sc_data(&sd->bl);
+	int s_class=0;
+
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	s_class = pc_calc_base_job(sd->status.class);
 
  	if( battle_config.gm_allequip>0 && pc_isGM(sd)>=battle_config.gm_allequip )
 		return 1;
@@ -489,7 +502,7 @@ int pc_isequip(struct map_session_data *sd,int n)
 		return 0;
 	if(item->elv > 0 && sd->status.base_level < item->elv)
 		return 0;
-	if(((1<<sd->status.class)&item->class) == 0)
+	if(((1<<s_class)&item->class) == 0)
 		return 0;
 	if(map[sd->bl.m].flag.pvp && (item->flag.no_equip==1 || item->flag.no_equip==3))
 		return 0;
@@ -842,6 +855,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	int skill,aspd_rate,wele,wele_,def_ele,refinedef=0;
 	int pele=0,pdef_ele=0;
 	int str,dstr,dex;
+	int s_class=0;
 
 	b_speed = sd->speed;
 	b_max_hp = sd->status.max_hp;
@@ -873,7 +887,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	pc_calc_skilltree(sd);	// ƒXƒLƒ‹ƒcƒŠ[‚ÌŒvZ
 
-	sd->max_weight = max_weight_base[sd->status.class]+sd->status.str*300;
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	s_class = pc_calc_base_job(sd->status.class);
+	
+	sd->max_weight = max_weight_base[s_class]+sd->status.str*300;
 	if( (skill=pc_checkskill(sd,MC_INCCARRY))>0 )	// Š—Ê‘‰Á
 		sd->max_weight += skill*1000;
 
@@ -1148,8 +1165,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	// jobƒ{[ƒiƒX•ª
 	for(i=0;i<sd->status.job_level && i<MAX_LEVEL;i++)
-		if(job_bonus[sd->status.class][i])
-			sd->paramb[job_bonus[sd->status.class][i]-1]++;
+		if(job_bonus[s_class][i])
+			sd->paramb[job_bonus[s_class][i]-1]++;
 
 	if( (skill=pc_checkskill(sd,AC_OWL))>0 )	// ‚Ó‚­‚ë‚¤‚Ì–Ú
 		sd->paramb[4] += skill;
@@ -1244,11 +1261,11 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	// “ñ“—¬ ASPD C³
 	if (sd->status.weapon <= 16)
-		sd->aspd += aspd_base[sd->status.class][sd->status.weapon]-(sd->paramc[1]*4+sd->paramc[4])*aspd_base[sd->status.class][sd->status.weapon]/1000;
+		sd->aspd += aspd_base[s_class][sd->status.weapon]-(sd->paramc[1]*4+sd->paramc[4])*aspd_base[s_class][sd->status.weapon]/1000;
 	else
 		sd->aspd += (
-			(aspd_base[sd->status.class][sd->weapontype1]-(sd->paramc[1]*4+sd->paramc[4])*aspd_base[sd->status.class][sd->weapontype1]/1000) +
-			(aspd_base[sd->status.class][sd->weapontype2]-(sd->paramc[1]*4+sd->paramc[4])*aspd_base[sd->status.class][sd->weapontype2]/1000)
+			(aspd_base[s_class][sd->weapontype1]-(sd->paramc[1]*4+sd->paramc[4])*aspd_base[s_class][sd->weapontype1]/1000) +
+			(aspd_base[s_class][sd->weapontype2]-(sd->paramc[1]*4+sd->paramc[4])*aspd_base[s_class][sd->weapontype2]/1000)
 			) * 140 / 200;
 
 	aspd_rate = sd->aspd_rate;
@@ -1282,7 +1299,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	bl=sd->status.base_level;
 
-	sd->status.max_hp += (3500 + bl*hp_coefficient2[sd->status.class] + hp_sigma_val[sd->status.class][(bl > 0)? bl-1:0])/100 * (100 + sd->paramc[2])/100 + (sd->parame[2] - sd->paramcard[2]);
+	sd->status.max_hp += (3500 + bl*hp_coefficient2[s_class] + hp_sigma_val[s_class][(bl > 0)? bl-1:0])/100 * (100 + sd->paramc[2])/100 + (sd->parame[2] - sd->paramcard[2]);
 	if(sd->hprate!=100)
 		sd->status.max_hp = sd->status.max_hp*sd->hprate/100;
 
@@ -1290,7 +1307,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->status.max_hp = battle_config.max_hp;
 
 	// Å‘åSPŒvZ
-	sd->status.max_sp += ((sp_coefficient[sd->status.class] * bl) + 1000)/100 * (100 + sd->paramc[3])/100 + (sd->parame[3] - sd->paramcard[3]);
+	sd->status.max_sp += ((sp_coefficient[s_class] * bl) + 1000)/100 * (100 + sd->paramc[3])/100 + (sd->parame[3] - sd->paramcard[3]);
 	if(sd->sprate!=100)
 		sd->status.max_sp = sd->status.max_sp*sd->sprate/100;
 
@@ -2488,6 +2505,10 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 {
 	struct item_data *item = sd->inventory_data[n];
 	int nameid = sd->status.inventory[n].nameid;
+	int s_class=0;
+
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	s_class = pc_calc_base_job(sd->status.class);
 
 	if(item == NULL)
 		return 0;
@@ -2505,7 +2526,7 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 		return 0;
 	if(item->elv > 0 && sd->status.base_level < item->elv)
 		return 0;
-	if(((1<<sd->status.class)&item->class) == 0)
+	if(((1<<s_class)&item->class) == 0)
 		return 0;
 	return 1;
 }
@@ -3314,6 +3335,24 @@ int pc_checkequip(struct map_session_data *sd,int pos)
 	return -1;
 }
 
+/*==========================================
+ * “]¶E‚â—{qE‚ÌŒ³‚ÌE‹Æ‚ğ•Ô‚·
+ *------------------------------------------
+ */
+int pc_calc_base_job(int b_class)
+{
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	if(b_class < MAX_PC_CLASS){ //’Êí
+		return b_class;
+	}else if(b_class >= 4001 && b_class < 4023){ //“]¶E
+		return b_class - 4001;
+	}else if(b_class == 23 + 4023 -1){ //—{qƒXƒpƒmƒr
+		return b_class - (4023 - 1);
+	}else{ //—{qƒXƒpƒmƒrˆÈŠO‚Ì—{q
+		return b_class - 4023;
+	}
+}
+
 
 /*==========================================
  * PC‚ÌUŒ‚ (timerŠÖ”)
@@ -3585,7 +3624,6 @@ int pc_nextbaseexp(struct map_session_data *sd)
 	return exp_table[i][sd->status.base_level-1];
 }
 
-
 /*==========================================
  * job level‘¤•K—vŒoŒ±’lŒvZ
  *------------------------------------------
@@ -3607,7 +3645,6 @@ int pc_nextjobexp(struct map_session_data *sd)
 
 	return exp_table[i][sd->status.job_level-1];
 }
-
 
 /*==========================================
  * •K—vƒXƒe[ƒ^ƒXƒ|ƒCƒ“ƒgŒvZ
@@ -3915,6 +3952,10 @@ int pc_resetskill(struct map_session_data* sd)
 int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 {
 	int i=0;
+	int s_class=0;
+
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	s_class = pc_calc_base_job(sd->status.class);
 
 	// Šù ‚É€‚ñ‚Å‚¢‚½‚ç–³Œø
 	if(pc_isdead(sd))
@@ -3981,7 +4022,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		}
 
 	if(battle_config.death_penalty_type&1) {
-		if(sd->status.class > 0 && !map[sd->bl.m].flag.nopenalty && !map[sd->bl.m].flag.gvg){
+		if(s_class > 0 && !map[sd->bl.m].flag.nopenalty && !map[sd->bl.m].flag.gvg){
 			if(battle_config.death_penalty_type&2 && battle_config.death_penalty_base > 0)
 				sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
 			else if(battle_config.death_penalty_base > 0) {
@@ -4304,13 +4345,13 @@ int pc_percentheal(struct map_session_data *sd,int hp,int sp)
 int pc_jobchange(struct map_session_data *sd,int job)
 {
 	int i;
+	int s_class=0;
 
-	if((sd->status.sex == 0 && job == 19) ||
-	   (sd->status.sex == 0 && job == 19 + 4001) ||
-	   (sd->status.sex == 0 && job == 19 + 4023) ||
-	   (sd->status.sex == 1 && job == 20) ||
-	   (sd->status.sex == 1 && job == 20 + 4001) ||
-	   (sd->status.sex == 1 && job == 20 + 4023) ||
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	s_class = pc_calc_base_job(job);
+
+	if((sd->status.sex == 0 && s_class == 19) ||
+	   (sd->status.sex == 1 && s_class == 20) ||
 	   job ==22 || sd->status.class == job) //Š‚Íƒo[ƒh‚É‚È‚ê‚È‚¢A‰‚Íƒ_ƒ“ƒT[‚É‚È‚ê‚È‚¢AŒ‹¥ˆßÖ‚à‚¨’f‚è
 		return 1;
 
@@ -4855,6 +4896,11 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 {
 	int i,nameid;
 	struct item_data *id;
+	int s_class=0;
+
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	s_class = pc_calc_base_job(sd->status.class);
+
 	nameid = sd->status.inventory[n].nameid;
 	id = sd->inventory_data[n];
 	pos = pc_equippoint(sd,n);
@@ -4877,7 +4923,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	// “ñ“—¬ˆ—
 	if ((pos==0x22) // ˆê‰A‘•”õ—v‹‰ÓŠ‚ª“ñ“—¬•Ší‚©ƒ`ƒFƒbƒN‚·‚é
 	 &&	(id->equip==2)	// ’P è•Ší
-	 &&	(pc_checkskill(sd, AS_LEFT) > 0 || sd->status.class == 12) ) // ¶èC˜B—L
+	 &&	(pc_checkskill(sd, AS_LEFT) > 0 || s_class == 12) ) // ¶èC˜B—L
 	{
 		int tpos=0;
 		if(sd->equip_index[8] >= 0)

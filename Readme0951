@@ -1,4 +1,30 @@
 --------------------
+//0958 by (凸)
+・転生職方面の実装を色々
+・重量制限は良く分からないので元の職業の値をそのまま使っています(モンク＝チャンピオン等)
+・装備品も同上、HPやSPのテーブルも同上なので、転生してもHPなどが増えないガッカリ仕様です
+
+	(map/)
+	atcommand.c
+		atcommand_joblevelup() 修正
+		atcommand_character_joblevel() 修正
+	pc.c
+		pc_setrestartvalue() 修正
+		pc_equippoint() 修正
+		pc_isequip() 修正
+		pc_calcstatus() 修正
+		pc_isUseitem() 修正
+		pc_calc_base_job() 追加
+		pc_damage() 修正
+		pc_jobchange() 修正
+		pc_equipitem() 修正
+	pc.h 修正
+	script.c
+		buildin_changesex() 修正
+	skill.c
+		skill_castend_nodamage_id() 修正
+
+--------------------
 //0957 by (凸)
 ・@charjob2と@charjob3を追加、関係としては@charjob⇔@jobchange、@charjob2⇔@jobchange2、(ry
 ・@mapexitを追加、map-serverを落とすコマンドですatcommand_athena.confでは99設定にされてますので使用には十分注意してください。
