@@ -2224,18 +2224,19 @@ int pc_checkallowskill(struct map_session_data *sd,int nameid)
 {
 	// 騎士・クルセイダー系スキルのチェック
 	if(sd->sc_data[SC_TWOHANDQUICKEN].timer!=-1){	// 2HQ
-		if(sd->status.weapon != 3){	// 両手剣か
-			skill_status_change_end(&sd->bl,SC_TWOHANDQUICKEN,-1);	// 2HQを解除
-			return -1;
-		}
+		skill_status_change_end(&sd->bl,SC_TWOHANDQUICKEN,-1);	// 2HQを解除
+		return -1;
 	}
 	if(sd->sc_data[SC_SPEARSQUICKEN].timer!=-1){	// スピアクィッケン
-		if(sd->status.weapon != 5){	// 槍か
-			skill_status_change_end(&sd->bl,SC_SPEARSQUICKEN,-1);	// スピアクイッケンを解除
-			return -1;
-		}
+		skill_status_change_end(&sd->bl,SC_SPEARSQUICKEN,-1);	// スピアクイッケンを解除
+		return -1;
 	}
-
+/*
+	if(sd->sc_data[SC_AUTOGUARD].timer!=-1){	// オートガード
+		skill_status_change_end(&sd->bl,SC_AUTOGUARD,-1);
+		return -1;
+	}
+*/
 	return 0;
 }
 
