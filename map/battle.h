@@ -120,6 +120,7 @@ extern struct Battle_Config {
 	int attr_recover;
 	int flooritem_lifetime;
 	int item_rate,base_exp_rate,job_exp_rate;
+	int death_penalty_base,death_penalty_job;
 	int mvp_item_rate,mvp_exp_rate;
 	int mvp_hp_rate;
 	int atc_gmonly,gm_allskill;

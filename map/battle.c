@@ -1803,6 +1803,8 @@ int battle_config_read(const char *cfgName)
 	battle_config.item_rate=100;
 	battle_config.base_exp_rate=100;
 	battle_config.job_exp_rate=100;
+	battle_config.death_penalty_base=100;
+	battle_config.death_penalty_job=100;
 	battle_config.mvp_item_rate=100;
 	battle_config.mvp_exp_rate=100;
 	battle_config.mvp_hp_rate=100;
@@ -1839,6 +1841,8 @@ int battle_config_read(const char *cfgName)
 			{	"item_rate",			&battle_config.item_rate			},
 			{	"base_exp_rate",		&battle_config.base_exp_rate		},
 			{	"job_exp_rate",			&battle_config.job_exp_rate			},
+			{	"death_penalty_base",			&battle_config.death_penalty_base			},
+			{	"death_penalty_job",			&battle_config.death_penalty_job			},
 			{	"mvp_hp_rate",			&battle_config.mvp_hp_rate			},
 			{	"mvp_item_rate",		&battle_config.mvp_item_rate		},
 			{	"mvp_exp_rate",			&battle_config.mvp_exp_rate			},

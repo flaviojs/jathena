@@ -217,6 +217,8 @@ int pc_makesavestatus(struct map_session_data *sd)
 		if( pc_check_equip_dcard(sd,4144) ){	// オシリスカード
 			sd->status.hp=sd->status.max_hp;
 			sd->status.sp=sd->status.max_sp;
+//		}else if(sd->status.class == 0){	// ノービス
+//			sd->status.hp=(sd->status.max_hp)/2;
 		}else
 			sd->status.hp=1;
 
@@ -2543,7 +2545,12 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	}
 	//-----------------------
 	// 死亡した
-	sd->status.hp = 1;
+	if(sd->status.class == 0){	// ノービス
+		sd->status.hp=(sd->status.max_hp)/2;
+	}else{
+		sd->status.hp = 1;
+	}
+	
 	pc_setdead(sd);
 	if(sd->status.pet_id && sd->pet_npcdata) {
 		if(sd->petDB) {
@@ -2552,6 +2559,20 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 				sd->pet.intimate = 0;
 			clif_send_petdata(sd,1,sd->pet.intimate);
 		}
+	}
+
+	//経験値の減少
+	if(sd->status.class){
+		sd->status.base_exp -= pc_nextbaseexp(sd) * battle_config.death_penalty_base / 10000;
+		if(sd->status.base_exp < 0)
+			sd->status.base_exp = 0;
+		clif_updatestatus(sd,SP_BASEEXP);
+		
+		sd->status.job_exp -= pc_nextjobexp(sd) * battle_config.death_penalty_job / 10000;
+		if(sd->status.job_exp < 0)
+			sd->status.job_exp = 0;
+		clif_updatestatus(sd,SP_JOBEXP);
+
 	}
 
 	pc_stop_walking(sd);
@@ -2791,6 +2812,8 @@ int pc_percentheal(struct map_session_data *sd,int hp,int sp)
  */
 int pc_jobchange(struct map_session_data *sd,int job)
 {
+	int i;
+
 	sd->status.class=job;
 	clif_changelook(&sd->bl,LOOK_BASE,sd->status.class);
 
@@ -2800,6 +2823,8 @@ int pc_jobchange(struct map_session_data *sd,int job)
 	clif_updatestatus(sd,SP_JOBEXP);
 	clif_updatestatus(sd,SP_NEXTJOBEXP);
 	pc_calcstatus(sd,0);
+
+	for(i=0;i<MAX_INVENTORY;i++) pc_unequipitem(sd,i);	// 装備外し
 
 	return 0;
 }

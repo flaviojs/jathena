@@ -1,4 +1,20 @@
 --------------
+//0513 by RR
+・転職時に装備が全て外れるようにしました。関数位置の変更してないので、ひょっとしたらおかしくなってるかもしれません。うちの環境(win2k cygwin)では平気でしたのでそのままにしてあります。。
+・ノービス時の死亡では、最大HPの２分の１で復活できるよう修正。(スキルによる復活は未確認)
+・デスペナルティによる経験値減少を追加。battle_athena.confにて、減少率を変更できるように設定。減る経験値は小数点以下切り捨てなので、必要経験値が低いうちにはちょうどその％分引かれるという風にはなりません。
+	battle.h
+		Battle_Configにdeath_penalty_baseとdeath_penalty_jobを追加。
+	battle.c
+		battle_config_readでdeath_penalty_baseとdeath_penalty_jobを読むように修正。
+	pc.c
+		pc_makesavestatus() 修正。
+		pc_damege() 修正。
+		pc_jobchange() 修正。
+	battle_athena.conf
+		death_penalty_base,death_penalty_job追加。
+
+--------------
 //0512 by 死神
 
 ・問題になりそうな部分の修正と新しいパケットの対応がメインです。後バグも少し治しました。(動けない状態異常になっても動く問題の修正等です。)

@@ -329,6 +329,16 @@ job_exp_rate
 	JobEXPの所得倍率を百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
 
+death_penalty_base
+	デスペナルティによるBASE経験値減少率を百分率で調整します。
+	あまり低すぎる値を使うと減りません。
+	0-1000程度の数値を指定してください。デフォルトは100です。
+
+death_penalty_job
+	デスペナルティによるJOB経験値減少率を百分率で調整します。
+	あまり低すぎる値を使うと減りません。
+	0-1000程度の数値を指定してください。デフォルトは100です。
+
 mvp_hp_rate
 	MVP MOBのHPを百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
@@ -409,6 +419,8 @@ flooritem_lifetime: 60000
 item_rate: 100
 base_exp_rate: 100
 job_exp_rate: 100
+death_penalty_base: 100
+death_penalty_job: 100
 mvp_hp_rate: 100
 mvp_item_rate: 100
 mvp_exp_rate: 100
