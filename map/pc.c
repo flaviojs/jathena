@@ -1525,6 +1525,8 @@ int pc_takeitem(struct map_session_data *sd,struct flooritem_data *fitem)
 		clif_additem(sd,0,0,flag);
 	} else {
 		/* Žæ“¾¬Œ÷ */
+		if(sd->attacktimer != -1)
+			pc_stopattack(sd);
 		clif_takeitem(&sd->bl,&fitem->bl);
 		map_clearflooritem(fitem->bl.id);
 	}
@@ -3469,7 +3471,7 @@ int pc_calc_pvprank(struct map_session_data *sd)
 	sd->pvp_rank=1;
 	map_foreachinarea(pc_calc_pvprank_sub,sd->bl.m,0,0,m->xs,m->ys,BL_PC,sd);
 	if(old!=sd->pvp_rank || sd->pvp_lastusers!=m->users)
-		clif_pvpset(sd,sd->pvp_rank,sd->pvp_lastusers=m->users);
+		clif_pvpset(sd,sd->pvp_rank,sd->pvp_lastusers=m->users,0);
 	return sd->pvp_rank;
 }
 /*==========================================

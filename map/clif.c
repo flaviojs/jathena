@@ -2955,7 +2955,7 @@ int clif_set0199(int fd,int type)
  * PVPŽÀ‘•H(‰¼)
  *------------------------------------------
  */
-int clif_pvpset(struct map_session_data *sd,int pvprank,int pvpnum)
+int clif_pvpset(struct map_session_data *sd,int pvprank,int pvpnum,int type)
 {
 	char buf[32];
 
@@ -2963,7 +2963,10 @@ int clif_pvpset(struct map_session_data *sd,int pvprank,int pvpnum)
 	WBUFL(buf,2)=sd->bl.id;
 	WBUFL(buf,6)=pvprank;
 	WBUFL(buf,10)=pvpnum;
-	clif_send(buf,packet_len_table[0x19a],&sd->bl,ALL_SAMEMAP);
+	if(!type)
+		clif_send(buf,packet_len_table[0x19a],&sd->bl,AREA);
+	else
+		clif_send(buf,packet_len_table[0x19a],&sd->bl,ALL_SAMEMAP);
 
 	return 0;
 }
@@ -4519,7 +4522,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 		delete_timer(sd->pvp_timer,pc_calc_pvprank_timer);
 	if(map[sd->bl.m].flag.pvp){
 		sd->pvp_timer=add_timer(
-			gettick(),pc_calc_pvprank_timer,sd->bl.id,0);
+			gettick()+200,pc_calc_pvprank_timer,sd->bl.id,0);
 		sd->pvp_rank=0;
 		sd->pvp_lastusers=0;
 		sd->pvp_point=5;

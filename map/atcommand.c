@@ -456,7 +456,7 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			bl.id = 0;
 			map[sd->bl.m].flag.pvp = 0;
 			clif_send0199(sd->bl.m,0);
-			clif_pvpset((struct map_session_data *)&bl,0,0);
+			clif_pvpset((struct map_session_data *)&bl,0,0,1);
 			for(i=0;i<fd_max;i++){	//人数分ループ
 				if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
 					if(sd->bl.m == pl_sd->bl.m && pl_sd->pvp_timer != -1) {
@@ -477,7 +477,7 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			for(i=0;i<fd_max;i++){	//人数分ループ
 				if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
 					if(sd->bl.m == pl_sd->bl.m && pl_sd->pvp_timer == -1) {
-						pl_sd->pvp_timer=add_timer(gettick(),pc_calc_pvprank_timer,pl_sd->bl.id,0);
+						pl_sd->pvp_timer=add_timer(gettick()+200,pc_calc_pvprank_timer,pl_sd->bl.id,0);
 						pl_sd->pvp_rank=0;
 						pl_sd->pvp_lastusers=0;
 						pl_sd->pvp_point=5;

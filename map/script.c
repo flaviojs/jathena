@@ -2454,7 +2454,7 @@ int buildin_pvpon(struct script_state *st)
 		for(i=0;i<fd_max;i++){	//人数分ループ
 			if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
 				if(m == pl_sd->bl.m && pl_sd->pvp_timer == -1) {
-					pl_sd->pvp_timer=add_timer(gettick(),pc_calc_pvprank_timer,pl_sd->bl.id,0);
+					pl_sd->pvp_timer=add_timer(gettick()+200,pc_calc_pvprank_timer,pl_sd->bl.id,0);
 					pl_sd->pvp_rank=0;
 					pl_sd->pvp_lastusers=0;
 					pl_sd->pvp_point=5;
@@ -2480,7 +2480,7 @@ int buildin_pvpoff(struct script_state *st)
 		bl.id = 0;
 		map[m].flag.pvp = 0;
 		clif_send0199(m,0);
-		clif_pvpset((struct map_session_data *)&bl,0,0);
+		clif_pvpset((struct map_session_data *)&bl,0,0,1);
 		for(i=0;i<fd_max;i++){	//人数分ループ
 			if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
 				if(m == pl_sd->bl.m && pl_sd->pvp_timer != -1) {

@@ -129,7 +129,7 @@ int clif_skill_setunit(struct skill_unit *unit);
 int clif_skill_delunit(struct skill_unit *unit);
 
 int clif_spiritball(struct map_session_data *sd);
-int clif_combo_delay(struct block_list *src, int wait);
+int clif_combo_delay(struct block_list *src,int wait);
 int clif_changemapcell(int m,int x,int y,int cell_type,int type);
 
 int clif_status_change(struct block_list *bl,int type,int flag);
@@ -210,7 +210,7 @@ int clif_GMmessage(struct block_list *bl,char* mes,int len,int flag);
 int clif_heal(int fd,int type,int val);
 int clif_resurrection(struct block_list *bl,int type);
 int clif_set0199(int fd,int type);
-int clif_pvpset(struct map_session_data *sd, int pvprank, int pvpnum);
+int clif_pvpset(struct map_session_data *sd, int pvprank, int pvpnum,int type);
 int clif_send0199(int map,int type);
 int clif_refine(int fd,struct map_session_data *sd,int fail,int index,int val);
 
