@@ -1857,7 +1857,7 @@ int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
 	if(val < 0) val = 0;
 	if(orig_value > 0 && val < 1) val = 1;
 
-	return orig_value;
+	return val;
 }
 
 
@@ -1873,7 +1873,7 @@ int pc_modifysellvalue(struct map_session_data *sd,int orig_value)
 	if(val < 0) val = 0;
 	if(orig_value > 0 && val < 1) val = 1;
 
-	return orig_value;
+	return val;
 }
 
 
