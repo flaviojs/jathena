@@ -111,11 +111,12 @@ struct item_data* itemdb_search(int nameid)
 	id=numdb_search(item_db,nameid);
 	if(id) return id;
 
-	id=calloc(sizeof(struct item_data), 1);
+	id=malloc(sizeof(struct item_data));
 	if(id==NULL){
 		printf("out of memory : itemdb_search\n");
 		exit(1);
 	}
+	memset(id,0,sizeof(struct item_data));
 	numdb_insert(item_db,nameid,id);
 
 	id->nameid=nameid;
@@ -369,79 +370,6 @@ static int itemdb_read_itemvaluedb(void)
 	}
 	fclose(fp);
 	printf("read db/item_value_db.txt done (count=%d)\n",ln);
-	return 0;
-}
-
-/*==========================================
- * 装備可能職業テーブルのオーバーライド
- *------------------------------------------
- */
-static int itemdb_read_classequipdb(void)
-{
-	FILE *fp;
-	char line[1024];
-	int ln=0;
-	int nameid,i,j;
-	char *str[32],*p;
-	struct item_data *id;
-	
-	if( (fp=fopen("db/class_equip_db.txt","r"))==NULL ){
-		printf("can't read db/class_equip_db.txt\n");
-		return -1;
-	}
-	while(fgets(line,1020,fp)){
-		if(line[0]=='/' && line[1]=='/')
-			continue;
-		memset(str,0,sizeof(str));
-		for(j=0,p=line;j<MAX_PC_CLASS+4 && p;j++){
-			str[j]=p;
-			p=strchr(p,',');
-			if(p) *p++=0;
-		}
-		if(str[0]==NULL)
-			continue;
-
-		nameid=atoi(str[0]);
-		if(nameid<=0 || nameid>=20000)
-			continue;
-
-		ln++;
-
-		//ID,Name,class1,class2,class3, ...... ,class22
-		if( !(id=itemdb_exists(nameid)) )
-			continue;
-			
-		id->class = 0;
-		if(str[2] && str[2][0]) {
-			j = atoi(str[2]);
-			id->sex = j;
-		}
-		if(str[3] && str[3][0]) {
-			j = atoi(str[3]);
-			id->elv = j;
-		}
-		for(i=4;i<MAX_PC_CLASS+4;i++) {
-			if(str[i]!=NULL && str[i][0]) {
-				j = atoi(str[i]);
-				if(j == 99) {
-					for(j=0;j<MAX_PC_CLASS;j++)
-						id->class |= 1<<j;
-					break;
-				}
-				else if(j == 9999)
-					break;
-				else if(j >= 0 && j < MAX_PC_CLASS) {
-					id->class |= 1<<j;
-					if(j == 7)
-						id->class |= 1<<13;
-					if(j == 14)
-						id->class |= 1<<21;
-				}
-			}
-		}
-	}
-	fclose(fp);
-	printf("read db/class_equip_db.txt done (count=%d)\n",ln);
 	return 0;
 }
 
@@ -704,7 +632,6 @@ int do_init_itemdb(void)
 
 	itemdb_read_itemslottable();
 	itemdb_readdb();
-	itemdb_read_classequipdb();
 	itemdb_read_itemvaluedb();
 	itemdb_read_randomitem();
 	itemdb_read_itemavail();

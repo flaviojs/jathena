@@ -19,6 +19,7 @@
 
 #define SKILLUNITTIMER_INVERVAL	100
 
+
 /* スキル番号＝＞ステータス異常番号変換テーブル */
 int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 /* 0- */
@@ -1299,7 +1300,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		return 1;
 	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
 		return 1;
-	map_freeblock_lock();
 	switch(skillid)
 	{
 	/* 武器攻撃系スキル */
@@ -1531,10 +1531,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case PR_TURNUNDEAD:			/* ターンアンデッド */
 		if(bl->type != BL_PC && battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)))
 			skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
-		else {
-			map_freeblock_unlock();
-			return 1;
-		}
+		else return 1;
 		break;
 
 	/* 魔法系スキル */
@@ -1698,18 +1695,16 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				int ar=sd->splash_range;
 				skill_area_temp[1]=bl->id;
 				map_foreachinarea(skill_area_sub,
-					bl->m, bl->x - ar, bl->y - ar, bl->x + ar, bl->y + ar, 0,
-					src, skillid, skilllv, tick, flag | BCT_ENEMY | 1,
+					bl->m,bl->x-ar,bl->y-ar,bl->x+ar,bl->y+ar,0,
+					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
 					skill_castend_damage_id);
 			}
 		}
 		break;
 
 	default:
-		map_freeblock_unlock();
 		return 1;
 	}
-	map_freeblock_unlock();
 
 	return 0;
 }
@@ -1760,7 +1755,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	if(battle_get_class(bl) == 1288)
 		return 1;
 
-	map_freeblock_lock();
 	switch(skillid)
 	{
 	case AL_HEAL:				/* ヒール */
@@ -2009,10 +2003,8 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 	case SM_PROVOKE:		/* プロボック */
 		/* MVPmobには効かない */
-		if(bl->type==BL_MOB && battle_get_mode(bl)&0x20) {
-			map_freeblock_unlock();
+		if(bl->type==BL_MOB && battle_get_mode(bl)&0x20)
 			return 1;
-		}
 
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
@@ -2036,7 +2028,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			  ||(sd->status.guild_id != dstsd->status.guild_id))	// 同じギルドじゃないとだめ
 			 ||(dstsd->status.class==14||dstsd->status.class==21)){	// クルセだめ
 				clif_skill_fail(sd,skillid,0,0);
-				map_freeblock_unlock();
 				return 1;
 			}
 			for(i=0;i<skilllv;i++){
@@ -2046,7 +2037,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 					break;
 				}else if(i==skilllv-1){		// 空きがなかった
 					clif_skill_fail(sd,skillid,0,0);
-					map_freeblock_unlock();
 					return 1;
 				}
 			}
@@ -2518,12 +2508,10 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				i = pc_search_inventory(sd,skill_db[skillid].itemid[x]);
 				if(i < 0 || skill_db[skillid].itemid[x] <= 0) {
 					clif_skill_fail(sd,skillid,0,0);
-					map_freeblock_unlock();
 					return 1;
 				}
 				if(sd->inventory_data[i] == NULL || sd->status.inventory[i].amount < skill_db[skillid].amount[x]) {
 					clif_skill_fail(sd,skillid,0,0);
-					map_freeblock_unlock();
 					return 1;
 				}
 				sd->state.potionpitcher_flag = 1;
@@ -2837,11 +2825,9 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 
 	default:
-		map_freeblock_unlock();
 		return 1;
 	}
 
-	map_freeblock_unlock();
 	return 0;
 }
 
@@ -3188,7 +3174,7 @@ int skill_castend_map( struct map_session_data *sd,int skill_num, const char *ma
 				return 0;
 
 			group=skill_unitsetting(&sd->bl,sd->skillid,sd->skilllv,sd->skillx,sd->skilly,0);
-			group->valstr=calloc(24, 1);
+			group->valstr=malloc(24);
 			if(group->valstr==NULL){
 				printf("skill_castend_map: out of memory !\n");
 				exit(1);
@@ -4040,7 +4026,7 @@ int skill_unit_onlimit(struct skill_unit *src,unsigned int tick)
 			struct skill_unit_group *group=
 				skill_unitsetting(map_id2bl(sg->src_id),sg->skill_id,sg->skill_lv,
 					src->bl.x,src->bl.y,1);
-			group->valstr=calloc(24, 1);
+			group->valstr=malloc(24);
 			if(group->valstr==NULL){
 				printf("skill_unit_ondelete: out of memory !\n");
 				exit(1);
@@ -6332,12 +6318,12 @@ struct skill_unit_group *skill_initunitgroup(struct block_list *src,
 	if(skill_unit_group_newid<=0)
 		skill_unit_group_newid=10;
 
-	group->unit=calloc(sizeof(struct skill_unit)*count, 1);
+	group->unit=malloc(sizeof(struct skill_unit)*count);
 	if(group->unit==NULL){
 		printf("skill_initunitgroup: out of memory! \n");
 		exit(1);
 	}
-	//memset(group->unit,0,sizeof(struct skill_unit)*count);
+	memset(group->unit,0,sizeof(struct skill_unit)*count);
 
 	group->unit_count=count;
 	group->val1=group->val2=0;
@@ -6942,9 +6928,10 @@ int skill_arrow_create( struct map_session_data *sd,int nameid)
  */
 int skill_readdb(void)
 {
-	int i,j,k,l;
+	int i,j,k,l,m;
 	FILE *fp;
 	char line[1024],*p;
+	char *filename[]={"db/produce_db.txt","db/produce_db2.txt"};
 
 	/* スキルデータベース */
 	memset(skill_db,0,sizeof(skill_db));
@@ -7209,44 +7196,49 @@ int skill_readdb(void)
 	fclose(fp);
 	printf("read db/cast_db.txt done\n");
 
+	/* 製造系スキルデータベース */
 	memset(skill_produce_db,0,sizeof(skill_produce_db));
-	fp=fopen("db/produce_db.txt","r");
-	if(fp==NULL){
-		printf("can't read db/produce_db.txt\n");
-		return 1;
-	}
-	k=0;
-	while(fgets(line,1020,fp)){
-		char *split[16];
-		int x,y;
-		if(line[0]=='/' && line[1]=='/')
-			continue;
-		memset(split,0,sizeof(split));
-		for(j=0,p=line;j<13 && p;j++){
-			split[j]=p;
-			p=strchr(p,',');
-			if(p) *p++=0;
+	for(m=0;m<2;m++){
+		fp=fopen(filename[m],"r");
+		if(fp==NULL){
+			if(m>0)
+				continue;
+			printf("can't read %s\n",filename[m]);
+			return 1;
 		}
-		if(split[0]==NULL)
-			continue;
-		i=atoi(split[0]);
-		if(i<=0)
-			continue;
+		k=0;
+		while(fgets(line,1020,fp)){
+			char *split[16];
+			int x,y;
+			if(line[0]=='/' && line[1]=='/')
+				continue;
+			memset(split,0,sizeof(split));
+			for(j=0,p=line;j<13 && p;j++){
+				split[j]=p;
+				p=strchr(p,',');
+				if(p) *p++=0;
+			}
+			if(split[0]==NULL)
+				continue;
+			i=atoi(split[0]);
+			if(i<=0)
+				continue;
 
-		skill_produce_db[k].nameid=i;
-		skill_produce_db[k].itemlv=atoi(split[1]);
-		skill_produce_db[k].req_skill=atoi(split[2]);
+			skill_produce_db[k].nameid=i;
+			skill_produce_db[k].itemlv=atoi(split[1]);
+			skill_produce_db[k].req_skill=atoi(split[2]);
 
-		for(x=3,y=0;split[x] && split[x+1] && y<5;x+=2,y++){
-			skill_produce_db[k].mat_id[y]=atoi(split[x]);
-			skill_produce_db[k].mat_amount[y]=atoi(split[x+1]);
+			for(x=3,y=0;split[x] && split[x+1] && y<5;x+=2,y++){
+				skill_produce_db[k].mat_id[y]=atoi(split[x]);
+				skill_produce_db[k].mat_amount[y]=atoi(split[x+1]);
+			}
+			k++;
+			if(k >= MAX_SKILL_PRODUCE_DB)
+				break;
 		}
-		k++;
-		if(k >= MAX_SKILL_PRODUCE_DB)
-			break;
+		fclose(fp);
+		printf("read %s done (count=%d)\n",filename[m],k);
 	}
-	fclose(fp);
-	printf("read db/produce_db.txt done (count=%d)\n",k);
 
 	memset(skill_arrow_db,0,sizeof(skill_arrow_db));
 	fp=fopen("db/create_arrow_db.txt","r");

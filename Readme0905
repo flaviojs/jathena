@@ -1,4 +1,16 @@
 --------------------
+//0918 by 聖
+・item_db自体がオーバーライド可能になったので、class_equip_db.txtの廃止。
+・pet_db.txt、produce_db.txtもオーバーライド可能に修正。
+	(map/)
+	itemdb.c
+		do_init_itemdb() 修正。
+	pet.c
+		read_petdb() 修正。
+	skill.c
+		skill_readdb() 修正。
+
+--------------------
 //0917 by RR
 ・スクリプト修正
 	桃太郎イベントと闘技場イベントをNPCタイマーに変更

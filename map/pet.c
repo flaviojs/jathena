@@ -598,7 +598,7 @@ int pet_data_init(struct map_session_data *sd)
 		return 1;
 	}
 	sd->petDB = &pet_db[i];
-	sd->pd = pd = calloc(sizeof(struct pet_data), 1);
+	sd->pd = pd = malloc(sizeof(struct pet_data));
 	if(pd==NULL){
 		printf("out of memory : pet_data_init\n");
 		exit(1);
@@ -1111,67 +1111,73 @@ int read_petdb()
 {
 	FILE *fp;
 	char line[1024];
+	int i;
 	int j=0;
-	
+	char *filename[]={"db/pet_db.txt","db/pet_db2.txt"};
+
 	memset(pet_db,0,sizeof(pet_db));
-	fp=fopen("db/pet_db.txt","r");
-	if(fp==NULL){
-		printf("can't read db/pet_db.txt\n");
-		return -1;
-	}
-	while(fgets(line,1020,fp)){
-		int nameid,i;
-		char *str[32],*p,*np;
-
-		if(line[0] == '/' && line[1] == '/')
-			continue;
-
-		for(i=0,p=line;i<20;i++){
-			if((np=strchr(p,','))!=NULL){
-				str[i]=p;
-				*np=0;
-				p=np+1;
-			} else {
-				str[i]=p;
-				p+=strlen(p);
-			}
+	for(i=0;i<2;i++){
+		fp=fopen(filename[i],"r");
+		if(fp==NULL){
+			if(i>0)
+				continue;
+			printf("can't read %s\n",filename[i]);
+			return -1;
 		}
+		while(fgets(line,1020,fp)){
+			int nameid,i;
+			char *str[32],*p,*np;
 
-		nameid=atoi(str[0]);
-		if(nameid<=0 || nameid>2000)
-			continue;
-		
-		//MobID,Name,JName,ItemID,EggID,AcceID,FoodID,"Fullness (1回の餌での満腹度増加率%)","HungryDeray (/min)","R_Hungry (空腹時餌やり親密度増加率%)","R_Full (とても満腹時餌やり親密度減少率%)","Intimate (捕獲時親密度%)","Die (死亡時親密度減少率%)","Capture (捕獲率%)",(Name)
-		pet_db[j].class = nameid;
-		memcpy(pet_db[j].name,str[1],24);
-		memcpy(pet_db[j].jname,str[2],24);
-		pet_db[j].itemID=atoi(str[3]);
-		pet_db[j].EggID=atoi(str[4]);
-		pet_db[j].AcceID=atoi(str[5]);
-		pet_db[j].FoodID=atoi(str[6]);
-		pet_db[j].fullness=atoi(str[7]);
-		pet_db[j].hungry_delay=atoi(str[8])*1000;
-		pet_db[j].r_hungry=atoi(str[9]);
-		if(pet_db[j].r_hungry <= 0)
-			pet_db[j].r_hungry=1;
-		pet_db[j].r_full=atoi(str[10]);
-		pet_db[j].intimate=atoi(str[11]);
-		pet_db[j].die=atoi(str[12]);
-		pet_db[j].capture=atoi(str[13]);
-		pet_db[j].speed=atoi(str[14]);
-		pet_db[j].s_perfor=(char)atoi(str[15]);
-		pet_db[j].talk_convert_class=atoi(str[16]);
-		pet_db[j].attack_rate=atoi(str[17]);
-		pet_db[j].defence_attack_rate=atoi(str[18]);
-		pet_db[j].change_target_rate=atoi(str[19]);
-		pet_db[j].script = NULL;
-		if((np=strchr(p,'{'))==NULL)
-			continue;
-		pet_db[j].script = parse_script(np,0);
-		j++;
+			if(line[0] == '/' && line[1] == '/')
+				continue;
+
+			for(i=0,p=line;i<20;i++){
+				if((np=strchr(p,','))!=NULL){
+					str[i]=p;
+					*np=0;
+					p=np+1;
+				} else {
+					str[i]=p;
+					p+=strlen(p);
+				}
+			}
+
+			nameid=atoi(str[0]);
+			if(nameid<=0 || nameid>2000)
+				continue;
+
+			//MobID,Name,JName,ItemID,EggID,AcceID,FoodID,"Fullness (1回の餌での満腹度増加率%)","HungryDeray (/min)","R_Hungry (空腹時餌やり親密度増加率%)","R_Full (とても満腹時餌やり親密度減少率%)","Intimate (捕獲時親密度%)","Die (死亡時親密度減少率%)","Capture (捕獲率%)",(Name)
+			pet_db[j].class = nameid;
+			memcpy(pet_db[j].name,str[1],24);
+			memcpy(pet_db[j].jname,str[2],24);
+			pet_db[j].itemID=atoi(str[3]);
+			pet_db[j].EggID=atoi(str[4]);
+			pet_db[j].AcceID=atoi(str[5]);
+			pet_db[j].FoodID=atoi(str[6]);
+			pet_db[j].fullness=atoi(str[7]);
+			pet_db[j].hungry_delay=atoi(str[8])*1000;
+			pet_db[j].r_hungry=atoi(str[9]);
+			if(pet_db[j].r_hungry <= 0)
+				pet_db[j].r_hungry=1;
+			pet_db[j].r_full=atoi(str[10]);
+			pet_db[j].intimate=atoi(str[11]);
+			pet_db[j].die=atoi(str[12]);
+			pet_db[j].capture=atoi(str[13]);
+			pet_db[j].speed=atoi(str[14]);
+			pet_db[j].s_perfor=(char)atoi(str[15]);
+			pet_db[j].talk_convert_class=atoi(str[16]);
+			pet_db[j].attack_rate=atoi(str[17]);
+			pet_db[j].defence_attack_rate=atoi(str[18]);
+			pet_db[j].change_target_rate=atoi(str[19]);
+			pet_db[j].script = NULL;
+			if((np=strchr(p,'{'))==NULL)
+				continue;
+			pet_db[j].script = parse_script(np,0);
+			j++;
+		}
+		fclose(fp);
+		printf("read %s done (count=%d)\n",filename[i],j);
 	}
-	fclose(fp);
-	printf("read db/pet_db.txt done (count=%d)\n",j);
 	return 0;
 }
 
