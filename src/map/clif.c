@@ -253,7 +253,7 @@ int clif_send(unsigned char *buf,int len,struct block_list *bl,int type)
 	struct guild *g=NULL;
 	int x0=0,x1=0,y0=0,y1=0;
 
-	if( bl == NULL ){
+	if( bl == NULL && type != ALL_CLIENT ){
 		printf("clif_send nullpo\n");
 		return 0;
 	}

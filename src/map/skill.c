@@ -7990,12 +7990,12 @@ int skill_delunit(struct skill_unit *unit)
 		printf("skill_delunit nullpo 1\n");
 		return 0;
 	}
-	if( (group=unit->group) == NULL ){
-		printf("skill_delunit nullpo 2 bl.id:%d val1:%d\n",unit->bl.id, unit->val1);
-		return 0;
-	}
 	if(!unit->alive)
 		return 0;
+	if( (group=unit->group) == NULL ){
+		printf("skill_delunit nullpo 2 bl.id:%d avail:%d val1:%d val2:%d limit:%d %d %d %d\n",unit->bl.id, unit->alive, unit->val1, unit->val2, unit->limit, unit->bl.m, unit->bl.x, unit->bl.y);
+		return 0;
+	}
 
 	/* onlimitイベント呼び出し */
 	skill_unit_onlimit( unit,gettick() );
