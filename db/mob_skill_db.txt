@@ -371,7 +371,7 @@
 1086,モンスター召喚＠黄金蟲,attack,209,8,1000,3000,3600000,no,self,myhpltmaxrate,5,1054,,,,,,,
 1086,属性攻撃(火)＠黄金蟲,attack,186,5,200,0,5000,yes,target,always,0,,,,,,,,
 1086,2HQ＠黄金蟲,attack,60,10,500,3000,300000,no,self,myhpltmaxrate,20,,,,,,,,
-1086,手下召喚＠黄金蟲,attack,196,8,1000,3000,10000,no,self,slavele,0,1054,,,,,,,
+1086,手下召喚＠黄金蟲,attack,196,8,1000,3000,3600000,no,self,slavele,0,1054,,,,,,,
 1086,hide＠黄金蟲,attack,51,1,150,0,5000,no,self,myhpltmaxrate,30,,,,,,,,
 1086,hide＠黄金蟲,attack,51,1,150,0,5000,no,self,myhpltmaxrate,30,,,,,,,,
 1086,必中攻撃＠黄金蟲,attack,172,1,200,0,5000,yes,target,always,0,,,,,,,,
