@@ -2210,6 +2210,35 @@ int pc_checkskill(struct map_session_data *sd,int skill_id)
 	return 0;
 }
 
+/*==========================================
+ * 武器変更によるスキルの継続チェック
+ * 引数：
+ *   struct map_session_data *sd	セッションデータ
+ *   int nameid						装備品ID
+ * 返り値：
+ *   0		変更なし
+ *   -1		スキルを解除
+ *------------------------------------------
+ */
+int pc_checkallowskill(struct map_session_data *sd,int nameid)
+{
+	// 騎士・クルセイダー系スキルのチェック
+	if(sd->sc_data[SC_TWOHANDQUICKEN].timer!=-1){	// 2HQ
+		if(sd->status.weapon != 3){	// 両手剣か
+			skill_status_change_end(&sd->bl,SC_TWOHANDQUICKEN,-1);	// 2HQを解除
+			return -1;
+		}
+	}
+	if(sd->sc_data[SC_SPEARSQUICKEN].timer!=-1){	// スピアクィッケン
+		if(sd->status.weapon != 5){	// 槍か
+			skill_status_change_end(&sd->bl,SC_SPEARSQUICKEN,-1);	// スピアクイッケンを解除
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 
 /*==========================================
  * 装 備品のチェック
@@ -3357,6 +3386,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	else	clif_equipitemack(sd,n,pos,1);
 
 	sd->status.inventory[n].equip=pos;
+	pc_checkallowskill(sd,nameid);	// 装備品でスキルか解除されるかチェック
 	pc_calcstatus(sd,0);
 
 	return 0;

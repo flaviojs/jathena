@@ -1,4 +1,22 @@
 --------------
+//0563 by パイン
+
+・MOBの暗闇スキルを食らった後に回復しないのを修正。…なんだけど、適正な値が分からないので
+　毒や沈黙と同じ時間にしてあります
+　今後、また手を加えるかもしれません。
+・2HQとスピアクイッケンを使用中に武器を変えた場合は解除するように変更。
+
+	(/map)
+	skill.c
+		skill_castend_damage_id() 修正。
+		skill_status_change_timer() 修正。
+	pc.c
+		pc_checkallowskill() 新設。
+		pc_equipitem() 修正。
+	pc.h
+		pc_checkallowskill() 新設。
+
+--------------
 //0562 by huge
 
 ・矢を弓装備時以外でも装備できるように戻しました。

@@ -28,6 +28,7 @@ int pc_authok(int,struct mmo_charstatus *);
 int pc_authfail(int);
 
 int pc_checkskill(struct map_session_data *sd,int skill_id);
+int pc_checkallowskill(struct map_session_data *sd,int nameid);
 int pc_checkequip(struct map_session_data *sd,int pos);
 
 int pc_checkoverhp(struct map_session_data*);

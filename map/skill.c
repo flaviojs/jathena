@@ -388,11 +388,11 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	case NPC_SLEEPATTACK:
 		{
 			const int sc[]={
-				SC_POISON,	SC_BLIND,	SC_SILENCE,	SC_STAN,
-				SC_STONE,	SC_CURSE,	SC_SLEEP	};
+				SC_POISON, SC_BLIND, SC_SILENCE, SC_STAN,
+				SC_STONE, SC_CURSE, SC_SLEEP };
 			const int sc2[]={
-				6000,		0,			6000,			1000,
-				1000,		0,			6000	};
+				6000, 6000, 6000, 1000,
+				1000, 0, 6000 };
 			skill_status_change_start(bl,
 				sc[skillid-NPC_POISON],skilllv,sc2[skillid-NPC_POISON]*skilllv);
 		}
@@ -3534,7 +3534,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	case SC_AETERNA:
 	case SC_TRICKDEAD:
 	case SC_STONE:
-	case SC_BLIND:
+/*	case SC_BLIND: */
 	case SC_RIDING:
 	case SC_FALCON:
 	case SC_WEIGHT50:
@@ -3795,7 +3795,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			break;
 		case SC_BLIND:				/* à√çï */
 			if( (tick=val2)<=0 )
-				tick = 1000*600;
+				tick = 500*600;		/* Ç∆ÇËÇ†Ç¶Ç∏ÇTï™ */
 			break;
 			
 		/* option */
