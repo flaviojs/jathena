@@ -1,4 +1,18 @@
 --------------------
+//0780 by reia
+
+・ペコペコの卵などが孵化するとノビになってしまう問題修正。
+・GMコマンド「@kickall」が何時の間にか無効になっていたので修正。
+
+	(/conf)
+	atcommand_athena.conf 修正。
+	(db/)
+	mob_skill_db.txt 修正。
+	(map/)
+	atcommand.c
+		atcommand_config_read() 修正。
+
+--------------------
 //0779 by あゆみ
 
 ・全スキル取得コマンドの追加。
