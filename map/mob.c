@@ -1555,14 +1555,14 @@ int mob_deleteslave(struct mob_data *md)
  */
 int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 {
-	int i,sum,count,minpos,mindmg;
+	int i,count,minpos,mindmg;
 	struct map_session_data *sd = NULL,*tmpsd[DAMAGELOG_SIZE];
 	struct {
 		struct party *p;
 		int id,base_exp,job_exp;
 	} pt[DAMAGELOG_SIZE];
 	int pnum=0;
-	int mvp_damage=0,max_hp = battle_get_max_hp(&md->bl);
+	int mvp_damage,max_hp = battle_get_max_hp(&md->bl);
 	struct map_session_data *mvp_sd=sd;
 
 	if(src && src->type == BL_PC) {
@@ -1601,7 +1601,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 
 	if(!(type&2)) {
 		if(sd!=NULL){
-			for(i=0,minpos=0,mindmg=30000;i<DAMAGELOG_SIZE;i++){
+			for(i=0,minpos=0,mindmg=0x7fffffff;i<DAMAGELOG_SIZE;i++){
 				if(md->dmglog[i].id==sd->bl.id)
 					break;
 				if(md->dmglog[i].id==0){
@@ -1625,7 +1625,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		}
 		if(src && src->type == BL_PET && battle_config.pet_attack_exp_to_master) {
 			struct pet_data *pd = (struct pet_data *)src;
-			for(i=0,minpos=0,mindmg=30000;i<DAMAGELOG_SIZE;i++){
+			for(i=0,minpos=0,mindmg=0x7fffffff;i<DAMAGELOG_SIZE;i++){
 				if(md->dmglog[i].id==pd->msd->bl.id)
 					break;
 				if(md->dmglog[i].id==0){
@@ -1638,10 +1638,10 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 				}
 			}
 			if(i<DAMAGELOG_SIZE)
-				md->dmglog[i].dmg+=damage;
+				md->dmglog[i].dmg+=(damage*battle_config.pet_attack_exp_rate)/100;
 			else {
 				md->dmglog[minpos].id=pd->msd->bl.id;
-				md->dmglog[minpos].dmg=damage;
+				md->dmglog[minpos].dmg=(damage*battle_config.pet_attack_exp_rate)/100;
 			}
 		}
 	}
@@ -1661,27 +1661,25 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	memset(tmpsd,0,sizeof(tmpsd));
 	memset(pt,0,sizeof(pt));
 
+	max_hp = battle_get_max_hp(&md->bl);
+
 	// map外に消えた人は計算から除くので
 	// overkill分は無いけどsumはmax_hpとは違う
-	for(i=0,sum=0,count=0;i<DAMAGELOG_SIZE;i++){
+	for(i=0,count=0,mvp_damage=0;i<DAMAGELOG_SIZE;i++){
 		if(md->dmglog[i].id==0)
 			continue;
 		tmpsd[i] = map_id2sd(md->dmglog[i].id);
-		if(tmpsd[i] == 0)
+		if(tmpsd[i] == NULL)
 			continue;
 		count++;
-		if(tmpsd[i]->bl.m != md->bl.m)
+		if(tmpsd[i]->bl.m != md->bl.m || pc_isdead(tmpsd[i]))
 			continue;
-		sum+=md->dmglog[i].dmg;
 
 		if(mvp_damage<md->dmglog[i].dmg){
 			mvp_sd=tmpsd[i];
 			mvp_damage=md->dmglog[i].dmg;
 		}
 	}
-	// div0対策
-	if(sum == 0)
-		sum = max_hp;
 
 	// 経験値の分配
 	for(i=0;i<DAMAGELOG_SIZE;i++){
@@ -1690,11 +1688,13 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		if(tmpsd[i]==NULL || tmpsd[i]->bl.m != md->bl.m)
 			continue;
 
-		per=md->dmglog[i].dmg*256*(9+count)/10/sum;
+		per=md->dmglog[i].dmg*256*(9+((count > 5)? 5:count))/10/max_hp;
 		if(per>512) per=512;
 		if(per<1) per=1;
 		base_exp=mob_db[md->class].base_exp*per/256;
+		if(base_exp < 1) base_exp = 1;
 		job_exp=mob_db[md->class].job_exp*per/256;
+		if(job_exp < 1) job_exp = 1;
 
 		if((pid=tmpsd[i]->status.party_id)>0){	// パーティに入っている
 			int j=0;
@@ -1799,8 +1799,10 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 
 	// mvp処理
 	if(mvp_sd && mob_db[md->class].mexp ){
-		int flag = 0;
+		int mexp = mob_db[md->class].mexp*(9+count)/10;
 		clif_mvp_effect(mvp_sd);					// エフェクト
+		clif_mvp_exp(mvp_sd,mexp);	// 無条件で経験値
+		pc_gainexp(mvp_sd,mexp,0);
 		for(i=0;i<3;i++){
 			struct item item;
 			int ret;
@@ -1822,12 +1824,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 				clif_additem(sd,0,0,ret);
 				map_addflooritem(&item,1,mvp_sd->bl.m,mvp_sd->bl.x,mvp_sd->bl.y);
 			}
-			flag = 1;
 			break;
-		}
-		if(!flag) {
-			clif_mvp_exp(mvp_sd,mob_db[md->class].mexp);	// 無条件で経験値
-			pc_gainexp(mvp_sd,mob_db[md->class].mexp,0);
 		}
 	}
 
@@ -2128,7 +2125,7 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 {
 	struct mob_data* md=NULL;
-	int range,c;
+	int range;
 
 	if( (md=(struct mob_data *)map_id2bl(id))==NULL ||
 		md->bl.type!=BL_MOB || md->bl.prev==NULL )
@@ -2142,32 +2139,34 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 		md->sc_data[SC_STEELBODY].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1)
 		return 0;
 
-	switch(md->skillid) {
-		case AL_PNEUMA:
-		case AL_WARP:
-		case WZ_FIREPILLAR:
-		case HT_SKIDTRAP:
-		case HT_LANDMINE:
-		case HT_ANKLESNARE:
-		case HT_SHOCKWAVE:
-		case HT_SANDMAN:
-		case HT_FLASHER:
-		case HT_FREEZINGTRAP:
-		case HT_BLASTMINE:
-		case HT_CLAYMORETRAP:
-		case HT_TALKIEBOX:
-			c = 0;
-			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx-2,md->skilly-2,md->skillx+2,md->skilly+2,BL_SKILL,1,&c);
-			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx-1,md->skilly-1,md->skillx+1,md->skilly+1,BL_SKILL,0,&c);
-			if(c > 0) return 0;
-			break;
-		case MG_SAFETYWALL:
-			c = 0;
-			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx-1,md->skilly-1,md->skillx+1,md->skilly+1,BL_SKILL,1,&c);
-			map_foreachinarea(skill_check_unit_sub,md->bl.m,md->skillx,md->skilly,md->skillx,md->skilly,BL_SKILL,0,&c);
-			if(c > 0) return 0;
-			break;
+	if(battle_config.monster_skill_reiteration == 0) {
+		range = -1;
+		switch(md->skillid) {
+			case MG_SAFETYWALL:
+				range = 0;
+				break;
+			case AL_PNEUMA:
+			case AL_WARP:
+			case WZ_FIREPILLAR:
+			case HT_SKIDTRAP:
+			case HT_LANDMINE:
+			case HT_ANKLESNARE:
+			case HT_SHOCKWAVE:
+			case HT_SANDMAN:
+			case HT_FLASHER:
+			case HT_FREEZINGTRAP:
+			case HT_BLASTMINE:
+			case HT_CLAYMORETRAP:
+			case HT_TALKIEBOX:
+				range = 1;
+				break;
+		}
+		if(range >= 0) {
+			if(skill_check_unit_range(md->bl.m,md->skillx,md->skilly,range) > 0)
+				return 0;
+		}
 	}
+
 	range = skill_get_range(md->skillid,md->skilllv);
 	if(range < 0)
 		range = (1 - range) + battle_get_range(&md->bl);

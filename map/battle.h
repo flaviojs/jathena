@@ -151,6 +151,7 @@ extern struct Battle_Config {
 	int skillfree;
 	int skillup_limit;
 	int wp_rate;
+	int pp_rate;
 	int monster_active_enable;
 	int monster_damage_delay_rate;
 	int monster_loot_type;
@@ -170,6 +171,7 @@ extern struct Battle_Config {
 	int pet_damage_support;
 	int pet_support_rate;
 	int pet_attack_exp_to_master;
+	int pet_attack_exp_rate;
 	int skill_min_damage;
 	int finger_offensive_type;
 	int heal_exp,shop_exp;
@@ -203,6 +205,8 @@ extern struct Battle_Config {
 	int vit_penaly_type;
 	int vit_penaly_count;
 	int vit_penaly_num;
+	int pc_skill_reiteration;
+	int monster_skill_reiteration;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

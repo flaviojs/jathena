@@ -680,7 +680,7 @@ int pc_calc_skilltree(struct map_session_data *sd)
 	int i,id=0,flag;
 	int c=sd->status.class;
 
-	if(battle_config.skillup_limit) {
+	if(battle_config.skillup_limit && c >= 0 && c < 23) {
 		int skill_point = pc_calc_skillpoint(sd);
 		if(skill_point < 9)
 			c = 0;
@@ -740,9 +740,8 @@ int pc_calc_skilltree(struct map_session_data *sd)
 				if(!battle_config.skillfree) {
 					for(j=0;j<5;j++) {
 						if( skill_tree[c][i].need[j].id &&
-							pc_checkskill(sd,skill_tree[c][i].need[j].id) <
-							skill_tree[c][i].need[j].lv
-						 ) f=0;
+							pc_checkskill(sd,skill_tree[c][i].need[j].id) < skill_tree[c][i].need[j].lv)
+							f=0;
 					}
 				}
 				if(f && sd->status.skill[id].id==0 ){
@@ -1286,10 +1285,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->base_atk = sd->base_atk*(100+2*sd->sc_data[SC_PROVOKE].val1)/100;
 			sd->watk = sd->watk*(100+2*sd->sc_data[SC_PROVOKE].val1)/100;
 		}
-		if(sd->sc_data[SC_POISON].timer!=-1){	// プロボック
-			sd->def = sd->def*75/100;
+		if(sd->sc_data[SC_POISON].timer!=-1)	// プロボック
 			sd->def2 = sd->def2*75/100;
-		}
 		if(sd->sc_data[SC_DRUMBATTLE].timer!=-1){	// 戦太鼓の響き
 			sd->watk += sd->sc_data[SC_DRUMBATTLE].val2;
 			sd->def  += sd->sc_data[SC_DRUMBATTLE].val3;

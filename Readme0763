@@ -1,4 +1,53 @@
 --------------------
+//0764 by 死神
+
+・全てのダメージが1になる防御を10000から1000000に変更。
+・battle_athena.confに項目追加。
+・モンスターから経験値を貰う処理を本鯖のように修正。
+・スキルスローポイズン実装。
+・交換バグ修正。
+・その他細かい修正。
+・テストは殆どしてません。
+	(db/)
+	mob_db.txt 修正。
+	skill_db.txt 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	db_ref.txt 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(map/)
+	makefile 修正。
+	battle.h 修正。
+	battle.c
+		battle_get_def()、battle_get_mdef() 修正。
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack()、battle_calc_magic_attack() 修正。
+		battle_calc_misc_attack()、battle_config_read() 修正。
+	skill.h 修正。
+	skill.c
+		skill_castend_nodamage_id()、skill_castend_damage_id() 修正。
+		skill_check_condition()、skill_status_change_timer() 修正。
+		skill_status_change_end()、skill_status_change_start() 修正。
+		skill_additional_effect()、skill_produce_mix()、skill_unit_timer_sub() 修正。
+		skill_check_unit_sub()を skill_check_unit_range_sub()に変更。
+		skill_check_unit_range() 追加。
+		skill_castend_pos()、skill_area_sub_count() 修正。
+	mob.c
+		mobskill_castend_pos()、mob_damage() 修正。
+	clif.c
+		clif_parse_TradeRequest()、clif_parse_TradeAck() 修正。
+		clif_parse_TradeAddItem()、clif_parse_TradeOk() 修正。
+		clif_parse_TradeCansel()、clif_parse_TradeCommit() 修正。
+	map.h 修正。
+	map.c
+		do_init() 修正。
+	pc.c
+		pc_calc_skilltree()、pc_calcstatus() 修正。
+	tarde.c
+		trade_tradeack() 修正。
+
+--------------------
 //0763 by 胡蝶蘭
 
 ・サーバーsnapshot

@@ -460,6 +460,10 @@ weapon_produce_rate
 	武器製造スキルでの製造成功率を百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
 
+potion_produce_rate
+	ポーション製造スキルでの製造成功率を百分率で調整します。
+	0-1000程度の数値を指定してください。デフォルトは100です。
+
 monster_active_enable
 	先攻モンスターを先攻にするかどうかです。これをnoにすると
 	先攻モンスターが非先攻になります。デフォルトはyesです。
@@ -543,6 +547,10 @@ pet_attack_exp_to_master
 	ペットが与えたダメージの分の経験値を主人が収得するかどうかです。
 	これをyesにするとペットの攻撃によるダメージも主人が与えた物になり
 	主人が経験値を収得することができます。デフォルトはnoです。
+
+pet_attack_exp_rate
+	ペットが与えたダメージの分の経験値を主人が収得する時の倍率です。
+	デフォルトは100です。
 
 skill_min_damage
 	スキルを使った時ダメージが連打数より未満の場合全てミスになるか1ダメージになるかを決定します。
@@ -703,6 +711,16 @@ vit_penaly_num
 	vitペナルティによって減る回避の量を設定します。
 	デフォルトは0です。
 
+player_skill_reiteration
+	一部のプレイヤーの地面スキルの重ね置きを許可するかどうかです。
+	これをyesにするとSWやニューマ、トラップを重ねて置くことができます。
+	デフォルトはnoです。
+
+monster_skill_reiteration
+	一部のモンスターの地面スキルの重ね置きを許可するかどうかです。
+	これをyesにするとSWやニューマ、トラップを重ねて置くことができます。
+	デフォルトはnoです。
+
 
 
 < 例 >
@@ -744,6 +762,7 @@ gm_all_skill: 0
 player_skillfree: no
 player_skillup_limit: no
 weapon_produce_rate: 100
+potion_produce_rate: 100
 monster_active_enable: yes
 monster_damage_delay_rate: 100
 monster_loot_type: 0
@@ -762,6 +781,7 @@ pet_status_support: no
 pet_support: no
 pet_support_rate: 100
 pet_attack_exp_to_master: no
+pet_attack_exp_rate: no
 skill_min_damage: no
 finger_offensive_type: 0
 heal_exp: 0
@@ -796,6 +816,8 @@ agi_penaly_num: 0
 vit_penaly_type: 0
 vit_penaly_count: 3
 vit_penaly_num: 0
+player_skill_reiteration: no
+monster_skill_reiteration: no
 
 
 =====================================================================ghos6. atcommand_athena.conf

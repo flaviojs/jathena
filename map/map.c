@@ -1340,7 +1340,7 @@ int do_init(int argc,char *argv[])
 	nick_db = strdb_init(24);
 	charid_db = numdb_init();
 
-	grfio_init((argc>5)? argv[5]:GRF_PATH_FILENAME);
+	grfio_init((argc>6)? argv[6]:GRF_PATH_FILENAME);
 	map_readallmap();
 
 	add_timer_func_list(map_clearflooritem_timer,"map_clearflooritem_timer");

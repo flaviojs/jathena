@@ -27,7 +27,7 @@ delay_list: ƒXƒLƒ‹‚ÌƒfƒBƒŒƒCŽžŠÔ‚ðÝ’è‚µ‚Ü‚·BƒŒƒxƒ‹•Ê‚ÉÝ’è‚·‚éê‡‚Íu:v‚ðŽg‚
 upkeep_time:ƒXƒLƒ‹‚ÌˆÛŽŽžŠÔ‚ðÝ’è‚µ‚Ü‚·BƒŒƒxƒ‹•Ê‚ÉÝ’è‚·‚éê‡‚Íu:v‚ðŽg‚¢‚Ü‚·B
 upkeep_time2:ƒXƒLƒ‹‚É‚æ‚Á‚Ä‹N‚±‚éó‘ÔˆÙí‚ÌˆÛŽŽžŠÔ‚ðÝ’è‚µ‚Ü‚·BƒŒƒxƒ‹•Ê‚ÉÝ’è‚·‚éê‡‚Íu:v‚ðŽg‚¢‚Ü‚·B(‚½‚¾‘¬“xŒ¸­‚Íupkeep_time‚ðŽg‚¢‚Ü‚·‚Ì‚Å’ˆÓ‚µ‚Ä‚­‚¾‚³‚¢B)
 
-¦•Ší‚Ì’Ç‰ÁŒø‰Ê‚É‚æ‚éó‘ÔˆÙí‚ÍMG_STONECURSE(Î‰»)AMG_FROSTDIVER(“€Œ‹)ANPC_STUNATTACK(ƒXƒ^ƒ“)ANPC_SLEEPATTACK(‡–°)ATF_POISON(“Å)ANPC_CURSEATTACK(Žô‚¢)ANPC_SILENCEATTACK(‡–°)ANPC_BLINDATTACK(ˆÃ•)‚Ìupkeep_time2‚ðŽg‚¢‚Ü‚·B(ƒŒƒxƒ‹‚Í10‚Å“K—p)
+¦•Ší‚Ì’Ç‰ÁŒø‰Ê‚É‚æ‚éó‘ÔˆÙí‚ÍMG_STONECURSE(Î‰»)AMG_FROSTDIVER(“€Œ‹)ANPC_STUNATTACK(ƒXƒ^ƒ“)ANPC_SLEEPATTACK(‡–°)ATF_POISON(“Å)ANPC_CURSEATTACK(Žô‚¢)ANPC_SILENCEATTACK(’¾–Ù)ANPC_BLINDATTACK(ˆÃ•)‚Ìupkeep_time2‚ðŽg‚¢‚Ü‚·B(ƒŒƒxƒ‹‚Í7‚Å“K—p)
 ¦‹}ŠUŒ‚‚Ìê‡Å‘åƒŒƒxƒ‹‚Í1‚Å‚·‚ªƒoƒbƒVƒ…‚ÌƒŒƒxƒ‹‚É‚æ‚Á‚ÄˆÙíŽžŠÔ‚ð•ÏX‚Å‚«‚é‚Ì‚Å•¡”Ý’è‚à‰Â”\‚Å‚·B
 ¦ƒ}ƒLƒVƒ}ƒCƒYƒpƒ[‚ÆƒNƒ[ƒLƒ“ƒO‚Ìupkeep_time‚ÍˆÛŽŽžŠÔ‚Å‚Í‚È‚­SP‚ª1Œ¸‚éŽžŠÔ‚Å‚·B
 
@@ -51,7 +51,7 @@ MaxLv: ƒXƒLƒ‹‚ÌÅ‘åƒŒƒxƒ‹‚Å‚·B
 list_num: Hit‰ñ”‚ÌƒŠƒXƒg‚Å‚·BƒŒƒxƒ‹•Ê‚ÉÝ’è‚·‚éê‡‚Íu:v‚ðŽg‚¢‚Ü‚·B
 castcancel: ƒXƒLƒ‹‚ªƒLƒƒƒ“ƒZƒ‹‚³‚ê‚é‚©‚Ç‚¤‚©‚ðÝ’è‚µ‚Ü‚·B1‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚é•¨‚Å0‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚È‚¢•¨‚Å‚·B
 cast_defence_rate: ƒLƒƒƒXƒeƒBƒ“ƒO’†‚É’á‰º‚·‚é–hŒä—Í‚Ì”ä—¦‚Å‚·Bƒ{ƒEƒŠƒ“ƒOƒoƒbƒVƒ…‚âƒNƒ‰ƒ“ƒhƒNƒƒX‚Ì‚æ‚¤‚ÉƒXƒLƒ‹ƒLƒƒƒXƒeƒBƒ“ƒO’†‚É–hŒä‚ªŒ¸‚éƒXƒLƒ‹‚ÌÝ’è‚ÉŽg‚¢‚Ü‚·B
-inf2: ƒXƒLƒ‹î•ñ2‚Å‚·B1 - ƒNƒFƒXƒgƒXƒLƒ‹A2 - npc ƒXƒLƒ‹A4-“GA8-êŠA16-‘¦Žž”­“®A32-–¡•ûA64-ã©A128-PVPƒ‚[ƒh‚ÅŽ©•ª‚ðŠÜ‚Þ‘S‚Ä‚Ì•¨‚Éƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚Ý)A256-•’Ê‚ÌŽg—p‚ÅŽ©•ª‚É‚àƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚Ý)A512-Ž©•ª‚É‚ÍŽg‚¤‚±‚Æ‚ª‚Å‚«‚È‚¢ƒXƒLƒ‹B(4A8A16A32A64‚Íˆê•”‚ÌƒAƒNƒeƒBƒuƒXƒLƒ‹‚ªŽg—pB¡‚Íˆ¢C—…”e–PŒ‚Ì‚ÝŽg—pB)
+inf2: ƒXƒLƒ‹î•ñ2‚Å‚·B1 - ƒNƒFƒXƒgƒXƒLƒ‹A2 - npc ƒXƒLƒ‹A4-“GA8-êŠA16-‘¦Žž”­“®A32-–¡•ûA64-ã©A128-PVPƒ‚[ƒh‚ÅŽ©•ª‚ðŠÜ‚Þ‘S‚Ä‚Ì•¨‚Éƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚Ý)A256-•’Ê‚ÌŽg—p‚ÅŽ©•ª‚É•K‚¸ƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚Ý)A512-Ž©•ª‚É‚ÍŽg‚¤‚±‚Æ‚ª‚Å‚«‚È‚¢ƒXƒLƒ‹B(4A8A16A32A64‚Íˆê•”‚ÌƒAƒNƒeƒBƒuƒXƒLƒ‹‚ªŽg—pB¡‚Íˆ¢C—…”e–PŒ‚Ì‚ÝŽg—pB)
 
 
 ==========================================================================
@@ -74,7 +74,7 @@ list_weapon: ƒXƒLƒ‹‚ðŽg‚¤‚±‚Æ‚ª‚Å‚«‚é•Ší‚ðÝ’è‚µ‚Ü‚·B
 	•¡”‚ðÝ’è‚·‚éê‡‚Íu:v‚ðŽg‚¢‚Ü‚·B
 state:ƒXƒLƒ‹‚ðŽg—p‚·‚éˆ×‚ÌðŒ‚ðÝ’è‚µ‚Ü‚·B•¡”‚ÌÝ’è‚Í‚Å‚«‚Ü‚¹‚ñB
 	none - ðŒ–³‚µ
-	hiding - ƒnƒCƒfƒBƒ“ƒOó‘Ô(ƒXƒLƒ‹Žg—p‚ÌŒãƒnƒCƒfƒBƒ“ƒO‚Í‰ðœ‚³‚ê‚é)
+	hiding - ƒnƒCƒfƒBƒ“ƒOó‘Ô
 	cloacking - ƒNƒ[ƒLƒ“ƒOó‘ÔB
 	hidden: ƒnƒCƒfƒBƒ“ƒO‚âƒNƒƒbƒLƒ“ƒOó‘Ô
 	riding: ƒyƒRƒyƒR‚Éæ‚Á‚Ä‚¢‚é

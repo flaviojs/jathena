@@ -91,7 +91,7 @@ int skill_clear_unitgroup(struct block_list *src);
 int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,
 	int damage,unsigned int tick);
 
-int skill_check_unit_sub( struct block_list *bl,va_list ap );
+int skill_check_unit_range(int m,int x,int y,int range);
 int skill_unit_out_all( struct block_list *bl,unsigned int tick,int range);
 int skill_unit_move( struct block_list *bl,unsigned int tick,int range);
 
@@ -169,6 +169,7 @@ enum {	// struct map_session_data ‚Ì status_change‚Ì”Ô†ƒe[ƒuƒ‹
 	SC_RUWACH				=151,
 	SC_INCREASEAGI			=12,
 	SC_DECREASEAGI			=13,
+	SC_SLOWPOISON				=14,
 	SC_SIGNUMCRUCIS			=11,
 	SC_ANGELUS				= 9,
 	SC_BLESSING				=10,

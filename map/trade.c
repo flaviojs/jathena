@@ -5,6 +5,7 @@
 #include "map.h"
 #include "trade.h"
 #include "pc.h"
+#include "npc.h"
 
 /*==========================================
  * æˆø—v¿‚ğ‘Šè‚É‘—‚é
@@ -53,6 +54,10 @@ void trade_tradeack(struct map_session_data *sd,int type)
 			target_sd->deal_locked=0;
 			target_sd->trade_partner=0;
 		}
+		if(sd->npc_id != 0)
+			npc_event_dequeue(sd);
+		if(target_sd->npc_id != 0)
+			npc_event_dequeue(target_sd);
 	}
 }
 
