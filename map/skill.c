@@ -2098,7 +2098,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		{
 			int sp=0;
 			if(bl->type==BL_MOB){	// MOB
-				if(dstmd->skilltimer!=-1 && dstmd->state.skillcastcancel){	// ‰r¥–WŠQ
+				if(dstmd->skilltimer!=-1 && dstmd->state.skillcastcancel && skill_db[dstmd->skillid].delay[dstmd->skilllv-1]){
 					sp = skill_db[dstmd->skillid].sp[dstmd->skilllv-1]*(skilllv-1)*25/100;
 					skill_castcancel(bl,0);
 					pc_heal(sd,0,sp);
@@ -2106,11 +2106,11 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 					clif_skill_fail(sd,skillid,0,0);
 					break;
 				}
-			}else	if(bl->type==BL_PC && dstsd->skilltimer!=-1){	// PC
+			}else	if(bl->type==BL_PC && dstsd->skilltimer!=-1 && skill_db[dstsd->skillid].delay[dstsd->skilllv-1]){	// PC
 					sp = skill_db[dstsd->skillid].sp[dstsd->skilllv-1]*(skilllv-1)*25/100;
 					skill_castcancel(bl,0);
 					pc_heal(sd,0,sp);
-					pc_heal(dstsd,0,-sp);
+					pc_heal(dstsd,0,-(skill_db[dstsd->skillid].sp[dstsd->skilllv-1]));
 				}else{
 					clif_skill_fail(sd,skillid,0,0);
 					break;
