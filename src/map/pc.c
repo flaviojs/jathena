@@ -3161,7 +3161,7 @@ int pc_steal_coin(struct map_session_data *sd,struct block_list *bl)
 int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrtype)
 {
 	char mapname[24];
-	int m,c;
+	int m;
 
 	nullpo_retr(0, sd);
 
@@ -3247,7 +3247,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 
 	if(x <0 || x >= map[m].xs || y <0 || y >= map[m].ys)
 		x=y=0;
-	if((x==0 && y==0) || (c=read_gat(m,x,y))==1 || c==5){
+	if((x==0 && y==0) || map_getcell(m,x,y,CELL_CHKNOPASS)){
 		if(x||y) {
 			if(battle_config.error_log)
 				printf("stacked (%d,%d)\n",x,y);
@@ -3255,7 +3255,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		do {
 			x=rand()%(map[m].xs-2)+1;
 			y=rand()%(map[m].ys-2)+1;
-		} while((c=read_gat(m,x,y))==1 || c==5);
+		} while(map_getcell(m,x,y,CELL_CHKNOPASS));
 	}
 
 	if(sd->mapname[0] && sd->bl.prev != NULL){
@@ -3317,7 +3317,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
  */
 int pc_randomwarp(struct map_session_data *sd,int type)
 {
-	int x,y,c,i=0;
+	int x,y,i=0;
 	int m;
 
 	nullpo_retr(0, sd);
@@ -3330,7 +3330,7 @@ int pc_randomwarp(struct map_session_data *sd,int type)
 	do{
 		x=rand()%(map[m].xs-2)+1;
 		y=rand()%(map[m].ys-2)+1;
-	}while( ((c=read_gat(m,x,y))==1 || c==5) && (i++)<1000 );
+	}while( map_getcell(m,x,y,CELL_CHKNOPASS)&& (i++)<1000 );
 
 	if(i<1000)
 		pc_setpos(sd,map[m].name,x,y,type);
@@ -3438,7 +3438,7 @@ static int calc_next_walk_step(struct map_session_data *sd)
 static int pc_walk(int tid,unsigned int tick,int id,int data)
 {
 	struct map_session_data *sd;
-	int i,ctype;
+	int i;
 	int moveblock;
 	int x,y,dx,dy;
 
@@ -3472,16 +3472,16 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 
 		x = sd->bl.x;
 		y = sd->bl.y;
-		ctype = map_getcell(sd->bl.m,x,y);
-		if(ctype == 1 || ctype == 5) {
+		if(map_getcell(sd->bl.m,x,y,CELL_CHKNOPASS))
+		{
 			pc_stop_walking(sd,1);
 			return 0;
 		}
 		sd->dir=sd->head_dir=sd->walkpath.path[sd->walkpath.path_pos];
 		dx = dirx[(int)sd->dir];
 		dy = diry[(int)sd->dir];
-		ctype = map_getcell(sd->bl.m,x+dx,y+dy);
-		if(ctype == 1 || ctype == 5) {
+		if(map_getcell(sd->bl.m,x,y,CELL_CHKNOPASS))
+		{
 			pc_walktoxy_sub(sd);
 			return 0;
 		}
@@ -3529,7 +3529,7 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 
 		skill_unit_move(&sd->bl,tick,1);	// スキルユニットの検査
 
-		if(map_getcell(sd->bl.m,x,y)&0x80)
+		if(map_getcell(sd->bl.m,x,y,CELL_CHKTOUCH))
 			npc_touch_areanpc(sd,sd->bl.m,x,y);
 		else
 			sd->areanpc_id=0;
@@ -3674,7 +3674,7 @@ int pc_movepos(struct map_session_data *sd,int dst_x,int dst_y)
 
 	skill_unit_move(&sd->bl,gettick(),dist+7);	// スキルユニットの検査
 
-	if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y)&0x80)
+	if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y,CELL_CHKTOUCH))
 		npc_touch_areanpc(sd,sd->bl.m,sd->bl.x,sd->bl.y);
 	else
 		sd->areanpc_id=0;

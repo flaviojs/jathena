@@ -1,4 +1,54 @@
 --------------------
+//1085 by zalem
+・マップデータの読み込みはビットマップファイルから行なえるような機能追加
+
+		grfファイルから一度ビットマップファイルを作成して以後はその
+	作成されたビットマップフォーマットのファイルからマップ情報を読み込む
+	という方法を採ることによって、map-serverが立ち上がる時マップ情報を読み取る
+	のに掛かる時間がほとんどなくなる、また1intに32個のセル情報が格納できるの
+	で、map情報に関するメモリ使用量も３割り近くまで減るので(そのかわりに
+	ある程度CPUの負担が大きくなる)、追加してみた。
+		conf/map_athena.confのread_map_from_bitmapオプションで利用する
+	かどうかを指定でき、その下にあるmap_bitmap_pathでファイル名を変更する
+	(デフォルトでdb/map.info)
+		まだテスト段階なので、導入はご慎重に(一応Linuxで、いろいろと
+	テストしてみたが...)
+
+・map_getcell()に4番目引数の追加とmap_setcell()の4番目引数の変更
+		
+		関数の利用意図がわかりやすいように、そしてこれからの変更を容易にする
+	ために、map_getcell()とmap_setcell()のそれぞれ4番目の引数を追加、変更してみた、
+	map_getcell()の4番目の引数はmap.hで定義されてるCELL_CHK列挙型、map_setcell()
+	の4番目の引数はmap.hで定義されてるCELL_SET列挙型をとるように変更.また、上の
+	Featureに対応するため、map_getcell()をポインタに変更した。
+		
+	主な変更点：
+
+	src/map/map.h   read_gat(),read_gatp()マクロの変更
+			列挙型 CELL_CHK,CELL_SETを追加,map_getcell(),map_setcel()用
+			map_data構造体にメンバーint* gat_fileused[MAX_CELL_TYPE+2]追加
+	src/map/map.c	map_getcell()を関数型ポインタに変更,map_getcellp()をread_gatp()
+		     のために追加,実際に下の四つの関数のどっちに指すかはmap_read_flagによる
+		     	map_getcell_gat(),map_getcell_bitmap()	追加
+		     	map_getcellp_gat(),map_getcellp_bitmap()	追加
+		     	map_setcell()	変更
+			map_createbitmap()	追加
+			map_readmapfromfile()	追加
+			map_readallmap()	変更
+			map_config_read()	変更
+			do_final()	変更
+	以下の*.cファイル内のmap_getcell(),map_setcell(),read_gat(),read_gatp()を呼出した部分をすべて変更
+	src/map/atcommand.c
+	src/map/mob.c
+	src/map/npc.c
+	src/map/path.c
+	src/map/pc.c
+	src/map/pet.c
+	src/map/skill.c
+			
+	conf/map_athena.conf	read_map_from_bitmap,map_bitmap_path	追加
+
+--------------------
 //1084 by lizorett
 ・経験値獲得のバグ修正(バグ報告スレッド part7 >>134)
 	(src/map)

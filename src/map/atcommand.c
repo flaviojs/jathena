@@ -1849,11 +1849,11 @@ atcommand_gat(
 		snprintf(output, sizeof output,
 			"%s (x= %d, y= %d) %02X %02X %02X %02X %02X",
 			map[sd->bl.m].name, sd->bl.x - 2, sd->bl.y + y,
-			map_getcell(sd->bl.m, sd->bl.x - 2, sd->bl.y + y),
-			map_getcell(sd->bl.m, sd->bl.x - 1, sd->bl.y + y),
-			map_getcell(sd->bl.m, sd->bl.x,     sd->bl.y + y),
-			map_getcell(sd->bl.m, sd->bl.x + 1, sd->bl.y + y),
-			map_getcell(sd->bl.m, sd->bl.x + 2, sd->bl.y + y));
+ 			map_getcell(sd->bl.m, sd->bl.x - 2, sd->bl.y + y,CELL_CHKTYPE),
+ 			map_getcell(sd->bl.m, sd->bl.x - 1, sd->bl.y + y,CELL_CHKTYPE),
+ 			map_getcell(sd->bl.m, sd->bl.x,     sd->bl.y + y,CELL_CHKTYPE),
+ 			map_getcell(sd->bl.m, sd->bl.x + 1, sd->bl.y + y,CELL_CHKTYPE),
+ 			map_getcell(sd->bl.m, sd->bl.x + 2, sd->bl.y + y,CELL_CHKTYPE));
 		clif_displaymessage(fd, output);
 			}
 	

@@ -69,8 +69,25 @@ struct charid2nick {
 	unsigned long ip;
 	unsigned int port;
 };
+//各マップごとの最小限情報を入れるもの、READ_FROM_BITMAP用
+typedef struct{
+		char fn[32];//ファイル名
+		int xs,ys; //幅と高さ
+		int sizeinint;//intでの大きさ、1intに32セルの情報が入てる
+		int celltype[MAX_CELL_TYPE];//マップごとにそのタイプのセルがあれば対応する数字が入る、なければ1
+						//(タイプ1そのものは0と同じ配列gat_fileused[0]に
+		long pos[MAX_CELL_TYPE];//ビットマップファイルでの場所、読み出す時に使う
+		}CELL_INFO;
 
 
+#define READ_FROM_GAT 0 //gatファイルから
+#define READ_FROM_BITMAP 1 //ビットマップファイルから
+int  map_read_flag=READ_FROM_GAT;//上の判定フラグ,どっちを使うかはmap_athana.conf内のread_map_from_bitmapで指定
+					//0ならばREAD_FROM_GAT,1ならばREAD_FROM_BITMAP
+int (*map_getcell)(int,int x,int y,CELL_CHK cellchk);
+int (*map_getcellp)(struct map_data* m,int x,int y,CELL_CHK cellchk);
+
+char map_bitmap_filename[256]="db/map.info";//ビットマップファイルのデフォルトパス
 char motd_txt[256]="conf/motd.txt";
 char help_txt[256]="conf/help.txt";
 
@@ -637,7 +654,7 @@ int map_clearflooritem_timer(int tid,unsigned int tick,int id,int data)
  */
 int map_searchrandfreecell(int m,int x,int y,int range)
 {
-	int free_cell,i,j,c;
+	int free_cell,i,j;
 
 	for(free_cell=0,i=-range;i<=range;i++){
 		if(i+y<0 || i+y>=map[m].ys)
@@ -645,7 +662,7 @@ int map_searchrandfreecell(int m,int x,int y,int range)
 		for(j=-range;j<=range;j++){
 			if(j+x<0 || j+x>=map[m].xs)
 				continue;
-			if((c=read_gat(m,j+x,i+y))==1 || c==5)
+			if(map_getcell(m,j+x,i+y,CELL_CHKNOPASS))
 				continue;
 			free_cell++;
 		}
@@ -659,7 +676,7 @@ int map_searchrandfreecell(int m,int x,int y,int range)
 		for(j=-range;j<=range;j++){
 			if(j+x<0 || j+x>=map[m].xs)
 				continue;
-			if((c=read_gat(m,j+x,i+y))==1 || c==5)
+			if(map_getcell(m,j+x,i+y,CELL_CHKNOPASS))
 				continue;
 			if(free_cell==0){
 				x+=j;
@@ -1162,24 +1179,195 @@ int map_calc_dir( struct block_list *src,int x,int y)
  * (m,x,y)の状態を調べる
  *------------------------------------------
  */
-int map_getcell(int m,int x,int y)
+
+/* gat用：map_getcell_gat,map_getcellp_gat
+ * bitmap用: map_getcell_bitmap,map_getcellp_bitmap
+ * 実際はどっちを使うかは立ち上がる時map_config_read()がmap_read_flagによって判断する
+ */
+int map_getcell_gat(int m,int x,int y,CELL_CHK cellchk)
 {
+	int j;
 	if(x<0 || x>=map[m].xs-1 || y<0 || y>=map[m].ys-1)
-		return 1;
-	return map[m].gat[x+y*map[m].xs];
+	{
+		if(cellchk==CELL_CHKNOPASS) return 1;
+		return 0;
+	}
+	j=x+y*map[m].xs;
+
+	//printf("m=%d,x=%d,y=%d,j=%d\n",m,x,y,j);
+	switch(cellchk)
+	{
+		case CELL_CHKTOUCH: //0x80
+			if(map[m].gat[j]&0x80) return 1;return 0;
+		case CELL_CHKWATER: //3
+			if(map[m].gat[j]==3) return 1;return 0;
+		case CELL_CHKHIGH: //5
+			if(map[m].gat[j]==5) return 1;return 0;
+		case CELL_CHKPASS: //0,3,6
+			if(map[m].gat[j]!=1&&map[m].gat[j]!=5) return 1;return 0;
+		case CELL_CHKNOPASS://1,5
+			if(map[m].gat[j]==1||map[m].gat[j]==5) return 1;return 0;
+		case CELL_CHKTYPE:
+			return map[m].gat[j];
+		default: return 0;
+	}	
+	return 0;
 }
 
+int map_getcell_bitmap(int m,int x,int y,CELL_CHK cellchk)
+{
+	int i,j;
+	if(x<0 || x>=map[m].xs-1 || y<0 || y>=map[m].ys-1)
+	{
+		if(cellchk==CELL_CHKNOPASS) return 1;
+		return 0;
+	}
+	j=x+y*map[m].xs;
+	switch(cellchk)
+	{
+		case CELL_CHKTOUCH: //MAX_CELL_TYPE+1
+			if(*(map[m].gat_fileused[MAX_CELL_TYPE+1]+j/32)&(0x1<<(j%32))) return 1; return 0; 
+		case CELL_CHKWATER://3
+			if(map[m].gat_fileused[3]==NULL) return 0;
+			if(*(map[m].gat_fileused[3]+j/32)&(0x1<<(j%32))) return 1; return 0; 
+		case CELL_CHKHIGH://5
+			if(map[m].gat_fileused[5]==NULL) return 0;
+			if( *(map[m].gat_fileused[5]+j/32)&(0x1<<(j%32))) return 1; return 0; 
+		case CELL_CHKPASS://0,3,6	
+			if(*(map[m].gat_fileused[0]+j/32)&(0x1<<(j%32))) return 1;return 0;
+		case CELL_CHKNOPASS://1,5
+			if(*(map[m].gat_fileused[0]+j/32)&(0x1<<(j%32))) return 0;return 1;
+		case CELL_CHKTYPE:
+			for(i=MAX_CELL_TYPE;i>=0;i--)
+			{
+				if(map[m].gat_fileused[i]==NULL) continue;
+				if(*(map[m].gat_fileused[i]+j/32)&(0x1<<(j%32))) 
+					return i;
+			}
+			return 1;
+		default: return 0;
+	}
+	return 0;
+}
+
+//
+
+int map_getcellp_gat(struct map_data* m,int x,int y,CELL_CHK cellchk)
+{
+	int j;
+	if(x<0 || x>=m->xs-1 || y<0 || y>=m->ys-1)
+	{
+		if(cellchk==CELL_CHKNOPASS) return 1;
+		return 0;
+	}
+	j=x+y*m->xs;
+
+	switch(cellchk)
+	{
+		case CELL_CHKTOUCH:
+			if(m->gat[j]&0x80) return 1;return 0;
+		case CELL_CHKWATER:
+			if(m->gat[j]==3) return 1;return 0;
+		case CELL_CHKHIGH:
+			if(m->gat[j]==5) return 1;return 0;
+		case CELL_CHKPASS:
+			if(m->gat[j]!=1&&m->gat[j]!=5) return 1; return 0;
+		case CELL_CHKNOPASS:
+			if(m->gat[j]==1||m->gat[j]==5) return 1; return 0;
+		case CELL_CHKTYPE:
+			return m->gat[j];
+		default: return 0;
+	}	
+	return 0;
+}
+int map_getcellp_bitmap(struct map_data* m,int x,int y,CELL_CHK cellchk)
+{
+	int i,j;
+	if(x<0 || x>=m->xs-1 || y<0 || y>=m->ys-1)
+	{
+		if(cellchk==CELL_CHKNOPASS) return 1;
+		return 0;
+	}
+	j=x+y*m->xs;
+	switch(cellchk)
+	{
+		case CELL_CHKTOUCH:
+			if((*(m->gat_fileused[MAX_CELL_TYPE+1]+j/32)&(0x1<<(j%32)))) return 1;return 0;
+		case CELL_CHKWATER:
+			if(m->gat_fileused[3]==NULL) return 0;
+		if( *(m->gat_fileused[3]+j/32)&(0x1<<(j%32))) return 1;return 0;
+		case CELL_CHKHIGH:
+			if(m->gat_fileused[5]==NULL) return 0;
+			if(*(m->gat_fileused[5]+j/32)&(0x1<<(j%32))) return 1; return 0;
+		case CELL_CHKPASS:
+			if( *(m->gat_fileused[0]+j/32)&(0x1<<(j%32))) return 1;return 0;
+		case CELL_CHKNOPASS:
+			if(*(m->gat_fileused[0]+j/32)&(0x1<<(j%32))) return 0;return 1;
+		case CELL_CHKTYPE:
+			for(i=MAX_CELL_TYPE;i>=0;i--)
+			{
+				if(m->gat_fileused[i]==NULL) continue;
+				if((*(m->gat_fileused[i]+j/32)&(0x1<<(j%32))))
+					return i;
+			}
+			return 1;
+		default: return 0;
+	}
+	return 0;
+}
 /*==========================================
- * (m,x,y)の状態をtにする
+ * (m,x,y)の状態を設定する
  *------------------------------------------
  */
-int map_setcell(int m,int x,int y,int t)
+int map_setcell(int m,int x,int y,CELL_SET cellset)
 {
+	int i,j;
+		
 	if(x<0 || x>=map[m].xs || y<0 || y>=map[m].ys)
-		return t;
-	return map[m].gat[x+y*map[m].xs]=t;
+		return 0;
+	j=x+y*map[m].xs;
+	switch(cellset)
+	{
+	case CELL_SETTOUCH://MAX_CELL_TYPE+1(READ_FROM_BITMAP)か0x80(READ_FROM_GAT)
+		if(map_read_flag==READ_FROM_GAT)
+			return map[m].gat[j]|=0x80;
+		i=MAX_CELL_TYPE+1;break;
+	case CELL_SETWATER://3
+		i=3;break;
+	case CELL_SETPASS://0
+		i=0;break;
+	case CELL_SETNOPASS://gat_fileused[0](READ_FROM_BITMAP)か1(READ_FROM_GAT)
+		if(map_read_flag==READ_FROM_BITMAP)
+		{
+			if( *(map[m].gat_fileused[0]+j/32)&(0x1<<(j%32)))
+				*(map[m].gat_fileused[0]+j/32)^=0x1<<(j%32) ;
+			return 1;	
+		}
+		else i=1;break;
+	case CELL_SETHIGH://5
+		i=5;break;
+	case CELL_SETNOHIGH://5
+		if(map_read_flag==READ_FROM_BITMAP)
+		{
+			if( *(map[m].gat_fileused[5]+j/32)&(0x1<<(j%32)))
+				*(map[m].gat_fileused[5]+j/32)^=0x1<<(j%32) ;
+			return 1;	
+		}
+		else i=5;break;
+	default:
+		return 0;
+	}
+	if(map_read_flag==READ_FROM_BITMAP)
+	{
+		if(map[m].gat_fileused[i]==NULL) 
+			map[m].gat_fileused[i]=aCalloc((map[m].xs*map[m].ys+31)/32,sizeof(int));
+		*(map[m].gat_fileused[i]+j/32)|=0x1<<(j%32) ;
+	}
+	else if(map_read_flag==READ_FROM_GAT)
+		map[m].gat[j]=i;
+	   
+	return 1;
 }
-
 /*==========================================
  * 他鯖管理のマップをdbに追加
  *------------------------------------------
@@ -1289,12 +1477,153 @@ static void map_readwater(char *watertxt)
 	}
 	fclose(fp);
 }
+/*==========================================
+*grfファイルからビットマップファイル生成する
+*ファイル名デフォルトでdb/map.info
+*map_athena.conf内のmap_bitmap_pathで指定できる
+*===========================================*/
+static int map_createbitmap(int m,char *fn,FILE* fp)
+{
+	unsigned char *gat;
+	int x,y,xs,ys;
+	struct gat_1cell {float high[4]; int type;} *p;
+	int wh,i;
+	size_t size;
+	int *buff[MAX_CELL_TYPE];
+	int currenttype;
+	CELL_INFO cell_info;
+	static long currentpos=sizeof(CELL_INFO)*MAX_MAP_PER_SERVER;
+	static long currentpos_for_info=0;
+	FILE *fp2=fp;
 
+	strcpy(cell_info.fn,fn);
+	for(i=0;i<MAX_CELL_TYPE;i++) buff[i]=NULL;
+	// read & convert fn
+	gat=grfio_read(fn);
+	if(gat==NULL)
+		return -1;
+
+	printf("\rBitmap file  generating [%d/%d] %-20s  ",m,map_num,fn);
+	fflush(stdout);
+
+	cell_info.xs=xs=*(int*)(gat+6);
+	cell_info.ys=ys=*(int*)(gat+10);
+
+	cell_info.sizeinint=size=(xs*ys+31)/32;
+
+	wh=map_waterheight(fn+5);
+
+	for(y=0;y<ys;y++){
+		p=(struct gat_1cell*)(gat+y*xs*20+14);
+		for(x=0;x<xs;x++){
+			i=x+y*xs;
+			if(wh!=NO_WATER&&p->type==0)
+				currenttype=(int)((p->high[0]>wh || p->high[1]>wh || p->high[2]>wh || p->high[3]>wh) ? 3 : 0);
+			else 
+				currenttype=p->type;
+			if(currenttype!=1)
+			{
+				if(buff[currenttype]==NULL)
+					buff[currenttype]=(int*)aCalloc(size,sizeof(int));
+				if(currenttype==5)
+				{
+					if(buff[0]==NULL)
+						buff[0]=(int*)aCalloc(size,sizeof(int));
+					if( *(buff[0]+i/32)&(0x1<<(i%32)))
+						*(buff[0]+i/32)^=0x1<<(i%32) ;
+				}
+				else
+				{
+					if(buff[0]==NULL)
+						buff[0]=(int*)aCalloc(size,sizeof(int));
+					*(buff[0]+i/32)|=0x1<<(i%32);
+				}
+				*(buff[currenttype]+i/32)|=0x1<<(i%32);
+			}
+			p++;
+		}
+	}
+	free(gat);
+
+	fseek(fp2,currentpos,SEEK_SET);
+	for(i=0;i<MAX_CELL_TYPE;i++)
+	{
+		if(buff[i]==NULL)
+		{
+			cell_info.celltype[i]=1;
+			cell_info.pos[i]=0;
+			 continue;
+		}
+		cell_info.celltype[i]=i;
+		cell_info.pos[i]=ftell(fp2);
+		fwrite(buff[i],sizeof(int),size,fp2);
+		
+		free(buff[i]);
+	}
+	currentpos=ftell(fp2);
+
+	fseek(fp,currentpos_for_info,SEEK_SET);
+	fwrite(&cell_info,1,sizeof(CELL_INFO),fp);
+	currentpos_for_info=ftell(fp);
+
+	return 0;
+}
+
+/*====================================================
+ * マップ1枚読み込み
+ * もしmap_read_flagはREAD_FROM_BITMAPならこっちを使う
+ * ===================================================*/
+static int map_readmapfromfile(int m,char *fn,FILE* fp)
+{
+	int xs,ys;
+	int size,j;
+	CELL_INFO cell_info;
+
+	printf("\rmap reading [%d/%d] %-20s",m,map_num,cell_info.fn);
+	fflush(stdout);
+
+	fseek(fp,sizeof(CELL_INFO)*m,SEEK_SET);
+	fread(&cell_info,sizeof(CELL_INFO),1,fp);
+	
+	map[m].gat_fileused[MAX_CELL_TYPE+1]=aMalloc(sizeof(int)*cell_info.sizeinint);
+
+	for(j=0;j<MAX_CELL_TYPE;j++) 
+	{
+		if(cell_info.celltype[j]==1)
+		{
+			map[m].gat_fileused[j]=NULL;
+			continue;	
+		}	
+		map[m].gat_fileused[j]=aMalloc(sizeof(int)*cell_info.sizeinint);
+		fseek(fp,cell_info.pos[j],SEEK_SET);
+		fread(map[m].gat_fileused[j],sizeof(int),cell_info.sizeinint,fp);
+	}
+
+	map[m].gat = (unsigned char *)map[m].gat_fileused[0];
+	map[m].xs=xs=cell_info.xs;
+	map[m].ys=ys=cell_info.ys;
+	map[m].m=m;
+	memset(&map[m].flag,0,sizeof(map[m].flag));
+	map[m].npc_num=0;
+	map[m].users=0;
+	map[m].bxs=(xs+BLOCK_SIZE-1)/BLOCK_SIZE;
+	map[m].bys=(ys+BLOCK_SIZE-1)/BLOCK_SIZE;
+	size = map[m].bxs * map[m].bys * sizeof(struct block_list*);
+	map[m].block = (struct block_list **)aCalloc(1,size);
+	map[m].block_mob = (struct block_list **)aCalloc(1,size);
+	size = map[m].bxs*map[m].bys*sizeof(int);
+	map[m].block_count = (int *)aCalloc(1,size);
+	map[m].block_mob_count=(int *)aCalloc(1,size);
+	strdb_insert(map_db,map[m].name,&map[m]);
+
+
+	return 0;
+}
 /*==========================================
  * マップ1枚読み込み
- *------------------------------------------
- */
-static int map_readmap(int m,char *fn)
+ * もしmap_read_flagはREAD_FROM_GATならこっちを使う
+ * ===================================================*/
+static int map_readmap(int m,char *fn,FILE* fp)
 {
 	unsigned char *gat;
 	int s;
@@ -1355,8 +1684,28 @@ static int map_readmap(int m,char *fn)
 int map_readallmap(void)
 {
 	int i;
+	int (*map_read_func)(int,char*,FILE*)=NULL;
 	char fn[256];
+	FILE *fp=NULL;
 
+	if(map_read_flag==READ_FROM_BITMAP)//ビットマップファイルから
+	{
+		puts("Read map from [bitmap] file.");
+		fp=fopen(map_bitmap_filename,"rb");
+		if(fp==NULL)//ビットマップファイルが存在しなかった
+		{
+			puts("Bitmap file not found,now creating.");
+			fp=fopen(map_bitmap_filename,"wb");
+			map_read_func=map_createbitmap;//作成する
+		}
+		else
+			map_read_func=map_readmapfromfile;//見付かったらただちに読み出す
+	}
+	else //grfファイルから
+	{
+		puts("Read map from [grf] files.");
+		map_read_func=map_readmap;
+	}
 	// 先に全部のマップの存在を確認
 	for(i=0;i<map_num;i++){
 		if(strstr(map[i].name,".gat")==NULL)
@@ -1368,13 +1717,31 @@ int map_readallmap(void)
 		if(strstr(map[i].name,".gat")==NULL)
 			continue;
 		sprintf(fn,"data\\%s",map[i].name);
-		map_readmap(i,fn);
+		map_read_func(i,fn,fp);
+
 	}
+
+	if(map_read_func==map_createbitmap) //ビットマップ作成終了
+	{
+		printf("\n%s\n","Generation completed.");
+		printf("%s","Now reading");
+		fclose(fp);
+		fp=fopen(map_bitmap_filename,"rb");
+		for(i=0;i<map_num;i++)
+		{
+			if(strstr(map[i].name,".gat")==NULL)
+				continue;
+			map_readmapfromfile(i,NULL,fp);//作成されたファイルから読み出す
+		}
+	}
+
 	free(waterlist);
 	printf("\rmap read done. (%d map) %24s\n",map_num,"");
+
+	if(fp!=NULL)	fclose(fp);
+
 	return 0;
 }
-
 /*==========================================
  * 読み込むmapを追加する
  *------------------------------------------
@@ -1520,7 +1887,22 @@ int map_config_read(char *cfgName)
 			strncpy(help_txt,w2,256);
 		} else if(strcmpi(w1,"mapreg_txt")==0){
 			strncpy(mapreg_txt,w2,256);
-		} else if(strcmpi(w1,"import")==0){
+		}else if(strcmpi(w1,"read_map_from_bitmap")==0){
+			map_read_flag=atoi(w2);
+			if(map_read_flag==0) //grfファイル使用
+			{
+				map_getcell=map_getcell_gat;
+				map_getcellp=map_getcellp_gat;
+			}
+			else if(map_read_flag==1)//ビットファイル使用
+			{
+				map_getcell=map_getcell_bitmap;
+				map_getcellp=map_getcellp_bitmap;
+			}
+			else continue;//指定なしの場合はデフォルト方式(grfファイルから)使用
+		}else if(strcmpi(w1,"map_bitmap_path")==0){
+			strncpy(map_bitmap_filename,w2,255);
+		}else if(strcmpi(w1,"import")==0){
 			map_config_read(w2);
 		}
 	}
@@ -1569,7 +1951,7 @@ static int charid_db_final(void *key,void *data,va_list ap)
 }
 void do_final(void)
 {
-	int i;
+	int i,j;
 
 	chrif_mapactive(0); //マップサーバー停止中
 
@@ -1584,7 +1966,19 @@ void do_final(void)
 	do_final_party();
 
 	for(i=0;i<=map_num;i++){
-		if(map[i].gat) free(map[i].gat);
+		if(map[i].gat)
+		{	
+			if(map_read_flag==READ_FROM_GAT)
+				free(map[i].gat);
+			else if(map_read_flag==READ_FROM_BITMAP)
+				for(j=0;j<=MAX_CELL_TYPE+1;j++) 
+					if(map[i].gat_fileused[i])
+					{
+						free(map[i].gat_fileused[j]);	
+						map[i].gat_fileused[j]=NULL;	
+					}
+			map[i].gat=NULL;//ビットマップファイル使う場合もちゃんとgat_fileused[0]に指してるので片付け
+		}
 		if(map[i].block) free(map[i].block);
 		if(map[i].block_mob) free(map[i].block_mob);
 		if(map[i].block_count) free(map[i].block_count);

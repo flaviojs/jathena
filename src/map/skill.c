@@ -1399,13 +1399,13 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 				break;
 			case RG_INTIMIDATE:
 				if(sd && !map[src->m].flag.noteleport) {
-					int x,y,i,j,c;
+					int x,y,i,j;
 					pc_randomwarp(sd,3);
 					for(i=0;i<16;i++) {
 						j = rand()%8;
 						x = sd->bl.x + dirx[j];
 						y = sd->bl.y + diry[j];
-						if((c=map_getcell(sd->bl.m,x,y)) != 1 && c != 5)
+						if(map_getcell(sd->bl.m,x,y,CELL_CHKPASS))
 							break;
 					}
 					if(i >= 16) {
@@ -1420,13 +1420,13 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 					}
 				}
 				else if(md && !map[src->m].flag.monster_noteleport) {
-					int x,y,i,j,c;
+					int x,y,i,j;
 					mob_warp(md,-1,-1,-1,3);
 					for(i=0;i<16;i++) {
 						j = rand()%8;
 						x = md->bl.x + dirx[j];
 						y = md->bl.y + diry[j];
-						if((c=map_getcell(md->bl.m,x,y)) != 1 && c != 5)
+						if(map_getcell(sd->bl.m,x,y,CELL_CHKPASS))
 							break;
 					}
 					if(i >= 16) {
@@ -3714,7 +3714,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 		{
 			int flag=0;
 			for(i=0;i<2+(skilllv>>1);i++) {
-				int j=0, c;
+				int j=0;
 				do {
 					tmpx = x + (rand()%7 - 3);
 					tmpy = y + (rand()%7 - 3);
@@ -3727,7 +3727,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 					else if(tmpy >= map[src->m].ys)
 						tmpy = map[src->m].ys - 1;
 					j++;
-				} while(((c=map_getcell(src->m,tmpx,tmpy))==1 || c==5) && j<100);
+				} while((map_getcell(src->m,tmpx,tmpy,CELL_CHKNOPASS)) && j<100);
 				if(j >= 100)
 					continue;
 				if(flag==0){
@@ -4406,11 +4406,11 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 			map_foreachinarea(skill_landprotector,src->m,ux,uy,ux,uy,BL_SKILL,skillid,&alive);
 
 		if(skillid==WZ_ICEWALL && alive){
-			val2=map_getcell(src->m,ux,uy);
+			val2=map_getcell(src->m,ux,uy,CELL_CHKTYPE);
 			if(val2==5 || val2==1)
 				alive=0;
 			else {
-				map_setcell(src->m,ux,uy,5);
+				map_setcell(src->m,ux,uy,CELL_SETNOPASS);
 				clif_changemapcell(src->m,ux,uy,5,0);
 			}
 		}
@@ -4960,6 +4960,8 @@ int skill_unit_onlimit(struct skill_unit *src,unsigned int tick)
 
 	switch(sg->unit_id){
 	case 0x8d:	/* アイスウォール */
+		if(map_read_flag==1)
+			map_setcell(src->bl.m,src->bl.x,src->bl.y,CELL_SETPASS);
 		map_setcell(src->bl.m,src->bl.x,src->bl.y,src->val2);
 		clif_changemapcell(src->bl.m,src->bl.x,src->bl.y,src->val2,1);
 		break;
@@ -5629,7 +5631,7 @@ int skill_check_condition(struct map_session_data *sd,int type)
 		}
 		break;
 	case ST_WATER:
-		if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y) != 3 && (sd->sc_data[SC_DELUGE].timer==-1)){	//水場判定
+		if((!map_getcell(sd->bl.m,sd->bl.x,sd->bl.y,CELL_CHKWATER))&& (sd->sc_data[SC_DELUGE].timer==-1)){	//水場判定
 			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
@@ -8267,8 +8269,7 @@ int skill_check_cloaking(struct block_list *bl)
 	if(bl->type == BL_MOB && battle_config.monster_cloak_check_type&1)
 		return 0;
 	for(i=0;i<sizeof(dx)/sizeof(dx[0]);i++){
-		int c=map_getcell(bl->m,bl->x+dx[i],bl->y+dy[i]);
-		if(c==1 || c==5) end=0;
+		 if(map_getcell(bl->m,bl->x+dx[i],bl->y+dy[i],CELL_CHKNOPASS)) end=0;
 	}
 	if(end){
 		skill_status_change_end(bl, SC_CLOAKING, -1);
