@@ -711,6 +711,18 @@ static int clif_mob0078(struct mob_data *md,unsigned char *buf)
 	WBUFW(buf,10)=md->opt2;
 	WBUFW(buf,12)=md->option;
 	WBUFW(buf,14)=mob_get_viewclass(md->class);
+	if(mob_get_viewclass(md->class) < 24)
+	{
+		WBUFW(buf,16)=mob_get_hair(md->class);
+		WBUFW(buf,18)=mob_get_weapon(md->class);
+		WBUFW(buf,20)=mob_get_head_buttom(md->class);
+		WBUFW(buf,22)=mob_get_shield(md->class);
+		WBUFW(buf,24)=mob_get_head_top(md->class);
+		WBUFW(buf,26)=mob_get_head_mid(md->class);
+		WBUFW(buf,28)=mob_get_hair_color(md->class);
+		WBUFB(buf,45)=mob_get_sex(md->class);
+	}
+
 	WBUFPOS(buf,46,md->bl.x,md->bl.y);
 	WBUFB(buf,48)|=md->dir&0x0f;
 	WBUFB(buf,49)=5;
@@ -737,7 +749,21 @@ static int clif_mob007b(struct mob_data *md,unsigned char *buf)
 	WBUFW(buf,10)=md->opt2;
 	WBUFW(buf,12)=md->option;
 	WBUFW(buf,14)=mob_get_viewclass(md->class);
-	WBUFL(buf,22)=gettick();
+	if(mob_get_viewclass(md->class) < 24)
+	{
+		WBUFW(buf,16)=mob_get_hair(md->class);
+		WBUFW(buf,18)=mob_get_weapon(md->class);
+		WBUFW(buf,20)=mob_get_head_buttom(md->class);
+		WBUFL(buf,22)=gettick();
+		WBUFW(buf,26)=mob_get_shield(md->class);
+		WBUFW(buf,28)=mob_get_head_top(md->class);
+		WBUFW(buf,30)=mob_get_head_mid(md->class);
+		WBUFW(buf,32)=mob_get_hair_color(md->class);
+		WBUFB(buf,49)=mob_get_sex(md->class);
+	}
+	else
+		WBUFL(buf,22)=gettick();
+
 	WBUFPOS2(buf,50,md->bl.x,md->bl.y,md->to_x,md->to_y);
 	WBUFB(buf,56)=5;
 	WBUFB(buf,57)=5;
@@ -911,22 +937,31 @@ int clif_spawnmob(struct mob_data *md)
 	unsigned char buf[64];
 	int len;
 
-	memset(buf,0,packet_len_table[0x7c]);
+	if(mob_get_viewclass(md->class) > 23)
+	{
+		memset(buf,0,packet_len_table[0x7c]);
 
-	WBUFW(buf,0)=0x7c;
-	WBUFL(buf,2)=md->bl.id;
-	WBUFW(buf,6)=md->speed;
-	WBUFW(buf,8)=md->opt1;
-	WBUFW(buf,10)=md->opt2;
-	WBUFW(buf,12)=md->option;
-	WBUFW(buf,20)=mob_get_viewclass(md->class);
+		WBUFW(buf,0)=0x7c;
+		WBUFL(buf,2)=md->bl.id;
+		WBUFW(buf,6)=md->speed;
+		WBUFW(buf,8)=md->opt1;
+		WBUFW(buf,10)=md->opt2;
+		WBUFW(buf,12)=md->option;
+		WBUFW(buf,20)=mob_get_viewclass(md->class);
 
-	WBUFPOS(buf,36,md->bl.x,md->bl.y);
+		WBUFPOS(buf,36,md->bl.x,md->bl.y);
 
-	clif_send(buf,packet_len_table[0x7c],&md->bl,AREA);
+		clif_send(buf,packet_len_table[0x7c],&md->bl,AREA);
 
-	len = clif_mob0078(md,buf);
-	clif_send(buf,len,&md->bl,AREA);
+		len = clif_mob0078(md,buf);
+		clif_send(buf,len,&md->bl,AREA);
+	}
+	else
+	{
+		len = clif_mob0078(md,buf);
+		clif_send(buf,len,&md->bl,AREA);
+	}
+
 
 	return 0;
 }

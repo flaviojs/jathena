@@ -15,7 +15,6 @@ struct mob_skill {
 };
 
 struct mob_db {
-	int view_class;
 	char name[24],jname[24];
 	int lv;
 	int max_hp,max_sp;
@@ -29,6 +28,8 @@ struct mob_db {
 	int mexp,mexpper;
 	struct { int nameid,p; } dropitem[8];
 	struct { int nameid,p; } mvpitem[3];
+	int view_class,sex;
+	short hair,hair_color,weapon,shield,head_top,head_mid,head_buttom;
 	int summonper[MAX_RANDOMMONSTER];
 	int maxskill;
 	struct mob_skill skill[MAX_MOBSKILL];
@@ -83,6 +84,14 @@ int mob_damage(struct block_list *,struct mob_data*,int,int);
 int mob_changestate(struct mob_data *md,int state,int type);
 int mob_heal(struct mob_data*,int);
 int mob_get_viewclass(int);
+int mob_get_sex(int);
+short mob_get_hair(int);
+short mob_get_hair_color(int);
+short mob_get_weapon(int);
+short mob_get_shield(int);
+short mob_get_head_top(int);
+short mob_get_head_mid(int);
+short mob_get_head_buttom(int);
 int do_init_mob(void);
 
 int mob_delete(struct mob_data *md);

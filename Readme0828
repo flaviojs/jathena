@@ -1,4 +1,21 @@
 --------------------
+//0844 by ぽぽぽ
+
+・mob_avail.txtでPCグラフィック(0～23)を指定したMOBが出現したときクライアントエラーがでるのを暫定修正。
+・mob_avail.txtでPCキャラの性別･髪型&色･武器･盾･頭装備を指定できるようにしました。
+　グラフィックすり替え先IDが0～23の時だけ有効で、指定方法は
+	MOB-ID,グラフィックすり替え先ID,性別(0=female,1=male),髪型,髪色,武器,盾,上段頭装備,中段頭装備,下段頭装備
+　となります。装備はitem_dbのView欄参照のこと。
+	(map/)
+	clif.c
+		clif_mob_0078()、clif_mob007b()、clif_spawnmob()修正。
+	mob.h修正。
+	mob.c
+		mob_get_sex()、mob_get_hair()、mob_get_hair_color()、ob_get_weapon()、
+		mob_get_shield()、mob_get_head_top()、mob_get_head_mid()、mob_get_head_buttom()追加。
+		mob_readdb()、mob_readdb_mobavail()修正。
+		
+--------------------
 //0843 by 死神
 
 ・リフレクトシールド実装。

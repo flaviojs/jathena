@@ -204,6 +204,38 @@ int mob_get_viewclass(int class)
 {
 	return mob_db[class].view_class;
 }
+int mob_get_sex(int class)
+{
+	return mob_db[class].sex;
+}
+short mob_get_hair(int class)
+{
+	return mob_db[class].hair;
+}
+short mob_get_hair_color(int class)
+{
+	return mob_db[class].hair_color;
+}
+short mob_get_weapon(int class)
+{
+	return mob_db[class].weapon;
+}
+short mob_get_shield(int class)
+{
+	return mob_db[class].shield;
+}
+short mob_get_head_top(int class)
+{
+	return mob_db[class].head_top;
+}
+short mob_get_head_mid(int class)
+{
+	return mob_db[class].head_mid;
+}
+short mob_get_head_buttom(int class)
+{
+	return mob_db[class].head_buttom;
+}
 
 /*==========================================
  * MOBが現在移動可能な状態にあるかどうか
@@ -2732,7 +2764,7 @@ static int mob_readdb(void)
 			mob_db[class].adelay=atoi(str[26]);
 			mob_db[class].amotion=atoi(str[27]);
 			mob_db[class].dmotion=atoi(str[28]);
-	
+
 			for(i=0;i<8;i++){
 				mob_db[class].dropitem[i].nameid=atoi(str[29+i*2]);
 				mob_db[class].dropitem[i].p=atoi(str[30+i*2])*battle_config.item_rate/100;
@@ -2747,6 +2779,15 @@ static int mob_readdb(void)
 			for(i=0;i<MAX_RANDOMMONSTER;i++)
 				mob_db[class].summonper[i]=0;
 			mob_db[class].maxskill=0;
+			
+			mob_db[class].sex=0;
+			mob_db[class].hair=0;
+			mob_db[class].hair_color=0;
+			mob_db[class].weapon=0;
+			mob_db[class].shield=0;
+			mob_db[class].head_top=0;
+			mob_db[class].head_mid=0;
+			mob_db[class].head_buttom=0;
 		}
 		fclose(fp);
 		printf("read %s done\n",filename[i]);
@@ -2755,7 +2796,7 @@ static int mob_readdb(void)
 }
 
 /*==========================================
- * MOB表示グラフィックの変更
+ * MOB表示グラフィック変更データ読み込み
  *------------------------------------------
  */
 static int mob_readdb_mobavail(void)
@@ -2764,7 +2805,7 @@ static int mob_readdb_mobavail(void)
 	char line[1024];
 	int ln=0;
 	int class,j,k;
-	char *str[10],*p;
+	char *str[10],*p,*np;
 	
 	if( (fp=fopen("db/mob_avail.txt","r"))==NULL ){
 		printf("can't read db/mob_avail.txt\n");
@@ -2775,11 +2816,15 @@ static int mob_readdb_mobavail(void)
 		if(line[0]=='/' && line[1]=='/')
 			continue;
 		memset(str,0,sizeof(str));
-		for(j=0,p=line;j<2 && p;j++){
-			str[j]=p;
-			p=strchr(p,',');
-			if(p) *p++=0;
-		}
+
+		for(j=0,p=line;j<10;j++){
+			if((np=strchr(p,','))!=NULL){
+				str[j]=p;
+				*np=0;
+				p=np+1;
+			} else
+					str[j]=p;
+			}
 
 		if(str[0]==NULL)
 			continue;
@@ -2791,6 +2836,18 @@ static int mob_readdb_mobavail(void)
 		k=atoi(str[1]);
 		if(k >= 0) {
 			mob_db[class].view_class=k;
+		}
+		
+		if(mob_db[class].view_class>=0 && mob_db[class].view_class<24)
+		{
+			mob_db[class].sex=atoi(str[2]);
+			mob_db[class].hair=atoi(str[3]);
+			mob_db[class].hair_color=atoi(str[4]);
+			mob_db[class].weapon=atoi(str[5]);
+			mob_db[class].shield=atoi(str[6]);
+			mob_db[class].head_top=atoi(str[7]);
+			mob_db[class].head_mid=atoi(str[8]);
+			mob_db[class].head_buttom=atoi(str[9]);
 		}
 		ln++;
 	}
