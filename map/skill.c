@@ -466,7 +466,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			if(md)
 				m=md->bl.m;
 
-			if(map[m].flag.noteleport)	// テレポート禁止
+			if(map[m].flag.noteleport && !map[m].flag.pvp)	// テレポート禁止
 				break;
 
 			do{
@@ -497,8 +497,8 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 					printf("Skill INTIMIDATE failed : random warp error\n");
 					break;
 			}
-			skill_status_change_start(src,SC_INTIMIDATE,0,600);
-			skill_status_change_start(bl,SC_INTIMIDATE,0,600);
+			skill_status_change_start(src,SC_INTIMIDATE,0,700);
+			skill_status_change_start(bl,SC_INTIMIDATE,0,700);
 		}
 			break;
 
@@ -775,7 +775,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 
 	clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 		damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
-	if(dmg.blewcount > 0) {	/* 吹き飛ばし処理とそのパケット */
+	if(dmg.blewcount > 0 &&  !map[((struct map_session_data *)src)->bl.m].flag.gvg) {	/* 吹き飛ばし処理とそのパケット */
 		skill_blown(dsrc,bl,dmg.blewcount);
 		if(bl->type == BL_MOB)
 			clif_fixmobpos((struct mob_data *)bl);
@@ -3830,6 +3830,61 @@ int skill_castcancel(struct block_list *bl,int type)
 	return 1;
 }
 
+/*==========================================
+ * ギャングスターパラダイス判定処理(foreachinarea)
+ *------------------------------------------
+ */
+
+int skill_gangster_in(struct block_list *bl,va_list ap)
+{
+	int *c;
+	c=va_arg(ap,int *);
+	struct map_session_data *sd=(struct map_session_data*)bl;
+
+	if(sd->state.dead_sit == 2 && pc_checkskill(sd,RG_GANGSTER)){
+		printf("%sさんにG☆Pを付与しますた\n",sd->status.name);
+		sd->gangsterparadise=1;
+		(*c)++;
+	}
+	return 0;
+}
+
+int skill_gangster_out(struct block_list *bl,va_list ap)
+{
+	struct map_session_data *sd=(struct map_session_data*)bl;
+	if(sd->gangsterparadise == 1){
+		printf("%sさんのG☆Pを解除しますた\n",sd->status.name);
+		sd->gangsterparadise=0;
+	}
+	return 0;
+}
+
+int skill_gangsterparadise(struct map_session_data *sd ,int type)
+{
+	int range=1;
+	int c=0;
+
+	if(!pc_checkskill(sd,RG_GANGSTER))
+		return 0;
+
+	if(type==1){/* 座った時の処理 */
+		map_foreachinarea(skill_gangster_in,sd->bl.m,
+			sd->bl.x-range,sd->bl.y-range,
+			sd->bl.x+range,sd->bl.y+range,BL_PC,&c);
+		if(c>0){/*ギャングスター成功したら自分にもギャングスター属性付与*/
+			printf("ギャングスター成功！\n");
+			sd->gangsterparadise=1;
+		}
+		return 0;
+	}else if(type==0){/* 立ち上がったときの処理 */
+		map_foreachinarea(skill_gangster_out,sd->bl.m,
+			sd->bl.x-range,sd->bl.y-range,
+			sd->bl.x+range,sd->bl.y+range,BL_PC);
+			printf("ギャングスター解除終了！\n");
+		return 0;
+	}
+	return 0;
+}
 
 
 

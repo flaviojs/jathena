@@ -91,6 +91,7 @@ int skill_castcancel(struct block_list *bl,int type);
 
 // その他
 int skill_check_cloaking(struct block_list *bl);
+int skill_gangsterparadise(struct map_session_data *sd ,int type);
 
 // ステータス異常
 int skill_status_change_start(struct block_list *bl,int type,int val1,int val2);

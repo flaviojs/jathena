@@ -1,4 +1,25 @@
 --------------
+//0745 by ぴざまん
+・ギャングスターパラダイス実装
+・PvPエリアのmapflagを修正(同士討ちが無くなったかと思います)
+・シーズモードでノックバックがあったバグを修正
+・インティミの遅延時間を少し調整
+	(map/)
+	skill.c
+		skill_attack()、skill_additional_effect()修正
+		skill_gangsterparadise()、skill_gangster_in()、skill_gangster_out()追加
+	clif.c
+		clif_parse_ActionRequest()修正
+	mob.c
+		mob_target()、mob_attack()修正
+		mob_ai_sub_hard()、mob_ai_sub_hard_mastersearch()修正
+		mob_ai_sub_hard_activesearch()修正
+	map.h 修正
+	skill.h 修正
+	(conf/)
+	npc_pvp.txt 修正
+
+--------------
 //0744 by 聖
 
 ・アイスウォール、メテオストームのコンボでメテオストームのエフェクトが表示されなくなる問題を修正。

@@ -245,6 +245,7 @@ struct map_session_data {
 
 	int sg_count;
 	int intimidate_x,intimidate_y,intimidate_map;
+	int gangsterparadise;
 };
 
 struct npc_item_list {
