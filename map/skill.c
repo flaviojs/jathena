@@ -798,7 +798,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case DC_THROWARROW:		/* –îŒ‚‚¿ */
 	case BA_DISSONANCE:		/* •s‹¦˜a‰¹ */
 	case MO_INVESTIGATE:	/* ”­™¤ */
-	case MO_EXTREMITYFIST:	/* ˆ¢C—…”e–PŒ */
 	case CR_HOLYCROSS:		/* ƒz[ƒŠ[ƒNƒƒX */
 	/* ˆÈ‰ºMOBê—p */
 	/* ’P‘ÌUŒ‚ASPŒ¸­UŒ‚A‰“‹——£UŒ‚A–hŒä–³Ž‹UŒ‚A‘½’iUŒ‚ */
@@ -829,8 +828,6 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case NPC_DARKNESSATTACK:
 	case NPC_TELEKINESISATTACK:
 	case NPC_LICK:
-		if(skillid == MO_EXTREMITYFIST)
-			skill_status_change_end(src, SC_EXPLOSIONSPIRITS, -1);
 		if(skillid==RG_BACKSTAP && pc_ishiding(sd))
 			skill_status_change_end(src, SC_HIDDING, -1);	// ƒnƒCƒfƒBƒ“ƒO‰ðœ
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
@@ -858,6 +855,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		sd->canmove_tick = tick + sd->combo_delay1;
 		clif_combo_delay(src, sd->combo_delay1);
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+		sd->combo_delay2 = tick + sd->combo_delay1 - 300;
 		break;
 	case MO_COMBOFINISH:	/* –Ò—´Œ */
 		sd->combo_delay2 = 700 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
@@ -870,6 +868,27 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		sd->canmove_tick = tick + sd->combo_delay2;
 		clif_combo_delay(src, sd->combo_delay2);
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+		sd->combo_delay3 = tick + sd->combo_delay2 - 300;
+		break;
+	case MO_EXTREMITYFIST:	/* ˆ¢C—…”e–PŒ */
+		skill_status_change_end(src, SC_EXPLOSIONSPIRITS, -1);
+		int dx = ((sd->bl.x - bl->x)>0?-4:4);
+		int dy = ((sd->bl.y - bl->y)>0?-4:4);
+		dx = ((sd->bl.x - bl->x)!=0?dx:0);
+		dy = ((sd->bl.y - bl->y)!=0?dy:0);
+		sd->bl.x = bl->x;
+		sd->bl.y = bl->y;
+		while(!pc_can_reach(sd, sd->bl.x + dx, sd->bl.y + dy)) {
+			dx = (int)((float)dx / 4 * 3);
+			dy = (int)((float)dy / 4 * 3);
+			if(dx == 0 && dy == 0) break;
+		}
+		sd->to_x = sd->bl.x + dx;
+		sd->to_y = sd->bl.y + dy;
+		sd->canact_tick = tick + skill_get_delay(skillid, skilllv);
+		sd->canmove_tick = tick + skill_get_delay(skillid, skilllv);
+		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+		pc_walktoxy(sd, sd->to_x, sd->to_y);
 		break;
 	/* •ŠíŒn”ÍˆÍUŒ‚ƒXƒLƒ‹ */
 	case AC_SHOWER:			/* ƒAƒ[ƒVƒƒƒ[ */
@@ -2896,12 +2915,17 @@ int skill_check_condition( struct map_session_data *sd )
 			break;
 
 		case MO_EXTREMITYFIST:					// ˆ¢C—…”e–PŒ
+			tick = gettick();
 			if( sd->sc_data[SC_EXPLOSIONSPIRITS].timer == -1) {
 				clif_skill_fail(sd,sd->skillid,0,0);
 				return 0;
 			}
-			else
-				spiritball = 5;									// Ÿ†‹…
+			else {
+				if(sd->combo_delay3 <= tick && tick <= sd->combo_delay3 + battle_config.asuradelay) 
+					spiritball = 4;							// Ÿ†‹…					
+				else spiritball = 5;							// Ÿ†‹…
+			}
+			sd->skill_old = 0;
 			break;
 
 		case MO_FINGEROFFENSIVE:	//Žw’e
@@ -3066,6 +3090,7 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	int target_fd=-1;
 	int forcecast=0;
 	struct block_list *bl;
+	tick=gettick();
 
 	bl=map_id2bl(target_id);
 	if(bl==NULL){
@@ -3140,6 +3165,11 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		sd->state.skillcastcancel=0;
 		target_id = sd->attacktarget;
 		break;
+	case MO_EXTREMITYFIST:	/*ˆ¢C—…”e–PŒ*/
+		if(sd->combo_delay3 <= tick && tick <= sd->combo_delay3 + battle_config.asuradelay) {
+			casttime = 0;
+		}
+		break;	
 	}
 
 	printf("PC %d skill use target_id=%d skill=%d lv=%d cast=%d\n"
@@ -3171,7 +3201,6 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	sd->skilly		= 0;
 	sd->skillid		= skill_num;
 	sd->skilllv		= skill_lv;
-	tick=gettick();
 	sd->canact_tick = tick + casttime + delay;
 	sd->canmove_tick = tick;
 	if(casttime > 0)

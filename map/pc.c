@@ -379,6 +379,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->combo_flag = 0;
 	sd->combo_delay1 = 0;
 	sd->combo_delay2 = 0;
+	sd->combo_delay3 = 0;
 	sd->triple_delay = 0;
 	sd->skill_old = 0;
 	for(i=0;i<10;i++)
@@ -2275,12 +2276,10 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 	}
 	else if (sd->combo_flag == 2) {
 		sd->attackabletime = tick + sd->combo_delay1;
-		sd->combo_delay2 = tick + sd->combo_delay1 - 300;
 		sd->combo_flag = 0;
 	}
 	else if (sd->combo_flag == 4) {
 		sd->attackabletime = tick + sd->combo_delay2;
-		sd->combo_delay2 = tick + sd->combo_delay2 - 300;
 		sd->combo_flag = 0;
 	}
 	else sd->attackabletime = tick + sd->aspd*2;

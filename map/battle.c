@@ -1183,7 +1183,7 @@ struct Damage battle_calc_weapon_attack(
 				div_=4;
 				break;
 			case MO_COMBOFINISH:	// 猛龍拳
-				blewcount=5;
+				blewcount=3;
 				damage = damage*(240+ 60*skill_lv)/100;
 				break;
 			case BA_MUSICALSTRIKE:	// ミュージカルストライク
@@ -1221,6 +1221,11 @@ struct Damage battle_calc_weapon_attack(
 			damage += battle_get_atk2(src) - sd->watk_2;
 		if( src->type==BL_PC)
 			damage2 += sd->watk_2;
+	}
+	if(da == 2) { //三段掌が発動しているか
+		type = 0x08;
+		div_ = 255;	//三段掌用に…
+		damage = damage * (100 + 20 * pc_checkskill(sd, MO_TRIPLEATTACK)) / 100;
 	}
  	// 過剰精錬ボーナス
 	if( src->type==BL_PC){
@@ -1320,11 +1325,7 @@ struct Damage battle_calc_weapon_attack(
 			damage <<= 1;
 			type = 0x08;
 		}
-		if(da == 2) { //三段掌が発動しているか
-			type = 0x08;
-			div_ = 255;	//三段掌用に…
-			damage = damage * (100 + 20 * pc_checkskill(sd, MO_TRIPLEATTACK)) / 100;
-		}
+
 		item_id = pc_checkequip(sd,34);		// 両 手用か？
 		if(item_id != -1) {
 			if(itemdb_look(item_id) == 16) {
@@ -1906,6 +1907,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.finger_offensive_type=0;
 	battle_config.heal_exp=0;
 	battle_config.shop_exp=0;
+	battle_config.asuradelay=300;
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
 		printf("file not found: %s\n",cfgName);
@@ -1953,7 +1955,7 @@ int battle_config_read(const char *cfgName)
 			{ "finger_offensive_type", &battle_config.finger_offensive_type	},
 			{ "heal_exp", &battle_config.heal_exp	},
 			{ "shop_exp", &battle_config.shop_exp	},
-
+			{ "asuradelay", &battle_config.asuradelay},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

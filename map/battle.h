@@ -142,6 +142,7 @@ extern struct Battle_Config {
 	int sanctury_type;
 	int finger_offensive_type;
 	int heal_exp,shop_exp;
+	int asuradelay;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"
