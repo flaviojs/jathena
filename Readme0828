@@ -1,4 +1,29 @@
 --------------------
+//0854 by Kalen
+
+・不足していた一次職転職クエスト追加及び、それに伴うWarp、Mob修正)
+	(/conf)
+	   (/npc)
+		npc_job_archer.txt
+		npc_job_swordman.txt
+		npc_job_thief.txt(台詞修正、点数処理変更)
+		npc_job_magician.txt
+	   (/warp)
+		npc_warp25.txt(一部移動)
+		npc_warp.txt(一部移動)
+		npc_warp_job.txt(新設)
+	   (/mob)
+		npc_mob_job.txt
+・雛祭りQuest追加及び、それに伴うNPC修正。アマツ行き船で料金を取らなかった問題修正
+	(/conf)
+		npc_event_hinamatsuri.txt
+		npc_town_amatsu.txt
+		npc_town_guide.txt
+		npc_town_kafra.txt
+	雛祭りを有効にするとアマツカプラをWに、
+	アルベルタ南カプラを削除にするようにしています。
+
+--------------------
 //0853 by 死神
 
 ・バグ修正とNPCスキル関係の修正。

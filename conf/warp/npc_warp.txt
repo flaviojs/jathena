@@ -904,9 +904,6 @@ izlude_in.gat,171,97,0	warp	iz06	3,2,izlude_in.gat,172,119
 izlude_in.gat,172,116,0	warp	iz06-1	3,2,izlude_in.gat,172,94
 izlude_in.gat,172,139,0	warp	iz07	3,2,izlude_in.gat,172,161
 izlude_in.gat,172,158,0	warp	iz07-1	3,2,izlude_in.gat,172,136
-//
-izlude_in.gat,43,169,0	warp	w219	2,3,izlude_in.gat,64,169
-izlude_in.gat,62,169,0	warp	w1039	1,1,izlude_in.gat,40,169
 // izlude <=> lzlu2dun ; NPC
 izlu2dun.gat,108,83,0	warp	izd01	3,2,iz_dun00.gat,168,168
 iz_dun00.gat,168,173,0	warp	izd01-1	3,3,izlu2dun.gat,108,88
@@ -1397,68 +1394,6 @@ force_1-3.gat,179,50,0	warp	fc318-1	1,1,force_1-3.gat,179,25
 force_1-3.gat,179,109,0	warp	fc319	1,1,force_1-3.gat,179,132
 force_1-3.gat,179,128,0	warp	fc319-1	1,1,force_1-3.gat,179,105
 
-// (import from EoR-162)
-new_1-1.gat,148,112,0	warp	new11	2,3,new_1-2.gat,100,9
-new_1-1.gat,166,112,0	warp	new12	2,2,new_1-2.gat,100,153
-new_1-2.gat,100,150,0	warp	new12-1	2,1,new_1-1.gat,162,112
-new_1-1.gat,169,75,0	warp	new13	2,2,new_1-2.gat,182,163
-new_1-2.gat,182,159,0	warp	new13-1	2,2,new_1-1.gat,165,75
-new_1-1.gat,169,147,0	warp	new14	2,2,new_1-2.gat,18,163
-new_1-2.gat,18,159,0	warp	new14-1	2,2,new_1-1.gat,165,147
-new_1-2.gat,100,122,0	warp	new15	2,1,new_1-2.gat,100,162
-new_1-2.gat,100,165,0	warp	new15-1	2,1,new_1-2.gat,100,119
-new_1-2.gat,126,106,0	warp	new16	2,4,new_1-2.gat,156,171
-new_1-2.gat,153,171,0	warp	new16-1	2,4,new_1-2.gat,123,106
-new_1-3.gat,96,175,0	warp	new17	3,2,new_1-4.gat,100,14
-new_2-1.gat,148,112,0	warp	new21	2,3,new_2-2.gat,100,9
-new_2-1.gat,166,112,0	warp	new22	2,2,new_2-2.gat,100,153
-new_2-2.gat,100,150,0	warp	new22-1	2,1,new_2-1.gat,162,112
-new_2-1.gat,169,75,0	warp	new23	2,2,new_2-2.gat,182,163
-new_2-2.gat,182,159,0	warp	new23-1	2,2,new_2-1.gat,165,75
-new_2-1.gat,169,147,0	warp	new24	2,2,new_2-2.gat,18,163
-new_2-2.gat,18,159,0	warp	new24-1	2,2,new_2-1.gat,165,147
-new_2-2.gat,100,122,0	warp	new25	2,1,new_2-2.gat,100,162
-new_2-2.gat,100,165,0	warp	new25-1	2,1,new_2-2.gat,100,119
-new_2-2.gat,126,106,0	warp	new26	2,4,new_2-2.gat,156,171
-new_2-2.gat,153,171,0	warp	new26-1	2,4,new_2-2.gat,123,106
-new_2-3.gat,96,175,0	warp	new27	3,2,new_2-4.gat,100,14
-new_3-1.gat,148,112,0	warp	new31	2,3,new_3-2.gat,100,9
-new_3-1.gat,166,112,0	warp	new32	2,2,new_3-2.gat,100,153
-new_3-2.gat,100,150,0	warp	new32-1	2,1,new_3-1.gat,162,112
-new_3-1.gat,169,75,0	warp	new33	2,2,new_3-2.gat,182,163
-new_3-2.gat,182,159,0	warp	new33-1	2,2,new_3-1.gat,165,75
-new_3-1.gat,169,147,0	warp	new34	2,2,new_3-2.gat,18,163
-new_3-2.gat,18,159,0	warp	new34-1	2,2,new_3-1.gat,165,147
-new_3-2.gat,100,122,0	warp	new35	2,1,new_3-2.gat,100,162
-new_3-2.gat,100,165,0	warp	new35-1	2,1,new_3-2.gat,100,119
-new_3-2.gat,126,106,0	warp	new36	2,4,new_3-2.gat,156,171
-new_3-2.gat,153,171,0	warp	new36-1	2,4,new_3-2.gat,123,106
-new_3-3.gat,96,175,0	warp	new37	3,2,new_3-4.gat,100,14
-new_4-1.gat,148,112,0	warp	new41	2,3,new_4-2.gat,100,9
-new_4-1.gat,166,112,0	warp	new42	2,2,new_4-2.gat,100,153
-new_4-2.gat,100,150,0	warp	new42-1	2,1,new_4-1.gat,162,112
-new_4-1.gat,169,75,0	warp	new43	2,2,new_4-2.gat,182,163
-new_4-2.gat,182,159,0	warp	new43-1	2,2,new_4-1.gat,165,75
-new_4-1.gat,169,147,0	warp	new44	2,2,new_4-2.gat,18,163
-new_4-2.gat,18,159,0	warp	new44-1	2,2,new_4-1.gat,165,147
-new_4-2.gat,100,122,0	warp	new45	2,1,new_4-2.gat,100,162
-new_4-2.gat,100,165,0	warp	new45-1	2,1,new_4-2.gat,100,119
-new_4-2.gat,126,106,0	warp	new46	2,4,new_4-2.gat,156,171
-new_4-2.gat,153,171,0	warp	new46-1	2,4,new_4-2.gat,123,106
-new_4-3.gat,96,175,0	warp	new47	3,2,new_4-4.gat,100,14
-new_5-1.gat,148,112,0	warp	new51	2,3,new_5-2.gat,100,9
-new_5-1.gat,166,112,0	warp	new52	2,2,new_5-2.gat,100,153
-new_5-2.gat,100,150,0	warp	new52-1	2,1,new_5-1.gat,162,112
-new_5-1.gat,169,75,0	warp	new53	2,2,new_5-2.gat,182,163
-new_5-2.gat,182,159,0	warp	new53-1	2,2,new_5-1.gat,165,75
-new_5-1.gat,169,147,0	warp	new54	2,2,new_5-2.gat,18,163
-new_5-2.gat,18,159,0	warp	new54-1	2,2,new_5-1.gat,165,147
-new_5-2.gat,100,122,0	warp	new55	2,1,new_5-2.gat,100,162
-new_5-2.gat,100,165,0	warp	new55-1	2,1,new_5-2.gat,100,119
-new_5-2.gat,126,106,0	warp	new56	2,4,new_5-2.gat,156,171
-new_5-2.gat,153,171,0	warp	new56-1	2,4,new_5-2.gat,123,106
-new_5-3.gat,96,175,0	warp	new57	3,2,new_5-4.gat,100,14
-
 // import from EoR-162
 ordeal_1-1.gat,100,150,0	warp	ord11	1,1,ordeal_1-1.gat,128,150
 ordeal_1-1.gat,123,150,0	warp	ord11-1	1,1,ordeal_1-1.gat,95,150
@@ -1615,28 +1550,6 @@ ordeal_a04.gat,153,180,0	warp	orda5	0,0,ordeal_a04.gat,144,284
 ordeal_a04.gat,172,135,0	warp	orda6	0,0,ordeal_a04.gat,284,24
 ordeal_a04.gat,172,172,0	warp	orda7	0,0,ordeal_a04.gat,284,284
 ordeal_a04.gat,180,154,0	warp	orda8	0,0,ordeal_a04.gat,284,164
-
-// import from EoR-162
-sword_1-1.gat,65,117,0	warp	swd101	1,1,sword_1-1.gat,10,245
-sword_1-1.gat,98,27,0	warp	swd102	1,1,sword_1-1.gat,11,207
-sword_1-1.gat,161,27,0	warp	swd103	1,1,sword_1-1.gat,11,207
-sword_1-1.gat,223,205,0	warp	swd104	1,1,sword_1-1.gat,11,168
-sword_1-1.gat,223,243,0	warp	swd105	1,1,sword_1-1.gat,11,206
-sword_1-1.gat,239,117,0	warp	swd106	1,1,sword_1-1.gat,11,169
-sword_2-1.gat,65,117,0	warp	swd201	1,1,sword_2-1.gat,10,245
-sword_2-1.gat,98,27,0	warp	swd202	1,1,sword_2-1.gat,11,207
-sword_2-1.gat,161,27,0	warp	swd203	1,1,sword_2-1.gat,11,207
-sword_2-1.gat,223,205,0	warp	swd204	1,1,sword_2-1.gat,11,168
-sword_2-1.gat,223,243,0	warp	swd205	1,1,sword_2-1.gat,11,206
-sword_2-1.gat,239,117,0	warp	swd206	1,1,sword_2-1.gat,11,169
-sword_3-1.gat,65,117,0	warp	swd301	1,1,sword_3-1.gat,10,245
-sword_3-1.gat,98,27,0	warp	swd302	1,1,sword_3-1.gat,11,207
-sword_3-1.gat,161,27,0	warp	swd303	1,1,sword_3-1.gat,11,207
-sword_3-1.gat,223,205,0	warp	swd304	1,1,sword_3-1.gat,11,168
-sword_3-1.gat,223,243,0	warp	swd305	1,1,sword_3-1.gat,11,206
-sword_3-1.gat,239,117,0	warp	swd306	1,1,sword_3-1.gat,11,169
-
-job_thief1.gat,180,15,0	warp	jthf	7,1,moc_ruins.gat,145,117
 
 
 // EP1.5 : Xmas

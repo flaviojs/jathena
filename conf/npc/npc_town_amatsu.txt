@@ -99,6 +99,7 @@ alberta.gat,245,93,4	script	貿易船船長	709,{
 			mes "[ワルター=メオス]";
 			mes "よし、出発だ！";
 			next;
+			set Zeny,Zeny-10000;
 			warp "amatsu",197,83;
 			end;
 		Lzeny:
@@ -113,6 +114,7 @@ amatsu.gat,194,79,4	script	貿易船船長	709,{
 	mes "アマツ観光は十分に楽しんだかな？";
 	mes "よし、それじゃアルベルタに";
 	mes "帰ろうか。";
+	next;
 	menu "アルベルタに帰る",L1,"まだここにいる",-;
 		mes "[ワルター=メオス]";
 		mes "うん、ゆっくりしてきな。";

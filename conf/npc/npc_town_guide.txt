@@ -2261,6 +2261,7 @@ LEnd:
 //[案内要員 - アマツ]
 
 amatsu.gat,207,91,4	script	ミス・アマツ	758,{
+if ($hinamatsuri == 1) goto LeventStart;
 	mes "[蛍ちゃん]";
 	mes "私は、第13代ミス・アマツ";
 	mes "｢蛍｣と申します。";
@@ -2301,6 +2302,201 @@ LEnd:
 		mes "それでは、アマツで";
 		mes "楽しい時間をお過ごし下さいませ。";
 		close;
+LeventStart:
+	mes "[蛍ちゃん]";
+	mes "いつも満開の美しい花が";
+	mes "旅人を出迎える静かな村";
+	mes "アマツによくいらして下さいました。";
+	mes "ただいま、アマツは";
+	mes "雛祭りの真っ最中です。";
+	mes "雛壇では、記念撮影が出来ます。";
+	next;
+	mes "[蛍ちゃん]";
+	mes "あと臨時ですが";
+	mes "新しいカプラさんもいらしてます。";
+	mes "可愛らしい方ですので、";
+	mes "ご挨拶してあげてくださいませ。";
+	next;
+	mes "[蛍ちゃん]";
+	mes "あ、自己紹介が遅れました";
+	mes "私は、第13代ミス・アマツ";
+	mes "｢蛍｣と申します。アマツ代表として";
+	mes "村の案内を仰せつかっております。";
+	mes "また、雛祭り期間は特別な場所への";
+	mes "ご案内もさせていただいております。";
+	next;
+	menu "城",L1,"道具店",L2,"武器店",L3,"居酒屋",L4,"独りぼっちのお雛様",Le_1,"火竜の住処",Le_2,"天",Le_3,"キノコ半島",Le_4,"展望台",Le_5,"キノコがいっぱい",Le_6,"ちょっと休憩",Le_7,"知識の泉",Le_8,"砂漠のオアシス",Le_9,"別荘",Le_10,"謎の遺跡",Le_11,"迷子になる森",Le_12,"水辺でチクタク",Le_13,"孤独な剣",Le_14,"甲羅の屋根",Le_15,"時計と羽と鍵",Le_16;
+Le_1:
+	set @gonum,1;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff独りぼっちのお雛様^000000ですね。";
+	goto LchooseArare;
+Le_2:
+	set @gonum,2;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff火竜の住処^000000ですね。";
+	goto LchooseHisimochi;
+Le_3:
+	set @gonum,3;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff天^000000ですね。";
+	goto LchooseHisimochi;
+Le_4:
+	set @gonum,4;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ffキノコ半島^000000ですね。";
+	goto LchooseArare;
+Le_5:
+	set @gonum,5;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff展望台^000000ですね。";
+	goto LchooseHisimochi;
+Le_6:
+	set @gonum,6;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ffキノコがいっぱい^000000ですね。";
+	goto LchooseArare;
+Le_7:
+	set @gonum,7;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ffちょっと休憩^000000ですね。";
+	goto LchooseHisimochi;
+Le_8:
+	set @gonum,8;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff知識の泉^000000ですね。";
+	goto LchooseHisimochi;
+Le_9:
+	set @gonum,9;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff砂漠のオアシス^000000ですね。";
+	goto LchooseArare;
+Le_10:
+	set @gonum,10;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff別荘^000000ですね。";
+	goto LchooseArare;
+Le_11:
+	set @gonum,11;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff謎の遺跡^000000ですね。";
+	goto LchooseArare;
+Le_12:
+	set @gonum,12;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff,迷子になる森^000000ですね。";
+	goto LchooseHisimochi;
+Le_13:
+	set @gonum,13;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff水辺でチクタク^000000ですね。";
+	goto LchooseBoth;
+Le_14:
+	set @gonum,14;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff孤独な剣^000000ですね。";
+	goto LchooseBoth;
+Le_15:
+	set @gonum,15;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff甲羅の屋根^000000ですね。";
+	goto LchooseBoth;
+Le_16:
+	set @gonum,16;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff時計と羽と鍵^000000ですね。";
+	goto LchooseBoth;
+LchooseArare:
+	mes "そこへ向かうためには、";
+	mes "^ff0000ひなあられが1個^000000必要です。";
+	mes "よろしいですか？";
+	next;
+	menu "はい",-,"いいえ",Levend;
+		if (countitem(542)<1) goto LErrorArare;
+		goto Lwarp;
+LchooseHisimochi:
+	mes "そこへ向かうためには、";
+	mes "^ff0000菱餅が1個^000000必要です。";
+	mes "よろしいですか？";
+	next;
+	menu "はい",-,"いいえ",Levend;
+		if (countitem(543)<1) goto LErrorHisimochi;
+		goto Lwarp;
+LchooseBoth:
+	mes "そこへ向かうためには、";
+	mes "^ff0000ひなあられが1個^000000と";
+	mes "^ff0000菱餅が1個^000000必要です。";
+	mes "よろしいですか？";
+	next;
+	menu "はい",-,"いいえ",Levend;
+		if ((countitem(542) < 1) || (countitem(543) < 1)) goto LErrorBoth;
+		goto Lwarp;
+Lwarp:
+	mes "[蛍ちゃん]";
+	mes "はい、では";
+	mes "お気をつけて";
+	mes "いってらっしゃいませ。";
+	next;
+	if ((@gonum == 1) || (@gonum == 4) || (@gonum == 6) || (@gonum == 9) || (@gonum == 10) || (@gonum == 11)) delitem 542,1;
+	if ((@gonum == 2) || (@gonum == 3) || (@gonum == 5) || (@gonum == 7) || (@gonum == 8) || (@gonum == 12)) delitem 543,1;
+	if ((@gonum == 13) || (@gonum == 14) || (@gonum == 15) || (@gonum == 16)) delitem 542,1;
+	if ((@gonum == 13) || (@gonum == 14) || (@gonum == 15) || (@gonum == 16)) delitem 543,1;
+	if (@gonum == 1) warp "ama_dun03.gat",120,204;
+	if (@gonum == 2) warp "mag_dun02.gat",151,194;
+	if (@gonum == 3) warp "gonryun.gat",36,90;
+	if (@gonum == 4) warp "pay_fild05.gat",92,153;
+	if (@gonum == 5) warp "gef_fild12.gat",247,180;
+	if (@gonum == 6) warp "gef_fild02.gat",87,49;
+	if (@gonum == 7) warp "cmd_fild07.gat",155,357;
+	if (@gonum == 8) warp "yuno_in02.gat",93,205;
+	if (@gonum == 9) warp "moc_fild11.gat",198,215;
+	if (@gonum == 10) warp "yuno_fild02.gat",92,211;
+	if (@gonum == 11) warp "cmd_fild04.gat",129,261;
+	if (@gonum == 12) warp "prt_maze02.gat",105,80;
+	if (@gonum == 13) warp "alde_dun04.gat",164,143;
+	if (@gonum == 14) warp "glast_01.gat",44,363;
+	if (@gonum == 15) warp "tur_dun03.gat",56,36;
+	if (@gonum == 16) warp "c_tower4.gat",42,38;
+	end;
+LErrorArare:
+	mes "[蛍ちゃん]";
+	mes "すみません……";
+	mes "足りないようなのですが……";
+	mes "ご希望の場所に送って";
+	mes "差し上げるためには、^ff0000ひなあられ^000000が";
+	mes "どうしても必要なのです。";
+	mes "誠に申し訳ありません……";
+	close;
+LErrorHisimochi:
+	mes "[蛍ちゃん]";
+	mes "すみません……";
+	mes "足りないようなのですが……";
+	mes "ご希望の場所に送って";
+	mes "差し上げるためには、^ff0000菱餅^000000が";
+	mes "どうしても必要なのです。";
+	mes "誠に申し訳ありません……";
+	close;
+LErrorBoth:
+	mes "[蛍ちゃん]";
+	mes "すみません……";
+	mes "足りないようなのですが……";
+	mes "ご希望の場所に送って";
+	mes "差し上げる為には、";
+	next;
+	mes "[蛍ちゃん]";
+	mes "^ff0000ひなあられと";
+	mes "菱餅^000000が";
+	mes "どうしても必要なのです。";
+	mes "誠に申し訳ありません……";
+	close;
+Levend:
+	mes "[蛍ちゃん]";
+	mes "そうですか……";
+	mes "Ｗちゃん、残念がるな……";
+	mes "あ、いえ、こちらの話です。";
+	mes "すみません。";
+	mes "気が変わりましたら、是非どうぞ。";
+	close;
 }
 
 amatsu.gat,251,283,4	script	案内人	767,{
