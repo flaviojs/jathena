@@ -594,7 +594,8 @@ int battle_get_speed(struct block_list *bl)
 		struct status_change *sc_data=battle_get_sc_data(bl);
 		int speed = 1000;
 		if(bl->type == BL_MOB)
-			speed = mob_db[((struct mob_data *)bl)->class].speed;
+//			speed = mob_db[((struct mob_data *)bl)->class].speed;
+			speed = ((struct mob_data *)bl)->speed;
 		else if(bl->type == BL_PET)
 			speed = ((struct pet_data *)bl)->msd->petDB->speed;
 

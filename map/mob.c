@@ -721,7 +721,8 @@ int mob_spawn(int id)
 	md->target_id = 0;
 	md->move_fail_count = 0;
 
-	md->speed = mob_db[md->class].speed;
+	if(!md->speed)
+		md->speed = mob_db[md->class].speed;
 	md->def_ele = mob_db[md->class].element;
 	md->master_id=0;
 	md->master_dist=0;
@@ -2286,6 +2287,7 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,int flag)
 			md->y0=y;
 			md->xs=0;
 			md->ys=0;
+			md->speed=md2->speed;
 			md->spawndelay1=-1;	// 一度のみフラグ
 			md->spawndelay2=-1;	// 一度のみフラグ
 
