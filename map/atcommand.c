@@ -517,18 +517,18 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 //「@model x y z」のように値を入力、ただしこれらを変更した状態で2HQを使うとエラーが・・・(´Д｀)　解明しだい直します。
 /*	例：@model 15 4 0
 
-x [0～17]髪型
+x [0～19]髪型
 y [0～8]髪の色
 z [0～4]服の色
 
 */
 		if (strcmpi(command, "@model") == 0 && gm_level >= atcommand_config.model) {
 			sscanf(message, "%s%d%d%d", command, &x, &y, &z);
-			if (x >= 0 && x < 18 && y >= 0 && y < 9 && z >= 0 && z <= 4) {
+			if (x >= 0 && x < 20 && y >= 0 && y < 9 && z >= 0 && z <= 4) {
 				//服の色変更
-				if (sd->status.class == 12) {
-					//アサシンは服の色未実装
-					clif_displaymessage(fd,"アサシンは未実装らしいです");
+				if ((sd->status.class == 12 || sd->status.class == 14 || sd->status.class == 15 || sd->status.class == 16 || sd->status.class == 17 || sd->status.class == 21) && z != 0) {
+					//服の色未実装職の判定
+					clif_displaymessage(fd,"服染め未実装です");
 				} else {
 					pc_changelook(sd,LOOK_HAIR,x);
 					pc_changelook(sd,LOOK_HAIR_COLOR,y);
