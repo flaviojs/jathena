@@ -53,10 +53,10 @@ int npc_enable(const char *name,int flag)
 		return 0;
 	
 	if(flag){	// 有効化
-		nd->state.flag&=~1;
+		nd->flag&=~1;
 		clif_spawnnpc(nd);
 	}else{		// 無効化
-		nd->state.flag|=1;
+		nd->flag|=1;
 		clif_clearchar(&nd->bl,0);
 	}
 	return 0;
@@ -196,7 +196,7 @@ int npc_event(struct map_session_data *sd,const char *eventname)
 		}
 		return 1;
 	}
-	if(nd->state.flag&1){	// 無効化されている
+	if(nd->flag&1){	// 無効化されている
 		npc_event_dequeue(sd);
 		return 0;
 	}
@@ -216,7 +216,7 @@ int npc_touch_areanpc(struct map_session_data *sd,int m,int x,int y)
 	int xs,ys;
 
 	for(i=0;i<map[m].npc_num;i++){
-		if(map[m].npc[i]->state.flag&1){	// 無効化されている
+		if(map[m].npc[i]->flag&1){	// 無効化されている
 			f=0;
 			continue;
 		}
@@ -242,15 +242,24 @@ int npc_touch_areanpc(struct map_session_data *sd,int m,int x,int y)
 			printf("npc_touch_areanpc : some bug \n");
 		return 1;
 	}
+	f=0;
 	switch(map[m].npc[i]->bl.subtype){
 	case WARP:
+		f=1;
 		pc_setpos(sd,map[m].npc[i]->u.warp.name,map[m].npc[i]->u.warp.x,map[m].npc[i]->u.warp.y,0);
 		break;
 	case SCRIPT:
+		f=1;
 		npc_click(sd,map[m].npc[i]->bl.id);
 		break;
 	}
-	return 0;
+	if(f) {
+		sd->to_x = sd->bl.x;
+		sd->to_y = sd->bl.y;
+		clif_walkok(sd);
+	}
+
+	return f;
 }
 
 /*==========================================
@@ -297,7 +306,7 @@ int npc_click(struct map_session_data *sd,int id)
 
 	nd=(struct npc_data *)map_id2bl(id);
 
-	if(nd->state.flag&1)	// 無効化されている
+	if(nd->flag&1)	// 無効化されている
 		return 1;
 
 	sd->npc_id=id;
@@ -351,7 +360,7 @@ int npc_buysellsel(struct map_session_data *sd,int id,int type)
 		sd->npc_id=0;
 		return 1;
 	}
-	if(nd->state.flag&1)	// 無効化されている
+	if(nd->flag&1)	// 無効化されている
 		return 1;
 
 	sd->npc_shopid=id;
@@ -387,7 +396,10 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 		if(nd->u.shop_item[j].nameid==0)
 			return 3;
 
-		z+=pc_modifybuyvalue(sd,nd->u.shop_item[j].value) * item_list[i*2];
+		if (itemdb_value_notdc(nd->u.shop_item[j].nameid))
+			z+=nd->u.shop_item[j].value * item_list[i*2];
+		else
+			z+=pc_modifybuyvalue(sd,nd->u.shop_item[j].value) * item_list[i*2];
 		itemamount+=item_list[i*2];
 
 		switch(pc_checkadditem(sd,item_list[i*2+1],item_list[i*2])){
@@ -427,10 +439,14 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 		pc_gainexp(sd,0,z);
 	}*/
 	if(battle_config.shop_exp > 0 && z > 0 && (skill = pc_checkskill(sd,MC_DISCOUNT)) > 0) {
-		z = (int)(log((double)z * (double)skill) * (double)battle_config.shop_exp/100.);
-		if(z <= 0)
-			z = 1;
-		pc_gainexp(sd,0,z);
+		if(sd->status.skill[MC_DISCOUNT].flag != 0)
+			skill = sd->status.skill[MC_DISCOUNT].flag - 2;
+		if(skill > 0) {
+			z = (int)(log((double)z * (double)skill) * (double)battle_config.shop_exp/100.);
+			if(z <= 0)
+				z = 1;
+			pc_gainexp(sd,0,z);
+		}
 	}
 
 	return 0;
@@ -454,7 +470,10 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 		if(nameid == 0 ||
 		   sd->status.inventory[item_list[i*2]-2].amount < item_list[i*2+1])
 			return 1;
-		z+=pc_modifysellvalue(sd,itemdb_sellvalue(nameid)) * item_list[i*2+1];
+		if (itemdb_value_notoc(nameid))
+			z+=itemdb_value_sell(nameid) * item_list[i*2+1];
+		else
+			z+=pc_modifysellvalue(sd,itemdb_value_sell(nameid)) * item_list[i*2+1];
 		itemamount+=item_list[i*2+1];
 	}
 
@@ -470,10 +489,14 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 		pc_gainexp(sd,0,z);
 	}*/
 	if(battle_config.shop_exp > 0 && z > 0 && (skill = pc_checkskill(sd,MC_OVERCHARGE)) > 0) {
-		z = (int)(log((double)z * (double)skill) * (double)battle_config.shop_exp/100.);
-		if(z <= 0)
-			z = 1;
-		pc_gainexp(sd,0,z);
+		if(sd->status.skill[MC_OVERCHARGE].flag != 0)
+			skill = sd->status.skill[MC_OVERCHARGE].flag - 2;
+		if(skill > 0) {
+			z = (int)(log((double)z * (double)skill) * (double)battle_config.shop_exp/100.);
+			if(z <= 0)
+				z = 1;
+			pc_gainexp(sd,0,z);
+		}
 	}
 
 	return 0;
@@ -513,8 +536,6 @@ void npc_addsrcfile(char *name)
  *------------------------------------------
  */
 // warp行読み込み
-#define WARP_CLASS 45
-#define WARP_DEBUG_CLASS 722
 static int npc_parse_warp(char *w1,char *w2,char *w3,char *w4)
 {
 	int x,y,xs,ys,to_x,to_y,m;
@@ -544,7 +565,7 @@ static int npc_parse_warp(char *w1,char *w2,char *w3,char *w4)
 	nd->bl.x=x;
 	nd->bl.y=y;
 	nd->dir=0;
-	nd->state.flag=0;
+	nd->flag=0;
 	memcpy(nd->name,w3,24);
 	memcpy(nd->exname,w3,24);
 
@@ -591,7 +612,7 @@ static int npc_parse_shop(char *w1,char *w2,char *w3,char *w4)
 {
 	char *p;
 	int x,y,dir,m;
-	int max=64,pos=0;
+	int max=100,pos=0;
 	char mapname[24];
 	struct npc_data *nd;
 
@@ -617,6 +638,10 @@ static int npc_parse_shop(char *w1,char *w2,char *w3,char *w4)
 		if(sscanf(p,"%d:%d",&nameid,&value)!=2)
 			break;
 		nd->u.shop_item[pos].nameid=nameid;
+		if(value < 0) {
+			struct item_data *id = itemdb_search(nameid);
+			value=id->value_buy;
+		}
 		nd->u.shop_item[pos].value=value;
 		pos++;
 		p=strchr(p,',');
@@ -632,7 +657,7 @@ static int npc_parse_shop(char *w1,char *w2,char *w3,char *w4)
 	nd->bl.y = y;
 	nd->bl.id=npc_id++;
 	nd->dir = dir;
-	nd->state.flag=0;
+	nd->flag=0;
 	memcpy(nd->name,w3,24);
 	nd->class=atoi(w4);
 	nd->speed=200;
@@ -734,8 +759,8 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	if(sscanf(w4,"%d,%d,%d",&class,&xs,&ys)==3){
 		int i,j;
 		
-		if(xs>0)xs=xs*2+1;
-		if(ys>0)ys=ys*2+1;
+		if(xs>=0)xs=xs*2+1;
+		if(ys>=0)ys=ys*2+1;
 		
 		if(class>=0){	// 接触型NPC
 
@@ -779,7 +804,7 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	nd->bl.y = y;
 	nd->bl.id=npc_id++;
 	nd->dir = dir;
-	nd->state.flag=0;
+	nd->flag=0;
 	nd->class=class;
 	nd->speed=200;
 	nd->u.scr.script=script;
@@ -809,7 +834,6 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	// イベント用ラベルデータのエクスポート
 	label_db=script_get_label_db();
 	strdb_foreach(label_db,npc_event_export,nd);
-	
 
 	return 0;
 }
@@ -953,12 +977,6 @@ static int npc_parse_mapflag(char *w1,char *w2,char *w3,char *w4)
 	}
 	else if(strcmpi(w3,"gvg_noparty")==0) {
 		map[m].flag.gvg_noparty=1;
-	}
-	else if(strcmpi(w3,"water")==0) {
-		map[m].flag.water_flag=1;
-	}
-	else if(strcmpi(w3,"all_water")==0) {
-		map[m].flag.water_flag=2;
 	}
 
 	return 0;

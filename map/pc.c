@@ -1295,6 +1295,11 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		before.cart_weight != before.cart_weight || before.cart_max_weight != before.cart_max_weight )
 		clif_updatestatus(sd,SP_CARTINFO);*/
 
+	if(sd->status.hp<sd->status.max_hp>>2 && pc_checkskill(sd,SM_AUTOBERSERK)>0 &&
+		(sd->sc_data[SC_PROVOKE].timer==-1 || sd->sc_data[SC_PROVOKE].val2==0 ) && !pc_isdead(sd))
+		// オートバーサーク発動
+		skill_status_change_start(&sd->bl,SC_PROVOKE,10,1);
+
 	return 0;
 }
 
@@ -4368,7 +4373,7 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 {
 	int skill;
 	if( (battle_config.natural_heal_weight_rate > 100 || sd->weight*100/sd->max_weight < battle_config.natural_heal_weight_rate) &&
-		!pc_isdead(sd) && !pc_ishiding(sd) ) {
+		!pc_isdead(sd) && !pc_ishiding(sd) && sd->sc_data[SC_POISON].timer == -1) {
 		pc_natural_heal_hp(sd);
 		pc_natural_heal_sp(sd);
 	}
@@ -4376,7 +4381,7 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 		sd->hp_sub = sd->inchealhptick = 0;
 		sd->sp_sub = sd->inchealsptick = 0;
 	}
-	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0 && pc_issit(sd) && !pc_ishiding(sd))
+	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0 && pc_issit(sd) && !pc_ishiding(sd) && sd->sc_data[SC_POISON].timer == -1)
 		pc_spirit_heal(sd,skill);
 	else
 		sd->inchealspirittick = 0;

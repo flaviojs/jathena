@@ -61,13 +61,13 @@ bonus bPerfectHitRate,n;	必中攻撃確率n%(高い物だけ適用)
 bonus bPerfectHitAddRate,n;	必中攻撃確率+n%
 bonus bGetZenyNum,n;	物理攻撃でモンスターを倒した時rand()%n+1のゼニを得る(nは高い物だけ適用)
 bonus bAddGetZenyNum,n;	物理攻撃でモンスターを倒した時rand()%n+1のゼニを得る(nは+される)
-bonus bRestartFullRecover,n;	復活した時HPとSPを全て回復(nは無意なし)
-bonus bNoCastCancel,n;	キャスティングをキャンセルされない(nは無意なし)
-bonus bNoSizeFix,n;		モンスターのサイズによる攻撃補正を受けない(nは無意なし)
-bonus bNoMagicDamage,n;	魔法にダメージを受けない(ヒールも含めて、nは無意なし)
-bonus bNoWeaponDamage,n;	物理攻撃にダメージを受けない(nは無意なし)
-bonus bNoGemStone,n;	スキルを使う時ジェムストーンを消耗されない(nは無意なし)
-bonus bDefRatioAtk,n;	相手の防御力が高ければ高いほど大きダメージを与える(防御は無視されない、nは無意なし)
+bonus bRestartFullRecover,n;	復活した時HPとSPを全て回復(nは意味なし)
+bonus bNoCastCancel,n;	キャスティングをキャンセルされない(nは意味なし)
+bonus bNoSizeFix,n;		モンスターのサイズによる攻撃補正を受けない(nは意味なし)
+bonus bNoMagicDamage,n;	魔法にダメージを受けない(ヒールも含めて、nは意味なし)
+bonus bNoWeaponDamage,n;	物理攻撃にダメージを受けない(nは意味なし)
+bonus bNoGemStone,n;	スキルを使う時ジェムストーンを消耗されない(nは意味なし)
+bonus bDefRatioAtk,n;	相手の防御力が高ければ高いほど大きダメージを与える(防御は無視されない、nは意味なし)
 
 
 bonus2 bAddEff,Eff_Blind,n;	n%の確立で暗黒付与
