@@ -286,6 +286,7 @@ int skill_abra_dataset(int skilllv);
 int skill_clear_element_field(struct block_list *bl);
 int skill_landprotector(struct block_list *bl, va_list ap );
 int skill_trap_splash(struct block_list *bl, va_list ap );
+int skill_count_target(struct block_list *bl, va_list ap );
 
 static int distance(int x0,int y0,int x1,int y1)
 {
@@ -4137,7 +4138,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	struct skill_unit_group *sg= src->group;
 	struct block_list *ss=map_id2bl(sg->src_id);
 	struct skill_unit_group_tickset *ts;
-	int diff,goflag;
+	int diff,goflag,splash_count=0;
 
 	if(bl == NULL ||  bl->prev==NULL || !src->alive || (bl->type == BL_PC && pc_isdead((struct map_session_data *)bl) ) )
 		return 0;
@@ -4273,10 +4274,14 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0x96:	/* フラッシャー */
 	case 0x97:	/* フリージングトラップ */
 	case 0x98:	/* クレイモアートラップ */
+		map_foreachinarea(skill_count_target,src->bl.m
+					,src->bl.x-src->range,src->bl.y-src->range
+					,src->bl.x+src->range,src->bl.y+src->range
+					,0,&src->bl,&splash_count);
 		map_foreachinarea(skill_trap_splash,src->bl.m
 					,src->bl.x-src->range,src->bl.y-src->range
 					,src->bl.x+src->range,src->bl.y+src->range
-					,0,&src->bl,tick);
+					,0,&src->bl,tick,splash_count);
 		sg->unit_id = 0x8c;
 		clif_changelook(&src->bl,LOOK_BASE,sg->unit_id);
 		sg->limit=DIFF_TICK(tick,sg->tick)+1500;
@@ -6083,12 +6088,24 @@ int skill_idun_heal(struct block_list *bl, va_list ap )
 	if(bl->type == BL_SKILL || bl->id == sg->src_id)
 		return 0;
 	
-	clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
-	battle_heal(NULL,bl,heal,0,0);
-
+	if(bl->type == BL_PC || bl->type == BL_MOB){
+		clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
+		battle_heal(NULL,bl,heal,0,0);
+	}
 	return 0;
 }
 
+/*==========================================
+ * 指定範囲内でsrcに対して有効なターゲットのblの数を数える(foreachinarea)
+ *------------------------------------------
+ */
+int skill_count_target(struct block_list *bl, va_list ap ){
+	struct block_list *src = va_arg(ap,struct block_list *);
+	int *c = va_arg(ap,int *);
+	if(battle_check_target(src,bl,BCT_ENEMY) > 0)
+		(*c)++;
+	return 0;
+}
 /*==========================================
  * トラップ範囲処理(foreachinarea)
  *------------------------------------------
@@ -6097,8 +6114,11 @@ int skill_trap_splash(struct block_list *bl, va_list ap )
 {
 	struct block_list *src = va_arg(ap,struct block_list *);
 	int tick = va_arg(ap,int);
+	int splash_count = va_arg(ap,int);
 	struct skill_unit_group *sg = ((struct skill_unit *)src)->group;
 	struct block_list *ss=map_id2bl(sg->src_id);
+
+	int i;
 
 	if(src && sg && ss && battle_check_target(src,bl,BCT_ENEMY) > 0){
 		switch(sg->unit_id){
@@ -6108,10 +6128,12 @@ int skill_trap_splash(struct block_list *bl, va_list ap )
 				skill_additional_effect(ss,bl,sg->skill_id,sg->skill_lv,BF_MISC,tick);
 				break;
 			case 0x8f:	/* ブラストマイン */
-			case 0x97:	/* フリージングトラップ */
 			case 0x98:	/* クレイモアートラップ */
-				skill_attack((sg->unit_id==0x97)?BF_WEAPON:BF_MISC,
-					ss,src,bl,sg->skill_id,sg->skill_lv,tick,(sg->val2)?0x0500:0);
+				for(i=0;i<splash_count;i++){
+					skill_attack(BF_MISC,ss,src,bl,sg->skill_id,sg->skill_lv,tick,(sg->val2)?0x0500:0);
+				}
+			case 0x97:	/* フリージングトラップ */
+					skill_attack(BF_WEAPON,	ss,src,bl,sg->skill_id,sg->skill_lv,tick,(sg->val2)?0x0500:0);
 				break;
 			default:
 				break;
@@ -7900,6 +7922,32 @@ int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int
 				}
 			}
 		}
+/*
+		int i,j,r_flag[group->unit_count],c_flag[group->unit_count],m_flag[group->unit_count];
+		memset(r_flag,0,sizeof(r_flag));
+		memset(m_flag,0,sizeof(m_flag));
+		memset(c_flag,0,sizeof(c_flag));
+		for(i=0;i<group->unit_count;i++){
+			struct skill_unit *unit1=&group->unit[i];
+			int checked=0;
+			for(j=0;j<group->unit_count;j++){
+				struct skill_unit *unit2=&group->unit[j];
+				if(checked)
+					continue;
+				if(unit1->bl.m==m
+					&& unit1->bl.x+dx==unit2->bl.x && unit1->bl.y+dy==unit2->bl.y){
+					unit1->bl.m = m;
+					unit1->bl.x += dx;
+					unit1->bl.y += dy;
+					r_flag[j]=i;
+					m_flag[j]=1;
+					checked=1;
+				}else{
+				}
+			}
+			
+		}
+*/		
 	}
 	return 0;
 }

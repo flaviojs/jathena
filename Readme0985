@@ -1,4 +1,20 @@
 --------------------
+//1000 by ぴざまん
+・0999の変更取り戻し
+・トラップの巻き込み実装
+・イドゥンの林檎でNPCまで回復した(ように見える)問題修正(未テスト)
+・デモンストレーションのエフェクト変更(こちらに明記)
+	(map/)
+	skill.c
+		skill_count_target() 追加
+		skill_unit_onplace()、skill_trap_splash() 変更
+--------------------
+//0999 by eAthena Dev Team (Yor's Fixes)
+(login/)
+	added email for accounts
+(char/)
+	added email for character deletion
+--------------------
 //0998 by (凸)
 ・battle.cで引数の存在を確認せずに値を見に行ってる関数をいくつか修正
 ・ダンス中は座れないようにした(本鯖相違スレッド part2 >>114 DoTさん)
