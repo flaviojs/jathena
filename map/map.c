@@ -304,14 +304,14 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 				}
 			}
 		}
-	
+
 	if(bl_list_count>=BL_LIST_MAX) {
 		if(battle_config.error_log)
 			printf("map_foreachinarea: *WARNING* block count too many!\n");
 	}
 
 	map_freeblock_lock();	// メモリからの解放を禁止する
-		
+
 	for(i=blockcount;i<bl_list_count;i++)
 		if(bl_list[i]->prev)	// 有効かどうかチェック
 			func(bl_list[i],ap);
@@ -379,7 +379,7 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 		}
 	}else{
 		// L字領域の場合
-		
+
 		if(x0<0) x0=0;
 		if(y0<0) y0=0;
 		if(x1>=map[m].xs) x1=map[m].xs-1;
@@ -421,7 +421,7 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 	}
 
 	map_freeblock_lock();	// メモリからの解放を禁止する
-		
+
 	for(i=blockcount;i<bl_list_count;i++)
 		if(bl_list[i]->prev)	// 有効かどうかチェック
 			func(bl_list[i],ap);
@@ -499,7 +499,7 @@ int map_delobject(int id)
 	if(obj==NULL)
 		return 0;
 
-	map_delobjectnofree(id);	
+	map_delobjectnofree(id);
 	map_freeblock(obj);
 
 	return 0;
@@ -780,7 +780,7 @@ int map_quit(struct map_session_data *sd)
 {
 	if(sd->chatID)	// チャットから出る
 		chat_leavechat(sd);
-		
+
 	if(sd->trade_partner)	// 取引を中断する
 		trade_tradecancel(sd);
 
@@ -835,6 +835,9 @@ int map_quit(struct map_session_data *sd)
 	pc_makesavestatus(sd);
 	chrif_save(sd);
 	storage_storage_save(sd);
+
+	if( sd->npc_stackbuf )
+		free( sd->npc_stackbuf );
 
 	map_delblock(&sd->bl);
 
@@ -1213,7 +1216,7 @@ static int map_readmap(int m,char *fn)
 		printf("out of memory : map_readmap block_mob\n");
 		exit(1);
 	}
-	
+
 	size = map[m].bxs*map[m].bys*sizeof(int);
 
 	map[m].block_count = calloc(size, 1);
@@ -1231,7 +1234,7 @@ static int map_readmap(int m,char *fn)
 	memset(map[m].block_mob_count,0,size);
 
 	strdb_insert(map_db,map[m].name,&map[m]);
-	
+
 //	printf("%s read done\n",fn);
 
 	return 0;
@@ -1290,12 +1293,12 @@ int map_addmap(char *mapname)
 int map_delmap(char *mapname)
 {
 	int i;
-	
+
 	if( strcmpi(mapname,"all")==0 ){
 		map_num=0;
 		return 0;
 	}
-	
+
 	for(i=0;i<map_num;i++){
 		if(strcmp(map[i].name,mapname)==0){
 			memmove(map+i,map+i+1,sizeof(map[0])*(map_num-i-1));
@@ -1333,7 +1336,7 @@ int map_config_read(char *cfgName)
 			chrif_setpasswd(w2);
 		} else if(strcmpi(w1,"char_ip")==0){
 			h = gethostbyname (w2);
-			if(h != NULL) { 
+			if(h != NULL) {
 				printf("Character sever IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
 				sprintf(w2,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
 			}
@@ -1342,7 +1345,7 @@ int map_config_read(char *cfgName)
 			chrif_setport(atoi(w2));
 		} else if(strcmpi(w1,"map_ip")==0){
 			h = gethostbyname (w2);
-			if(h != NULL) { 
+			if(h != NULL) {
 				printf("Map server IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
 				sprintf(w2,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
 			}

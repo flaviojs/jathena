@@ -1168,6 +1168,81 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	return 0;
 }
 
+/*==========================================
+ * function行解析
+ *------------------------------------------
+ */
+static int npc_parse_function(char *w1,char *w2,char *w3,char *w4,char *first_line,FILE *fp,int *lines)
+{
+	char *srcbuf=NULL,*script;
+	int srcsize=65536;
+	int startline=0;
+	char line[1024];
+	int i;
+//	struct dbt *label_db;
+	char *p;
+
+	// スクリプトの解析
+	srcbuf=calloc(srcsize, 1);
+	if (srcbuf==NULL) {
+		printf("out of memory : npc_parse_function srcbuf\n");
+		exit(1);
+	}
+	if (strchr(first_line,'{')) {
+		strcpy(srcbuf,strchr(first_line,'{'));
+		startline=*lines;
+	} else
+		srcbuf[0]=0;
+	while(1) {
+		for(i=strlen(srcbuf)-1;i>=0 && isspace(srcbuf[i]);i--);
+		if (i>=0 && srcbuf[i]=='}')
+			break;
+		fgets(line,1020,fp);
+		(*lines)++;
+		if (feof(fp))
+			break;
+		if (strlen(srcbuf)+strlen(line)+1>=srcsize) {
+			srcsize += 65536;
+			srcbuf = realloc(srcbuf, srcsize);
+			if (srcbuf==NULL) {
+				printf("out of memory : npc_parse_function srcbuf realloc\n");
+				exit(1);
+			}
+			memset(srcbuf + srcsize - 65536, '\0', 65536);
+		}
+		if (srcbuf[0]!='{') {
+			if (strchr(line,'{')) {
+				strcpy(srcbuf,strchr(line,'{'));
+				startline=*lines;
+			}
+		} else
+			strcat(srcbuf,line);
+	}
+	script=parse_script(srcbuf,startline);
+	if (script==NULL) {
+		// script parse error?
+		free(srcbuf);
+		return 1;
+	}
+
+	if( (p=malloc(50))==NULL ){
+		printf("out of memory : npc_parse_function (name)\n");
+		exit(1);
+	}
+
+	strcpy(p,w3);
+	strdb_insert(script_get_userfunc_db(),p,script);
+
+//	label_db=script_get_label_db();
+
+	// もう使わないのでバッファ解放
+	free(srcbuf);
+	
+//	printf("function %s => %p\n",p,script);
+	
+	return 0;
+}
+
 
 /*==========================================
  * mob行解析
@@ -1377,7 +1452,7 @@ int do_init_npc(void)
 				continue;
 			}
 			// マップの存在確認
-			if( strcmp(w1,"-")!=0 ){
+			if( strcmp(w1,"-")!=0 && strcmpi(w1,"function")!=0 ){
 				sscanf(w1,"%[^,]",mapname);
 				m = map_mapname2mapid(mapname);
 				if (strlen(mapname)>16 || m<0) {
@@ -1390,8 +1465,12 @@ int do_init_npc(void)
 			} else if (strcmpi(w2,"shop")==0 && count > 3) {
 				npc_parse_shop(w1,w2,w3,w4);
 			} else if (strcmpi(w2,"script")==0 && count > 3) {
-				npc_parse_script(w1,w2,w3,w4,line+w4pos,fp,&lines);
-			} else if ((i=0,sscanf(w2,"duplicate%n",&i), (i>0 && w2[i]=='(')) && count > 3) {
+				if( strcmpi(w1,"function")==0 ){
+					npc_parse_function(w1,w2,w3,w4,line+w4pos,fp,&lines);
+				}else{
+					npc_parse_script(w1,w2,w3,w4,line+w4pos,fp,&lines);
+				}
+			} else if ( (i=0,sscanf(w2,"duplicate%n",&i), (i>0 && w2[i]=='(')) && count > 3) {
 				npc_parse_script(w1,w2,w3,w4,line+w4pos,fp,&lines);
 			} else if (strcmpi(w2,"monster")==0 && count > 3) {
 				npc_parse_mob(w1,w2,w3,w4);

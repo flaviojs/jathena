@@ -136,6 +136,12 @@ AthenaNPCScript
 		コピー元のNPCがマップ上に配置されている場合、同じマップである必要があります。
 		マップ上に配置されていない場合は、どのマップへもコピー可能です。
 	
+	＊ユーザー定義関数スクリプト：スクリプトから呼び出されるユーザー定義関数を作成します。
+		function<tab>script<tab><name><tab>{ <script> ... }
+		
+		callfunc命令で呼び出すことの出来る関数を作成します。
+		関数の最後には必ずreturn命令を入れてください。
+	
 	＊マップフラグ：MAPのルールを管理します。
 		<gatname><tab>mapflag<tab><const>
 		
@@ -922,6 +928,33 @@ AthenaNPCScript
 			ラベル付きイベントも指定でき、NPC名を省略することで、イベントをブロードキャストできます。
 			（複数のNPCの同じ名前のラベルを実行できる。 例＞"::OnEvent"）
 	
+		callsub命令
+			callsub <label>
+		
+			label	ラベル
+		
+			同一スクリプト内のラベル<label>をサブルーティンとして実行します。
+			サブルーティンから復帰するときはreturn命令を使用してください。
+			この命令はreturn命令の実行状況によっては関数として使用することも出来ます。
+			
+		callfunc命令
+			callfunc <func>
+		
+			func	文字列
+		
+			<func>で定義されたユーザー定義関数を実行します。
+			ユーザー定義関数から復帰するときはreturn命令を使用してください。
+			この命令はreturn命令の実行状況によっては関数として使用することも出来ます。
+	
+		return命令
+			return <retval>
+			
+			retval	数値または文字列、省略可
+		
+			直ちにサブルーティンもしくはユーザー定義関数を抜け、呼び出し元に戻ります。
+			<retval>は戻り値で、callsubまたはcallfuncが関数として呼び出されているとき、この戻り値が使用されます。
+			callsubまたはfuncが命令として呼ばれているときは、<retval>は省略してください。
+	
 	＊関数
 		rand関数
 			rand(<n1>[,<n2>])
@@ -1178,6 +1211,16 @@ AthenaNPCScript
 			<例> 配列@hogeが 1,2,3,4,5 だとすると、
 			     getarraysize(@hoge)=5, getarraysize(@hoge[10])=10;
 		
+		callsub関数
+			callsub <label>
+			
+			callsub命令を関数として実行します。詳しくはcallsub命令を見てください。
+
+		callfunc関数
+			callfunc <func>
+			
+			callfunc命令を関数として実行します。詳しくはcallfunc命令を見てください。
+		
 	＊定数ラベル
 		-ラベル
 			if文やmenu文で使用します。次の行からスクリプトを開始します。
@@ -1351,6 +1394,15 @@ AthenaNPCScript
 			関数実行/命令実行部分で、関数でも命令でもない
 			シンボルがありました。
 			if文のなかである可能性が高いです。
+
+		return without callfunc or callsub !
+			callfuncやcallsubされていないのにreturn命令を実行しました。
+			
+		stack.sp(?) != default(?)
+			スタックポインタが基準スタックポインタと異なっています。
+			命令を実行した結果、スタックポインタが狂いました。
+			関数を命令として実行した可能性があります。
+		
 
 ５．あとがき
 	この文章を作成するにあたり、snapshotに含まれるNPCを参考にしました。

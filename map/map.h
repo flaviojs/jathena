@@ -161,6 +161,9 @@ struct map_session_data {
 	int npc_pos;
 	int npc_menu;
 	int npc_amount;
+	int npc_stack,npc_stackmax;
+	char *npc_script,*npc_scriptroot;
+	char *npc_stackbuf;
 	char npc_str[256];
 	unsigned int chatID;
 

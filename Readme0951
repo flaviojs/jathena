@@ -1,4 +1,58 @@
 --------------------
+//0961 by 胡蝶蘭
+
+・スクリプトにサブルーチン/ユーザー定義関数機能追加
+	詳しくはサンプルとscript_ref.txtを読んでください。
+	地味に大改造なので、スクリプト関係でバグがあるかもしれません。
+	
+	(map/)
+	map.h/map.c
+		struct map_session_data にスクリプト情報退避用のメンバ追加
+		map_quit()修正
+	script.h/script.c
+		色々修正(run_script(),run_func()が主)
+	npc.c
+		npc_parse_function()追加他
+	(conf/sample)
+	npc_test_func.txt
+		ユーザー定義関数/サブルーティンのテストスクリプト
+	(doc/)
+	script_ref.txt
+		サブルーティンなどの説明追加
+
+--------------------
+//0960 by (凸)
+・本鯖相違スレッド part2 >>62 KKさんのアンクルスネア修正を同梱
+・バグ報告スレッド part5 >>14-16 rbさんのバグ修正を同梱
+・For English User Forum >>15 Mugendaiさんの指摘で0x1d7を使うのはVal>255に修正(0xc3のValは1バイトだから0x1d7を使うのかと納得)
+・pc_calc_base_job()を変更して元jobだけでなくノビか一次職か二次職(type)、通常か転生か養子(upper)を返すようにした
+
+	(map/)
+	atcommand.c
+		atcommand_joblevelup() 修正
+		atcommand_character_joblevel() 修正
+	clif.c
+		clif_changelook() 修正
+	pc.h 修正
+	pc.c
+		pc_setrestartvalue() 修正
+		pc_equippoint() 修正
+		pc_isequip() 修正
+		pc_calc_skilltree() 修正
+		pc_calcstatus() 修正
+		pc_isUseitem() 修正
+		pc_calc_base_job() 修正
+		pc_allskillup() 修正
+		pc_damage() 修正
+		pc_jobchange() 修正
+		pc_equipitem() 修正
+	script.c
+		buildin_changesex() 修正
+	skill.c
+		skill_castend_nodamage_id() 修正
+		skill_unit_onplace() 修正
+		
+--------------------
 //0959 by (凸)
 ・help.txtがdocじゃなくてconfのが読み出されてた＿|￣|○
 ・gamejokeを参考に転生二次職のステータス加重値をjob_db2-2.txtに記述

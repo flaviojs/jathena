@@ -18,6 +18,8 @@ struct script_state {
 	int start,end;
 	int pos,state;
 	int rid,oid;
+	char *script,*new_script;
+	int defsp,new_pos,new_defsp;
 };
 
 #define SCRIPT_CONF_NAME	"conf/script_athena.conf"
@@ -26,6 +28,7 @@ unsigned char * parse_script(unsigned char *,int);
 int run_script(unsigned char *,int,int,int);
 
 struct dbt* script_get_label_db();
+struct dbt* script_get_userfunc_db();
 
 int script_config_read(char *cfgName);
 int do_init_script();
