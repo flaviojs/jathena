@@ -30,7 +30,7 @@ struct item {
 	int id;
 	short nameid;
 	short amount;
-	short equip;
+	unsigned short equip;
 	char identify;
 	char refine;
 	char attribute;

@@ -3381,9 +3381,12 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 		}
 	}
 	// 弓矢装備
-	if(pos==0x8000)
+	if(pos==0x8000){
 		clif_arrowequip(sd,n);
-	else	clif_equipitemack(sd,n,pos,1);
+		clif_arrow_fail(sd,3);	// 3=矢が装備できました
+	}
+	else
+		clif_equipitemack(sd,n,pos,1);
 
 	sd->status.inventory[n].equip=pos;
 	pc_checkallowskill(sd,nameid);	// 装備品でスキルか解除されるかチェック

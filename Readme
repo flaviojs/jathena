@@ -1,4 +1,22 @@
 --------------
+//0565 by 引退人
+
+・マップ移動時に矢装備が外れないように修正
+・ログイン時に矢装備が表示されるように修正
+	(/common)
+	mmo.h
+		（矢装備は0x8000なので）shortだとintへのキャスト時などに
+		負値となってしまうためunsigned shortに修正
+		struct item
+			short equip; -> unsigned short equip;
+	(/map)
+	clif.c
+		clif_itemlist() アイテムリストの矢のついでに矢装備もチェック
+		clif_arrowequip() シンプル化
+	pc.c
+		pc_equipitem() 修正
+
+--------------
 //0564 by 紅葉
 
 ・@modelの服染め不可能判定修正。

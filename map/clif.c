@@ -1116,7 +1116,7 @@ int clif_delitem(struct map_session_data *sd,int n,int amount)
  */
 int clif_itemlist(struct map_session_data *sd)
 {
-	int i,n,fd=sd->fd;
+	int i,n,fd=sd->fd,arrow=-1;
 	unsigned char *buf = WFIFOP(fd,0);
 
 	WBUFW(buf,0)=0xa3;
@@ -1129,16 +1129,20 @@ int clif_itemlist(struct map_session_data *sd)
 		WBUFB(buf,n*10+8)=itemdb_type(sd->status.inventory[i].nameid);
 		WBUFB(buf,n*10+9)=sd->status.inventory[i].identify;
 		WBUFW(buf,n*10+10)=sd->status.inventory[i].amount;
-		if(itemdb_equip(sd->status.inventory[i].nameid) == 0x8000)
-			 WBUFW(buf,n*10+12)=0x8000;
-			 else
-			 WBUFW(buf,n*10+12)=0;
+		if(itemdb_equip(sd->status.inventory[i].nameid) == 0x8000){
+			WBUFW(buf,n*10+12)=0x8000;
+			if(sd->status.inventory[i].equip) arrow=i;	// ついでに矢装備チェック
+		}
+		else
+			WBUFW(buf,n*10+12)=0;
 		n++;
 	}
 	if(n){
 		WBUFW(buf,2)=4+n*10;
 		WFIFOSET(fd,WFIFOW(fd,2));
 	}
+	if(arrow!=-1)
+		clif_arrowequip(sd,arrow);
 	return 0;
 }
 
@@ -1508,42 +1512,32 @@ int clif_initialstatus(struct map_session_data *sd)
  *矢装備
  *------------------------------------------
  */
- int clif_arrowequip(struct map_session_data *sd,int val)
- {
- 	int fd=sd->fd;
- 	
- 	//いったん装備解除
- 	WFIFOW(fd,0)=0x013c;
- 	WFIFOW(fd,2)=0;
+int clif_arrowequip(struct map_session_data *sd,int val)
+{
+	int fd=sd->fd;
+	
+	WFIFOW(fd,0)=0x013c;
+	WFIFOW(fd,2)=val+2;//矢のアイテムID
+
 	WFIFOSET(fd,packet_len_table[0x013c]);
- 	
- 	//装備
- 	WFIFOW(fd,0)=0x013c;
- 	WFIFOW(fd,2)=val+2;//矢のアイテムID
- 	WFIFOSET(fd,packet_len_table[0x013c]);
- 	
- 	WFIFOW(fd,0)=0x013b;
-  	WFIFOW(fd,2)=3;
- 	WFIFOSET(fd,packet_len_table[0x013b]);
- 	
- 	return 0;
- }
+	
+	return 0;
+}
 /*==========================================
  *
  *------------------------------------------
  */
- int clif_arrow_fail(struct map_session_data *sd,int type)
- {
- 	int fd=sd->fd;
+int clif_arrow_fail(struct map_session_data *sd,int type)
+{
+	int fd=sd->fd;
 
- 	WFIFOW(fd,0)=0x013b;
-  	WFIFOW(fd,2)=type;
+	WFIFOW(fd,0)=0x013b;
+	WFIFOW(fd,2)=type;
 
 	WFIFOSET(fd,packet_len_table[0x013b]);
- 	
- 	return 0;
 
- }
+	return 0;
+}
 /*==========================================
  * 作成可能 矢リスト送信
  *------------------------------------------
