@@ -1136,8 +1136,20 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case KN_BRANDISHSPEAR:		/* ブランディッシュスピア */
-		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
-		skill_blown(src,bl,1);
+		{
+			struct mob_data* mb=(struct mob_data*)bl;
+
+			skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+			if(mb->hp > 0){
+				skill_blown(src,bl,1);
+				if(bl->type == BL_MOB)
+					clif_fixmobpos((struct mob_data *)bl);
+				else if(bl->type == BL_PET)
+					clif_fixpetpos((struct pet_data *)bl);
+				else
+					clif_fixpos(bl);
+			}
+		}
 		break;
 	case RG_BACKSTAP:		/* バックスタブ */
 		{
@@ -1745,38 +1757,50 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case KN_BRANDISHSPEAR:	/*ブランディッシュスピア*/
 		{
-			int c,n=1,ar;
+			int c,n=4,ar;
 			int dir = map_calc_dir(src,bl->x,bl->y);
 			struct brandish tc;
 			int x=bl->x,y=bl->y;
 			ar=skilllv/3;
-			/* 範囲① */
 			skill_brandishspear_first(&tc,dir,x,y);
-			for(c=0;c<5;c++){
-				map_foreachinarea(skill_area_sub,
-					bl->m,tc.tar_x[c],tc.tar_y[c],tc.tar_x[c],tc.tar_y[c],0,
-					src,skillid,skilllv,tick, flag|BCT_ENEMY|n,
-					skill_castend_damage_id);
-			}
-			/* 範囲①'②③ */
-			skill_brandishspear_dir(&tc,dir);
-			for(c=0;c<5;c++){
-				map_foreachinarea(skill_area_sub,
-					bl->m,tc.tar_x[c],tc.tar_y[c],tc.tar_x[c],tc.tar_y[c],0,
-					src,skillid,skilllv,tick, flag|BCT_ENEMY|n,
-					skill_castend_damage_id);
-				if(c==4 && skilllv > 3 && n==1){ n++; c=-1;}
-				else if(c==4 && skilllv > 6 && n==2){ n++; c=-1;}
-			}
+			skill_brandishspear_dir(&tc,dir,4);
 			/* 範囲④ */
 			if(skilllv == 10){
-				skill_brandishspear_dir(&tc,dir);
 				for(c=1;c<4;c++){
 					map_foreachinarea(skill_area_sub,
 						bl->m,tc.tar_x[c],tc.tar_y[c],tc.tar_x[c],tc.tar_y[c],0,
-						src,skillid,skilllv,tick, flag|BCT_ENEMY|4,
+						src,skillid,skilllv,tick, flag|BCT_ENEMY|n,
 						skill_castend_damage_id);
 				}
+			}
+			/* 範囲③② */
+			if(skilllv > 6){
+				skill_brandishspear_dir(&tc,dir,-1);
+				n--;
+			}else{
+				skill_brandishspear_dir(&tc,dir,-2);
+				n-=2;
+			}
+
+			if(skilllv > 3){
+				for(c=0;c<5;c++){
+					map_foreachinarea(skill_area_sub,
+						bl->m,tc.tar_x[c],tc.tar_y[c],tc.tar_x[c],tc.tar_y[c],0,
+						src,skillid,skilllv,tick, flag|BCT_ENEMY|n,
+						skill_castend_damage_id);
+					if(skilllv > 6 && n==3 && c==4){
+						skill_brandishspear_dir(&tc,dir,-1);
+						n--;c=-1;
+					}
+				}
+			}
+			/* 範囲① */
+			for(c=0;c<10;c++){
+				if(c==0||c==5) skill_brandishspear_dir(&tc,dir,-1);
+				map_foreachinarea(skill_area_sub,
+					bl->m,tc.tar_x[c%5],tc.tar_y[c%5],tc.tar_x[c%5],tc.tar_y[c%5],0,
+					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
+					skill_castend_damage_id);
 			}
 		}
 		break;
@@ -3961,50 +3985,129 @@ int skill_castcancel(struct block_list *bl,int type)
  */
 void skill_brandishspear_first(struct brandish *tc,int dir,int x,int y){
 	if(dir == 0){
-		tc->tar_x[0]=x-2;tc->tar_y[0]=y-1;tc->tar_y[1]=y-1;tc->tar_y[3]=y-1;tc->tar_y[4]=y-1;tc->tar_x[1]=x-1;tc->tar_x[3]=x+1;tc->tar_x[4]=x+2; }
+		tc->tar_x[0]=x-2;
+		tc->tar_x[1]=x-1;
+		tc->tar_x[2]=x;
+		tc->tar_x[3]=x+1;
+		tc->tar_x[4]=x+2;
+		tc->tar_y[0]=
+		tc->tar_y[1]=
+		tc->tar_y[2]=
+		tc->tar_y[3]=
+		tc->tar_y[4]=y-1;
+	}
 	else if(dir==2){
-		tc->tar_x[0]=x+1;tc->tar_x[1]=x+1;tc->tar_x[3]=x+1;tc->tar_x[4]=x+1;tc->tar_y[0]=y+2;tc->tar_y[1]=y+1;tc->tar_y[3]=y-1;tc->tar_y[4]=y-2; }
+		tc->tar_x[0]=
+		tc->tar_x[1]=
+		tc->tar_x[2]=
+		tc->tar_x[3]=
+		tc->tar_x[4]=x+1;
+		tc->tar_y[0]=y+2;
+		tc->tar_y[1]=y+1;
+		tc->tar_y[2]=y;
+		tc->tar_y[3]=y-1;
+		tc->tar_y[4]=y-2;
+	}
 	else if(dir==4){
-		tc->tar_x[0]=x-2;tc->tar_x[1]=x-1;tc->tar_x[3]=x+1;tc->tar_x[4]=x+2;tc->tar_y[0]=x+1;tc->tar_y[1]=x+1;tc->tar_y[3]=x+1;tc->tar_y[4]=x+1; }
+		tc->tar_x[0]=x-2;
+		tc->tar_x[1]=x-1;
+		tc->tar_x[2]=x;
+		tc->tar_x[3]=x+1;
+		tc->tar_x[4]=x+2;
+		tc->tar_y[0]=
+		tc->tar_y[1]=
+		tc->tar_y[2]=
+		tc->tar_y[3]=
+		tc->tar_y[4]=y+1;
+	}
 	else if(dir==6){
-		tc->tar_x[0]=x-1;tc->tar_x[1]=x-1;tc->tar_x[3]=x-1;tc->tar_x[4]=x-1;tc->tar_y[0]=y+2;tc->tar_y[1]=y+1;tc->tar_y[3]=y-1;tc->tar_y[4]=y-2; }
+		tc->tar_x[0]=
+		tc->tar_x[1]=
+		tc->tar_x[2]=
+		tc->tar_x[3]=
+		tc->tar_x[4]=x-1;
+		tc->tar_y[0]=y+2;
+		tc->tar_y[1]=y+1;
+		tc->tar_y[2]=y;
+		tc->tar_y[3]=y-1;
+		tc->tar_y[4]=y-2;
+	}
 	else if(dir==1){
-		tc->tar_x[0]=x-1;tc->tar_y[0]=y-4;tc->tar_x[1]=x;  tc->tar_y[1]=y-3;tc->tar_x[3]=x+2;tc->tar_y[3]=y;  tc->tar_x[4]=x+3;tc->tar_y[4]=y+1; }
+		tc->tar_x[0]=x-1;
+		tc->tar_x[1]=x;
+		tc->tar_x[2]=x+1;
+		tc->tar_x[3]=x+2;
+		tc->tar_x[4]=x+3;
+		tc->tar_y[0]=y-4;
+		tc->tar_y[1]=y-3;
+		tc->tar_y[2]=y-1;
+		tc->tar_y[3]=y;
+		tc->tar_y[4]=y+1;
+	}
 	else if(dir==3){
-		tc->tar_x[0]=x+3;tc->tar_y[0]=y-1;tc->tar_x[1]=x+2;tc->tar_y[1]=y;  tc->tar_x[3]=x;  tc->tar_y[3]=y+2;tc->tar_x[4]=x-1;tc->tar_y[4]=y+3; }
+		tc->tar_x[0]=x+3;
+		tc->tar_x[1]=x+2;
+		tc->tar_x[2]=x+1;
+		tc->tar_x[3]=x;
+		tc->tar_x[4]=x-1;
+		tc->tar_y[0]=y-1;
+		tc->tar_y[1]=y;
+		tc->tar_y[2]=y+1;
+		tc->tar_y[3]=y+2;
+		tc->tar_y[4]=y+3;
+	}
 	else if(dir==5){
-		tc->tar_x[0]=x+1;tc->tar_y[0]=y+3;tc->tar_x[1]=x;  tc->tar_y[1]=y+2;tc->tar_x[3]=x-2;tc->tar_y[3]=y;  tc->tar_x[4]=x-3;tc->tar_y[4]=y-1; }
+		tc->tar_x[0]=x+1;
+		tc->tar_x[1]=x;
+		tc->tar_x[2]=x-1;
+		tc->tar_x[3]=x-2;
+		tc->tar_x[4]=x-3;
+		tc->tar_y[0]=y+3;
+		tc->tar_y[1]=y+2;
+		tc->tar_y[2]=y+1;
+		tc->tar_y[3]=y;
+		tc->tar_y[4]=y-1;
+	}
 	else if(dir==7){
-		tc->tar_x[0]=x-3;tc->tar_y[0]=y+1;tc->tar_x[1]=x-2;tc->tar_y[1]=y;  tc->tar_x[3]=x;  tc->tar_y[3]=y-2;tc->tar_x[4]=x+1;tc->tar_y[4]=y-3; }
+		tc->tar_x[0]=x-3;
+		tc->tar_x[1]=x-2;
+		tc->tar_x[2]=x-1;
+		tc->tar_x[3]=x;
+		tc->tar_x[4]=x+1;
+		tc->tar_y[1]=y;
+		tc->tar_y[0]=y+1;
+		tc->tar_y[2]=y-1;
+		tc->tar_y[3]=y-2;
+		tc->tar_y[4]=y-3;
+	}
 
-	tc->tar_x[2]=x;tc->tar_y[2]=y;
 }
 
 /*=========================================
  * ブランディッシュスピア 方向判定 範囲拡張
  *-----------------------------------------
  */
-void skill_brandishspear_dir(struct brandish *tc,int dir){
+void skill_brandishspear_dir(struct brandish *tc,int dir,int are){
 
 	int c;
 
 	for(c=0;c<5;c++){
 		if(dir==0){
-			tc->tar_y[c]++; }
+			tc->tar_y[c]+=are; }
 		else if(dir==1){
-			tc->tar_x[c]--; tc->tar_y[c]++; }
+			tc->tar_x[c]-=are; tc->tar_y[c]+=are; }
 		else if(dir==2){
-			tc->tar_x[c]--; }
+			tc->tar_x[c]-=are; }
 		else if(dir==3){
-			tc->tar_x[c]--; tc->tar_y[c]--; }
+			tc->tar_x[c]-=are; tc->tar_y[c]-=are; }
 		else if(dir==4){
-			tc->tar_y[c]--; }
+			tc->tar_y[c]-=are; }
 		else if(dir==5){
-			tc->tar_x[c]++; tc->tar_y[c]--; }
+			tc->tar_x[c]+=are; tc->tar_y[c]-=are; }
 		else if(dir==6){
-			tc->tar_x[c]++; }
+			tc->tar_x[c]+=are; }
 		else if(dir==7){
-			tc->tar_x[c]++; tc->tar_y[c]++; }
+			tc->tar_x[c]+=are; tc->tar_y[c]+=are; }
 	}
 }
 

@@ -1,4 +1,19 @@
 --------------------
+//0786 by huge
+・BDS修正
+    前から吹き飛ばして行くと良くないかもしれないので、後ろから処理
+    有効範囲の修正
+
+	(/map)
+
+	skill.h
+	skill.c
+		skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id() 修正。
+		skill_brandishspear_first() 修正。
+		skill_brandishspear_dir() 修正。
+
+--------------------
 //0785 by 死神
 
 ・本鯖に合わせて修正。(韓国鞍のパッチnoticeを参考して修正しました。)
