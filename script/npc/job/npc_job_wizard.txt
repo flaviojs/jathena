@@ -561,7 +561,9 @@ L_Misc2:
 	close;
 }
 
-gef_tower.gat,102,24,8	script	陰気なウィザード	735,{
+gef_tower.gat,102,24,2	script	陰気なウィザード	735,{
+	if (Class == 0) goto L_Misc4;
+	if (Class == 8) goto L_Misc3;
 	if (Class == 9) goto L_Misc2;
 	if (Class != 2) goto L_Misc1;
 	if (job2nd_wiz == 1) goto L_Wait1;
@@ -1186,6 +1188,24 @@ L_Misc2:
 	mes "残りの人生を、廃人として";
 	mes "終わらせたくなければな…。";
 	close;
+L_Misc3:
+	mes "[ラウレル]";
+	mes "帰るんだ。神の仕いに用はない。";
+	mes "魔力と神力は相容れないからな。";
+	next;
+	mes "[ラウレル]";
+	mes "それでなくとも私の体調はよくない…";
+	mes "近づかずあちらへ行きなさい。";
+	close;
+L_Misc4:
+	mes "[ラウレル]";
+	mes "ひよっこがなぜこんな場所に来た？";
+	mes "すぐに立ち去りなさい。";
+	next;
+	warp "geffen",120,110;
+	end;
+
+
 }
 
 gef_tower.gat,116,39,4	script	flagcontrol2	111,{

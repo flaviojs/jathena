@@ -1,4 +1,11 @@
 --------------------
+//1041 by mare
+	FIX NPC Script Command - buildin_getgdskilllv()
+        Add NPC Sctipt Command - buildin_agitcheck()
+	(script/npc/job/)
+	npc_job_wizard.txt
+		ラウレルさんの台詞、ノビとプリの場合の分追加
+-------------------
 //1040 by 胡蝶蘭
 
 ・サーバー間接続のパケット表追加
