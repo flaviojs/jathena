@@ -29,6 +29,9 @@ struct dbt* script_get_label_db();
 
 int script_config_read(char *cfgName);
 int do_init_script();
+int do_final_script();
+
+extern char mapreg_txt[];
 
 #endif
 

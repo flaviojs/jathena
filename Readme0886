@@ -1,4 +1,40 @@
 --------------------
+//0896 by 胡蝶蘭
+
+・永続的マップ変数機能追加
+・マップ変数を文字列型変数としても使用できるようにした
+	・今までのプレフィックス $ は永続的になります。
+	  一時的マップ変数を使用する場合はプレフィックス $@ を指定してください.
+
+	・永続的/一時的ともに文字列型に対応しています。
+	  文字列型のポストフィックスは$です。
+
+	<例> $@hoge 数値型一時マップ変数、$hoge$ 文字列型永続マップ変数
+	・永続マップ変数はデフォルトでは save/mapreg.txt に保存されます。
+	  これはmap_athena.confのmapreg_txtで設定できます。
+
+・str_dataが再割り当てされるとマップ変数が正常に使用できないバグ修正
+	・strdbからnumdbにして、変数名はstr_bufに入れるように。
+
+・map_athena.confのdelnpc,npc:clearが正しく働かないバグ修正
+
+	(map/)
+	npc.c
+		npc_delsrcfile(),npc_clearsrcfile()修正
+	script.c / script.h
+		マップ変数系かなり修正
+	map.c
+		map_read_config()修正など
+	(conf/)
+	map_athena.conf
+		mapreg_txt追加
+	(doc/)
+	conf_ref.txt
+		mapreg_txt,help_txt,motd_txt追加
+	script_ref.txt
+		文字列型変数の説明修正
+
+--------------------
 //0895 by Selena
 
 ・mapflagにnozenypenaltyを追加。

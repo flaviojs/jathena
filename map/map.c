@@ -1373,6 +1373,8 @@ int map_config_read(char *cfgName)
 			strcpy(motd_txt,w2);
 		} else if(strcmpi(w1,"help_txt")==0){
 			strcpy(help_txt,w2);
+		} else if(strcmpi(w1,"mapreg_txt")==0){
+			strcpy(mapreg_txt,w2);
 		} else if(strcmpi(w1,"import")==0){
 			map_config_read(w2);
 		}
@@ -1388,6 +1390,7 @@ int map_config_read(char *cfgName)
  */
 void do_final(void)
 {
+	do_final_script();
 	do_final_itemdb();
 	do_final_storage();
 }

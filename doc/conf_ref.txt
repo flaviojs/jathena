@@ -336,6 +336,18 @@ water_height
 	水場の高さを指定するファイルを決めます。
 	省略可能で、デフォルトはconf/water_height.txtです。
 
+motd_txt
+	Message of the Dayファイルを指定します。
+	省略可能で、デフォルトはconf/motd.txtです。
+
+help_txt
+	@helpで表示するファイルを指定します。
+	省略可能で、デフォルトはconf/help.txtです。
+
+mapreg_txt
+	MAPサーバー内キャラクター共有変数を保存するファイルを指定します。
+	省略可能で、デフォルトはsave/mapreg_txtです。
+
 data_grf
 	ROデータファイル data.grf へのパスです。
 	省略可能で、デフォルトは ./data.grf です。

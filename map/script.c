@@ -52,7 +52,11 @@ static struct {
 int str_num=LABEL_START,str_data_size;
 int str_hash[16];
 
-static struct dbt *mapvar_db;
+static struct dbt *mapreg_db=NULL;
+static struct dbt *mapregstr_db=NULL;
+static int mapreg_dirty=0;
+char mapreg_txt[256]="save/mapreg.txt";
+#define MAPREG_AUTOSAVE_INTERVAL	(10*1000)
 
 static struct dbt *scriptlabel_db=NULL;
 struct dbt* script_get_label_db(){ return scriptlabel_db; }
@@ -167,6 +171,9 @@ int buildin_setcastledata(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
+
+int mapreg_setreg(const char *name,int val);
+int mapreg_setregstr(const char *name,const char *str);
 
 struct {
 	int (*func)();
@@ -286,7 +293,7 @@ enum {
  * 文字列のハッシュを計算
  *------------------------------------------
  */
-static int calc_hash(unsigned char *p)
+static int calc_hash(const unsigned char *p)
 {
 	int h=0;
 	while(*p){
@@ -301,7 +308,7 @@ static int calc_hash(unsigned char *p)
  *------------------------------------------
  */
 // 既存のであれば番号、無ければ-1
-static int search_str(unsigned char *p)
+static int search_str(const unsigned char *p)
 {
 	int i;
 	i=str_hash[calc_hash(p)];
@@ -319,7 +326,7 @@ static int search_str(unsigned char *p)
  *------------------------------------------
  */
 // 既存のであれば番号、無ければ登録して新規番号
-static int add_str(unsigned char *p)
+static int add_str(const unsigned char *p)
 {
 	int i;
 	char *lowcase;
@@ -515,9 +522,10 @@ static unsigned char *skip_space(unsigned char *p)
 static unsigned char *skip_word(unsigned char *p)
 {
 	// prefix
-	if(*p=='@') p++;	// like weiss
 	if(*p=='$') p++;	// MAP鯖内共有変数用
+	if(*p=='@') p++;	// 一時的変数用(like weiss)
 	if(*p=='#') p++;	// account変数用
+	if(*p=='#') p++;	// ワールドaccount変数用
 	
 	while(isalnum(*p)||*p=='_'|| *p>=0x81)
 		if(*p>=0x81 && p[1]){
@@ -950,10 +958,14 @@ int get_val(struct script_state*st,struct script_data* data)
 			data->type=C_CONSTSTR;
 			if( prefix=='@' || prefix=='l' ){
 				data->u.str = pc_readregstr(sd,data->u.num);
+			}else if(prefix=='$'){
+				data->u.str = (char *)numdb_search(mapregstr_db,data->u.num);
 			}else{
 				printf("script: get_val: illeagal scope string variable.\n");
 				data->u.str = "!!ERROR!!";
 			}
+			if( data->u.str == NULL )
+				data->u.str ="";
 			
 		}else{
 		
@@ -965,7 +977,7 @@ int get_val(struct script_state*st,struct script_data* data)
 			}else if(prefix=='@' || prefix=='l'){
 				data->u.num = pc_readreg(sd,data->u.num);
 			}else if(prefix=='$'){
-				data->u.num = (int)strdb_search(mapvar_db,name);
+				data->u.num = (int)numdb_search(mapreg_db,data->u.num);
 			}else if(prefix=='#'){
 				if( name[1]=='#')
 					data->u.num = pc_readaccountreg2(sd,name);
@@ -1366,7 +1378,9 @@ int buildin_input(struct script_state *st)
 			// 文字列
 			if(st->end>st->start+2){ // 引数1個
 				if(prefix=='@' || prefix=='l')
-					pc_setregstr(sd,num,sd->npc_str);	
+					pc_setregstr(sd,num,sd->npc_str);
+				else if(prefix=='$')
+					mapreg_setregstr(name,sd->npc_str);
 				else{
 					printf("buildin_input: illeagal scope string variable.\n");
 				}
@@ -1379,7 +1393,7 @@ int buildin_input(struct script_state *st)
 				if(prefix=='@' || prefix=='l')
 					pc_setreg(sd,num,sd->npc_amount);
 				else if(prefix=='$')
-					strdb_insert(mapvar_db,name,sd->npc_amount);
+					mapreg_setreg(name,sd->npc_amount);
 				else if(prefix=='#'){
 					if( str_buf[str_data[num].str+1]=='#')
 						pc_setaccountreg2(sd,name,sd->npc_amount);
@@ -1445,6 +1459,8 @@ int buildin_set(struct script_state *st)
 		char *str = conv_str(st,& (st->stack->stack_data[st->start+3]));
 		if( prefix=='@' || prefix=='l'){
 			pc_setregstr(sd,num,str);
+		}else if(prefix=='$') {
+			mapreg_setregstr(name,str);
 		}else{
 			printf("script: buildin_set: illeagal scope string variable !");
 		}
@@ -1456,7 +1472,7 @@ int buildin_set(struct script_state *st)
 		}else if(prefix=='@' || prefix=='l') {
 			pc_setreg(sd,num,val);
 		}else if(prefix=='$') {
-			strdb_insert(mapvar_db,name,val);
+			mapreg_setreg(name,val);
 		}else if(prefix=='#') {
 			if( str_buf[str_data[num].str+1]=='#' )
 				pc_setaccountreg2(sd,name,val);	
@@ -3689,6 +3705,131 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 }
 
 /*==========================================
+ * マップ変数の変更
+ *------------------------------------------
+ */
+int mapreg_setreg(const char *name,int val)
+{
+	int i=add_str(name);
+	
+	if(val!=0)
+		numdb_insert(mapreg_db,i,val);
+	else
+		numdb_erase(mapreg_db,i);
+	
+	mapreg_dirty=1;
+	return 0;
+}
+/*==========================================
+ * 文字列型マップ変数の変更
+ *------------------------------------------
+ */
+int mapreg_setregstr(const char *name,const char *str)
+{
+	char *p;
+	int i=add_str(name);
+	
+	if( (p=numdb_search(mapregstr_db,i))!=NULL )
+		free(p);
+		
+	if( str==NULL || *str==0 ){
+		numdb_erase(mapregstr_db,i);
+		mapreg_dirty=1;
+		return 0;
+	}
+	if( (p=malloc(strlen(str)+1))==NULL ){
+		printf("script: mapreg_setregstr: out of memory !!");
+		return 0;
+	}
+	strcpy(p,str);
+	numdb_insert(mapregstr_db,i,p);
+	mapreg_dirty=1;
+	return 0;
+}
+
+/*==========================================
+ * 永続的マップ変数の読み込み
+ *------------------------------------------
+ */
+static int script_load_mapreg()
+{
+	FILE *fp;
+	char line[1024];
+
+	if( (fp=fopen(mapreg_txt,"rt"))==NULL )
+		return -1;
+
+	while(fgets(line,sizeof(line),fp)){
+		char buf1[256],buf2[1024],*p;
+		int n,i,s;
+		if( sscanf(line,"%[^\t]\t%n",buf1,&n)!=1 )
+			continue;
+		if( buf1[strlen(buf1)-1]=='$' ){
+			if( sscanf(line+n,"%[^\n\r]",buf2)!=1 ){
+				printf("%s: %s broken data !\n",mapreg_txt,buf1);
+				continue;
+			}
+			if( (p=(char *)malloc(strlen(buf2)))==NULL ){
+				printf("script_load_mapreg: out of memory !!");
+				exit(0);
+			}
+			strcpy(p,buf2);
+			s=add_str(buf1);
+			numdb_insert(mapregstr_db,s,p);
+		}else{
+			if( sscanf(line+n,"%d",&i)!=1 ){
+				printf("%s: %s broken data !\n",mapreg_txt,buf1);
+				continue;
+			}
+			s=add_str(buf1);
+			numdb_insert(mapreg_db,s,i);
+		}
+	}
+	fclose(fp);
+	return 0;
+}
+/*==========================================
+ * 永続的マップ変数の書き込み
+ *------------------------------------------
+ */
+static int script_save_mapreg_intsub(void *key,void *data,va_list ap)
+{
+	FILE *fp=va_arg(ap,FILE*);
+	char *name=str_buf+str_data[(int)key].str;
+	if( name[1]!='@' ){
+		fprintf(fp,"%s\t%d\n", name, (int)data);
+	}
+	return 0;
+}
+static int script_save_mapreg_strsub(void *key,void *data,va_list ap)
+{
+	FILE *fp=va_arg(ap,FILE*);
+	char *name=str_buf+str_data[(int)key].str;
+	if( name[1]!='@' ){
+		fprintf(fp,"%s\t%s\n", name, (char *)data);
+	}
+	return 0;
+}
+static int script_save_mapreg()
+{
+	FILE *fp;
+
+	if( (fp=fopen(mapreg_txt,"wt"))==NULL )
+		return -1;
+	numdb_foreach(mapreg_db,script_save_mapreg_intsub,fp);
+	numdb_foreach(mapregstr_db,script_save_mapreg_strsub,fp);
+	fclose(fp);
+	mapreg_dirty=0;
+	return 0;
+}
+static int script_autosave_mapreg(int tid,unsigned int tick,int id,int data)
+{
+	if(mapreg_dirty)
+		script_save_mapreg();
+	return 0;
+}
+
+/*==========================================
  * 
  *------------------------------------------
  */
@@ -3741,12 +3882,28 @@ int script_config_read(char *cfgName)
 }
 
 /*==========================================
+ * 終了
+ *------------------------------------------
+ */
+int do_final_script()
+{
+	script_save_mapreg();
+	return 0;
+}
+/*==========================================
  * 初期化
  *------------------------------------------
  */
 int do_init_script()
 {
-	mapvar_db=strdb_init(32);
+	mapreg_db=numdb_init();
+	mapregstr_db=numdb_init();
+	script_load_mapreg();
+
+	add_timer_func_list(script_autosave_mapreg,"script_autosave_mapreg");
+	add_timer_interval(gettick()+MAPREG_AUTOSAVE_INTERVAL,
+		script_autosave_mapreg,0,0,MAPREG_AUTOSAVE_INTERVAL);
+
 	scriptlabel_db=strdb_init(50);
 	return 0;
 }

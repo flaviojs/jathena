@@ -604,6 +604,7 @@ void npc_clearsrcfile()
 		free(p2);
 	}
 	npc_src_first=NULL;
+	npc_src_last=NULL;
 }
 /*==========================================
  * “Ç‚Ýž‚Þnpcƒtƒ@ƒCƒ‹‚Ì’Ç‰Á
@@ -638,16 +639,18 @@ void npc_addsrcfile(char *name)
  */
 void npc_delsrcfile(char *name)
 {
-	struct npc_src_list *p=npc_src_first,**lp=&npc_src_first;
+	struct npc_src_list *p=npc_src_first,*pp=NULL,**lp=&npc_src_first;
 
 	if( strcmpi(name,"all")==0 ){
 		npc_clearsrcfile();
 		return;
 	}
 
-	for( ; p; lp=&p->next,p=p->next ){
+	for( ; p; lp=&p->next,pp=p,p=p->next ){
 		if( strcmp(p->name,name)==0 ){
 			*lp=p->next;
+			if( npc_src_last==p )
+				npc_src_last=pp;
 			free(p);
 			break;
 		}
