@@ -2368,89 +2368,97 @@ static int mob_readdb(void)
 {
 	FILE *fp;
 	char line[1024];
-
+	char *filename[]={ "db/mob_db.txt","db/mob_db2.txt" };
+	int i;
+	
 	memset(mob_db,0,sizeof(mob_db));
-	fp=fopen("db/mob_db.txt","r");
-	if(fp==NULL){
-		printf("can't read db/mob_db.txt\n");
-		return -1;
+	
+	for(i=0;i<2;i++){
+
+		fp=fopen(filename[i],"r");
+		if(fp==NULL){
+			if(i>0)
+				continue;
+			printf("can't read %s\n",filename[i]);
+			return -1;
+		}
+		while(fgets(line,1020,fp)){
+			int class,i;
+			char *str[55],*p,*np;
+	
+			if(line[0] == '/' && line[1] == '/')
+				continue;
+	
+			for(i=0,p=line;i<55;i++){
+				if((np=strchr(p,','))!=NULL){
+					str[i]=p;
+					*np=0;
+					p=np+1;
+				} else
+					str[i]=p;
+			}
+	
+			class=atoi(str[0]);
+			if(class<=1000 || class>2000)
+				continue;
+	
+			memcpy(mob_db[class].name,str[1],24);
+			memcpy(mob_db[class].jname,str[2],24);
+			mob_db[class].lv=atoi(str[3]);
+			mob_db[class].max_hp=atoi(str[4]);
+			mob_db[class].max_sp=atoi(str[5]);
+			mob_db[class].base_exp=atoi(str[6])*
+					battle_config.base_exp_rate/100;
+			if(mob_db[class].base_exp <= 0)
+				mob_db[class].base_exp = 1;
+			mob_db[class].job_exp=atoi(str[7])*
+					battle_config.job_exp_rate/100;
+			if(mob_db[class].job_exp <= 0)
+				mob_db[class].job_exp = 1;
+			mob_db[class].range=atoi(str[8]);
+			mob_db[class].atk1=atoi(str[9]);
+			mob_db[class].atk2=atoi(str[10]);
+			mob_db[class].def=atoi(str[11]);
+			mob_db[class].mdef=atoi(str[12]);
+			mob_db[class].str=atoi(str[13]);
+			mob_db[class].agi=atoi(str[14]);
+			mob_db[class].vit=atoi(str[15]);
+			mob_db[class].int_=atoi(str[16]);
+			mob_db[class].dex=atoi(str[17]);
+			mob_db[class].luk=atoi(str[18]);
+			mob_db[class].range2=atoi(str[19]);
+			mob_db[class].range3=atoi(str[20]);
+			mob_db[class].size=atoi(str[21]);
+			mob_db[class].race=atoi(str[22]);
+			mob_db[class].element=atoi(str[23]);
+			mob_db[class].mode=atoi(str[24]);
+			mob_db[class].speed=atoi(str[25]);
+			mob_db[class].adelay=atoi(str[26]);
+			mob_db[class].amotion=atoi(str[27]);
+			mob_db[class].dmotion=atoi(str[28]);
+	
+			for(i=0;i<8;i++){
+				mob_db[class].dropitem[i].nameid=atoi(str[29+i*2]);
+				mob_db[class].dropitem[i].p=atoi(str[30+i*2])*battle_config.item_rate/100;
+			}
+			// Item1,Item2
+			mob_db[class].mexp=atoi(str[47])*battle_config.mvp_exp_rate/100;
+			mob_db[class].mexpper=atoi(str[48]);
+			for(i=0;i<3;i++){
+				mob_db[class].mvpitem[i].nameid=atoi(str[49+i*2]);
+				mob_db[class].mvpitem[i].p=atoi(str[50+i*2])*battle_config.mvp_item_rate/100;
+			}
+			if(battle_config.mvp_hp_rate!=100 && mob_db[class].mexp)
+				if((mob_db[class].max_hp=mob_db[class].max_hp*
+					battle_config.mvp_hp_rate/100)<=0)
+					mob_db[class].max_hp=1;
+			for(i=0;i<MAX_RANDOMMONSTER;i++)
+				mob_db[class].summonper[i]=0;
+			mob_db[class].maxskill=0;
+		}
+		fclose(fp);
+		printf("read %s done\n",filename[i]);
 	}
-	while(fgets(line,1020,fp)){
-		int class,i;
-		char *str[55],*p,*np;
-
-		if(line[0] == '/' && line[1] == '/')
-			continue;
-
-		for(i=0,p=line;i<55;i++){
-			if((np=strchr(p,','))!=NULL){
-				str[i]=p;
-				*np=0;
-				p=np+1;
-			} else
-				str[i]=p;
-		}
-
-		class=atoi(str[0]);
-		if(class<=1000 || class>2000)
-			continue;
-
-		memcpy(mob_db[class].name,str[1],24);
-		memcpy(mob_db[class].jname,str[2],24);
-		mob_db[class].lv=atoi(str[3]);
-		mob_db[class].max_hp=atoi(str[4]);
-		mob_db[class].max_sp=atoi(str[5]);
-		mob_db[class].base_exp=atoi(str[6])*
-				battle_config.base_exp_rate/100;
-		if(mob_db[class].base_exp <= 0)
-			mob_db[class].base_exp = 1;
-		mob_db[class].job_exp=atoi(str[7])*
-				battle_config.job_exp_rate/100;
-		if(mob_db[class].job_exp <= 0)
-			mob_db[class].job_exp = 1;
-		mob_db[class].range=atoi(str[8]);
-		mob_db[class].atk1=atoi(str[9]);
-		mob_db[class].atk2=atoi(str[10]);
-		mob_db[class].def=atoi(str[11]);
-		mob_db[class].mdef=atoi(str[12]);
-		mob_db[class].str=atoi(str[13]);
-		mob_db[class].agi=atoi(str[14]);
-		mob_db[class].vit=atoi(str[15]);
-		mob_db[class].int_=atoi(str[16]);
-		mob_db[class].dex=atoi(str[17]);
-		mob_db[class].luk=atoi(str[18]);
-		mob_db[class].range2=atoi(str[19]);
-		mob_db[class].range3=atoi(str[20]);
-		mob_db[class].size=atoi(str[21]);
-		mob_db[class].race=atoi(str[22]);
-		mob_db[class].element=atoi(str[23]);
-		mob_db[class].mode=atoi(str[24]);
-		mob_db[class].speed=atoi(str[25]);
-		mob_db[class].adelay=atoi(str[26]);
-		mob_db[class].amotion=atoi(str[27]);
-		mob_db[class].dmotion=atoi(str[28]);
-
-		for(i=0;i<8;i++){
-			mob_db[class].dropitem[i].nameid=atoi(str[29+i*2]);
-			mob_db[class].dropitem[i].p=atoi(str[30+i*2])*battle_config.item_rate/100;
-		}
-		// Item1,Item2
-		mob_db[class].mexp=atoi(str[47])*battle_config.mvp_exp_rate/100;
-		mob_db[class].mexpper=atoi(str[48]);
-		for(i=0;i<3;i++){
-			mob_db[class].mvpitem[i].nameid=atoi(str[49+i*2]);
-			mob_db[class].mvpitem[i].p=atoi(str[50+i*2])*battle_config.mvp_item_rate/100;
-		}
-		if(battle_config.mvp_hp_rate!=100 && mob_db[class].mexp)
-			if((mob_db[class].max_hp=mob_db[class].max_hp*
-				battle_config.mvp_hp_rate/100)<=0)
-				mob_db[class].max_hp=1;
-		for(i=0;i<MAX_RANDOMMONSTER;i++)
-			mob_db[class].summonper[i]=0;
-		mob_db[class].maxskill=0;
-	}
-	fclose(fp);
-	printf("read db/mob_db.txt done\n");
 	return 0;
 }
 /*==========================================
