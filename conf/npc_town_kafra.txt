@@ -5732,3 +5732,196 @@ yuno.gat,276,222,4	script	カプラ職員	113,{
 		cutin "kafra_05",255;
 		close;
 }
+
+//----------------------------------
+// < アマツ >
+//----------------------------------
+
+amatsu.gat,102,149,4	script	カプラ職員	116,{
+	set @KAFRA_COUPON,0;
+	cutin "kafra_02",2;
+	mes "[カプラ職員]";
+	mes "まったくもう、研修に送ったコは";
+	mes "どこにいっちゃったのかしら……";
+	mes "お客様もこんなに遠くまで観光ですか？";
+	mes "私もせっかく来たんだからゆっくり";
+	mes "していこっと。";
+	mes "空気は良いし、お花も綺麗ですしね。";
+	next;
+	mes "[カプラ職員]";
+	mes "さて、カプラサービスはたとえ";
+	mes "異国の地でもお客様のために";
+	mes "サービスを欠かしません。";
+	mes "何をお手伝いいたしましょう？";
+	next;
+ L_START_1:
+	if (@KAFRA_COUPON != 1) goto L_SUB_0_1;
+		mes "[カプラ職員]";
+		mes "何をお手伝いいたしましょう？";
+		next;
+ L_SUB_0_1:
+	menu "位置セーブサービス",L_MENU_1,"倉庫サービス",L_MENU_2,"カートサービス",L_MENU_4,"カプラ利用券を使用する",L_MENU_5,"積立ポイント確認",L_MENU_8,"カプラ職員配置案内",L_MENU_6,"終了",L_MENU_7;
+	L_MENU_1:
+		savepoint "yuno.gat",157,123;
+		mes "[カプラ職員]";
+		mes "セーブしました。";
+		if (@KAFRA_COUPON != 0) goto L_SUB_1_2;
+			mes "ご利用ありがとうございます。";
+			goto L_EXIT;
+	L_SUB_1_2:
+			next;
+			goto L_START_1;
+	L_MENU_2:
+		if((basicskillcheck(0) == 0) || getskilllv(1) >= 6) goto L_SUB_2_1;
+			mes "[カプラ職員]";
+			mes "倉庫は基本スキルレベル6を";
+			mes "習得してから利用可能となります。";
+			if (@KAFRA_COUPON != 0) goto L_ROOT_2_1;
+				goto L_EXIT;
+		L_ROOT_2_1:
+				next;
+				goto L_START_1;
+	L_SUB_2_1:
+		if (@KAFRA_COUPON != 0) goto L_SUB_2_2;
+			if (Zeny >= 40) goto L_ROOT_2_2;
+				mes "[カプラ職員]";
+				mes "お客様、お金が足りません。";
+				mes "倉庫利用料金は 40 Zenyです。";
+				goto L_EXIT;
+		L_ROOT_2_2:
+			set Zeny,Zeny-40;
+			openstorage;
+			goto L_EXIT;
+	L_SUB_2_2:
+		openstorage;
+		goto L_EXIT;
+	L_MENU_4:
+		if (Class == 5) goto L_SUB_4_1;
+		if (Class == 10) goto L_SUB_4_1;
+		if (Class == 18) goto L_SUB_4_1;
+			mes "[カプラ職員]";
+			mes "申し訳ございません。";
+			mes "カートは商人とブラックスミス";
+			mes "アルケミスト専用のサービスです。";
+			if (@KAFRA_COUPON != 0) goto L_ROOT_4_1;
+				goto L_EXIT;
+			L_ROOT_4_1:
+				next;
+				goto L_START_1;
+		L_SUB_4_1:
+			if (@KAFRA_COUPON != 0) goto L_SUB_4_2;
+				mes "[カプラ職員]";
+	   			mes "カート利用料金は 800 Zenyです。";
+    	   		mes "また、カートを利用するには";
+       			mes "‘プッシュカート’スキルが必要です。";
+       			mes "そのスキルがないとカートを利用";
+       			mes "できずにお金だけ消えてしまいます。";
+	       		mes "準備はよろしいですか？";
+				next;
+   				menu "利用する",L_MENU_4_1,"取り消し",L_MENU_4_2;
+		L_MENU_4_1:
+				if (Zeny >= 800) goto L_ROOT_4_2;
+        	 		mes "[カプラ職員]";
+       				mes "お客様、お金が足りません。";
+	       			mes "カート利用料金は 800 Zenyです。";
+					goto L_EXIT;
+		L_ROOT_4_2:
+				set Zeny,Zeny-800;
+				setcart;
+				goto L_EXIT;
+		L_MENU_4_2:
+				mes "[カプラ職員]";
+  				mes "ありがとうございました。";
+   				mes "またご利用くださいませ。";
+				goto L_EXIT;
+		L_SUB_4_2:
+			setcart;
+			goto L_START_1;
+	L_MENU_5:
+		if (@KAFRA_COUPON != 1) goto L_ROOT_5_1;
+		   	mes "[カプラ職員]";
+			mes "現在、カプラ利用券の使用中です。";
+			next;
+			goto L_START_1;
+		L_ROOT_5_1:
+			if (countitem(1084)>=1) goto L_SUB_5_1;
+   			   	mes "[カプラ職員]";
+		   		mes "お客様、カプラ利用券が必要ですよ。";
+				goto L_EXIT;
+		L_SUB_5_1:
+			delitem 1084,1;
+			set @KAFRA_COUPON,1;
+	   		mes "[カプラ職員]";
+			mes "カプラ利用券を使用しました。";
+			next;
+			goto L_START_1;
+	L_MENU_6:
+		if (@COMPASS_CHECK != 0) goto L_SUB_6_1;
+			mes "[カプラ職員]";
+			mes "ミニマップに位置表示を残しますか？";
+			next;
+			menu "はい",-,"いいえ",L_SUB_6_1;
+				set @COMPASS_CHECK,1;
+		L_SUB_6_1:
+   			mes "[カプラ職員]";
+		   	mes "ミニマップ表示地点に";
+		   	mes "カプラ職員がいます。";
+			if (@COMPASS_CHECK != 1) goto L_SUB_6_2;
+				viewpoint 1,152,187,1,0x0000FF;
+				viewpoint 1,328,109,2,0x0000FF;
+				viewpoint 1,276,222,3,0x0000FF;
+				goto L_SUB_6_3;
+		L_SUB_6_2:
+				viewpoint 2,152,187,1,0x0000FF;
+				viewpoint 2,328,109,2,0x0000FF;
+				viewpoint 1,276,222,3,0x0000FF;
+		L_SUB_6_3:
+			if (@KAFRA_COUPON != 0) goto L_SUB_6_4;
+				goto L_EXIT;
+		L_SUB_6_4:
+				next;
+				goto L_START_1;
+	L_MENU_8:
+	   	mes "[カプラ職員]";
+		mes "お客様の積み立てポイントを確認できます";
+		next;
+		menu "積立ポイント確認",-,"積立ポイントとは？",L_SUB_8_3,"取り消し",L_SUB_8_2;
+			mes "[カプラ職員]";
+			mes strcharinfo(0) + " 様の積立ポイントは、";
+			if (KF_PIT != 0) goto L_SUB_8_1;
+			mes "現在 0 点です。";
+			goto L_SUB_8_4;
+		L_SUB_8_1:
+			mes "現在 " + KF_PIT + " 点です。";
+			goto L_SUB_8_4;
+		L_SUB_8_2:
+			mes "[カプラ職員]";
+			mes "ありがとうございました。";
+			mes "またご利用くださいませ。";
+			goto L_SUB_8_4;
+		L_SUB_8_3:
+			mes "[カプラ職員]";
+			mes "積立ポイントとは、カプラサービスの空間移動サービスをご利用されると、そのご利用度数に応じて積み立てられるマイレージプログラムです。";
+			next;
+			mes "[カプラ職員]";
+			mes "積立ポイントはカプラ本社で様々な商品と引き換えが可能です。";
+			mes "ぜひポイントを積み立てて多くの商品をもらって下さい。";
+		L_SUB_8_4:
+			if (@KAFRA_COUPON != 0) goto L_SUB_8_5;
+			goto L_EXIT;
+		L_SUB_8_5:
+			next;
+			goto L_START_1;
+	L_MENU_7:
+		mes "[カプラ職員]";
+		mes "我々カプラサービスは、より完璧な";
+		mes "サービスと管理業務を目指し";
+		mes "お客様が安心してご利用いただけるよう";
+		mes "いつも最善を尽くしています。";
+		mes "（株）カプラサービスをご利用いただき";
+		mes "ありがとうございました。";
+ L_EXIT:
+		cutin "kafra_05",255;
+		close;
+}
+
