@@ -1,4 +1,46 @@
 --------------
+//0508 by 死神
+
+・バグ修正と息吹、気功、気奪の修正がメインです。(今度からは他の人にも気がちゃんと見えます。)
+・死んだキャラに経験値が入る問題修正。(テストはしてません。どうなのか報告をお願いします。)
+	pc.h
+		pc_addspiritball()、pc_delspiritball() 追加。
+		pc_is50overweight() 修正。
+	pc.c
+		pc_gainexp() 修正。
+		pc_insert_card()、pc_item_identify() 修正。(大した修正じゃありませんが...)
+		pc_authok() 修正。
+		pc_addspiritball()、pc_delspiritball() 追加。
+		pc_spiritball_timer() 追加。
+		do_init_pc()、pc_calcstatus()修正。
+		pc_spirit_heal() 追加。
+		pc_natural_heal()に関わる物の修正。
+	map.h
+		struct map_session_data 修正。
+	map.c
+		map_quit() 修正。
+		map_addflooritem() 修正。
+	clif.h
+		clif_spiritball_int()をclif_spiritball()に変更。
+		clif_spiritball_ext() 削除。
+	clif.c
+		clif_spiritball_int() をclif_spiritball()に変えて修正。
+		clif_spiritball_ext() 削除。
+		clif_set01e1() 追加。
+		clif_getareachar_pc() 修正。
+	skill.h
+		SC_CALLSPIRITS 削除。
+	skill.c
+		SC_CALLSPIRITS 削除。
+		skill_castend_nodamage_id()、skill_check_condition() 修正。
+		skill_status_change_start() 修正。
+・床に落ちたアイテムが消えるまでの時間を設定できるように変更。
+	battle.h、battle.c
+		battle_config_read() 修正。
+	conf_ref.txt 修正。
+	battle_athena.conf 修正。
+
+--------------
 //0507 by Diex
 0505の修正
 ・三段掌のエフェクト実装

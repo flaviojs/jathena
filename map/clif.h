@@ -130,9 +130,7 @@ int clif_produceeffect(struct map_session_data *sd,int flag,int nameid);
 int clif_skill_setunit(struct skill_unit *unit);
 int clif_skill_delunit(struct skill_unit *unit);
 
-int clif_spiritball_int(struct map_session_data *sd,int);
-int clif_spiritball_ext(struct map_session_data *sd,int);
-
+int clif_spiritball(struct map_session_data *sd);
 
 int clif_status_change(struct block_list *bl,int type,int flag);
 

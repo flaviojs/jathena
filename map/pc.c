@@ -107,6 +107,87 @@ int pc_delghosttimer(struct map_session_data *sd)
 	return 0;
 }
 
+static int pc_spiritball_timer(int tid,unsigned int tick,int id,int data)
+{
+	struct map_session_data *sd;
+	int i;
+
+	sd=(struct map_session_data *)map_id2sd(id);
+	if(sd==NULL || sd->bl.type!=BL_PC)
+		return 1;
+
+	if(sd->spirit_timer[0] != tid){
+		printf("spirit_timer %d != %d\n",sd->spirit_timer[0],tid);
+		return 0;
+	}
+	sd->spirit_timer[0]=-1;
+	for(i=1;i<10;i++) {
+		sd->spirit_timer[i-1] = sd->spirit_timer[i];
+		sd->spirit_timer[i] = -1;
+	}
+	sd->spiritball--;
+	clif_spiritball(sd);
+
+	return 0;
+}
+
+
+int pc_addspiritball(struct map_session_data *sd,int interval,int max)
+{
+	int i;
+
+	if(max > 10)
+		max = 10;
+	if(sd->spiritball < 0)
+		sd->spiritball = 0;
+
+	if(sd->spiritball >= max) {
+		if(sd->spirit_timer[0] != -1) {
+			delete_timer(sd->spirit_timer[0],pc_spiritball_timer);
+			sd->spirit_timer[0] = -1;
+		}
+		for(i=1;i<max;i++) {
+			sd->spirit_timer[i-1] = sd->spirit_timer[i];
+			sd->spirit_timer[i] = -1;
+		}
+	}
+	else
+		sd->spiritball++;
+
+	sd->spirit_timer[sd->spiritball-1] = add_timer(gettick()+interval,pc_spiritball_timer,sd->bl.id,0);
+	clif_spiritball(sd);
+
+	return 0;
+}
+
+
+int pc_delspiritball(struct map_session_data *sd,int count,int type)
+{
+	int i;
+
+	if(count > 10)
+		count = 10;
+	if(count > sd->spiritball)
+		count = sd->spiritball;
+
+	for(i=0;i<count;i++) {
+		if(sd->spirit_timer[i] != -1) {
+			delete_timer(sd->spirit_timer[i],pc_spiritball_timer);
+			sd->spirit_timer[i] = -1;
+		}
+	}
+	for(i=count;i<10;i++) {
+		sd->spirit_timer[i-count] = sd->spirit_timer[i];
+		sd->spirit_timer[i] = -1;
+	}
+
+	sd->spiritball -= count;
+	if(type == 0)
+		clif_spiritball(sd);
+
+	return 0;
+}
+
 
 /*==========================================
  * ローカルプロトタイプ宣言 (必要な物のみ)
@@ -219,6 +300,11 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->inchealsptick = 0;
 	sd->hp_sub = 0;
 	sd->sp_sub = 0;
+	sd->inchealspirittick = 0;
+
+	sd->spiritball = 0;
+	for(i=0;i<10;i++)
+		sd->spirit_timer[i] = -1;
 
 	// pet
 	sd->petDB = NULL;
@@ -826,27 +912,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer!=-1)	// 爆裂波動
 			sd->critical += sd->sc_data[SC_EXPLOSIONSPIRITS].val2 * sd->critical/1000;
 
-		if(sd->sc_data[SC_CALLSPIRITS].timer != -1 && sd->sc_data[SC_CALLSPIRITS].val2 > 0) {	// 氣球
-			sd->spiritball = sd->sc_data[SC_CALLSPIRITS].val2;
-			sd->sc_data[SC_CALLSPIRITS].val2 = 0;
-			clif_spiritball_int(sd,sd->spiritball);
-		} else {
-			if(sd->sc_data[SC_CALLSPIRITS].timer != -1 || sd->spiritball > 0){
-				if(sd->spiritball <= 0) {
-					delete_timer(sd->sc_data[SC_CALLSPIRITS].timer, skill_status_change_timer);
-					sd->sc_data[SC_CALLSPIRITS].timer = -1;
-					sd->spiritball = 0;
-				} else { 
-					if(sd->sc_data[SC_CALLSPIRITS].timer == -1) {		
-						sd->spiritball--;
-						if(sd->spiritball != 0)
-							sd->sc_data[SC_CALLSPIRITS].timer = add_timer(
-								gettick() + 1000 * 60 * 10, skill_status_change_timer, sd->bl.id, SC_CALLSPIRITS);
-						clif_spiritball_int(sd,sd->spiritball);
-					}
-				}
-			}
-		}
 		if(sd->sc_data[SC_STEELBODY].timer!=-1){	// 金剛
 			sd->def = 90;
 			sd->mdef = 90;
@@ -1081,36 +1146,40 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
  */
 int pc_insert_card(struct map_session_data *sd,int idx_card,int idx_equip)
 {
-	int i;
-	int nameid=sd->status.inventory[idx_equip].nameid;
-	int cardid=sd->status.inventory[idx_card].nameid;
-	int ep=itemdb_equip(cardid);
+	if(idx_card >= 0 && idx_card < MAX_INVENTORY && idx_equip >= 0 && idx_equip < MAX_INVENTORY) {
+		int i;
+		int nameid=sd->status.inventory[idx_equip].nameid;
+		int cardid=sd->status.inventory[idx_card].nameid;
+		int ep=itemdb_equip(cardid);
 
-	if( nameid <= 0 || ( itemdb_type(nameid)!=4 && itemdb_type(nameid)!=5)||	// 装 備じゃない
-		( sd->status.inventory[idx_equip].identify==0 ) ||		// 未鑑定
-		( sd->status.inventory[idx_equip].card[0]==0x00ff) ||		// 製造武器
-		( (itemdb_equip(nameid)&ep)==0 ) ||					// 装 備個所違い
-		( itemdb_type(nameid)==4 && ep==32) ||			// 両 手武器と盾カード
-		( sd->status.inventory[idx_equip].card[0]==(short)0xff00) || sd->status.inventory[idx_equip].equip > 0){
+		if( nameid <= 0 || ( itemdb_type(nameid)!=4 && itemdb_type(nameid)!=5)||	// 装 備じゃない
+			( sd->status.inventory[idx_equip].identify==0 ) ||		// 未鑑定
+			( sd->status.inventory[idx_equip].card[0]==0x00ff) ||		// 製造武器
+			( (itemdb_equip(nameid)&ep)==0 ) ||					// 装 備個所違い
+			( itemdb_type(nameid)==4 && ep==32) ||			// 両 手武器と盾カード
+			( sd->status.inventory[idx_equip].card[0]==(short)0xff00) || sd->status.inventory[idx_equip].equip > 0){
 
-		clif_insert_card(sd,idx_equip,idx_card,1);
-		return 0;
-	}
-	for(i=0;i<itemdb_slot(nameid);i++){
-		if( sd->status.inventory[idx_equip].card[i] == 0){
-			// 空きスロットがあったので差し込む
-			sd->status.inventory[idx_equip].card[i]=cardid;
-
-			// カードは減らす
-			sd->status.inventory[idx_card].amount-=1;
-			sd->weight -= itemdb_weight(sd->status.inventory[idx_card].nameid);
-			if(sd->status.inventory[idx_card].amount==0){
-				memset(&sd->status.inventory[idx_card],0,sizeof(sd->status.inventory[0]));
-			}
-			clif_insert_card(sd,idx_equip,idx_card,0);
+			clif_insert_card(sd,idx_equip,idx_card,1);
 			return 0;
 		}
+		for(i=0;i<itemdb_slot(nameid);i++){
+			if( sd->status.inventory[idx_equip].card[i] == 0){
+			// 空きスロットがあったので差し込む
+				sd->status.inventory[idx_equip].card[i]=cardid;
+
+			// カードは減らす
+				sd->status.inventory[idx_card].amount-=1;
+				sd->weight -= itemdb_weight(sd->status.inventory[idx_card].nameid);
+				if(sd->status.inventory[idx_card].amount==0){
+					memset(&sd->status.inventory[idx_card],0,sizeof(sd->status.inventory[0]));
+				}
+				clif_insert_card(sd,idx_equip,idx_card,0);
+				return 0;
+			}
+		}
 	}
+	else
+		clif_insert_card(sd,idx_equip,idx_card,1);
 
 	return 0;
 }
@@ -1519,11 +1588,15 @@ int pc_item_identify(struct map_session_data *sd,int idx)
 {
 	int flag=1;
 
-	if(sd->status.inventory[idx].nameid > 0 && sd->status.inventory[idx].identify == 0 ){
-		flag=0;
-		sd->status.inventory[idx].identify=1;
+	if(idx >= 0 && idx < MAX_INVENTORY) {
+		if(sd->status.inventory[idx].nameid > 0 && sd->status.inventory[idx].identify == 0 ){
+			flag=0;
+			sd->status.inventory[idx].identify=1;
+		}
+		clif_item_identified(sd,idx,flag);
 	}
-	clif_item_identified(sd,idx,flag);
+	else
+		clif_item_identified(sd,idx,flag);
 
 	return !flag;
 }
@@ -2205,6 +2278,9 @@ int pc_checkjoblevelup(struct map_session_data *sd)
  */
 int pc_gainexp(struct map_session_data *sd,int base_exp,int job_exp)
 {
+	if(sd->bl.prev == NULL || pc_isdead(sd))
+		return 0;
+
 	if(sd->status.guild_id>0){	// ギルドに上納
 		base_exp-=guild_payexp(sd,base_exp);
 		if(base_exp < 0)
@@ -3277,20 +3353,18 @@ int pc_calc_pvprank_timer(int tid,unsigned int tick,int id,int data)
  * SP回復量計算
  *------------------------------------------
  */
-static int natural_heal_tick,natural_heal_prev_tick;
+static int natural_heal_tick,natural_heal_prev_tick,natural_heal_diff_tick;
 static int pc_spheal(struct map_session_data *sd)
 {
-	int a = 0;
+	int a;
 
-	a = DIFF_TICK(natural_heal_tick,natural_heal_prev_tick);
+	a = natural_heal_diff_tick;
 	if(pc_issit(sd)) a += a;
-
 	if( sd->sc_data[SC_MAGNIFICAT].timer!=-1 )	// マグニフィカート
 		a += a;
 
 	return a;
 }
-
 
 /*==========================================
  * HP回復量計算
@@ -3300,7 +3374,7 @@ static int pc_hpheal(struct map_session_data *sd)
 {
 	int a;
 
-	a = DIFF_TICK(natural_heal_tick,natural_heal_prev_tick);
+	a = natural_heal_diff_tick;
 	if(pc_issit(sd)) a += a;
 
 	return a;
@@ -3317,9 +3391,9 @@ static int pc_natural_heal_hp(struct map_session_data *sd)
 	}
 
 	bhp=sd->status.hp;
-	hp_flag = ((pc_checkskill(sd,SM_MOVINGRECOVERY) > 0) && (sd->walktimer > 0) && !(pc_is50overweight(sd)));
+	hp_flag = (pc_checkskill(sd,SM_MOVINGRECOVERY) > 0 && sd->walktimer != -1);
 
-	if(sd->walktimer<=0) {
+	if(sd->walktimer == -1) {
 		inc_num = pc_hpheal(sd);
 		sd->hp_sub += inc_num;
 		sd->inchealhptick += inc_num;
@@ -3334,7 +3408,7 @@ static int pc_natural_heal_hp(struct map_session_data *sd)
 		return 0;
 	}
 
-	if((sd->hp_sub >= 4000) && !(pc_is50overweight(sd))) {
+	if(sd->hp_sub >= 4000) {
 		bonus = 1 + (sd->paramc[2]/6) + (sd->status.max_hp/200);
 		if(hp_flag) {
 			bonus /= 4;
@@ -3350,11 +3424,10 @@ static int pc_natural_heal_hp(struct map_session_data *sd)
 			}
 		}
 	}
-	
 	if(bhp!=sd->status.hp)
 		clif_updatestatus(sd,SP_HP);
 
-	if(((skill=pc_checkskill(sd,SM_RECOVERY)) > 0) && !(pc_is50overweight(sd))) {
+	if((skill=pc_checkskill(sd,SM_RECOVERY)) > 0) {
 		if(sd->inchealhptick >= 10000 && sd->status.hp < sd->status.max_hp) {
 			bonus = skill*5 + (sd->status.max_hp/50);
 			while(sd->inchealhptick >= 10000) {
@@ -3370,32 +3443,12 @@ static int pc_natural_heal_hp(struct map_session_data *sd)
 			}
 		}
 	}
+	else sd->inchealhptick = 0;
 
-	if(bhp!=sd->status.hp)
-		clif_updatestatus(sd,SP_HP);
-
-	if(((skill=pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0) && pc_issit(sd)) {
-		if((sd->inchealhptick >= 20000*(1+pc_is50overweight(sd))) && (sd->status.hp < sd->status.max_hp)) {
-			bonus = skill*4 + (sd->status.max_hp/50);
-			while(sd->inchealhptick >= 20000*(1+pc_is50overweight(sd))) {
-				sd->inchealhptick -= 20000*(1+pc_is50overweight(sd));
-				if(sd->status.hp + bonus <= sd->status.max_hp)
-					sd->status.hp += bonus;
-				else {
-					bonus = sd->status.max_hp - sd->status.hp;
-					sd->status.hp = sd->status.max_hp;
-					sd->hp_sub = sd->inchealhptick = 0;
-				}
-				clif_heal(sd->fd,SP_HP,bonus);
-			}
-		}
-	}
-
-	if(bhp!=sd->status.hp)
-		clif_updatestatus(sd,SP_HP);
+	return 0;
 
 	if(sd->sc_data[SC_APPLEIDUN].timer!=-1) { // Apple of Idun
-		if((sd->inchealhptick >= 6000) && sd->status.hp < sd->status.max_hp) {
+		if(sd->inchealhptick >= 6000 && sd->status.hp < sd->status.max_hp) {
 			bonus = skill*20;
 			while(sd->inchealhptick >= 6000) {
 				sd->inchealhptick -= 6000;
@@ -3410,10 +3463,10 @@ static int pc_natural_heal_hp(struct map_session_data *sd)
 			}
 		}
 	}
+	else sd->inchealhptick = 0;
 
 	return 0;
 }
-
 
 static int pc_natural_heal_sp(struct map_session_data *sd)
 {
@@ -3428,12 +3481,13 @@ static int pc_natural_heal_sp(struct map_session_data *sd)
 	bsp=sd->status.sp;
 
 	inc_num = pc_spheal(sd);
-	sd->sp_sub += inc_num;
-	if(sd->walktimer<=0)
+	if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer == -1)
+		sd->sp_sub += inc_num;
+	if(sd->walktimer == -1)
 		sd->inchealsptick += inc_num;
 	else sd->inchealsptick = 0;
 
-	if(sd->sp_sub >= 8000 && !(pc_is50overweight(sd)) && sd->sc_data[SC_EXPLOSIONSPIRITS].timer == -1){
+	if(sd->sp_sub >= 8000){
 		bonus = 1 + (sd->paramc[3]/6) + (sd->status.max_sp/100);
 		while(sd->sp_sub >= 8000){
 			sd->sp_sub -= 8000;
@@ -3449,7 +3503,7 @@ static int pc_natural_heal_sp(struct map_session_data *sd)
 	if(bsp != sd->status.sp)
 		clif_updatestatus(sd,SP_SP);
 
-	if(((skill=pc_checkskill(sd,MG_SRECOVERY)) > 0) && !(pc_is50overweight(sd))) {
+	if((skill=pc_checkskill(sd,MG_SRECOVERY)) > 0) {
 		if(sd->inchealsptick >= 10000 && sd->status.sp < sd->status.max_sp) {
 			bonus = skill*3 + (sd->status.max_sp/50);
 			while(sd->inchealsptick >= 10000) {
@@ -3465,30 +3519,62 @@ static int pc_natural_heal_sp(struct map_session_data *sd)
 			}
 		}
 	}
+	else sd->inchealsptick = 0;
 
-	if(bsp != sd->status.sp)
-		clif_updatestatus(sd,SP_SP);
+	return 0;
+}
 
-	if(((skill=pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0) && pc_issit(sd)) {
-		if((sd->inchealsptick >= 20000*(1+pc_is50overweight(sd))) && (sd->status.sp < sd->status.max_sp)) {
-			bonus = skill*2 + (sd->status.max_sp/50);
-			while(sd->inchealsptick >= 20000*(1+pc_is50overweight(sd))) {
-				sd->inchealsptick -= 20000*(1+pc_is50overweight(sd));
-				if(sd->status.sp + bonus <= sd->status.max_sp)
-					sd->status.sp += bonus;
+static int pc_spirit_heal(struct map_session_data *sd,int level)
+{
+	int bonus_hp,bonus_sp,flag,interval = 10000;
+
+	if(pc_checkoverhp(sd) && pc_checkoversp(sd)) {
+		sd->inchealspirittick = 0;
+		return 0;
+	}
+
+	sd->inchealspirittick += natural_heal_diff_tick;
+
+	if(pc_is50overweight(sd))
+		interval <<= 1;
+
+	if(sd->inchealspirittick >= interval) {
+		bonus_hp = level*4 + (sd->status.max_hp/50);
+		bonus_sp = level*2 + (sd->status.max_sp/50);
+		flag = 0;
+		while(sd->inchealspirittick >= interval) {
+			sd->inchealspirittick -= interval;
+			if(sd->status.hp < sd->status.max_hp) {
+				if(sd->status.hp + bonus_hp <= sd->status.max_hp)
+					sd->status.hp += bonus_hp;
 				else {
-					bonus = sd->status.max_sp - sd->status.sp;
-					sd->status.sp = sd->status.max_sp;
-					sd->sp_sub = sd->inchealsptick = 0;
+					bonus_hp = sd->status.max_hp - sd->status.hp;
+					sd->status.hp = sd->status.max_hp;
+					flag |= 0x01;
 				}
-				clif_heal(sd->fd,SP_SP,bonus);
+				clif_heal(sd->fd,SP_HP,bonus_hp);
 			}
+			else
+				flag |= 0x01;
+			if(sd->status.sp < sd->status.max_sp) {
+				if(sd->status.sp + bonus_sp <= sd->status.max_sp)
+					sd->status.sp += bonus_sp;
+				else {
+					bonus_sp = sd->status.max_sp - sd->status.sp;
+					sd->status.sp = sd->status.max_sp;
+					flag |= 0x02;
+				}
+				clif_heal(sd->fd,SP_SP,bonus_sp);
+			}
+			else
+				flag |= 0x02;
+			if(flag >= 3)
+				sd->inchealspirittick = 0;
 		}
 	}
 
 	return 0;
 }
-
 
 /*==========================================
  * HP/SP 自然回復 各クライアント
@@ -3497,17 +3583,22 @@ static int pc_natural_heal_sp(struct map_session_data *sd)
 
 static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 {
-	if(pc_is90overweight(sd) || (pc_is50overweight(sd) && pc_checkskill(sd,MO_SPIRITSRECOVERY) == 0) || pc_isdead(sd)) {
+	int skill;
+	if(sd->weight*2 < sd->max_weight && !pc_isdead(sd)) {
+		pc_natural_heal_hp(sd);
+		pc_natural_heal_sp(sd);
+	}
+	else {
 		sd->hp_sub = sd->inchealhptick = 0;
 		sd->sp_sub = sd->inchealsptick = 0;
-		return 0;
 	}
-	pc_natural_heal_hp(sd);
-	pc_natural_heal_sp(sd);
+	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0 && pc_issit(sd))
+		pc_spirit_heal(sd,skill);
+	else
+		sd->inchealspirittick = 0;
 
 	return 0;
 }
-
 
 /*==========================================
  * HP/SP自然回復 (interval timer関数)
@@ -3516,13 +3607,12 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 int pc_natural_heal(int tid,unsigned int tick,int id,int data)
 {
 	natural_heal_tick = tick;
+	natural_heal_diff_tick = DIFF_TICK(natural_heal_tick,natural_heal_prev_tick);
 	clif_foreachclient(pc_natural_heal_sub);
 
 	natural_heal_prev_tick = tick;
-
 	return 0;
 }
-
 
 /*==========================================
  * セーブポイントの保存
@@ -3872,8 +3962,9 @@ int do_init_pc(void)
 	add_timer_func_list(pc_attack_timer,"pc_attack_timer");
 	add_timer_func_list(pc_natural_heal,"pc_natural_heal");
 	add_timer_func_list(pc_ghost_timer,"pc_ghost_timer");
-	add_timer_interval((natural_heal_prev_tick=gettick()+10),pc_natural_heal,0,0,NATURAL_HEAL_INTERVAL);
-	add_timer(gettick()+10,pc_autosave,0,0);
+	add_timer_func_list(pc_spiritball_timer,"pc_spiritball_timer");
+	add_timer_interval((natural_heal_prev_tick=gettick()+NATURAL_HEAL_INTERVAL),pc_natural_heal,0,0,NATURAL_HEAL_INTERVAL);
+	add_timer(gettick()+autosave_interval,pc_autosave,0,0);
 	pc_readdb();
 	pc_read_gm_account();
 

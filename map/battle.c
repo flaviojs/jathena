@@ -1777,6 +1777,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.delay_dependon_dex=0;
 	battle_config.defnotenemy=1;
 	battle_config.attr_recover=1;
+	battle_config.flooritem_lifetime=LIFETIME_FLOORITEM*1000;
 	battle_config.item_rate=100;
 	battle_config.base_exp_rate=100;
 	battle_config.job_exp_rate=100;
@@ -1810,12 +1811,13 @@ int battle_config_read(const char *cfgName)
 			{	"casting_rate",			&battle_config.cast_rate			},
 			{	"delay_rate",			&battle_config.delay_rate			},
 			{	"delay_dependon_dex",	&battle_config.delay_dependon_dex	},
-			{	"attribute_recover",	&battle_config.attr_recover	},
-			{	"item_rate",			&battle_config.item_rate			},
 			{	"defunit_not_enemy",	&battle_config.defnotenemy			},
-			{	"mvp_hp_rate",			&battle_config.mvp_hp_rate			},
+			{	"attribute_recover",	&battle_config.attr_recover	},
+			{	"flooritem_lifetime",			&battle_config.flooritem_lifetime			},
+			{	"item_rate",			&battle_config.item_rate			},
 			{	"base_exp_rate",		&battle_config.base_exp_rate		},
 			{	"job_exp_rate",			&battle_config.job_exp_rate			},
+			{	"mvp_hp_rate",			&battle_config.mvp_hp_rate			},
 			{	"mvp_item_rate",		&battle_config.mvp_item_rate		},
 			{	"mvp_exp_rate",			&battle_config.mvp_exp_rate			},
 			{	"atcommand_gm_only",	&battle_config.atc_gmonly			},
@@ -1842,6 +1844,9 @@ int battle_config_read(const char *cfgName)
 				*data[i].val=battle_config_switch(w2);
 	}
 	fclose(fp);
+
+	if(battle_config.flooritem_lifetime < 1000)
+		battle_config.flooritem_lifetime = LIFETIME_FLOORITEM*1000;
 
 	return 0;
 }

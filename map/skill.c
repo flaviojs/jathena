@@ -136,9 +136,7 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	SC_SPEARSQUICKEN,
 	-1,
 /* 260- */
-	-1,
-	SC_CALLSPIRITS,
-	-1,-1,-1,-1,-1,-1,
+	-1,-1,-1,-1,-1,-1,-1,-1,
 	SC_STEELBODY,
 	-1,
 /* 270- */
@@ -845,8 +843,9 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag )
 {
 	struct map_session_data *sd=NULL;
-	struct map_session_data *sd2=NULL;
+	struct map_session_data *dstsd=NULL;
 	struct mob_data *md=NULL;
+	int i;
 
 	if(src->type==BL_PC)
 		sd=(struct map_session_data *)src;
@@ -854,7 +853,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		md=(struct mob_data *)src;
 
 	if(bl->type==BL_PC)
-		sd2=(struct map_session_data *)bl; 
+		dstsd=(struct map_session_data *)bl; 
 
 	switch(skillid)
 	{
@@ -965,7 +964,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case SA_LIGHTNINGLOADER:/* ライトニングローダー */
 	case SA_SEISMICWEAPON:	/* サイズミックウェポン */
 	case MO_EXPLOSIONSPIRITS:	// 爆裂波動
-	case MO_CALLSPIRITS:	// 気功
 	case MO_STEELBODY:		// 金剛
 #if 0
 	case CR_AUTOGUARD:		/* オートガード */
@@ -981,26 +979,40 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		clif_skill_nodamage( (skillid==PR_KYRIE)?bl:src,bl,skillid,0,1);
 		skill_status_change_start( bl,
 			SkillStatusChangeTable[skillid], skilllv, 0 );
-
 		if(skillid==SM_PROVOKE && bl->type==BL_MOB)
 			mob_target((struct mob_data *)bl,src,skill_get_range(skillid));
 		break;
-
+	case MO_CALLSPIRITS:	// 気功
+		clif_skill_nodamage(src,bl,skillid,0,1);
+		pc_addspiritball(sd,60*10*1000,skilllv);
+		break;
 	case MO_ABSORBSPIRITS:	// 気奪
-		if(sd && sd2) {
-			if(sd2->spiritball > 0) {
-				clif_skill_nodamage( (skillid==PR_KYRIE)?bl:src,bl,skillid,0,1);
-				sd2->spiritball--;
-				sd->status.sp+=10;
-				clif_spiritball_int(sd2,sd2->spiritball);
-				clif_updatestatus(sd,SP_SP);
-			} else
-				clif_skill_nodamage( (skillid==PR_KYRIE)?bl:src,bl,skillid,0,0);
+		if(sd && dstsd) {
+			if(sd == dstsd || map[sd->bl.m].flag&MF_PVP) {
+				if(dstsd->spiritball > 0) {
+					clif_skill_nodamage(src,bl,skillid,0,1);
+					i = dstsd->spiritball * 7;
+					pc_delspiritball(dstsd,dstsd->spiritball,0);
+					if(i > 0x7FFF)
+						i = 0x7FFF;
+					if(sd->status.sp + i > sd->status.max_sp) {
+						i = sd->status.max_sp - sd->status.sp;
+						sd->status.sp = sd->status.max_sp;
+					}
+					else
+						sd->status.sp += i;
+					clif_heal(sd->fd,SP_SP,i);
+				}
+				else
+					clif_skill_nodamage(src,bl,skillid,0,0);
+			}
+			else
+				clif_skill_nodamage(src,bl,skillid,0,0);
 		}
 		break;
 
 	case BS_HAMMERFALL:		/* ハンマーフォール */
-		clif_skill_nodamage( (skillid==PR_KYRIE)?bl:src,bl,skillid,0,1);
+		clif_skill_nodamage(src,bl,skillid,0,1);
 		if( rand()%100 < (20+ 10*skilllv) ) {
 			skill_status_change_start(bl,SC_STAN,skilllv,10000);
 		}
@@ -2605,10 +2617,8 @@ int skill_check_condition( struct map_session_data *sd )
 			sd->status.zeny -= zeny;
 			clif_updatestatus(sd,SP_ZENY);
 		}
-		if(spiritball) {			// 氣球消費
-			sd->spiritball -= spiritball;
-			clif_spiritball_int(sd,sd->spiritball);
-		}
+		if(spiritball)			// 氣球消費
+			pc_delspiritball(sd,spiritball,0);
 	}
 	return 1;
 }
@@ -3295,10 +3305,6 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 		case SC_EXPLOSIONSPIRITS:	// 爆裂波動
 			tick = 1000 * 60 * 3;
 			val2 = 75 + 25*val1;
-			break;
-		case SC_CALLSPIRITS:		// 気功
-			tick = 1000 * 60 * 10;
-			val2 = val1;
 			break;
 		case SC_STEELBODY:			// 金剛
 			tick = 1000 * 30 * val1;

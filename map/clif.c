@@ -577,6 +577,19 @@ static int clif_set007b(struct map_session_data *sd,unsigned char *buf)
  *
  *------------------------------------------
  */
+static int clif_set01e1(struct map_session_data *sd,unsigned char *buf)
+{
+	WBUFW(buf,0)=0x1e1;
+	WBUFL(buf,2)=sd->bl.id;
+	WBUFW(buf,6)=sd->spiritball;
+
+	return packet_len_table[0x1e1];
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
 int clif_spawnpc(struct map_session_data *sd)
 {
 	clif_set0078(sd,WFIFOP(sd->fd,0));
@@ -2006,6 +2019,10 @@ void clif_getareachar_pc(struct map_session_data* sd,struct map_session_data* ds
 	if(dstsd->vender_id){
 		clif_showvendingboard(&dstsd->bl,dstsd->message,sd->fd);
 	}
+	if(dstsd->spiritball > 0) {
+		clif_set01e1(dstsd,WFIFOP(sd->fd,0));
+		WFIFOSET(sd->fd,packet_len_table[0x1e1]);
+	}
 }
 
 /*==========================================
@@ -2994,7 +3011,7 @@ int clif_use_card(struct map_session_data *sd,int idx)
 		}
 		if(j==itemdb_slot(nameid))	// ‚·‚Å‚ÉƒJ[ƒh‚ªˆê”t
 			continue;
-		
+
 		WFIFOW(fd,4+c*2)=i+2;
 		c++;
 	}
@@ -3728,29 +3745,13 @@ int clif_pet_food(struct map_session_data *sd,int foodid,int fail)
  * Ÿ†‹… 
  *------------------------------------------
  */
-int clif_spiritball_int(struct map_session_data *sd,int num)
+int clif_spiritball(struct map_session_data *sd)
 {
-	unsigned char buf[8];
+	unsigned char buf[16];
 	WBUFW(buf,0)=0x1d0;
-	WBUFL(buf,2)= sd->bl.id;
-	WBUFW(buf,6)=num;
+	WBUFL(buf,2)=sd->bl.id;
+	WBUFW(buf,6)=sd->spiritball;
 	clif_send(buf,packet_len_table[0x1d0],&sd->bl,AREA);
-	clif_spiritball_ext(sd,num);
-	return 0;
-}
-
-/*==========================================
- * Ÿ†‹… 
- *------------------------------------------
- */
-int clif_spiritball_ext(struct map_session_data *sd,int num)
-{
-
-	unsigned char buf[8];
-	WBUFW(buf,0)=0x1e1;
-	WBUFL(buf,2)= sd->bl.id;
-	WBUFW(buf,6)=num;
-	clif_send(buf,packet_len_table[0x1e1],&sd->bl,AREA);
 	return 0;
 }
 
