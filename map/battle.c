@@ -1299,7 +1299,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	int def2 = battle_get_def2(target);
 	int t_vit = battle_get_vit(target);
 	struct Damage wd;
-	int damage,type,div_,blewcount=0;
+	int damage,damage2=0,type,div_,blewcount=0;
 	int flag;
 	int t_mode=0,t_race=0,t_size=1,s_race=0,s_ele=0;
 	struct status_change *t_sc_data;
@@ -1417,8 +1417,15 @@ static struct Damage battle_calc_pet_weapon_attack(
 			case KN_SPEARBOOMERANG:	// スピアブーメラン
 				damage = damage*(100+ 50*skill_lv)/100;
 				break;
-			case KN_BRANDISHSPEAR:
+			case KN_BRANDISHSPEAR: // ブランディッシュスピア
 				damage = damage*(100+ 20*skill_lv)/100;
+				if(skill_lv>3 && wflag==1) damage2+=damage/2;
+				if(skill_lv>6 && wflag==1) damage2+=damage/4;
+				if(skill_lv>9 && wflag==1) damage2+=damage/8;
+				if(skill_lv>6 && wflag==2) damage2+=damage/2;
+				if(skill_lv>9 && wflag==2) damage2+=damage/4;
+				if(skill_lv>9 && wflag==3) damage2+=damage/2;
+				damage +=damage2;
 				break;
 			case KN_BOWLINGBASH:	// ボウリングバッシュ
 				damage = damage*(100+ 50*skill_lv)/100;
@@ -1608,7 +1615,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	int def2 = battle_get_def2(target);
 	int t_vit = battle_get_vit(target);
 	struct Damage wd;
-	int damage,type,div_,blewcount=0;
+	int damage,damage2=0,type,div_,blewcount=0;
 	int flag,skill,ac_flag = 0;
 	int t_mode=0,t_race=0,t_size=1,s_race=0,s_ele=0;
 	struct status_change *sc_data,*t_sc_data;
@@ -1767,8 +1774,15 @@ static struct Damage battle_calc_mob_weapon_attack(
 			case KN_SPEARBOOMERANG:	// スピアブーメラン
 				damage = damage*(100+ 50*skill_lv)/100;
 				break;
-			case KN_BRANDISHSPEAR:
+			case KN_BRANDISHSPEAR: // ブランディッシュスピア
 				damage = damage*(100+ 20*skill_lv)/100;
+				if(skill_lv>3 && wflag==1) damage2+=damage/2;
+				if(skill_lv>6 && wflag==1) damage2+=damage/4;
+				if(skill_lv>9 && wflag==1) damage2+=damage/8;
+				if(skill_lv>6 && wflag==2) damage2+=damage/2;
+				if(skill_lv>9 && wflag==2) damage2+=damage/4;
+				if(skill_lv>9 && wflag==3) damage2+=damage/2;
+				damage +=damage2;
 				break;
 			case KN_BOWLINGBASH:	// ボウリングバッシュ
 				damage = damage*(100+ 50*skill_lv)/100;
@@ -2000,7 +2014,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	int def2 = battle_get_def2(target);
 	int t_vit = battle_get_vit(target);
 	struct Damage wd;
-	int damage,damage2,type,div_,blewcount=0;
+	int damage,damage2,damage3=0,damage4=0,type,div_,blewcount=0;
 	int flag,skill;
 	int t_mode=0,t_race=0,t_size=1,s_race=7,s_ele=0;
 	struct status_change *sc_data,*t_sc_data;
@@ -2349,9 +2363,23 @@ static struct Damage battle_calc_pc_weapon_attack(
 				damage = damage*(100+ 50*skill_lv)/100;
 				damage2 = damage2*(100+ 50*skill_lv)/100;
 				break;
-			case KN_BRANDISHSPEAR:
+			case KN_BRANDISHSPEAR: // ブランディッシュスピア
 				damage = damage*(100+ 20*skill_lv)/100;
 				damage2 = damage2*(100+ 20*skill_lv)/100;
+				if(skill_lv>3 && wflag==1) damage3+=damage/2;
+				if(skill_lv>6 && wflag==1) damage3+=damage/4;
+				if(skill_lv>9 && wflag==1) damage3+=damage/8;
+				if(skill_lv>6 && wflag==2) damage3+=damage/2;
+				if(skill_lv>9 && wflag==2) damage3+=damage/4;
+				if(skill_lv>9 && wflag==3) damage3+=damage/2;
+				damage +=damage3;
+				if(skill_lv>3 && wflag==1) damage4+=damage2/2;
+				if(skill_lv>6 && wflag==1) damage4+=damage2/4;
+				if(skill_lv>9 && wflag==1) damage4+=damage2/8;
+				if(skill_lv>6 && wflag==2) damage4+=damage2/2;
+				if(skill_lv>9 && wflag==2) damage4+=damage2/4;
+				if(skill_lv>9 && wflag==3) damage4+=damage2/2;
+				damage2 +=damage4;
 				break;
 			case KN_BOWLINGBASH:	// ボウリングバッシュ
 				damage = damage*(100+ 50*skill_lv)/100;

@@ -1,4 +1,33 @@
 --------------------
+//0783 by huge
+
+・ブランディッシュスピアの修正
+	範囲指定、斜めの際の格子範囲、攻撃力計算
+	多分合ってると思うんですけど、イマイチ自信が持てない・・・
+	(参考)みすとれ巣 -スキル関連豆情報
+・スペルブレイカーをちょっと修正
+・プロボックをMVPmobに効かないよう修正
+・バグ報告スレ３ >>8 で報告されたものの取り込み
+
+	(/db)
+	create_arrow.txt 修正。
+	skill_db.txt 修正。
+
+	(/map)
+	battle.c
+		battle_calc_pet_weapon_attack() 修正。
+		battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack() 修正。
+
+	skill.h
+	skill.c
+		skill_brandishspear_first() 追加。
+		skill_brandishspear_dir() 追加。
+		skill_castend_nodamage_id() 修正。
+		skill_castend_damage_id() 修正。
+		skill_unit_group() 修正。
+
+--------------------
 //0782 by ぴざまん
 ・@allskillコマンドの使用条件が参照されていなかったバグ修正
 	(/map)

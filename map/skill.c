@@ -1129,6 +1129,10 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case NPC_LICK:
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
+	case KN_BRANDISHSPEAR:		/* ブランディッシュスピア */
+		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+		skill_blown(src,bl,1);
+		break;
 	case RG_BACKSTAP:		/* バックスタブ */
 		{
 			int dir = map_calc_dir(src,bl->x,bl->y),t_dir = battle_get_dir(bl);
@@ -1202,14 +1206,13 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case AC_SHOWER:			/* アローシャワー */
 	case SM_MAGNUM:			/* マグナムブレイク */
 	case AS_GRIMTOOTH:		/* グリムトゥース */
-	case KN_BRANDISHSPEAR:	/*ブランディッシュスピア*/
 	case MC_CARTREVOLUTION:	/* カートレヴォリューション */
 	case NPC_SPLASHATTACK:	/* スプラッシュアタック */
 		if(flag&3){
 			/* 個別にダメージを与える */
 			if(bl->id!=skill_area_temp[1]){
 				int dist=0;
-				if(skillid==SM_MAGNUM || skillid==KN_BRANDISHSPEAR){	/* マグナムブレイクなら中心からの距離を計算 */
+				if(skillid==SM_MAGNUM){	/* マグナムブレイクなら中心からの距離を計算 */
 					int dx=abs( bl->x - skill_area_temp[2] );
 					int dy=abs( bl->y - skill_area_temp[3] );
 					dist=((dx>dy)?dx:dy);
@@ -1220,7 +1223,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		}else{
 			int ar=1;
 			int x=bl->x,y=bl->y;
-			if( skillid==SM_MAGNUM  || skillid==KN_BRANDISHSPEAR){
+			if( skillid==SM_MAGNUM){
 				x=src->x;
 				y=src->y;
 			}else if(skillid==AC_SHOWER)	/* アローシャワー範囲 */
@@ -1634,6 +1637,11 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case SA_LANDPROTECTOR:	/* ランドプロテクター */
 	case BA_FROSTJOKE:		/* 寒いジョーク */
 #endif
+		/* MVPmobには効かない */
+		if(bl->type==BL_MOB && skillid==SM_PROVOKE)
+			if(mob_db[dstmd->class].mexp > 0)
+				return 0;
+
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_status_change_start( bl, SkillStatusChangeTable[skillid], skilllv, 0,skill_get_time(skillid,skilllv),0 );
 		if(skillid==SM_PROVOKE && bl->type==BL_MOB) {
@@ -1714,6 +1722,44 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				skill_castend_damage_id);
 		}
 		skill_status_change_end(src, SC_HIDING, -1);	// ハイディング解除
+		break;
+
+	case KN_BRANDISHSPEAR:	/*ブランディッシュスピア*/
+		{
+			int c,n=1,ar;
+			int dir = map_calc_dir(src,bl->x,bl->y);
+			struct brandish tc;
+			int x=bl->x,y=bl->y;
+			ar=skilllv/3;
+			/* 範囲① */
+			skill_brandishspear_first(&tc,dir,x,y);
+			for(c=0;c<5;c++){
+				map_foreachinarea(skill_area_sub,
+					bl->m,tc.tar_x[c],tc.tar_y[c],tc.tar_x[c],tc.tar_y[c],0,
+					src,skillid,skilllv,tick, flag|BCT_ENEMY|n,
+					skill_castend_damage_id);
+			}
+			/* 範囲①'②③ */
+			skill_brandishspear_dir(&tc,dir);
+			for(c=0;c<5;c++){
+				map_foreachinarea(skill_area_sub,
+					bl->m,tc.tar_x[c],tc.tar_y[c],tc.tar_x[c],tc.tar_y[c],0,
+					src,skillid,skilllv,tick, flag|BCT_ENEMY|n,
+					skill_castend_damage_id);
+				if(c==4 && skilllv > 3 && n==1){ n++; c=-1;}
+				else if(c==4 && skilllv > 6 && n==2){ n++; c=-1;}
+			}
+			/* 範囲④ */
+			if(skilllv == 10){
+				skill_brandishspear_dir(&tc,dir);
+				for(c=1;c<4;c++){
+					map_foreachinarea(skill_area_sub,
+						bl->m,tc.tar_x[c],tc.tar_y[c],tc.tar_x[c],tc.tar_y[c],0,
+						src,skillid,skilllv,tick, flag|BCT_ENEMY|4,
+						skill_castend_damage_id);
+				}
+			}
+		}
 		break;
 
 	/* パーティスキル */
@@ -2099,7 +2145,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		{
 			int sp=0;
 			if(bl->type==BL_MOB){	// MOB
-				if(dstmd->skilltimer!=-1 && dstmd->state.skillcastcancel && skill_db[dstmd->skillid].delay[dstmd->skilllv-1]){
+				if(dstmd->skilltimer!=-1 && dstmd->state.skillcastcancel){
 					sp = skill_db[dstmd->skillid].sp[dstmd->skilllv-1]*(skilllv-1)*25/100;
 					skill_castcancel(bl,0);
 					pc_heal(sd,0,sp);
@@ -2456,17 +2502,6 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 	int dir=0;
 
 	switch(skillid){	/* 設定 */
-
-	case KN_BRANDISHSPEAR:	/*ブランディッシュスピア*/
-		if(skilllv >1 && skilllv <=3)
-			range=1;
-		else if(skilllv >3 && skilllv <=6)
-			range=2;
-		else if(skilllv >6 && skilllv <=9)
-			range=3;
-		else
-			range=4;
-		break;
 
 	case MG_SAFETYWALL:			/* セイフティウォール */
 		limit=skill_get_time(skillid,skilllv);
@@ -3418,6 +3453,7 @@ int skill_check_condition( struct map_session_data *sd )
 				if(sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH)
 					spiritball--;
 				break;
+
 		}
 
 		if( hp>0 && sd->status.hp < hp) {				/* HPチェック */
@@ -3894,6 +3930,58 @@ int skill_castcancel(struct block_list *bl,int type)
 		return 0;
 	}
 	return 1;
+}
+/*=========================================
+ * ブランディッシュスピア 初期範囲決定
+ *----------------------------------------
+ */
+void skill_brandishspear_first(struct brandish *tc,int dir,int x,int y){
+	if(dir == 0){
+		tc->tar_x[0]=x-2;tc->tar_y[0]=y-1;tc->tar_y[1]=y-1;tc->tar_y[3]=y-1;tc->tar_y[4]=y-1;tc->tar_x[1]=x-1;tc->tar_x[3]=x+1;tc->tar_x[4]=x+2; }
+	else if(dir==2){
+		tc->tar_x[0]=x+1;tc->tar_x[1]=x+1;tc->tar_x[3]=x+1;tc->tar_x[4]=x+1;tc->tar_y[0]=y+2;tc->tar_y[1]=y+1;tc->tar_y[3]=y-1;tc->tar_y[4]=y-2; }
+	else if(dir==4){
+		tc->tar_x[0]=x-2;tc->tar_x[1]=x-1;tc->tar_x[3]=x+1;tc->tar_x[4]=x+2;tc->tar_y[0]=x+1;tc->tar_y[1]=x+1;tc->tar_y[3]=x+1;tc->tar_y[4]=x+1; }
+	else if(dir==6){
+		tc->tar_x[0]=x-1;tc->tar_x[1]=x-1;tc->tar_x[3]=x-1;tc->tar_x[4]=x-1;tc->tar_y[0]=y+2;tc->tar_y[1]=y+1;tc->tar_y[3]=y-1;tc->tar_y[4]=y-2; }
+	else if(dir==1){
+		tc->tar_x[0]=x-1;tc->tar_y[0]=y-4;tc->tar_x[1]=x;  tc->tar_y[1]=y-3;tc->tar_x[3]=x+2;tc->tar_y[3]=y;  tc->tar_x[4]=x+3;tc->tar_y[4]=y+1; }
+	else if(dir==3){
+		tc->tar_x[0]=x+3;tc->tar_y[0]=y-1;tc->tar_x[1]=x+2;tc->tar_y[1]=y;  tc->tar_x[3]=x;  tc->tar_y[3]=y+2;tc->tar_x[4]=x-1;tc->tar_y[4]=y+3; }
+	else if(dir==5){
+		tc->tar_x[0]=x+1;tc->tar_y[0]=y+3;tc->tar_x[1]=x;  tc->tar_y[1]=y+2;tc->tar_x[3]=x-2;tc->tar_y[3]=y;  tc->tar_x[4]=x-3;tc->tar_y[4]=y-1; }
+	else if(dir==7){
+		tc->tar_x[0]=x-3;tc->tar_y[0]=y+1;tc->tar_x[1]=x-2;tc->tar_y[1]=y;  tc->tar_x[3]=x;  tc->tar_y[3]=y-2;tc->tar_x[4]=x+1;tc->tar_y[4]=y-3; }
+
+	tc->tar_x[2]=x;tc->tar_y[2]=y;
+}
+
+/*=========================================
+ * ブランディッシュスピア 方向判定 範囲拡張
+ *-----------------------------------------
+ */
+void skill_brandishspear_dir(struct brandish *tc,int dir){
+
+	int c;
+
+	for(c=0;c<5;c++){
+		if(dir==0){
+			tc->tar_y[c]++; }
+		else if(dir==1){
+			tc->tar_x[c]--; tc->tar_y[c]++; }
+		else if(dir==2){
+			tc->tar_x[c]--; }
+		else if(dir==3){
+			tc->tar_x[c]--; tc->tar_y[c]--; }
+		else if(dir==4){
+			tc->tar_y[c]--; }
+		else if(dir==5){
+			tc->tar_x[c]++; tc->tar_y[c]--; }
+		else if(dir==6){
+			tc->tar_x[c]++; }
+		else if(dir==7){
+			tc->tar_x[c]++; tc->tar_y[c]++; }
+	}
 }
 
 /*==========================================
