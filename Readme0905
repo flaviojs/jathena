@@ -1,4 +1,29 @@
 --------------------
+//0929 by ぴざまん
+
+・ランドプロテクター完全実装。
+・プロボックのスキル仕様変更(詠唱妨害・凍結、石化、睡眠解除)。
+・リカバリーのスキル仕様変更(アンデッドに使用すると一定確率で暗闇効果)。
+・状態異常中でも装備の切り替えが出来るように変更。
+・アイテム自動取得中に@killmonsterを使用すると落ちるバグ修正。
+・胡蝶蘭さんが上げていたnpc.cを同梱しました。
+・skill_dbで気になってたとこをちょこっと修正。
+
+	(map/)
+	clif.c
+		clif_parse_EquipItem() 修正。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+		skill_unitsetting()、skill_unit_onplace() 修正。
+		skill_landprotector() 追加。
+	mob.c
+		mob_delay_item_drop()、mob_delay_item_drop2() 修正。
+	npc.c 修正
+
+	(db/)
+	skill_db.txt 修正。
+
+--------------------
 //0928 by End_of_exam
 
 ・キャラや倉庫内アイテムが消える問題に暫定対処（キャラ鯖の改良）。

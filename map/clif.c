@@ -6100,7 +6100,7 @@ void clif_parse_EquipItem(int fd,struct map_session_data *sd)
 		return;
 	}
 	index = RFIFOW(fd,2)-2;
-	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0) return;
+	if(sd->npc_id!=0 || sd->vender_id != 0) return;
 
 	if(sd->status.inventory[index].identify != 1) {		// –¢ŠÓ’è
 		clif_equipitemack(sd,index,0,0);	// fail

@@ -1006,9 +1006,9 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 			strcat(srcbuf,line);
 	}
 	script=parse_script(srcbuf,startline);
-	free(srcbuf);
 	if (script==NULL) {
 		// script parse error?
+		free(srcbuf);
 		return 1;
 	}
 
@@ -1105,6 +1105,7 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 	nd->u.scr.nexttimer=-1;
 	nd->u.scr.timerid=-1;
 
+	free(srcbuf);
 	return 0;
 }
 

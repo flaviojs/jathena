@@ -1568,7 +1568,7 @@ static int mob_delay_item_drop(int tid,unsigned int tick,int id,int data)
 	temp_item.identify = !itemdb_isequip3(temp_item.nameid);
 
 	if(battle_config.item_auto_get){
-		if((flag = pc_additem(ditem->first_sd,&temp_item,ditem->amount))){
+		if(ditem->first_sd && (flag = pc_additem(ditem->first_sd,&temp_item,ditem->amount))){
 			clif_additem(ditem->first_sd,0,0,flag);
 			map_addflooritem(&temp_item,1,ditem->m,ditem->x,ditem->y,ditem->first_sd,ditem->second_sd,ditem->third_sd,0);
 		}
@@ -1594,7 +1594,7 @@ static int mob_delay_item_drop2(int tid,unsigned int tick,int id,int data)
 	ditem=(struct delay_item_drop2 *)id;
 
 	if(battle_config.item_auto_get){
-		if((flag = pc_additem(ditem->first_sd,&ditem->item_data,ditem->item_data.amount))){
+		if(ditem->first_sd && (flag = pc_additem(ditem->first_sd,&ditem->item_data,ditem->item_data.amount))){
 			clif_additem(ditem->first_sd,0,0,flag);
 			map_addflooritem(&ditem->item_data,ditem->item_data.amount,ditem->m,ditem->x,ditem->y,ditem->first_sd,ditem->second_sd,ditem->third_sd,0);
 		}

@@ -244,6 +244,7 @@ int skill_attack_area(struct block_list *bl,va_list ap);
 int skill_is_danceskill(int id);
 int skill_abra_dataset(int skilllv);
 int skill_clear_element_field(struct block_list *bl);
+int skill_landprotector(struct block_list *bl, va_list ap );
 
 static int distance(int x0,int y0,int x1,int y1)
 {
@@ -2007,19 +2008,39 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		}
 		break;
 	case SM_PROVOKE:		/* プロボック */
-		/* MVPmobには効かない */
-		if(bl->type==BL_MOB && battle_get_mode(bl)&0x20) {
-			map_freeblock_unlock();
-			return 1;
-		}
+		{
+			struct status_change *sc_data = battle_get_sc_data(bl);
 
-		clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
-		if(bl->type==BL_MOB) {
-			int range = skill_get_range(skillid,skilllv);
-			if(range < 0)
-				range = battle_get_range(src) - (range + 1);
-			mob_target((struct mob_data *)bl,src,range);
+			/* MVPmobには効かない */
+			if(bl->type==BL_MOB && battle_get_mode(bl)&0x20) {
+				map_freeblock_unlock();
+				return 1;
+			}
+
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
+
+			if(dstmd && dstmd->skilltimer!=-1 && dstmd->state.skillcastcancel)	// 詠唱妨害
+				skill_castcancel(bl,0);
+			if(dstsd && dstsd->skilltimer!=-1 && (!dstsd->special_state.no_castcancel || map[bl->m].flag.gvg)
+				&& dstsd->state.skillcastcancel	&& !dstsd->special_state.no_castcancel2)
+				skill_castcancel(bl,0);
+
+			if(sc_data){
+				if(sc_data[SC_FREEZE].timer!=-1)
+					skill_status_change_end(bl,SC_FREEZE,-1);
+				if(sc_data[SC_STONE].timer!=-1 && sc_data[SC_STONE].val2==0)
+					skill_status_change_end(bl,SC_STONE,-1);
+				if(sc_data[SC_SLEEP].timer!=-1)
+					skill_status_change_end(bl,SC_SLEEP,-1);
+			}
+
+			if(bl->type==BL_MOB) {
+				int range = skill_get_range(skillid,skilllv);
+				if(range < 0)
+					range = battle_get_range(src) - (range + 1);
+				mob_target((struct mob_data *)bl,src,range);
+			}
 		}
 		break;
 
@@ -2354,13 +2375,22 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 
 	case PR_STRECOVERY:			/* リカバリー */
-		clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
-			break;
-		skill_status_change_end(bl, SC_FREEZE	, -1 );
-		skill_status_change_end(bl, SC_STONE	, -1 );
-		skill_status_change_end(bl, SC_SLEEP	, -1 );
-		skill_status_change_end(bl, SC_STAN		, -1 );
+		{
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
+				break;
+			skill_status_change_end(bl, SC_FREEZE	, -1 );
+			skill_status_change_end(bl, SC_STONE	, -1 );
+			skill_status_change_end(bl, SC_SLEEP	, -1 );
+			skill_status_change_end(bl, SC_STAN		, -1 );
+			if( battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) ){//アンデッドなら暗闇効果
+				int blind_time;
+				//blind_time=30-battle_get_vit(bl)/10-battle_get_int/15;
+				blind_time=30*(100-(battle_get_int(bl)+battle_get_vit(bl))/2)/100;
+				if(rand()%100 < (100-(battle_get_int(bl)/2+battle_get_vit(bl)/3+battle_get_luk(bl)/10)))
+					skill_status_change_start(bl, SC_BLIND,1,0,0,0,blind_time,0);
+			}
+		}
 		break;
 
 	case WZ_ESTIMATION:			/* モンスター情報 */
@@ -3514,7 +3544,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 	for(i=0;i<count;i++){
 		struct skill_unit *unit;
 		int ux=x,uy=y,val1=skilllv,val2=0,limit=group->limit,alive=1;
-		int range=0;
+		int range=group->range;
 		switch(skillid){	/* 設定 */
 		case AL_PNEUMA:				/* ニューマ */
 			{
@@ -3592,13 +3622,6 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 					dir=map_calc_dir(src,x,y);
 				ux+=(2-i)*diry[dir];
 				uy+=(i-2)*dirx[dir];
-				val2=map_getcell(src->m,ux,uy);
-				if(val2==5 || val2==1)
-					alive=0;
-				else {
-					map_setcell(src->m,ux,uy,5);
-					clif_changemapcell(src->m,ux,uy,5,0);
-				}
 			}
 			break;
 
@@ -3630,20 +3653,30 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		case SA_DELUGE:				/* デリュージ */
 		case SA_VIOLENTGALE:				/* バイオレントゲイル */
 			{
-				int u_range=0;
-				if(skilllv<=2) u_range=2;
-				else if(skilllv<=4) u_range=3;
-				else if(skilllv>=5) u_range=4;
-
+				int u_range=0,central=0;
+				if(skilllv<=2){
+					u_range=2;
+					central=12;
+				}else if(skilllv<=4){
+					u_range=3;
+					central=24;
+				}else if(skilllv>=5){
+					u_range=4;
+					central=40;
+				}
 				ux+=(i%(u_range*2+1)-u_range);
 				uy+=(i/(u_range*2+1)-u_range);
 
-
+				if(i==central)
+					range=u_range;//中央のユニットの効果範囲は全範囲
+				else
+					range=-1;//中央以外のユニットは飾り
 			}
 			break;
 		case SA_LANDPROTECTOR:				/* ランドプロテクター */
 			{
 				int u_range=0;
+
 				if(skilllv<=2) u_range=3;
 				else if(skilllv<=4) u_range=4;
 				else if(skilllv>=5) u_range=5;
@@ -3651,9 +3684,10 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 				ux+=(i%(u_range*2+1)-u_range);
 				uy+=(i/(u_range*2+1)-u_range);
 
-
+				range=0;
 			}
 			break;
+
 
 		/* ダンスなど */
 		case BD_LULLABY:		/* 子守歌 */
@@ -3682,6 +3716,20 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 				range=-1;	/* 中心じゃない場合は範囲を-1にオーバーライド */
 			break;
 		}
+		//直上スキルの場合設置座標上にランドプロテクターがないかチェック
+		if(range<=0)
+			map_foreachinarea(skill_landprotector,src->m,ux,uy,ux,uy,BL_SKILL,skillid,&alive);
+
+		if(skillid==WZ_ICEWALL && alive){
+			val2=map_getcell(src->m,ux,uy);
+			if(val2==5 || val2==1)
+				alive=0;
+			else {
+				map_setcell(src->m,ux,uy,5);
+				clif_changemapcell(src->m,ux,uy,5,0);
+			}
+		}
+
 		if(alive){
 			unit=skill_initunit(group,i,ux,uy);
 			unit->val1=val1;
@@ -3715,6 +3763,10 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	ts=skill_unitgrouptickset_search( bl, sg->group_id);
 	diff=DIFF_TICK(tick,ts->tick);
 	goflag=(diff>sg->interval || diff<0);
+
+	//対象がLP上に居る場合は無効
+	map_foreachinarea(skill_landprotector,bl->m,bl->x,bl->y,bl->x,bl->y,BL_SKILL,0,&goflag);
+
 	if(!goflag)
 		return 0;
 	ts->tick=tick;
@@ -5296,6 +5348,24 @@ int skill_clear_element_field(struct block_list *bl)
 			if(skillid==SA_DELUGE||skillid==SA_VOLCANO||skillid==SA_VIOLENTGALE||skillid==SA_LANDPROTECTOR)
 				skill_delunitgroup(&md->skillunit[i]);
 		}
+	}
+	return 0;
+}
+/*==========================================
+ * ランドプロテクターチェック(foreachinarea)
+ *------------------------------------------
+ */
+int skill_landprotector(struct block_list *bl, va_list ap )
+{
+	int skillid=va_arg(ap,int);
+	int *alive=va_arg(ap,int *);
+	struct skill_unit *unit=(struct skill_unit *)bl;
+
+	if(skillid==SA_LANDPROTECTOR){
+		skill_delunit(unit);
+	}else{
+		if(unit->group->skill_id==SA_LANDPROTECTOR)
+			(*alive)=0;
 	}
 	return 0;
 }
