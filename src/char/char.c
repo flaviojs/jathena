@@ -652,7 +652,7 @@ int char_divorce(struct mmo_charstatus *cs){
 			if(char_dat[i].char_id == cs->partner_id && char_dat[i].partner_id == cs->char_id){
 				cs->partner_id=0;
 				char_dat[i].partner_id=0;
-				for(j=0;i<MAX_INVENTORY;j++){
+				for(j=0;j<MAX_INVENTORY;j++){
 					if(char_dat[i].inventory[j].nameid == WEDDING_RING_M || char_dat[i].inventory[j].nameid == WEDDING_RING_F){
 						memset(&char_dat[i].inventory[j],0,sizeof(char_dat[i].inventory[0]));
 					}
