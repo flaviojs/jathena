@@ -3138,6 +3138,29 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			}
 		}
 		break;
+	case HT_SPRINGTRAP:				/* スプリングトラップ */
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		{
+			struct skill_unit *su=NULL;
+			if((bl->type==BL_SKILL) && (su=(struct skill_unit *)bl)){
+				switch(su->group->unit_id){
+					case 0x8f:	/* ブラストマイン */
+					case 0x90:	/* スキッドトラップ */
+					case 0x93:	/* ランドマイン */
+					case 0x94:	/* ショックウェーブトラップ */
+					case 0x95:	/* サンドマン */
+					case 0x96:	/* フラッシャー */
+					case 0x97:	/* フリージングトラップ */
+					case 0x98:	/* クレイモアートラップ */
+					case 0x99:	/* トーキーボックス */
+						su->group->unit_id = 0x8c;
+						clif_changelook(bl,LOOK_BASE,su->group->unit_id);
+						su->group->limit=DIFF_TICK(tick+1500,su->group->tick);
+						su->limit=DIFF_TICK(tick+1500,su->group->tick);
+				}
+			}
+		}
+		break;
 	default:
 		map_freeblock_unlock();
 		return 1;
@@ -3319,6 +3342,15 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 			src->m,x-2,y-2,x+2,y+2,0,
 			src,skillid,skilllv,tick, flag|BCT_ENEMY|2,
 			skill_castend_nodamage_id);
+		break;
+
+	case HT_DETECTING:				/* ディテクティング */
+		{
+			const int range=7;
+			map_foreachinarea( skill_status_change_timer_sub,
+				src->m, src->x-range, src->y-range, src->x+range,src->y+range,0,
+				src,SC_SIGHT,tick);
+		}
 		break;
 
 	case MG_SAFETYWALL:			/* セイフティウォール */
@@ -5397,6 +5429,7 @@ int skill_use_pos( struct map_session_data *sd,
 int skill_castcancel(struct block_list *bl,int type)
 {
 	int inf;
+	int ret=0;
 	if(bl->type==BL_PC){
 		struct map_session_data *sd=(struct map_session_data *)bl;
 		unsigned long tick=gettick();
@@ -5409,15 +5442,19 @@ int skill_castcancel(struct block_list *bl,int type)
 			}
 			if(!type) {
 				if((inf = skill_get_inf( sd->skillid )) == 2 || inf == 32)
-					delete_timer( sd->skilltimer, skill_castend_pos );
+					ret=delete_timer( sd->skilltimer, skill_castend_pos );
 				else
-					delete_timer( sd->skilltimer, skill_castend_id );
+					ret=delete_timer( sd->skilltimer, skill_castend_id );
+				if(ret<0)
+					printf("delete timer error : skillid : %d\n",sd->skillid);
 			}
 			else {
 				if((inf = skill_get_inf( sd->skillid_old )) == 2 || inf == 32)
-					delete_timer( sd->skilltimer, skill_castend_pos );
+					ret=delete_timer( sd->skilltimer, skill_castend_pos );
 				else
-					delete_timer( sd->skilltimer, skill_castend_id );
+					ret=delete_timer( sd->skilltimer, skill_castend_id );
+				if(ret<0)
+					printf("delete timer error : skillid : %d\n",sd->skillid_old);
 			}
 			sd->skilltimer=-1;
 			clif_skillcastcancel(bl);
@@ -5428,12 +5465,14 @@ int skill_castcancel(struct block_list *bl,int type)
 		struct mob_data *md=(struct mob_data *)bl;
 		if( md->skilltimer!=-1 ){
 			if((inf = skill_get_inf( md->skillid )) == 2 || inf == 32)
-				delete_timer( md->skilltimer, mobskill_castend_pos );
+				ret=delete_timer( md->skilltimer, mobskill_castend_pos );
 			else
-				delete_timer( md->skilltimer, mobskill_castend_id );
+				ret=delete_timer( md->skilltimer, mobskill_castend_id );
 			md->skilltimer=-1;
 			clif_skillcastcancel(bl);
 		}
+		if(ret<0)
+			printf("delete timer error : skillid : %d\n",md->skillid);
 		return 0;
 	}
 	return 1;
