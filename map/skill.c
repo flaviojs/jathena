@@ -517,10 +517,10 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		type=(flag&0xff00)>>8;
 
 	if( dmg.blewcount ){	/* 吹き飛ばし処理とそのパケット */
-		if(dmg.damage + dmg.damage2 > 0)
-			skill_blown(dsrc,bl,dmg.blewcount);
 		clif_skill_damage2(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 			dmg.damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
+//		if(dmg.damage + dmg.damage2 > 0)
+//			skill_blown(dsrc,bl,dmg.blewcount);
 	} else			/* スキルのダメージパケット */
 		clif_skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 			dmg.damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
@@ -618,13 +618,24 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 		if(target->type == BL_PC && pc_isdead((struct map_session_data *)target))
 			return 0;
 
-		skill_attack(skl->type,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag);
+		switch(skl->skill_id) {
+			case TF_BACKSLIDING:	
+				clif_skill_nodamage(src,src,skl->skill_id,0,1);
+				break;
+			default:
+				skill_attack(skl->type,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag);
+				break;
+		}
 	}
 	else {
 		switch(skl->skill_id) {
 			case WZ_METEOR:
-				clif_skill_poseffect(src,skl->skill_id,skl->skill_lv,skl->x,skl->y,tick);
-				skill_unitsetting(src,skl->skill_id,skl->skill_lv,skl->x,skl->y,0);
+				if(skl->type >= 0) {
+					skill_unitsetting(src,skl->skill_id,skl->skill_lv,skl->type>>16,skl->type&0xFFFF,0);
+					clif_skill_poseffect(src,skl->skill_id,skl->skill_lv,skl->x,skl->y,tick);
+				}
+				else
+					skill_unitsetting(src,skl->skill_id,skl->skill_lv,skl->x,skl->y,0);
 				break;
 		}
 	}
@@ -796,7 +807,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			if(sd) {
 				for(i=1;i<sd->spiritball_old;i++)
 					skill_addtimerskill(src,tick+i*250,bl->id,0,0,skillid,skilllv,BF_WEAPON,flag);
-				sd->skillcanmove_tick = tick + (sd->spiritball_old-1)*250;
+				sd->canmove_tick = tick + (sd->spiritball_old-1)*250;
 			}
 		}
 
@@ -1012,6 +1023,13 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	if(bl->type==BL_PC)
 		dstsd=(struct map_session_data *)bl; 
+
+	if(bl == NULL || bl->prev == NULL)
+		return 0;
+	if(sd && pc_isdead(sd))
+		return 0;
+	if(dstsd && pc_isdead(dstsd))
+		return 0;
 
 	switch(skillid)
 	{
@@ -1502,11 +1520,10 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 
 	case TF_BACKSLIDING:		/* バックステップ */
-		if(sd)
-			pc_stop_walking(sd);
+		battle_stopwalking(src,0);
 		skill_blown(src,bl,5|0x10000);
-		clif_skill_nodamage(src,bl,skillid,0,1);
 		clif_fixpos(src);
+		skill_addtimerskill(src,tick + 200,src->id,0,0,skillid,skilllv,0,flag);
 		break;
 
 	/* ランダム属性変化、水属性変化、地、火、風 */
@@ -1607,7 +1624,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skilllv,unsigned int tick,int flag)
 {
 	struct map_session_data *sd=NULL;
-	int i,tmpx,tmpy;
+	int i,tmpx = 0,tmpy = 0, x1 = 0, y1 = 0;
 
 	if(src->type==BL_PC)
 		sd=(struct map_session_data *)src;
@@ -1674,21 +1691,32 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 
 	case WZ_METEOR:				//メテオストーム
 		for(i=0;i<2+(skilllv>>1);i++) {
-			int j = 0,c;
+			int j = 0, c;
 			do {
-				tmpx=x + (rand()%7 - 3);
-				tmpy=y + (rand()%7 - 3);
+				tmpx = x + (rand()%7 - 3);
+				tmpy = y + (rand()%7 - 3);
+				if(tmpx < 0)
+					tmpx = 0;
+				else if(tmpx >= map[src->m].xs)
+					tmpx = map[src->m].xs - 1;
+				if(tmpy < 0)
+					tmpy = 0;
+				else if(tmpy >= map[src->m].ys)
+					tmpy = map[src->m].ys - 1;
 				j++;
 			} while(((c=map_getcell(src->m,x,y))==1 || c==5) && j<100);
 			if(j >= 100)
 				continue;
-			if(i==0) {
+
+			if(i==0)
 				clif_skill_poseffect(src,skillid,skilllv,tmpx,tmpy,tick);
-				skill_unitsetting(src,skillid,skilllv,tmpx,tmpy,0);
-			}
-			else
-				skill_addtimerskill(src,tick+i*1000,0,tmpx,tmpy,skillid,skilllv,BF_MAGIC,flag);
+			if(i > 0)
+				skill_addtimerskill(src,tick+i*1000,0,tmpx,tmpy,skillid,skilllv,(x1<<16)|y1,flag);
+
+			x1 = tmpx;
+			y1 = tmpy;
 		}
+		skill_addtimerskill(src,tick+i*1000,0,tmpx,tmpy,skillid,skilllv,-1,flag);
 		break;
 
 	case AL_WARP:				/* ワープポータル */
@@ -2243,7 +2271,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 
 	case 0x90:	/* スキッドトラップ */
 		if(sg->val2==0){
-			battle_stopwalking(bl);
+			battle_stopwalking(bl,0);
 			skill_blown(&src->bl,bl,sg->skill_lv|0x30000);
 			sg->limit=DIFF_TICK(tick,sg->tick)+3000;
 			sg->val2=bl->id;
@@ -2955,8 +2983,8 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	sd->skillid		= skill_num;
 	sd->skilllv		= skill_lv;
 	tick=gettick();
-	sd->canmove_tick = tick + casttime + delay;
-	sd->skillcanmove_tick = tick;
+	sd->canact_tick = tick + casttime + delay;
+	sd->canmove_tick = tick;
 	if(casttime > 0)
 		sd->skilltimer = add_timer( tick+casttime, skill_castend_id, sd->bl.id, 0 );
 	else {
@@ -3013,8 +3041,8 @@ int skill_use_pos( struct map_session_data *sd,
 	sd->skillid		= skill_num;
 	sd->skilllv			= skill_lv;
 	tick=gettick();
-	sd->canmove_tick = tick + casttime + delay;
-	sd->skillcanmove_tick = tick;
+	sd->canact_tick = tick + casttime + delay;
+	sd->canmove_tick = tick;
 	if(casttime > 0)
 		sd->skilltimer = add_timer( tick+casttime, skill_castend_pos, sd->bl.id, 0 );
 	else {
@@ -3036,8 +3064,8 @@ int skill_castcancel( struct block_list *bl )
 	if(bl->type==BL_PC){
 		struct map_session_data *sd=(struct map_session_data *)bl;
 		unsigned long tick=gettick();
-		sd->canmove_tick=tick;
-		sd->skillcanmove_tick = tick;
+		sd->canact_tick=tick;
+		sd->canmove_tick = tick;
 		if( sd->skilltimer!=-1){
 			if( skill_get_inf( sd->skillid )&2 )
 				delete_timer( sd->skilltimer, skill_castend_pos );
@@ -3313,7 +3341,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			return 0;
 		}
 		if(type==SC_STONE || type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
-			mob_stop_walking(md);
+			mob_stop_walking(md,0);
 	}else if(bl->type==BL_PC){
 		sd=(struct map_session_data *)bl;
 		
@@ -3324,7 +3352,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			}
 		}
 		if(type==SC_STONE || type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
-			pc_stop_walking(sd);
+			pc_stop_walking(sd,0);
 	}else{
 		printf("skill_status_change_start: neither MOB nor PC !\n");
 		return 0;

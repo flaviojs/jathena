@@ -579,12 +579,12 @@ int battle_stopattack(struct block_list *bl)
 	return 0;
 }
 // ˆÚ“®’âŽ~
-int battle_stopwalking(struct block_list *bl)
+int battle_stopwalking(struct block_list *bl,int type)
 {
 	if(bl->type==BL_MOB)
-		return mob_stop_walking((struct mob_data*)bl);
+		return mob_stop_walking((struct mob_data*)bl,type);
 	else if(bl->type==BL_PC)
-		return pc_stop_walking((struct map_session_data*)bl);
+		return pc_stop_walking((struct map_session_data*)bl,type);
 	return 0;
 }
 

@@ -73,7 +73,7 @@ int mob_once_spawn_area(struct map_session_data *sd,char *mapname,
 int mob_walktoxy(struct mob_data *md,int x,int y,int easy);
 
 int mob_target(struct mob_data *md,struct block_list *bl,int dist);
-int mob_stop_walking(struct mob_data *md);
+int mob_stop_walking(struct mob_data *md,int type);
 int mob_stopattack(struct mob_data *);
 int mob_spawn(int);
 int mob_damage(struct map_session_data *,struct mob_data*,int);

@@ -4557,7 +4557,7 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 	if(sd->chatID)
 		return;
 
-	if(sd->skillcanmove_tick > gettick())
+	if(sd->canmove_tick > gettick())
 		return;
 
 	pc_stopattack(sd);
@@ -4566,9 +4566,9 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 	y = ((RFIFOB(fd,3)&0x3f)<<4)+(RFIFOB(fd,4)>>4);
 
 	// ステータス異常やハイディング中(トンネルドライブ無)で動けない
-	if(sd->opt1>0 || sd->status.option&2 || sd->sc_data[SC_ANKLE].timer!=-1 )
-		if(sd->status.option&2 && !pc_checkskill(sd,RG_TUNNELDRIVE))
-			return;
+	if(sd->opt1>0 || sd->sc_data[SC_ANKLE].timer!=-1 || (sd->status.option&2 && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0) )
+		return;
+
 	pc_walktoxy(sd,x,y);
 }
 
@@ -4734,12 +4734,12 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 
 	tick=gettick();
 
-	pc_stop_walking(sd);
+	pc_stop_walking(sd,0);
 	pc_stopattack(sd);
 	switch(RFIFOB(fd,6)){
 	case 0x00:	// once attack
 	case 0x07:	// continuous attack
-		if(DIFF_TICK(tick , sd->canmove_tick) < 0) {
+		if(DIFF_TICK(tick , sd->canact_tick) < 0) {
 			clif_skill_fail(sd,1,4,0);
 			return;
 		}
@@ -5174,7 +5174,7 @@ void clif_parse_UseSkillToId(int fd,struct map_session_data *sd)
 {
 	int skillnum,skilllv,lv;
 	unsigned int tick=gettick();
-	if(DIFF_TICK(tick , sd->canmove_tick) < 0) {
+	if(DIFF_TICK(tick , sd->canact_tick) < 0) {
 		clif_skill_fail(sd,RFIFOW(fd,4),4,0);
 		return;
 	}
@@ -5206,7 +5206,7 @@ void clif_parse_UseSkillToPos(int fd,struct map_session_data *sd)
 {
 	int skillnum,skilllv,lv;
 	unsigned int tick=gettick();
-	if(DIFF_TICK(tick , sd->canmove_tick) < 0) {
+	if(DIFF_TICK(tick , sd->canact_tick) < 0) {
 		clif_skill_fail(sd,RFIFOW(fd,4),4,0);
 		return;
 	}

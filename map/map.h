@@ -148,8 +148,8 @@ struct map_session_data {
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
 	int ghost_timer;
 
+	unsigned long canact_tick;
 	unsigned long canmove_tick;
-	unsigned long skillcanmove_tick;
 	int hp_sub,sp_sub;
 	int inchealhptick,inchealsptick,inchealspirittick;
 

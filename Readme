@@ -1,3 +1,27 @@
+--------------
+//0525 by 死神
+
+・dmotionの間はキャラが動かないように変更。(テストしてません。)
+・メテオのダメージ表示タイミング修正。(少し遅い気もしますが...)
+・バックスライディングの時にモーションが出るように変更。(スキル使用後
+0.2秒後にスキル使用パケットを送るように変更しました。ラグ等によって変な動作をする可能性もあります。)
+・0524の修正。
+・ハイディングしている時自然回復しないように変更。
+・0519で間違ったconfの修正と細かい所修正。
+	map.h
+		struct map_session_dataのcanmove_tickをcanact_tickに変更。
+		skillcanmove_tickをcanmove_tickに変更。
+	skill.c 修正。
+	pc.c 修正。
+	pc.h 修正。
+	clif.c 修正。
+	battle.c 修正。
+	battle.h 修正。
+	mob.c 修正。
+	mob.h 修正。
+	char_athena.conf 修正。
+	map_athena.conf 修正。
+
 ----------------
 //0524 by huge
 

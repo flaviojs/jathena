@@ -258,7 +258,7 @@ int pc_setnewpc(struct map_session_data *sd,int account_id,int char_id,int login
 	sd->sex          = sex;
 	sd->state.auth   = 0;
 	sd->bl.type      = BL_PC;
-	sd->canmove_tick = gettick();
+	sd->canact_tick = sd->canmove_tick = gettick();
 	sd->state.waitingdisconnect=0;
 
 	return 0;
@@ -316,8 +316,8 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->hp_sub = 0;
 	sd->sp_sub = 0;
 	sd->inchealspirittick = 0;
+	sd->canact_tick = tick;
 	sd->canmove_tick = tick;
-	sd->skillcanmove_tick = tick;
 
 	sd->spiritball = 0;
 	for(i=0;i<10;i++)
@@ -724,8 +724,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		}
 		if(sd->sc_data[SC_DECREASEAGI].timer!=-1)	// 速度減少(agiはbattle.cで)
 			sd->speed = sd->speed *125/100;
-		if(sd->sc_data[RG_TUNNELDRIVE].timer!=-1 && sd->status.option&2)	// トンネルドライブ	// トンネルドライブ
-			sd->speed += sd->speed*(20-pc_checkskill(sd,RG_TUNNELDRIVE))/40;
+
 		if(sd->sc_data[SC_BLESSING].timer!=-1){	// ブレッシング
 			sd->paramb[0]+= sd->sc_data[SC_BLESSING].val1;
 			sd->paramb[3]+= sd->sc_data[SC_BLESSING].val1;
@@ -820,6 +819,9 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->flee += (skill*3)>>1;
 	if( (skill=pc_checkskill(sd,BS_WEAPONRESEARCH))>0)	// 武器研究の命中率増加
 		sd->hit += skill*2;
+
+	if(sd->status.option&2 && (skill = pc_checkskill(sd,RG_TUNNELDRIVE))>0 )	// トンネルドライブ	// トンネルドライブ
+		sd->speed += sd->speed*(20-skill)/40;
 	if (pc_iscarton(sd) && (skill=pc_checkskill(sd,MC_PUSHCART))>0)	// カートによる速度低下
 		sd->speed = sd->speed + (10-skill) * 0.1 * DEFAULT_WALK_SPEED;
 	else if (pc_isriding(sd))	// ペコペコ乗りによる速度増加
@@ -2042,17 +2044,20 @@ int pc_walktoxy(struct map_session_data *sd,int x,int y)
  * 歩 行停止
  *------------------------------------------
  */
-int pc_stop_walking(struct map_session_data *sd)
+int pc_stop_walking(struct map_session_data *sd,int type)
 {
 	if(sd->walktimer>0){
 		delete_timer(sd->walktimer,pc_walk);
 		sd->walktimer=-1;
 		sd->walkpath.path_len=0;
-		clif_fixpos(&sd->bl);
+		if(type != 2)
+			clif_fixpos(&sd->bl);
 		if(sd->status.pet_id && sd->pet_npcdata) {
 			pet_stop_walking(sd,sd->dir);
 		}
 	}
+	if(type == 1)
+		sd->canmove_tick = gettick() + sd->dmotion;
 
 	return 0;
 }
@@ -2552,7 +2557,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		pc_setstand(sd);
 	// 歩 いていたら足を止める
 	if(sd->sc_data[SC_ENDURE].timer == -1)
-		pc_stop_walking(sd);
+		pc_stop_walking(sd,1);
 
 	sd->status.hp-=damage;
 	if(sd->status.hp>0){
@@ -2596,7 +2601,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		clif_updatestatus(sd,SP_JOBEXP);
 	}
 
-	pc_stop_walking(sd);
+	pc_stop_walking(sd,0);
 	skill_castcancel(&sd->bl);	// 詠唱の中止
 	clif_updatestatus(sd,SP_HP);
 	clif_clearchar_area(&sd->bl,1);
@@ -3640,7 +3645,7 @@ static int pc_spirit_heal(struct map_session_data *sd,int level)
 static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 {
 	int skill;
-	if(sd->weight*2 < sd->max_weight && !pc_isdead(sd)) {
+	if(!pc_is50overweight(sd) && !pc_isdead(sd) && !pc_ishiding(sd) ) {
 		pc_natural_heal_hp(sd);
 		pc_natural_heal_sp(sd);
 	}

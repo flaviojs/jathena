@@ -52,7 +52,7 @@ int battle_heal(struct block_list *bl,struct block_list *target,int hp,int sp);
 
 // UŒ‚‚âˆÚ“®‚ğ~‚ß‚é
 int battle_stopattack(struct block_list *bl);
-int battle_stopwalking(struct block_list *bl);
+int battle_stopwalking(struct block_list *bl,int type);
 
 // ’ÊíUŒ‚ˆ—‚Ü‚Æ‚ß
 int battle_weapon_attack( struct block_list *bl,struct block_list *target,
