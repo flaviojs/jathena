@@ -1,4 +1,12 @@
 --------------------
+//0932 by End_of_exam
+
+・0930でギルド倉庫の中身が消えるバグを修正。
+
+	(char/)
+	int_storage.c guild_storage_tostr() 修正。
+
+--------------------
 //0931 by (凸)
 ・サーバーsnapshot
 ・AthenaDB計画から更新のあった物を反映
