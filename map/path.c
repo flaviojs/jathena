@@ -17,7 +17,7 @@ struct tmp_path { short x,y,dist,before,cost; char dir,flag;};
 #define calc_index(x,y) (((x)+(y)*32) & 1023)
 
 /*==========================================
- * Œo˜H’Tõ•â•heap push
+ * Œo˜H’Tõ•â?heap push
  *------------------------------------------
  */
 static inline void push_heap_path(int *heap,struct tmp_path *tp,int index)
@@ -34,7 +34,7 @@ static inline void push_heap_path(int *heap,struct tmp_path *tp,int index)
 }
 
 /*==========================================
- * Œo˜H’Tõ•â•heap update
+ * Œo˜H’Tõ•â?heap update
  * cost‚ªŒ¸‚Á‚½‚Ì‚Åª‚Ì•û‚ÖˆÚ“®
  *------------------------------------------
  */
@@ -57,7 +57,7 @@ static inline void update_heap_path(int *heap,struct tmp_path *tp,int index)
 }
 
 /*==========================================
- * Œo˜H’Tõ•â•heap pop
+ * Œo˜H’Tõ•â?heap pop
  *------------------------------------------
  */
 static int pop_heap_path(int *heap,struct tmp_path *tp)
@@ -145,7 +145,7 @@ static int add_path(int *heap,struct tmp_path *tp,int x,int y,int dist,int dir,i
 
 /*==========================================
  * (x,y)‚ªˆÚ“®•s‰Â”\’n‘Ñ‚©‚Ç‚¤‚©
- * flag 0x10000 ‰“‹——£UŒ‚”»’è
+ * flag 0x10000 ??—£U?”»’è
  *------------------------------------------
  */
 static inline int can_place(struct map_data *m,int x,int y,int flag)
@@ -168,8 +168,9 @@ static inline int can_move(struct map_data *m,int x0,int y0,int x1,int y1,int fl
 		return 0;
 	if(x1<0 || y1<0 || x1>=m->xs || y1>=m->ys)
 		return 0;
-	if(!can_place(m,x0,y0,flag))
-		return 0;
+	// (Fix Player&Monster cannot move in ICEWALL) mark by Michael at 2004-0127.
+//	if(!can_place(m,x0,y0,flag))
+//		return 0;
 	if(!can_place(m,x1,y1,flag))
 		return 0;
 	if(x0==x1 || y0==y1)
@@ -179,8 +180,8 @@ static inline int can_move(struct map_data *m,int x0,int y0,int x1,int y1,int fl
 	return 1;
 }
 /*==========================================
- * (x0,y0)‚©‚ç(dx,dy)•ûŒü‚ÖcountƒZƒ‹•ª
- * ‚«”ò‚Î‚µ‚½‚ ‚Æ‚ÌÀ•W‚ğŠ“¾
+ * (x0,y0)‚©‚ç(dx,dy)•ûŒü‚ÖcountƒZ?•ª
+ * ?‚«”ò‚Î‚µ‚½?‚Æ‚ÌÀ•W‚ğ?“¾
  *------------------------------------------
  */
 int path_blownpos(int m,int x0,int y0,int dx,int dy,int count)
@@ -191,7 +192,7 @@ int path_blownpos(int m,int x0,int y0,int dx,int dy,int count)
 		return -1;
 	md=&map[m];
 
-	if(count>15){	// Å‘å10ƒ}ƒX‚É§ŒÀ
+	if(count>15){	// Å‘å10/ƒX‚É§ŒÀ
 		if(battle_config.error_log)
 			printf("path_blownpos: count too many %d !\n",count);
 		count=15;
@@ -340,7 +341,7 @@ char gat[64][64]={
 struct map_data map[1];
 
 /*==========================================
- * Œo˜H’Tõƒ‹[ƒ`ƒ“’P‘ÌƒeƒXƒg—pmainŠÖ”
+ * Œo˜H’Tõ?[ƒ`?’P‘ÌƒeƒXƒg—pmainŠÖ?
  *------------------------------------------
  */
 void main(int argc,char *argv[])

@@ -1,4 +1,17 @@
 --------------
+//0748 by Michael
+	(map/)
+	pc.c 
+		pc_walk();
+		Fix Player cannot move in ICEWALL but have Path.
+	mob.c
+		mob_walk();
+		Fix Monster cannot move in ICEWALL but have Path.
+	path.c
+		can_move();
+		Fix Player&Monster cannot move in ICEWALL.
+
+--------------
 //0747 by 聖
 ・ペットがエモを出すとmap-serverが落ちることがあった問題を修正。
 	(map/)

@@ -28,7 +28,7 @@
 #include "memwatch.h"
 #endif
 
-#define PVP_CALCRANK_INTERVAL 1000	// PVP順位計算の間隔
+#define PVP_CALCRANK_INTERVAL 1000	// PVP?位計算の間隔
 
 static int max_weight_base[MAX_PC_CLASS];
 static int hp_coefficient[MAX_PC_CLASS];
@@ -47,8 +47,8 @@ static struct {
 } skill_tree[MAX_PC_CLASS][100];
 
 
-static int atkmods[3][20];	// 武器ATKサイズ修正(size_fix.txt)
-static int refinebonus[5][3];	// 精錬ボーナステーブル(refine_db.txt)
+static int atkmods[3][20];	// ?器ATKサイズ修正(size_fix.txt)
+static int refinebonus[5][3];	// 精錬ボーナステーブ?(refine_db.txt)
 static int percentrefinery[5][10];	// 精錬成功率(refine_db.txt)
 
 static int dirx[8]={0,-1,-1,-1,0,1,1,1};
@@ -219,8 +219,8 @@ int pc_delspiritball(struct map_session_data *sd,int count,int type)
 int pc_setrestartvalue(struct map_session_data *sd,int type)
 {
 	//-----------------------
-	// 死亡した
-	if(sd->special_state.restart_full_recover) {	// オシリスカード
+	// ?亡した
+	if(sd->special_state.restart_full_recover) {	// オシ?スカード
 		sd->status.hp=sd->status.max_hp;
 		sd->status.sp=sd->status.max_sp;
 	}
@@ -281,13 +281,13 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 
 
 /*==========================================
- * ローカルプロトタイプ宣言 (必要な物のみ)
+ * ?ーカ?プ?トタイプ宣言 (必要な物のみ)
  *------------------------------------------
  */
 static int pc_walktoxy_sub(struct map_session_data *);
 
 /*==========================================
- * 自分をロックしているMOBの数を数える(foreachclient)
+ * 自分を?ックしているMOBの?を?える(foreachclient)
  *------------------------------------------
  */
 int pc_counttargeted_sub(struct block_list *bl,va_list ap)
@@ -316,11 +316,11 @@ int pc_counttargeted(struct map_session_data *sd)
  */
 int pc_makesavestatus(struct map_session_data *sd)
 {
-	// 服の色は色々弊害が多いので保存対象にはしない
+	// ?の色は色々弊害が多いので保存対象にはしない
 	if(!battle_config.save_clothcolor)
 		sd->status.clothes_color=0;
 
-	// 死亡状態だったのでhpを1、位置をセーブ場所に変更
+	// ?亡状態だったのでhpを1、位置をセーブ場?に変更
 	if(pc_isdead(sd)){
 		pc_setrestartvalue(sd,0);
 		memcpy(&sd->status.last_point,&sd->status.save_point,sizeof(sd->status.last_point));
@@ -344,7 +344,7 @@ int pc_makesavestatus(struct map_session_data *sd)
 
 
 /*==========================================
- * 接続時の初期化
+ * 接続?の?期化
  *------------------------------------------
  */
 int pc_setnewpc(struct map_session_data *sd,int account_id,int char_id,int login_id1,int client_tick,int sex,int fd)
@@ -390,22 +390,22 @@ int pc_calcweapontype(struct map_session_data *sd)
 {
 	if(sd->weapontype1 != 0 &&	sd->weapontype2 == 0)
 		sd->status.weapon = sd->weapontype1;
-	if(sd->weapontype1 == 0 &&	sd->weapontype2 != 0)// 左手武器 Only
+	if(sd->weapontype1 == 0 &&	sd->weapontype2 != 0)// 左手?器 Only
 		sd->status.weapon = sd->weapontype2;
-	else if(sd->weapontype1 == 1 && sd->weapontype2 == 1)// 双短剣
+	else if(sd->weapontype1 == 1 && sd->weapontype2 == 1)// 双短?
 		sd->status.weapon = 0x11;
-	else if(sd->weapontype1 == 2 && sd->weapontype2 == 2)// 双単手剣
+	else if(sd->weapontype1 == 2 && sd->weapontype2 == 2)// 双単手?
 		sd->status.weapon = 0x12;
-	else if(sd->weapontype1 == 6 && sd->weapontype2 == 6)// 双単手斧
+	else if(sd->weapontype1 == 6 && sd->weapontype2 == 6)// 双単手?
 		sd->status.weapon = 0x13;
 	else if( (sd->weapontype1 == 1 && sd->weapontype2 == 2) ||
-		(sd->weapontype1 == 2 && sd->weapontype2 == 1) ) // 短剣 - 単手剣
+		(sd->weapontype1 == 2 && sd->weapontype2 == 1) ) // 短? - 単手?
 		sd->status.weapon = 0x14;
 	else if( (sd->weapontype1 == 1 && sd->weapontype2 == 6) ||
-		(sd->weapontype1 == 6 && sd->weapontype2 == 1) ) // 短剣 - 斧
+		(sd->weapontype1 == 6 && sd->weapontype2 == 1) ) // 短? - ?
 		sd->status.weapon = 0x15;
 	else if( (sd->weapontype1 == 2 && sd->weapontype2 == 6) ||
-		(sd->weapontype1 == 6 && sd->weapontype2 == 2) ) // 単手剣 - 斧
+		(sd->weapontype1 == 6 && sd->weapontype2 == 2) ) // 単手? - ?
 		sd->status.weapon = 0x16;
 	else
 		sd->status.weapon = sd->weapontype1;
@@ -471,7 +471,7 @@ int pc_isequip(struct map_session_data *sd,int n)
 
 /*==========================================
  * session idに問題無し
- * char鯖から送られてきたステータスを設定
+ * char鯖から?られてきたステータスを設定
  *------------------------------------------
  */
 int pc_authok(int id,struct mmo_charstatus *st)
@@ -486,7 +486,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	if(sd==NULL)
 		return 1;
 	if(sd->new_fd){
-		// 2重login状態だったので、両方落す
+		// 2重login状態だったので、両方?す
 		clif_authfail_fd(sd->fd,2);	// same id
 		clif_authfail_fd(sd->new_fd,2);	// same id
 		return 1;
@@ -499,7 +499,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	}
 
 	memset(&sd->state,0,sizeof(sd->state));
-	// 基本的な初期化
+	// 基本的な?期化
 	sd->state.connect_new = 1;
 	sd->weapontype1 = sd->weapontype2 = 0;
 	sd->view_class = sd->status.class;
@@ -533,7 +533,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	for(i=0;i<MAX_SKILLTIMERSKILL;i++)
 		sd->skilltimerskill[i].timer = -1;
 
-	// アイテムチェック
+	// アイテ?チェック
 	pc_setinventorydata(sd);
 	pc_checkitem(sd);
 
@@ -543,29 +543,29 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->pet_hungry_timer = -1;
 	memset(&sd->pet,0,sizeof(struct s_pet));
 
-	// ステータス異常の初期化
+	// ステータス異常の?期化
 	for(i=0;i<MAX_STATUSCHANGE;i++)
 		sd->sc_data[i].timer=-1;
 	sd->sc_count=0;
 	sd->status.option&=OPTION_MASK;
 
-	// スキルユニット関係の初期化
+	// スキ??ニット関係の?期化
 	memset(sd->skillunit,0,sizeof(sd->skillunit));
 	memset(sd->skillunittick,0,sizeof(sd->skillunittick));
 
-	// パーティー関係の初期化
+	// パーティー関係の?期化
 	sd->party_sended=0;
 	sd->party_invite=0;
 	sd->party_x=-1;
 	sd->party_y=-1;
 	sd->party_hp=-1;
 
-	// ギルド関係の初期化
+	// ギ?ド関係の?期化
 	sd->guild_sended=0;
 	sd->guild_invite=0;
 	sd->guild_alliance=0;
 
-	// イベント関係の初期化
+	// イベ?ト関係の?期化
 	memset(sd->eventqueue,0,sizeof(sd->eventqueue));
 	for(i=0;i<MAX_EVENTTIMER;i++)
 		sd->eventtimer[i] = -1;
@@ -578,7 +578,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	if(sd->status.pet_id > 0)
 		intif_request_petdata(sd->status.account_id,sd->status.char_id,sd->status.pet_id);
 
-	// パーティ、ギルドデータの要求
+	// パーティ、ギ?ドデータの要?
 	if( sd->status.party_id>0 && (p=party_search(sd->status.party_id))==NULL)
 		party_request_info(sd->status.party_id);
 	if( sd->status.guild_id>0 && (g=guild_search(sd->status.guild_id))==NULL)
@@ -593,10 +593,10 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	clif_authok(sd);
 	map_addnickdb(sd);
 
-	// ステータス初期計算など
+	// ステータス?期計算など
 	pc_calcstatus(sd,1);
 
-	// Message of the Dayの送信
+	// Message of the Dayの?信
 	{
 		char buf[256];
 		FILE *fp;
@@ -622,7 +622,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 
 
 /*==========================================
- * session idに問題ありなので後始末
+ * session idに問題?りなので後始?
  *------------------------------------------
  */
 int pc_authfail(int id)
@@ -633,7 +633,7 @@ int pc_authfail(int id)
 	if(sd==NULL)
 		return 1;
 	if(sd->new_fd){
-		// 2重login状態だったので、新しい接続のみ落す
+		// 2重login状態だったので、新しい接続のみ?す
 		clif_authfail_fd(sd->new_fd,0);
 
 		sd->new_fd=0;
@@ -663,7 +663,7 @@ static int pc_calc_skillpoint(struct map_session_data* sd)
 }
 
 /*==========================================
- * 覚えられるスキルの計算
+ * 覚えられるスキ?の計算
  *------------------------------------------
  */
 int pc_calc_skilltree(struct map_session_data *sd)
@@ -708,14 +708,14 @@ int pc_calc_skilltree(struct map_session_data *sd)
 
 	for(i=0;i<MAX_SKILL;i++){
 		sd->status.skill[i].id=0;
-		if (sd->status.skill[i].flag){	// cardスキルなら、
-			sd->status.skill[i].lv=(sd->status.skill[i].flag==1)?0:sd->status.skill[i].flag-2;	// 本当のlvに
+		if (sd->status.skill[i].flag){	// cardスキ?なら、
+			sd->status.skill[i].lv=(sd->status.skill[i].flag==1)?0:sd->status.skill[i].flag-2;	// 本?のlvに
 			sd->status.skill[i].flag=0;	// flagは0にしておく
 		}
 	}
 
 	if (battle_config.gm_allskill > 0 && pc_isGM(sd) >= battle_config.gm_allskill){
-		// 全てのスキル
+		// 全てのスキ?
 		for(i=1;i<158;i++)
 			sd->status.skill[i].id=i;
 		for(i=210;i<291;i++)
@@ -751,7 +751,7 @@ int pc_calc_skilltree(struct map_session_data *sd)
 
 
 /*==========================================
- * 重量アイコンの確認
+ * 重量アイコ?の確認
  *------------------------------------------
  */
 int pc_checkweighticon(struct map_session_data *sd)
@@ -779,10 +779,10 @@ int pc_checkweighticon(struct map_session_data *sd)
 
 
 /*==========================================
- * パラメータ計算
- * first==0の時、計算対象のパラメータが呼び出し前から
- * 変 化した場合自動でsendするが、
- * 能動的に変化させたパラメータは自前でsendするように
+ * パ??ータ計算
+ * first==0の?、計算対象のパ??ータが呼び出し前から
+ * 変 化した場?自動でsendするが、
+ * 能動的に変化させたパ??ータは自前でsendするように
  *------------------------------------------
  */
 int pc_calcstatus(struct map_session_data* sd,int first)
@@ -824,10 +824,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->view_class = sd->status.class;
 	b_base_atk = sd->base_atk;
 
-	pc_calc_skilltree(sd);	// スキルツリーの計算
+	pc_calc_skilltree(sd);	// スキ?ツ?ーの計算
 
 	sd->max_weight = max_weight_base[sd->status.class]+sd->status.str*300;
-	if( (skill=pc_checkskill(sd,MC_INCCARRY))>0 )	// 所持量増加
+	if( (skill=pc_checkskill(sd,MC_INCCARRY))>0 )	// ??量?加
 		sd->max_weight += skill*1000;
 
 	if(first&1) {
@@ -895,7 +895,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(sd->reseff,0,sizeof(sd->reseff));
 	memset(&sd->special_state,0,sizeof(sd->special_state));
 
-	sd->watk_ = 0;			//二刀流用(仮)
+	sd->watk_ = 0;			//二?流用(仮)
 	sd->watk_2 = 0;
 	sd->atk_ele_ = 0;
 	sd->star_ = 0;
@@ -989,7 +989,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	}
 	memcpy(sd->paramcard,sd->parame,sizeof(sd->paramcard));
 
-	// 装備品によるステータス変化はここで実行
+	// ?備品によるステータス変化はここで実行
 	for(i=0;i<10;i++) {
 		index = sd->equip_index[i];
 		if(index < 0)
@@ -1005,14 +1005,14 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			if(sd->inventory_data[index]->type == 4) {
 				int r,wlv = sd->inventory_data[index]->wlv;
 				if(i == 8 && sd->status.inventory[index].equip == 0x20) {
-					//二刀流用データ入力
+					//二?流用データ入力
 					sd->watk_ += sd->inventory_data[index]->atk;
-					sd->watk_2 = (r=sd->status.inventory[index].refine)*	// 精錬攻撃力
+					sd->watk_2 = (r=sd->status.inventory[index].refine)*	// 精錬攻?力
 						refinebonus[wlv][0];
 					if( (r-=refinebonus[wlv][2])>0 )	// 過剰精錬ボーナス
 						sd->overrefine_ = r*refinebonus[wlv][1];
 
-					if(sd->status.inventory[index].card[0]==0x00ff){	// 製造武器
+					if(sd->status.inventory[index].card[0]==0x00ff){	// 製造?器
 						sd->star_ = (sd->status.inventory[index].card[1]>>8);	// 星のかけら
 						wele_= (sd->status.inventory[index].card[1]&0x0f);	// 属 性
 					}
@@ -1021,14 +1021,14 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 					run_script(sd->inventory_data[index]->equip_script,0,sd->bl.id,0);
 					sd->state.lr_flag = 0;
 				}
-				else {	//二刀流武器以外
+				else {	//二?流?器以外
 					sd->watk += sd->inventory_data[index]->atk;
-					sd->watk2 += (r=sd->status.inventory[index].refine)*	// 精錬攻撃力
+					sd->watk2 += (r=sd->status.inventory[index].refine)*	// 精錬攻?力
 						refinebonus[wlv][0];
 					if( (r-=refinebonus[wlv][2])>0 )	// 過剰精錬ボーナス
 						sd->overrefine += r*refinebonus[wlv][1];
 
-					if(sd->status.inventory[index].card[0]==0x00ff){	// 製造武器
+					if(sd->status.inventory[index].card[0]==0x00ff){	// 製造?器
 						sd->star += (sd->status.inventory[index].card[1]>>8);	// 星のかけら
 						wele = (sd->status.inventory[index].card[1]&0x0f);	// 属 性
 					}
@@ -1081,11 +1081,11 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if(sd->aspd_add_rate != 100)
 		sd->aspd_rate += sd->aspd_add_rate - 100;
 
-	// 武器ATKサイズ補正 (右手)
+	// ?器ATKサイズ補正 (右手)
 	sd->atkmods[0] = atkmods[0][sd->weapontype1];
 	sd->atkmods[1] = atkmods[1][sd->weapontype1];
 	sd->atkmods[2] = atkmods[2][sd->weapontype1];
-	//武器ATKサイズ補正 (左手)
+	//?器ATKサイズ補正 (左手)
 	sd->atkmods_[0] = atkmods[0][sd->weapontype2];
 	sd->atkmods_[1] = atkmods[1][sd->weapontype2];
 	sd->atkmods_[2] = atkmods[2][sd->weapontype2];
@@ -1098,26 +1098,26 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if( (skill=pc_checkskill(sd,AC_OWL))>0 )	// ふくろうの目
 		sd->paramb[4] += skill;
 
-	// ステータス変化による基本パラメータ補正
+	// ステータス変化による基本パ??ータ補正
 	if(sd->sc_count){
-		if(sd->sc_data[SC_CONCENTRATE].timer!=-1 && sd->sc_data[SC_QUAGMIRE].timer == -1){	// 集中力向上
+		if(sd->sc_data[SC_CONCENTRATE].timer!=-1 && sd->sc_data[SC_QUAGMIRE].timer == -1){	// 集?力向上
 			sd->paramb[1]+= (sd->status.agi+sd->paramb[1]+sd->parame[1]-sd->paramcard[1])*(2+sd->sc_data[SC_CONCENTRATE].val1)/100;
 			sd->paramb[4]+= (sd->status.dex+sd->paramb[4]+sd->parame[4]-sd->paramcard[4])*(2+sd->sc_data[SC_CONCENTRATE].val1)/100;
 		}
-		if(sd->sc_data[SC_INCREASEAGI].timer!=-1 && sd->sc_data[SC_QUAGMIRE].timer == -1){	// 速度増加
+		if(sd->sc_data[SC_INCREASEAGI].timer!=-1 && sd->sc_data[SC_QUAGMIRE].timer == -1){	// 速度?加
 			sd->paramb[1]+= 2+sd->sc_data[SC_INCREASEAGI].val1;
 			sd->speed -= sd->speed *25/100;
 		}
 		if(sd->sc_data[SC_DECREASEAGI].timer!=-1)	// 速度減少(agiはbattle.cで)
 			sd->speed = sd->speed *125/100;
-		if(sd->sc_data[SC_BLESSING].timer!=-1){	// ブレッシング
+		if(sd->sc_data[SC_BLESSING].timer!=-1){	// ブ?ッシ?グ
 			sd->paramb[0]+= sd->sc_data[SC_BLESSING].val1;
 			sd->paramb[3]+= sd->sc_data[SC_BLESSING].val1;
 			sd->paramb[4]+= sd->sc_data[SC_BLESSING].val1;
 		}
-		if(sd->sc_data[SC_GLORIA].timer!=-1)	// グロリア
+		if(sd->sc_data[SC_GLORIA].timer!=-1)	// グ??ア
 			sd->paramb[5]+= 30;
-		if(sd->sc_data[SC_LOUD].timer!=-1 && sd->sc_data[SC_QUAGMIRE].timer == -1)	// ラウドボイス
+		if(sd->sc_data[SC_LOUD].timer!=-1 && sd->sc_data[SC_QUAGMIRE].timer == -1)	// ?ウドボイス
 			sd->paramb[0]+= 4;
 		if(sd->sc_data[SC_QUAGMIRE].timer!=-1)	// クァグマイア(AGI/DEXはbattle.cで)
 			sd->speed = sd->speed*3/2;
@@ -1179,7 +1179,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->mdef2 = (sd->mdef2*sd->mdef2_rate)/100;
 	if(sd->mdef2 < 1) sd->mdef2 = 1;
 
-	// 二刀流 ASPD 修正
+	// 二?流 ASPD 修正
 	if (sd->status.weapon <= 16)
 		sd->aspd += aspd_base[sd->status.class][sd->status.weapon]-(sd->paramc[1]*4+sd->paramc[4])*aspd_base[sd->status.class][sd->status.weapon]/1000;
 	else
@@ -1190,24 +1190,24 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	aspd_rate = sd->aspd_rate;
 
-	//攻撃速度増加
+	//攻?速度?加
 
-	if( (skill=pc_checkskill(sd,AC_VULTURE))>0){	// ワシの目
+	if( (skill=pc_checkskill(sd,AC_VULTURE))>0){	// ?シの目
 		sd->hit += skill;
 		if(sd->status.weapon == 11)
 			sd->attackrange += skill;
 	}
-	if( (skill=pc_checkskill(sd,TF_MISS))>0 )	// 回避率増加
+	if( (skill=pc_checkskill(sd,TF_MISS))>0 )	// 回避率?加
 		sd->flee += skill*3;
 	if( (skill=pc_checkskill(sd,MO_DODGE))>0 )	// 見切り
 		sd->flee += (skill*3)>>1;
-	if( (skill=pc_checkskill(sd,BS_WEAPONRESEARCH))>0)	// 武器研究の命中率増加
+	if( (skill=pc_checkskill(sd,BS_WEAPONRESEARCH))>0)	// ?器研?の命?率?加
 		sd->hit += skill*2;
-	if(sd->status.option&2 && (skill = pc_checkskill(sd,RG_TUNNELDRIVE))>0 )	// トンネルドライブ	// トンネルドライブ
+	if(sd->status.option&2 && (skill = pc_checkskill(sd,RG_TUNNELDRIVE))>0 )	// ト?ネ?ド?イブ	// ト?ネ?ド?イブ
 		sd->speed += sd->speed*(20-skill)/40;
 	if (pc_iscarton(sd) && (skill=pc_checkskill(sd,MC_PUSHCART))>0)	// カートによる速度低下
 		sd->speed += (10-skill) * (DEFAULT_WALK_SPEED * 0.1);
-	else if (pc_isriding(sd))	// ペコペコ乗りによる速度増加
+	else if (pc_isriding(sd))	// ペコペコ乗りによる速度?加
 		sd->speed -= (0.2 * DEFAULT_WALK_SPEED);
 
 	if((skill=pc_checkskill(sd,CR_TRUST))>0) { // フェイス
@@ -1260,27 +1260,27 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(sd->nhealsp < 1) sd->nhealsp = 1;
 	}
 
-	// 種族耐性（これでいいの？ ディバインプロテクションと同じ処理がいるかも）
-	if( (skill=pc_checkskill(sd,SA_DRAGONOLOGY))>0 ){	// ドラゴノロジー
+	// 種族耐性（これでいいの？ ディバイ?プ?テクシ??と同じ??がいるかも）
+	if( (skill=pc_checkskill(sd,SA_DRAGONOLOGY))>0 ){	// ド?ゴノ?ジー
 		skill = skill*4;
 		sd->addrace[9]+=skill;
 		sd->addrace_[9]+=skill;
 		sd->subrace[9]+=skill;
 	}
 
-	// スキルやステータス異常による残りのパラメータ補正
+	// スキ?やステータス異常による残りのパ??ータ補正
 	if(sd->sc_count){
 		// ATK/DEF変化形
-		if(sd->sc_data[SC_ANGELUS].timer!=-1)	// エンジェラス
+		if(sd->sc_data[SC_ANGELUS].timer!=-1)	// エ?ジェ?ス
 			sd->def2 = sd->def2*(110+5*sd->sc_data[SC_ANGELUS].val1)/100;
-		if(sd->sc_data[SC_IMPOSITIO].timer!=-1)	// インポシティオマヌス
+		if(sd->sc_data[SC_IMPOSITIO].timer!=-1)	// イ?ポシティオマヌス
 			sd->watk += sd->sc_data[SC_IMPOSITIO].val1*5;
-		if(sd->sc_data[SC_PROVOKE].timer!=-1){	// プロボック
+		if(sd->sc_data[SC_PROVOKE].timer!=-1){	// プ?ボック
 			sd->def2 = sd->def2*(100-6*sd->sc_data[SC_PROVOKE].val1)/100;
 			sd->base_atk = sd->base_atk*(100+2*sd->sc_data[SC_PROVOKE].val1)/100;
 			sd->watk = sd->watk*(100+2*sd->sc_data[SC_PROVOKE].val1)/100;
 		}
-		if(sd->sc_data[SC_POISON].timer!=-1){	// プロボック
+		if(sd->sc_data[SC_POISON].timer!=-1){	// プ?ボック
 			sd->def = sd->def*75/100;
 			sd->def2 = sd->def2*75/100;
 		}
@@ -1288,33 +1288,33 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->watk += sd->sc_data[SC_DRUMBATTLE].val2;
 			sd->def  += sd->sc_data[SC_DRUMBATTLE].val3;
 		}
-		if(sd->sc_data[SC_NIBELUNGEN].timer!=-1)	// ニーベルングの指輪
+		if(sd->sc_data[SC_NIBELUNGEN].timer!=-1)	// ニーベ??グの指輪
 			sd->watk += sd->sc_data[SC_NIBELUNGEN].val2;
-		if(sd->sc_data[SC_ETERNALCHAOS].timer!=-1)	// エターナルカオス
+		if(sd->sc_data[SC_ETERNALCHAOS].timer!=-1)	// エターナ?カオス
 			sd->def=0;
 
 		// ASPD/移動速度変化系
 		if(sd->sc_data[SC_TWOHANDQUICKEN].timer != -1 && sd->sc_data[SC_QUAGMIRE].timer == -1)	// 2HQ
 			aspd_rate -= 30;
 		if(sd->sc_data[SC_ADRENALINE].timer != -1 && sd->sc_data[SC_TWOHANDQUICKEN].timer == -1 &&
-			sd->sc_data[SC_QUAGMIRE].timer == -1)	// アドレナリンラッシュ
+			sd->sc_data[SC_QUAGMIRE].timer == -1)	// アド?ナ???ッシ?
 			aspd_rate -= 30;
 		if(sd->sc_data[SC_SPEARSQUICKEN].timer != -1 && sd->sc_data[SC_ADRENALINE].timer == -1 &&
-			sd->sc_data[SC_TWOHANDQUICKEN].timer == -1 && sd->sc_data[SC_QUAGMIRE].timer == -1)	// スピアクィッケン
+			sd->sc_data[SC_TWOHANDQUICKEN].timer == -1 && sd->sc_data[SC_QUAGMIRE].timer == -1)	// スピアクィッケ?
 			aspd_rate -= sd->sc_data[SC_SPEARSQUICKEN].val2;
-		if(sd->sc_data[SC_ASSNCROS].timer!=-1 && // 夕陽のアサシンクロス
+		if(sd->sc_data[SC_ASSNCROS].timer!=-1 && // 夕陽のアサシ?ク?ス
 			sd->sc_data[SC_TWOHANDQUICKEN].timer==-1 && sd->sc_data[SC_ADRENALINE].timer==-1 && sd->sc_data[SC_SPEARSQUICKEN].timer==-1)
 			aspd_rate -= sd->sc_data[SC_ASSNCROS].val2;
-		if(sd->sc_data[SC_DONTFORGETME].timer!=-1){		// 私を忘れないで
+		if(sd->sc_data[SC_DONTFORGETME].timer!=-1){		// ?を忘れないで
 			aspd_rate += sd->sc_data[SC_DONTFORGETME].val2;
 			sd->speed= sd->speed* sd->sc_data[SC_DONTFORGETME].val3/100;
 		}
 		if(	sd->sc_data[i=SC_SPEEDPOTION2].timer!=-1 ||
 			sd->sc_data[i=SC_SPEEDPOTION1].timer!=-1 ||
-			sd->sc_data[i=SC_SPEEDPOTION0].timer!=-1)	// 増 速ポーション
+			sd->sc_data[i=SC_SPEEDPOTION0].timer!=-1)	// ? 速ポーシ??
 			aspd_rate -= sd->sc_data[i].val2;
 		
-		if( sd->sc_data[SC_DANCING].timer!=-1 )		// 演奏/ダンス使用中
+		if( sd->sc_data[SC_DANCING].timer!=-1 )		// ?奏/ダ?ス使用?
 			sd->speed*=4;
 
 		// HIT/FLEE変化系
@@ -1322,30 +1322,30 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->flee += sd->sc_data[SC_WHISTLE].val1 * sd->flee/100;
 			sd->flee2+= sd->sc_data[SC_WHISTLE].val1 * 10;
 		}
-		if(sd->sc_data[SC_HUMMING].timer!=-1)  // ハミング
+		if(sd->sc_data[SC_HUMMING].timer!=-1)  // ハミ?グ
 			sd->hit += sd->sc_data[SC_HUMMING].val2 * sd->hit/100;
-		if(sd->sc_data[SC_BLIND].timer!=-1){	// 暗黒
+		if(sd->sc_data[SC_BLIND].timer!=-1){	// 暗?
 			sd->hit -= sd->hit*25/100;
 			sd->flee -= sd->flee*25/100;
 		}
 
 		// 耐性
-		if(sd->sc_data[SC_SIEGFRIED].timer!=-1){  // 不死身のジークフリード
-			sd->subele[1] += sd->sc_data[SC_SIEGFRIED].val2;	// 水
+		if(sd->sc_data[SC_SIEGFRIED].timer!=-1){  // 不?身のジークフ?ード
+			sd->subele[1] += sd->sc_data[SC_SIEGFRIED].val2;	// ?
 			sd->subele[3] += sd->sc_data[SC_SIEGFRIED].val2;	// 火
 		}
-		if(sd->sc_data[SC_PROVIDENCE].timer!=-1){	// プロヴィデンス
+		if(sd->sc_data[SC_PROVIDENCE].timer!=-1){	// プ??ィデ?ス
 			sd->subele[6] += sd->sc_data[SC_PROVIDENCE].val2;	// 対 聖属性
-			sd->subrace[6] += sd->sc_data[SC_PROVIDENCE].val2;	// 対 ?魔
+			sd->subrace[6] += sd->sc_data[SC_PROVIDENCE].val2;	// 対 ??
 		}
 
 		// その他
-		if(sd->sc_data[SC_APPLEIDUN].timer!=-1){	// イドゥンの林檎
+		if(sd->sc_data[SC_APPLEIDUN].timer!=-1){	// イドゥ?の林檎
 			sd->status.max_hp += (sd->sc_data[SC_APPLEIDUN].val2 * sd->status.max_hp)/100;
 			if(sd->status.max_hp < 0 || sd->status.max_hp > battle_config.max_hp)
 				sd->status.max_hp = battle_config.max_hp;
 		}
-		if(sd->sc_data[SC_SERVICE4U].timer!=-1) {	// サービスフォーユー
+		if(sd->sc_data[SC_SERVICE4U].timer!=-1) {	// サービスフォー?ー
 			sd->status.max_sp += (sd->sc_data[SC_SERVICE4U].val2 * sd->status.max_sp)/100;
 			if(sd->status.max_sp < 0 || sd->status.max_sp > battle_config.max_sp)
 				sd->status.max_sp = battle_config.max_sp;
@@ -1356,10 +1356,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(sd->sc_data[SC_FORTUNE].timer!=-1)	// 幸運のキス
 			sd->critical += sd->sc_data[SC_FORTUNE].val1*10;
 
-		if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer!=-1)	// 爆裂波動
+		if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer!=-1)	// ?裂波動
 			sd->critical += sd->sc_data[SC_EXPLOSIONSPIRITS].val2;
 
-		if(sd->sc_data[SC_STEELBODY].timer!=-1){	// 金剛
+		if(sd->sc_data[SC_STEELBODY].timer!=-1){	// 金?
 			sd->def = 90;
 			sd->mdef = 90;
 			aspd_rate += 25;
@@ -1375,9 +1375,9 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->status.sp = ((skill*25-25)/sd->status.max_sp)/100;
 		}
 		*/
-/*		if(sd->sc_data[SC_VOLCANO].timer!=-1)	// エンチャントポイズン(属性はbattle.cで)
+/*		if(sd->sc_data[SC_VOLCANO].timer!=-1)	// エ?チ??トポイズ?(属性はbattle.cで)
 			sd->addeff[2]+=sd->sc_data[SC_VOLCANO].val2;//% of granting
-		if(sd->sc_data[SC_DELUGE].timer!=-1)	// エンチャントポイズン(属性はbattle.cで)
+		if(sd->sc_data[SC_DELUGE].timer!=-1)	// エ?チ??トポイズ?(属性はbattle.cで)
 			sd->addeff[0]+=sd->sc_data[SC_DELUGE].val2;//% of granting
 		*/
 	}
@@ -1423,7 +1423,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	}
 
 	if( memcmp(b_skill,sd->status.skill,sizeof(sd->status.skill)) )
-		clif_skillinfoblock(sd);	// スキル送信
+		clif_skillinfoblock(sd);	// スキ??信
 
 	if(b_speed != sd->speed)
 		clif_updatestatus(sd,SP_SPEED);
@@ -1487,7 +1487,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 }
 
 /*==========================================
- * 装 備品による能力等のボーナス設定
+ * ? 備品による能力?のボーナス設定
  *------------------------------------------
  */
 int pc_bonus(struct map_session_data *sd,int type,int val)
@@ -1802,7 +1802,7 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 }
 
 /*==========================================
- * 装 備品による能力等のボーナス設定
+ * ? 備品による能力?のボーナス設定
  *------------------------------------------
  */
 int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
@@ -1977,7 +1977,7 @@ int pc_bonus3(struct map_session_data *sd,int type,int type2,int type3,int val)
 }
 
 /*==========================================
- * スクリプトによるスキル所得
+ * スク?プトによるスキ??得
  *------------------------------------------
  */
 int pc_skill(struct map_session_data *sd,int id,int level,int flag)
@@ -1987,7 +1987,7 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 			printf("support card skill only!\n");
 		return 0;
 	}
-	if(!flag && sd->status.skill[id].id == id){	// クエスト所得ならここで条件を確認して送信する
+	if(!flag && sd->status.skill[id].id == id){	// クエスト?得ならここで条?を確認して?信する
 		sd->status.skill[id].lv=level;
 		pc_calcstatus(sd,0);
 		clif_skillinfoblock(sd);
@@ -1997,7 +1997,7 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 			sd->status.skill[id].flag=sd->status.skill[id].lv+2;	// lvを記憶
 		else {
 			sd->status.skill[id].id=id;
-			sd->status.skill[id].flag=1;	// cardスキルとする
+			sd->status.skill[id].flag=1;	// cardスキ?とする
 		}
 		sd->status.skill[id].lv=level;
 	}
@@ -2019,11 +2019,11 @@ int pc_insert_card(struct map_session_data *sd,int idx_card,int idx_equip)
 		int ep=sd->inventory_data[idx_card]->equip;
 
 		if( nameid <= 0 || sd->inventory_data[idx_equip] == NULL ||
-			(sd->inventory_data[idx_equip]->type!=4 && sd->inventory_data[idx_equip]->type!=5)||	// 装 備じゃない
+			(sd->inventory_data[idx_equip]->type!=4 && sd->inventory_data[idx_equip]->type!=5)||	// ? 備じゃない
 			( sd->status.inventory[idx_equip].identify==0 ) ||		// 未鑑定
-			( sd->status.inventory[idx_equip].card[0]==0x00ff) ||		// 製造武器
-			( (sd->inventory_data[idx_equip]->equip&ep)==0 ) ||					// 装 備個所違い
-			( sd->inventory_data[idx_equip]->type==4 && ep==32) ||			// 両 手武器と盾カード
+			( sd->status.inventory[idx_equip].card[0]==0x00ff) ||		// 製造?器
+			( (sd->inventory_data[idx_equip]->equip&ep)==0 ) ||					// ? 備個?違い
+			( sd->inventory_data[idx_equip]->type==4 && ep==32) ||			// 両 手?器と?カード
 			( sd->status.inventory[idx_equip].card[0]==(short)0xff00) || sd->status.inventory[idx_equip].equip){
 
 			clif_insert_card(sd,idx_equip,idx_card,1);
@@ -2031,7 +2031,7 @@ int pc_insert_card(struct map_session_data *sd,int idx_card,int idx_equip)
 		}
 		for(i=0;i<sd->inventory_data[idx_equip]->slot;i++){
 			if( sd->status.inventory[idx_equip].card[i] == 0){
-			// 空きスロットがあったので差し込む
+			// 空きス?ットが?ったので差し?む
 				sd->status.inventory[idx_equip].card[i]=cardid;
 
 			// カードは減らす
@@ -2048,20 +2048,20 @@ int pc_insert_card(struct map_session_data *sd,int idx_card,int idx_equip)
 }
 
 //
-// アイテム物
+// アイテ?物
 //
 
 
 /*==========================================
- * スキルによる買い値修正
+ * スキ?による?い値修正
  *------------------------------------------
  */
 int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
 {
 	int skill,val = orig_value;
-	if((skill=pc_checkskill(sd,MC_DISCOUNT))>0)	// ディスカウント
+	if((skill=pc_checkskill(sd,MC_DISCOUNT))>0)	// ディスカウ?ト
 		val -= (int)((double)orig_value*(5+skill*2-(skill==10))/100);
-	if((skill=pc_checkskill(sd,RG_COMPULSION))>0)	// コムパルションディスカウント
+	if((skill=pc_checkskill(sd,RG_COMPULSION))>0)	// コ?パ?シ??ディスカウ?ト
 		val -= (int)((double)orig_value*(5+skill*4)/100);
 	if(val < 0) val = 0;
 	if(orig_value > 0 && val < 1) val = 1;
@@ -2071,13 +2071,13 @@ int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
 
 
 /*==========================================
- * スキルによる売り値修正
+ * スキ?による?り値修正
  *------------------------------------------
  */
 int pc_modifysellvalue(struct map_session_data *sd,int orig_value)
 {
 	int skill,val = orig_value;
-	if((skill=pc_checkskill(sd,MC_OVERCHARGE))>0)	// オーバーチャージ
+	if((skill=pc_checkskill(sd,MC_OVERCHARGE))>0)	// オーバーチ?ージ
 		val += (int)((double)orig_value*(5+skill*2-(skill==10))/100);
 	if(val < 0) val = 0;
 	if(orig_value > 0 && val < 1) val = 1;
@@ -2087,8 +2087,8 @@ int pc_modifysellvalue(struct map_session_data *sd,int orig_value)
 
 
 /*==========================================
- * アイテムを買った時に、新しいアイテム欄を使うか、
- * 3万個制限にかかるか確認
+ * アイテ?を?った?に、新しいアイテ??を使うか、
+ * 3?個制限にかかるか確認
  *------------------------------------------
  */
 int pc_checkadditem(struct map_session_data *sd,int nameid,int amount)
@@ -2113,7 +2113,7 @@ int pc_checkadditem(struct map_session_data *sd,int nameid,int amount)
 
 
 /*==========================================
- * 空きアイテム欄の個数
+ * 空きアイテ??の個?
  *------------------------------------------
  */
 int pc_inventoryblank(struct map_session_data *sd)
@@ -2163,7 +2163,7 @@ int pc_getzeny(struct map_session_data *sd,int zeny)
 
 
 /*==========================================
- * アイテムを探して、インデックスを返す
+ * アイテ?を探して、イ?デックスを返す
  *------------------------------------------
  */
 int pc_search_inventory(struct map_session_data *sd,int item_id)
@@ -2180,7 +2180,7 @@ int pc_search_inventory(struct map_session_data *sd,int item_id)
 
 
 /*==========================================
- * アイテム追加。個数のみitem構造体の数字を無視
+ * アイテ?追加。個?のみitem構造体の??を無?
  *------------------------------------------
  */
 int pc_additem(struct map_session_data *sd,struct item *item_data,int amount)
@@ -2196,7 +2196,7 @@ int pc_additem(struct map_session_data *sd,struct item *item_data,int amount)
 
 	i = -1;
 	if(!itemdb_isequip2(data)){
-		// 装 備品ではないので、既所有品なら個数のみ変化させる
+		// ? 備品ではないので、既?有品なら個?のみ変化させる
 		i = pc_search_inventory(sd,item_data->nameid);
 		if(i >= 0) {
 			if(sd->status.inventory[i].amount+amount > MAX_AMOUNT)
@@ -2206,7 +2206,7 @@ int pc_additem(struct map_session_data *sd,struct item *item_data,int amount)
 		}
 	}
 	if(i < 0){
-		// 装 備品か未所有品だったので空き欄へ追加
+		// ? 備品か未?有品だったので空き?へ追加
 		i = pc_search_inventory(sd,0);
 		if(i >= 0) {
 			memcpy(&sd->status.inventory[i],item_data,sizeof(sd->status.inventory[0]));
@@ -2224,7 +2224,7 @@ int pc_additem(struct map_session_data *sd,struct item *item_data,int amount)
 
 
 /*==========================================
- * アイテムを減らす
+ * アイテ?を減らす
  *------------------------------------------
  */
 int pc_delitem(struct map_session_data *sd,int n,int amount,int type)
@@ -2250,7 +2250,7 @@ int pc_delitem(struct map_session_data *sd,int n,int amount,int type)
 
 
 /*==========================================
- * アイテムを落す
+ * アイテ?を?す
  *------------------------------------------
  */
 int pc_dropitem(struct map_session_data *sd,int n,int amount)
@@ -2266,7 +2266,7 @@ int pc_dropitem(struct map_session_data *sd,int n,int amount)
 
 
 /*==========================================
- * アイテムを拾う
+ * アイテ?を拾う
  *------------------------------------------
  */
 int pc_takeitem(struct map_session_data *sd,struct flooritem_data *fitem)
@@ -2307,7 +2307,7 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 }
 
 /*==========================================
- * アイテムを使う
+ * アイテ?を使う
  *------------------------------------------
  */
 int pc_useitem(struct map_session_data *sd,int n)
@@ -2335,7 +2335,7 @@ int pc_useitem(struct map_session_data *sd,int n)
 
 
 /*==========================================
- * カートアイテム追加。個数のみitem構造体の数字を無視
+ * カートアイテ?追加。個?のみitem構造体の??を無?
  *------------------------------------------
  */
 int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amount)
@@ -2347,7 +2347,7 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 
 	i=MAX_CART;
 	if(!itemdb_isequip(item_data->nameid)){
-		// 装 備品ではないので、既所有品なら個数のみ変化させる
+		// ? 備品ではないので、既?有品なら個?のみ変化させる
 		for(i=0;i<MAX_CART;i++){
 			if(sd->status.cart[i].nameid==item_data->nameid){
 				if(sd->status.cart[i].amount+amount > MAX_AMOUNT)
@@ -2359,7 +2359,7 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 		}
 	}
 	if(i==MAX_CART){
-		// 装 備品か未所有品だったので空き欄へ追加
+		// ? 備品か未?有品だったので空き?へ追加
 		for(i=MAX_CART-1;i>=0;i--){
 			if(sd->status.cart[i].nameid==0 &&
 			   (i==0 || sd->status.cart[i-1].nameid)){
@@ -2381,7 +2381,7 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 
 
 /*==========================================
- * カートアイテムを減らす
+ * カートアイテ?を減らす
  *------------------------------------------
  */
 int pc_cart_delitem(struct map_session_data *sd,int n,int amount,int type)
@@ -2406,7 +2406,7 @@ int pc_cart_delitem(struct map_session_data *sd,int n,int amount,int type)
 
 
 /*==========================================
- * カートへアイテム移動
+ * カートへアイテ?移動
  *------------------------------------------
  */
 int pc_putitemtocart(struct map_session_data *sd,int idx,int amount)
@@ -2422,7 +2422,7 @@ int pc_putitemtocart(struct map_session_data *sd,int idx,int amount)
 
 
 /*==========================================
- * カートからアイテム移動
+ * カートからアイテ?移動
  *------------------------------------------
  */
 int pc_getitemfromcart(struct map_session_data *sd,int idx,int amount)
@@ -2440,7 +2440,7 @@ int pc_getitemfromcart(struct map_session_data *sd,int idx,int amount)
 
 
 /*==========================================
- * アイテム鑑定
+ * アイテ?鑑定
  *------------------------------------------
  */
 int pc_item_identify(struct map_session_data *sd,int idx)
@@ -2530,23 +2530,23 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 	char mapname[24];
 	int m,c;
 
-	if(sd->chatID)	// チャットから出る
+	if(sd->chatID)	// チ?ットから出る
 		chat_leavechat(sd);
-	if(sd->trade_partner)	// 取引を中断する
+	if(sd->trade_partner)	// 取引を?断する
 		trade_tradecancel(sd);
 	storage_storage_quit(sd);	// 倉庫を開いてるなら保存する
 
-	if(sd->party_invite>0)	// パーティ勧誘を拒否する
+	if(sd->party_invite>0)	// パーティ勧誘を?否する
 		party_reply_invite(sd,sd->party_invite_account,0);
-	if(sd->guild_invite>0)	// ギルド勧誘を拒否する
+	if(sd->guild_invite>0)	// ギ?ド勧誘を?否する
 		guild_reply_invite(sd,sd->guild_invite,0);
-	if(sd->guild_alliance>0)	// ギルド同盟勧誘を拒否する
+	if(sd->guild_alliance>0)	// ギ?ド同盟勧誘を?否する
 		guild_reply_reqalliance(sd,sd->guild_alliance_account,0);
 
-	skill_castcancel(&sd->bl,0);	// 詠唱中断
-	skill_stop_dancing(&sd->bl);// ダンス/演奏中断
-	pc_stop_walking(sd,0);		// 歩行中断
-	pc_stopattack(sd);			// 攻撃中断
+	skill_castcancel(&sd->bl,0);	// 詠唱?断
+	skill_stop_dancing(&sd->bl);// ダ?ス/?奏?断
+	pc_stop_walking(sd,0);		// 歩行?断
+	pc_stopattack(sd);			// 攻??断
 
 	if(sd->status.pet_id > 0 && sd->pd && sd->pet.intimate > 0) {
 		pet_stopattack(sd->pd);
@@ -2656,7 +2656,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		sd->pd->dir = sd->dir;
 	}
 
-//	map_addblock(&sd->bl);	/// ブロック登録とspawnは
+//	map_addblock(&sd->bl);	/// ブ?ック登録とspawnは
 //	clif_spawnpc(sd);		// clif_parse_LoadEndAckで行う
 
 	return 0;
@@ -2664,7 +2664,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 
 
 /*==========================================
- * PCのランダムワープ
+ * PCの??ダ??ープ
  *------------------------------------------
  */
 int pc_randomwarp(struct map_session_data *sd,int type)
@@ -2672,7 +2672,7 @@ int pc_randomwarp(struct map_session_data *sd,int type)
 	int x,y,c,i=0;
 	int m=sd->bl.m;
 
-	if(map[sd->bl.m].flag.noteleport)	// テレポート禁止
+	if(map[sd->bl.m].flag.noteleport)	// テ?ポート禁止
 		return 0;
 
 	do{
@@ -2688,7 +2688,7 @@ int pc_randomwarp(struct map_session_data *sd,int type)
 
 
 /*==========================================
- * 現在位置のメモ
+ * 現在位置の??
  *------------------------------------------
  */
 int pc_memo(struct map_session_data *sd,int i)
@@ -2746,7 +2746,7 @@ int pc_can_reach(struct map_session_data *sd,int x,int y)
 // 歩 行物
 //
 /*==========================================
- * 次の1歩にかかる時間を計算
+ * ?の1歩にかかる?間を計算
  *------------------------------------------
  */
 static int calc_next_walk_step(struct map_session_data *sd)
@@ -2761,7 +2761,7 @@ static int calc_next_walk_step(struct map_session_data *sd)
 
 
 /*==========================================
- * 半歩進む(timer関数)
+ * 半歩進む(timer関?)
  *------------------------------------------
  */
 static int pc_walk(int tid,unsigned int tick,int id,int data)
@@ -2785,20 +2785,22 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 		return 0;
 
 	sd->walkpath.path_half ^= 1;
-	if(sd->walkpath.path_half==0){ // マス目中心へ到着
+	if(sd->walkpath.path_half==0){ // マス目?心へ??
 		sd->walkpath.path_pos++;
 		if(sd->state.change_walk_target){
 			pc_walktoxy_sub(sd);
 			return 0;
 		}
-	} else { // マス目境界へ到着
+	} else { // マス目境界へ??
 		if(sd->walkpath.path[sd->walkpath.path_pos]>=8)
 			return 1;
 
 		x = sd->bl.x;
 		y = sd->bl.y;
 		ctype = map_getcell(sd->bl.m,x,y);
-		if(ctype == 1 || ctype == 5) {
+		// (Fix Player cannot move in ICEWALL) by Michael at 2004-0127.
+		//if(ctype == 1 || ctype == 5) {
+		if(ctype == 1) {
 			pc_stop_walking(sd,1);
 			return 0;
 		}
@@ -2827,7 +2829,7 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 		map_foreachinmovearea(clif_pcinsight,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,-dx,-dy,0,sd);
 		sd->walktimer = -1;
 
-		if(sd->status.party_id>0){	// パーティのＨＰ情報通知検査
+		if(sd->status.party_id>0){	// パーティのＨＰ情報通知?査
 			struct party *p=party_search(sd->status.party_id);
 			if(p!=NULL){
 				int flag=0;
@@ -2836,10 +2838,10 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 					sd->party_hp=-1;
 			}
 		}
-		if(sd->status.option&4)	// クローキングの消滅検査
+		if(sd->status.option&4)	// ク?ーキ?グの消滅?査
 			skill_check_cloaking(&sd->bl);
 
-		skill_unit_move(&sd->bl,tick,1);	// スキルユニットの検査
+		skill_unit_move(&sd->bl,tick,1);	// スキ??ニットの?査
 
 		if(map_getcell(sd->bl.m,x,y)&0x80)
 			flag = npc_touch_areanpc(sd,sd->bl.m,x,y);
@@ -2882,7 +2884,7 @@ static int pc_walktoxy_sub(struct map_session_data *sd)
 
 
 /*==========================================
- * pc歩 行要求
+ * pc歩 行要?
  *------------------------------------------
  */
 int pc_walktoxy(struct map_session_data *sd,int x,int y)
@@ -2892,7 +2894,7 @@ int pc_walktoxy(struct map_session_data *sd,int x,int y)
 	sd->to_y=y;
 
 	if(sd->walktimer != -1 && sd->state.change_walk_target==0){
-		// 現在歩いている最中の目的地変更なのでマス目の中心に来た時に
+		// 現在歩いている最?の目的地変更なのでマス目の?心に?た?に
 		// timer関 ?からpc_walktoxy_subを呼ぶようにする
 		sd->state.change_walk_target=1;
 	} else {
@@ -2961,7 +2963,7 @@ int pc_movepos(struct map_session_data *sd,int dst_x,int dst_y)
 
 	map_foreachinmovearea(clif_pcinsight,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,-dx,-dy,0,sd);
 
-	if(sd->status.party_id>0){	// パーティのＨＰ情報通知検査
+	if(sd->status.party_id>0){	// パーティのＨＰ情報通知?査
 		struct party *p=party_search(sd->status.party_id);
 		if(p!=NULL){
 			int flag=0;
@@ -2971,10 +2973,10 @@ int pc_movepos(struct map_session_data *sd,int dst_x,int dst_y)
 		}
 	}
 
-	if(sd->status.option&4)	// クローキングの消滅検査
+	if(sd->status.option&4)	// ク?ーキ?グの消滅?査
 		skill_check_cloaking(&sd->bl);
 
-	skill_unit_move(&sd->bl,gettick(),dist+7);	// スキルユニットの検査
+	skill_unit_move(&sd->bl,gettick(),dist+7);	// スキ??ニットの?査
 
 	if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y)&0x80)
 		npc_touch_areanpc(sd,sd->bl.m,sd->bl.x,sd->bl.y);
@@ -2983,10 +2985,10 @@ int pc_movepos(struct map_session_data *sd,int dst_x,int dst_y)
 }
 
 //
-// 武器戦闘
+// ?器戦闘
 //
 /*==========================================
- * スキルの検索 所有していた場合Lvが返る
+ * スキ?の?索 ?有していた場?Lvが返る
  *------------------------------------------
  */
 int pc_checkskill(struct map_session_data *sd,int skill_id)
@@ -3005,27 +3007,27 @@ int pc_checkskill(struct map_session_data *sd,int skill_id)
 }
 
 /*==========================================
- * 武器変更によるスキルの継続チェック
- * 引数：
- *   struct map_session_data *sd	セッションデータ
- *   int nameid						装備品ID
+ * ?器変更によるスキ?の継続チェック
+ * 引?：
+ *   struct map_session_data *sd	セッシ??データ
+ *   int nameid						?備品ID
  * 返り値：
  *   0		変更なし
- *   -1		スキルを解除
+ *   -1		スキ?を解?
  *------------------------------------------
  */
 int pc_checkallowskill(struct map_session_data *sd)
 {
 	if(sd->status.weapon!=3 && sd->sc_data[SC_TWOHANDQUICKEN].timer!=-1) {	// 2HQ
-		skill_status_change_end(&sd->bl,SC_TWOHANDQUICKEN,-1);	// 2HQを解除
+		skill_status_change_end(&sd->bl,SC_TWOHANDQUICKEN,-1);	// 2HQを解?
 		return -1;
 	}
-	if(sd->status.weapon!=4 && sd->status.weapon!=5 && sd->sc_data[SC_SPEARSQUICKEN].timer!=-1){	// スピアクィッケン
-		skill_status_change_end(&sd->bl,SC_SPEARSQUICKEN,-1);	// スピアクイッケンを解除
+	if(sd->status.weapon!=4 && sd->status.weapon!=5 && sd->sc_data[SC_SPEARSQUICKEN].timer!=-1){	// スピアクィッケ?
+		skill_status_change_end(&sd->bl,SC_SPEARSQUICKEN,-1);	// スピアクイッケ?を解?
 		return -1;
 	}
-	if((sd->status.weapon < 6 || sd->status.weapon > 9) && sd->sc_data[SC_ADRENALINE].timer!=-1){	// アドレナリンラッシュ
-		skill_status_change_end(&sd->bl,SC_ADRENALINE,-1);	// アドレナリンラッシュを解除
+	if((sd->status.weapon < 6 || sd->status.weapon > 9) && sd->sc_data[SC_ADRENALINE].timer!=-1){	// アド?ナ???ッシ?
+		skill_status_change_end(&sd->bl,SC_ADRENALINE,-1);	// アド?ナ???ッシ?を解?
 		return -1;
 	}
 
@@ -3043,7 +3045,7 @@ int pc_checkallowskill(struct map_session_data *sd)
 
 
 /*==========================================
- * 装 備品のチェック
+ * ? 備品のチェック
  *------------------------------------------
  */
 int pc_checkequip(struct map_session_data *sd,int pos)
@@ -3059,7 +3061,7 @@ int pc_checkequip(struct map_session_data *sd,int pos)
 
 
 /*==========================================
- * PCの攻撃 (timer関数)
+ * PCの攻? (timer関?)
  *------------------------------------------
  */
 int pc_attack_timer(int tid,unsigned int tick,int id,int data)
@@ -3082,12 +3084,12 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 	if(bl==NULL || bl->prev == NULL)
 		return 0;
 
-	// 同じmapでないなら攻撃しない
-	// PCが死んでても攻撃しない
+	// 同じmapでないなら攻?しない
+	// PCが?んでても攻?しない
 	if(sd->bl.m != bl->m || pc_isdead(sd))
 		return 0;
 
-	if( sd->opt1>0 || sd->status.option&6)	// 異常などで攻撃できない
+	if( sd->opt1>0 || sd->status.option&6)	// 異常などで攻?できない
 		return 0;
 
 	if(sd->skilltimer != -1 && pc_checkskill(sd,SA_FREECAST) <= 0)
@@ -3121,7 +3123,7 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 			map_freeblock_lock();
 			pc_stop_walking(sd,0);
 			sc_data = battle_get_sc_data(bl);
-			//オートカウンター
+			//オートカウ?ター
 			if(sc_data && sc_data[SC_AUTOCOUNTER].timer != -1)
 			{
 				battle_weapon_attack(bl,&sd->bl,tick,0);
@@ -3132,13 +3134,13 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 			if(sd->status.pet_id > 0 && sd->pd && sd->petDB && battle_config.pet_attack_support)
 				pet_target_check(sd,bl,0);
 			map_freeblock_unlock();
-			if(sd->skilltimer != -1 && (skill = pc_checkskill(sd,SA_FREECAST)) > 0 ) // フリーキャスト
+			if(sd->skilltimer != -1 && (skill = pc_checkskill(sd,SA_FREECAST)) > 0 ) // フ?ーキ?スト
 				sd->attackabletime = tick + ((sd->aspd<<1)*(150 - skill*5)/100);
 			else
 				sd->attackabletime = tick + (sd->aspd<<1);
 		}
 		else if(sd->attackabletime <= tick) {
-			if(sd->skilltimer != -1 && (skill = pc_checkskill(sd,SA_FREECAST)) > 0 ) // フリーキャスト
+			if(sd->skilltimer != -1 && (skill = pc_checkskill(sd,SA_FREECAST)) > 0 ) // フ?ーキ?スト
 				sd->attackabletime = tick + ((sd->aspd<<1)*(150 - skill*5)/100);
 			else
 				sd->attackabletime = tick + (sd->aspd<<1);
@@ -3154,8 +3156,8 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 
 
 /*==========================================
- * 攻撃要求
- * typeが1なら継続攻撃
+ * 攻?要?
+ * typeが1なら継続攻?
  *------------------------------------------
  */
 int pc_attack(struct map_session_data *sd,int target_id,int type)
@@ -3174,10 +3176,10 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
 	sd->state.attack_continue=type;
 
 	d=DIFF_TICK(sd->attackabletime,gettick());
-	if(d>0 && d<2000){	// 攻撃delay中
+	if(d>0 && d<2000){	// 攻?delay?
 		sd->attacktimer=add_timer(sd->attackabletime,pc_attack_timer,sd->bl.id,0);
 	} else {
-		// 本来timer関数なので引数を合わせる
+		// 本?timer関?なので引?を?わせる
 		pc_attack_timer(-1,gettick(),sd->bl.id,0);
 	}
 
@@ -3186,7 +3188,7 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
 
 
 /*==========================================
- * 継 ?攻撃停止
+ * 継 ?攻?停止
  *------------------------------------------
  */
 int pc_stopattack(struct map_session_data *sd)
@@ -3207,7 +3209,7 @@ int pc_checkbaselevelup(struct map_session_data *sd)
 	int next = pc_nextbaseexp(sd);
 
 	if(sd->status.base_exp >= next && next > 0){
-		// base側レベルアップ処理
+		// base側?ベ?アップ??
 		sd->status.base_exp -= next;
 
 		sd->status.base_level ++;
@@ -3220,7 +3222,7 @@ int pc_checkbaselevelup(struct map_session_data *sd)
 
 		clif_misceffect(&sd->bl,0);
 
-		//レベルアップしたのでパーティー情報を更新する
+		//?ベ?アップしたのでパーティー情報を更新する
 		//(公平範囲チェック)
 		party_send_movemap(sd);
 
@@ -3236,7 +3238,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 	int next = pc_nextjobexp(sd);
 
 	if(sd->status.job_exp >= next && next > 0){
-		// job側レベルアップ処理
+		// job側?ベ?アップ??
 		sd->status.job_exp -= next;
 		sd->status.job_level ++;
 		clif_updatestatus(sd,SP_JOBLEVEL);
@@ -3262,7 +3264,7 @@ int pc_gainexp(struct map_session_data *sd,int base_exp,int job_exp)
 	if(sd->bl.prev == NULL || pc_isdead(sd))
 		return 0;
 
-	if(sd->status.guild_id>0){	// ギルドに上納
+	if(sd->status.guild_id>0){	// ギ?ドに上納
 		base_exp-=guild_payexp(sd,base_exp);
 		if(base_exp < 0)
 			base_exp = 0;
@@ -3327,7 +3329,7 @@ int pc_nextjobexp(struct map_session_data *sd)
 
 
 /*==========================================
- * 必要ステータスポイント計算
+ * 必要ステータスポイ?ト計算
  *------------------------------------------
  */
 int pc_need_status_point(struct map_session_data *sd,int type)
@@ -3491,7 +3493,7 @@ int pc_statusup2(struct map_session_data *sd,int type,int val)
 }
 
 /*==========================================
- * スキルポイント割り振り
+ * スキ?ポイ?ト?り振り
  *------------------------------------------
  */
 int pc_skillup(struct map_session_data *sd,int skill_num)
@@ -3589,12 +3591,12 @@ int pc_resetskill(struct map_session_data* sd)
 
 
 /*==========================================
- * pcにダメージを与える
+ * pcにダ?ージを与える
  *------------------------------------------
  */
 int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 {
-	// 既 に死んでいたら無効
+	// 既 に?んでいたら無効
 	if(pc_isdead(sd))
 		return 0;
 	// 座ってたら立ち上がる
@@ -3603,7 +3605,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	// 歩 いていたら足を止める
 	if(sd->sc_data[SC_ENDURE].timer == -1)
 		pc_stop_walking(sd,3);
-	// 演奏/ダンスの中断
+	// ?奏/ダ?スの?断
 	if( damage*4>sd->status.max_hp)
 		skill_stop_dancing(&sd->bl);
 
@@ -3638,10 +3640,10 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	}
 
 	pc_stop_walking(sd,0);
-	skill_castcancel(&sd->bl,0);	// 詠唱の中止
+	skill_castcancel(&sd->bl,0);	// 詠唱の?止
 	clif_clearchar_area(&sd->bl,1);
 	skill_unit_out_all(&sd->bl,gettick(),1);
-	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
+	skill_status_change_clear(&sd->bl);	// ステータス異常を解?する
 	clif_updatestatus(sd,SP_HP);
 	pc_calcstatus(sd,0);
 
@@ -3788,7 +3790,7 @@ int pc_setparam(struct map_session_data *sd,int type,int val)
 
 
 /*==========================================
- * HP/SP回復
+ * HP/SP回?
  *------------------------------------------
  */
 int pc_heal(struct map_session_data *sd,int hp,int sp)
@@ -3826,7 +3828,7 @@ int pc_heal(struct map_session_data *sd,int hp,int sp)
 
 
 /*==========================================
- * HP/SP回復
+ * HP/SP回?
  *------------------------------------------
  */
 int pc_itemheal(struct map_session_data *sd,int hp,int sp)
@@ -3881,7 +3883,7 @@ int pc_itemheal(struct map_session_data *sd,int hp,int sp)
 
 
 /*==========================================
- * HP/SP回復
+ * HP/SP回?
  *------------------------------------------
  */
 int pc_percentheal(struct map_session_data *sd,int hp,int sp)
@@ -3960,7 +3962,7 @@ int pc_jobchange(struct map_session_data *sd,int job)
 	for(i=0;i<11;i++) {
 		if(sd->equip_index[i] >= 0)
 			if(!pc_isequip(sd,sd->equip_index[i]))
-				pc_unequipitem(sd,sd->equip_index[i],1);	// 装備外し
+				pc_unequipitem(sd,sd->equip_index[i],1);	// ?備外し
 	}
 	pc_calcstatus(sd,0);
 	pc_equiplookall(sd);
@@ -4053,7 +4055,7 @@ int pc_setcart(struct map_session_data *sd,int type)
 {
 	int cart[6]={0x0000,0x0008,0x0080,0x0100,0x0200,0x0400};
 
-	if(pc_checkskill(sd,MC_PUSHCART)>0){ // プッシュカートスキル所持
+	if(pc_checkskill(sd,MC_PUSHCART)>0){ // プッシ?カートスキ???
 		if(!pc_iscarton(sd)){ // カートを付けていない
 			pc_setoption(sd,cart[type]);
 			clif_cart_itemlist(sd);
@@ -4075,7 +4077,7 @@ int pc_setcart(struct map_session_data *sd,int type)
  */
 int pc_setfalcon(struct map_session_data *sd)
 {
-	if(pc_checkskill(sd,HT_FALCON)>0){	// ファルコンマスタリースキル所持
+	if(pc_checkskill(sd,HT_FALCON)>0){	// ファ?コ?マスタ?ースキ???
 		pc_setoption(sd,0x0010);
 	}
 
@@ -4089,7 +4091,7 @@ int pc_setfalcon(struct map_session_data *sd)
  */
 int pc_setriding(struct map_session_data *sd)
 {
-	if(pc_checkskill(sd,KN_RIDING)>0){ // ライディングスキル所持
+	if(pc_checkskill(sd,KN_RIDING)>0){ // ?イディ?グスキ???
 		pc_setoption(sd,0x0020);
 	}
 
@@ -4098,7 +4100,7 @@ int pc_setriding(struct map_session_data *sd)
 
 
 /*==========================================
- * script用変数の値を読む
+ * script用変?の値を読む
  *------------------------------------------
  */
 int pc_readreg(struct map_session_data *sd,int reg)
@@ -4114,7 +4116,7 @@ int pc_readreg(struct map_session_data *sd,int reg)
 
 
 /*==========================================
- * script用変数の値を設定
+ * script用変?の値を設定
  *------------------------------------------
  */
 int pc_setreg(struct map_session_data *sd,int reg,int val)
@@ -4140,7 +4142,7 @@ int pc_setreg(struct map_session_data *sd,int reg,int val)
 
 
 /*==========================================
- * script用グローバル変数の値を読む
+ * script用グ?ーバ?変?の値を読む
  *------------------------------------------
  */
 int pc_readglobalreg(struct map_session_data *sd,char *reg)
@@ -4157,7 +4159,7 @@ int pc_readglobalreg(struct map_session_data *sd,char *reg)
 
 
 /*==========================================
- * script用グローバル変数の値を設定
+ * script用グ?ーバ?変?の値を設定
  *------------------------------------------
  */
 int pc_setglobalreg(struct map_session_data *sd,char *reg,int val)
@@ -4200,7 +4202,7 @@ int pc_setglobalreg(struct map_session_data *sd,char *reg,int val)
 int pc_percentrefinery(struct map_session_data *sd,struct item *item)
 {
 	int percent=percentrefinery[itemdb_wlv(item->nameid)][(int)item->refine];
-	percent += pc_checkskill(sd,BS_WEAPONRESEARCH);	// 武器研究スキル所持
+	percent += pc_checkskill(sd,BS_WEAPONRESEARCH);	// ?器研?スキ???
 
 	// 確率の有効範囲チェック
 	if( percent > 100 ){
@@ -4214,7 +4216,7 @@ int pc_percentrefinery(struct map_session_data *sd,struct item *item)
 }
 
 /*==========================================
- * イベントタイマー処理
+ * イベ?トタイマー??
  *------------------------------------------
  */
 int pc_eventtimer(int tid,unsigned int tick,int id,int data)
@@ -4242,7 +4244,7 @@ int pc_eventtimer(int tid,unsigned int tick,int id,int data)
 
 
 /*==========================================
- * イベントタイマー追加
+ * イベ?トタイマー追加
  *------------------------------------------
  */
 int pc_addeventtimer(struct map_session_data *sd,int tick,const char *name)
@@ -4270,7 +4272,7 @@ int pc_addeventtimer(struct map_session_data *sd,int tick,const char *name)
 
 
 /*==========================================
- * イベントタイマー削除
+ * イベ?トタイマー削?
  *------------------------------------------
  */
 int pc_deleventtimer(struct map_session_data *sd,const char *name)
@@ -4289,7 +4291,7 @@ int pc_deleventtimer(struct map_session_data *sd,const char *name)
 
 
 /*==========================================
- * イベントタイマーカウント値追加
+ * イベ?トタイマーカウ?ト値追加
  *------------------------------------------
  */
 int pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick)
@@ -4307,7 +4309,7 @@ int pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick)
 
 
 /*==========================================
- * イベントタイマー全削除
+ * イベ?トタイマー全削?
  *------------------------------------------
  */
 int pc_cleareventtimer(struct map_session_data *sd)
@@ -4323,10 +4325,10 @@ int pc_cleareventtimer(struct map_session_data *sd)
 }
 
 //
-// 装 備物
+// ? 備物
 //
 /*==========================================
- * アイテムを装備する
+ * アイテ?を?備する
  *------------------------------------------
  */
 int pc_equipitem(struct map_session_data *sd,int n,int pos)
@@ -4341,7 +4343,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 		clif_equipitemack(sd,n,0,0);	// fail
 		return 0;
 	}
-	if(pos==0x88){ // アクセサリ用例外処理
+	if(pos==0x88){ // アクセサ?用例外??
 		int epor=0;
 		if(sd->equip_index[0] >= 0)
 			epor |= sd->status.inventory[sd->equip_index[0]].equip;
@@ -4351,9 +4353,9 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 		pos = epor == 0x08 ? 0x80 : 0x08;
 	}
 
-	// 二刀流処理
-	if ((pos==0x22) // 一応、装備要求箇所が二刀流武器かチェックする
-	 &&	(id->equip==2)	// 単 手武器
+	// 二?流??
+	if ((pos==0x22) // 一?、?備要?箇?が二?流?器かチェックする
+	 &&	(id->equip==2)	// 単 手?器
 	 &&	(pc_checkskill(sd, AS_LEFT) > 0 || sd->status.class == 12) ) // 左手修錬有
 	{
 		int tpos=0;
@@ -4370,10 +4372,10 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 			pc_unequipitem(sd,sd->equip_index[i],1);
 		}
 	}
-	// 弓矢装備
+	// 弓矢?備
 	if(pos==0x8000){
 		clif_arrowequip(sd,n);
-		clif_arrow_fail(sd,3);	// 3=矢が装備できました
+		clif_arrow_fail(sd,3);	// 3=矢が?備できました
 	}
 	else
 		clif_equipitemack(sd,n,pos,1);
@@ -4435,7 +4437,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	if(sd->status.inventory[n].equip & 0x0040)
 		clif_changelook(&sd->bl,LOOK_SHOES,0);
 
-	pc_checkallowskill(sd);	// 装備品でスキルか解除されるかチェック
+	pc_checkallowskill(sd);	// ?備品でスキ?か解?されるかチェック
 	pc_calcstatus(sd,0);
 
 	if(sd->special_state.infinite_endure) {
@@ -4451,7 +4453,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 }
 
 /*==========================================
- * 装 備した物を外す
+ * ? 備した物を外す
  *------------------------------------------
  */
 int pc_unequipitem(struct map_session_data *sd,int n,int type)
@@ -4495,7 +4497,7 @@ int pc_unequipitem(struct map_session_data *sd,int n,int type)
 		if(!type)
 			pc_checkallowskill(sd);
 		if(sd->weapontype1 == 0 && sd->weapontype2 == 0)
-			skill_encchant_eremental_end(&sd->bl,-1);  //武器持ち誓えは無条件で属性付与解除
+			skill_encchant_eremental_end(&sd->bl,-1);  //?器?ち誓えは無条?で属性付与解?
 	} else {
 		clif_unequipitemack(sd,n,0,0);
 	}
@@ -4510,15 +4512,15 @@ int pc_unequipitem(struct map_session_data *sd,int n,int type)
 
 
 /*==========================================
- * アイテムのindex番号を詰めたり
- * 装 備品の装備可能チェックを行なう
+ * アイテ?のindex番?を詰めたり
+ * ? 備品の?備可能チェックを行なう
  *------------------------------------------
  */
 int pc_checkitem(struct map_session_data *sd)
 {
 	int i,j,k,id;
 
-	// 所持品空き詰め
+	// ??品空き詰め
 	for(i=j=0;i<MAX_INVENTORY;i++){
 		if( (id=sd->status.inventory[i].nameid)==0)
 			continue;
@@ -4557,7 +4559,7 @@ int pc_checkitem(struct map_session_data *sd)
 	if(j < MAX_CART)
 		memset(&sd->status.cart[j],0,sizeof(struct item)*(MAX_CART-j));
 
-	// 装 備位置チェック
+	// ? 備位置チェック
 	for(i=0;i<MAX_INVENTORY;i++){
 		if(sd->status.inventory[i].nameid==0)
 			continue;
@@ -4599,7 +4601,7 @@ int pc_checkoversp(struct map_session_data *sd)
 
 
 /*==========================================
- * PVP順位計算用(foreachinarea)
+ * PVP?位計算用(foreachinarea)
  *------------------------------------------
  */
 int pc_calc_pvprank_sub(struct block_list *bl,va_list ap)
@@ -4611,7 +4613,7 @@ int pc_calc_pvprank_sub(struct block_list *bl,va_list ap)
 	return 0;
 }
 /*==========================================
- * PVP順位計算
+ * PVP?位計算
  *------------------------------------------
  */
 int pc_calc_pvprank(struct map_session_data *sd)
@@ -4627,7 +4629,7 @@ int pc_calc_pvprank(struct map_session_data *sd)
 	return sd->pvp_rank;
 }
 /*==========================================
- * PVP順位計算(timer)
+ * PVP?位計算(timer)
  *------------------------------------------
  */
 int pc_calc_pvprank_timer(int tid,unsigned int tick,int id,int data)
@@ -4644,10 +4646,10 @@ int pc_calc_pvprank_timer(int tid,unsigned int tick,int id,int data)
 }
 
 //
-// 自然回復物
+// 自然回?物
 //
 /*==========================================
- * SP回復量計算
+ * SP回?量計算
  *------------------------------------------
  */
 static int natural_heal_tick,natural_heal_prev_tick,natural_heal_diff_tick;
@@ -4664,7 +4666,7 @@ static int pc_spheal(struct map_session_data *sd)
 }
 
 /*==========================================
- * HP回復量計算
+ * HP回?量計算
  *------------------------------------------
  */
 static int pc_hpheal(struct map_session_data *sd)
@@ -4874,7 +4876,7 @@ static int pc_spirit_heal(struct map_session_data *sd,int level)
 }
 
 /*==========================================
- * HP/SP 自然回復 各クライアント
+ * HP/SP 自然回? 各ク?イア?ト
  *------------------------------------------
  */
 
@@ -4899,7 +4901,7 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 }
 
 /*==========================================
- * HP/SP自然回復 (interval timer関数)
+ * HP/SP自然回? (interval timer関?)
  *------------------------------------------
  */
 int pc_natural_heal(int tid,unsigned int tick,int id,int data)
@@ -4913,7 +4915,7 @@ int pc_natural_heal(int tid,unsigned int tick,int id,int data)
 }
 
 /*==========================================
- * セーブポイントの保存
+ * セーブポイ?トの保存
  *------------------------------------------
  */
 int pc_setsavepoint(struct map_session_data *sd,char *mapname,int x,int y)
@@ -4927,7 +4929,7 @@ int pc_setsavepoint(struct map_session_data *sd,char *mapname,int x,int y)
 
 
 /*==========================================
- * 自動セーブ 各クライアント
+ * 自動セーブ 各ク?イア?ト
  *------------------------------------------
  */
 static int last_save_fd,save_flag;
@@ -4951,7 +4953,7 @@ static int pc_autosave_sub(struct map_session_data *sd,va_list ap)
 
 
 /*==========================================
- * 自動セーブ (timer関数)
+ * 自動セーブ (timer関?)
  *------------------------------------------
  */
 int pc_autosave(int tid,unsigned int tick,int id,int data)
@@ -5009,17 +5011,17 @@ int pc_read_gm_account()
 
 
 //
-// 初期化物
+// ?期化物
 //
 /*==========================================
- * 設定ファイル読み込む
+ * 設定ファイ?読み?む
  * exp.txt 必要経験値
- * job_db1.txt 重量,hp,sp,攻撃速度
+ * job_db1.txt 重量,hp,sp,攻?速度
  * job_db2.txt job能力値ボーナス
- * skill_tree.txt 各職毎のスキルツリー
- * attr_fix.txt 属性修正テーブル
- * size_fix.txt サイズ補正テーブル
- * refine_db.txt 精錬データテーブル
+ * skill_tree.txt 各職?のスキ?ツ?ー
+ * attr_fix.txt 属性修正テーブ?
+ * size_fix.txt サイズ補正テーブ?
+ * refine_db.txt 精錬データテーブ?
  *------------------------------------------
  */
 int pc_readdb(void)
@@ -5028,7 +5030,7 @@ int pc_readdb(void)
 	FILE *fp;
 	char line[1024],*p;
 
-	// 必要経験値読み込み
+	// 必要経験値読み?み
 
 	fp=fopen("db/exp.txt","r");
 	if(fp==NULL){
@@ -5057,7 +5059,7 @@ int pc_readdb(void)
 	fclose(fp);
 	printf("read db/exp.txt done\n");
 
-	// JOB補正数値１
+	// JOB補正?値１
 	fp=fopen("db/job_db1.txt","r");
 	if(fp==NULL){
 		printf("can't read db/job_db1.txt\n");
@@ -5112,7 +5114,7 @@ int pc_readdb(void)
 	fclose(fp);
 	printf("read db/job_db2.txt done\n");
 
-	// スキルツリー
+	// スキ?ツ?ー
 	memset(skill_tree,0,sizeof(skill_tree));
 	fp=fopen("db/skill_tree.txt","r");
 	if(fp==NULL){
@@ -5142,7 +5144,7 @@ int pc_readdb(void)
 	fclose(fp);
 	printf("read db/skill_tree.txt done\n");
 
-	// 属性修正テーブル
+	// 属性修正テーブ?
 	for(i=0;i<4;i++)
 		for(j=0;j<10;j++)
 			for(k=0;k<10;k++)
@@ -5187,7 +5189,7 @@ int pc_readdb(void)
 	}
 	printf("read db/attr_fix.txt done\n");
 
-	// サイズ補正テーブル
+	// サイズ補正テーブ?
 	for(i=0;i<3;i++)
 		for(j=0;j<20;j++)
 			atkmods[i][j]=100;
@@ -5215,7 +5217,7 @@ int pc_readdb(void)
 	}
 	printf("read db/size_fix.txt done\n");
 
-	// 精錬データテーブル
+	// 精錬データテーブ?
 	for(i=0;i<5;i++){
 		for(j=0;j<10;j++)
 			percentrefinery[i][j]=100;
@@ -5269,7 +5271,7 @@ static int pc_calc_sigma(void)
 }
 
 /*==========================================
- * pc関 係初期化
+ * pc関 係?期化
  *------------------------------------------
  */
 int do_init_pc(void)
