@@ -63,6 +63,15 @@ struct dbt* script_get_label_db(){ return scriptlabel_db; }
 static int scriptlabel_final(void *k,void *d,va_list ap){ return 0; }
 static char pos[11][100] = {"頭","体","左手","右手","ローブ","靴","アクセサリー1","アクセサリー2","頭2","頭3","装着していない"};
 
+static struct Script_Config {
+	int warn_func_no_comma;
+	int warn_cmd_no_comma;
+	int warn_func_mismatch_paramnum;
+	int warn_cmd_mismatch_paramnum;
+} script_config;
+static int parse_cmd_if=0;
+static int parse_cmd;
+
 /*==========================================
  * ローカルプロトタイプ宣言 (必要な物のみ)
  *------------------------------------------
@@ -191,13 +200,13 @@ struct {
 	{buildin_menu,"menu","*"},
 	{buildin_goto,"goto","l"},
 	{buildin_jobchange,"jobchange","i"},
-	{buildin_input,"input",""},
+	{buildin_input,"input","*"},
 	{buildin_warp,"warp","sii"},
 	{buildin_areawarp,"areawarp","siiiisii"},
 	{buildin_setlook,"setlook","ii"},
 	{buildin_set,"set","ii"},
 	{buildin_getelementofarray,"getelementofarray","ii"},
-	{buildin_if,"if","igi"},
+	{buildin_if,"if","i*"},
 	{buildin_getitem,"getitem","ii"},
 	{buildin_getitem2,"getitem2","iiiiiiiii"},
 	{buildin_delitem,"delitem","ii"},
@@ -284,7 +293,7 @@ struct {
 	{buildin_agitstart,"agitstart",""},	// <Agit>
 	{buildin_agitend,"agitend",""},
 	{buildin_getcastlename,"getcastlename","s"},
-	{buildin_getcastledata,"getcastledata","si"},
+	{buildin_getcastledata,"getcastledata","si*"},
 	{buildin_setcastledata,"setcastledata","sii"},
 	{buildin_requestguildinfo,"requestguildinfo","i*"},
 	{buildin_getequipcardcnt,"getequipcardcnt","i"},
@@ -557,7 +566,7 @@ static int startline;
  * エラーメッセージ出力
  *------------------------------------------
  */
-static void disp_error_message(char *mes,unsigned char *pos)
+static void disp_error_message(const char *mes,const unsigned char *pos)
 {
 	int line,c=0,i;
 	unsigned char *p,*linestart,*lineend;
@@ -623,6 +632,10 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 		while(*p && *p!='"'){
 			if(p[-1]<=0x7e && *p=='\\')
 				p++;
+			else if(*p=='\n'){
+				disp_error_message("unexpected newline @ string",p);
+				exit(1);
+			}
 			add_scriptb(*p++);
 		}
 		if(!*p){
@@ -642,6 +655,10 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 		p2=skip_word(p);
 		c=*p2;	*p2=0;	// 名前をadd_strする
 		l=add_str(p);
+		
+		parse_cmd=l;	// warn_*_mismatch_paramnumのために必要
+		if(l==search_str("if"))	// warn_cmd_no_commaのために必要
+			parse_cmd_if++;
 
 		// 廃止予定のl14/l15,およびプレフィックスｌの警告
 		if(	strcmp(str_buf+str_data[l].str,"l14")==0 ||
@@ -654,7 +671,7 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 		*p2=c;	p=p2;
 		
 		
-		if(c=='['){
+		if(str_data[l].type!=C_FUNC && c=='['){
 			// array(name[i] => getelementofarray(name,i) )
 			add_scriptl(search_str("getelementofarray"));
 			add_scriptc(C_ARG);
@@ -726,16 +743,39 @@ unsigned char* parse_subexpr(unsigned char *p,int limit)
 		   (op=C_LT,opl=2,len=1,*p=='<')) && opl>limit){
 		p+=len;
 		if(op==C_FUNC){
+			int i=0,func=parse_cmd;
+			const char *plist[32];
+			
+			if( str_data[func].type!=C_FUNC ){
+				disp_error_message("expect function",p);
+				exit(0);
+			}
+			
 			add_scriptc(C_ARG);
 			do {
+				plist[i]=p;
 				p=parse_subexpr(p,-1);
 				p=skip_space(p);
 				if(*p==',') p++;
+				else if(*p!=')' && script_config.warn_func_no_comma){
+					disp_error_message("expect ',' or ')' at func params",p);
+				}
 				p=skip_space(p);
-			} while(*p && *p!=')');
+				i++;
+			} while(*p && *p!=')' && i<32);
+			plist[i]=p;
 			if(*(p++)!=')'){
 				disp_error_message("func request '(' ')'",p);
 				exit(1);
+			}
+			
+			if( str_data[func].type==C_FUNC && script_config.warn_func_mismatch_paramnum){
+				const char *arg=buildin_func[str_data[func].val].arg;
+				int j=0;
+				for(j=0;arg[j];j++) if(arg[j]=='*')break;
+				if( (arg[j]==0 && i!=j) || (arg[j]=='*' && i<j) ){
+					disp_error_message("illeagal number of parameters",plist[(i<j)?i:j]);
+				}
 			}
 		} else {
 			p=parse_subexpr(p,opl);
@@ -780,27 +820,55 @@ unsigned char* parse_expr(unsigned char *p)
  */
 unsigned char* parse_line(unsigned char *p)
 {
+	int i=0,cmd;
+	const char *plist[32];
+
 	p=skip_space(p);
 	if(*p==';')
 		return p;
+
+	parse_cmd_if=0;	// warn_cmd_no_commaのために必要
 
 	// 最初は関数名
 	p=parse_simpleexpr(p);
 	p=skip_space(p);
 
+	cmd=parse_cmd;
+	if( str_data[cmd].type!=C_FUNC ){
+		disp_error_message("expect command",p);
+		exit(0);
+	}
+	
 	add_scriptc(C_ARG);
-	while(p && *p && *p!=';'){
+	while(p && *p && *p!=';' && i<32){
+		plist[i]=p;
+		
 		p=parse_expr(p);
 		p=skip_space(p);
-		// 引数区切りの,は有っても無くても良し
+		// 引数区切りの,処理
 		if(*p==',') p++;
+		else if(*p!=';' && script_config.warn_cmd_no_comma && parse_cmd_if*2<=i ){
+			disp_error_message("expect ',' or ';' at cmd params",p);
+		}
 		p=skip_space(p);
+		i++;
 	}
+	plist[i]=p;
 	if(!p || *(p++)!=';'){
 		disp_error_message("need ';'",p);
 		exit(1);
-	}
+	}	
 	add_scriptc(C_FUNC);
+
+	if( str_data[cmd].type==C_FUNC && script_config.warn_cmd_mismatch_paramnum){
+		const char *arg=buildin_func[str_data[cmd].val].arg;
+		int j=0;
+		for(j=0;arg[j];j++) if(arg[j]=='*')break;
+		if( (arg[j]==0 && i!=j) || (arg[j]=='*' && i<j) ){
+			disp_error_message("illeagal number of parameters",plist[(i<j)?i:j]);
+		}
+	}
+
 
 	return p;
 }
@@ -815,6 +883,7 @@ static void add_buildin_func(void)
 	for(i=0;buildin_func[i].func;i++){
 		n=add_str(buildin_func[i].name);
 		str_data[n].type=C_FUNC;
+		str_data[n].val=i;
 		str_data[n].func=buildin_func[i].func;
 	}
 }
@@ -4101,6 +4170,11 @@ int script_config_read(char *cfgName)
 	int i;
 	char line[1024],w1[1024],w2[1024];
 	FILE *fp;
+
+	script_config.warn_func_no_comma=1;
+	script_config.warn_cmd_no_comma=1;
+	script_config.warn_func_mismatch_paramnum=1;
+	script_config.warn_cmd_mismatch_paramnum=1;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){

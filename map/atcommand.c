@@ -815,7 +815,7 @@ atcommand_item(
 		clif_displaymessage(fd, msg_table[18]);
 			} else {
 		clif_displaymessage(fd, msg_table[19]);
-		}
+			}
 	
 	return 0;
 }
@@ -938,7 +938,7 @@ atcommand_baselevelup(
 						sd->status.status_point += 22;
 					else
 				sd->status.status_point += (i + 14) / 5 ;
-			}
+				}
 		sd->status.base_level += level;
 		clif_updatestatus(sd, SP_BASELEVEL);
 		clif_updatestatus(sd, SP_NEXTBASEEXP);
@@ -1096,9 +1096,9 @@ atcommand_pvpon(
 					pl_sd->pvp_rank = 0;
 					pl_sd->pvp_lastusers = 0;
 					pl_sd->pvp_point = 5;
+						}
 					}
 				}
-			}
 		clif_displaymessage(fd, msg_table[32]);
 		}
 
@@ -1127,7 +1127,7 @@ atcommand_gvgon(
 				map[sd->bl.m].flag.gvg = 1;
 		clif_send0199(sd->bl.m, 3);
 		clif_displaymessage(fd, msg_table[34]);
-		}
+			}
 	return 0;
 }
 
@@ -1412,8 +1412,8 @@ atcommand_gat(
 			map_getcell(sd->bl.m, sd->bl.x + 1, sd->bl.y + y),
 			map_getcell(sd->bl.m, sd->bl.x + 2, sd->bl.y + y));
 		clif_displaymessage(fd, output);
-		}
-
+			}
+	
 	return 0;
 }
 
@@ -1685,7 +1685,7 @@ atcommand_recall(
 					pc_setpos(pl_sd, sd->mapname, sd->bl.x, sd->bl.y, 2);
 			snprintf(output, sizeof output, msg_table[46], character);
 			clif_displaymessage(fd, output);
-		}
+				}
 	} else {
 		clif_displaymessage(fd, msg_table[47]);
 					}
@@ -1821,7 +1821,7 @@ atcommand_character_option(
 			pl_sd->status.option = opt3;
 					clif_changeoption(&pl_sd->bl);
 			clif_displaymessage(fd, msg_table[55]);
-		}
+			}
 	} else {
 		clif_displaymessage(fd, msg_table[56]);
 				}

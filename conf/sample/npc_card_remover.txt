@@ -41,58 +41,17 @@ REMOVEMENU:
 	next;
 //	menu "I changed my mind.",CLOSEOUT,
 	menu "やっぱりやめます。",CLOSEOUT,
-	     getequipname(1),SLOT1,
-	     getequipname(2),SLOT2,
-	     getequipname(3),SLOT3,
-	     getequipname(4),SLOT4,
-	     getequipname(5),SLOT5,
-	     getequipname(6),SLOT6,
-	     getequipname(7),SLOT7,
-	     getequipname(8),SLOT8,
-	     getequipname(9),SLOT9,
-	     getequipname(10),SLOT10;
-
-SLOT1:
-	set @part,1;
-	goto CARDNUMCHECK;
-
-SLOT2:
-	set @part,2;
-	goto CARDNUMCHECK;
-
-SLOT3:
-	set @part,3;
-	goto CARDNUMCHECK;
-
-SLOT4:
-	set @part,4;
-	goto CARDNUMCHECK;
-
-SLOT5:
-	set @part,5;
-	goto CARDNUMCHECK;
-
-SLOT6:
-	set @part,6;
-	goto CARDNUMCHECK;
-
-SLOT7:
-	set @part,7;
-	goto CARDNUMCHECK;
-
-SLOT8:
-	set @part,8;
-	goto CARDNUMCHECK;
-
-SLOT9:
-	set @part,9;
-	goto CARDNUMCHECK;
-
-SLOT10:
-	set @part,10;
-	goto CARDNUMCHECK;
-
-CARDNUMCHECK:
+	     getequipname(1),-,
+	     getequipname(2),-,
+	     getequipname(3),-,
+	     getequipname(4),-,
+	     getequipname(5),-,
+	     getequipname(6),-,
+	     getequipname(7),-,
+	     getequipname(8),-,
+	     getequipname(9),-,
+	     getequipname(10),-;
+	set @part,@menu-1;
 	if(getequipcardcnt(@part) == 0) goto DENYCARDCOUNT;
 	set @cardcount,getequipcardcnt(@part);
 //	if(@cardcount > 1) goto CARDNUMMULTIMSG;
@@ -207,7 +166,7 @@ FAILREMOVECARD3:
 	mes "[賢い老女]";
 	mes "カードを取り外すのに失敗したよ。";
 	mes "でも、不幸中の幸いさ。";
-	mes "武具もアイテムも無事だよ。";
+	mes "武具もカードも無事だよ。";
 	failedremovecards @part,3;
 	close;
 

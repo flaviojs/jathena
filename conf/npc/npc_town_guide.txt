@@ -5,7 +5,7 @@
 //[案内要員 - プロンテラ]
 
 prontera.gat,154,187,4	script	案内要員	105,{
-	scriptlabel GuideProntera;
+//	scriptlabel GuideProntera;
 	cutin "prt_soldier",2;
 	mes "[プロンテラ 案内要員]";
 	mes "ようこそ、ルーンミッドガッツ王国の";
