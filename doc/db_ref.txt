@@ -36,7 +36,7 @@ upkeep_time2:ƒXƒLƒ‹‚É‚æ‚Á‚Ä‹N‚±‚éó‘ÔˆÙí‚ÌˆÛŽŽžŠÔ‚ðÝ’è‚µ‚Ü‚·BƒŒƒxƒ‹•Ê‚ÉÝ’è‚
 2. db/skill_db.txt
 --------------------------------------------------------------------------
 
-id,range,hit,inf,pl,nk,max,list_num,castcancel,cast_defence_rate,inf2,maxcount
+id,range,hit,inf,pl,nk,max,list_num,castcancel,cast_defence_rate,inf2,maxcount,skill_type,blow_count
 
 id: ƒXƒLƒ‹‚ÌID‚Å‚·B
 range: ƒXƒLƒ‹‚ÌŽË’ö‹——£‚Å‚·BƒŒƒxƒ‹•Ê‚ÉÝ’è‚·‚éê‡‚Íu:v‚ðŽg‚¢‚Ü‚·B-1‚ÍƒLƒƒƒ‰‚Ì•ŠíŽË’ö‚Æ“¯‚¶‚ÆŒ¾‚¤ˆÓ–¡‚Å-2‚È‚çƒLƒƒƒ‰‚Ì•ŠíŽË’ö+1A-3‚È‚çƒLƒƒƒ‰‚Ì•ŠíŽË’ö+2‚É‚È‚è‚Ü‚·B
@@ -49,10 +49,12 @@ pl: ƒXƒLƒ‹‚Ì‘®«‚Å‚·B
 nk: •t‰Á@1Œø‰Ê@2‚«”ò‚Î‚µ
 MaxLv: ƒXƒLƒ‹‚ÌÅ‘åƒŒƒxƒ‹‚Å‚·B
 list_num: Hit‰ñ”‚ÌƒŠƒXƒg‚Å‚·BƒŒƒxƒ‹•Ê‚ÉÝ’è‚·‚éê‡‚Íu:v‚ðŽg‚¢‚Ü‚·B
-castcancel: ƒXƒLƒ‹‚ªƒLƒƒƒ“ƒZƒ‹‚³‚ê‚é‚©‚Ç‚¤‚©‚ðÝ’è‚µ‚Ü‚·B1‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚é•¨‚Å0‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚È‚¢•¨‚Å‚·B
+castcancel: ƒXƒLƒ‹‚ªƒLƒƒƒ“ƒZƒ‹‚³‚ê‚é‚©‚Ç‚¤‚©‚ðÝ’è‚µ‚Ü‚·Byes‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚é•¨‚Åno‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚È‚¢•¨‚Å‚·B
 cast_defence_rate: ƒLƒƒƒXƒeƒBƒ“ƒO’†‚É’á‰º‚·‚é–hŒä—Í‚Ì”ä—¦‚Å‚·Bƒ{ƒEƒŠƒ“ƒOƒoƒbƒVƒ…‚âƒNƒ‰ƒ“ƒhƒNƒƒX‚Ì‚æ‚¤‚ÉƒXƒLƒ‹ƒLƒƒƒXƒeƒBƒ“ƒO’†‚É–hŒä‚ªŒ¸‚éƒXƒLƒ‹‚ÌÝ’è‚ÉŽg‚¢‚Ü‚·B
 inf2: ƒXƒLƒ‹î•ñ2‚Å‚·B1 - ƒNƒFƒXƒgƒXƒLƒ‹A2 - npc ƒXƒLƒ‹A4-“GA8-êŠA16-‘¦Žž”­“®A32-–¡•ûA64-ã©A128-PVPƒ‚[ƒh‚ÅŽ©•ª‚ðŠÜ‚Þ‘S‚Ä‚Ì•¨‚Éƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚Ý)A256-•’Ê‚ÌŽg—p‚ÅŽ©•ª‚É•K‚¸ƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚Ý)A512-Ž©•ª‚É‚ÍŽg‚¤‚±‚Æ‚ª‚Å‚«‚È‚¢ƒXƒLƒ‹B(4A8A16A32A64‚Íˆê•”‚ÌƒAƒNƒeƒBƒuƒXƒLƒ‹‚ªŽg—pB¡‚Íˆ¢C—…”e–PŒ‚Ì‚ÝŽg—pB)
 maxcount: ’n–ÊƒXƒLƒ‹‚Ì‚Ý‚É“K—p‚³‚ê‚é•¨‚ÅƒXƒLƒ‹‚ð’u‚¯‚éÅ‘å”‚Å‚·B0‚Í’u‚¯‚È‚¢‚ÆŒ¾‚¤ˆÓ–¡‚Å‚Í‚È‚­§ŒÀ‚ª‚È‚¢•¨‚ÆŒ¾‚¤ˆÓ–¡‚Å‚·B
+skill_type: ƒXƒLƒ‹‚ÌŽí—Þ‚ðÝ’è‚µ‚Ü‚·Bweapon‚Í•ŠíƒXƒLƒ‹‚Åmagic‚Í–‚–@ƒXƒLƒ‹Amisc‚Í•Ší‚Å‚à–‚–@‚Å‚à‚È‚¢ƒXƒLƒ‹‚Å‚·Bnone‚ÍŒˆ‚ß“ï‚µ‚¢•¨“™‚ÉÝ’è‚µ‚Ü‚·B‚½‚¾‚±‚ê‚ð•Ï‚¦‚½‚Æ‚µ‚Ä‚àƒXƒLƒ‹‚Ìƒ_ƒ[ƒWŒvŽZ‚ª‚±‚ê‚É‡‚í‚¹‚Ä•Ï‚í‚é‚í‚¯‚Å‚Í‚È‚­ƒ_ƒ[ƒW‚ÌŒvŽZ‚ÍƒvƒƒOƒ‰ƒ€ƒŒƒxƒ‹‚Ås‚È‚Á‚Ä‚¢‚Ü‚·B‚±‚ê‚ÍƒXƒyƒ‹ƒuƒŒƒCƒJ[‚Å‰r¥’†Ž~‚³‚ê‚é‚©‚Ç‚¤‚©‚ðÝ’è‚·‚éˆ×‚Ì•¨‚Å‚·B(‘¼‚ÌƒXƒLƒ‹‚Å‚±‚ÌÝ’è‚ðŽg—p‚·‚é‰Â”\«‚à‚ ‚è‚Ü‚·‚ª¡‚ÌŠƒXƒyƒ‹ƒuƒŒƒCƒJ[‚Ì‚Ý‚Å‚·B) magic‚ÉÝ’è‚·‚é‚ÆƒXƒyƒ‹ƒuƒŒƒCƒJ[‚Å‰r¥’†Ž~‚³‚ê‚Ü‚·B
+blow_count: ƒXƒLƒ‹‚æ‚éƒmƒbƒNƒoƒbƒN‹——£‚Å‚·BƒŒƒxƒ‹•Ê‚ÉÝ’è‚·‚éê‡‚Íu:v‚ðŽg‚¢‚Ü‚·B
 
 
 ==========================================================================

@@ -162,15 +162,11 @@ static int pet_attack(struct pet_data *pd,unsigned int tick,int data)
 	}
 
 	range = mob_db[pd->class].range + 1;
-	if(distance(pd->bl.x,pd->bl.y,md->bl.x,md->bl.y) > range){
-		pd->state.state=MS_IDLE;
+	if(distance(pd->bl.x,pd->bl.y,md->bl.x,md->bl.y) > range)
 		return 0;
-	}
 	if(battle_config.monster_attack_direction_change)
 		pd->dir=map_calc_dir(&pd->bl, md->bl.x,md->bl.y );
 
-	pd->to_x = pd->bl.x;
-	pd->to_y = pd->bl.y;
 	clif_fixpetpos(pd);
 
 	battle_weapon_attack(&pd->bl,&md->bl,tick,0);

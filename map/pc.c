@@ -546,7 +546,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->attackabletime = tick;
 
 	sd->spiritball = 0;
-	for(i=0;i<10;i++)
+	for(i=0;i<MAX_SKILL_LEVEL;i++)
 		sd->spirit_timer[i] = -1;
 	for(i=0;i<MAX_SKILLTIMERSKILL;i++)
 		sd->skilltimerskill[i].timer = -1;
@@ -3302,6 +3302,9 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 		if(battle_config.pc_attack_direction_change)
 			sd->dir=sd->head_dir=map_calc_dir(&sd->bl, bl->x,bl->y );	// Œü‚«İ’è
 
+		if(sd->walktimer != -1)
+			pc_stop_walking(sd,1);
+
 		if(sd->sc_data[SC_COMBO].timer == -1) {
 			map_freeblock_lock();
 			pc_stop_walking(sd,0);
@@ -5107,32 +5110,34 @@ static int pc_spirit_heal(struct map_session_data *sd,int level)
 		flag = 0;
 		while(sd->inchealspirittick >= interval) {
 			sd->inchealspirittick -= interval;
-			if(sd->status.hp < sd->status.max_hp) {
-				if(sd->status.hp + bonus_hp <= sd->status.max_hp)
-					sd->status.hp += bonus_hp;
-				else {
-					bonus_hp = sd->status.max_hp - sd->status.hp;
-					sd->status.hp = sd->status.max_hp;
+			if(pc_issit(sd)) {
+				if(sd->status.hp < sd->status.max_hp) {
+					if(sd->status.hp + bonus_hp <= sd->status.max_hp)
+						sd->status.hp += bonus_hp;
+					else {
+						bonus_hp = sd->status.max_hp - sd->status.hp;
+						sd->status.hp = sd->status.max_hp;
+						flag |= 0x01;
+					}
+					clif_heal(sd->fd,SP_HP,bonus_hp);
+				}
+				else
 					flag |= 0x01;
+				if(sd->status.sp < sd->status.max_sp) {
+					if(sd->status.sp + bonus_sp <= sd->status.max_sp)
+						sd->status.sp += bonus_sp;
+					else {
+						bonus_sp = sd->status.max_sp - sd->status.sp;
+						sd->status.sp = sd->status.max_sp;
+						flag |= 0x02;
+					}
+					clif_heal(sd->fd,SP_SP,bonus_sp);
 				}
-				clif_heal(sd->fd,SP_HP,bonus_hp);
-			}
-			else
-				flag |= 0x01;
-			if(sd->status.sp < sd->status.max_sp) {
-				if(sd->status.sp + bonus_sp <= sd->status.max_sp)
-					sd->status.sp += bonus_sp;
-				else {
-					bonus_sp = sd->status.max_sp - sd->status.sp;
-					sd->status.sp = sd->status.max_sp;
+				else
 					flag |= 0x02;
-				}
-				clif_heal(sd->fd,SP_SP,bonus_sp);
+				if(flag >= 3)
+					sd->inchealspirittick = 0;
 			}
-			else
-				flag |= 0x02;
-			if(flag >= 3)
-				sd->inchealspirittick = 0;
 		}
 	}
 
@@ -5156,7 +5161,7 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 		sd->hp_sub = sd->inchealhptick = 0;
 		sd->sp_sub = sd->inchealsptick = 0;
 	}
-	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0 && pc_issit(sd) && !pc_ishiding(sd) && sd->sc_data[SC_POISON].timer == -1)
+	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0 && !pc_ishiding(sd) && sd->sc_data[SC_POISON].timer == -1)
 		pc_spirit_heal(sd,skill);
 	else
 		sd->inchealspirittick = 0;

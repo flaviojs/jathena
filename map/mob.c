@@ -390,7 +390,7 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 
 	md->min_chase=13;
 	md->state.state=MS_IDLE;
-	md->state.skillstate=MSS_ATTACK;
+	md->state.skillstate=MSS_IDLE;
 
 	if( md->skilltimer!=-1 )	// スキル使用中
 		return 0;
@@ -421,17 +421,14 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 	range = mob_db[md->class].range;
 	if(mode&1)
 		range++;
-	if(distance(md->bl.x,md->bl.y,sd->bl.x,sd->bl.y) > range){
-		md->state.state=MS_IDLE;
+	if(distance(md->bl.x,md->bl.y,sd->bl.x,sd->bl.y) > range)
 		return 0;
-	}
 	if(battle_config.monster_attack_direction_change)
 		md->dir=map_calc_dir(&md->bl, sd->bl.x,sd->bl.y );	// 向き設定
 
-	md->to_x = md->bl.x;
-	md->to_y = md->bl.y;
 	clif_fixmobpos(md);
 
+	md->state.skillstate=MSS_ATTACK;
 	if( mobskill_use(md,tick,-2) )	// スキル使用
 		return 0;
 
@@ -732,7 +729,7 @@ int mob_spawn(int id)
 		memset(md->lootitem,0,sizeof(md->lootitem));
 	md->lootitem_count = 0;
 
-	for(i=0;i<MAX_SKILLTIMERSKILL/2;i++)
+	for(i=0;i<MAX_MOBSKILLTIMERSKILL;i++)
 		md->skilltimerskill[i].timer = -1;
 
 	for(i=0;i<MAX_STATUSCHANGE;i++) {
@@ -2442,7 +2439,7 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 {
 	int casttime,range;
 	struct mob_skill *ms=&mob_db[md->class].skill[skill_idx];
-	int skill_id=ms->skill_id, skill_lv=ms->skill_lv;
+	int skill_id=ms->skill_id, skill_lv=ms->skill_lv, forcecast = 0;
 
 	if(target==NULL && (target=map_id2bl(md->target_id))==NULL)
 		return 0;
@@ -2480,10 +2477,24 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	md->state.skillcastcancel=ms->cancel;
 	md->skilldelay[skill_idx]=gettick();
 
+	switch(skill_id){	/* 何か特殊な処理が必要 */
+	case ALL_RESURRECTION:	/* リザレクション */
+		if(target->type != BL_PC && battle_check_undead(battle_get_race(target),battle_get_elem_type(target))){	/* 敵がアンデッドなら */
+			forcecast=1;	/* ターンアンデットと同じ詠唱時間 */
+			casttime=skill_castfix(&md->bl, skill_get_cast(PR_TURNUNDEAD,skill_lv) );
+		}
+		break;
+	case MO_EXTREMITYFIST:	/*阿修羅覇鳳拳*/
+	case SA_MAGICROD:
+	case SA_SPELLBREAKER:
+		forcecast=1;
+		break;
+	}
+
 	if(battle_config.mob_skill_log)
 		printf("MOB skill use target_id=%d skill=%d lv=%d cast=%d, class = %d\n",target->id,skill_id,skill_lv,casttime,md->class);
 
-	if( casttime>0 ){ 	// 詠唱が必要
+	if(casttime>0 || forcecast){ 	// 詠唱が必要
 //		struct mob_data *md2;
 		clif_skillcasting( &md->bl,
 			md->bl.id, target->id, 0,0, skill_id,casttime);

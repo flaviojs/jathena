@@ -14,8 +14,8 @@ struct skill_db {
 	int cast[MAX_SKILL_LEVEL],delay[MAX_SKILL_LEVEL];
 	int upkeep_time[MAX_SKILL_LEVEL],upkeep_time2[MAX_SKILL_LEVEL];
 	int castcancel,cast_def_rate;
-	int inf2;
-	int maxcount;
+	int inf2,maxcount,skill_type;
+	int blewcount[MAX_SKILL_LEVEL];
 	int hp[MAX_SKILL_LEVEL],sp[MAX_SKILL_LEVEL],hp_rate[MAX_SKILL_LEVEL],sp_rate[MAX_SKILL_LEVEL],zeny[MAX_SKILL_LEVEL];
 	int weapon,state,spiritball[MAX_SKILL_LEVEL];
 	int itemid[5],amount[5];
@@ -64,6 +64,7 @@ int	skill_get_weapontype( int id );
 int skill_get_unit_id(int id,int flag);
 int	skill_get_inf2( int id );
 int	skill_get_maxcount( int id );
+int	skill_get_blewcount( int id ,int lv );
 
 // スキルの使用
 int skill_use_id( struct map_session_data *sd, int target_id,
@@ -154,42 +155,21 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 // 2-2次職の値はなんかめちゃくちゃっぽいので暫定。たぶん変更されます。
 	SC_SENDMAX				=128,
 
-	SC_STONE				=128,
-	SC_FREEZE				=129,
-	SC_STAN					=130,
-	SC_SLEEP				=131,
-	SC_POISON				=132,
-	SC_CURSE				=133,
-	SC_SILENCE				=134,
-	SC_CONFUSION			=135,
-	SC_BLIND				=136,
-
-	SC_SAFETYWALL			=140,
-	SC_PNEUMA				=141,
-	SC_WATERBALL			=142,
-	SC_ANKLE				=143,
-	SC_DANCING				=144,
-	SC_KEEPING			=145,
-	SC_BARRIER			=146,
-
-	SC_TRICKDEAD			=29,
 	SC_PROVOKE				= 0,
 	SC_ENDURE				= 1,
-	SC_SIGHT				=150,
-	SC_ENERGYCOAT			=31,
+	SC_TWOHANDQUICKEN		= 2,
 	SC_CONCENTRATE			= 3,
 	SC_HIDING				= 4,
-	SC_LOUD					=30,
-	SC_HALLUCINATION	=34,
-	SC_RUWACH				=151,
+	SC_CLOAKING				= 5,
+	SC_ENCPOISON			= 6,
+	SC_POISONREACT			= 7,
+	SC_QUAGMIRE				= 8,
+	SC_ANGELUS				= 9,
+	SC_BLESSING				=10,
+	SC_SIGNUMCRUCIS			=11,
 	SC_INCREASEAGI			=12,
 	SC_DECREASEAGI			=13,
 	SC_SLOWPOISON				=14,
-	SC_SIGNUMCRUCIS			=11,
-	SC_ANGELUS				= 9,
-	SC_BLESSING				=10,
-	SC_TWOHANDQUICKEN		= 2,
-	SC_AUTOCOUNTER			=152,
 	SC_IMPOSITIO			=15,
 	SC_SUFFRAGIUM			=16,
 	SC_ASPERSIO				=17,
@@ -197,17 +177,22 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_KYRIE				=19,
 	SC_MAGNIFICAT			=20,
 	SC_GLORIA				=21,
-	SC_DIVINA				= SC_SILENCE,
 	SC_AETERNA				=22,
-	SC_QUAGMIRE				= 8,
 	SC_ADRENALINE			=23,
 	SC_WEAPONPERFECTION		=24,
 	SC_OVERTHRUST			=25,
 	SC_MAXIMIZEPOWER		=26,
-	SC_CLOAKING				= 5,
-	SC_ENCPOISON			= 6,
-	SC_POISONREACT			= 7,
-
+	SC_RIDING				=27,
+	SC_FALCON				=28,
+	SC_TRICKDEAD			=29,
+	SC_LOUD					=30,
+	SC_ENERGYCOAT			=31,
+	SC_HALLUCINATION	=34,
+	SC_WEIGHT50				=35,
+	SC_WEIGHT90				=36,
+	SC_SPEEDPOTION0			=37,
+	SC_SPEEDPOTION1			=38,
+	SC_SPEEDPOTION2			=39,
 	SC_STRIPWEAPON			=50,
 	SC_STRIPSHIELD			=51,
 	SC_STRIPARMOR			=52,
@@ -231,6 +216,29 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_LIGHTNINGLOADER		=92,
 	SC_SEISMICWEAPON		=93,
 
+	SC_STONE				=128,
+	SC_FREEZE				=129,
+	SC_STAN					=130,
+	SC_SLEEP				=131,
+	SC_POISON				=132,
+	SC_CURSE				=133,
+	SC_SILENCE				=134,
+	SC_CONFUSION			=135,
+	SC_BLIND				=136,
+	SC_DIVINA				= SC_SILENCE,
+
+	SC_SAFETYWALL			=140,
+	SC_PNEUMA				=141,
+	SC_WATERBALL			=142,
+	SC_ANKLE				=143,
+	SC_DANCING				=144,
+	SC_KEEPING			=145,
+	SC_BARRIER			=146,
+
+	SC_MAGICROD			=149,
+	SC_SIGHT				=150,
+	SC_RUWACH				=151,
+	SC_AUTOCOUNTER			=152,
 	SC_VOLCANO				=153,
 	SC_DELUGE				=154,
 
@@ -243,26 +251,15 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_INTOABYSS			=166,
 	SC_SIEGFRIED			=167,
 	SC_DISSONANCE			=168,
-	SC_FROSTJOKE			=169,
-	SC_WHISTLE				=170,
-	SC_ASSNCROS				=171,
-	SC_POEMBRAGI			=172,
-	SC_APPLEIDUN			=173,
-	SC_UGLYDANCE			=174,
-	SC_SCREAM				=175,
-	SC_HUMMING				=176,
-	SC_DONTFORGETME			=177,
-	SC_FORTUNE				=178,
-	SC_SERVICE4U			=179,
-
-	SC_RIDING				=27,
-	SC_FALCON				=28,
-	SC_WEIGHT50				=35,
-	SC_WEIGHT90				=36,
-	SC_SPEEDPOTION0			=37,
-	SC_SPEEDPOTION1			=38,
-	SC_SPEEDPOTION2			=39,
-
+	SC_WHISTLE				=169,
+	SC_ASSNCROS				=170,
+	SC_POEMBRAGI			=171,
+	SC_APPLEIDUN			=172,
+	SC_UGLYDANCE			=173,
+	SC_HUMMING				=174,
+	SC_DONTFORGETME			=175,
+	SC_FORTUNE				=176,
+	SC_SERVICE4U			=177,
 };
 extern int SkillStatusChangeTable[];
 
@@ -620,6 +617,10 @@ enum {
 	DC_DONTFORGETME,
 	DC_FORTUNEKISS,
 	DC_SERVICEFORYOU,
+
+	WE_MALE = 334,
+	WE_FEMALE,
+	WE_CALLPARTNER,
 
 	GD_APPROVAL=10000,
 	GD_KAFRACONTACT,
