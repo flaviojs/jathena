@@ -1055,10 +1055,12 @@ static void npc_parse_script_line(unsigned char *p,int *curly_count,int line) {
 
 static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line,FILE *fp,int *lines)
 {
-	int x,y,dir,m,xs,ys,class;
+	int x,y,m,xs,ys;
+	int dir = 0;
+	int class = 0;
 	char mapname[24];
 	char *srcbuf=NULL,*script;
-	int srcsize=65536;
+	unsigned int srcsize=65536;
 	int startline=0;
 	char line[1024];
 	int i;
@@ -1316,7 +1318,7 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 static int npc_parse_function(char *w1,char *w2,char *w3,char *w4,char *first_line,FILE *fp,int *lines)
 {
 	char *srcbuf=NULL,*script;
-	int srcsize=65536;
+	unsigned int srcsize=65536;
 	int startline=0;
 	char line[1024];
 	int curly_count = 0;
@@ -1688,16 +1690,18 @@ int do_init_npc(void)
 			if (line[0] == '/' && line[1] == '/')
 				continue;
 			// 不要なスペースやタブの連続は詰める
-			for(i=j=0;line[i];i++) {
-				if (line[i]==' ') {
-					if (!((line[i+1] && (isspace(line[i+1]) || line[i+1]==',')) ||
-						 (j && line[j-1]==',')))
-						line[j++]=' ';
-				} else if (line[i]=='\t') {
-					if (!(j && line[j-1]=='\t'))
-						line[j++]='\t';
-				} else
- 					line[j++]=line[i];
+			for( i = j = 0 ; line[ i ] >= 0 ; i++ ){
+				if( line[ i ] == ' ' ){
+					if( !( ( line[ i + 1 ] >= 0 && ( isspace( line[ i + 1 ] ) || line[ i + 1 ] == ',' ) ) || ( j >= 0 && line[ j - 1 ] == ',' ) ) ){
+						line[ j++ ] = ' ';
+					}
+				}else if( line[ i ] == '\t' ){
+					if( j != 0 && line[j-1]!='\t' ){
+						line[ j++ ] = '\t';
+					}
+				}else{
+ 					line[ j++ ] = line[ i ];
+				}
 			}
 			// 最初はタブ区切りでチェックしてみて、ダメならスペース区切りで確認
 			if ((count=sscanf(line,"%[^\t]\t%[^\t]\t%[^\t\r\n]\t%n%[^\t\r\n]",w1,w2,w3,&w4pos,w4)) < 3 &&

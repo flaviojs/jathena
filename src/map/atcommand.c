@@ -3160,7 +3160,7 @@ atcommand_idsearch(
 {
 	char item_name[100];
 	char output[100];
-	int i,j,k,len,flag,match=0;
+	unsigned int i,j,k,len,flag,match=0;
 	struct item_data *item=NULL;
 	if (sscanf(message, "%99s", item_name) < 0)
 		return -1;

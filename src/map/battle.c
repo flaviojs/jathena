@@ -1630,7 +1630,7 @@ int battle_addmastery(struct map_session_data *sd,struct block_list *target,int 
 	// DB修正後: floor( ( 3 + 0.05 * BaseLv ) * SkillLv )
 	if((skill = pc_checkskill(sd,AL_DEMONBANE)) > 0 && (battle_check_undead(race,battle_get_elem_type(target)) || race==6) ) {
 		//damage += (skill * 3);
-		damage += floor( ( 3 + 0.05 * sd->status.base_level ) * skill ); // sdの内容は保証されている
+		damage += (int)(floor( ( 3 + 0.05 * sd->status.base_level ) * skill )); // sdの内容は保証されている
 	}
 
 	// ビーストベイン(+4 ～ +40) vs 動物 or 昆虫
@@ -1772,7 +1772,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	int def1 = battle_get_def(target);
 	int def2 = battle_get_def2(target);
 	int t_vit = battle_get_vit(target);
-	struct Damage wd;
+	static struct Damage wd = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int damage,damage2=0,type,div_,blewcount=skill_get_blewcount(skill_num,skill_lv);
 	int flag,dmg_lv=0;
 	int t_mode=0,t_race=0,t_size=1,s_race=0,s_ele=0;
@@ -2191,7 +2191,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	int def1 = battle_get_def(target);
 	int def2 = battle_get_def2(target);
 	int t_vit = battle_get_vit(target);
-	struct Damage wd;
+	static struct Damage wd = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int damage,damage2=0,type,div_,blewcount=skill_get_blewcount(skill_num,skill_lv);
 	int flag,skill,ac_flag = 0,dmg_lv = 0;
 	int t_mode=0,t_race=0,t_size=1,s_race=0,s_ele=0;
@@ -2579,7 +2579,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 					if(tsd && (skill=pc_checkskill(tsd,AL_DP)) > 0 ){
 						//t_def += skill*3;
 						// tsdの内容は保証されている
-						t_def += floor( ( 3 + 0.04 * tsd->status.base_level ) * skill + 0.5);
+						t_def += (int)(floor( ( 3 + 0.04 * tsd->status.base_level ) * skill + 0.5));
 					}
 
 				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
@@ -2719,7 +2719,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	int def2 = battle_get_def2(target);
 	int mdef1, mdef2;
 	int t_vit = battle_get_vit(target);
-	struct Damage wd;
+	static struct Damage wd = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int damage,damage2,damage3=0,damage4=0,type,div_,blewcount=skill_get_blewcount(skill_num,skill_lv);
 	int flag,skill,dmg_lv = 0;
 	int t_mode=0,t_race=0,t_size=1,s_race=7,s_ele=0;
@@ -3452,24 +3452,10 @@ static struct Damage battle_calc_pc_weapon_attack(
 	// 状態異常中のダメージ追加でクリティカルにも有効なスキル
 	if (sc_data) {
 		// エンチャントデッドリーポイズン
-		if (!no_cardfix && sc_data[SC_EDP].timer != -1) {
-			// 右手のみに効果がのる。カード効果無効のスキルには乗らない
+		if (sc_data[SC_EDP].timer != -1) {
 			damage += damage * (150 + sc_data[SC_EDP].val1 * 50) / 100;
+			damage2 += damage2 * (150 + sc_data[SC_EDP].val1 * 50) / 100;
 			no_cardfix = 1;
-		}
-		// サクリファイス
-		if (!skill_num && !(t_mode&0x20) && sc_data[SC_SACRIFICE].timer != -1) {
-			int mhp = battle_get_max_hp(src);
-			int dmg = mhp * (5 + sc_data[SC_SACRIFICE].val1 * 5) / 1000;
-			pc_heal(sd, -dmg, 0);
-			damage = dmg * (90 + sc_data[SC_SACRIFICE].val1 * 15) / 100;
-			damage2 = 0;
-			hitrate = 1000000;
-			s_ele = 0;
-			s_ele_ = 0;
-			sc_data[SC_SACRIFICE].val2 --;
-			if (sc_data[SC_SACRIFICE].val2 == 0)
-				skill_status_change_end(src, SC_SACRIFICE,-1);
 		}
 	}
 
@@ -3789,7 +3775,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 struct Damage battle_calc_weapon_attack(
 	struct block_list *src,struct block_list *target,int skill_num,int skill_lv,int wflag)
 {
-	struct Damage wd;
+	static struct Damage wd = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	//return前の処理があるので情報出力部のみ変更
 	if( src == NULL || target == NULL ){
@@ -3968,7 +3954,7 @@ struct Damage battle_calc_magic_attack(
 			break;
 		case WZ_STORMGUST:	// ストームガスト
 			MATK_FIX( skill_lv*40+100 ,100 );
-//			blewcount|=0x10000;
+			blewcount|=0x10000;
 			break;
 		case AL_HOLYLIGHT:	// ホーリーライト
 			MATK_FIX( 125,100 );
@@ -4052,7 +4038,7 @@ struct Damage battle_calc_magic_attack(
 	damage=battle_attr_fix(damage, ele, battle_get_element(target) );		// 属 性修正
 
 	if(skill_num == CR_GRANDCROSS||skill_num ==NPC_DARKGRANDCROSS) {	// グランドクロス
-		struct Damage wd;
+		static struct Damage wd = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		wd=battle_calc_weapon_attack(bl,target,skill_num,skill_lv,flag);
 		damage = (damage + wd.damage) * (100 + 40*skill_lv)/100;
 		if(battle_config.gx_dupele) damage=battle_attr_fix(damage, ele, battle_get_element(target) );	//属性2回かかる
@@ -4241,7 +4227,7 @@ struct Damage  battle_calc_misc_attack(
 struct Damage battle_calc_attack(	int attack_type,
 	struct block_list *bl,struct block_list *target,int skill_num,int skill_lv,int flag)
 {
-	struct Damage d;
+	static struct Damage wd = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	switch(attack_type){
 	case BF_WEAPON:
 		return battle_calc_weapon_attack(bl,target,skill_num,skill_lv,flag);
@@ -4254,7 +4240,7 @@ struct Damage battle_calc_attack(	int attack_type,
 			printf("battle_calc_attack: unknwon attack type ! %d\n",attack_type);
 		break;
 	}
-	return d;
+	return wd;
 }
 /*==========================================
  * 通常攻撃処理まとめ
@@ -4268,7 +4254,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	short *opt1;
 	int race = 7, ele = 0;
 	int damage,rdamage = 0;
-	struct Damage wd;
+	static struct Damage wd = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	nullpo_retr(0, src);
 	nullpo_retr(0, target);
@@ -4498,8 +4484,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			battle_weapon_attack(target,src,tick,0x8000|t_sc_data[SC_AUTOCOUNTER].val1);
 		skill_status_change_end(target,SC_AUTOCOUNTER,-1);
 	}
-	if (t_sc_data && t_sc_data[SC_BLADESTOP_WAIT].timer != -1 &&
-			!(battle_get_mode(src)&0x20)) { // ボスには無効
+	if(t_sc_data && t_sc_data[SC_BLADESTOP_WAIT].timer != -1){
 		int lv = t_sc_data[SC_BLADESTOP_WAIT].val1;
 		skill_status_change_end(target,SC_BLADESTOP_WAIT,-1);
 		skill_status_change_start(src,SC_BLADESTOP,lv,1,(int)src,(int)target,skill_get_time2(MO_BLADESTOP,lv),0);

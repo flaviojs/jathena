@@ -4598,7 +4598,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 			struct status_change *sc_data=battle_get_sc_data(bl);
 			if(sg->val2==0 && sc_data && sc_data[SC_ANKLE].timer==-1){
 				int moveblock = ( bl->x/BLOCK_SIZE != src->bl.x/BLOCK_SIZE || bl->y/BLOCK_SIZE != src->bl.y/BLOCK_SIZE);
-				int sec=skill_get_time2(sg->skill_id,sg->skill_lv) - (double)battle_get_agi(bl)*0.1;
+				int sec=(int)(skill_get_time2(sg->skill_id,sg->skill_lv) - (double)battle_get_agi(bl)*0.1);
 				if(battle_get_mode(bl)&0x20)
 					sec = sec/5;
 				battle_stopwalking(bl,1);

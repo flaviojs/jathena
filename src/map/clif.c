@@ -73,8 +73,8 @@ enum {
 	GUILD_WOS,
 	SELF };
 
-#define WBUFPOS(p,pos,x,y) { unsigned char *__p = (p); __p+=(pos); __p[0] = (x)>>2; __p[1] = ((x)<<6) | (((y)>>4)&0x3f); __p[2] = (y)<<4; }
-#define WBUFPOS2(p,pos,x0,y0,x1,y1) { unsigned char *__p = (p); __p+=(pos); __p[0] = (x0)>>2; __p[1] = ((x0)<<6) | (((y0)>>4)&0x3f); __p[2] = ((y0)<<4) | (((x1)>>6)&0x0f); __p[3]=((x1)<<2) | (((y1)>>8)&0x03); __p[4]=(y1); }
+#define WBUFPOS(p,pos,x,y) { unsigned char *__p = (p); __p+=(pos); __p[0] = (unsigned char)((x)>>2); __p[1] = (unsigned char)(((x)<<6) | (((y)>>4)&0x3f)); __p[2] = (unsigned char)((y)<<4); }
+#define WBUFPOS2(p,pos,x0,y0,x1,y1) { unsigned char *__p = (p); __p+=(pos); __p[0] = (unsigned char)((x0)>>2); __p[1] = (unsigned char)(((x0)<<6) | (((y0)>>4)&0x3f)); __p[2] = (unsigned char)(((y0)<<4) | (((x1)>>6)&0x0f)); __p[3] = (unsigned char)(((x1)<<2) | (((y1)>>8)&0x03)); __p[4] = (unsigned char)(y1); }
 
 #define WFIFOPOS(fd,pos,x,y) { WBUFPOS (WFIFOP(fd,pos),0,x,y); }
 #define WFIFOPOS2(fd,pos,x0,y0,x1,y1) { WBUFPOS2(WFIFOP(fd,pos),0,x0,y0,x1,y1); }
@@ -648,8 +648,8 @@ static int clif_set009e(struct flooritem_data *fitem,unsigned char *buf)
 	WBUFB(buf,8)=fitem->item_data.identify;
 	WBUFW(buf,9)=fitem->bl.x;
 	WBUFW(buf,11)=fitem->bl.y;
-	WBUFB(buf,13)=fitem->subx;
-	WBUFB(buf,14)=fitem->suby;
+	WBUFB(buf,13)=(unsigned char)fitem->subx;
+	WBUFB(buf,14)=(unsigned char)fitem->suby;
 	WBUFW(buf,15)=fitem->item_data.amount;
 
 	return packet_db[0x9e].len;
@@ -822,7 +822,7 @@ static int clif_set0078(struct map_session_data *sd,unsigned char *buf)
 	WBUFW(buf,38)=sd->guild_emblem_id;
 	WBUFW(buf,40)=sd->status.manner;
 	WBUFW(buf,42)=sd->opt3;
-	WBUFB(buf,44)=sd->status.karma;
+	WBUFB(buf,44)=(unsigned char)sd->status.karma;
 	WBUFB(buf,45)=sd->sex;
 	WBUFPOS(buf,46,sd->bl.x,sd->bl.y);
 	WBUFB(buf,48)|=sd->dir&0x0f;
@@ -912,7 +912,7 @@ static int clif_set007b(struct map_session_data *sd,unsigned char *buf)
 	WBUFW(buf,42)=sd->guild_emblem_id;
 	WBUFW(buf,44)=sd->status.manner;
 	WBUFW(buf,46)=sd->opt3;
-	WBUFB(buf,48)=sd->status.karma;
+	WBUFB(buf,48)=(unsigned char)sd->status.karma;
 	WBUFB(buf,49)=sd->sex;
 	WBUFPOS2(buf,50,sd->bl.x,sd->bl.y,sd->to_x,sd->to_y);
 	WBUFB(buf,55)=0;
@@ -3669,8 +3669,8 @@ void clif_getareachar_item(struct map_session_data* sd,struct flooritem_data* fi
 	WFIFOW(fd,9)=fitem->bl.x;
 	WFIFOW(fd,11)=fitem->bl.y;
 	WFIFOW(fd,13)=fitem->item_data.amount;
-	WFIFOB(fd,15)=fitem->subx;
-	WFIFOB(fd,16)=fitem->suby;
+	WFIFOB(fd,15)=(unsigned char)fitem->subx;
+	WFIFOB(fd,16)=(unsigned char)fitem->suby;
 
 	WFIFOSET(fd,packet_db[0x9d].len);
 }
@@ -7193,7 +7193,7 @@ void clif_parse_ChangeDir(int fd,struct map_session_data *sd, int cmd)
 	WFIFOW(fd,0)=0x9c;
 	WFIFOL(fd,2)=sd->bl.id;
 	WFIFOW(fd,6)=headdir;
-	WFIFOB(fd,8)=dir;
+	WFIFOB(fd,8)=(unsigned char)dir;
 	clif_send(WFIFOP(fd,0),packet_db[0x9c].len,&sd->bl,AREA_WOS);
 }
 

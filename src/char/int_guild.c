@@ -669,7 +669,7 @@ int mapif_guild_memberinfoshort(struct guild *g,int idx)
 	WBUFL(buf, 2)=g->guild_id;
 	WBUFL(buf, 6)=g->member[idx].account_id;
 	WBUFL(buf,10)=g->member[idx].char_id;
-	WBUFB(buf,14)=g->member[idx].online;
+	WBUFB(buf,14)=(unsigned char)g->member[idx].online;
 	WBUFW(buf,15)=g->member[idx].lv;
 	WBUFW(buf,17)=g->member[idx].class;
 	mapif_sendall(buf,19);
