@@ -96,6 +96,7 @@ enum AtCommandType {
 	AtCommand_AgitStart,
 	AtCommand_AgitEnd,
 	AtCommand_MapExit,
+	AtCommand_IDSearch,
 	AtCommand_Unknown,
 	AtCommand_MAX
 };

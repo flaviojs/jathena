@@ -104,6 +104,7 @@ ATCOMMAND_FUNC(guild);
 ATCOMMAND_FUNC(agitstart);
 ATCOMMAND_FUNC(agitend);
 ATCOMMAND_FUNC(mapexit);
+ATCOMMAND_FUNC(idsearch);
 
 /*==========================================
  *AtCommandInfo atcommand_info[]構造体の定義
@@ -193,6 +194,7 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_AgitStart,				"@agitstart",		0, atcommand_agitstart },
 	{ AtCommand_AgitEnd,				"@agitend",			0, atcommand_agitend },
 	{ AtCommand_MapExit,				"@mapexit",			0, atcommand_mapexit },
+	{ AtCommand_IDSearch,				"@idsearch",			0, atcommand_idsearch },
 	// add here
 	{ AtCommand_MapMove,				"@mapmove",			0, NULL },
 	{ AtCommand_Broadcast,				"@broadcast",		0, NULL },
@@ -2599,3 +2601,41 @@ atcommand_mapexit(
 	exit(1);
 }
 
+int
+atcommand_idsearch(
+	const int fd, struct map_session_data* sd,
+	const char* command, const char* message)
+{
+	char item_name[100];
+	char output[100];
+	int i,j,k,len,flag,match=0;
+	struct item_data *item=NULL;
+	if (sscanf(message, "%99s", item_name) < 0)
+		return -1;
+	len=strlen(item_name);
+	snprintf(output,sizeof output,msg_table[77],item_name);
+	clif_displaymessage(fd,output);
+	for(i=0;i<20000;i++){
+		if((item=itemdb_exists(i))==NULL)
+			continue;
+		//文字列関数はよくわからないので自前で文字列検索_|￣|○for使いすぎ
+		for(j=0;j<strlen(item->jname);j++){
+			if(item->jname[j]==item_name[0]){
+				//1文字目が合ってるなら2文字目以降を検索。
+				flag=1;
+				for(k=1;k<len;k++){
+					if(item->jname[j+k]==item_name[k])
+						flag++;
+				}
+				if(flag==len){
+					match++;
+					snprintf(output, sizeof output,msg_table[78],item->jname,item->nameid);
+					clif_displaymessage(fd,output);
+				}
+			}
+		}
+	}
+	snprintf(output, sizeof output,msg_table[79],match);
+	clif_displaymessage(fd,output);
+	return 0;
+}

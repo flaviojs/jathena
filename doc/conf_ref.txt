@@ -1076,6 +1076,20 @@ enable_upper_class
 	転生、養子職を有効にするかどうかです。
 	デフォルトはnoです。
 
+pet_atack_attr_none
+	ペットによる無属性通常攻撃を
+	属性無し(属性による補正無し)にするかどうかです。
+	デフォルトはnoです
+
+pc_atack_attr_none
+	プレイヤーによる無属性通常攻撃を
+	属性無し(属性による補正無し)にするかどうかです。
+	デフォルトはnoです
+
+mob_atack_attr_none
+	モンスターによる無属性通常攻撃を
+	属性無し(属性による補正無し)にするかどうかです。
+	デフォルトはyesです
 import
 	その行を別ファイルの中身と置き換えます。
 
@@ -1219,6 +1233,9 @@ dead_branch_active: no
 vending_max_value: 10000000
 show_steal_in_same_party: no
 enable_upper_class: no
+pet_atack_attr_none: no
+pc_atack_attr_none: no
+mob_atack_attr_none: yes
 
 ==========================================================================
 6. atcommand_athena.conf
@@ -1381,6 +1398,10 @@ agitstart
 	@コマンド @agitstart
 agitend
 	@コマンド @agitend
+mapexit
+	@コマンド @mapexit
+idsearch
+	@コマンド @idsearch
 
 import
 	その行を別ファイルの中身と置き換えます。
@@ -1464,6 +1485,8 @@ party: 1
 guild: 1
 agitstart: 1
 agitend: 1
+mapexit: 1
+idsearch: 1
 
 
 ==========================================================================

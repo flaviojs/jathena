@@ -1594,6 +1594,14 @@ static struct Damage battle_calc_pet_weapon_attack(
 			case CR_GRANDCROSS:
 				hitrate= 1000000;
 				break;
+			case AM_DEMONSTRATION:	// デモンストレーション
+				damage = damage*(100+ 20*skill_lv)/100;
+				damage2 = damage2*(100+ 20*skill_lv)/100;
+				break;
+			case AM_ACIDTERROR:	// アシッドテラー
+				damage = damage*(100+ 40*skill_lv)/100;
+				damage2 = damage2*(100+ 40*skill_lv)/100;
+				break;
 			case MO_FINGEROFFENSIVE:	//指弾
 				damage = damage * (100 + 50 * skill_lv) / 100;
 				div_ = 1;
@@ -1684,7 +1692,8 @@ static struct Damage battle_calc_pet_weapon_attack(
 	if(damage < 0) damage = 0;
 
 	// 属 性の適用
-	damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
+	if(skill_num != 0 || s_ele != 0 || !battle_config.pet_attack_attr_none)
+		damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
 
 	// インベナム修正
 	if(skill_num==TF_POISON){
@@ -1990,6 +1999,14 @@ static struct Damage battle_calc_mob_weapon_attack(
 			case CR_GRANDCROSS:
 				hitrate= 1000000;
 				break;
+			case AM_DEMONSTRATION:	// デモンストレーション
+				damage = damage*(100+ 20*skill_lv)/100;
+				damage2 = damage2*(100+ 20*skill_lv)/100;
+				break;
+			case AM_ACIDTERROR:	// アシッドテラー
+				damage = damage*(100+ 40*skill_lv)/100;
+				damage2 = damage2*(100+ 40*skill_lv)/100;
+				break;
 			case MO_FINGEROFFENSIVE:	//指弾
 				damage = damage * (100 + 50 * skill_lv) / 100;
 				div_ = 1;
@@ -2105,7 +2122,8 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if(damage < 0) damage = 0;
 
 	// 属 性の適用
-	damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
+	if(skill_num != 0 || s_ele != 0 || !battle_config.mob_attack_attr_none)
+		damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
 
 	// インベナム修正
 	if(skill_num==TF_POISON){
@@ -2644,6 +2662,14 @@ static struct Damage battle_calc_pc_weapon_attack(
 			case CR_GRANDCROSS:
 				hitrate= 1000000;
 				break;
+			case AM_DEMONSTRATION:	// デモンストレーション
+				damage = damage*(100+ 20*skill_lv)/100;
+				damage2 = damage2*(100+ 20*skill_lv)/100;
+				break;
+			case AM_ACIDTERROR:	// アシッドテラー
+				damage = damage*(100+ 40*skill_lv)/100;
+				damage2 = damage2*(100+ 40*skill_lv)/100;
+				break;
 			case MO_FINGEROFFENSIVE:	//指弾
 				if(battle_config.finger_offensive_type == 0) {
 					damage = damage * (100 + 50 * skill_lv) / 100 * sd->spiritball_old;
@@ -2927,8 +2953,10 @@ static struct Damage battle_calc_pc_weapon_attack(
 	if(damage2 < 0) damage2 = 0;
 
 	// 属 性の適用
-	damage=battle_attr_fix(damage,s_ele, battle_get_element(target) );
-	damage2=battle_attr_fix(damage2,s_ele_, battle_get_element(target) );
+	if(skill_num != 0 || s_ele != 0 || !battle_config.pc_attack_attr_none)
+		damage=battle_attr_fix(damage,s_ele, battle_get_element(target) );
+	if(skill_num != 0 || s_ele != 0 || !battle_config.pc_attack_attr_none)
+		damage2=battle_attr_fix(damage2,s_ele_, battle_get_element(target) );
 
 	// 星のかけらの適用
 	damage += sd->star;
@@ -4049,6 +4077,9 @@ int battle_config_read(const char *cfgName)
 		battle_config.pet_weight = 1000;
 		battle_config.show_steal_in_same_party = 0;
 		battle_config.enable_upper_class = 0;
+		battle_config.pet_attack_attr_none = 0;
+		battle_config.pc_attack_attr_none = 0;
+		battle_config.mob_attack_attr_none = 1;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4203,6 +4234,9 @@ int battle_config_read(const char *cfgName)
 			{ "pet_weight", 				&battle_config.pet_weight				},
 			{ "show_steal_in_same_party", 	&battle_config.show_steal_in_same_party	},
 			{ "enable_upper_class", 		&battle_config.enable_upper_class		},
+			{ "pet_attack_attr_none", 		&battle_config.pet_attack_attr_none		},
+			{ "mob_attack_attr_none", 		&battle_config.mob_attack_attr_none		},
+			{ "pc_attack_attr_none", 		&battle_config.pc_attack_attr_none		},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

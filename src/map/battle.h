@@ -258,6 +258,9 @@ extern struct Battle_Config {
 	int pet_weight;
 	int show_steal_in_same_party;
 	int enable_upper_class;
+	int pet_attack_attr_none;
+	int mob_attack_attr_none;
+	int pc_attack_attr_none;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

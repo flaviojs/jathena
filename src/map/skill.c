@@ -311,6 +311,7 @@ int skill_get_unit_id(int id,int flag)
 	case DC_FORTUNEKISS:	return 0xae;				/* 幸運のキス */
 	case DC_SERVICEFORYOU:	return 0xaf;				/* サービスフォーユー */
 	case RG_GRAFFITI:		return 0xb0;				/* グラフィティ */
+	case AM_DEMONSTRATION:		return 0xb1;				/* デモンストレーション */
 	}
 	return 0;
 	/*
@@ -1401,6 +1402,12 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				clif_skill_fail(sd,sd->skillid,0,0);
 		}
 		break;
+
+	case AM_ACIDTERROR:		/* アシッドテラー */
+		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+//		if(bl->type == BL_PC && rand()%100 < skill_get_time(skillid,skilllv))
+//			pc_break_armor((struct map_session_data *)bl);
+		break;
 	case MO_FINGEROFFENSIVE:	/* 指弾 */
 		{
 			struct status_change *sc_data = battle_get_sc_data(src);
@@ -1969,7 +1976,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 	case SA_REVERSEORCISH:
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		if (dstsd) pc_setoption(dstsd,0x0800);
+		if (dstsd) pc_setoption(dstsd,dstsd->status.option|0x0800);
 		break;
 	case SA_FORTUNE:
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
@@ -3112,6 +3119,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case HT_BLASTMINE:			/* ブラストマイン */
 	case HT_CLAYMORETRAP:		/* クレイモアートラップ */
 	case AS_VENOMDUST:			/* ベノムダスト */
+	case AM_DEMONSTRATION:			/* デモンストレーション */
 		skill_unitsetting(src,skillid,skilllv,x,y,0);
 		break;
 
@@ -3549,7 +3557,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		else
 			val1 = 0;
 		val1 |= (battle_get_vit(src))&0xffff;
-		val2 = gettick();
+		val2 = 0;//回復用タイムカウンタ(6秒毎に1増加)
 		break;
 	case DC_SERVICEFORYOU:		/* サービスフォーユー */
 		count=81;
@@ -3577,6 +3585,13 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		if(src->type == BL_PC)
 			val1 = (pc_checkskill((struct map_session_data *)src,DC_DANCINGLESSON)+1)>>1;
 		val2 = battle_get_luk(src)/10;
+		break;
+	case AM_DEMONSTRATION:		/* デモンストレーション */
+		count=9;
+		limit=skill_get_time(skillid,skilllv);
+		interval=1000;
+		range=1;
+		target=BCT_ENEMY;
 		break;
 	};
 
@@ -3741,6 +3756,15 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 			}
 			break;
 
+		case AM_DEMONSTRATION:		/* デモンストレーション */
+			ux+=(i%3-2);
+			uy+=(i/3-2);
+			if(i==4)
+				range=1;
+			else
+				range=-1;
+
+			break;
 
 		/* ダンスなど */
 		case BD_LULLABY:		/* 子守歌 */
@@ -4066,13 +4090,13 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 						(int)src,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
 				ts->tick-=sg->interval;
 			}
-			if(DIFF_TICK(tick,sg->val2)>=6000){
-				int heal=30+src->group->skill_lv*5+((src->group->val1)>>16)*5+((src->group->val1)&0xfff)/2;
-				clif_skill_nodamage(&src->bl,bl,AL_HEAL,heal,1);
-				battle_heal(NULL,bl,heal,0,0);
-				sg->val2=tick;
-			}
 		} break;
+
+	case 0xb1:	/* デモンストレーション */
+		skill_attack(BF_WEAPON,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
+//		if(bl->type == BL_PC && rand()%100 < sg->skill_lv)
+//			pc_break_weapon((struct map_session_data *)bl);
+		break;
 /*	default:
 		if(battle_config.error_log)
 			printf("skill_unit_onplace: Unknown skill unit id=%d block=%d\n",sg->unit_id,bl->id);
@@ -5465,6 +5489,24 @@ int skill_landprotector(struct block_list *bl, va_list ap )
 	}
 	return 0;
 }
+/*==========================================
+ * イドゥンの林檎の回復処理(foreachinarea)
+ *------------------------------------------
+ */
+int skill_idun_heal(struct block_list *bl, va_list ap )
+{
+	struct skill_unit *unit = va_arg(ap,struct skill_unit *);
+	struct skill_unit_group *sg = unit->group;
+	int heal=30+sg->skill_lv*5+((sg->val1)>>16)*5+((sg->val1)&0xfff)/2;
+
+	if(bl->type == BL_SKILL || bl->id == sg->src_id)
+		return 0;
+	
+	clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
+	battle_heal(NULL,bl,heal,0,0);
+
+	return 0;
+}
 
 /*----------------------------------------------------------------------------
  * ステータス異常
@@ -6477,11 +6519,15 @@ int skill_status_change_clear(struct block_list *bl,int type)
 		return 0;
 	for(i = 0; i < MAX_STATUSCHANGE; i++){
 		if(sc_data[i].timer != -1){	/* 異常があるならタイマーを削除する */
+/*
 			delete_timer(sc_data[i].timer, skill_status_change_timer);
 			sc_data[i].timer = -1;
 
 			if(!type && i<SC_SENDMAX)
-				clif_status_change(bl,i,0);	/* アイコン消去 */
+				clif_status_change(bl,i,0);
+*/
+
+			skill_status_change_end(bl,i,-1);
 		}
 	}
 	*sc_count = 0;
@@ -6797,9 +6843,8 @@ int skill_unitgrouptickset_delete(struct block_list *bl,int group_id)
 int skill_unit_timer_sub_onplace( struct block_list *bl, va_list ap )
 {
 	struct block_list *src;
-	unsigned int tick;
 	src=va_arg(ap,struct block_list*);
-	tick=va_arg(ap,unsigned int);
+	unsigned int tick=va_arg(ap,unsigned int);
 
 	if( ((struct skill_unit *)src)->alive) {
 		if(battle_check_target(src,bl,((struct skill_unit *)src)->group->target_flag )>0)
@@ -6844,11 +6889,16 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 	range=(unit->range!=0)?unit->range:group->range;
 
 	/* onplaceイベント呼び出し */
-	if(unit->alive && unit->range>=0)
+	if(unit->alive && unit->range>=0){
 		map_foreachinarea( skill_unit_timer_sub_onplace, bl->m,
 			bl->x-range,bl->y-range,bl->x+range,bl->y+range,0,
-			bl,tick );
-
+			bl,tick);
+		if(group->unit_id == 0xaa && DIFF_TICK(tick,group->tick)>=6000*group->val2){
+			map_foreachinarea( skill_idun_heal, bl->m,
+				bl->x-range,bl->y-range,bl->x+range,bl->y+range,0,unit);
+			group->val2++;
+		}
+	}
 	/* 時間切れ削除 */
 	if(unit->alive &&
 		(DIFF_TICK(tick,group->tick)>=group->limit || DIFF_TICK(tick,group->tick)>=unit->limit) ){
@@ -6864,6 +6914,7 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 		}
 		skill_delunit(unit);
 	}
+		
 	if(group->unit_id == 0x8d) {
 		unit->val1 -= 5;
 		if(unit->val1 <= 0 && unit->limit + group->tick > tick + 700)
