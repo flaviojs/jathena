@@ -1,4 +1,18 @@
 --------------------
+//0813 by Kalen
+・コンロンNPC追加
+	conf/npc/npc_town_gonryun.txt(クエストは不明
+	conf/npc/npc_town_kafra.txt
+	conf/npc/npc_town_guide.txt
+	(conf/npc/npc_event_tougijou.txt)データ不足
+
+・全GvGMAPのMobデータ追加
+	conf/mob/npc_monster_gvg.txt
+
+・TESTmobからテストギルドフラグ移動
+	conf/gvg/TEST_prtg_cas01_AbraiJ.txt
+
+--------------------
 //0812 by huge
 
 ・ディボーションの仮実装
