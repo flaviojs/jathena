@@ -830,7 +830,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->spiritball = sd->sc_data[SC_CALLSPIRITS].val2;
 			sd->sc_data[SC_CALLSPIRITS].val2 = 0;
 			clif_spiritball_int(sd,sd->spiritball);
-			clif_spiritball_ext(sd,sd->spiritball);
 		} else {
 			if(sd->sc_data[SC_CALLSPIRITS].timer != -1 || sd->spiritball > 0){
 				if(sd->spiritball <= 0) {
@@ -844,7 +843,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 							sd->sc_data[SC_CALLSPIRITS].timer = add_timer(
 								gettick() + 1000 * 60 * 10, skill_status_change_timer, sd->bl.id, SC_CALLSPIRITS);
 						clif_spiritball_int(sd,sd->spiritball);
-						clif_spiritball_ext(sd,sd->spiritball);
 					}
 				}
 			}
@@ -1548,7 +1546,7 @@ int pc_steal_item(struct map_session_data *sd,struct block_list *bl)
 				j = rand()%8;
 				itemid = mob_db[md->class].dropitem[j].nameid;
 				if(itemid > 0 && itemdb_type(itemid) != 6) {
-					rate = (mob_db[md->class].dropitem[j].p * (sd->status.base_level*5 + sd->paramc[4]*4 + skill))/1000;
+					rate = (mob_db[md->class].dropitem[j].p * (sd->status.base_level*5 + sd->paramc[4]*4 + skill*50))/1000;
 					if(rand()%10000 < rate) {
 						tmp_item.nameid = itemid;
 						tmp_item.amount = 1;

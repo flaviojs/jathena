@@ -993,7 +993,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				sd2->spiritball--;
 				sd->status.sp+=10;
 				clif_spiritball_int(sd2,sd2->spiritball);
-				clif_spiritball_ext(sd2,sd2->spiritball);
 				clif_updatestatus(sd,SP_SP);
 			} else
 				clif_skill_nodamage( (skillid==PR_KYRIE)?bl:src,bl,skillid,0,0);
@@ -2378,7 +2377,10 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
  */
 int skill_check_condition( struct map_session_data *sd )
 {
-	int sp=0,zeny=0,ygem=0,rgem=0,bgem=0,i=0,gem_id=0,spiritball=0;
+	int j=0,sp=0,zeny=0,spiritball=0;
+	int	i[3]={0,0,0},
+		item_id[3]={0,0,0},
+		item_amount[3]={0,0,0};
 
 	if(sd->sc_data[SC_STEELBODY].timer!=-1) {
 		clif_skill_fail(sd,sd->skillid,0,0);
@@ -2396,18 +2398,50 @@ int skill_check_condition( struct map_session_data *sd )
 		/* スキルごとの使用条件 */
 		switch(sd->skillid)
 		{
-		case MG_STONECURSE:		// ストーンカース
-		case AS_VENOMDUST:		// ベナムダスト
-			rgem = 1;
+		case SA_ABRACADABRA:
+			item_amount[0]+=1;
+		case SA_VOLCANO:
+		case SA_DELUGE:
+		case SA_VIOLENTGALE:
+			item_id[0]=715;		//	ygem = 715;
+			item_amount[0]+=1;
 			break;
 
+		case SA_DISPELL:
+			item_id[1]=715;		//	ygem = 715;
+			item_amount[1]+=1;
+		case MG_STONECURSE:		// ストーンカース
+		case AS_VENOMDUST:		// ベナムダスト
+			item_id[0]=716;		//	rgem = 716;
+			item_amount[0]+=1;
+			break;
+
+		case SA_LANDPROTECTOR:
+			item_id[1]=715;
+			item_amount[1]+=1;
 		case MG_SAFETYWALL:		// セイフティウォール
-		case AL_WARP:		// ワープポータル
+		case AL_WARP:			// ワープポータル
 		case ALL_RESURRECTION:	// リザレクション
 		case PR_SANCTUARY:		// サンクチュアリ
-		case PR_MAGNUS:		// マグヌスエクソシズム
+		case PR_MAGNUS:			// マグヌスエクソシズム
 		case WZ_FIREPILLAR:		// ファイアーピラー
-			bgem = 1;
+			item_id[0]=717;		//	bgem = 717;
+			item_amount[0]+=1;
+			break;
+
+		case SA_FROSTWEAPON:
+			item_id[0]=991;
+			item_amount[0]+=1;
+			break;
+
+		case SA_LIGHTNINGLOADER:
+			item_id[0]=992;
+			item_amount[0]+=1;
+			break;
+
+		case SA_SEISMICWEAPON:
+			item_id[0]=993;
+			item_amount[0]+=1;
 			break;
 
 		case MC_MAMMONITE:		/* メマーナイト */
@@ -2542,17 +2576,25 @@ int skill_check_condition( struct map_session_data *sd )
 			return 0;
 		}
 
-		if(!pc_check_equip_dcard(sd,4132) && (ygem || bgem || rgem)) {
-			if( ygem ) gem_id = 715;			// ミストレスカード
-			if( rgem ) gem_id = 716;
-			if( bgem ) gem_id = 717;
-			for(i=0;i<MAX_INVENTORY;i++)		// ジェムストーンチェック
-				if(sd->status.inventory[i].nameid == gem_id)
-					break;
-			if(sd->status.inventory[i].nameid != gem_id) {	// ジェムストーンなし
-				clif_skill_fail(sd,sd->skillid,(6+(gem_id-715)),0);
-				return 0;
-			}else	pc_delitem(sd,i,1,0);		// ジェムストーン消費
+		if(!pc_check_equip_dcard(sd,4132) && 
+			(item_id[0] || item_id[1] || item_id[2])) {	// ミストレスカード
+			for(j=0;j<3;j++) {
+				if(item_id[j] == 0 || item_amount[j] == 0)
+					continue;
+				if((i[j]=pc_search_inventory(sd,item_id[j])) == -1 ||
+					sd->status.inventory[i[j]].amount < item_amount[j]) {	// ジェムストーンなし
+					if(item_id[j] == 716 || item_id[j] == 717)
+						clif_skill_fail(sd,sd->skillid,(6+(item_id[j]-715)),0);
+					else
+						clif_skill_fail(sd,sd->skillid,0,0);
+					return 0;
+				}
+			}
+			for(j=0;j<3;j++) {
+				if(i[j] == 0)
+					continue;
+				pc_delitem(sd,i[j],item_amount[j],0);		// ジェムストーン消費
+			}
 		}
 
 		if(sp) {					/* SP消費 */
@@ -2566,7 +2608,6 @@ int skill_check_condition( struct map_session_data *sd )
 		if(spiritball) {			// 氣球消費
 			sd->spiritball -= spiritball;
 			clif_spiritball_int(sd,sd->spiritball);
-			clif_spiritball_ext(sd,sd->spiritball);
 		}
 	}
 	return 1;
