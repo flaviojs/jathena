@@ -1,4 +1,15 @@
 --------------------
+//0994 by huge
+・battle.pet_lootitemが適応されていなかったのを修正。
+・ペットにパフォーマンスをさせた後、10秒間くらいは拾わせないように。
+
+	(map/)
+	map.h	pet_dataにlootitem_timer追加。
+	pet.c
+		pet_ai_sub_hard_lootsearch() 修正。
+		pet_lootitem_drop() 修正。
+
+--------------------
 //0993 by (凸)
 ・一人で合奏だけど合奏スキル中は動けないように
 ・アンコール実装。直前に使ったダンススキルを半分のSPで使えます

@@ -393,6 +393,7 @@ struct pet_data {
 	struct item *lootitem;
 	short lootitem_count;
 	short lootitem_weight;
+	int lootitem_timer;
 	struct map_session_data *msd;
 };
 

@@ -661,7 +661,7 @@ int pet_data_init(struct map_session_data *sd)
 		memset(pd->lootitem,0,sizeof(pd->lootitem));
 	pd->lootitem_count = 0;
 	pd->lootitem_weight = 0;
-
+	pd->lootitem_timer = 0;
 	return 0;
 }
 
@@ -1196,7 +1196,7 @@ int pet_ai_sub_hard_lootsearch(struct block_list *bl,va_list ap)
 	pd=va_arg(ap,struct pet_data *);
 	itc=va_arg(ap,int *);
 
-	if( !pd->target_id ){//battle_config.monster_loot_type == 1 && 
+	if( !pd->target_id && battle_config.pet_lootitem && gettick()>pd->lootitem_timer){
 		struct flooritem_data *fitem = (struct flooritem_data *)bl;
 		struct map_session_data *sd = NULL;
 		// ƒ‹[ƒgŒ –³‚µ
@@ -1254,6 +1254,7 @@ int pet_lootitem_drop(struct pet_data *pd,struct map_session_data *sd)
 			memset(pd->lootitem,0,sizeof(pd->lootitem));
 			pd->lootitem_count = 0;
 			pd->lootitem_weight = 0;
+			pd->lootitem_timer = gettick()+10000;	//	10*1000ms‚ÌŠÔE‚í‚È‚¢
 		}
 	}
 	return 1;
