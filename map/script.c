@@ -28,6 +28,7 @@
 #include "battle.h"
 #include "party.h"
 #include "guild.h"
+#include "lock.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -92,6 +93,11 @@ int buildin_jobchange(struct script_state *st);
 int buildin_input(struct script_state *st);
 int buildin_setlook(struct script_state *st);
 int buildin_set(struct script_state *st);
+int buildin_setarray(struct script_state *st);
+int buildin_cleararray(struct script_state *st);
+int buildin_copyarray(struct script_state *st);
+int buildin_getarraysize(struct script_state *st);
+int buildin_deletearray(struct script_state *st);
 int buildin_getelementofarray(struct script_state *st);
 int buildin_if(struct script_state *st);
 int buildin_getitem(struct script_state *st);
@@ -219,6 +225,11 @@ struct {
 	{buildin_areawarp,"areawarp","siiiisii"},
 	{buildin_setlook,"setlook","ii"},
 	{buildin_set,"set","ii"},
+	{buildin_setarray,"setarray","ii*"},
+	{buildin_cleararray,"cleararray","iii"},
+	{buildin_copyarray,"copyarray","iii"},
+	{buildin_getarraysize,"getarraysize","i"},
+	{buildin_deletearray,"deletearray","ii"},
 	{buildin_getelementofarray,"getelementofarray","ii"},
 	{buildin_if,"if","i*"},
 	{buildin_getitem,"getitem","ii"},
@@ -1098,7 +1109,6 @@ struct map_session_data *script_rid2sd(struct script_state *st)
  * 変数の読み取り
  *------------------------------------------
  */
-// 変数のデータ拾いのみ
 int get_val(struct script_state*st,struct script_data* data)
 {
 	struct map_session_data *sd=NULL;
@@ -1143,6 +1153,58 @@ int get_val(struct script_state*st,struct script_data* data)
 			}else{
 				data->u.num = pc_readglobalreg(sd,name);
 			}
+		}
+	}
+	return 0;
+}
+/*==========================================
+ * 変数の読み取り2
+ *------------------------------------------
+ */
+void* get_val2(struct script_state*st,int num)
+{
+	struct script_data dat;
+	dat.type=C_NAME;
+	dat.u.num=num;
+	get_val(st,&dat);
+	if( dat.type==C_INT ) return (void*)dat.u.num;
+	else return (void*)dat.u.str;
+}
+
+/*==========================================
+ * 変数設定用
+ *------------------------------------------
+ */
+static int set_reg(struct map_session_data *sd,int num,char *name,void *v)
+{
+	char prefix=*name;
+	char postfix=name[strlen(name)-1];
+	
+	if( postfix=='$' ){
+		char *str=(char*)v;
+		if( prefix=='@' || prefix=='l'){
+			pc_setregstr(sd,num,str);
+		}else if(prefix=='$') {
+			mapreg_setregstr(num,str);
+		}else{
+			printf("script: set_reg: illeagal scope string variable !");
+		}
+	}else{
+		// 数値
+		int val = (int)v;
+		if(str_data[num&0x00ffffff].type==C_PARAM){
+			pc_setparam(sd,str_data[num&0x00ffffff].val,val);
+		}else if(prefix=='@' || prefix=='l') {
+			pc_setreg(sd,num,val);
+		}else if(prefix=='$') {
+			mapreg_setreg(num,val);
+		}else if(prefix=='#') {
+			if( name[1]=='#' )
+				pc_setaccountreg2(sd,name,val);	
+			else
+				pc_setaccountreg(sd,name,val);	
+		}else{
+			pc_setglobalreg(sd,name,val);
 		}
 	}
 	return 0;
@@ -1539,7 +1601,7 @@ int buildin_input(struct script_state *st)
 	struct map_session_data *sd=NULL;
 	int num=(st->end>st->start+2)?st->stack->stack_data[st->start+2].u.num:0;
 	char *name=(st->end>st->start+2)?str_buf+str_data[num&0x00ffffff].str:"";
-	char prefix=*name;
+//	char prefix=*name;
 	char postfix=name[strlen(name)-1];
 
 	sd=script_rid2sd(st);
@@ -1548,30 +1610,14 @@ int buildin_input(struct script_state *st)
 		if( postfix=='$' ){
 			// 文字列
 			if(st->end>st->start+2){ // 引数1個
-				if(prefix=='@' || prefix=='l')
-					pc_setregstr(sd,num,sd->npc_str);
-				else if(prefix=='$')
-					mapreg_setregstr(num,sd->npc_str);
-				else{
-					printf("buildin_input: illeagal scope string variable.\n");
-				}
+				set_reg(sd,num,name,(void*)sd->npc_str);
 			}else{
 				printf("buildin_input: string discarded !!\n");
 			}
 		}else{
 			// 数値
 			if(st->end>st->start+2){ // 引数1個
-				if(prefix=='@' || prefix=='l')
-					pc_setreg(sd,num,sd->npc_amount);
-				else if(prefix=='$')
-					mapreg_setreg(num,sd->npc_amount);
-				else if(prefix=='#'){
-					if( name[1]=='#')
-						pc_setaccountreg2(sd,name,sd->npc_amount);
-					else
-						pc_setaccountreg(sd,name,sd->npc_amount);
-				}else
-					pc_setglobalreg(sd,name,sd->npc_amount);
+				set_reg(sd,num,name,(void*)sd->npc_amount);
 			} else {
 				// ragemu互換のため
 				pc_setreg(sd,add_str("l14"),sd->npc_amount);
@@ -1612,8 +1658,9 @@ int buildin_if(struct script_state *st)
 	return 0;
 }
 
+
 /*==========================================
- *
+ * 変数設定
  *------------------------------------------
  */
 int buildin_set(struct script_state *st)
@@ -1631,38 +1678,180 @@ int buildin_set(struct script_state *st)
 
 	if( prefix!='$' )
 		sd=script_rid2sd(st);
+
 		
 	if( postfix=='$' ){
 		// 文字列
 		char *str = conv_str(st,& (st->stack->stack_data[st->start+3]));
-		if( prefix=='@' || prefix=='l'){
-			pc_setregstr(sd,num,str);
-		}else if(prefix=='$') {
-			mapreg_setregstr(num,str);
-		}else{
-			printf("script: buildin_set: illeagal scope string variable !");
-		}
+		set_reg(sd,num,name,(void*)str);
 	}else{
 		// 数値
 		int val = conv_num(st,& (st->stack->stack_data[st->start+3]));
-		if(str_data[num&0x00ffffff].type==C_PARAM){
-			pc_setparam(sd,str_data[num&0x00ffffff].val,val);
-		}else if(prefix=='@' || prefix=='l') {
-			pc_setreg(sd,num,val);
-		}else if(prefix=='$') {
-			mapreg_setreg(num,val);
-		}else if(prefix=='#') {
-			if( name[1]=='#' )
-				pc_setaccountreg2(sd,name,val);	
-			else
-				pc_setaccountreg(sd,name,val);	
-		}else{
-			pc_setglobalreg(sd,name,val);
-		}
+		set_reg(sd,num,name,(void*)val);
 	}
 
 	return 0;
 }
+/*==========================================
+ * 配列変数設定
+ *------------------------------------------
+ */
+int buildin_setarray(struct script_state *st)
+{
+	struct map_session_data *sd=NULL;
+	int num=st->stack->stack_data[st->start+2].u.num;
+	char *name=str_buf+str_data[num&0x00ffffff].str;
+	char prefix=*name;
+	char postfix=name[strlen(name)-1];
+	int i,j;
+	
+	if( prefix!='$' && prefix!='@' ){
+		printf("buildin_setarray: illeagal scope !\n");
+		return 0;
+	}
+	if( prefix!='$' )
+		sd=script_rid2sd(st);
+
+	for(j=0,i=st->start+3; i<st->end && j<128;i++,j++){
+		void *v;
+		if( postfix=='$' )
+			v=(void*)conv_str(st,& (st->stack->stack_data[i]));
+		else
+			v=(void*)conv_num(st,& (st->stack->stack_data[i]));
+		set_reg( sd, num+(j<<24), name, v);
+	}
+	return 0;
+}
+/*==========================================
+ * 配列変数クリア
+ *------------------------------------------
+ */
+int buildin_cleararray(struct script_state *st)
+{
+	struct map_session_data *sd=NULL;
+	int num=st->stack->stack_data[st->start+2].u.num;
+	char *name=str_buf+str_data[num&0x00ffffff].str;
+	char prefix=*name;
+	char postfix=name[strlen(name)-1];
+	int sz=conv_num(st,& (st->stack->stack_data[st->start+4]));
+	int i;
+	void *v;
+	
+	if( prefix!='$' && prefix!='@' ){
+		printf("buildin_cleararray: illeagal scope !\n");
+		return 0;
+	}
+	if( prefix!='$' )
+		sd=script_rid2sd(st);
+		
+	if( postfix=='$' )
+		v=(void*)conv_str(st,& (st->stack->stack_data[st->start+3]));
+	else
+		v=(void*)conv_num(st,& (st->stack->stack_data[st->start+3]));
+	
+	for(i=0;i<sz;i++)
+		set_reg(sd,num+(i<<24),name,v);
+	return 0;
+}
+/*==========================================
+ * 配列変数コピー
+ *------------------------------------------
+ */
+int buildin_copyarray(struct script_state *st)
+{
+	struct map_session_data *sd=NULL;
+	int num=st->stack->stack_data[st->start+2].u.num;
+	char *name=str_buf+str_data[num&0x00ffffff].str;
+	char prefix=*name;
+	char postfix=name[strlen(name)-1];
+	int num2=st->stack->stack_data[st->start+3].u.num;
+	char *name2=str_buf+str_data[num2&0x00ffffff].str;
+	char prefix2=*name2;
+	char postfix2=name2[strlen(name2)-1];
+	int sz=conv_num(st,& (st->stack->stack_data[st->start+4]));
+	int i;
+	
+	if( prefix!='$' && prefix!='@' && prefix2!='$' && prefix2!='@' ){
+		printf("buildin_copyarray: illeagal scope !\n");
+		return 0;
+	}
+	if( (postfix=='$' || postfix2=='$') && postfix!=postfix2 ){
+		printf("buildin_copyarray: type mismatch !\n");
+		return 0;
+	}
+	if( prefix!='$' || prefix2!='$' )
+		sd=script_rid2sd(st);
+		
+	
+	for(i=0;i<sz;i++)
+		set_reg(sd,num+(i<<24),name, get_val2(st,num2+(i<<24)) );
+	return 0;
+}
+/*==========================================
+ * 配列変数のサイズ所得
+ *------------------------------------------
+ */
+static int getarraysize(struct script_state *st,int num,int postfix)
+{
+	int i=(num>>24),c=i;
+	for(;i<128;i++){
+		void *v=get_val2(st,num+(i<<24));
+		if(postfix=='$' && *((char*)v) ) c=i;
+		if(postfix!='$' && (int)v )c=i;
+	}
+	return c+1;
+}
+int buildin_getarraysize(struct script_state *st)
+{
+	int num=st->stack->stack_data[st->start+2].u.num;
+	char *name=str_buf+str_data[num&0x00ffffff].str;
+	char prefix=*name;
+	char postfix=name[strlen(name)-1];
+	
+	if( prefix!='$' && prefix!='@' ){
+		printf("buildin_copyarray: illeagal scope !\n");
+		return 0;
+	}
+
+	push_val(st->stack,C_INT,getarraysize(st,num,postfix) );
+	return 0;
+}
+/*==========================================
+ * 配列変数から要素削除
+ *------------------------------------------
+ */
+int buildin_deletearray(struct script_state *st)
+{
+	struct map_session_data *sd=NULL;
+	int num=st->stack->stack_data[st->start+2].u.num;
+	char *name=str_buf+str_data[num&0x00ffffff].str;
+	char prefix=*name;
+	char postfix=name[strlen(name)-1];
+
+	int count=1;
+	
+	if( (st->end > st->start+3) )
+		count=conv_num(st,& (st->stack->stack_data[st->start+3]));
+	
+	int i,sz=getarraysize(st,num,postfix)-(num>>24)-count+1;
+	
+	if( prefix!='$' && prefix!='@' ){
+		printf("buildin_deletearray: illeagal scope !\n");
+		return 0;
+	}
+	if( prefix!='$' )
+		sd=script_rid2sd(st);
+	
+	for(i=0;i<sz;i++){
+		set_reg(sd,num+(i<<24),name, get_val2(st,num+((i+count)<<24) ) );
+	}
+	for(;i<(128-(num>>24));i++){
+		if( postfix!='$' ) set_reg(sd,num+(i<<24),name, 0);
+		if( postfix=='$' ) set_reg(sd,num+(i<<24),name, "");
+	}
+	return 0;
+}
+
 /*==========================================
  * 指定要素を表す値(キー)を所得する
  *------------------------------------------
@@ -3387,8 +3576,10 @@ int buildin_warpwaitingpc(struct script_state *st)
 	if( st->end > st->start+5 )
 		n=conv_num(st,& (st->stack->stack_data[st->start+5]));
 
+	
 	for(i=0;i<n;i++){
 		struct map_session_data *sd=cd->usersd[i];
+		mapreg_setreg(add_str("$@warpwaitingpc")+(i<<24),sd->bl.id);
 	
 		if(strcmp(str,"Random")==0)
 			pc_randomwarp(sd,3);
@@ -3401,6 +3592,7 @@ int buildin_warpwaitingpc(struct script_state *st)
 		}else
 			pc_setpos(sd,str,x,y,0);
 	}
+	mapreg_setreg(add_str("$@warpwaitingpcnum"),n);
 	return 0;
 }
 /*==========================================
@@ -4528,12 +4720,13 @@ static int script_save_mapreg_strsub(void *key,void *data,va_list ap)
 static int script_save_mapreg()
 {
 	FILE *fp;
+	int lock;
 
-	if( (fp=fopen(mapreg_txt,"wt"))==NULL )
+	if( (fp=lock_fopen(mapreg_txt,&lock))==NULL )
 		return -1;
 	numdb_foreach(mapreg_db,script_save_mapreg_intsub,fp);
 	numdb_foreach(mapregstr_db,script_save_mapreg_strsub,fp);
-	fclose(fp);
+	lock_fclose(fp,mapreg_txt,&lock);
 	mapreg_dirty=0;
 	return 0;
 }

@@ -849,6 +849,14 @@ int mapif_parse_CreateGuild(int fd,int account_id,char *name,struct guild_member
 	struct guild *g;
 	int i;
 	
+	for(i=0;i<24 && name[i];i++){
+		if(name[i]<0x20 || name[i]==0x7f){
+			printf("int_guild: illeagal guild name [%s]\n",name);
+			mapif_guild_created(fd,account_id,NULL);
+			return 0;
+		}
+	}
+	
 	if( (g=search_guildname(name))!=NULL){
 		printf("int_guild: same name guild exists [%s]\n",name);
 		mapif_guild_created(fd,account_id,NULL);

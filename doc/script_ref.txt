@@ -365,10 +365,51 @@ AthenaNPCScript
 			set <variable>,<n>;
 			
 			variable	変数
-			n		数値
+			n		数値/文字列
 			
 			<variable>に<n>を代入します。
+			文字列型を使用するときは変数名にポストフィックスを忘れないで下さい。
 			
+		setarray命令
+			setarray <variable>[,<n0>[,<n1>…]];
+		
+			variable	変数
+			nx		数値/文字列
+		
+			配列<variable>に値<n0>,<n1>,…のリストを代入します。
+			<variable>は配列名を指定すると最初から、要素番号も指定すれば途中から代入できます。
+			<例> setarray @hoge[2],16,24,32;  @hogeの要素2から4までを16,24,32にする。
+
+		cleararray命令
+			cleararray <variable>,<n>,<count>;
+			
+			variable	変数
+			n		数値/文字列
+			count		数値
+			
+			配列<variable>に値<n>を<count>個分代入します。
+			<variable>は配列名を指定すると最初から、要素番号も指定すれば途中から代入できます。
+			<例> cleararray @hoge[3],0,6;  @hogeの要素3から8までを0にセットする
+		
+		copyarray命令
+			copyarray <var1>,<var2>,<n>;
+			
+			<var1>,<var2>	変数
+			n		個数
+			
+			配列<var1>に配列<var2>の要素<n>個をコピーします。
+			<var1>,<var2>は配列名を指定すると最初から、要素番号も指定すれば途中からコピーできます。
+
+		deletearray命令
+			
+			deletearray <variable>,<n>;
+			
+			variable	変数
+			n		数値
+			
+			配列<variable>から<n>個の要素を削除し、後ろの要素を前に詰める
+			<variable>は配列名を指定すると最初から、要素番号も指定すれば途中から削除できます。
+		
 		if命令
 			if (<cond>) goto <label>;
 			
@@ -741,6 +782,10 @@ AthenaNPCScript
 			命令を実行したNPCのチャットルームに入っているPCのうち、
 			<num>で指定した人数を、<gatname>の座標<x>,<y>に移動させます。
 			<num>を省略すると waitingroomの<trigger>で指定した人数を使用します。
+
+			ワープさせた人数を $@warpwaitingpcnum に、ワープさせた人のアカウントIDを
+			配列 $@warpwaitingpc にセットします(先頭から人数分)。
+			
 			
 		emotion命令
 			emotion <n>;
@@ -1015,6 +1060,8 @@ AthenaNPCScript
 		getnpctimer関数
 			getnpctimer(<num>[,<name>])
 			
+			num	数値
+
 			<name>で指定されたNPCが持つNPCタイマーの情報を得ます。
 			nameを省略すると、命令を実行したNPCが対象になります。
 			<num>で得たい情報を指定します。
@@ -1026,6 +1073,8 @@ AthenaNPCScript
 		attachrid関数
 			attachrid(<num>)
 			
+			num	数値
+
 			<num>で指定されたIDのキャラクターを実行したスクリプトにアタッチします。
 			以後、キャラクターに関する命令や関数/変数などは全て新しいキャラクターが対象になります。
 			これはスクリプトが終了/中断する(close,end,menu,next,inputなどの実行)まで有効です。
@@ -1044,8 +1093,23 @@ AthenaNPCScript
 		isloggedin関数
 			isloggedin(<num>)
 			
+			num	数値
+
 			<num>で指定されたIDのキャラクターがこのマップサーバーに
 			ログインしているかどうか調べます。
+		
+		getarraysize関数
+			getarraysize(<variable>)
+			
+			variable	変数
+			
+			配列<variable>の有効なサイズを調べます。
+			ここでのサイズは要素が0（文字列変数では"")でない、
+			最大の要素番号+1 になります。
+			配列名ではなく要素番号付きで指定すると、
+			少なくともその要素までは全て有効であると仮定します。
+			<例> 配列@hogeが 1,2,3,4,5 だとすると、
+			     getarraysize(@hoge)=5, getarraysize(@hoge[10])=10;
 		
 	＊定数ラベル
 		-ラベル
@@ -1187,6 +1251,10 @@ AthenaNPCScript
 			文字列変数のスコープが不正です。
 			未対応のプレフィックスで文字列変数が使用されました。
 			プレフィックスを確認してください。
+		
+		illeagal scope
+			スコープが不正です。配列変数未対応のプレフィックスを
+			持つ変数に配列変数系の命令を実行した場合など。
 		
 		not label !
 			goto/menu命令でラベルが指定されるべきところに

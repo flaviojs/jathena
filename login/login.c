@@ -21,6 +21,7 @@
 #include "mmo.h"
 #include "version.h"
 #include "db.h"
+#include "lock.h"
 
 
 #ifdef PASSWORDENC
@@ -277,8 +278,8 @@ int mmo_auth_init(void)
 void mmo_auth_sync(void)
 {
 	FILE *fp;
-	int i,j,maxid=0;
-	fp=fopen(account_filename,"w");
+	int i,j,maxid=0,lock;
+	fp=lock_fopen(account_filename,&lock);
 	if(fp==NULL)
 		return;
 	for(i=0;i<auth_num;i++){
@@ -302,15 +303,20 @@ void mmo_auth_sync(void)
 	}
 	fprintf(fp,"%d\t%%newid%%\n",account_id_count);
 
-	fclose(fp);
+	lock_fclose(fp,account_filename,&lock);
 }
 
 // アカウント作成
 int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 {
-	int i=auth_num;
+	int j,i=auth_num,c;
 	login_log("auth new %s %s %s" RETCODE,
 		tmpstr,account->userid,account->passwd);
+	
+	for(j=0;j<24 && (c=account->userid[j]);j++){
+		if(c<0x20 || c==0x7f)
+			return 0;
+	}
 	
 	if(auth_num>=auth_max){
 		auth_max+=256;
@@ -327,7 +333,7 @@ int mmo_auth_new( struct mmo_account* account,const char *tmpstr,char sex )
 	auth_dat[i].state = 0;
 	auth_dat[i].account_reg2_num = 0;
 	auth_num++;
-	return 0;
+	return 1;
 }
 
 // 認証
@@ -441,7 +447,11 @@ int mmo_auth( struct mmo_account* account, int fd )
 		auth_dat[i].sex=account->userid[len+1]=='M';
 		auth_dat[i].logincount=0;
 		auth_num++;*/
-		mmo_auth_new(account,tmpstr,account->userid[len+1]);
+		if( !mmo_auth_new(account,tmpstr,account->userid[len+1]) ){
+			login_log("auth new failed %s %s %s %d" RETCODE,
+				tmpstr,account->userid,account->passwd,newaccount);
+			return 0;
+		}
 	}
 
 	if(auth_dat[i].state){
@@ -711,8 +721,10 @@ int parse_admin(int fd)
 						break;
 					}
 				}
-				if(i==auth_num)
-					mmo_auth_new(&ma,"( ladmin )",ma.sex);
+				if(i==auth_num){
+					if( !mmo_auth_new(&ma,"( ladmin )",ma.sex) )
+						WFIFOW(fd,2)=1;
+				}
 				WFIFOSET(fd,28);
 				RFIFOSKIP(fd,RFIFOW(fd,2));
 			}break;

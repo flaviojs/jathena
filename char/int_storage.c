@@ -21,26 +21,49 @@ static struct dbt *guild_storage_db;
 // 倉庫データを文字列に変換
 int storage_tostr(char *str,struct storage *p)
 {
-	int i,f=1;
+	int i,f=0;
 	char *str_p = str;
-	str_p += sprintf(str_p,"%d,%d",p->account_id,p->storage_amount);
+	str_p += sprintf(str_p,"%d,%d\t",p->account_id,p->storage_amount);
 
-	strcat(str_p,"\t"); str_p++;
+	for(i=0;i<MAX_STORAGE;i++)
+		if( (p->storage[i].nameid) && (p->storage[i].amount) ){
+			str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+				p->storage[i].id,p->storage[i].nameid,p->storage[i].amount,p->storage[i].equip,
+				p->storage[i].identify,p->storage[i].refine,p->storage[i].attribute,
+				p->storage[i].card[0],p->storage[i].card[1],p->storage[i].card[2],p->storage[i].card[3]);
+			f++;
+		}
+
+	*(str_p++)='\t';
+
+	*str_p='\0';
+	if(!f)
+		str[0]=0;
+	return 0;
+}
+/*
+int storage_tostr(char *str,struct storage *p)
+{
+	int i,f=1;
+	sprintf(str,"%d,%d",p->account_id,p->storage_amount);
+
+	strcat(str,"\t");
 	for(i=0;i<MAX_STORAGE;i++)
 	if( (p->storage[i].nameid) && (p->storage[i].amount) ){
 		f=0;
-		str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+		sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
 		  p->storage[i].id,p->storage[i].nameid,p->storage[i].amount,p->storage[i].equip,
 		  p->storage[i].identify,p->storage[i].refine,p->storage[i].attribute,
 		  p->storage[i].card[0],p->storage[i].card[1],p->storage[i].card[2],p->storage[i].card[3]);
 	}
 
-	strcat(str_p,"\t"); str_p++;
+	strcat(str,"\t");
 
 	if(f)
 		str[0]=0;
 	return 0;
 }
+*/
 
 // 文字列を倉庫データに変換
 int storage_fromstr(char *str,struct storage *p)
@@ -84,22 +107,23 @@ int storage_fromstr(char *str,struct storage *p)
 
 int guild_storage_tostr(char *str,struct guild_storage *p)
 {
-	int i,f=1;
-	sprintf(str,"%d,%d",p->guild_id,p->storage_amount);
+	int i,f=0;
+	char *str_p = str;
+	str_p+=sprintf(str,"%d,%d\t",p->guild_id,p->storage_amount);
 
-	strcat(str,"\t");
 	for(i=0;i<MAX_GUILD_STORAGE;i++)
-	if( (p->storage[i].nameid) && (p->storage[i].amount) ){
-		f=0;
-		sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
-		  p->storage[i].id,p->storage[i].nameid,p->storage[i].amount,p->storage[i].equip,
-		  p->storage[i].identify,p->storage[i].refine,p->storage[i].attribute,
-		  p->storage[i].card[0],p->storage[i].card[1],p->storage[i].card[2],p->storage[i].card[3]);
-	}
+		if( (p->storage[i].nameid) && (p->storage[i].amount) ){
+			sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+				p->storage[i].id,p->storage[i].nameid,p->storage[i].amount,p->storage[i].equip,
+				p->storage[i].identify,p->storage[i].refine,p->storage[i].attribute,
+				p->storage[i].card[0],p->storage[i].card[1],p->storage[i].card[2],p->storage[i].card[3]);
+			f++;
+		}
 
-	strcat(str,"\t");
+	*(str_p++)='\t';
 
-	if(f)
+	*str_p='\0';
+	if(!f)
 		str[0]=0;
 	return 0;
 }
@@ -254,7 +278,8 @@ int inter_storage_save_sub(void *key,void *data,va_list ap)
 	FILE *fp;
 	storage_tostr(line,(struct storage *)data);
 	fp=va_arg(ap,FILE *);
-	fprintf(fp,"%s" RETCODE,line);
+	if(*line)
+		fprintf(fp,"%s" RETCODE,line);
 	return 0;
 }
 //---------------------------------------------------------
@@ -280,7 +305,8 @@ int inter_guild_storage_save_sub(void *key,void *data,va_list ap)
 	if(inter_guild_search(((struct guild_storage *)data)->guild_id) != NULL) {
 		guild_storage_tostr(line,(struct guild_storage *)data);
 		fp=va_arg(ap,FILE *);
-		fprintf(fp,"%s" RETCODE,line);
+		if(*line)
+			fprintf(fp,"%s" RETCODE,line);
 	}
 	return 0;
 }

@@ -146,7 +146,6 @@ int inter_party_save()
 //	printf("int_party: %s saved.\n",party_txt);
 	return 0;
 }
-
 // パーティ名検索用
 int search_partyname_sub(void *key,void *data,va_list ap)
 {
@@ -359,6 +358,16 @@ int mapif_party_message(int party_id,int account_id,char *mes,int len)
 int mapif_parse_CreateParty(int fd,int account_id,char *name,char *nick,char *map,int lv)
 {
 	struct party *p;
+	int i;
+	
+	for(i=0;i<24 && name[i];i++){
+		if(name[i]<0x20 || name[i]==0x7f){
+			printf("int_party: illeagal party name [%s]\n",name);
+			mapif_party_created(fd,account_id,NULL);
+			return 0;
+		}
+	}
+
 	if( (p=search_partyname(name))!=NULL){
 		printf("int_party: same name party exists [%s]\n",name);
 		mapif_party_created(fd,account_id,NULL);

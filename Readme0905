@@ -1,4 +1,55 @@
 --------------------
+//0930 by 胡蝶蘭
+
+	既存の char/ にあるlock.cとlock.hは削除してください。
+	これらは common/ に移動されます。
+
+・スクリプト追加修正
+	・setarray（配列へリスト代入）追加
+	・cleararray（配列を指定値でクリア）追加
+	・copyarray（配列をコピー）追加
+	・getarraysize（配列の有効な要素数を求める）追加
+	・deletearray（配列の要素を削除してつめる）追加
+	・warpwaitingpc：人数やアカウントIDをマップ変数にセットするように修正
+
+	(map/)
+	script.c
+		色々
+	(doc/)
+	script_ref.txt
+		命令追加など
+	(npc/sample/)
+	npc_test_array.txt
+		配列系テスト用NPCスクリプト
+
+・バグ修正など
+	・キャラクター名/アカウント名/パーティ名/ギルド名/ペット名に
+	  コントロールコードを使えないように修正。
+	・char.cなどの保存の効率を更にアップ。
+	・倉庫ファイル/ギルド倉庫ファイルに空行が残らないように修正
+	・lock.*をcommon/に移動、ファイルが保存できなくなるバグ修正、
+	  アカウントとマップ変数の保存にもlock_fopenを使うように。
+
+	(common/)
+	lock.c/lock.h
+		フォルダ移動、lock_fopen修正
+	(login/)
+	login.c
+		mmo_auth_new()修正
+	(char/)
+	char.c
+		mmo_char_tostr(),make_new_char()修正
+	int_storage.c
+		storage_tostr(),guild_storage_tostr(),
+		inter_storage_save_sub(),inter_guild_storage_save_sub()修正
+	int_party.c
+	int_guild.c
+		名前問題修正
+	(map/)
+	pet.c
+		名前問題修正
+
+--------------------
 //0929 by ぴざまん
 
 ・ランドプロテクター完全実装。

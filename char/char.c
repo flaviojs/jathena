@@ -20,12 +20,11 @@
 #include "timer.h"
 #include "mmo.h"
 #include "version.h"
+#include "lock.h"
 #include "char.h"
 
 #include "inter.h"
 #include "int_pet.h"
-
-#include "lock.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -80,6 +79,61 @@ int mmo_char_tostr(char *str,struct mmo_charstatus *p)
   char *str_p = str;
   str_p += sprintf(str_p,"%d\t%d,%d\t%s\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
 	  "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
+	  "\t%s,%d,%d\t%s,%d,%d\t",
+	  p->char_id,p->account_id,p->char_num,p->name, //
+	  p->class,p->base_level,p->job_level,
+	  p->base_exp,p->job_exp,p->zeny,
+	  p->hp,p->max_hp,p->sp,p->max_sp,
+	  p->str,p->agi,p->vit,p->int_,p->dex,p->luk,
+	  p->status_point,p->skill_point,
+	  p->option,p->karma,p->manner,	//
+	  p->party_id,p->guild_id,p->pet_id,
+	  p->hair,p->hair_color,p->clothes_color,
+	  p->weapon,p->shield,p->head_top,p->head_mid,p->head_bottom,
+	  p->last_point.map,p->last_point.x,p->last_point.y, //
+	  p->save_point.map,p->save_point.x,p->save_point.y
+	  );
+  for(i=0;i<10;i++)
+    if(p->memo_point[i].map[0]){
+      str_p += sprintf(str_p,"%s,%d,%d",p->memo_point[i].map,p->memo_point[i].x,p->memo_point[i].y);
+    }
+  
+  *(str_p++)='\t';
+  for(i=0;i<MAX_INVENTORY;i++)
+    if(p->inventory[i].nameid){
+      str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+	      p->inventory[i].id,p->inventory[i].nameid,p->inventory[i].amount,p->inventory[i].equip,
+	      p->inventory[i].identify,p->inventory[i].refine,p->inventory[i].attribute,
+	      p->inventory[i].card[0],p->inventory[i].card[1],p->inventory[i].card[2],p->inventory[i].card[3]);
+    }
+  *(str_p++)='\t';
+  for(i=0;i<MAX_CART;i++)
+    if(p->cart[i].nameid){
+      str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+	      p->cart[i].id,p->cart[i].nameid,p->cart[i].amount,p->cart[i].equip,
+	      p->cart[i].identify,p->cart[i].refine,p->cart[i].attribute,
+	      p->cart[i].card[0],p->cart[i].card[1],p->cart[i].card[2],p->cart[i].card[3]);
+    }
+  *(str_p++)='\t';
+  for(i=0;i<MAX_SKILL;i++)
+    if(p->skill[i].id && p->skill[i].flag!=1){
+      str_p += sprintf(str_p,"%d,%d ",p->skill[i].id,(p->skill[i].flag==0)?p->skill[i].lv:p->skill[i].flag-2);
+    }
+  *(str_p++)='\t';
+  for(i=0;i<p->global_reg_num;i++)
+    str_p += sprintf(str_p,"%s,%d ",p->global_reg[i].str,p->global_reg[i].value);
+  *(str_p++)='\t';
+
+  *str_p='\0';
+  return 0;
+}
+
+/*
+int mmo_char_tostr(char *str,struct mmo_charstatus *p)
+{
+  int i;
+  sprintf(str,"%d\t%d,%d\t%s\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d\t%d,%d,%d,%d,%d,%d\t%d,%d"
+	  "\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d\t%d,%d,%d,%d,%d"
 	  "\t%s,%d,%d\t%s,%d,%d",
 	  p->char_id,p->account_id,p->char_num,p->name, //
 	  p->class,p->base_level,p->job_level,
@@ -94,39 +148,39 @@ int mmo_char_tostr(char *str,struct mmo_charstatus *p)
 	  p->last_point.map,p->last_point.x,p->last_point.y, //
 	  p->save_point.map,p->save_point.x,p->save_point.y
 	  );
-  strcat(str_p,"\t"); str_p++;
+  strcat(str,"\t");
   for(i=0;i<10;i++)
     if(p->memo_point[i].map[0]){
-      str_p += sprintf(str_p,"%s,%d,%d",p->memo_point[i].map,p->memo_point[i].x,p->memo_point[i].y);
+      sprintf(str+strlen(str),"%s,%d,%d",p->memo_point[i].map,p->memo_point[i].x,p->memo_point[i].y);
     }      
-  strcat(str_p,"\t"); str_p++;
+  strcat(str,"\t");
   for(i=0;i<MAX_INVENTORY;i++)
     if(p->inventory[i].nameid){
-      str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+      sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
 	      p->inventory[i].id,p->inventory[i].nameid,p->inventory[i].amount,p->inventory[i].equip,
 	      p->inventory[i].identify,p->inventory[i].refine,p->inventory[i].attribute,
 	      p->inventory[i].card[0],p->inventory[i].card[1],p->inventory[i].card[2],p->inventory[i].card[3]);
-    }
-  strcat(str_p,"\t"); str_p++;
+    }      
+  strcat(str,"\t");
   for(i=0;i<MAX_CART;i++)
     if(p->cart[i].nameid){
-      str_p += sprintf(str_p,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
+      sprintf(str+strlen(str),"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d ",
 	      p->cart[i].id,p->cart[i].nameid,p->cart[i].amount,p->cart[i].equip,
 	      p->cart[i].identify,p->cart[i].refine,p->cart[i].attribute,
 	      p->cart[i].card[0],p->cart[i].card[1],p->cart[i].card[2],p->cart[i].card[3]);
     }      
-  strcat(str_p,"\t"); str_p++;
+  strcat(str,"\t");
   for(i=0;i<MAX_SKILL;i++)
     if(p->skill[i].id && p->skill[i].flag!=1){
-      str_p += sprintf(str_p,"%d,%d ",p->skill[i].id,(p->skill[i].flag==0)?p->skill[i].lv:p->skill[i].flag-2);
+      sprintf(str+strlen(str),"%d,%d ",p->skill[i].id,(p->skill[i].flag==0)?p->skill[i].lv:p->skill[i].flag-2);
     }      
-  strcat(str_p,"\t"); str_p++;
+  strcat(str,"\t");
   for(i=0;i<p->global_reg_num;i++)
-    str_p += sprintf(str_p,"%s,%d ",p->global_reg[i].str,p->global_reg[i].value);
-  strcat(str_p,"\t"); str_p++;
+    sprintf(str+strlen(str),"%s,%d ",p->global_reg[i].str,p->global_reg[i].value);
+  strcat(str,"\t");
   return 0;
 }
-
+*/
 int mmo_char_fromstr(char *str,struct mmo_charstatus *p)
 {
   int tmp_int[256];
@@ -360,6 +414,11 @@ int make_new_char(int fd,unsigned char *dat)
 	int i;
 	struct char_session_data *sd;
 	FILE *logfp;
+	
+	for(i=0;i<24 && dat[i];i++){
+		if(dat[i]<0x20 || dat[i]==0x7f)
+			return -1;
+	}
 	
 	if(dat[24]+dat[25]+dat[26]+dat[27]+dat[28]+dat[29]>5*6 ||
 		 dat[30]>=9 ||

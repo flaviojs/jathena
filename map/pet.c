@@ -823,8 +823,15 @@ int pet_menu(struct map_session_data *sd,int menunum)
 
 int pet_change_name(struct map_session_data *sd,char *name)
 {
+	int i;
+	
 	if(sd->pet.rename_flag == 1 && battle_config.pet_rename == 0)
 		return 1;
+
+	for(i=0;i<24 && name[i];i++){
+		if(name[i]<0x20 || name[i]==0x7f)
+			return 1;
+	}
 
 	pet_stop_walking(sd->pd,1);
 	memcpy(sd->pet.name,name,24);
