@@ -663,6 +663,11 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y,struct 
 	unsigned int tick;
 	struct flooritem_data *fitem;
 
+	if( item_data == NULL ){ //*_sdはNULLで呼ばれることがあるので他でチェック
+		printf("map_addflooritem nullpo\n");
+		return 0;
+	}
+
 	if((xy=map_searchrandfreecell(m,x,y,1))<0)
 		return 0;
 	r=rand();

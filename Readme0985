@@ -1,4 +1,28 @@
 --------------------
+//1004 by (凸)
+・NULLチェックでエンバグしていたところをいくつか修正と他のNULLチェック強化
+・skill.cでもnullpoを表示するように変更
+
+	(map/)
+	battle.c
+		battle_damage() NULLチェック強化
+		battle_heal() 同上
+	clif.c
+		clif_damage() 同上
+	map.c
+		map_addflooritem() NULLチェック強化
+	mob.c
+		mob_once_spawn() 余計なNULLチェックを削除
+		mob_once_spawn_area() 同上
+		mob_damage() 同上
+		mob_counttargeted() 同上
+		mobskill_castend_id() 同上
+		mob_summonslave() メッセージ間違いを修正
+	pc.c
+		pc_damage() NULLチェック強化
+	skill.c ほぼ全部 NULL関連修正
+
+--------------------
 //1003 by (凸)
 ・jROクライアントで/account使用時に繋がらない原因の0x200パケット問題を修正
 ・0x1c9パケットの穴埋めを引き続き継続中

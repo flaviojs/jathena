@@ -2995,7 +2995,14 @@ int clif_fixpetpos(struct pet_data *pd)
 int clif_damage(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int damage,int div,int type,int damage2)
 {
 	unsigned char buf[256];
-	struct status_change *sc_data = battle_get_sc_data(dst);
+	struct status_change *sc_data;
+
+	if( src == NULL || dst == NULL ){
+		printf("clif_damage nullpo\n");
+		return 0;
+	}
+
+	sc_data = battle_get_sc_data(dst);
 
 	if(type != 4 && dst->type == BL_PC && ((struct map_session_data *)dst)->special_state.infinite_endure)
 		type = 9;

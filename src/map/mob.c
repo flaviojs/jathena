@@ -103,7 +103,7 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 	struct mob_data *md=NULL;
 	int m,count,lv=255,r=class;
 	
-	if( sd == NULL || mapname == NULL || mobname == NULL ){
+	if( mapname == NULL || mobname == NULL ){
 		printf("mob_once_spawn nullpo\n");
 		return 0;
 	}
@@ -111,7 +111,7 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 	if( sd )
 		lv=sd->status.base_level;
 
-	if(strcmp(mapname,"this")==0)
+	if( sd && strcmp(mapname,"this")==0)
 		m=sd->bl.m;
 	else
 		m=map_mapname2mapid(mapname);
@@ -193,12 +193,14 @@ int mob_once_spawn_area(struct map_session_data *sd,char *mapname,
 	const char *mobname,int class,int amount,const char *event)
 {
 	int x,y,i,c,max,lx=-1,ly=-1,id=0;
-	int m=map_mapname2mapid(mapname);
+	int m;
 
-	if( sd == NULL || mapname == NULL || mobname == NULL || event == NULL ){
+	if( mapname == NULL || mobname == NULL ){ //sd,eventはNULLがあるので別で
 		printf("mob_once_spawn_area nullpo\n");
 		return 0;
 	}
+
+	m=map_mapname2mapid(mapname);
 
 	max=(y1-y0+1)*(x1-x0+1)*3;
 	if(max>1000)max=1000;
@@ -1921,7 +1923,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	int drop_rate;
 	int skill,sp;
 
-	if( src == NULL || md == NULL ){
+	if( md == NULL ){ //srcはNULLで呼ばれる場合もあるので、他でチェック
 		printf("mob_damage nullpo\n");
 		return 0;
 	}
@@ -2537,13 +2539,13 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,int flag)
 			int x=0,y=0,c=0,i=0;
 			md=calloc(sizeof(struct mob_data), 1);
 			if(md==NULL){
-				printf("mob_once_spawn: out of memory !\n");
+				printf("mob_summonslave: out of memory !\n");
 				exit(1);
 			}
 			if(mob_db[class].mode&0x02) {
 				md->lootitem=calloc(sizeof(struct item)*LOOTITEM_SIZE, 1);
 				if(md->lootitem==NULL){
-					printf("mob_once_spawn: out of memory !\n");
+					printf("mob_summonslave: out of memory !\n");
 					exit(1);
 				}
 			}
@@ -2627,7 +2629,7 @@ static int mob_counttargeted_sub(struct block_list *bl,va_list ap)
 int mob_counttargeted(struct mob_data *md,struct block_list *src,int target_lv)
 {
 	int c=0;
-	if( md == NULL || src == NULL ){
+	if( md == NULL ){ //src=NULLで呼ばれる場合もあるので次(mob_counttargeted_sub)でチェック
 		printf("mob_counttargeted nullpo\n");
 		return 0;
 	}
@@ -2667,10 +2669,13 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 	struct block_list *mbl;
 	int range;
 
-	if((mbl = map_id2bl(id)) == NULL || (md=(struct mob_data *)mbl) == NULL || md->bl.type!=BL_MOB || md->bl.prev==NULL ){
+	if((mbl = map_id2bl(id)) == NULL || (md=(struct mob_data *)mbl) == NULL ){
 		printf("mobskill_castend_id nullpo\n");
 		return 0;
 	}
+	
+	if( md->bl.type!=BL_MOB || md->bl.prev==NULL )
+		return 0;
 
 	if( md->skilltimer != tid )	// タイマIDの確認
 		return 0;
@@ -2687,8 +2692,8 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 	if(md->skillid != NPC_EMOTION)
 		md->last_thinktime=tick + battle_get_adelay(&md->bl);
 
-	if((bl = map_id2bl(md->skilltarget)) == NULL || bl->prev==NULL){
-		printf("mobskill_castend_id nullpo\n");
+	if((bl = map_id2bl(md->skilltarget)) == NULL || bl->prev==NULL){ //スキルターゲットが存在しない
+		//printf("mobskill_castend_id nullpo\n");//ターゲットがいないときはnullpoじゃなくて普通に終了
 		return 0;
 	}
 	if(md->bl.m != bl->m)
@@ -2856,10 +2861,14 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	struct mob_skill *ms;
 	int skill_id, skill_lv, forcecast = 0;
 
-	if( md == NULL || (ms=&mob_db[md->class].skill[skill_idx]) == NULL || (target==NULL && (target=map_id2bl(md->target_id))==NULL) || target->prev==NULL || md->bl.prev==NULL ){
+	if( md == NULL || (ms=&mob_db[md->class].skill[skill_idx]) == NULL || ( target==NULL && (target=map_id2bl(md->target_id))==NULL ) ){
 		printf("mobskill_use_id nullpo\n");
 		return 0;
 	}
+	
+	if( target->prev==NULL || md->bl.prev==NULL )
+		return 0;
+	
 	skill_id=ms->skill_id;
 	skill_lv=ms->skill_lv;
 

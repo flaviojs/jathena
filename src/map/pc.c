@@ -4088,10 +4088,16 @@ int pc_resetskill(struct map_session_data* sd)
 int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 {
 	int i=0,j=0;
-	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
-	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
+	struct pc_base_job s_class;
 
-	// Šù ‚É€‚ñ‚Å‚¢‚½‚ç–³Œø
+	if( sd == NULL ){ //src‚ÍNULL‚ÅŒÄ‚Î‚ê‚é‚±‚Æ‚ª‚ ‚é‚Ì‚Å‘¼‚Åƒ`ƒFƒbƒN
+		printf("pc_damage nullpo\n");
+		return 0;
+	}
+
+	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
+	s_class = pc_calc_base_job(sd->status.class);
+	// Šù‚É€‚ñ‚Å‚¢‚½‚ç–³Œø
 	if(pc_isdead(sd))
 		return 0;
 	// À‚Á‚Ä‚½‚ç—§‚¿ã‚ª‚é

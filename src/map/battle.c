@@ -1298,6 +1298,11 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage,int
 	short *sc_count;
 	int i;
 
+	if( target == NULL ){ //blはNULLで呼ばれることがあるので他でチェック
+		printf("battle_damage nullpo\n");
+		return 0;
+	}
+
 	if(damage==0 || target->type == BL_PET)
 		return 0;
 
@@ -1340,7 +1345,7 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage,int
 			if(md && skill_devotion3(&md->bl,target->id)){
 				skill_devotion(md,target->id);
 			}
-			else if(md)
+			else if(md && bl)
 				for(i=0;i<5;i++)
 					if(md->dev.val1[i] == target->id){
 						clif_damage(bl,&md->bl, gettick(), 0, 0, 
@@ -1367,6 +1372,11 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage,int
 }
 int battle_heal(struct block_list *bl,struct block_list *target,int hp,int sp,int flag)
 {
+	if( target == NULL ){ //blはNULLで呼ばれることがあるので他でチェック
+		printf("battle_heal nullpo\n");
+		return 0;
+	}
+
 	if(target->type == BL_PET)
 		return 0;
 	if( target->type ==BL_PC && pc_isdead((struct map_session_data *)target) )
