@@ -3621,7 +3621,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 				md->master_id=sd->bl.id;
 				md->hp=2210+skilllv*200;
 				md->state.special_mob_ai=1;
-				add_timer(gettick()+30000+skilllv*10000,mob_timer_delete,id,0);
+				md->deletetimer=add_timer(gettick()+30000+skilllv*10000,mob_timer_delete,id,0);
 			}
 		}
 		break;
@@ -3638,7 +3638,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 				md->master_id=sd->bl.id;
 				md->hp=1000+skilllv*200;
 				md->state.special_mob_ai=2;
-				add_timer(gettick()+30000,mob_timer_delete,id,0);
+				md->deletetimer=add_timer(gettick()+30000,mob_timer_delete,id,0);
 			}
 		}
 		break;

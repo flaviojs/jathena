@@ -1,3 +1,21 @@
+----------------------------------------
+//1026 by (凸)
+・1023で入れてなかったclif.hを同梱
+・バイオプラントとスフィアーマインで出したmobを倒すとmob_timer_delete()でnullpoが出る問題を解決したつもり
+・バグ報告スレッド part6 >>63 Destさんのscript.c修正を取り込み
+
+	(map/)
+	clif.h 変更
+	map.h 変更
+	mob.c
+		mob_changestate() 変更
+	skill.c
+		skill_castend_pos2() 変更
+		mob_spawn() 変更
+		do_init_mob() add_timer_func_listにmob_timer_deleteが無かったので追加してみた
+	script.c
+		script_load_mapreg() 変更
+
 ------------------------
 //1025 by Sel
 ・ロードナイトのジョブ補正が間違っていたのを修正

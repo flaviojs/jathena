@@ -362,6 +362,8 @@ struct mob_data {
 	short opt1,opt2,option;
 	short min_chase;
 
+	int deletetimer;
+
 	int skilltimer;
 	int skilltarget;
 	short skillx,skilly;

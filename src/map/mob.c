@@ -561,6 +561,9 @@ int mob_changestate(struct mob_data *md,int state,int type)
 		skill_status_change_clear(&md->bl,2);	// ステータス異常を解除する
 		skill_clear_unitgroup(&md->bl);	// 全てのスキルユニットグループを削除する
 		skill_cleartimerskill(&md->bl);
+		if(md->deletetimer!=-1)
+			delete_timer(md->deletetimer,mob_timer_delete);
+		md->deletetimer=-1;
 		md->hp=md->target_id=md->attacked_id=0;
 		md->state.targettype = NONE_ATTACKABLE;
 		break;
@@ -785,6 +788,8 @@ int mob_spawn(int id)
 	md->next_walktime = tick+rand()%50+5000;
 	md->attackabletime = tick;
 	md->canmove_tick = tick;
+
+	md->deletetimer=-1;
 
 	md->skilltimer=-1;
 	for(i=0,c=tick-1000*3600*10;i<MAX_MOBSKILL;i++)
@@ -3648,6 +3653,7 @@ int do_init_mob(void)
 	add_timer_func_list(mob_ai_lazy,"mob_ai_lazy");
 	add_timer_func_list(mobskill_castend_id,"mobskill_castend_id");
 	add_timer_func_list(mobskill_castend_pos,"mobskill_castend_pos");
+	add_timer_func_list(mob_timer_delete,"mob_timer_delete");
 	add_timer_interval(gettick()+MIN_MOBTHINKTIME,mob_ai_hard,0,0,MIN_MOBTHINKTIME);
 	add_timer_interval(gettick()+MIN_MOBTHINKTIME*10,mob_ai_lazy,0,0,MIN_MOBTHINKTIME*10);
 

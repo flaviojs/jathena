@@ -4955,7 +4955,7 @@ static int script_load_mapreg()
 	while(fgets(line,sizeof(line),fp)){
 		char buf1[256],buf2[1024],*p;
 		int n,v,s,i;
-		if( sscanf(line,"%[^,],%d\t%n",buf1,&i,&n)!=2 &&
+		if( sscanf(line,"%255[^,],%d\t%n",buf1,&i,&n)!=2 &&
 			(i=0,sscanf(line,"%[^\t]\t%n",buf1,&n)!=1) )
 			continue;
 		if( buf1[strlen(buf1)-1]=='$' ){
@@ -4963,7 +4963,7 @@ static int script_load_mapreg()
 				printf("%s: %s broken data !\n",mapreg_txt,buf1);
 				continue;
 			}
-			if( (p=(char *)calloc(strlen(buf2), 1))==NULL ){
+			if( (p=(char *)calloc(strlen(buf2) + 1, 1))==NULL ){
 				printf("script_load_mapreg: out of memory !!");
 				exit(0);
 			}
