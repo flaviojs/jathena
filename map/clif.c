@@ -1516,14 +1516,15 @@ int clif_initialstatus(struct map_session_data *sd)
  	//いったん装備解除
  	WFIFOW(fd,0)=0x013c;
  	WFIFOW(fd,2)=0;
- 	WFIFOSET(fd,packet_len_table[0x013c]);
+	WFIFOSET(fd,packet_len_table[0x013c]);
  	
  	//装備
  	WFIFOW(fd,0)=0x013c;
- 	WFIFOW(fd,2)=val;//矢のアイテムID
+ 	WFIFOW(fd,2)=val+2;//矢のアイテムID
  	WFIFOSET(fd,packet_len_table[0x013c]);
  	
  	WFIFOW(fd,0)=0x013b;
+  	WFIFOW(fd,2)=3;
  	WFIFOSET(fd,packet_len_table[0x013b]);
  	
  	return 0;

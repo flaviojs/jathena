@@ -704,7 +704,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->def += sd->status.inventory[i].refine*refinebonus[0][0];
 		} else if(itemdb_type(nameid)==10){ // –î
 			if(atk_ele == 0)		//‚Ü‚¾‘®«‚ª“ü‚Á‚Ä‚¢‚È‚¢
-				atk_ele = sd->atk_ele;	//‹|‚Ì‘®«‚ğ—Dæ‚Æ‚·‚é
+				atk_ele = sd->atk_ele;	//–î‚Ì‘®«‚ğ—Dæ‚Æ‚·‚é
 		}
 	}
 	for(i=0;i<6;i++)
@@ -3344,17 +3344,17 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 		pos = tpos == 0x02 ? 0x20 : 0x02;
 	}
 	
-	//‹|‘•”õ
-	if(pos==0x8000)
-	 clif_arrowequip(sd,n);
-
 	for(i=0;i<100;i++){
 		if(sd->status.inventory[i].nameid &&
 		   (sd->status.inventory[i].equip&pos)){
 			pc_unequipitem(sd,i);
 		}
 	}
-	clif_equipitemack(sd,n,pos,1);
+	// ‹|–î‘•”õ
+	if(pos==0x8000)
+		clif_arrowequip(sd,n);
+	else	clif_equipitemack(sd,n,pos,1);
+
 	sd->status.inventory[n].equip=pos;
 	pc_calcstatus(sd,0);
 
