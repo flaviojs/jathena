@@ -741,7 +741,7 @@ save_clothcolor
 undead_detect_type
 	アンデッドを認識する方法を設定します。0で属性のみ、1で種族のみ、
 	2で属性と種族の両方のどちらでもあってる場合になります。
-	デフォルトは2です。
+	デフォルトは0です。
 
 player_auto_counter_type
 	プレイヤーのオートカウンターの仕様を設定します。0で100%クリティカル
@@ -838,6 +838,12 @@ gvg_misc_attack_damage_rate
 mob_changetarget_byskill: no
 	条件がskillusedのスキルをMOBがPCに使用するとき、その対象をスキル使用者にするかどうかです。
 	MOBスキル使用後にタゲは戻ります。デフォルトはnoです。
+
+monster_attack_direction_change
+	モンスターが攻撃した時方向を変更するかどうかです。本鯖ではモンスターは動けない限り方向が変えらないのですがバグぽい仕様なのでデフォルトはyesです。
+	noにすれば動くことだけで方向が変えるようになります。
+
+
 < 例 >
 
 warp_point_debug: no
@@ -949,6 +955,7 @@ gvg_long_attack_damage_rate: 100
 gvg_magic_attack_damage_rate: 100
 gvg_misc_attack_damage_rate: 100
 mob_changetarget_byskill: no
+monster_attack_direction_change:yes
 
 
 =====================================================================ghos6. atcommand_athena.conf

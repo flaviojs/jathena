@@ -176,7 +176,7 @@
 // 敵(NPC)スキル
 // 日本語解説参照元
 // http://rovc.at.infoseek.co.jp/o/2/oindex2.html
-158,-3,6,1,0,0,10,1,1,0,2,0	//npc_piercingatt：単体攻撃（レンジ2？）
+158,3,6,1,0,0,10,1,1,0,2,0	//npc_piercingatt：単体攻撃（レンジ2？）
 159,-1,6,1,0,0,10,1,1,0,2,0	//npc_mentalbreaker：SP減少攻撃
 160,9,6,1,0,0,10,1,1,0,2,0	//npc_rangeattack：遠距離攻撃
 161,0,0,4,0,1,10,1,1,0,2,0	//npc_attrichange：ランダム属性変化

@@ -425,7 +425,8 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 		md->state.state=MS_IDLE;
 		return 0;
 	}
-	md->dir=map_calc_dir(&md->bl, sd->bl.x,sd->bl.y );	// Œü‚«İ’è
+	if(battle_config.monster_attack_direction_change)
+		md->dir=map_calc_dir(&md->bl, sd->bl.x,sd->bl.y );	// Œü‚«İ’è
 
 	md->to_x = md->bl.x;
 	md->to_y = md->bl.y;

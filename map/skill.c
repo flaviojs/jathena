@@ -1239,7 +1239,8 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	if(sd && pc_isdead(sd))
 		return 1;
 
-	if(skillid == WZ_SIGHTRASHER || skillid == CR_GRANDCROSS) bl = src;
+	if((skillid == WZ_SIGHTRASHER || skillid == CR_GRANDCROSS) && src != bl)
+		bl = src;
 	if(bl == NULL || bl->prev == NULL)
 		return 1;
 	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
@@ -2527,7 +2528,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			clif_skill_nodamage(src,bl,skillid,skilllv,1);
 			md->def_ele=skill_get_pl(skillid);
 			if(md->def_ele==0)			/* ランダム変化、ただし、*/
-				md->def_ele=rand()%9;	/* 不死属性は除く */
+				md->def_ele=rand()%10;	/* 不死属性は除く */
 			md->def_ele+=(1+rand()%4)*20;	/* 属性レベルはランダム */
 		}
 		break;
@@ -2952,6 +2953,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 	case MG_SAFETYWALL:			/* セイフティウォール */
 		limit=skill_get_time(skillid,skilllv);
 		val2=skilllv+1;
+		interval = -1;
 		target=(battle_config.defnotenemy)?BCT_NOENEMY:BCT_ALL;
 		break;
 
@@ -2969,6 +2971,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 
 	case AL_PNEUMA:				/* ニューマ */
 		limit=skill_get_time(skillid,skilllv);
+		interval = -1;
 		target=(battle_config.defnotenemy)?BCT_NOENEMY:BCT_ALL;
 		count = 9;
 		break;

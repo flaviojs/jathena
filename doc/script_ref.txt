@@ -322,6 +322,13 @@ AthenaNPCScript
 			hp,sp		数値
 			
 			<hp>分HPを、<sp>分SPを回復します。
+
+		itemheal命令
+			itemheal <hp>,<sp>;
+			
+			hp,sp		数値
+			
+			<hp>分HPを、<sp>分SPを回復します。healとは違い回復するHPとSPの量にVIT(SPの場合INT)とスキルによる補正が付きます。
 			
 		end命令
 			end;
@@ -760,6 +767,12 @@ AthenaNPCScript
 			
 			<n>で指定したIDを持つギルド名を返します。
 			
+		basicskillcheck命令
+			basicskillcheck(0);
+			
+			battle_athena.confのbasic_skill_checkの設定値を返します。0は意味はありませんが何も入れなかった場合エラーになります。
+			basic_skill_checkとカプラの倉庫利用を合わせる為に作った物でそれ以外の機能はありません。戻った数値が0ならbasic_skill_checkがno、1ならyesです。
+
 			
 	＊定数ラベル
 		-ラベル
