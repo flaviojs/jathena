@@ -1,4 +1,17 @@
 --------------------
+//0796 by huge
+
+E×‚©‚¢C³
+	(conf/npc/)
+	npc_event_valentine.txt C³B
+
+	(map/)
+	pc.c
+		pc_takeitem() C³B
+	skill.c
+		skill_unit_timer_sub() C³B
+
+--------------------
 //0795 by Kalen
 
 EG’k341‚Ìnpc_warp_niflheim.txt’Ç‰Á
@@ -58,7 +71,7 @@
 		mob_spawn_dataset() C³B
 		mob_damage() C³B
 	pc.c
-		pc_additem() C³B
+		pc_takeitem() C³B
 
 --------------------
 

@@ -5524,12 +5524,11 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 		(DIFF_TICK(tick,group->tick)>=group->limit ||
 		 DIFF_TICK(tick,group->tick)>=unit->limit) ){
 		if((group->unit_id >= 0x8f && group->unit_id <= 0x98) && group->unit_id != 0x92) {
-			struct map_session_data *md = map_id2sd(unit->group->src_id);
 			struct item item_tmp;
 			memset(&item_tmp,0,sizeof(item_tmp));
 			item_tmp.nameid=1065;
 			item_tmp.identify=1;
-			if(md != NULL) pc_additem(md,&item_tmp,1);	// 㩕Ԋ�
+			map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y);	// 㩕Ԋ�
 		}
 		skill_delunit(unit);
 	}

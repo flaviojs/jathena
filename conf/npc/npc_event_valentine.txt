@@ -181,7 +181,7 @@ LStartWomen:
 		mes "再びワタクシの虜と出来るのか!?";
 		close;
 L1:
-		if (countitem(558) > 3) goto L2;
+		if (countitem(558) >= 3) goto L2;
 		mes "[シャルル=オルレアン]";
 		mes "オゥ、マドモアゼル！";
 		mes "ワタクシは神でも錬金術師でもないので";
