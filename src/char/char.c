@@ -1,5 +1,6 @@
 // $Id: char2.c,v 1.4 2003/06/29 05:50:51 lemit Exp $
 // original : char2.c 2003/03/14 11:58:35 Rev.1.5
+#define DUMP_UNKNOWN_PACKET	1
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -1154,11 +1155,16 @@ int parse_char(int fd)
 		delete_session(fd);
 		return 0;
 	}
-	if(RFIFOW(fd,0)<30000)
-		printf("parse_char : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
 	sd=session[fd]->session_data;
 	while(RFIFOREST(fd)>=2){
+		if(RFIFOW(fd,0)<30000)
+			printf("parse_char : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
 		switch(RFIFOW(fd,0)){
+		case 0x20b:		//20040622ˆÃ†‰»ragexe‘Î‰ž
+			if(RFIFOREST(fd)<19)
+				return 0;
+			RFIFOSKIP(fd,19);
+			break;
 		case 0x65:	// Ú‘±—v‹
 			if(RFIFOREST(fd)<17)
 				return 0;
@@ -1387,6 +1393,18 @@ int parse_char(int fd)
 			return 0;
 
 		default:
+#ifdef DUMP_UNKNOWN_PACKET
+			{
+				int i;
+				printf("---- 00-01-02-03-04-05-06-07-08-09-0A-0B-0C-0D-0E-0F");
+				for(i=0;i<RFIFOREST(fd);i++){
+					if((i&15)==0)
+						printf("\n%04X ",i);
+					printf("%02X ",RFIFOB(fd,i));
+				}
+				printf("\n");
+			}
+#endif
 			close(fd);
 			session[fd]->eof=1;
 			return 0;

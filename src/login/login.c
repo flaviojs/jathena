@@ -1,5 +1,6 @@
 // $Id: login2.c,v 1.3 2003/07/06 07:56:09 lemit Exp $
 // original : login2.c 2003/01/28 02:29:17 Rev.1.1.1.1
+#define DUMP_UNKNOWN_PACKET	1
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -804,14 +805,19 @@ int parse_login(int fd)
     delete_session(fd);
     return 0;
   }
-  if(RFIFOW(fd,0)<30000) {
-  	if(RFIFOW(fd,0) == 0x64 || RFIFOW(fd,0) == 0x01dd)
-		  printf("parse_login : %d %d %d %s\n",fd,RFIFOREST(fd),RFIFOW(fd,0),RFIFOP(fd,6));
-		else
-		  printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
-	}
   while(RFIFOREST(fd)>=2){
+	if(RFIFOW(fd,0)<30000) {
+	  	if(RFIFOW(fd,0) == 0x64 || RFIFOW(fd,0) == 0x01dd)
+			  printf("parse_login : %d %d %d %s\n",fd,RFIFOREST(fd),RFIFOW(fd,0),RFIFOP(fd,6));
+			else
+			  printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
+	}
 	switch(RFIFOW(fd,0)){
+	case 0x204:		//20040622暗号化ragexe対応
+		if(RFIFOREST(fd)<18)
+			return 0;
+		RFIFOSKIP(fd,18);
+		break;
 	case 0x200:		//クライアントでaccountオプション使用時の謎パケットへの対応
 		if(RFIFOREST(fd)<26)
 			return 0;
@@ -1012,6 +1018,18 @@ int parse_login(int fd)
 		break;
 
 	default:
+#ifdef DUMP_UNKNOWN_PACKET
+		{
+			int i;
+			printf("---- 00-01-02-03-04-05-06-07-08-09-0A-0B-0C-0D-0E-0F");
+			for(i=0;i<RFIFOREST(fd);i++){
+				if((i&15)==0)
+					printf("\n%04X ",i);
+				printf("%02X ",RFIFOB(fd,i));
+			}
+			printf("\n");
+		}
+#endif
 		close(fd);
 		session[fd]->eof=1;
 		return 0;
