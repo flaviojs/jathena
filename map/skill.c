@@ -498,7 +498,17 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	 struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag )
 {
 	struct Damage dmg;
-	int type=-1,lv=(flag>>20)&0xf;
+	int type,lv;
+
+	if(src->prev == NULL || dsrc->prev == NULL)
+		return 0;
+	if(src->type == BL_PC && pc_isdead((struct map_session_data *)src))
+		return 0;
+	if(dsrc->type == BL_PC && pc_isdead((struct map_session_data *)dsrc))
+		return 0;
+
+	type=-1;
+	lv=(flag>>20)&0xf;
 	dmg=battle_calc_attack(attack_type, src,bl, skillid,skilllv, flag&0xff );
 	
 	if(lv==15)lv=-1;
@@ -506,11 +516,9 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	if( flag&0xff00 )
 		type=(flag&0xff00)>>8;
 
-	if(dmg.damage + dmg.damage2 <= 0)
-		dmg.blewcount = 0;
-
 	if( dmg.blewcount ){	/* 吹き飛ばし処理とそのパケット */
-		skill_blown(dsrc,bl,dmg.blewcount);
+		if(dmg.damage + dmg.damage2 > 0)
+			skill_blown(dsrc,bl,dmg.blewcount);
 		clif_skill_damage2(dsrc,bl,tick,dmg.amotion,dmg.dmotion,
 			dmg.damage, dmg.div_, skillid, (lv!=0)?lv:skilllv, type );
 	} else			/* スキルのダメージパケット */
@@ -578,39 +586,45 @@ int skill_area_sub_count(struct block_list *src,struct block_list *target,int sk
  */
 static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 {
-	struct map_session_data* sd=NULL/*,*target_sd=NULL*/;
-	struct block_list *bl;
-	struct skill_timerskill skl;
-	int i;
+	struct map_session_data *sd = NULL;
+	struct mob_data *md = NULL;
+	struct block_list *src,*target;
+	struct skill_timerskill *skl = NULL;
 	
-	if( (sd=map_id2sd(id))==NULL )
+	src = map_id2bl(id);
+	if(src == NULL || src->prev == NULL)
 		return 0;
 
-	sd->skilltimerskill[0].timer = -1;
-	memcpy(&skl, &sd->skilltimerskill[0],sizeof(struct skill_timerskill));
-	for(i=1;i<sd->skill_timer_count;i++)
-		memcpy(&sd->skilltimerskill[i-1],&sd->skilltimerskill[i],sizeof(struct skill_timerskill));
-	sd->skill_timer_count--;
-	if(sd->skill_timer_count < 0)
-		sd->skill_timer_count = 0;
+	if(src->type == BL_PC) {
+		sd = (struct map_session_data *)src;
+		skl = &sd->skilltimerskill[data];
+	}
+	else if(src->type == BL_MOB) {
+		md = (struct mob_data *)src;
+		skl = &md->skilltimerskill[data];
+	}
+	else
+		return 0;
 
-	if(skl.target_id) {
-		bl=map_id2bl(skl.target_id);
-		if(bl==NULL || bl->prev == NULL)
+	skl->timer = -1;
+	if(skl->target_id) {
+		target = map_id2bl(skl->target_id);
+		if(target == NULL || target->prev ==NULL)
 			return 0;
-		if(sd->bl.m != bl->m || pc_isdead(sd))
+		if(src->m != target->m)
+			return 0;
+		if(sd && pc_isdead(sd))
+			return 0;
+		if(target->type == BL_PC && pc_isdead((struct map_session_data *)target))
 			return 0;
 
-		skill_attack(skl.type,&sd->bl,&sd->bl,bl,skl.skill_id,skl.skill_lv,tick,data);
+		skill_attack(skl->type,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag);
 	}
 	else {
-		if(sd->bl.m != skl.map)
-			return 0;
-
-		switch(skl.skill_id) {
+		switch(skl->skill_id) {
 			case WZ_METEOR:
-				clif_skill_poseffect(&sd->bl,skl.skill_id,skl.skill_lv,skl.x,skl.y,tick);
-				skill_unitsetting(&sd->bl,skl.skill_id,skl.skill_lv,skl.x,skl.y,0);
+				clif_skill_poseffect(src,skl->skill_id,skl->skill_lv,skl->x,skl->y,tick);
+				skill_unitsetting(src,skl->skill_id,skl->skill_lv,skl->x,skl->y,0);
 				break;
 		}
 	}
@@ -622,21 +636,49 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
  *
  *------------------------------------------
  */
-int skill_addtimerskill(struct map_session_data *sd,int tick,int interval,
-	int target,int x,int y,int skill_id,int skill_lv,int type,int flag)
+int skill_addtimerskill(struct block_list *src,int tick,int target,int x,int y,int skill_id,int skill_lv,int type,int flag)
 {
-	if(sd->skill_timer_count < MAX_SKILLTIMERSKILL) {
-		sd->skilltimerskill[sd->skill_timer_count].timer = add_timer(tick + interval, skill_timerskill, sd->bl.id, flag );
-		sd->skilltimerskill[sd->skill_timer_count].src_id = sd->bl.id;
-		sd->skilltimerskill[sd->skill_timer_count].target_id = target;
-		sd->skilltimerskill[sd->skill_timer_count].skill_id = skill_id;
-		sd->skilltimerskill[sd->skill_timer_count].skill_lv = skill_lv;
-		sd->skilltimerskill[sd->skill_timer_count].map = sd->bl.m;
-		sd->skilltimerskill[sd->skill_timer_count].x = x;
-		sd->skilltimerskill[sd->skill_timer_count].y = y;
-		sd->skilltimerskill[sd->skill_timer_count].type = type;
-		sd->skill_timer_count++;
-		return 0;
+	int i;
+
+	if(src->type == BL_PC) {
+		struct map_session_data *sd = (struct map_session_data *)src;
+		for(i=0;i<MAX_SKILLTIMERSKILL;i++) {
+			if(sd->skilltimerskill[i].timer == -1) {
+				sd->skilltimerskill[i].timer = add_timer(tick, skill_timerskill, src->id, i);
+				sd->skilltimerskill[i].src_id = src->id;
+				sd->skilltimerskill[i].target_id = target;
+				sd->skilltimerskill[i].skill_id = skill_id;
+				sd->skilltimerskill[i].skill_lv = skill_lv;
+				sd->skilltimerskill[i].map = src->m;
+				sd->skilltimerskill[i].x = x;
+				sd->skilltimerskill[i].y = y;
+				sd->skilltimerskill[i].type = type;
+				sd->skilltimerskill[i].flag = flag;
+
+				return 0;
+			}
+		}
+		return 1;
+	}
+	else if(src->type == BL_MOB) {
+		struct mob_data *md = (struct mob_data *)src;
+		for(i=0;i<MAX_SKILLTIMERSKILL/2;i++) {
+			if(md->skilltimerskill[i].timer == -1) {
+				md->skilltimerskill[i].timer = add_timer(tick, skill_timerskill, src->id, i);
+				md->skilltimerskill[i].src_id = src->id;
+				md->skilltimerskill[i].target_id = target;
+				md->skilltimerskill[i].skill_id = skill_id;
+				md->skilltimerskill[i].skill_lv = skill_lv;
+				md->skilltimerskill[i].map = src->m;
+				md->skilltimerskill[i].x = x;
+				md->skilltimerskill[i].y = y;
+				md->skilltimerskill[i].type = type;
+				md->skilltimerskill[i].flag = flag;
+
+				return 0;
+			}
+		}
+		return 1;
 	}
 
 	return 1;
@@ -646,16 +688,28 @@ int skill_addtimerskill(struct map_session_data *sd,int tick,int interval,
  *
  *------------------------------------------
  */
-int skill_cleartimerskill(struct map_session_data *sd)
+int skill_cleartimerskill(struct block_list *src)
 {
 	int i;
-	for(i=0;i<sd->skill_timer_count;i++) {
-		if(sd->skilltimerskill[i].timer != -1) {
-			delete_timer(sd->skilltimerskill[i].timer, skill_timerskill);
-			sd->skilltimerskill[i].timer = -1;
+
+	if(src->type == BL_PC) {
+		struct map_session_data *sd = (struct map_session_data *)src;
+		for(i=0;i<MAX_SKILLTIMERSKILL;i++) {
+			if(sd->skilltimerskill[i].timer != -1) {
+				delete_timer(sd->skilltimerskill[i].timer, skill_timerskill);
+				sd->skilltimerskill[i].timer = -1;
+			}
 		}
 	}
-	sd->skill_timer_count = 0;
+	else if(src->type == BL_MOB) {
+		struct mob_data *md = (struct mob_data *)src;
+		for(i=0;i<MAX_SKILLTIMERSKILL/2;i++) {
+			if(md->skilltimerskill[i].timer != -1) {
+				delete_timer(md->skilltimerskill[i].timer, skill_timerskill);
+				md->skilltimerskill[i].timer = -1;
+			}
+		}
+	}
 
 	return 0;
 }
@@ -739,9 +793,11 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		else {
 			skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
-			for(i=1;i<sd->spiritball_old;i++)
-				skill_addtimerskill(sd,tick,i*250,bl->id,0,0,skillid,skilllv,BF_WEAPON,flag);
-			sd->skillcanmove_tick = tick + (sd->spiritball_old-1)*250;
+			if(sd) {
+				for(i=1;i<sd->spiritball_old;i++)
+					skill_addtimerskill(src,tick+i*250,bl->id,0,0,skillid,skilllv,BF_WEAPON,flag);
+				sd->skillcanmove_tick = tick + (sd->spiritball_old-1)*250;
+			}
 		}
 
 		break;
@@ -1085,8 +1141,10 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			mob_target((struct mob_data *)bl,src,skill_get_range(skillid));
 		break;
 	case MO_CALLSPIRITS:	// 気功
-		clif_skill_nodamage(src,bl,skillid,0,1);
-		pc_addspiritball(sd,60*10*1000,skilllv);
+		if(sd) {
+			clif_skill_nodamage(src,bl,skillid,0,1);
+			pc_addspiritball(sd,60*10*1000,skilllv);
+		}
 		break;
 	case MO_ABSORBSPIRITS:	// 気奪
 		if(sd && dstsd) {
@@ -1628,8 +1686,8 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 				clif_skill_poseffect(src,skillid,skilllv,tmpx,tmpy,tick);
 				skill_unitsetting(src,skillid,skilllv,tmpx,tmpy,0);
 			}
-			else if(sd)
-				skill_addtimerskill(sd,tick,i*1000,0,tmpx,tmpy,skillid,skilllv,BF_MAGIC,flag);
+			else
+				skill_addtimerskill(src,tick+i*1000,0,tmpx,tmpy,skillid,skilllv,BF_MAGIC,flag);
 		}
 		break;
 
@@ -1642,7 +1700,8 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 			(sd->skilllv>3)?sd->status.memo_point[2].map:"");
 		break;
 	case MO_BODYRELOCATION:
-		pc_movepos(sd,x,y);
+		if(sd)
+			pc_movepos(sd,x,y);
 		break;
 	}
 	return 0;
@@ -2011,7 +2070,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 					alive=0;
 				else {
 					map_setcell(src->m,ux,uy,5);
-					clif_changemapcell(src->m,ux,uy,5);
+					clif_changemapcell(src->m,ux,uy,5,0);
 				}
 			}
 			break;
@@ -2441,7 +2500,7 @@ int skill_unit_onlimit(struct skill_unit *src,unsigned int tick)
 
 	case 0x8d:	/* アイスウォール */
 		map_setcell(src->bl.m,src->bl.x,src->bl.y,src->val2);
-		clif_changemapcell(src->bl.m,src->bl.x,src->bl.y,src->val2);
+		clif_changemapcell(src->bl.m,src->bl.x,src->bl.y,src->val2,1);
 		break;
 			
 	}
@@ -2657,6 +2716,13 @@ int skill_check_condition( struct map_session_data *sd )
 			}
 			break;
 
+		case MO_CALLSPIRITS:
+			if(sd->spiritball >= ((sd->skilllv > 10)? 10:sd->skilllv)) {
+				clif_skill_fail(sd,sd->skillid,0,0);
+				return 0;
+			}
+			break;
+
 		case MO_EXTREMITYFIST:					// 阿修羅覇鳳拳
 			if( sd->sc_data[SC_EXPLOSIONSPIRITS].timer == -1) {
 				clif_skill_fail(sd,sd->skillid,0,0);
@@ -2826,7 +2892,7 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	casttime=skill_castfix(&sd->bl, skill_get_cast( skill_num,skill_lv) );
 	delay=skill_delayfix(&sd->bl, skill_get_delay( skill_num,skill_lv) );
 
-	sd->skillcastcancel=1;
+	sd->state.skillcastcancel=1;
 
 	switch(skill_num){	/* 何か特殊な処理が必要 */
 	case AL_HEAL:	/* ヒール */
@@ -2851,11 +2917,11 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	case MO_CALLSPIRITS:	// 気功
 	case MO_INVESTIGATE:	/* 発勁 */
 	case MO_STEELBODY:	/* 金剛*/
-		sd->skillcastcancel=0;
+		sd->state.skillcastcancel=0;
 		break;
 	case MO_FINGEROFFENSIVE:	/* 指弾 */
 		casttime += casttime * ((skill_lv > sd->spiritball)? sd->spiritball:skill_lv);
-		sd->skillcastcancel=0;
+		sd->state.skillcastcancel=0;
 		break;
 	}
 
@@ -2880,7 +2946,7 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	}
 
 	if( casttime<=0 )	/* 詠唱の無いものはキャンセルされない */
-		sd->skillcastcancel=0;
+		sd->state.skillcastcancel=0;
 
 	sd->skilltarget	= target_id;
 /*	sd->cast_target_bl	= bl; */
@@ -2925,7 +2991,7 @@ int skill_use_pos( struct map_session_data *sd,
 	casttime=skill_castfix(&sd->bl, skill_get_cast( skill_num,skill_lv) );
 	delay=skill_delayfix(&sd->bl, skill_get_delay( skill_num,skill_lv) );
 
-	sd->skillcastcancel=1;
+	sd->state.skillcastcancel=1;
 
 	printf("skill use target_pos=(%d,%d) skill=%d lv=%d cast=%d\n",
 		skill_x,skill_y,skill_num,skill_lv,casttime);
@@ -2938,7 +3004,7 @@ int skill_use_pos( struct map_session_data *sd,
 			sd->bl.id, 0, skill_x,skill_y, skill_num,casttime);
 
 	if( casttime<=0 )	/* 詠唱の無いものはキャンセルされない */
-		sd->skillcastcancel=0;
+		sd->state.skillcastcancel=0;
 
 	sd->skillx			= skill_x;
 	sd->skilly			= skill_y;

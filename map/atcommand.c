@@ -1102,15 +1102,6 @@ z [0`4]•‚ÌF
 			return 1;
 		}
 
-		if(strcmpi(command, "@test") == 0){
-			sscanf(message, "%s %d", command, &x);
-//			clif_party_inviteack(sd,sd->status.name,x);
-//			clif_skill_fail(sd,x,0,y);
-//			clif_guild_created(sd,x);
-			clif_item_identified(sd,0,x);
-			return 1;
-		}
-
 	}
 
 	return 0;

@@ -590,6 +590,22 @@ static int clif_set01e1(struct map_session_data *sd,unsigned char *buf)
  *
  *------------------------------------------
  */
+static int clif_set0192(int fd,int m,int x,int y,int type)
+{
+	WFIFOW(fd,0) = 0x192;
+	WFIFOW(fd,2) = x;
+	WFIFOW(fd,4) = y;
+	WFIFOW(fd,6) = type;
+	memcpy(WFIFOP(fd,8),map[m].name,16);
+	WFIFOSET(fd,packet_len_table[0x192]);
+
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
 int clif_spawnpc(struct map_session_data *sd)
 {
 	clif_set0078(sd,WFIFOP(sd->fd,0));
@@ -2285,6 +2301,9 @@ int clif_getareachar_skillunit(struct map_session_data *sd,struct skill_unit *un
 	memset(WFIFOP(fd,16),packet_len_table[0x1c9]-16,0);
 	WFIFOSET(fd,packet_len_table[0x1c9]);
 #endif
+	if(unit->group->skill_id == WZ_ICEWALL)
+		clif_set0192(fd,unit->bl.m,unit->bl.x,unit->bl.y,5);
+
 	return 0;
 }
 /*==========================================
@@ -2296,6 +2315,9 @@ int clif_clearchar_skillunit(struct skill_unit *unit,int fd)
 	WFIFOW(fd, 0)=0x120;
 	WFIFOL(fd, 2)=unit->bl.id;
 	WFIFOSET(fd,packet_len_table[0x120]);
+	if(unit->group->skill_id == WZ_ICEWALL)
+		clif_set0192(fd,unit->bl.m,unit->bl.x,unit->bl.y,unit->val2);
+
 	return 0;
 }
 
@@ -3796,18 +3818,23 @@ int clif_spiritball(struct map_session_data *sd)
  *
  *------------------------------------------
  */
-int clif_changemapcell(int m,int x,int y,int type)
+int clif_changemapcell(int m,int x,int y,int cell_type,int type)
 {
 	struct block_list bl;
 	char buf[32];
 
 	bl.m = m;
+	bl.x = x;
+	bl.y = y;
 	WBUFW(buf,0) = 0x192;
 	WBUFW(buf,2) = x;
 	WBUFW(buf,4) = y;
-	WBUFW(buf,6) = type;
+	WBUFW(buf,6) = cell_type;
 	memcpy(WBUFP(buf,8),map[m].name,16);
-	clif_send(buf,packet_len_table[0x192],&bl,ALL_SAMEMAP);
+	if(!type)
+		clif_send(buf,packet_len_table[0x192],&bl,AREA);
+	else
+		clif_send(buf,packet_len_table[0x192],&bl,ALL_SAMEMAP);
 
 	return 0;
 }

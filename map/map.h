@@ -7,7 +7,7 @@
 #define MAX_PC_CLASS (1+6+6+1+6+1+1)
 #define MAX_NPC_PER_MAP 512
 #define BLOCK_SIZE 8
-#define AREA_SIZE 15
+#define AREA_SIZE 20
 #define LOCAL_REG_NUM 16
 #define LIFETIME_FLOORITEM 60
 #define DAMAGELOG_SIZE 16
@@ -16,7 +16,7 @@
 #define MAX_SKILLUNITGROUP	32
 #define MAX_MOBSKILLUNITGROUP	4
 #define MAX_SKILLUNITGROUPTICKSET	128
-#define MAX_SKILLTIMERSKILL 64
+#define MAX_SKILLTIMERSKILL 32
 #define MAX_MOBSKILL	24
 #define MAX_EVENTQUEUE	2
 #define MAX_EVENTTIMER	32
@@ -96,6 +96,7 @@ struct skill_timerskill {
 	short x,y;
 	short skill_id,skill_lv;
 	int type;
+	int flag;
 };
 
 
@@ -110,6 +111,7 @@ struct map_session_data {
 		unsigned attack_continue : 1 ;
 		unsigned menu_or_input : 1;
 		unsigned dead_sit : 2;
+		unsigned skillcastcancel : 1;
 	} state;
 	int char_id,login_id1,login_id2,sex;
 	struct mmo_charstatus status;
@@ -139,11 +141,10 @@ struct map_session_data {
 	int skilltarget;
 	short skillx,skilly;
 	short skillid,skilllv;
-	short skillcastcancel,skillitem,skillitemlv;
+	short skillitem,skillitemlv;
 	struct skill_unit_group skillunit[MAX_SKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
-	short skill_timer_count;
 	int ghost_timer;
 
 	unsigned long canmove_tick;
@@ -249,6 +250,8 @@ struct mob_data {
 		unsigned targettype : 1 ;
 		unsigned steal_flag : 1 ;
 		unsigned steal_coin_flag : 1 ;
+		unsigned skillcastcancel : 1 ;
+		unsigned master_check : 1 ;
 	} state;
 	int timer;
 	short to_x,to_y;
@@ -276,12 +279,12 @@ struct mob_data {
 	int skilltarget;
 	short skillx,skilly;
 	short skillid,skilllv,skillidx;
-	int skillcastcancel;
 	unsigned int skilldelay[MAX_MOBSKILL];
 	int def_ele;
 	int master_id,master_dist;
 	struct skill_unit_group skillunit[MAX_MOBSKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
+	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL/2];
 	char npc_event[50];
 };
 enum { MS_IDLE,MS_WALK,MS_ATTACK,MS_DEAD,MS_DELAY };

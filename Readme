@@ -1,4 +1,41 @@
 --------------
+//0519 by 死神
+
+・サーバーsnapshotと色々修正。
+・死んだキャラに攻撃が当たるバグ修正。(テストしてません。本当に治ったかどうか報告お願いします。)
+・0517のアイスウォールの処理を少し変更。
+・メテオをモンスターも使えるように変更。(テストしてません。報告お願いします。) でもちょっとメモリーの使用量が増えました。(約10M程上がるようです。)
+・ボスの取り巻きがボスと一緒に行動するように変更。(テストしてませんのでどんな動きをするかは確認してません。攻撃も受けてないのにボスの隣から勝手に離れるかどうかの確認をお願いします。)
+・その他細かい物修正。
+	client-packet.txt 修正。
+	map.h
+		AREA_SIZEを15から20に変更。
+		struct map_session_data、struct mob_data、struct skill_timerskill 修正。
+	map.c
+		map_quit() 修正。
+	clif.h
+		clif_changemapcell() 修正。
+	clif.c
+		clif_getareachar_skillunit()、clif_clearchar_skillunit()、clif_changemapcell() 修正。
+	skill.c
+		skill_unitsetting()、skill_unit_onlimit()、skill_castend_pos2() 修正。
+		skill_castend_nodamage_id()、skill_check_condition()、skill_attack() 修正。
+		skill_timerskill()、skill_addtimerskill()、skill_cleartimerskill() 修正。
+		その他少し修正。
+	skill.h
+		skill_addtimerskill()、skill_cleartimerskill() 修正。
+	pc.c
+		pc_movepos()、pc_walk()、pc_authok() 修正。
+	mob.c
+		mob_spawn_dataset()、mob_spawn() 修正。
+		mob_changestate()、mob_damage() 修正。
+		mob_ai_sub_hard_mastersearch()、mob_ai_sub_hard() 修正。
+		その他少し修正。
+	battle.c
+		battle_calc_weapon_attack()、battle_weapon_attack() 修正。
+		その他少し修正。
+
+--------------
 //0518 by Kalen
 ・Event_pumpkin関連のフラグ不具合修正
 

@@ -50,9 +50,8 @@ int skill_use_pos( struct map_session_data *sd,
 
 int skill_castend_map( struct map_session_data *sd,int skill_num, const char *map);
 
-int skill_cleartimerskill(struct map_session_data *sd);
-int skill_addtimerskill(struct map_session_data *sd,int tick,int interval,
-	int target,int x,int y,int skill_id,int skill_lv,int type,int flag);
+int skill_cleartimerskill(struct block_list *src);
+int skill_addtimerskill(struct block_list *src,int tick,int target,int x,int y,int skill_id,int skill_lv,int type,int flag);
 
 // ’Ç‰ÁŒø‰Ê
 int skill_additional_effect( struct block_list* src, struct block_list *bl,int skillid,int skilllv,unsigned int tick);

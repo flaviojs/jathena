@@ -49,6 +49,9 @@ static int atkmods[3][20];	// 武器ATKサイズ修正(size_fix.txt)
 static int refinebonus[5][3];	// 精錬ボーナステーブル(refine_db.txt)
 static int percentrefinery[5][10];	// 精錬成功率(refine_db.txt)
 
+static int dirx[8]={0,-1,-1,-1,0,1,1,1};
+static int diry[8]={1,1,0,-1,-1,-1,0,1};
+
 static struct dbt *gm_account_db;
 
 int pc_isGM(struct map_session_data *sd)
@@ -290,6 +293,7 @@ int pc_authok(int id,struct mmo_charstatus *st)
 		return 1;
 	}
 
+	memset(&sd->state,0,sizeof(sd->state));
 	// 基本的な初期化
 	sd->speed = DEFAULT_WALK_SPEED;
 	sd->state.dead_sit=0;
@@ -317,7 +321,6 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	sd->spiritball = 0;
 	for(i=0;i<10;i++)
 		sd->spirit_timer[i] = -1;
-	sd->skill_timer_count=0;
 	for(i=0;i<MAX_SKILLTIMERSKILL;i++)
 		sd->skilltimerskill[i].timer = -1;
 
@@ -1891,8 +1894,6 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 	struct map_session_data *sd;
 	int i;
 	int x,y,dx,dy;
-	static int dirx[8]={0,-1,-1,-1,0,1,1,1};
-	static int diry[8]={1,1,0,-1,-1,-1,0,1};
 
 	sd=map_id2sd(id);
 	if(sd==NULL)
@@ -2054,40 +2055,47 @@ int pc_stop_walking(struct map_session_data *sd)
  */
 int pc_movepos(struct map_session_data *sd,int dst_x,int dst_y)
 {
-	int x,y;
-	int moveblock;
+	int i;
+	int x,y,dx,dy;
 
-	if(sd->walktimer != -1){
-		delete_timer(sd->walktimer,pc_walk);
-		sd->walktimer=-1;
-		sd->walkpath.path_len=0;
-	}
+	struct walkpath_data wpd;
 
-	x = sd->bl.x;
-	y = sd->bl.y;
-	sd->dir=sd->head_dir=map_calc_dir((struct block_list *)sd,dst_x,dst_y);
+	if(path_search(&wpd,sd->bl.m,sd->bl.x,sd->bl.y,dst_x,dst_y,0))
+		return 1;
 
-	moveblock = ( x/BLOCK_SIZE != dst_x/BLOCK_SIZE || y/BLOCK_SIZE != dst_y/BLOCK_SIZE);
+	for(i=0;i<wpd.path_len;i++) {
+		int moveblock;
 
-	map_foreachinarea(clif_pcoutsight,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,0,sd);
+		if(wpd.path[i]>=8)
+			break;
 
-	x = dst_x;
-	y = dst_y;
+		x = sd->bl.x;
+		y = sd->bl.y;
+		sd->dir=sd->head_dir=wpd.path[i];
+		dx = dirx[(int)sd->dir];
+		dy = diry[(int)sd->dir];
+		moveblock = ( x/BLOCK_SIZE != (x+dx)/BLOCK_SIZE || y/BLOCK_SIZE != (y+dy)/BLOCK_SIZE);
 
-	if(moveblock) map_delblock(&sd->bl);
-	sd->bl.x = x;
-	sd->bl.y = y;
-	if(moveblock) map_addblock(&sd->bl);
+		map_foreachinmovearea(clif_pcoutsight,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,dx,dy,0,sd);
 
-	map_foreachinarea(clif_pcinsight,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,0,sd);
+		x += dx;
+		y += dy;
 
-	if(sd->status.party_id>0){	// パーティのＨＰ情報通知検査
-		struct party *p=party_search(sd->status.party_id);
-		if(p!=NULL){
-			int flag=0;
-			map_foreachinarea(party_send_hp_check,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,BL_PC,sd->status.party_id,&flag);
-			if(flag)
-				sd->party_hp=-1;
+		if(moveblock) map_delblock(&sd->bl);
+		sd->bl.x = x;
+		sd->bl.y = y;
+		if(moveblock) map_addblock(&sd->bl);
+
+		map_foreachinmovearea(clif_pcinsight,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,-dx,-dy,0,sd);
+
+		if(sd->status.party_id>0){	// パーティのＨＰ情報通知検査
+			struct party *p=party_search(sd->status.party_id);
+			if(p!=NULL){
+				int flag=0;
+				map_foreachinmovearea(party_send_hp_check,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,-dx,-dy,BL_PC,sd->status.party_id,&flag);
+				if(flag)
+					sd->party_hp=-1;
+			}
 		}
 	}
 	if(sd->status.option&4)	// クローキングの消滅検査
@@ -2095,8 +2103,8 @@ int pc_movepos(struct map_session_data *sd,int dst_x,int dst_y)
 
 	skill_unit_move(&sd->bl,gettick(),1);	// スキルユニットの検査
 
-	if(map_getcell(sd->bl.m,x,y)&0x80)
-		npc_touch_areanpc(sd,sd->bl.m,x,y);
+	if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y)&0x80)
+		npc_touch_areanpc(sd,sd->bl.m,sd->bl.x,sd->bl.y);
 
 	return 0;
 }

@@ -734,7 +734,7 @@ int map_quit(struct map_session_data *sd)
 	skill_castcancel(&sd->bl);	// 詠唱を中断する
 	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
 	skill_clear_unitgroup(&sd->bl);	// スキルユニットグループの削除
-	skill_cleartimerskill(sd);
+	skill_cleartimerskill(&sd->bl);
 	pc_stopattack(sd);
 	pc_delghosttimer(sd);
 	pc_delspiritball(sd,sd->spiritball,1);

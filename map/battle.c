@@ -539,7 +539,7 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 	if(target->type==BL_MOB){	// MOB
 
 		struct mob_data *md=(struct mob_data *)target;
-		if(md->skilltimer!=-1 && md->skillcastcancel)	// ârè•ñWäQ
+		if(md->skilltimer!=-1 && md->state.skillcastcancel)	// ârè•ñWäQ
 			skill_castcancel(target);
 		return mob_damage(sd,md,damage);
 
@@ -548,7 +548,7 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 		struct map_session_data *tsd=(struct map_session_data *)target;
 		if(tsd->skilltimer!=-1){	// ârè•ñWäQ
 				// ÉtÉFÉìÉJÅ[ÉhÇ‚ñWäQÇ≥ÇÍÇ»Ç¢ÉXÉLÉãÇ©ÇÃåüç∏
-			if( !pc_check_equip_dcard(tsd,4077) && tsd->skillcastcancel)
+			if( !pc_check_equip_dcard(tsd,4077) && tsd->state.skillcastcancel)
 				skill_castcancel(target);
 		}
 		return pc_damage(bl,tsd,damage);
@@ -1143,8 +1143,14 @@ struct Damage battle_calc_weapon_attack(
 				break;
 			case MO_FINGEROFFENSIVE:	//éwíe
 				if(!battle_config.finger_offencive_type) {
-					damage = damage * (100 + 50 * skill_lv) / 100 * sd->spiritball_old;
-					div_ = sd->spiritball_old;
+					if(src->type == BL_PC) {
+						damage = damage * (100 + 50 * skill_lv) / 100 * sd->spiritball_old;
+						div_ = sd->spiritball_old;
+					}
+					else {
+						damage = damage * (100 + 50 * skill_lv) / 100;
+						div_ = 1;
+					}
 				}
 				else {
 					damage = damage * (100 + 50 * skill_lv) / 100;
@@ -1659,12 +1665,19 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	struct map_session_data *sd=NULL;
 	sd = (struct map_session_data *)src;
 
+	if(src->prev == NULL || target->prev == NULL)
+		return 0;
+	if(src->type == BL_PC && pc_isdead((struct map_session_data *)src))
+		return 0;
+	if(target->type == BL_PC && pc_isdead((struct map_session_data *)target))
+		return 0;
+
 	if(battle_check_target(src,target,BCT_ENEMY) &&
 		battle_check_range(src,target->x,target->y,0)){
 		// çUåÇëŒè€Ç∆Ç»ÇËÇ§ÇÈÇÃÇ≈çUåÇ
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(src,target,0,0,0);
-		if (wd.div_ == 255)	//éOíiè∂
+		if (wd.div_ == 255 && src->type == BL_PC)	//éOíiè∂
 			clif_skill_damage(src , target , tick , wd.amotion , wd.dmotion , 
 				wd.damage , 3 , MO_TRIPLEATTACK, pc_checkskill(sd,MO_TRIPLEATTACK) , wd.type );
 		else

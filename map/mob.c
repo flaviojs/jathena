@@ -71,11 +71,9 @@ int mob_spawn_dataset(struct mob_data *md,const char *mobname,int class)
 	md->class=class;
 	md->bl.id= npc_get_new_npc_id();
 
-	md->state.state=0;
+	memset(&md->state,0,sizeof(md->state));
 	md->timer=0;
 	md->target_id=0;
-	md->state.targettype = NONE_ATTACKABLE;
-	md->state.targettype=0;
 	md->attacked_id=0;
 
 	return 0;
@@ -385,6 +383,7 @@ int mob_changestate(struct mob_data *md,int state)
 		clif_foreachclient(mob_stopattacked,md->bl.id);
 		skill_status_change_clear(&md->bl);	// ステータス異常を解除する
 		skill_clear_unitgroup(&md->bl);	// 全てのスキルユニットグループを削除する
+		skill_cleartimerskill(&md->bl);
 		md->hp=md->target_id=md->attacked_id=0;
 		md->state.targettype = NONE_ATTACKABLE;
 		break;
@@ -550,9 +549,9 @@ int mob_spawn(int id)
 		md->hp = mob_db[md->class].max_hp;
 	}
 
+	memset(&md->state,0,sizeof(md->state));
 	md->attacked_id = 0;
 	md->target_id = 0;
-	md->state.targettype = NONE_ATTACKABLE;
 	md->move_fail_count = 0;
 
 	md->speed = mob_db[md->class].speed;
@@ -571,15 +570,14 @@ int mob_spawn(int id)
 		md->skilldelay[i] = c;
 	md->skillid=0;
 	md->skilllv=0;
-	md->skillcastcancel=0;
 
 	memset(md->dmglog,0,sizeof(md->dmglog));
 	if(md->lootitem)
 		memset(md->lootitem,0,sizeof(md->lootitem));
 	md->lootitem_count = 0;
 	
-	md->state.steal_flag = 0;
-	md->state.steal_coin_flag = 0;
+	for(i=0;i<MAX_SKILLTIMERSKILL/2;i++)
+		md->skilltimerskill[i].timer = -1;
 
 	for(i=0;i<MAX_STATUSCHANGE;i++)
 		md->sc_data[i].timer=-1;
@@ -834,33 +832,50 @@ static int mob_ai_sub_hard_mastersearch(struct block_list *bl,va_list ap)
 	// 直前まで主が近くにいたのでテレポートして追いかける
 	if( old_dist<6 && md->master_dist>15){
 		mob_warp(md,mmd->bl.x,mmd->bl.y,3);
+		md->state.master_check = 1;
 		return 0;
 	}
 
 	// 主がいるが、少し遠いので近寄る
 	if((!md->target_id || md->state.targettype == NONE_ATTACKABLE) && mob_can_move(md) && 
-		(md->walkpath.path_pos>=md->walkpath.path_len || md->walkpath.path_len==0) &&
-		md->master_dist>5 && md->master_dist<15){
-		
+		(md->walkpath.path_pos>=md->walkpath.path_len || md->walkpath.path_len==0) && md->master_dist<15){
 		int i=0,dx,dy,ret;
-		do {
-			if(i<=5){
-				dx=mmd->bl.x - md->bl.x;
-				dy=mmd->bl.y - md->bl.y;
-				if(dx<0) dx+=(rand()%( (dx<-3)?3:-dx )+1);
-				else if(dx>0) dx-=(rand()%( (dx>3)?3:dx )+1);
-				if(dy<0) dy+=(rand()%( (dy<-3)?3:-dy )+1);
-				else if(dy>0) dy-=(rand()%( (dy>3)?3:dy )+1);
-			}else{
-				dx=mmd->bl.x - md->bl.x + rand()%7 - 3;
-				dy=mmd->bl.y - md->bl.y + rand()%7 - 3;
-			}
+		if(md->master_dist>4) {
+			do {
+				if(i<=5){
+					dx=mmd->bl.x - md->bl.x;
+					dy=mmd->bl.y - md->bl.y;
+					if(dx<0) dx+=(rand()%( (dx<-3)?3:-dx )+1);
+					else if(dx>0) dx-=(rand()%( (dx>3)?3:dx )+1);
+					if(dy<0) dy+=(rand()%( (dy<-3)?3:-dy )+1);
+					else if(dy>0) dy-=(rand()%( (dy>3)?3:dy )+1);
+				}else{
+					dx=mmd->bl.x - md->bl.x + rand()%7 - 3;
+					dy=mmd->bl.y - md->bl.y + rand()%7 - 3;
+				}
 
-			ret=mob_walktoxy(md,md->bl.x+dx,md->bl.y+dy,0);
-			i++;
-		} while(ret && i<10);
-			
+				ret=mob_walktoxy(md,md->bl.x+dx,md->bl.y+dy,0);
+				i++;
+			} while(ret && i<10);
+		}
+		else {
+			do {
+				dx = rand()%9 - 5;
+				dy = rand()%9 - 5;
+				if( dx == 0 && dy == 0) {
+					dx = (rand()%1)? 1:-1;
+					dy = (rand()%1)? 1:-1;
+				}
+				dx += mmd->bl.x;
+				dy += mmd->bl.y;
+
+				ret=mob_walktoxy(md,mmd->bl.x+dx,mmd->bl.y+dy,0);
+				i++;
+			} while(ret && i<10);
+		}
+
 		md->next_walktime=tick+500;
+		md->state.master_check = 1;
 	}
 
 	// 主がいて、主がロックしていて自分はロックしていない
@@ -877,6 +892,7 @@ static int mob_ai_sub_hard_mastersearch(struct block_list *bl,va_list ap)
 				md->target_id=sd->bl.id;
 				md->state.targettype = ATTACKABLE;
 				md->min_chase=5+distance(md->bl.x,md->bl.y,sd->bl.x,sd->bl.y);
+				md->state.master_check = 1;
 			}
 		}
 	}
@@ -1020,6 +1036,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 		}
 	}
 
+	md->state.master_check = 0;
 	// 取り巻きモンスターの主の検索
 	if( md->master_id > 0 )
 		map_foreachinarea(mob_ai_sub_hard_mastersearch,md->bl.m,
@@ -1028,7 +1045,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 						  BL_MOB,md,tick);
 
 	// アクティヴモンスターの策敵
-	if( (!md->target_id || md->state.targettype == NONE_ATTACKABLE) && mode&0x04 ){
+	if( (!md->target_id || md->state.targettype == NONE_ATTACKABLE) && mode&0x04 && !md->state.master_check){
 		i=0;
 		map_foreachinarea(mob_ai_sub_hard_activesearch,md->bl.m,
 						  md->bl.x-AREA_SIZE*2,md->bl.y-AREA_SIZE*2,
@@ -1037,7 +1054,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 	}
 	
 	// ルートモンスターのアイテムサーチ
-	if( !md->target_id && mode&0x02 ){
+	if( !md->target_id && mode&0x02 && !md->state.master_check){
 		i=0;
 		map_foreachinarea(mob_ai_sub_hard_lootsearch,md->bl.m,
 						  md->bl.x-AREA_SIZE*2,md->bl.y-AREA_SIZE*2,
@@ -1415,8 +1432,16 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 		printf("mob_damage : BlockError!!\n");return 0;
 	}
 
-	if(md->state.state==MS_DEAD || md->hp<=0)
+	if(md->state.state==MS_DEAD || md->hp<=0) {
+		if(md->bl.prev != NULL) {
+			mob_changestate(md,MS_DEAD);
+			mobskill_use(md,gettick(),-1);	// 死亡時スキル
+			clif_clearchar_area(&md->bl,1);
+			map_delblock(&md->bl);
+			mob_setdelayspawn(md->bl.id);
+		}
 		return 0;
+	}
 
 //	if(md->state.state==MS_WALK){
 //		mob_changestate(md,MS_IDLE);
@@ -1893,7 +1918,7 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 //	sd->skillcastcancel=1;
 
 	casttime=ms->casttime;
-	md->skillcastcancel=ms->cancel;
+	md->state.skillcastcancel=ms->cancel;
 	md->skilldelay[skill_idx]=gettick();
 	
 	printf("MOB skill use target_id=%d skill=%d lv=%d cast=%d\n"
@@ -1914,7 +1939,7 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	}
 	
 	if( casttime<=0 )	// 詠唱の無いものはキャンセルされない
-		md->skillcastcancel=0;
+		md->state.skillcastcancel=0;
 
 	md->skilltarget	= target->id;
 	md->skillx		= 0;
@@ -1960,7 +1985,7 @@ int mobskill_use_pos( struct mob_data *md,
 //	delay=skill_delayfix(&sd->bl, skill_get_delay( skill_num,skill_lv) );
 	casttime=ms->casttime;
 	md->skilldelay[skill_idx]=gettick();
-	md->skillcastcancel=ms->cancel;
+	md->state.skillcastcancel=ms->cancel;
 
 	printf("MOB skill use target_pos=(%d,%d) skill=%d lv=%d cast=%d\n",
 		skill_x,skill_y,skill_num,skill_lv,casttime);
@@ -1970,7 +1995,7 @@ int mobskill_use_pos( struct mob_data *md,
 			md->bl.id, 0, skill_x,skill_y, skill_num,casttime);
 
 	if( casttime<=0 )	// 詠唱の無いものはキャンセルされない
-		md->skillcastcancel=0;
+		md->state.skillcastcancel=0;
 
 
 	md->skillx		= skill_x;
