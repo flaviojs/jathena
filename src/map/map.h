@@ -172,6 +172,7 @@ struct map_session_data {
 
 	int attacktimer;
 	int attacktarget;
+	short attacktarget_lv;
 	unsigned int attackabletime;
 
 	short attackrange,attackrange_;
@@ -337,6 +338,7 @@ struct mob_data {
 	short speed;
 	int hp;
 	int target_id,attacked_id;
+	short target_lv;
 	struct walkpath_data walkpath;
 	unsigned int next_walktime;
 	unsigned int attackabletime;
@@ -383,6 +385,7 @@ struct pet_data {
 	short equip;
 	struct walkpath_data walkpath;
 	int target_id;
+	short target_lv;
 	int move_fail_count;
 	unsigned int attackabletime,next_walktime,last_thinktime;
 	struct item *lootitem;
@@ -394,6 +397,8 @@ struct pet_data {
 enum { MS_IDLE,MS_WALK,MS_ATTACK,MS_DEAD,MS_DELAY };
 
 enum { NONE_ATTACKABLE,ATTACKABLE };
+
+enum { ATK_LUCKY=1,ATK_FLEE,ATK_DEF};	// 囲まれペナルティ計算用
 
 struct map_data {
 	char name[24];
@@ -518,6 +523,8 @@ int map_delblock(struct block_list *);
 void map_foreachinarea(int (*)(struct block_list*,va_list),int,int,int,int,int,int,...);
 void map_foreachinmovearea(int (*)(struct block_list*,va_list),int,int,int,int,int,int,int,int,...);
 int map_countnearpc(int,int,int);
+//block関連に追加
+int map_count_oncell(int m,int x,int y);
 // 一時的object関連
 int map_addobject(struct block_list *);
 int map_delobject(int);
@@ -561,5 +568,7 @@ int map_calc_dir( struct block_list *src,int x,int y);
 // path.cより
 int path_search(struct walkpath_data*,int,int,int,int,int,int);
 int path_blownpos(int m,int x0,int y0,int dx,int dy,int count);
+
+
 
 #endif

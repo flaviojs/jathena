@@ -495,24 +495,24 @@ OnRecvCastleG04:
 	end;
 }
 //-------------------------------執事---------------------------------
-gefg_cas04.gat,73,46,3	script	ケルバーリ	55,{
-	set @GIDg4,getcastledata("gefg_cas04.gat",1);
-	if (getcharid(2) == @GIDg4) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事ケルバーリ]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDg4) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//gefg_cas04.gat,73,46,3	script	ケルバーリ	55,{
+//	set @GIDg4,getcastledata("gefg_cas04.gat",1);
+//	if (getcharid(2) == @GIDg4) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事ケルバーリ]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDg4) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
 gefg_cas04.gat,113,115,0	script	　	111,{
 	mes "小さなレバーがあります。";

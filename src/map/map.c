@@ -263,6 +263,37 @@ int map_countnearpc(int m,int x,int y)
 }
 
 /*==========================================
+ * セル上のPCとMOBの数を数える (グランドクロス用)
+ *------------------------------------------
+ */
+int map_count_oncell(int m,int x,int y)
+{
+	int bx,by;
+	struct block_list *bl;
+	int i,c;
+	int count = 0;
+
+	if (x < 0 || y < 0 || (x >= map[m].xs) || (y >= map[m].ys))
+		return 1;
+	bx = x/BLOCK_SIZE;
+	by = y/BLOCK_SIZE;
+
+	bl = map[m].block[bx+by*map[m].bxs];
+	c = map[m].block_count[bx+by*map[m].bxs];
+	for(i=0;i<c && bl;i++,bl=bl->next){
+		if(bl->x == x && bl->y == y && bl->type == BL_PC) count++;
+	}
+	bl = map[m].block_mob[bx+by*map[m].bxs];
+	c = map[m].block_mob_count[bx+by*map[m].bxs];
+	for(i=0;i<c && bl;i++,bl=bl->next){
+		if(bl->x == x && bl->y == y) count++;
+	}
+	if(!count) count = 1;
+	return count;
+}
+
+
+/*==========================================
  * map m (x0,y0)-(x1,y1)内の全objに対して
  * funcを呼ぶ
  * type!=0 ならその種類のみ

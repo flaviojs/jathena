@@ -39,12 +39,12 @@ static int distance(int x0,int y0,int x1,int y1)
  * 戻りは整数で0以上
  *------------------------------------------
  */
-int battle_counttargeted(struct block_list *bl,struct block_list *src)
+int battle_counttargeted(struct block_list *bl,struct block_list *src,int target_lv)
 {
 	if(bl->type == BL_PC)
-		return pc_counttargeted((struct map_session_data *)bl,src);
+		return pc_counttargeted((struct map_session_data *)bl,src,target_lv);
 	else if(bl->type == BL_MOB)
-		return mob_counttargeted((struct mob_data *)bl,src);
+		return mob_counttargeted((struct mob_data *)bl,src,target_lv);
 	return 0;
 }
 /*==========================================
@@ -1571,7 +1571,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	int t_vit = battle_get_vit(target);
 	struct Damage wd;
 	int damage,damage2=0,type,div_,blewcount=skill_get_blewcount(skill_num,skill_lv);
-	int flag;
+	int flag,dmg_lv=0;
 	int t_mode=0,t_race=0,t_size=1,s_race=0,s_ele=0;
 	struct status_change *t_sc_data;
 
@@ -1595,7 +1595,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	// 回避率計算、回避判定は後で
 	flee = battle_get_flee(target);
 	if(battle_config.agi_penaly_type > 0 || battle_config.vit_penaly_type > 0)
-		target_count += battle_counttargeted(target,src);
+		target_count += battle_counttargeted(target,src,battle_config.agi_penaly_count_lv);
 	if(battle_config.agi_penaly_type > 0) {
 		if(target_count >= battle_config.agi_penaly_count) {
 			if(battle_config.agi_penaly_type == 1)
@@ -1831,6 +1831,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 			// ディバインプロテクション（ここでいいのかな？）
 			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && def1 < 1000000 ) {	//DEF, VIT無視
 				int t_def;
+				target_count = 1 + battle_counttargeted(target,src,battle_config.vit_penaly_count_lv);
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
 						if(battle_config.vit_penaly_type == 1) {
@@ -1871,8 +1872,14 @@ static struct Damage battle_calc_pet_weapon_attack(
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
 		t_sc_data[SC_FREEZE].timer!=-1 || (t_sc_data[SC_STONE].timer!=-1 && t_sc_data[SC_STONE].val2==0) ) ) )	// 凍結は必中
 		hitrate = 1000000;
-	if(type == 0 && rand()%100 >= hitrate)
-		damage = 0;
+	if(type == 0 && rand()%100 >= hitrate) {
+		damage = damage2 = 0;
+		dmg_lv = ATK_FLEE;
+	} else {
+		dmg_lv = ATK_DEF;
+	}
+
+	
 	if(t_sc_data) {
 		int cardfix=100;
 		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG)
@@ -1896,9 +1903,10 @@ static struct Damage battle_calc_pet_weapon_attack(
 
 	// 完全回避の判定
 	if(battle_config.enemy_perfect_flee) {
-		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
+		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && rand()%1000 < battle_get_flee2(target) ){
 			damage=0;
 			type=0x0b;
+			dmg_lv = ATK_LUCKY;
 		}
 	}
 
@@ -1919,6 +1927,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 	wd.dmotion=battle_get_dmotion(target);
 	wd.blewcount=blewcount;
 	wd.flag=flag;
+	wd.dmg_lv=dmg_lv;
 
 	return wd;
 }
@@ -1935,7 +1944,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	int t_vit = battle_get_vit(target);
 	struct Damage wd;
 	int damage,damage2=0,type,div_,blewcount=skill_get_blewcount(skill_num,skill_lv);
-	int flag,skill,ac_flag = 0;
+	int flag,skill,ac_flag = 0,dmg_lv = 0;
 	int t_mode=0,t_race=0,t_size=1,s_race=0,s_ele=0;
 	struct status_change *sc_data,*t_sc_data;
 	short *sc_count;
@@ -1984,7 +1993,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	// 回避率計算、回避判定は後で
 	flee = battle_get_flee(target);
 	if(battle_config.agi_penaly_type > 0 || battle_config.vit_penaly_type > 0)
-		target_count += battle_counttargeted(target,src);
+		target_count += battle_counttargeted(target,src,battle_config.agi_penaly_count_lv);
 	if(battle_config.agi_penaly_type > 0) {
 		if(target_count >= battle_config.agi_penaly_count) {
 			if(battle_config.agi_penaly_type == 1)
@@ -2246,6 +2255,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 			// ディバインプロテクション（ここでいいのかな？）
 			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && def1 < 1000000) {	//DEF, VIT無視
 				int t_def;
+				target_count = 1 + battle_counttargeted(target,src,battle_config.vit_penaly_count_lv);
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
 						if(battle_config.vit_penaly_type == 1) {
@@ -2290,8 +2300,12 @@ static struct Damage battle_calc_mob_weapon_attack(
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
 		t_sc_data[SC_FREEZE].timer!=-1 || (t_sc_data[SC_STONE].timer!=-1 && t_sc_data[SC_STONE].val2==0) ) ) )	// 凍結は必中
 		hitrate = 1000000;
-	if(type == 0 && rand()%100 >= hitrate)
-		damage = 0;
+	if(type == 0 && rand()%100 >= hitrate) {
+		damage = damage2 = 0;
+		dmg_lv = ATK_FLEE;
+	} else {
+		dmg_lv = ATK_DEF;
+	}
 
 	if( target->type==BL_PC){
 		int cardfix=100,i;
@@ -2335,15 +2349,17 @@ static struct Damage battle_calc_mob_weapon_attack(
 	}
 
 	// 完全回避の判定
-	if(skill_num == 0 && skill_lv >= 0 && tsd!=NULL && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
+	if(skill_num == 0 && skill_lv >= 0 && tsd!=NULL && rand()%1000 < battle_get_flee2(target) ){
 		damage=0;
 		type=0x0b;
+		dmg_lv = ATK_LUCKY;
 	}
 
 	if(battle_config.enemy_perfect_flee) {
-		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
+		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && rand()%1000 < battle_get_flee2(target) ){
 			damage=0;
 			type=0x0b;
+			dmg_lv = ATK_LUCKY;
 		}
 	}
 
@@ -2367,7 +2383,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	wd.dmotion=battle_get_dmotion(target);
 	wd.blewcount=blewcount;
 	wd.flag=flag;
-
+	wd.dmg_lv=dmg_lv;
 	return wd;
 }
 /*
@@ -2387,7 +2403,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	int t_vit = battle_get_vit(target);
 	struct Damage wd;
 	int damage,damage2,damage3=0,damage4=0,type,div_,blewcount=skill_get_blewcount(skill_num,skill_lv);
-	int flag,skill;
+	int flag,skill,dmg_lv = 0;
 	int t_mode=0,t_race=0,t_size=1,s_race=7,s_ele=0;
 	struct status_change *sc_data,*t_sc_data;
 	short *sc_count;
@@ -2449,7 +2465,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	// 回避率計算、回避判定は後で
 	flee = battle_get_flee(target);
 	if(battle_config.agi_penaly_type > 0 || battle_config.vit_penaly_type > 0) //AGI、VITペナルティ設定が有効
-		target_count += battle_counttargeted(target,src); //対象の数を算出
+		target_count += battle_counttargeted(target,src,battle_config.agi_penaly_count_lv);	//対象の数を算出
 	if(battle_config.agi_penaly_type > 0) {
 		if(target_count >= battle_config.agi_penaly_count) { //ペナルティ設定より対象が多い
 			if(battle_config.agi_penaly_type == 1) //回避率がagi_penaly_num%ずつ減少
@@ -2472,48 +2488,36 @@ static struct Damage battle_calc_pc_weapon_attack(
 	damage = damage2 = battle_get_baseatk(&sd->bl); //damega,damega2初登場、base_atkの取得
 	atkmin = atkmin_ = dex; //最低ATKはDEXで初期化？
 	sd->state.arrow_atk = 0; //arrow_atk初期化
+	if(sd->equip_index[9] >= 0 && sd->inventory_data[sd->equip_index[9]])
+		atkmin = atkmin*(80 + sd->inventory_data[sd->equip_index[9]]->wlv*20)/100;
+	if(sd->equip_index[8] >= 0 && sd->inventory_data[sd->equip_index[8]])
+		atkmin_ = atkmin_*(80 + sd->inventory_data[sd->equip_index[8]]->wlv*20)/100;
 	if(sd->status.weapon == 11) { //武器が弓矢の場合
-		atkmin = watk * ((dex<watk)? dex:watk); //最低ATK再計算
+		atkmin = watk * ((atkmin<watk)? atkmin:watk)/100; //弓用最低ATK計算
 		flag=(flag&~BF_RANGEMASK)|BF_LONG; //遠距離攻撃フラグを有効
 		if(sd->arrow_ele > 0) //属性矢なら属性を矢の属性に変更
 			s_ele = sd->arrow_ele;
 		sd->state.arrow_atk = 1; //arrow_atk有効化
 	}
-	if(sd->equip_index[9] >= 0 && sd->inventory_data[sd->equip_index[9]])
-		atkmin = atkmin*(80 + sd->inventory_data[sd->equip_index[9]]->wlv*20)/100;
-	if(sd->equip_index[8] >= 0 && sd->inventory_data[sd->equip_index[8]])
-		atkmin_ = atkmin_*(80 + sd->inventory_data[sd->equip_index[8]]->wlv*20)/100;
-	if(sd->state.arrow_atk)
-		atkmin/=100;
 
 		// サイズ修正
 		// ペコ騎乗していて、槍で攻撃した場合は中型のサイズ修正を100にする
 		// ウェポンパーフェクション,ドレイクC
-	if(sd->special_state.no_sizefix){	// ドレイクカード
+	if((pc_isriding(sd) && (sd->status.weapon==4 || sd->status.weapon==5) && t_size==1) || skill_num == MO_EXTREMITYFIST) {	//ペコ騎乗していて、槍で中型を攻撃
 		atkmax = watk;
 		atkmax_ = watk_;
+	} else {
+		atkmax = (watk * sd->atkmods[ t_size ]) / 100;
+		atkmin = (atkmin * sd->atkmods[ t_size ]) / 100;
+		atkmax_ = (watk_ * sd->atkmods_[ t_size ]) / 100;
+		atkmin_ = (atkmin_ * sd->atkmods[ t_size ]) / 100;
 	}
-	else if( target->type==BL_MOB ){
-		if((pc_isriding(sd) && (sd->status.weapon==4 || sd->status.weapon==5) && t_size==1) || skill_num == MO_EXTREMITYFIST) {	//ペコ騎乗していて、槍で中型を攻撃
-			atkmax = watk;
-			atkmax_ = watk_;
-		}
-		else {
-			atkmax = (watk * sd->atkmods[ t_size ]) / 100;
-			atkmax_ = (watk_ * sd->atkmods_[ t_size ]) / 100;
-		}
-	}
-	else {
+	if( (sc_data != NULL && sc_data[SC_WEAPONPERFECTION].timer!=-1) || (sd->special_state.no_sizefix)) {	// ウェポンパーフェクション || ドレイクカード
 		atkmax = watk;
 		atkmax_ = watk_;
 	}
 
-	if(sc_data != NULL && sc_data[SC_WEAPONPERFECTION].timer!=-1 ) {	// ウェポンパーフェクション
-		atkmax = watk;
-		atkmax_ = watk_;
-	}
-
-	if(atkmin > atkmax) atkmin = atkmax;
+	if(atkmin > atkmax && !(sd->state.arrow_atk)) atkmin = atkmax;	//弓は最低が上回る場合あり
 	if(atkmin_ > atkmax_) atkmin_ = atkmax_;
 
 	if(sc_data != NULL && sc_data[SC_MAXIMIZEPOWER].timer!=-1 ){	// マキシマイズパワー
@@ -2972,6 +2976,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 			// ディバインプロテクション（ここでいいのかな？）
 			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && def1 < 1000000) {	//DEF, VIT無視
 				int t_def;
+				target_count = 1 + battle_counttargeted(target,src,battle_config.vit_penaly_count_lv);
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
 						if(battle_config.vit_penaly_type == 1) {
@@ -3065,9 +3070,12 @@ static struct Damage battle_calc_pc_weapon_attack(
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
 		t_sc_data[SC_FREEZE].timer!=-1 || (t_sc_data[SC_STONE].timer!=-1 && t_sc_data[SC_STONE].val2==0) ) ) )	// 凍結は必中
 		hitrate = 1000000;
-	if(type == 0 && rand()%100 >= hitrate)
+	if(type == 0 && rand()%100 >= hitrate) {
 		damage = damage2 = 0;
-
+		dmg_lv = ATK_FLEE;
+	} else {
+		dmg_lv = ATK_DEF;
+	}
 	// スキル修正３（武器研究）
 	if( (skill=pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0) {
 		damage+= skill*2;
@@ -3122,7 +3130,8 @@ static struct Damage battle_calc_pc_weapon_attack(
 			break;
 		}
 	}
-	damage=damage*cardfix/100; //カード補正によるダメージ増加
+	if(skill_num != CR_GRANDCROSS || !battle_config.gx_cardfix)
+		damage=damage*cardfix/100; //カード補正によるダメージ増加
 //カードによるダメージ増加処理ここまで
 
 //カードによるダメージ追加処理(左手)ここから
@@ -3143,7 +3152,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 			break;
 		}
 	}
-	damage2=damage2*cardfix/100; //カード補正による左手ダメージ増加
+	if(skill_num != CR_GRANDCROSS) damage2=damage2*cardfix/100; //カード補正による左手ダメージ増加
 //カードによるダメージ増加処理(左手)ここまで
 
 //カードによるダメージ減衰処理ここから
@@ -3243,16 +3252,18 @@ static struct Damage battle_calc_pc_weapon_attack(
 	}
 
 	// 完全回避の判定
-	if(skill_num == 0 && skill_lv >= 0 && tsd!=NULL && div_ < 255 && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ){
+	if(skill_num == 0 && skill_lv >= 0 && tsd!=NULL && div_ < 255 && rand()%1000 < battle_get_flee2(target) ){
 		damage=damage2=0;
 		type=0x0b;
+		dmg_lv = ATK_LUCKY;
 	}
 
 	// 対象が完全回避をする設定がONなら
 	if(battle_config.enemy_perfect_flee) {
-		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && div_ < 255 && hitrate < 1000000 && rand()%1000 < battle_get_flee2(target) ) {
+		if(skill_num == 0 && skill_lv >= 0 && tmd!=NULL && div_ < 255 && rand()%1000 < battle_get_flee2(target) ) {
 			damage=damage2=0;
 			type=0x0b;
+			dmg_lv = ATK_LUCKY;
 		}
 	}
 
@@ -3292,6 +3303,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	wd.dmotion=battle_get_dmotion(target);
 	wd.blewcount=blewcount;
 	wd.flag=flag;
+	wd.dmg_lv=dmg_lv;
 
 	return wd;
 }
@@ -3538,6 +3550,8 @@ struct Damage battle_calc_magic_attack(
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(bl,target,skill_num,skill_lv,flag);
 		damage = (damage + wd.damage) * (100 + 40*skill_lv)/100;
+		if(battle_config.gx_dupele) damage=battle_attr_fix(damage, ele, battle_get_element(target) );	//属性2回かかる
+		if(bl==target) damage=damage/2;	//反動は半分
 	}
 
 	div_=skill_get_num( skill_num,skill_lv );
@@ -3728,6 +3742,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	short *opt1;
 	int race = 7, ele = 0;
 	int damage,rdamage = 0;
+	struct Damage wd;
 
 	if(src->type == BL_PC)
 		sd = (struct map_session_data *)src;
@@ -3754,7 +3769,6 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	if(battle_check_target(src,target,BCT_ENEMY) > 0 &&
 		battle_check_range(src,target,0)){
 		// 攻撃対象となりうるので攻撃
-		struct Damage wd;
 		if(src->type == BL_PC && sd->status.weapon == 11) {
 			if(sd->equip_index[10] >= 0) {
 				if(battle_config.arrow_decrement)
@@ -3960,7 +3974,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 
 		map_freeblock_unlock();
 	}
-	return 0;
+	return wd.dmg_lv;
 }
 
 int battle_check_undead(int race,int element)
@@ -4272,9 +4286,11 @@ int battle_config_read(const char *cfgName)
 		battle_config.agi_penaly_type = 0;
 		battle_config.agi_penaly_count = 3;
 		battle_config.agi_penaly_num = 0;
+		battle_config.agi_penaly_count_lv = ATK_FLEE;
 		battle_config.vit_penaly_type = 0;
 		battle_config.vit_penaly_count = 3;
 		battle_config.vit_penaly_num = 0;
+		battle_config.vit_penaly_count_lv = ATK_DEF;
 		battle_config.player_defense_type = 0;
 		battle_config.monster_defense_type = 0;
 		battle_config.pet_defense_type = 0;
@@ -4313,6 +4329,10 @@ int battle_config_read(const char *cfgName)
 		battle_config.pet_attack_attr_none = 0;
 		battle_config.pc_attack_attr_none = 0;
 		battle_config.mob_attack_attr_none = 1;
+		battle_config.gx_allhit = 0;
+		battle_config.gx_cardfix = 0;
+		battle_config.gx_dupele = 1;
+		battle_config.gx_disptype = 1;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4429,9 +4449,11 @@ int battle_config_read(const char *cfgName)
 			{ "agi_penaly_type",			&battle_config.agi_penaly_type			},
 			{ "agi_penaly_count",			&battle_config.agi_penaly_count			},
 			{ "agi_penaly_num",				&battle_config.agi_penaly_num			},
+			{ "agi_penaly_count_lv",		&battle_config.agi_penaly_count_lv		},
 			{ "vit_penaly_type",			&battle_config.vit_penaly_type			},
 			{ "vit_penaly_count",			&battle_config.vit_penaly_count			},
 			{ "vit_penaly_num",				&battle_config.vit_penaly_num			},
+			{ "vit_penaly_count_lv",		&battle_config.vit_penaly_count_lv		},
 			{ "player_defense_type",		&battle_config.player_defense_type		},
 			{ "monster_defense_type",		&battle_config.monster_defense_type		},
 			{ "pet_defense_type",			&battle_config.pet_defense_type			},
@@ -4470,6 +4492,11 @@ int battle_config_read(const char *cfgName)
 			{ "pet_attack_attr_none", 		&battle_config.pet_attack_attr_none		},
 			{ "mob_attack_attr_none", 		&battle_config.mob_attack_attr_none		},
 			{ "pc_attack_attr_none", 		&battle_config.pc_attack_attr_none		},
+			{ "gx_allhit", 					&battle_config.gx_allhit				},
+			{ "gx_cardfix",					&battle_config.gx_cardfix				},
+			{ "gx_dupele", 					&battle_config.gx_dupele				},
+			{ "gx_disptype", 				&battle_config.gx_disptype				},
+
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

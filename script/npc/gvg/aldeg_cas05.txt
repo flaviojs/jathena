@@ -759,26 +759,26 @@ OnRecvCastleA05:
 	end;
 }
 //-------------------------------執事---------------------------------
-aldeg_cas05.gat,51,179,0	script	ブリムヘンセン	55,{
-	set @GIDa5,getcastledata("aldeg_cas05.gat",1);
-	if (getcharid(2) == @GIDa5) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事ブリムヘンセン]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDa5) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//aldeg_cas05.gat,51,179,0	script	ブリムヘンセン	55,{
+//	set @GIDa5,getcastledata("aldeg_cas05.gat",1);
+//	if (getcharid(2) == @GIDa5) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事ブリムヘンセン]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDa5) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
-aldeg_cas05.gat,68,13,0	script	　	111,{
+aldeg_cas05.gat,64,8,0	script	　	111,{
 	mes "小さなレバーがあります。";
 	mes "引きますか？";
 	next;

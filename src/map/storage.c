@@ -18,6 +18,35 @@
 static struct dbt *storage_db;
 static struct dbt *guild_storage_db;
 
+/*==========================================
+ * 倉庫内アイテムソート
+ *------------------------------------------
+ */
+int storage_comp_item(const struct item* i1, const struct item* i2){
+	if (i1->nameid == i2->nameid) {
+		return 0;
+	} else if (!(i1->nameid) || !(i1->amount)){
+		return 1;
+	} else if (!(i2->nameid) || !(i2->amount)){
+		return -1;
+	} else {
+		return i1->nameid - i2->nameid;
+	}
+}
+
+ 
+void sortage_sortitem(struct storage* stor){
+	qsort(stor->storage, MAX_STORAGE, sizeof(struct item), storage_comp_item);
+}
+
+void sortage_gsortitem(struct guild_storage* gstor){
+	qsort(gstor->storage, MAX_GUILD_STORAGE, sizeof(struct item), storage_comp_item);
+}
+
+/*==========================================
+ * 初期化とか
+ *------------------------------------------
+ */
 int do_init_storage(void) // map.c::do_init()から呼ばれる
 {
 	storage_db=numdb_init();
@@ -237,12 +266,12 @@ int storage_storagegettocart(struct map_session_data *sd,int index,int amount)
 int storage_storageclose(struct map_session_data *sd)
 {
 	struct storage *stor;
-
 	stor=account2storage(sd->status.account_id);
 	stor->storage_status=0;
 	sd->state.storage_flag = 0;
 	clif_storageclose(sd);
 
+	sortage_sortitem(stor);
 	return 0;
 }
 
@@ -460,11 +489,11 @@ int storage_guild_storagegettocart(struct map_session_data *sd,int index,int amo
 int storage_guild_storageclose(struct map_session_data *sd)
 {
 	struct guild_storage *stor;
-
 	if((stor=guild2storage(sd->status.guild_id)) != NULL) {
 		intif_send_guild_storage(sd->status.account_id,stor);
 		stor->storage_status = 0;
 		sd->state.storage_flag = 0;
+		sortage_gsortitem(stor);
 	}
 	clif_storageclose(sd);
 

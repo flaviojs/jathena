@@ -835,26 +835,26 @@ OnRecvCastleA04:
 	end;
 }
 //-------------------------------執事---------------------------------
-aldeg_cas04.gat,67,116,0	script	ウィリオット	55,{
-	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
-	if (getcharid(2) == @GIDa4) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事ウィリオット]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDa4) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//aldeg_cas04.gat,67,116,0	script	ウィリオット	55,{
+//	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
+//	if (getcharid(2) == @GIDa4) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事ウィリオット]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDa4) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
-aldeg_cas04.gat,79,15,0	script	　	111,{
+aldeg_cas04.gat,83,17,0	script	　	111,{
 	mes "小さなレバーがあります。";
 	mes "引きますか？";
 	next;

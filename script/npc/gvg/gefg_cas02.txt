@@ -531,26 +531,26 @@ OnRecvCastleG02:
 	end;
 }
 //-------------------------------執事---------------------------------
-gefg_cas02.gat,12,66,5	script	エスマーク	55,{
-	set @GIDg2,getcastledata("gefg_cas02.gat",1);
-	if (getcharid(2) == @GIDg2) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事エスマーク]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDg2) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//gefg_cas02.gat,12,66,5	script	エスマーク	55,{
+//	set @GIDg2,getcastledata("gefg_cas02.gat",1);
+//	if (getcharid(2) == @GIDg2) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事エスマーク]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDg2) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
-gefg_cas02.gat,137,113,0	script	　	111,{
+gefg_cas02.gat,145,115,0	script	　	111,{
 	mes "小さなレバーがあります。";
 	mes "引きますか？";
 	next;

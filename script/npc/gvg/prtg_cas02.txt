@@ -721,24 +721,24 @@ OnRecvCastleP02:
 	end;
 }
 //-------------------------------執事---------------------------------
-prtg_cas02.gat,94,61,4	script	ルエ	55,{
-	set @GIDp2,getcastledata("prtg_cas02.gat",1);
-	if (getcharid(2) == @GIDp2) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事ルエ]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDp2) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//prtg_cas02.gat,94,61,4	script	ルエ	55,{
+//	set @GIDp2,getcastledata("prtg_cas02.gat",1);
+//	if (getcharid(2) == @GIDp2) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事ルエ]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDp2) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
 prtg_cas02.gat,206,228,0	script	　	111,{
 	mes "小さなレバーがあります。";

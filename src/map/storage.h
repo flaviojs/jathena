@@ -28,4 +28,8 @@ int storage_guild_storagegettocart(struct map_session_data *sd,int index,int amo
 int storage_guild_storageclose(struct map_session_data *sd);
 int storage_guild_storage_quit(struct map_session_data *sd,int flag);
 
+int storage_comp_item(const struct item* i1, const struct item* i2);
+void sortage_sortitem(struct storage* stor);
+void sortage_gsortitem(struct guild_storage* gstor);
+
 #endif

@@ -493,26 +493,26 @@ OnRecvCastleG01:
 	end;
 }
 //-------------------------------執事---------------------------------
-gefg_cas01.gat,40,48,5	script	グナフチョ	55,{
-	set @GIDg1,getcastledata("gefg_cas01.gat",1);
-	if (getcharid(2) == @GIDg1) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事グナフチョ]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDg1) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//gefg_cas01.gat,40,48,5	script	グナフチョ	55,{
+//	set @GIDg1,getcastledata("gefg_cas01.gat",1);
+//	if (getcharid(2) == @GIDg1) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事グナフチョ]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDg1) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
-gefg_cas01.gat,151,109,0	script	　	111,{
+gefg_cas01.gat,152,117,0	script	　	111,{
 	mes "小さなレバーがあります。";
 	mes "引きますか？";
 	next;

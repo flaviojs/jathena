@@ -837,24 +837,24 @@ OnRecvCastleA01:
 	end;
 }
 //-------------------------------執事---------------------------------
-aldeg_cas01.gat,218,175,0	script	アルプレド	55,{
-	set @GIDa1,getcastledata("aldeg_cas01.gat",1);
-	if (getcharid(2) == @GIDa1) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事アルプレド]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDa1) + "^000000 様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//aldeg_cas01.gat,218,175,0	script	アルプレド	55,{
+//	set @GIDa1,getcastledata("aldeg_cas01.gat",1);
+//	if (getcharid(2) == @GIDa1) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事アルプレド]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDa1) + "^000000 様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
 aldeg_cas01.gat,123,223,0	script	　	111,{
 	mes "小さなレバーがあります。";
@@ -867,7 +867,8 @@ L2:
 	close;
 }
 //-----------------------------スイッチ2------------------------------
-aldeg_cas01.gat,123,223,0	script	　	111,{
+//aldeg_cas01のみスイッチ1と同座標だったので、適当な座標に設置。
+aldeg_cas01.gat,211,179,0	script	　	111,{
 	mes "[声]";
 	mes "試練に挑むならば先へ進むがよい";
 	next;

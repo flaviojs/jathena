@@ -650,7 +650,7 @@ OnRecvCastleP01:
 //	if (getcharid(2) == @GIDp1) goto LStartg;
 //	mes "NO MSG";
 //	close;
-LStartgm:
+//LStartgm:
 //	mes "[執事アブライ]";
 //	mes "あなた方がいくら脅そうとも、";
 //	mes "私は私のマスターである";
@@ -669,7 +669,7 @@ prtg_cas01.gat,15,209,0	script	　	111,{
 	mes "引きますか？";
 	next;
 	menu "引く",-,"引かない",L2;
-	warp "prtg_cas01",112,183;
+	warp "prtg_cas01",111,181;
 	end;
 L2:
 	close;

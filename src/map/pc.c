@@ -293,29 +293,31 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
  */
 static int pc_counttargeted_sub(struct block_list *bl,va_list ap)
 {
-	int id,*c;
+	int id,*c,target_lv;
 	struct block_list *src;
 	id=va_arg(ap,int);
 	c=va_arg(ap,int *);
 	src=va_arg(ap,struct block_list *);
+	target_lv=va_arg(ap,int);
 	if(id == bl->id || (src && id == src->id)) return 0;
 	if(bl->type == BL_PC) {
-		if(((struct map_session_data *)bl)->attacktarget == id && ((struct map_session_data *)bl)->attacktimer != -1)
+		if(((struct map_session_data *)bl)->attacktarget == id && ((struct map_session_data *)bl)->attacktimer != -1 && ((struct map_session_data *)bl)->attacktarget_lv >= target_lv)
 			(*c)++;
 	}
 	else if(bl->type == BL_MOB) {
-		if(((struct mob_data *)bl)->target_id == id && ((struct mob_data *)bl)->timer != -1 && ((struct mob_data *)bl)->state.state == MS_ATTACK)
+		if(((struct mob_data *)bl)->target_id == id && ((struct mob_data *)bl)->timer != -1 && ((struct mob_data *)bl)->state.state == MS_ATTACK && ((struct mob_data *)bl)->target_lv >= target_lv)
 			(*c)++;
+		//printf("md->target_lv:%d, target_lv:%d\n",((struct mob_data *)bl)->target_lv,target_lv);
 	}
 	return 0;
 }
 
-int pc_counttargeted(struct map_session_data *sd,struct block_list *src)
+int pc_counttargeted(struct map_session_data *sd,struct block_list *src,int target_lv)
 {
 	int c=0;
 	map_foreachinarea(pc_counttargeted_sub, sd->bl.m,
 		sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,
-		sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,0,sd->bl.id,&c,src);
+		sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,0,sd->bl.id,&c,src,target_lv);
 	return c;
 }
 
@@ -3488,7 +3490,7 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 		if(sd->sc_data[SC_COMBO].timer == -1) {
 			map_freeblock_lock();
 			pc_stop_walking(sd,0);
-			battle_weapon_attack(&sd->bl,bl,tick,0);
+			sd->attacktarget_lv = battle_weapon_attack(&sd->bl,bl,tick,0);
 			if(!(battle_config.pc_cloak_check_type&2) && sd->sc_data[SC_CLOAKING].timer != -1)
 				skill_status_change_end(&sd->bl,SC_CLOAKING,-1);
 			if(sd->status.pet_id > 0 && sd->pd && sd->petDB && battle_config.pet_attack_support)

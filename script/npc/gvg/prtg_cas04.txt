@@ -645,24 +645,24 @@ OnRecvCastleP04:
 	end;
 }
 //-------------------------------執事---------------------------------
-prtg_cas04.gat,259,265,4	script	バンドレッド	55,{
-	set @GIDp4,getcastledata("prtg_cas04.gat",1);
-	if (getcharid(2) == @GIDp4) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事バンドレッド]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDp4) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//prtg_cas04.gat,259,265,4	script	バンドレッド	55,{
+//	set @GIDp4,getcastledata("prtg_cas04.gat",1);
+//	if (getcharid(2) == @GIDp4) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事バンドレッド]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDp4) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
 prtg_cas04.gat,274,161,0	script	　	111,{
 	mes "小さなレバーがあります。";

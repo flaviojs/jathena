@@ -721,24 +721,24 @@ OnRecvCastleA02:
 	end;
 }
 //-------------------------------執事---------------------------------
-aldeg_cas02.gat,78,74,0	script	チェンチェンリ	55,{
-	set @GIDa2,getcastledata("aldeg_cas02.gat",1);
-	if (getcharid(2) == @GIDa2) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事チェンチェンリ]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDa2) + "^000000 様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//aldeg_cas02.gat,78,74,0	script	チェンチェンリ	55,{
+//	set @GIDa2,getcastledata("aldeg_cas02.gat",1);
+//	if (getcharid(2) == @GIDa2) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事チェンチェンリ]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDa2) + "^000000 様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
 aldeg_cas02.gat,139,234,0	script	　	111,{
 	mes "小さなレバーがあります。";

@@ -1,4 +1,66 @@
 --------------------
+//0974 by latte
+・グランドクロスを本鯖に基づき修正
+	アンデッド悪魔強制暗闇付与
+	反動ダメージ半減、モーションなし
+	MOB(PC)が重なったときのHIT数
+	%UP系武器カード効果なし
+	属性相性二重計算
+	MOBダメージ表示白
+
+	後半4項目は設定可
+
+・戦闘基本計算を本鯖に基づき微修正（DEXサイズ補正、弓最低ダメ、PCサイズ補正）
+
+・完全回避
+	スタン等で完全回避が発生しなかったのを修正
+	AGIVITペナルティが完全回避の敵もカウントして計算されていたのを修正　設定可
+		オートカウンターは未修正
+
+・倉庫を閉じるとき、アイテムIDでソートするようにした
+
+・kalenさんのプロ１執事NPCスクリプトを改造して
+	商業防衛値、投資金額、宝箱の数を本鯖に準拠(商業値は1~100)
+	全砦に設置
+	
+	(/script/npc)
+	aldeg_cas01.txt ... prtg_cas05.txt 修正
+	(/script/npc/gvg)
+	aldeg_cas01.txt ... prtg_cas05.txt 追加
+	tbox.txt 追加
+
+	(/conf)
+	battle_athena.conf
+		6項目追加
+
+	(/map)
+	mob.c/mob.h
+		mob_attack() 修正
+		mob_counttargeted_sub(),mob_counttargeted() 修正
+		mobskill_use() 修正（↑の引数だけ）
+	pc.c/pc.h
+		pc_counttargeted_sub(),pc_counttargeted() 修正
+		pc_attack_timer() 修正
+	pet.c
+		pet_attack() 修正
+
+	map.h
+		pc_data, mob_data, map_data 変数１つ追加
+		enum1つ追加
+	map.c/map.h
+		map_count_oncell() 追加 skill.cでよかったかも・・・
+
+	skill.c	
+		GX関連修正(skill_additional_effect(), skill_attack(), skill_castend_damage_id(), skill_unit_onplace())
+
+	battle.c 修正
+	battle.h 修正
+
+	storage.c/storage.h
+		storage_comp_item() 追加
+		sortage_sortitem(), sortage_gsortitem() 追加
+		storage_storageclose(), storage_guild_storageclose() 修正
+--------------------
 //0973 by 獅子o^.^o
 ・スクリプトのBASELEVEL,JOBLEVEL命令追加
 	例: set BASELEVEL,1;

@@ -645,26 +645,26 @@ OnRecvCastleP03:
 	end;
 }
 //-------------------------------執事---------------------------------
-prtg_cas03.gat,51,100,4	script	ステッキ	55,{
-	set @GIDp3,getcastledata("prtg_cas03.gat",1);
-	if (getcharid(2) == @GIDp3) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事ステッキ]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDp3) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//prtg_cas03.gat,51,100,4	script	ステッキ	55,{
+//	set @GIDp3,getcastledata("prtg_cas03.gat",1);
+//	if (getcharid(2) == @GIDp3) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事ステッキ]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDp3) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
-prtg_cas03.gat,192,134,0	script	　	111,{
+prtg_cas03.gat,193,130,0	script	　	111,{
 	mes "小さなレバーがあります。";
 	mes "引きますか？";
 	next;

@@ -510,12 +510,12 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	case CR_GRANDCROSS:		/* グランドクロス */
 		{
 			int race = battle_get_race(bl);
-			if( (battle_check_undead(race,battle_get_elem_type(bl)) || race == 6) && rand()%100 < sc_def_int)
+			if( (battle_check_undead(race,battle_get_elem_type(bl)) || race == 6) && rand()%100 < 100000*sc_def_int/100)	//強制付与だが完全耐性には無効
 				skill_status_change_start(bl,SC_BLIND,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		}
 		break;
 
-	case CR_SHIELDCHARGE:		/* グランドクロス */
+	case CR_SHIELDCHARGE:		/* シールドチャージ */
 		if( rand()%100 < (15 + skilllv*5)*sc_def_vit/100 )
 			skill_status_change_start(bl,SC_STAN,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
@@ -792,8 +792,10 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	if(damage <= 0 || damage < dmg.div_) //吹き飛ばし判定？※
 		dmg.blewcount = 0;
 
-	if(skillid == CR_GRANDCROSS && src == bl) //グランドクロスで使用者と対象が同じ場合？※
-		dsrc = src;
+	if(skillid == CR_GRANDCROSS) {//グランドクロス
+		if(battle_config.gx_disptype) dsrc = src;	// 敵ダメージ白文字表示
+		if( src == bl) type = 4;	// 反動はダメージモーションなし
+	}
 
 //使用者がPCの場合の処理ここから
 	if(src->type == BL_PC) {
@@ -1748,9 +1750,9 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		/* スキルユニット配置 */
 		skill_castend_pos2(src,bl->x,bl->y,skillid,skilllv,tick,0);
 		if(sd)
-			sd->canmove_tick = tick + 900;
+			sd->canmove_tick = tick + 1000;
 		else if(src->type == BL_MOB)
-			mob_changestate((struct mob_data *)src,MS_DELAY,900);
+			mob_changestate((struct mob_data *)src,MS_DELAY,1000);
 		break;
 
 	case TF_THROWSTONE:			/* 石投げ */
@@ -3948,6 +3950,8 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	ts=skill_unitgrouptickset_search( bl, sg->group_id);
 	diff=DIFF_TICK(tick,ts->tick);
 	goflag=(diff>sg->interval || diff<0);
+	if (sg->skill_id == CR_GRANDCROSS && !battle_config.gx_allhit) // 重なっていたら3HITしない
+		goflag = (diff>sg->interval*map_count_oncell(bl->m,bl->x,bl->y) || diff<0);
 
 	//対象がLP上に居る場合は無効
 	map_foreachinarea(skill_landprotector,bl->m,bl->x,bl->y,bl->x,bl->y,BL_SKILL,0,&goflag);

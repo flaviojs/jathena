@@ -493,24 +493,24 @@ OnRecvCastleF02:
 	end;
 }
 //-------------------------------執事---------------------------------
-payg_cas02.gat,22,260,7	script	チェリオス	55,{
-	set @GIDf2,getcastledata("payg_cas02.gat",1);
-	if (getcharid(2) == @GIDf2) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事チェリオス]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDf2) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//payg_cas02.gat,22,260,7	script	チェリオス	55,{
+//	set @GIDf2,getcastledata("payg_cas02.gat",1);
+//	if (getcharid(2) == @GIDf2) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事チェリオス]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDf2) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
 payg_cas02.gat,141,141,0	script	　	111,{
 	mes "小さなレバーがあります。";

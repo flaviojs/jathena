@@ -835,26 +835,26 @@ OnRecvCastleA03:
 	end;
 }
 //-------------------------------執事---------------------------------
-aldeg_cas03.gat,110,118,0	script	ナザプ	55,{
-	set @GIDa3,getcastledata("aldeg_cas03.gat",1);
-	if (getcharid(2) == @GIDa3) goto LStartg;
-	mes "NO MSG";
-	close;
-LStartgm:
-	mes "[執事ナザプ]";
-	mes "あなた方がいくら脅そうとも、";
-	mes "私は私のマスターである";
-	mes "^ff0000" + getguildmaster(@GIDa3) + "^000000様にのみ";
-	mes "お仕えする身である。";
-	mes "ガーディアンたちはどこか！";
-	mes "早くこの無礼な者等を追放しなさい！";
-	close;
-LStartg:
-	mes "執事機能は未実装です。";
-	close;
-}
+//aldeg_cas03.gat,110,118,0	script	ナザプ	55,{
+//	set @GIDa3,getcastledata("aldeg_cas03.gat",1);
+//	if (getcharid(2) == @GIDa3) goto LStartg;
+//	mes "NO MSG";
+//	close;
+//LStartgm:
+//	mes "[執事ナザプ]";
+//	mes "あなた方がいくら脅そうとも、";
+//	mes "私は私のマスターである";
+//	mes "^ff0000" + getguildmaster(@GIDa3) + "^000000様にのみ";
+//	mes "お仕えする身である。";
+//	mes "ガーディアンたちはどこか！";
+//	mes "早くこの無礼な者等を追放しなさい！";
+//	close;
+//LStartg:
+//	mes "執事機能は未実装です。";
+//	close;
+//}
 //-----------------------------スイッチ-------------------------------
-aldeg_cas03.gat,219,269,0	script	　	111,{
+aldeg_cas03.gat,229,267,0	script	　	111,{
 	mes "小さなレバーがあります。";
 	mes "引きますか？";
 	next;

@@ -169,7 +169,7 @@ static int pet_attack(struct pet_data *pd,unsigned int tick,int data)
 
 	clif_fixpetpos(pd);
 
-	battle_weapon_attack(&pd->bl,&md->bl,tick,0);
+	pd->target_lv = battle_weapon_attack(&pd->bl,&md->bl,tick,0);
 
 	pd->attackabletime = tick + battle_get_adelay(&pd->bl);
 

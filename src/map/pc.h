@@ -25,7 +25,7 @@ void pc_set_gm_account_fname(char *str);
 int pc_isGM(struct map_session_data *sd);
 int pc_getrefinebonus(int lv,int type);
 
-int pc_counttargeted(struct map_session_data *sd,struct block_list *src);
+int pc_counttargeted(struct map_session_data *sd,struct block_list *src,int target_lv);
 int pc_setrestartvalue(struct map_session_data *sd,int type);
 int pc_makesavestatus(struct map_session_data *);
 int pc_setnewpc(struct map_session_data*,int,int,int,int,int,int);

@@ -455,7 +455,7 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 	if( mobskill_use(md,tick,-2) )	// スキル使用
 		return 0;
 
-	battle_weapon_attack(&md->bl,&sd->bl,tick,0);
+	md->target_lv = battle_weapon_attack(&md->bl,&sd->bl,tick,0);
 	if(!(battle_config.monster_cloak_check_type&2) && md->sc_data[SC_CLOAKING].timer != -1)
 		skill_status_change_end(&md->bl,SC_CLOAKING,-1);
 
@@ -2353,22 +2353,23 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,int flag)
  */
 static int mob_counttargeted_sub(struct block_list *bl,va_list ap)
 {
-	int id,*c;
+	int id,*c,target_lv;
 	struct block_list *src;
 	id=va_arg(ap,int);
 	c=va_arg(ap,int *);
 	src=va_arg(ap,struct block_list *);
+	target_lv=va_arg(ap,int);
 	if(id == bl->id || (src && id == src->id)) return 0;
 	if(bl->type == BL_PC) {
-		if(((struct map_session_data *)bl)->attacktarget == id && ((struct map_session_data *)bl)->attacktimer != -1)
+		if(((struct map_session_data *)bl)->attacktarget == id && ((struct map_session_data *)bl)->attacktimer != -1 && ((struct map_session_data *)bl)->attacktarget_lv >= target_lv)
 			(*c)++;
 	}
 	else if(bl->type == BL_MOB) {
-		if(((struct mob_data *)bl)->target_id == id && ((struct mob_data *)bl)->timer != -1 && ((struct mob_data *)bl)->state.state == MS_ATTACK)
+		if(((struct mob_data *)bl)->target_id == id && ((struct mob_data *)bl)->timer != -1 && ((struct mob_data *)bl)->state.state == MS_ATTACK && ((struct mob_data *)bl)->target_lv >= target_lv)
 			(*c)++;
 	}
 	else if(bl->type == BL_PET) {
-		if(((struct pet_data *)bl)->target_id == id && ((struct pet_data *)bl)->timer != -1 && ((struct pet_data *)bl)->state.state == MS_ATTACK)
+		if(((struct pet_data *)bl)->target_id == id && ((struct pet_data *)bl)->timer != -1 && ((struct pet_data *)bl)->state.state == MS_ATTACK && ((struct pet_data *)bl)->target_lv >= target_lv)
 			(*c)++;
 	}
 	return 0;
@@ -2377,12 +2378,12 @@ static int mob_counttargeted_sub(struct block_list *bl,va_list ap)
  * 自分をロックしているPCの数を数える
  *------------------------------------------
  */
-int mob_counttargeted(struct mob_data *md,struct block_list *src)
+int mob_counttargeted(struct mob_data *md,struct block_list *src,int target_lv)
 {
 	int c=0;
 	map_foreachinarea(mob_counttargeted_sub, md->bl.m,
 		md->bl.x-AREA_SIZE,md->bl.y-AREA_SIZE,
-		md->bl.x+AREA_SIZE,md->bl.y+AREA_SIZE,0,md->bl.id,&c,src);
+		md->bl.x+AREA_SIZE,md->bl.y+AREA_SIZE,0,md->bl.id,&c,src,target_lv);
 	return c;
 }
 
@@ -2882,11 +2883,11 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 			case MSC_SLAVELT:		// slave < num
 				flag=( mob_countslave(md) < c2 ); break;
 			case MSC_ATTACKPCGT:	// attack pc > num
-				flag=( mob_counttargeted(md,NULL) > c2 ); break;
+				flag=( mob_counttargeted(md,NULL,0) > c2 ); break;
 			case MSC_SLAVELE:		// slave <= num
 				flag=( mob_countslave(md) <= c2 ); break;
 			case MSC_ATTACKPCGE:	// attack pc >= num
-				flag=( mob_counttargeted(md,NULL) >= c2 ); break;
+				flag=( mob_counttargeted(md,NULL,0) >= c2 ); break;
 			case MSC_SKILLUSED:		// specificated skill used
 				flag=( (event&0xffff)==MSC_SKILLUSED && ((event>>16)==c2 || c2==0)); break;
 			}

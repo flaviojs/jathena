@@ -8,6 +8,7 @@ struct Damage {
 	int amotion,dmotion;
 	int blewcount;
 	int flag;
+	int dmg_lv;	//囲まれ減算計算用　0:スキル攻撃 ATK_LUCKY,ATK_FLEE,ATK_DEF
 };
 
 // 属性表（読み込みはpc.c、battle_attr_fixで使用）
@@ -60,7 +61,7 @@ int battle_weapon_attack( struct block_list *bl,struct block_list *target,
 	 unsigned int tick,int flag);
 
 // 各種パラメータを得る
-int battle_counttargeted(struct block_list *bl,struct block_list *src);
+int battle_counttargeted(struct block_list *bl,struct block_list *src,int target_lv);
 int battle_get_class(struct block_list *bl);
 int battle_get_dir(struct block_list *bl);
 int battle_get_lv(struct block_list *bl);
@@ -261,6 +262,14 @@ extern struct Battle_Config {
 	int pet_attack_attr_none;
 	int mob_attack_attr_none;
 	int pc_attack_attr_none;
+
+	int agi_penaly_count_lv;
+	int vit_penaly_count_lv;
+
+	int gx_allhit;
+	int gx_cardfix;
+	int gx_dupele;
+	int gx_disptype;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"
