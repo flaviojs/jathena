@@ -1223,6 +1223,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case AL_INCAGI:			/* 速度増加 */
 	case AL_DECAGI:			/* 速度減少 */
 	case AL_BLESSING:		/* ブレッシング */
+	case AL_HOLYWATER:		/* アクアベネディクタ */
 	case KN_TWOHANDQUICKEN:	/* ツーハンドクイッケン */
 	case CR_SPEARQUICKEN:	/* スピアクイッケン */
 	case PR_IMPOSITIO:		/* イムポシティオマヌス */
@@ -2782,21 +2783,21 @@ int skill_check_condition( struct map_session_data *sd )
 		case SA_VOLCANO:
 		case SA_DELUGE:
 		case SA_VIOLENTGALE:
-			item_id[0]=715;		//	ygem = 715;
+			item_id[0]=715;		//	yellow_gem = 715;
 			item_amount[0]+=1;
 			break;
 
 		case SA_DISPELL:
-			item_id[1]=715;		//	ygem = 715;
+			item_id[1]=715;		//	yellow_gem = 715;
 			item_amount[1]+=1;
 		case MG_STONECURSE:		// ストーンカース
 		case AS_VENOMDUST:		// ベナムダスト
-			item_id[0]=716;		//	rgem = 716;
+			item_id[0]=716;		//	red_gem = 716;
 			item_amount[0]+=1;
 			break;
 
 		case SA_LANDPROTECTOR:
-			item_id[1]=715;
+			item_id[1]=715;		//	yellow_gem = 715;
 			item_amount[1]+=1;
 		case MG_SAFETYWALL:		// セイフティウォール
 		case AL_WARP:			// ワープポータル
@@ -2804,22 +2805,50 @@ int skill_check_condition( struct map_session_data *sd )
 		case PR_SANCTUARY:		// サンクチュアリ
 		case PR_MAGNUS:			// マグヌスエクソシズム
 		case WZ_FIREPILLAR:		// ファイアーピラー
-			item_id[0]=717;		//	bgem = 717;
+			item_id[0]=717;		//	blue_gem = 717;
+			item_amount[0]+=1;
+			break;
+
+		case SA_FLAMELAUNCHER:
+			item_id[0]=990;		// 火原石
 			item_amount[0]+=1;
 			break;
 
 		case SA_FROSTWEAPON:
-			item_id[0]=991;
+			item_id[0]=991;		// 水原石
 			item_amount[0]+=1;
 			break;
 
 		case SA_LIGHTNINGLOADER:
-			item_id[0]=992;
+			item_id[0]=992;		// 風原石
 			item_amount[0]+=1;
 			break;
 
 		case SA_SEISMICWEAPON:
-			item_id[0]=993;
+			item_id[0]=993;		// 地原石
+			item_amount[0]+=1;
+			break;
+
+		case HT_TALKIEBOX:	/* トーキーボックス */
+		case HT_BLASTMINE:	/* ブラストマイン */
+		case HT_SKIDTRAP:	/* スキッドトラップ */
+		case HT_ANKLESNARE:	/* アンクルスネア */
+		case HT_LANDMINE:	/* ランドマイン */
+		case HT_SHOCKWAVE:	/* ショックウェーブトラップ */
+		case HT_SANDMAN:	/* サンドマン */
+		case HT_FLASHER:	/* フラッシャー */
+		case HT_FREEZINGTRAP:	/* フリージングトラップ */
+		case HT_CLAYMORETRAP:	/* クレイモアートラップ */
+			item_id[0]=1065;		//	設置用トラップ;
+			item_amount[0]+=1;
+			break;
+
+		case AL_HOLYWATER:	/* アクアベネディクタ */
+			item_id[0]=713;			//	空きビン;
+			item_amount[0]+=1;
+			break;
+		case PR_ASPERSIO:	/* アスペルシオ */
+			item_id[0]=523;			//	聖水;
 			item_amount[0]+=1;
 			break;
 
@@ -2838,7 +2867,6 @@ int skill_check_condition( struct map_session_data *sd )
 			}
 			break;
 
-
 		case AC_DOUBLE:		// ダブルストレイフィング
 		case AC_SHOWER:		// アローシャワー
 		case AC_CHARGEARROW:		// チャージアロー
@@ -2851,7 +2879,7 @@ int skill_check_condition( struct map_session_data *sd )
 		case KN_BRANDISHSPEAR:	// ブランディッシュスピア
 			if(!pc_isriding(sd)) {
 				clif_skill_fail(sd,sd->skillid,0,0);
-				return 0;		// ,ペコペコ状態		
+				return 0;		// ,ペコペコ状態
 			}
 		case KN_PIERCE:			// ピアース
 		case KN_SPEARSTAB:		// スピアスタブ
@@ -2892,21 +2920,7 @@ int skill_check_condition( struct map_session_data *sd )
 			}
 			break;
 
-		case HT_TALKIEBOX:	/* トーキーボックス */
-		case HT_BLASTMINE:	/* ブラストマイン */
-		case HT_SKIDTRAP:	/* スキッドトラップ */
-		case HT_ANKLESNARE:	/* アンクルスネア */
-		case HT_LANDMINE:	/* ランドマイン */
-		case HT_SHOCKWAVE:	/* ショックウェーブトラップ */
-		case HT_SANDMAN:	/* サンドマン */
-		case HT_FLASHER:	/* フラッシャー */
-		case HT_FREEZINGTRAP:	/* フリージングトラップ */
-		case HT_CLAYMORETRAP:	/* クレイモアートラップ */
-			item_id[0]=1065;		//	bgem = 1065;
-			item_amount[0]+=1;
-			break;
-
-		case AS_GRIMTOOTH:		/* グリムトゥース */
+		case AS_GRIMTOOTH:	/* グリムトゥース */
 			if(!pc_ishiding(sd)) {		// ハイディング状態
 				clif_skill_fail(sd,sd->skillid,0,0);
 				return 0;
@@ -2939,22 +2953,22 @@ int skill_check_condition( struct map_session_data *sd )
 			}
 			else {
 				if(sd->combo_delay3 <= tick && tick <= sd->combo_delay3 + battle_config.asuradelay) 
-					spiritball = 4;							// 氣球					
-				else spiritball = 5;							// 氣球
+					spiritball = 4;				// 氣球
+				else spiritball = 5;			// 氣球
 			}
 			sd->skill_old = 0;
 			break;
 
-		case MO_FINGEROFFENSIVE:	//指弾
-			spiritball = sd->skilllv;							// 氣球
+		case MO_FINGEROFFENSIVE:				//指弾
+			spiritball = sd->skilllv;			// 氣球
 			if (sd->spiritball > 0 && sd->spiritball < spiritball) {
 				spiritball = sd->spiritball;
 				sd->spiritball_old = sd->spiritball;	
 			}
 			else sd->spiritball_old = sd->skilllv;	
 			break;
-		case MO_INVESTIGATE:		//発勁
-			spiritball = 1;									// 氣球
+		case MO_INVESTIGATE:					//発勁
+			spiritball = 1;						// 氣球
 			break;
 
 		case MO_BODYRELOCATION:
@@ -2962,15 +2976,15 @@ int skill_check_condition( struct map_session_data *sd )
 				clif_skill_fail(sd,sd->skillid,0,0);
 				return 0;
 			} else
-				spiritball = 1;									// 氣球
+				spiritball = 1;					// 氣球
 			break;
 		
 		case MO_STEELBODY:						// 金剛
 		case MO_EXPLOSIONSPIRITS:				// 爆裂波動
-				spiritball = 5;									// 氣球
+				spiritball = 5;					// 氣球
 			break;
 
-		case MO_CHAINCOMBO:					//連打掌
+		case MO_CHAINCOMBO:						//連打掌
 			tick = gettick();
 			if(sd->combo_delay1 <= tick && tick <= sd->combo_delay1 + 300) {
 				if(sd->skill_old == sd->skillid)
@@ -2999,7 +3013,7 @@ int skill_check_condition( struct map_session_data *sd )
 			}
 			break;
 
-	//		case RG_BACKSTAP:	// バックスタブ
+//		case RG_BACKSTAP:	// バックスタブ
 		case RG_RAID:		// サプライズアタック
 			if(!pc_ishiding(sd)) {		// ハイディング状態
 				clif_skill_fail(sd,sd->skillid,0,0);
@@ -3009,7 +3023,7 @@ int skill_check_condition( struct map_session_data *sd )
 
 	}
 
-		if( sp>0 && sd->status.sp < sp) {			/* SPチェック */
+		if( sp>0 && sd->status.sp < sp) {				/* SPチェック */
 			clif_skill_fail(sd,sd->skillid,1,0);		/* SP不足：失敗通知 */
 			return 0;
 		}
@@ -3019,14 +3033,14 @@ int skill_check_condition( struct map_session_data *sd )
 			return 0;
 		}
 
-		if(!pc_check_equip_dcard(sd,4132) && 
-			(item_id[0] || item_id[1] || item_id[2])) {	// ミストレスカード
+		if	(item_id[0] || item_id[1] || item_id[2]) {
 			for(j=0;j<3;j++) {
-				if(item_id[j] == 0 || item_amount[j] == 0)
-					continue;
+				if(!item_id[j] ||
+						 ((item_id[j] == 715 || item_id[j] == 716 || item_id[j] == 717) &&  pc_check_equip_dcard(sd,4132)))
+					continue;	// アイテム無し、３種ジェム＆ミストレスカード、は無処理
 				if((i[j]=pc_search_inventory(sd,item_id[j])) == -1 ||
-					sd->status.inventory[i[j]].amount < item_amount[j]) {	// ジェムストーンなし
-					if(item_id[j] == 716 || item_id[j] == 717)
+						sd->status.inventory[i[j]].amount < item_amount[j]) {	// アイテムなし
+					if(item_id[j] == 716 || item_id[j] == 717)		// 赤＆青ジェムの場合のみ
 						clif_skill_fail(sd,sd->skillid,(6+(item_id[j]-715)),0);
 					else
 						clif_skill_fail(sd,sd->skillid,0,0);
@@ -3034,21 +3048,30 @@ int skill_check_condition( struct map_session_data *sd )
 				}
 			}
 			for(j=0;j<3;j++) {
-				if(i[j] == 0)
-					continue;
-				pc_delitem(sd,i[j],item_amount[j],0);		// ジェムストーン消費
+				if(i[j] != 0) {
+					pc_delitem(sd,i[j],item_amount[j],0);		// アイテム消費
+				}
+			}
+			if(sd->skillid == AL_HOLYWATER) {	// アクアベネディクタ
+				struct item temp_item;
+				memset(&temp_item,0,sizeof(temp_item));
+				temp_item.nameid = 523;		// 聖水
+				temp_item.amount = 1;
+				temp_item.identify = 1;
+				pc_additem(sd,&temp_item,1);
+				clif_additem(sd,0,0,1);
 			}
 		}
 
-		if(sp) {					/* SP消費 */
+		if(sp) {					// SP消費
 			sd->status.sp-=sp;
 			clif_updatestatus(sd,SP_SP);
 		}
-		if(zeny) {					/* Zeny消費 */
+		if(zeny) {					// Zeny消費
 			sd->status.zeny -= zeny;
 			clif_updatestatus(sd,SP_ZENY);
 		}
-		if(spiritball)			// 氣球消費
+		if(spiritball)				// 氣球消費
 			pc_delspiritball(sd,spiritball,0);
 	}
 	return 1;
