@@ -2364,8 +2364,10 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 
 	if(item == NULL)
 		return 0;
-	if((nameid == 605 || nameid == 601) && map[sd->bl.m].flag.gvg)
+	if((nameid == 605) && map[sd->bl.m].flag.gvg)
 		return 0;
+	if((nameid == 602) && map[sd->bl.m].flag.gvg)
+		return 1;
 	if((nameid == 601 || nameid == 602) && map[sd->bl.m].flag.noteleport)
 		return 0;
 	if(nameid == 604 && (map[sd->bl.m].flag.nobranch || map[sd->bl.m].flag.gvg))

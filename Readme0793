@@ -1,4 +1,33 @@
 --------------------
+//0811 by ぴざまん
+
+・攻城中は蝶が使えるように修正
+・寒いジョーク・スクリーム実装(PTメンバーに低確率で云々は未実装です)
+・GVGスクリプトを修正(試行錯誤しすぎてどこをどうしたか覚えてません…)
+　GVGスクリプトに関してですが、既知のバグがあります
+　それは、占領ギルドマスター以外のPCが、占領ギルドマスターより先にNPCに話し掛けると
+　マップサーバが落ちるというものです。
+　これは、getguildmaster・getguildnameを使用しているスクリプトすべてに起こり得ることであり
+　先に占領ギルドマスター以外で話し掛けると、guild_searchが何故か(該当IDのギルドがあるにも関わらず)
+　NULLを返す事に起因します。
+　正直スクリプト関係はよくわかっていないので、これは私の技術では修正のしようがありません。
+　暫定的な対処としてNULLを返してMAP鯖が落ちるくらいなら文字列「null」を返すようにしました。
+
+	(map/)
+	skill.c
+		skill_frostjoke_scream() 追加。
+		skill_additional_effect()、skill_timerskill() 修正。
+		skill_castend_nodamage_id() 修正。
+	pc.c
+		pc_isUseitem() 修正。
+	script.c
+		buildin_getpartyname()、buildin_getguildname() 修正。
+		buildin_getguildmaster() 修正。
+	(db/)
+	cast_db.txt 修正。
+	(conf/gvg/)
+	ev_*.txt以外のtxt全てを修正。
+--------------------
 //0810 by 聖
 
 ・MVPの処理を変更。(確率で10000があっても、他のアイテムも出るようにしました)

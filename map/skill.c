@@ -219,6 +219,7 @@ int	skill_get_inf2( int id ){ return skill_db[id].inf2; }
 struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,int skilllv,int x,int y,int flag);
 int skill_check_condition( struct map_session_data *sd,int type);
 int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag );
+int skill_frostjoke_scream(struct block_list *bl,va_list ap);
 
 
 static int distance(int x0,int y0,int x1,int y1)
@@ -324,11 +325,11 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	else if(bl->type==BL_MOB)
 		md=(struct mob_data *)src;
 
-	sc_def_mdef=100 - battle_get_mdef(bl);
 	luk = battle_get_luk(bl);
-	sc_def_vit=100 - (battle_get_vit(bl) + luk/3);
-	sc_def_int=100 - (battle_get_int(bl) + luk/3);
-	sc_def_luk=100 - luk;
+	sc_def_mdef=100 - (3 + battle_get_mdef(bl) + luk/3);
+	sc_def_vit=100 - (3 + battle_get_vit(bl) + luk/3);
+	sc_def_int=100 - (3 + battle_get_int(bl) + luk/3);
+	sc_def_luk=100 - (3 + luk);
 	if(bl->type==BL_PC)
 		dstsd=(struct map_session_data *)bl;
 	else if(bl->type==BL_MOB){
@@ -384,7 +385,6 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	case MG_FROSTDIVER:		/* フロストダイバー */
 	case WZ_FROSTNOVA:		/* フロストノヴァ */
 	case HT_FREEZINGTRAP:	/* フリージングトラップ */
-	case BA_FROSTJOKE:		/* 寒いジョーク */
 /*
 		rate=battle_get_lv(src)/2 +battle_get_int(src)/3+ skilllv*2 +15 -battle_get_mdef(bl);
 		if(rate>95)rate=95;
@@ -464,6 +464,15 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			skill_status_change_start(bl,SC_STAN,skilllv,0,skill_get_time2(skillid,skilllv),0);
 		if( rand()%100 < (10+3*skilllv)*sc_def_int/100 )
 			skill_status_change_start(bl,SC_BLIND,skilllv,0,skill_get_time2(skillid,skilllv),0);
+		break;
+	case BA_FROSTJOKE:
+		if( rand()%100 < (15+5*skilllv)*sc_def_mdef/100)
+			skill_status_change_start(bl,SC_FREEZE,skilllv,0,skill_get_time2(skillid,skilllv),0);
+		break;
+
+	case DC_SCREAM:
+		if( rand()%100 < (25+5*skilllv)*sc_def_vit/100 )
+			skill_status_change_start(bl,SC_STAN,skilllv,0,skill_get_time2(skillid,skilllv),0);
 		break;
 
 	case BD_LULLABY:	/* 子守唄 */
@@ -902,6 +911,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 	struct mob_data *md = NULL;
 	struct block_list *src,*target;
 	struct skill_timerskill *skl = NULL;
+	int range;
 	
 	src = map_id2bl(id);
 	if(src == NULL || src->prev == NULL)
@@ -967,6 +977,17 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 					}
 				}
 				break;
+
+			case BA_FROSTJOKE:			/* 寒いジョーク */
+			case DC_SCREAM:				/* スクリーム */
+				range=15;		//視界全体
+				map_foreachinarea(skill_frostjoke_scream,sd->bl.m,
+					sd->bl.x-range,sd->bl.y-range,
+					sd->bl.x+range,sd->bl.y+range,BL_NUL,src,skl->skill_id,skl->skill_lv,tick);
+				break;
+
+
+
 			default:
 				skill_attack(skl->type,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag);
 				break;
@@ -1508,7 +1529,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	else if(src->type==BL_MOB)
 		md=(struct mob_data *)src;
 
-	sc_def_vit = 100 - (battle_get_vit(bl) + battle_get_luk(bl)/3);
+	sc_def_vit = 100 - (3 + battle_get_vit(bl) + battle_get_luk(bl)/3);
 	if(bl->type==BL_PC)
 		dstsd=(struct map_session_data *)bl; 
 	else if(bl->type==BL_MOB){
@@ -1900,6 +1921,12 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case BD_ADAPTATION:			/* アドリブ */
 		skill_stop_dancing(src);
+		break;
+
+	case BA_FROSTJOKE:			/* 寒いジョーク */
+	case DC_SCREAM:				/* スクリーム */
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		skill_addtimerskill(src,tick+3000,bl->id,0,0,skillid,skilllv,0,flag);
 		break;
 
 	case TF_STEAL:			// スティール
@@ -4196,6 +4223,32 @@ int skill_gangsterparadise(struct map_session_data *sd ,int type)
 	return 0;
 }
 
+int skill_frostjoke_scream(struct block_list *bl,va_list ap)
+{
+	struct block_list *src;
+	struct map_session_data *sd=NULL;
+	struct mob_data *md=NULL;
+
+	src=va_arg(ap,struct block_list*);
+	int skillnum=va_arg(ap,int);
+	int skilllv=va_arg(ap,int);
+	unsigned int tick=va_arg(ap,unsigned int);
+
+	if(bl->type == BL_PC)
+		sd=(struct map_session_data*)bl;
+	if(bl->type == BL_MOB)
+		md=(struct mob_data*)bl;
+
+	if(sd){
+		if(map[bl->m].flag.pvp || map[bl->m].flag.gvg)
+			skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
+	}
+	if(md){
+		skill_additional_effect(src,bl,skillnum,skilllv,0,tick);
+	}
+	return 0;
+}
+
 /*----------------------------------------------------------------------------
  * ステータス異常
  *----------------------------------------------------------------------------
@@ -4941,21 +4994,21 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_SLEEP:				/* 睡眠 */
 			if(!(flag&2)) {
-				int sc_def = 100 - (battle_get_int(bl) + battle_get_luk(bl)/3);
+				int sc_def = 100 - (3 + battle_get_int(bl) + battle_get_luk(bl)/3);
 				tick = tick * sc_def / 100;
 				if(tick < 1000) tick = 1000;
 			}
 			break;
 		case SC_FREEZE:				/* 凍結 */
 			if(!(flag&2)) {
-				int sc_def = 100 - battle_get_mdef(bl);
+				int sc_def = 100 - (3 + battle_get_mdef(bl) + battle_get_luk(bl)/3);
 				tick = tick * sc_def / 100;
 				if(tick < 1000) tick = 1000;
 			}
 			break;
 		case SC_STAN:				/* スタン（val2にミリ秒セット） */
 			if(!(flag&2)) {
-				int sc_def = 100 - (battle_get_vit(bl) + battle_get_luk(bl)/3);
+				int sc_def = 100 - (3 + battle_get_vit(bl) + battle_get_luk(bl)/3);
 				tick = tick * sc_def / 100;
 				if(tick < 1000) tick = 1000;
 			}
@@ -4965,7 +5018,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_POISON:				/* 毒 */
 			calc_flag = 1;
 			if(!(flag&2)) {
-				int sc_def = 100 - (battle_get_vit(bl) + battle_get_luk(bl)/3);
+				int sc_def = 100 - (3 + battle_get_vit(bl) + battle_get_luk(bl)/3);
 				tick = tick * sc_def / 100;
 				if(tick < 1000) tick = 1000;
 			}
@@ -4975,7 +5028,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_SILENCE:			/* 沈黙（レックスデビーナ） */
 			if(!(flag&2)) {
-				int sc_def = 100 - (battle_get_vit(bl) + battle_get_luk(bl)/3);
+				int sc_def = 100 - (3 + battle_get_vit(bl) + battle_get_luk(bl)/3);
 				tick = tick * sc_def / 100;
 				if(tick < 1000) tick = 1000;
 			}
@@ -4983,7 +5036,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_BLIND:				/* 暗黒 */
 			calc_flag = 1;
 			if(!(flag&2)) {
-				int sc_def = 100 - (battle_get_int(bl) + battle_get_luk(bl)/3);
+				int sc_def = 100 - (3 + battle_get_int(bl) + battle_get_luk(bl)/3);
 				tick = tick * sc_def / 100;
 				if(tick < 1000) tick = 1000;
 			}
@@ -4991,7 +5044,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_CURSE:
 			calc_flag = 1;
 			if(!(flag&2)) {
-				int sc_def = 100 - (battle_get_vit(bl) + battle_get_luk(bl)/3);
+				int sc_def = 100 - (3 + battle_get_vit(bl) + battle_get_luk(bl)/3);
 				tick = tick * sc_def / 100;
 				if(tick < 1000) tick = 1000;
 			}

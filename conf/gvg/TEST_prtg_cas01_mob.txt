@@ -29,8 +29,8 @@ OnAgitStart:
 	end;
 }
 prontera.gat,151,187,4	script	テストギルドフラッグ	722,{
-	getcastledata "prtg_cas01.gat",1,@GID;
-	if (@GID != 0) goto LStartg;
+	set @GIDp1,getcastledata("prtg_cas01.gat",1);
+	if (@GIDp1 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
 		mes "1.";

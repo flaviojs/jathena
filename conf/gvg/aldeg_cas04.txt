@@ -2,7 +2,7 @@
 //aldeg_cas04         by kalen
 //===================================================================
 aldeg_cas04.gat,167,61,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -37,7 +37,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,164,90,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -72,7 +72,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,143,209,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -107,7 +107,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,129,193,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -142,7 +142,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,112,206,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -177,7 +177,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,113,212,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -212,7 +212,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,77,117,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -247,7 +247,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,186,42,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -282,7 +282,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,30,69,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -317,7 +317,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,55,97,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -352,7 +352,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,45,98,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -387,7 +387,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,33,116,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -422,7 +422,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,130,180,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -457,7 +457,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,129,193,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -492,7 +492,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,142,209,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -527,7 +527,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,33,107,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -562,7 +562,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,133,220,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -597,7 +597,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,169,22,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -632,7 +632,7 @@ L2:
 		close;
 }
 aldeg_cas04.gat,169,15,2	script	ギルドフラッグ	722,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (@GIDa4 != 0) goto LStartg;
 		mes "[ ルーンミッドガッツ王国領 ]";
 		mes " ";
@@ -669,7 +669,7 @@ L2:
 //------------------------------カプラ--------------------------------
 aldeg_cas04.gat,45,88,0	script	カプラ職員	117,{
 	cutin "kafra_01",2;
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (getcharid(2) == @GIDa4) goto LStartg;
 	mes "[カプラ職員]";
 	mes "私は、ギルド";
@@ -772,7 +772,7 @@ L_EXIT:
 }
 //-------------------------------執事---------------------------------
 aldeg_cas04.gat,67,116,0	script	ウィリオット	55,{
-	getcastledata "aldeg_cas04.gat",1,@GIDa4;
+	set @GIDa4,getcastledata("aldeg_cas04.gat",1);
 	if (getcharid(2) == @GIDa4) goto LStartg;
 	mes "NO MSG";
 	close;

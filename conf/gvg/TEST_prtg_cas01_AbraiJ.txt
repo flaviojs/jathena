@@ -4,10 +4,11 @@
 //とりあえず、TEST作成('A`)
 //prtg_cas01.txtのアブライはコメントアウトですよ～
 prtg_cas01.gat,112,181,0	script	アブライ	55,{
-	if (getcastledata("prtg_cas01.gat",1) == 0) goto LStart;
-	getcastledata "prtg_cas01.gat",0;
-	getcastledata "prtg_cas01.gat",1,@GIDp1;
-	if ((getcharid(2) != 0) && (getcharid(2) == @GIDp1)) goto LStart2;
+	set @GIDp1,getcastledata("prtg_cas01.gat",1);
+	if (@GIDp1 == 0) goto LStart;
+	if (getcharid(2) != @GIDp1) goto LStart2;
+	if (strcharinfo(0) == getguildmaster(@GIDp1)) goto LStart3;
+
 // ------- アジト未占領 ----------------------------------
 LStart:
 	mes "[執事アブライ]";
@@ -16,7 +17,6 @@ LStart:
 	close;
 // -------- マスターじゃない ------------------------------
 LStart2:
-	if (strcharinfo(0) == getguildmaster(@GIDp1)) goto LStart3;
 	mes "[執事アブライ]";
 	mes "あなた方がいくら脅そうとも、";
 	mes "私は私のマスターである";
