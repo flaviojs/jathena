@@ -2870,13 +2870,24 @@ int buildin_maprespawnguildid_sub(struct block_list *bl,va_list ap)
 {
 	int g_id=va_arg(ap,int);
 	int flag=va_arg(ap,int);
+	struct map_session_data *sd=NULL;
+	struct mob_data *md=NULL;
 
-	struct map_session_data *sd=(struct map_session_data*)bl;
-	if((sd->status.guild_id == g_id) && (flag))
-		pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,3);
-	else if((sd->status.guild_id != g_id) && (!flag))
-		pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,3);
+	if(bl->type == BL_PC)
+		sd=(struct map_session_data*)bl;
+	if(bl->type == BL_MOB)
+		md=(struct mob_data *)bl;
 
+	if(sd){
+		if((sd->status.guild_id == g_id) && (flag&1))
+			pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,3);
+		else if((sd->status.guild_id != g_id) && (flag&2))
+			pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,3);
+	}
+	if(md && flag&4){
+		if(md->class < 1285 || md->class > 1288)
+			mob_delete(md);
+	}
 	return 0;
 }
 int buildin_maprespawnguildid(struct script_state *st)
@@ -2887,7 +2898,7 @@ int buildin_maprespawnguildid(struct script_state *st)
 
 	int m=map_mapname2mapid(mapname);
 
-	if(m) map_foreachinarea(buildin_maprespawnguildid_sub,m,0,0,map[m].xs-1,map[m].ys-1,BL_PC,g_id,flag);
+	if(m) map_foreachinarea(buildin_maprespawnguildid_sub,m,0,0,map[m].xs-1,map[m].ys-1,BL_NUL,g_id,flag);
 	return 0;
 }
 

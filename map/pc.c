@@ -4693,9 +4693,9 @@ int pc_checkitem(struct map_session_data *sd)
 			sd->status.inventory[i].equip=0;
 		//装備制限チェック
 		if(sd->status.inventory[i].equip && map[sd->bl.m].flag.pvp && (it->flag.no_equip==1 || it->flag.no_equip==3)){//PvP制限
-			sd->status.inventory[i].equip=0;
+			pc_unequipitem(sd,i,0);
 		}else if(sd->status.inventory[i].equip && map[sd->bl.m].flag.gvg && (it->flag.no_equip==2 || it->flag.no_equip==3)){//GvG制限
-			sd->status.inventory[i].equip=0;
+			pc_unequipitem(sd,i,0);
 		}
 	}
 

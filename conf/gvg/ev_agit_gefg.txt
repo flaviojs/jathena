@@ -3,6 +3,7 @@ OnAgitInit:
 	GetCastleData "gefg_cas01.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "gefg_cas01.gat",GetCastleData("gefg_cas01.gat",1),2;
 	Monster "gefg_cas01.gat",198,182,"エンペリウム",1288,1,"Agit_B01::OnAgitBreak";
 	GvgOn "gefg_cas01.gat";
 	End;
@@ -14,10 +15,11 @@ OnAgitBreak:
 	MapAnnounce "gefg_cas01.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "gefg_cas01.gat",GetCastleData("gefg_cas01.gat",1),0;
+	MapRespawnGuildID "gefg_cas01.gat",GetCastleData("gefg_cas01.gat",1),6;
 	Monster "gefg_cas01.gat",198,182,"エンペリウム",1288,1,"Agit_B01::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "gefg_cas01.gat",GetCastleData("gefg_cas01.gat",1),4;
 	KillMonster "gefg_cas01.gat","Agit_B01::OnAgitBreak";
 	GvgOff "gefg_cas01.gat";
 	End;
@@ -28,6 +30,7 @@ OnAgitInit:
 	GetCastleData "gefg_cas02.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "gefg_cas02.gat",GetCastleData("gefg_cas02.gat",1),2;
 	Monster "gefg_cas02.gat",176,178,"エンペリウム",1288,1,"Agit_B02::OnAgitBreak";
 	GvgOn "gefg_cas02.gat";
 	End;
@@ -39,10 +42,11 @@ OnAgitBreak:
 	MapAnnounce "gefg_cas02.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "gefg_cas02.gat",GetCastleData("gefg_cas02.gat",1),0;
+	MapRespawnGuildID "gefg_cas02.gat",GetCastleData("gefg_cas02.gat",1),6;
 	Monster "gefg_cas02.gat",176,178,"エンペリウム",1288,1,"Agit_B02::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "gefg_cas02.gat",GetCastleData("gefg_cas02.gat",1),4;
 	KillMonster "gefg_cas02.gat","Agit_B02::OnAgitBreak";
 	GvgOff "gefg_cas02.gat";
 	End;
@@ -53,6 +57,7 @@ OnAgitInit:
 	GetCastleData "gefg_cas03.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "gefg_cas03.gat",GetCastleData("gefg_cas03.gat",1),2;
 	Monster "gefg_cas03.gat",245,167,"エンペリウム",1288,1,"Agit_B03::OnAgitBreak";
 	GvgOn "gefg_cas03.gat";
 	End;
@@ -64,10 +69,11 @@ OnAgitBreak:
 	MapAnnounce "gefg_cas03.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "gefg_cas03.gat",GetCastleData("gefg_cas03.gat",1),0;
+	MapRespawnGuildID "gefg_cas03.gat",GetCastleData("gefg_cas03.gat",1),6;
 	Monster "gefg_cas03.gat",245,167,"エンペリウム",1288,1,"Agit_B03::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "gefg_cas03.gat",GetCastleData("gefg_cas03.gat",1),4;
 	KillMonster "gefg_cas03.gat","Agit_B03::OnAgitBreak";
 	GvgOff "gefg_cas03.gat";
 	End;
@@ -78,6 +84,7 @@ OnAgitInit:
 	GetCastleData "gefg_cas04.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "gefg_cas04.gat",GetCastleData("gefg_cas04.gat",1),2;
 	Monster "gefg_cas04.gat",174,178,"エンペリウム",1288,1,"Agit_B04::OnAgitBreak";
 	GvgOn "gefg_cas04.gat";
 	End;
@@ -89,10 +96,11 @@ OnAgitBreak:
 	MapAnnounce "gefg_cas04.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "gefg_cas04.gat",GetCastleData("gefg_cas04.gat",1),0;
+	MapRespawnGuildID "gefg_cas04.gat",GetCastleData("gefg_cas04.gat",1),6;
 	Monster "gefg_cas04.gat",174,178,"エンペリウム",1288,1,"Agit_B04::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "gefg_cas04.gat",GetCastleData("gefg_cas04.gat",1),4;
 	KillMonster "gefg_cas04.gat","Agit_B04::OnAgitBreak";
 	GvgOff "gefg_cas04.gat";
 	End;
@@ -103,6 +111,7 @@ OnAgitInit:
 	GetCastleData "gefg_cas05.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "gefg_cas05.gat",GetCastleData("gefg_cas05.gat",1),2;
 	Monster "gefg_cas05.gat",194,184,"エンペリウム",1288,1,"Agit_B05::OnAgitBreak";
 	GvgOn "gefg_cas05.gat";
 	End;
@@ -114,10 +123,11 @@ OnAgitBreak:
 	MapAnnounce "gefg_cas05.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "gefg_cas05.gat",GetCastleData("gefg_cas05.gat",1),0;
+	MapRespawnGuildID "gefg_cas05.gat",GetCastleData("gefg_cas05.gat",1),6;
 	Monster "gefg_cas05.gat",194,184,"エンペリウム",1288,1,"Agit_B05::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "gefg_cas05.gat",GetCastleData("gefg_cas05.gat",1),4;
 	KillMonster "gefg_cas05.gat","Agit_B05::OnAgitBreak";
 	GvgOff "gefg_cas05.gat";
 	End;

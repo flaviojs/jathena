@@ -3,6 +3,7 @@ OnAgitInit:
 	GetCastleData "payg_cas01.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "payg_cas01.gat",GetCastleData("payg_cas01.gat",1),2;
 	Monster "payg_cas01.gat",139,139,"エンペリウム",1288,1,"Agit_C01::OnAgitBreak";
 	GvgOn "payg_cas01.gat";
 	End;
@@ -14,10 +15,11 @@ OnAgitBreak:
 	MapAnnounce "payg_cas01.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "payg_cas01.gat",GetCastleData("payg_cas01.gat",1),0;
+	MapRespawnGuildID "payg_cas01.gat",GetCastleData("payg_cas01.gat",1),6;
 	Monster "payg_cas01.gat",139,139,"エンペリウム",1288,1,"Agit_C01::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "payg_cas01.gat",GetCastleData("payg_cas01.gat",1),4;
 	KillMonster "payg_cas01.gat","Agit_C01::OnAgitBreak";
 	GvgOff "payg_cas01.gat";
 	End;
@@ -28,6 +30,7 @@ OnAgitInit:
 	GetCastleData "payg_cas02.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),2;
 	Monster "payg_cas02.gat",39,25,"エンペリウム",1288,1,"Agit_C02::OnAgitBreak";
 	GvgOn "payg_cas02.gat";
 	End;
@@ -39,10 +42,11 @@ OnAgitBreak:
 	MapAnnounce "payg_cas02.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),0;
+	MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),6;
 	Monster "payg_cas02.gat",39,25,"エンペリウム",1288,1,"Agit_C02::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "payg_cas02.gat",GetCastleData("payg_cas02.gat",1),4;
 	KillMonster "payg_cas02.gat","Agit_C02::OnAgitBreak";
 	GvgOff "payg_cas02.gat";
 	End;
@@ -53,6 +57,7 @@ OnAgitInit:
 	GetCastleData "payg_cas03.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "payg_cas03.gat",GetCastleData("payg_cas03.gat",1),2;
 	Monster "payg_cas03.gat",269,265,"エンペリウム",1288,1,"Agit_C03::OnAgitBreak";
 	GvgOn "payg_cas03.gat";
 	End;
@@ -64,10 +69,11 @@ OnAgitBreak:
 	MapAnnounce "payg_cas03.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "payg_cas03.gat",GetCastleData("payg_cas03.gat",1),0;
+	MapRespawnGuildID "payg_cas03.gat",GetCastleData("payg_cas03.gat",1),6;
 	Monster "payg_cas03.gat",269,265,"エンペリウム",1288,1,"Agit_C03::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "payg_cas03.gat",GetCastleData("payg_cas03.gat",1),4;
 	KillMonster "payg_cas03.gat","Agit_C03::OnAgitBreak";
 	GvgOff "payg_cas03.gat";
 	End;
@@ -78,6 +84,7 @@ OnAgitInit:
 	GetCastleData "payg_cas04.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "payg_cas04.gat",GetCastleData("payg_cas04.gat",1),2;
 	Monster "payg_cas04.gat",271,29,"エンペリウム",1288,1,"Agit_C04::OnAgitBreak";
 	GvgOn "payg_cas04.gat";
 	End;
@@ -89,10 +96,11 @@ OnAgitBreak:
 	MapAnnounce "payg_cas04.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "payg_cas04.gat",GetCastleData("payg_cas04.gat",1),0;
+	MapRespawnGuildID "payg_cas04.gat",GetCastleData("payg_cas04.gat",1),6;
 	Monster "payg_cas04.gat",271,29,"エンペリウム",1288,1,"Agit_C04::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "payg_cas04.gat",GetCastleData("payg_cas04.gat",1),4;
 	KillMonster "payg_cas04.gat","Agit_C04::OnAgitBreak";
 	GvgOff "payg_cas04.gat";
 	End;
@@ -103,6 +111,7 @@ OnAgitInit:
 	GetCastleData "payg_cas05.gat",0;
 	End;
 OnAgitStart:
+	MapRespawnGuildID "payg_cas05.gat",GetCastleData("payg_cas05.gat",1),2;
 	Monster "payg_cas05.gat",30,30,"エンペリウム",1288,1,"Agit_C05::OnAgitBreak";
 	GvgOn "payg_cas05.gat";
 	End;
@@ -114,10 +123,11 @@ OnAgitBreak:
 	MapAnnounce "payg_cas05.gat","エンペリウムが破壊されました",17;
 	End;
 OnAgitEliminate:
-	MapRespawnGuildID "payg_cas05.gat",GetCastleData("payg_cas05.gat",1),0;
+	MapRespawnGuildID "payg_cas05.gat",GetCastleData("payg_cas05.gat",1),6;
 	Monster "payg_cas05.gat",30,30,"エンペリウム",1288,1,"Agit_C05::OnAgitBreak";
 	End;
 OnAgitEnd:
+	MapRespawnGuildID "payg_cas05.gat",GetCastleData("payg_cas05.gat",1),4;
 	KillMonster "payg_cas05.gat","Agit_C05::OnAgitBreak";
 	GvgOff "payg_cas05.gat";
 	End;

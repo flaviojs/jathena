@@ -1,4 +1,32 @@
 --------------------
+//0808 by ぴざまん
+
+・装備制限が上手く動作していなかったのを修正。
+・モンハウギルドはGvG開始時に作られるように変更。
+・GvG開始時に該当マップにいる全PC(占領ギルド員以外)をセーブポイントに戻すように修正。
+・モンハウギルドアジトでエンペを壊すと、モンハウが消えるように修正。
+　この修正に伴ってmaprespawnguildidの引数のflagの仕様を変更しました
+　flagはビットフラグになり、
+　　1ビット目：占領ギルド員をセーブポイントに戻すか
+　　2ビット目：占領ギルド員以外をセーブポイントに戻すか
+　　3ビット目：エンペ・ガーディアン以外のMOBを消すか
+　いずれも、0=NO、1=YESになります
+
+	(conf/gvg/)
+	ev_agit_aldeg.txt 修正。
+	ev_agit_gefg.txt 修正。
+	ev_agit_payg.txt 修正。
+	ev_agit_prtg.txt 修正。
+	TEST_prtg_cas01_AbraiJ.txt 修正。
+	TEST_prtg_cas01_mob.txt 修正。
+	(map/)
+	pc.c
+		pc_checkitem() 修正。
+	script.c
+		buildin_maprespawnguildid_sub() 修正。
+		buildin_maprespawnguildid() 修正。
+
+--------------------
 //0807 by 死神
 
 ・0805でFD_SETSIZEを修正する所を間違ったので修正しました。56名止まりが治ると言う保証はありませんが...

@@ -7,8 +7,9 @@
 //フラグイメージ読み込み不可
 //ガーディアンAI(自友軍へ攻撃しない、時間外攻撃しないetc)
 //ギルドスキルの判定(もうできるのかな？)
+
 prtg_cas01.gat,104,26,0	script	yobidashi	-1,{
-OnInit:
+OnAgitStart:
 	if (getcastledata("prtg_cas01.gat",1) != 0) end;
 	areamonster "prtg_cas01.gat",0,0,300,300,"レイドリック",1163,15;
 	areamonster "prtg_cas01.gat",0,0,300,300,"カーリッツバーグ",1132,10;

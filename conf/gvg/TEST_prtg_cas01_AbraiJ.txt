@@ -16,7 +16,7 @@ LStart:
 // -------- マスターじゃない ------------------------------
 LStart2:
 	if (strcharinfo(0) == getguildmaster(@GIDp1)) goto LStart3;
-	mes "[執事アルプレド]";
+	mes "[執事アブライ]";
 	mes "あなた方がいくら脅そうとも、";
 	mes "私は私のマスターである";
 	mes "^ff0000" + getguildmaster(@GIDp1) + "^000000様にのみ";
@@ -27,12 +27,10 @@ LStart2:
 // -------- 以下マスター時 ---------------------------------
 LStart3:
 	mes "[執事アブライ]";
-	mes "ようこそ！";
-	mes "我がマスター ^ff0000 " + getguildmaster(@GIDp1) + " ^000000 様!";
-	mes "用事があるならなんなりと";
-	mes "お申し付けくださいませ！";
+	mes "おかえりなさいませ、^ff0000 "+ getguildmaster(@GIDp1) + " ^000000 様";
+	mes "何なりと申し付けくださいませ";
 	next;
-	menu "ギルドのプロパティ",L1,"商業への投資",L2,"ディフェンスへの投資",L3,"ガーディアン設置",L4,"カプラとの契約・解雇",L5,"マスタールームに行く",L6,"アジトを放棄する",L7;
+	menu "砦の状態を表示",L1,"商業発展に投資",L2,"砦の防衛に投資",L3,"ガーディアン設置",L4,"カプラとの契約 / 解雇",L5,"マスターの部屋に入る",L6,"アジトを放棄する",L7;
 //-----------------------------------------------------------
 //================================================
 //Phase 1:ギルドのプロパティ(未調整)
@@ -348,7 +346,7 @@ L7:
 		setcastledata "prtg_cas01.gat",16,0;
 		setcastledata "prtg_cas01.gat",17,0;
 		Announce "砦 [" + GetCastleName("prtg_cas01.gat") + "]を [" + GetGuildName(@GIDp1) + "]ギルドが破棄しました。",0;
-		MapRespawnGuildID "prtg_cas01.gat",GetCastleData("prtg_cas01.gat",1),0;
+		MapRespawnGuildID "prtg_cas01.gat",GetCastleData("prtg_cas01.gat",1),7;
 		end;
 		L7_2:
 			mes "[執事アブライ]";
