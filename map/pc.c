@@ -286,6 +286,29 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
  */
 static int pc_walktoxy_sub(struct map_session_data *);
 
+/*==========================================
+ * 自分をロックしているMOBの数を数える(foreachclient)
+ *------------------------------------------
+ */
+int pc_counttargeted_sub(struct block_list *bl,va_list ap)
+{
+	struct mob_data *md=(struct mob_data *)bl;
+	int id,*c;
+	id=va_arg(ap,int);
+	c=va_arg(ap,int *);
+	if( md->target_id==id )
+		(*c)++;
+	return 0;
+}
+int pc_counttargeted(struct map_session_data *sd)
+{
+	int c=0;
+	map_foreachinarea(pc_counttargeted_sub, sd->bl.m,
+		sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,
+		sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,BL_MOB,
+		sd->bl.id,&c );
+	return c;
+}
 
 /*==========================================
  * saveに必要なステータス修正を行なう

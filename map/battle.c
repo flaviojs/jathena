@@ -202,10 +202,28 @@ int battle_get_luk(struct block_list *bl)
 int battle_get_flee(struct block_list *bl)
 {
 	int flee=0;
+	int skill;
+	int skill_flee=0;
+	int target_count;
 	struct status_change *sc_data=battle_get_sc_data(bl);
 
-	if(bl->type==BL_PC)
-		flee=((struct map_session_data *)bl)->flee;
+	if(bl->type==BL_PC){
+		target_count=pc_counttargeted((struct map_session_data *)bl);	//ƒ^ƒQ‚Á‚Ä‚¢‚éMOB‚Ì”
+
+		//ƒXƒLƒ‹‚É‚æ‚éFleeŒüã•ª‚ÍˆÍ‚Ü‚êFleeŒ¸­‚Ì‘ÎÛ‚É‚Í‚È‚ç‚È‚¢
+		if( (skill=pc_checkskill((struct map_session_data *)bl,TF_MISS))>0 )	// ‰ñ”ğ—¦‘‰Á
+			skill_flee += skill*3;
+		if( (skill=pc_checkskill((struct map_session_data *)bl,MO_DODGE))>0 )	// Œ©Ø‚è
+			skill_flee += (skill*3)>>1;
+
+		flee=((struct map_session_data *)bl)->flee -skill_flee;
+		if(target_count>2){
+			flee=flee*(12-target_count)*10/100;
+			if(flee<0)
+				flee=0;
+		}
+		flee+=skill_flee;
+	}
 	else
 		flee=battle_get_agi(bl) + battle_get_lv(bl);
 
@@ -218,6 +236,7 @@ int battle_get_flee(struct block_list *bl)
 
 	return flee;
 }
+
 int battle_get_hit(struct block_list *bl)
 {
 	int hit=0;
@@ -402,6 +421,7 @@ int battle_get_def(struct block_list *bl)
 {
 	struct status_change *sc_data=battle_get_sc_data(bl);
 	int def=0;
+	int target_count;
 
 	if(bl->type==BL_PC)
 		def = ((struct map_session_data *)bl)->def;
@@ -421,6 +441,14 @@ int battle_get_def(struct block_list *bl)
 			def = 0;
 		if(sc_data[SC_FREEZE].timer != -1 || sc_data[SC_STONE].timer != -1)
 			def >>= 1;
+	}
+	if(bl->type==BL_PC){	//ƒ^ƒQ‚ç‚ê”‚É‚æ‚éDEFŒ¸­
+		target_count=pc_counttargeted((struct map_session_data *)bl);	//ƒ^ƒQ‚Á‚Ä‚¢‚éMOB‚Ì”
+		if(target_count>2){
+			def=def*(22-target_count)*5/100;
+			if(def<0)
+				def=0;
+		}
 	}
 
 	return def;
@@ -448,6 +476,7 @@ int battle_get_def2(struct block_list *bl)
 {
 	struct status_change *sc_data=battle_get_sc_data(bl);
 	int def2=0;
+	int target_count;
 
 	if(bl->type==BL_PC)
 		def2 = ((struct map_session_data *)bl)->def2;
@@ -465,6 +494,14 @@ int battle_get_def2(struct block_list *bl)
 			def2 = def2*75/100;
 		if(sc_data[SC_FREEZE].timer != -1 || sc_data[SC_STONE].timer != -1)
 			def2 >>= 1;
+	}
+	if(bl->type==BL_PC){	//ƒ^ƒQ‚ç‚ê”‚É‚æ‚éDEFŒ¸­
+		target_count=pc_counttargeted((struct map_session_data *)bl);	//ƒ^ƒQ‚Á‚Ä‚¢‚éMOB‚Ì”
+		if(target_count>2){
+			def2=def2*(22-target_count)*5/100;
+			if(def2<0)
+				def2=0;
+		}
 	}
 
 	return def2;

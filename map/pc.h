@@ -25,6 +25,8 @@
 
 void pc_set_gm_account_fname(char *str);
 int pc_isGM(struct map_session_data *sd);
+int pc_getrefinebonus(int lv,int type);
+int pc_counttargeted(struct map_session_data *sd);
 
 int pc_setrestartvalue(struct map_session_data *sd,int type);
 int pc_makesavestatus(struct map_session_data *);
@@ -36,7 +38,7 @@ int pc_isequip(struct map_session_data *sd,int n);
 int pc_equippoint(struct map_session_data *sd,int n);
 
 int pc_checkskill(struct map_session_data *sd,int skill_id);
-int pc_checkallowskill(struct map_session_data *sd,int nameid);
+int pc_checkallowskill(struct map_session_data *sd);
 int pc_checkequip(struct map_session_data *sd,int pos);
 
 int pc_checkoverhp(struct map_session_data*);
