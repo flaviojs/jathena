@@ -22,7 +22,7 @@ ama_in01.gat,166,73,0	warp	ama0014	1,1,ama_in01.gat,162,31
 amatsu.gat,248,160,0	warp	ama0015	1,1,ama_in01.gat,79,178
 ama_in01.gat,76,178,0	warp	ama0016	1,1,amatsu.gat,245,160
 //èÈ
-amatsu.gat,89,235,0	warp	ama0017	1,1,ama_in02.gat,223,45
+amatsu.gat,85,235,0	warp	ama0017	1,1,ama_in02.gat,223,45
 ama_in02.gat,226,45,0	warp	ama0018	1,1,amatsu.gat,88,235
 ama_in02.gat,195,44,0	warp	ama0019	1,1,ama_in02.gat,65,40
 ama_in02.gat,65,38,0	warp	ama0020	1,1,ama_in02.gat,195,41

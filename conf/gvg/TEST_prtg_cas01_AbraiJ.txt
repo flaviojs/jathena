@@ -4,9 +4,10 @@
 //とりあえず、TEST作成('A`)
 //prtg_cas01.txtのアブライはコメントアウトですよ～
 prtg_cas01.gat,112,181,0	script	アブライ	55,{
+	if (getcastledata("prtg_cas01.gat",1) == 0) goto LStart;
 	getcastledata "prtg_cas01.gat",0;
 	getcastledata "prtg_cas01.gat",1,@GIDp1;
-	if (getcharid(2) == @GIDp1) goto LStart3;
+	if ((getcharid(2) != 0) && (getcharid(2) == @GIDp1)) goto LStart2;
 // ------- アジト未占領 ----------------------------------
 LStart:
 	mes "[執事アブライ]";
