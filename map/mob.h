@@ -13,6 +13,7 @@ struct mob_skill {
 };
 
 struct mob_db {
+	int mobid;
 	char name[24],jname[24];
 	int lv;
 	int max_hp,max_sp;

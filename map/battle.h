@@ -59,6 +59,7 @@ int battle_weapon_attack( struct block_list *bl,struct block_list *target,
 	 unsigned int tick,int flag);
 
 // 各種パラメータを得る
+int battle_get_mobid(struct block_list *bl);
 int battle_get_lv(struct block_list *bl);
 int battle_get_hp(struct block_list *bl);
 int battle_get_max_hp(struct block_list *bl);

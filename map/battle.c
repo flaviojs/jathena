@@ -21,6 +21,15 @@ struct Battle_Config battle_config;
 
 // 各種パラメータ所得
 
+int battle_get_mobid(struct block_list *bl)
+{
+	if(bl->type==BL_MOB)
+		return mob_db[((struct mob_data *)bl)->class].mobid;
+	else if(bl->type==BL_PC)
+		return -1;
+	else
+		return 0;
+}
 int battle_get_lv(struct block_list *bl)
 {
 	if(bl->type==BL_MOB)
@@ -1644,14 +1653,22 @@ struct Damage battle_calc_attack(	int attack_type,
 	struct Damage d;
 	switch(attack_type){
 	case BF_WEAPON:
-		return battle_calc_weapon_attack(bl,target,skill_num,skill_lv,flag);
+		d=battle_calc_weapon_attack(bl,target,skill_num,skill_lv,flag);
+		break;
 	case BF_MAGIC:
-		return battle_calc_magic_attack(bl,target,skill_num,skill_lv,flag);
+		d=battle_calc_magic_attack(bl,target,skill_num,skill_lv,flag);
+		break;
 	case BF_MISC:
-		return battle_calc_misc_attack(bl,target,skill_num,skill_lv,flag);
+		d=battle_calc_misc_attack(bl,target,skill_num,skill_lv,flag);
+		break;
 	default:
 		printf("battle_calc_attack: unknwon attack type ! %d\n",attack_type);
 		break;
+	}
+	int mobid=battle_get_mobid(target);
+	if(d.damage>=1 && mobid>=1078 && mobid<=1085){
+		d.damage=1;
+		if(d.div_>1) d.damage=d.div_;
 	}
 	return d;
 }
@@ -1677,14 +1694,22 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		// 攻撃対象となりうるので攻撃
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(src,target,0,0,0);
-		if (wd.div_ == 255 && src->type == BL_PC)	//三段掌
-			clif_skill_damage(src , target , tick , wd.amotion , wd.dmotion , 
-				wd.damage , 3 , MO_TRIPLEATTACK, pc_checkskill(sd,MO_TRIPLEATTACK) , wd.type );
-		else
+		int mobid=battle_get_mobid(target);
+		if(wd.damage>=1 && mobid>=1078 && mobid<=1085){
+			wd.damage=1;
+			wd.damage2=0;
 			clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
 				wd.damage, wd.div_ , wd.type, wd.damage2);
-		//二刀流左手とカタール追撃のミス表示(無理やり～)
-		if(wd.damage2==-1){wd.damage2=0;clif_damage(src,target,tick+200, wd.amotion, wd.dmotion,0, 1, 0, 0);}
+		} else {
+			if (wd.div_ == 255 && src->type == BL_PC)	//三段掌
+				clif_skill_damage(src , target , tick , wd.amotion , wd.dmotion , 
+					wd.damage , 3 , MO_TRIPLEATTACK, pc_checkskill(sd,MO_TRIPLEATTACK) , wd.type );
+			else
+				clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
+					wd.damage, wd.div_ , wd.type, wd.damage2);
+			//二刀流左手とカタール追撃のミス表示(無理やり～)
+			if(wd.damage2==-1){wd.damage2=0;clif_damage(src,target,tick+200, wd.amotion, wd.dmotion,0, 1, 0, 0);}
+		}
 		battle_damage(src,target,(wd.damage+wd.damage2));
 		if((wd.damage+wd.damage2)>0)
 			skill_additional_effect(src,target,0,0,tick);

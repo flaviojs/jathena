@@ -204,7 +204,7 @@ int skill_get_unit_id(int id,int flag)
 	switch(id){
 	case MG_SAFETYWALL:		return 0x7e;				/* セイフティウォール */
 	case MG_FIREWALL:		return 0x7f;				/* ファイアーウォール */
-	case AL_WARP:			return (flag==0)?0x81:0x80;	/* ワープポータル */
+	case AL_WARP:			return (flag==0)?0x81:0x80;		/* ワープポータル */
 	case PR_BENEDICTIO:		return 0x82;				/* 聖体降福 */
 	case PR_SANCTUARY:		return 0x83;				/* サンクチュアリ */
 	case PR_MAGNUS:			return 0x84;				/* マグヌスエクソシズム */
@@ -393,7 +393,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		int i;
 		for(i=SC_STONE;i<=SC_BLIND;i++){
 			if( sd->addeff[i-SC_STONE]>0 && rand()%100<sd->addeff[i-SC_STONE] ){
-				printf("skill_addeff: cardによる異常発動 %d %d\n",i,sd->addeff[i-SC_STONE]);
+				printf("PC %d skill addeff: cardによる異常発動 %d %d\n",sd->bl.id,i,sd->addeff[i-SC_STONE]);
 				skill_status_change_start(bl,i,1,5);
 			}
 		}
@@ -1581,6 +1581,10 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		if(md)
 			mob_summonslave(md,mob_db[md->class].skill[md->skillidx].val1,
 				skilllv,(skillid==NPC_SUMMONSLAVE)?1:0);
+			mob_summonslave(md,mob_db[md->class].skill[md->skillidx].val1,
+				skilllv,(skillid==NPC_SUMMONSLAVE)?1:0);
+			mob_summonslave(md,mob_db[md->class].skill[md->skillidx].val1,
+				skilllv,(skillid==NPC_SUMMONSLAVE)?1:0);
 		break;
 
 	case NPC_EMOTION:			/* エモーション */
@@ -1616,7 +1620,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 	if(!skill_check_condition( sd ))		/* 使用条件チェック */
 		return 0;
 		
-	printf("skill castend skill=%d\n",sd->skillid);
+	printf("PC %d skill castend skill=%d\n",sd->bl.id,sd->skillid);
 
 	if( (skill_get_inf(sd->skillid)&1) &&	// 彼我敵対関係チェック
 		battle_check_target(&sd->bl,bl, BCT_ENEMY)<=0 )
@@ -1705,9 +1709,9 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case HT_SHOCKWAVE:			/* ショックウェーブトラップ */
 	case HT_SANDMAN:			/* サンドマン */
 	case HT_FLASHER:			/* フラッシャー */
-	case HT_FREEZINGTRAP:		/* フリージングトラップ */
+	case HT_FREEZINGTRAP:			/* フリージングトラップ */
 	case HT_BLASTMINE:			/* ブラストマイン */
-	case HT_CLAYMORETRAP:		/* クレイモアートラップ */
+	case HT_CLAYMORETRAP:			/* クレイモアートラップ */
 	case AS_VENOMDUST:			/* ベノムダスト */
 		skill_unitsetting(src,skillid,skilllv,x,y,0);
 		break;
@@ -1765,6 +1769,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 int skill_castend_map( struct map_session_data *sd,int skill_num, const char *map)
 {
 	int x=0,y=0;
+	struct block_list *bl;
 	
 	if( sd==NULL || pc_isdead(sd))
 		return 0;
@@ -1776,8 +1781,9 @@ int skill_castend_map( struct map_session_data *sd,int skill_num, const char *ma
 		return 0;
 
 	pc_stopattack(sd);
+	bl=map_id2bl(sd->skilltarget);
 
-	printf("skill castend skill =%d map=%s\n",skill_num,map);
+	printf("PC %d skill castend skill=%d map=%s\n",sd->bl.id,skill_num,map);
 
 	if(strcmp(map,"cancel")==0)
 		return 0;
@@ -2212,10 +2218,12 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0x83:	/* サンクチュアリ */
 		{
 			int *list=sg->vallist;
-			int i,ei=0,race=battle_get_race(bl);
+			int i,ei=0;
+			int element=battle_get_element(bl) % 10;
+			int race=battle_get_race(bl);
 
 			if( battle_get_hp(bl)>=battle_get_max_hp(bl) &&
-				 race!=1 && race!=6  )
+				 element!=9 && race!=6  )
 				break;
 
 			for(i=0;i<16;i++)	/* 人数制限の計算 */
@@ -2230,7 +2238,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 					return 0;
 				}
 			}
-			if( race!=1 && race!=6 ){
+			if( element!=9 && race!=6 ){
 				int heal=sg->val2;
 				if( bl->type==BL_PC &&
 					pc_check_equip_dcard((struct map_session_data *)bl,4128) )
@@ -2245,8 +2253,9 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 
 	case 0x84:	/* マグヌスエクソシズム */
 		{
+			int element=battle_get_element(bl) % 10;
 			int race=battle_get_race(bl);
-			if( race!=1 && race!=6 )
+			if ( element!=9 && race!=6 )
 				return 0;
 			skill_attack(BF_MAGIC,ss,&src->bl,bl,
 				sg->skill_id,sg->skill_lv,tick,0);
@@ -2587,7 +2596,8 @@ int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,
  */
 int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 {
-	struct map_session_data* sd=NULL/*,*target_sd=NULL*/;
+	struct map_session_data* sd=NULL	/*,*target_sd=NULL*/;
+	struct block_list *bl;
 	
 	if( (sd=map_id2sd(id))==NULL )
 		return 0;
@@ -2602,7 +2612,8 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 	if(!skill_check_condition( sd ))		/* 使用条件チェック */
 		return 0;
 
-	printf("skill castend skill=%d\n",sd->skillid);
+	bl=map_id2bl(sd->skilltarget);
+	printf("PC %d skill castend skill=%d\n",sd->bl.id,sd->skillid);
 
 	skill_castend_pos2(&sd->bl,sd->skillx,sd->skilly,sd->skillid,sd->skilllv,tick,0);
 
@@ -2659,7 +2670,7 @@ int skill_check_condition( struct map_session_data *sd )
 			item_amount[1]+=1;
 		case MG_SAFETYWALL:		// セイフティウォール
 		case AL_WARP:			// ワープポータル
-		case ALL_RESURRECTION:	// リザレクション
+		case ALL_RESURRECTION:		// リザレクション
 		case PR_SANCTUARY:		// サンクチュアリ
 		case PR_MAGNUS:			// マグヌスエクソシズム
 		case WZ_FIREPILLAR:		// ファイアーピラー
@@ -2751,6 +2762,27 @@ int skill_check_condition( struct map_session_data *sd )
 			}
 			break;
 
+		case HT_TALKIEBOX:	/* トーキーボックス */
+		case HT_BLASTMINE:	/* ブラストマイン */
+		case HT_SKIDTRAP:	/* スキッドトラップ */
+		case HT_ANKLESNARE:	/* アンクルスネア */
+		case HT_LANDMINE:	/* ランドマイン */
+		case HT_SHOCKWAVE:	/* ショックウェーブトラップ */
+		case HT_SANDMAN:	/* サンドマン */
+		case HT_FLASHER:	/* フラッシャー */
+		case HT_FREEZINGTRAP:	/* フリージングトラップ */
+		case HT_CLAYMORETRAP:	/* クレイモアートラップ */
+			item_id[0]=1065;		//	bgem = 1065;
+			item_amount[0]+=1;
+			i[0]=pc_search_inventory(sd,item_id[0]);
+			if(i[0] == -1 || sd->status.inventory[i[0]].amount < item_amount[0]) {	// アイテム所持なし
+				clif_skill_fail(sd,sd->skillid,0,0);
+				return 0;
+			} else {
+				pc_delitem(sd,i[0],item_amount[0],0);		// 所持アイテム消費
+			}
+			break;
+
 		case AS_GRIMTOOTH:		/* グリムトゥース */
 			if(!pc_ishiding(sd)) {		// ハイディング状態
 				clif_skill_fail(sd,sd->skillid,0,0);
@@ -2823,8 +2855,8 @@ int skill_check_condition( struct map_session_data *sd )
 			return 0;
 		}
 
-		if(!pc_check_equip_dcard(sd,4132) && 
-			(item_id[0] || item_id[1] || item_id[2])) {	// ミストレスカード
+		if(!pc_check_equip_dcard(sd,4132) && 	// ミストレスカード
+			(item_id[0] || item_id[1] || item_id[2])) {
 			for(j=0;j<3;j++) {
 				if(item_id[j] == 0 || item_amount[j] == 0)
 					continue;
@@ -2978,8 +3010,8 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		break;
 	}
 
-	printf("skill use target_id=%d skill=%d lv=%d cast=%d\n"
-		,target_id,skill_num,skill_lv,casttime);
+	printf("PC %d skill use target_id=%d skill=%d lv=%d cast=%d\n",
+		sd->bl.id,target_id,skill_num,skill_lv,casttime);
 
 	if(sd->skillitem == skill_num)
 		casttime = delay = 0;
@@ -3046,8 +3078,8 @@ int skill_use_pos( struct map_session_data *sd,
 
 	sd->state.skillcastcancel=1;
 
-	printf("skill use target_pos=(%d,%d) skill=%d lv=%d cast=%d\n",
-		skill_x,skill_y,skill_num,skill_lv,casttime);
+	printf("PC %d skill use target_pos=(%d,%d) skill=%d lv=%d cast=%d\n",
+		sd->bl.id,skill_x,skill_y,skill_num,skill_lv,casttime);
 
 	if(sd->skillitem == skill_num)
 		casttime = delay = 0;
@@ -3372,7 +3404,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 		
 		if(SC_STONE<=type && type<=SC_BLIND){	/* カードによる耐性 */
 			if(sd->reseff[type-SC_STONE] && rand()%100<sd->reseff[type-SC_STONE]){
-				printf("skill_sc_start: cardによる異常耐性発動\n");
+				printf("PC %d skill_sc_start: cardによる異常耐性発動\n",sd->bl.id);
 				return 0;
 			}
 		}
