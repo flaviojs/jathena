@@ -685,7 +685,9 @@ int mob_setdelayspawn(int id)
 	struct mob_data *md;
 	struct block_list *bl;
 	
-	nullpo_retr(-1, bl=map_id2bl(id));
+	if((bl=map_id2bl(id)) == NULL)
+		return -1;
+
 	nullpo_retr(-1, md=(struct mob_data*)bl);
 
 	if(md->bl.type!=BL_MOB)
@@ -1766,7 +1768,6 @@ int mob_delete(struct mob_data *md)
 		return 1;
 	mob_changestate(md,MS_DEAD,0);
 	clif_clearchar_area(&md->bl,1);
-	free(md->lootitem);
 	map_delblock(&md->bl);
 	if(mob_get_viewclass(md->class) <= 1000)
 		clif_clearchar_delay(gettick()+3000,&md->bl,0);

@@ -950,6 +950,8 @@ char * map_charid2nick(int id)
  */
 struct map_session_data * map_nick2sd(char *nick)
 {
+	if(nick == NULL)
+		return NULL;
 	return strdb_search(nick_db,nick);
 }
 

@@ -90,7 +90,7 @@ static const int packet_len_table[0x210]={
    30,  8, 34, 14,  2,  6, 26,  2,  28, 81,  6, 10, 26,  2, -1, -1,
    -1, -1, 20, 10, 32,  9, 34, 14,   2,  6, 48, 56, -1,  4,  5, 10,
 //#0x200
-   26,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
+   26,  0,  0,  0, 18,  0,  0,  0,   0,  0,  0, 19, 19,  0,  0,  0,
 };
 
 // local define
@@ -846,7 +846,7 @@ static int clif_npc0078(struct npc_data *nd,unsigned char *buf)
 	WBUFL(buf,2)=nd->bl.id;
 	WBUFW(buf,6)=nd->speed;
 	WBUFW(buf,14)=nd->class;
-	if((nd->class == 722) && (nd->u.scr.guild_id > 0) && ((g=guild_search(nd->u.scr.guild_id)) != NULL))
+	if( (nd->bl.subtype!=WARP) && (nd->class == 722) && (nd->u.scr.guild_id > 0) && ((g=guild_search(nd->u.scr.guild_id)) != NULL) )
 	{
 		WBUFL(buf,22)=g->emblem_id;
 		WBUFL(buf,26)=g->guild_id;
@@ -6268,6 +6268,8 @@ void clif_sitting(int fd, struct map_session_data *sd)
 int clif_disp_onlyself(struct map_session_data *sd,char *mes,int len)
 {
 	unsigned char buf[len+32];
+
+	nullpo_retr(0, sd);
 
 	WBUFW(buf, 0)=0x17f;
 	WBUFW(buf, 2)=len+8;

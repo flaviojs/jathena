@@ -1,3 +1,22 @@
+--------------------
+//1032 by (凸)
+・1031で何故か削除されていたbuildin_getitemname()を復活
+・バグスレなどに出た修正を反映
+・その他細かい修正
+
+	(map/)
+	clif.c
+		clif_disp_onlyself() NULLチェック追加
+	map.c
+		map_nick2sd() nickがNULLだとすぐNULLを返すように変更
+	mob.c
+		mob_setdelayspawn() NULLチェック変更
+		mob_delete() 修正
+	npc.c
+		npc_parse_warp() 修正
+	script.c
+		buildin_getitemname() 復活
+
 ----------------------------------------
 //1031 by huge
 ・NPCのscriptに、makepetを追加。

@@ -214,6 +214,7 @@ int buildin_failedremovecards(struct script_state *st);
 int buildin_marriage(struct script_state *st);
 int buildin_wedding_effect(struct script_state *st);
 int buildin_divorce(struct script_state *st);
+int buildin_getitemname(struct script_state *st);
 int buildin_makepet(struct script_state *st);
 int buildin_getexp(struct script_state *st);
 
@@ -360,6 +361,7 @@ struct {
 	{buildin_marriage,"marriage","s"},
 	{buildin_wedding_effect,"wedding",""},
 	{buildin_divorce,"divorce",""},
+	{buildin_getitemname,"getitemname","i"},
 	{buildin_makepet,"makepet","i"},
 	{buildin_getexp,"getexp","ii"},
 	{NULL,NULL,NULL}
@@ -4439,6 +4441,34 @@ int buildin_divorce(struct script_state *st)
 		return 0;
 	}
 	push_val(st->stack,C_INT,1);
+	return 0;
+}
+
+
+/*==========================================
+ * ID‚©‚çItem–¼
+ *------------------------------------------
+ */
+int buildin_getitemname(struct script_state *st)
+{
+	int item_id;
+	struct item_data *i_data;
+	char *item_name;
+
+	item_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+
+	i_data = NULL;
+	i_data = itemdb_search(item_id);
+	item_name=calloc(24, 1);
+
+	if(i_data==NULL){
+		if(battle_config.error_log)
+			printf("out of memory : buildin_getitemname\n");
+		exit(1);
+	}
+
+	strncpy(item_name,i_data->jname,23);
+	push_str(st->stack,C_STR,item_name);
 	return 0;
 }
 
