@@ -4543,7 +4543,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.mob_warpportal = 0;
 		battle_config.dead_branch_active = 0;
 		battle_config.vending_max_value = 10000000;
-		battle_config.pet_lootitem = 1;
+		battle_config.pet_lootitem = 0;
 		battle_config.pet_weight = 1000;
 		battle_config.show_steal_in_same_party = 0;
 		battle_config.enable_upper_class = 0;

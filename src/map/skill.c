@@ -736,7 +736,7 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 		map_foreachinmovearea(clif_petoutsight,target->m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,dx,dy,BL_PC,pd);
 
 	if(su){
-		skill_unit_move_unit_group(su->group,dx,dy);
+		skill_unit_move_unit_group(su->group,target->m,dx,dy);
 	}else{
 		if(moveblock) map_delblock(target);
 		target->x=nx;
@@ -4589,7 +4589,7 @@ int skill_unit_onlimit(struct skill_unit *src,unsigned int tick)
 					src->bl.x,src->bl.y,1);
 			group->valstr=calloc(24, 1);
 			if(group->valstr==NULL){
-				printf("skill_unit_ondelete: out of memory !\n");
+				printf("skill_unit_onlimit: out of memory !\n");
 				exit(1);
 			}
 			memcpy(group->valstr,sg->valstr,24);
@@ -4835,7 +4835,7 @@ int skill_check_condition(struct map_session_data *sd,int type)
 	hp=skill_get_hp(skill, lv);	/* 消費HP */
 	sp=skill_get_sp(skill, lv);	/* 消費SP */
 	if((sd->skillid_old == BD_ENCORE) && skill==sd->skillid_dance)
-		sp=sp/2;	//アドリブ→アンコール時はSP消費が半分
+		sp=sp/2;	//アンコール時はSP消費が半分
 	hp_rate = (lv <= 0)? 0:skill_db[skill].hp_rate[lv-1];
 	sp_rate = (lv <= 0)? 0:skill_db[skill].sp_rate[lv-1];
 	zeny = skill_get_zeny(skill,lv);
@@ -4920,7 +4920,7 @@ int skill_check_condition(struct map_session_data *sd,int type)
 			spiritball--;
 		break;
 	case BD_ADAPTATION:				/* アドリブ */
-		if(sd->sc_data[SC_DANCING].timer==-1){ //ダンス中のみ？
+		if(sd->sc_data[SC_DANCING].timer==-1 || DIFF_TICK(gettick(),sd->sc_data[SC_DANCING].val3) <= 5000){ //ダンス中で使用後5秒以上のみ？
 			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
@@ -7233,7 +7233,7 @@ struct skill_unit_group *skill_initunitgroup(struct block_list *src,
 			sd->skillid_dance=skillid;
 			sd->skilllv_dance=skilllv;
 		}
-		skill_status_change_start(src,SC_DANCING,skillid,(int)group,0,0,1000*181,0);
+		skill_status_change_start(src,SC_DANCING,skillid,(int)group,gettick(),0,1000*181,0);
 	}
 	return group;
 }
@@ -7574,11 +7574,41 @@ int skill_unit_move( struct block_list *bl,unsigned int tick,int range)
 }
 
 /*==========================================
+ * スキルユニット自体の移動時処理(foreachinarea)
+ *------------------------------------------
+ */
+int skill_unit_move_unit_group_sub( struct block_list *bl, va_list ap )
+{
+	struct skill_unit *unit;
+	struct skill_unit_group *group;
+	struct block_list *src;
+	int range;
+	unsigned int tick;
+	src=va_arg(ap,struct block_list*);
+	tick=va_arg(ap,unsigned int);
+	unit=(struct skill_unit *)src;
+	if(!unit->alive || bl->prev==NULL)
+		return 0;
+
+	group=unit->group;
+	range=(unit->range!=0)?unit->range:group->range;
+
+	if( range<0 || battle_check_target(src,bl,group->target_flag )<=0 )
+		return 0;
+	if( bl->x >= src->x-range && bl->x <= src->x+range &&
+		bl->y >= src->y-range && bl->y <= src->y+range )
+		skill_unit_onplace( unit, bl, tick );
+	else
+		skill_unit_onout( unit, bl, tick );
+	return 0;
+}
+
+/*==========================================
  * スキルユニット自体の移動時処理
  * 引数はグループと移動量
  *------------------------------------------
  */
-int skill_unit_move_unit_group( struct skill_unit_group *group, int dx,int dy)
+int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int dy)
 {
 	if(group->unit_count<=0)
 		return 0;
@@ -7589,12 +7619,21 @@ int skill_unit_move_unit_group( struct skill_unit_group *group, int dx,int dy)
 			struct block_list *bl=NULL;
 			unit=&group->unit[i];
 			bl=(struct block_list *)unit;
-			if(unit->alive && !(dx==0 && dy==0)){
+			if(unit->alive && !(m==bl->m && dx==0 && dy==0)){
+				int range=unit->range;
+				if(range>0){
+					if(range<7)
+						range=7;
+					map_foreachinarea( skill_unit_move_unit_group_sub, unit->bl.m,
+						unit->bl.x-range,unit->bl.y-range,unit->bl.x+range,unit->bl.y+range,0,
+						&unit->bl,gettick() );
+				}
 				map_delblock(bl);
+				bl->m = m;
 				bl->x += dx;
 				bl->y += dy;
-				clif_skill_setunit(unit);
 				map_addblock(bl);
+				clif_skill_setunit(unit);
 			}
 		}
 	}

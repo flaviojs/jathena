@@ -3178,7 +3178,7 @@ static int pc_walk(int tid,unsigned int tick,int id,int data)
 		if(moveblock) map_addblock(&sd->bl);
 
 		if(sd->sc_data[SC_DANCING].timer!=-1)
-			skill_unit_move_unit_group((struct skill_unit_group *)sd->sc_data[SC_DANCING].val2,dx,dy);
+			skill_unit_move_unit_group((struct skill_unit_group *)sd->sc_data[SC_DANCING].val2,sd->bl.m,dx,dy);
 
 		map_foreachinmovearea(clif_pcinsight,sd->bl.m,x-AREA_SIZE,y-AREA_SIZE,x+AREA_SIZE,y+AREA_SIZE,-dx,-dy,0,sd);
 		sd->walktimer = -1;

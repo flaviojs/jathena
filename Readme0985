@@ -1,4 +1,30 @@
 --------------------
+//0995 by (凸)
+・battle.pet_lootitemのデフォルトがyesになっていたのを修正
+・battle.pet_lootitemの適用をforeach前でやるように修正
+・ペットの初期化でpd->lootitemがある時しか初期化されていなかったのを修正
+・領域が移動して対象が領域から抜けても効果が解除されない問題を修正
+・アドリブはダンス発動から5秒以上経たないと使用できないようにした
+
+	(map/)
+	pet.c
+		pet_data_init() 修正
+		pet_ai_sub_hard() 修正
+		pet_ai_sub_hard_lootsearch() 修正
+	skill.c
+		skill_blown() 変更
+		skill_unit_onlimit() エラーメッセージ修正
+		skill_check_condition() 変更
+		skill_initunitgroup() sd_data[SC_DANCING].val3にgettick()
+		skill_unit_move_unit_group_sub() 追加
+		skill_unit_move_unit_group() 変更
+	skill.h skill_unit_move_unit_group() 引数変更
+	battle.c
+		battle_config_read() pet_lootitem=0に修正
+	pc.c
+		pc_walk() 変更
+
+--------------------
 //0994 by huge
 ・battle.pet_lootitemが適応されていなかったのを修正。
 ・ペットにパフォーマンスをさせた後、10秒間くらいは拾わせないように。

@@ -109,7 +109,7 @@ int skill_check_unit_range(int m,int x,int y,int range,int skillid);
 int skill_check_unit_range2(int m,int x,int y,int range);
 int skill_unit_out_all( struct block_list *bl,unsigned int tick,int range);
 int skill_unit_move( struct block_list *bl,unsigned int tick,int range);
-int skill_unit_move_unit_group( struct skill_unit_group *group, int dx,int dy);
+int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int dy);
 
 struct skill_unit_group *skill_check_dancing( struct block_list *src );
 void skill_stop_dancing(struct block_list *src);

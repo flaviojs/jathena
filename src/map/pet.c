@@ -657,11 +657,10 @@ int pet_data_init(struct map_session_data *sd)
 		interval = 1;
 	sd->pet_hungry_timer = add_timer(gettick()+interval,pet_hungry,sd->bl.id,0);
 	pd->lootitem=calloc(sizeof(struct item)*LOOTITEM_SIZE, 1);
-	if(pd->lootitem)
-		memset(pd->lootitem,0,sizeof(pd->lootitem));
+	memset(pd->lootitem,0,sizeof(pd->lootitem));
 	pd->lootitem_count = 0;
 	pd->lootitem_weight = 0;
-	pd->lootitem_timer = 0;
+	pd->lootitem_timer = gettick();
 	return 0;
 }
 
@@ -1034,7 +1033,7 @@ static int pet_ai_sub_hard(struct pet_data *pd,unsigned int tick)
 	if(pd->state.state == MS_DELAY || pd->bl.m != sd->bl.m)
 		return 0;
 	// ペットによるルート
-	if(!pd->target_id && pd->lootitem_count < LOOTITEM_SIZE)
+	if(!pd->target_id && pd->lootitem_count < LOOTITEM_SIZE && battle_config.pet_lootitem && DIFF_TICK(gettick(),pd->lootitem_timer)>0)
 		map_foreachinarea(pet_ai_sub_hard_lootsearch,pd->bl.m,
 						  pd->bl.x-AREA_SIZE*2,pd->bl.y-AREA_SIZE*2,
 						  pd->bl.x+AREA_SIZE*2,pd->bl.y+AREA_SIZE*2,
@@ -1196,7 +1195,7 @@ int pet_ai_sub_hard_lootsearch(struct block_list *bl,va_list ap)
 	pd=va_arg(ap,struct pet_data *);
 	itc=va_arg(ap,int *);
 
-	if( !pd->target_id && battle_config.pet_lootitem && gettick()>pd->lootitem_timer){
+	if(!pd->target_id){
 		struct flooritem_data *fitem = (struct flooritem_data *)bl;
 		struct map_session_data *sd = NULL;
 		// ルート権無し
