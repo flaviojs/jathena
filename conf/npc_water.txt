@@ -1,7 +1,9 @@
 // 水の設定。
 // waterは水ありでall_waterは全て水だと判断するマップ。
+// 第4列で水場高さ設定
 
+iz_dun00.gat	mapflag	water
 iz_dun01.gat	mapflag	water
-iz_dun02.gat	mapflag	all_water
+iz_dun02.gat	mapflag	water	-57
 iz_dun03.gat	mapflag	all_water
 iz_dun04.gat	mapflag	all_water

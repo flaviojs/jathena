@@ -962,6 +962,42 @@ int map_setipport(char *name,unsigned long ip,int port)
 
 // 初期化周り
 /*==========================================
+ * "conf/npc_water.txt"の第4列で水場高さ設定（ちゃんとした水場判定が実装されるまでのつなぎとして・・・）
+ *------------------------------------------
+ */
+static int map_readwater(char *watermap)
+{
+	char line[1024];
+	FILE *fp;
+
+	fp=fopen("conf/npc_water.txt","r");
+	if(fp==NULL){
+		printf("file not found: %s\n","conf/npc_water.txt");
+		return 3;
+	}
+	while(fgets(line,1020,fp)){
+		char w1[1024],w2[1024],w3[1024],mapname[1024];
+		int wh=3,count;
+		if(line[0] == '/' && line[1] == '/')
+			continue;
+		if((count=sscanf(line,"%s%s%s%d",w1,w2,w3,&wh)) < 3){
+			continue;
+		}
+		sscanf(w1,"%[^,]",mapname);
+		if(strcmpi(watermap,mapname)==0){
+			if(strcmpi(w2,"mapflag")==0 && strcmpi(w3,"water")==0 && count >= 4){
+				fclose(fp);
+				return wh;
+			}else{
+				fclose(fp);
+				return 3;
+			}
+		}
+	}
+	fclose(fp);
+	return 3;
+}
+/*==========================================
  * マップ1枚読み込み
  *------------------------------------------
  */
@@ -971,6 +1007,7 @@ static int map_readmap(int m,char *fn)
 	int s;
 	int x,y,xs,ys;
 	struct gat_1cell {float high[4]; int type;} *p;
+	int wh;
 
 	// read & convert fn
 	gat=grfio_read(fn);
@@ -988,12 +1025,13 @@ static int map_readmap(int m,char *fn)
 	map[m].npc_num=0;
 	map[m].users=0;
 	memset(&map[m].flag,0,sizeof(map[m].flag));
+	wh=map_readwater(map[m].name);
 	for(y=0;y<ys;y++){
 		p=(struct gat_1cell*)(gat+y*xs*20+14);
 		for(x=0;x<xs;x++){
 			if(p->type==0){
 				// 水場判定
-				map[m].gat[x+y*xs]=(p->high[0]>3 || p->high[1]>3 || p->high[2]>3 || p->high[3]>3) ? 3 : 0;
+				map[m].gat[x+y*xs]=(p->high[0]>wh || p->high[1]>wh || p->high[2]>wh || p->high[3]>wh) ? 3 : 0;
 			} else {
 				map[m].gat[x+y*xs]=p->type;
 			}
