@@ -5759,8 +5759,7 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 		sd->sc_data[SC_AUTOCOUNTER].timer !=-1 || //オートカウンター
 		sd->sc_data[SC_TRICKDEAD].timer !=-1 || //死んだふり
 		sd->sc_data[SC_BLADESTOP].timer !=-1 || //白刃取り
-		sd->sc_data[SC_SPIDERWEB].timer !=-1 || //スパイダーウェッブ
-		sd->skilltimer !=-1 //詠唱中
+		sd->sc_data[SC_SPIDERWEB].timer !=-1 //スパイダーウェッブ
 		) //
 		return;
 	if( (sd->status.option&2) && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0)

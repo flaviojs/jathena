@@ -1,4 +1,4 @@
-//npc_monster.txt＠AthenaDB計画 2004/04/20 21:33:27 +0900 (JST)
+//npc_monster.txt＠AthenaDB計画 2004/05/24 21:26:46 +0900 (JST)
 
 //おもちゃ分類所(xmas_dun02.gat)
 xmas_dun02.gat,0,0,0,0	monster	クッキー	1246,20,0,0,0
@@ -27,11 +27,11 @@ mjolnir_01.gat,0,0,0,0	monster	クリーミー	1018,20,0,0,0
 mjolnir_01.gat,311,271,25,25	monster	青い草	1079,5,360000,180000,1
 mjolnir_01.gat,75,85,25,25	monster	緑色草	1080,5,180000,90000,1
 mjolnir_01.gat,78,219,25,25	monster	緑色草	1080,5,180000,90000,1
-mjolnir_01.gat,75,85,25,25	monster	輝く草	1083,1,1800000,900000,1
-mjolnir_01.gat,78,219,25,25	monster	輝く草	1083,1,1800000,900000,1
-mjolnir_01.gat,0,0,0,0	monster	キャラメル	1103,20,0,0,0
-mjolnir_01.gat,0,0,0,0	monster	コーコー	1104,20,0,0,0
-mjolnir_01.gat,0,0,0,0	monster	ホルン	1128,20,0,0,0
+mjolnir_01.gat,75,85,25,25	monster	輝く草	1083,2,1800000,900000,1
+mjolnir_01.gat,78,219,25,25	monster	輝く草	1083,2,1800000,900000,1
+mjolnir_01.gat,0,0,0,0	monster	キャラメル	1103,40,0,0,0
+mjolnir_01.gat,0,0,0,0	monster	コーコー	1104,70,0,0,0
+mjolnir_01.gat,0,0,0,0	monster	ホルン	1128,25,0,0,0
 
 //ミョルニール山脈 ０２(mjolnir_02.gat)
 mjolnir_02.gat,0,0,0,0	monster	ホーネット	1004,20,0,0,0
@@ -130,10 +130,10 @@ mjolnir_05.gat,134,103,20,20	monster	青い草	1079,3,360000,180000,1
 mjolnir_05.gat,200,240,40,40	monster	青い草	1079,3,360000,180000,1
 mjolnir_05.gat,261,100,20,10	monster	青い草	1079,3,360000,180000,1
 mjolnir_05.gat,200,240,40,40	monster	輝く草	1083,1,1800000,900000,1
-mjolnir_05.gat,0,0,0,0	monster	アルギオペ	1099,45,0,0,0
+mjolnir_05.gat,0,0,0,0	monster	アルギオペ	1099,70,0,0,0
 mjolnir_05.gat,0,0,0,0	monster	アルゴス	1100,20,0,0,0
-mjolnir_05.gat,0,0,0,0	monster	フローラ	1118,5,0,0,0
-mjolnir_05.gat,0,0,0,0	monster	マンティス	1139,45,0,0,0
+mjolnir_05.gat,0,0,0,0	monster	フローラ	1118,20,0,0,0
+mjolnir_05.gat,0,0,0,0	monster	マンティス	1139,40,0,0,0
 
 //ミョルニール山脈 ０６(mjolnir_06.gat)
 mjolnir_06.gat,0,0,0,0	monster	ポポリン	1031,20,0,0,0
@@ -316,7 +316,6 @@ prt_fild08.gat,0,0,0,0	monster	クリーミー	1018,10,0,0,0
 prt_fild08.gat,0,0,0,0	monster	ルナティック	1063,15,0,0,0
 prt_fild08.gat,350,114,10,10	monster	緑色草	1080,5,900000,450000,1
 prt_fild08.gat,0,0,0,0	monster	ドロップス	1113,40,0,0,0
-prt_fild08.gat,0,0,0,0	monster	アンソニ	1247,1,0,0,0
 
 //プロンテラフィールド ０９(prt_fild09.gat)
 prt_fild09.gat,0,0,0,0	monster	コンドル	1009,25,0,0,0
@@ -819,17 +818,17 @@ pay_fild04.gat,0,0,0,0	monster	ゴーストリング	1120,1,1800000,200000,1
 pay_fild04.gat,0,0,0,0	monster	マーリン	1242,20,0,0,0
 
 //フェイヨン迷いの森 ０５(pay_fild05.gat)
-pay_fild05.gat,0,0,0,0	monster	ポポリン	1031,30,0,0,0
-pay_fild05.gat,0,0,0,0	monster	ポイズンスポア	1077,15,0,0,0
+pay_fild05.gat,0,0,0,0	monster	ポポリン	1031,20,0,0,0
+pay_fild05.gat,0,0,0,0	monster	ポイズンスポア	1077,30,0,0,0
 pay_fild05.gat,86,90,5,5	monster	緑色草	1080,4,900000,450000,1
 pay_fild05.gat,95,147,5,5	monster	緑色草	1080,4,900000,450000,1
 pay_fild05.gat,0,0,0,0	monster	ドラゴンテイル	1321,3,0,0,0
 
 //フェイヨン迷いの森 ０６(pay_fild06.gat)
-pay_fild06.gat,0,0,0,0	monster	スポア	1014,40,0,0,0
-pay_fild06.gat,0,0,0,0	monster	ワームテール	1024,20,0,0,0
-pay_fild06.gat,0,0,0,0	monster	ポポリン	1031,20,0,0,0
-pay_fild06.gat,0,0,0,0	monster	盗蟲	1053,10,0,0,0
+pay_fild06.gat,0,0,0,0	monster	スポア	1014,20,0,0,0
+pay_fild06.gat,0,0,0,0	monster	ワームテール	1024,50,0,0,0
+pay_fild06.gat,0,0,0,0	monster	ポポリン	1031,10,0,0,0
+pay_fild06.gat,0,0,0,0	monster	盗蟲	1053,5,0,0,0
 pay_fild06.gat,268,155,20,20	monster	緑色草	1080,10,360000,180000,1
 pay_fild06.gat,268,155,20,20	monster	輝く草	1083,1,1800000,900000,1
 pay_fild06.gat,211,191,2,10	monster	赤いきのこ	1085,8,180000,90000,1
@@ -860,7 +859,7 @@ pay_fild09.gat,0,0,0,0	monster	ビックフット	1060,15,0,0,0
 pay_fild09.gat,198,217,30,30	monster	緑色草	1080,10,360000,180000,0
 pay_fild09.gat,198,217,30,30	monster	輝く草	1083,1,1800000,900000,1
 pay_fild09.gat,0,0,0,0	monster	ソヒー	1170,8,0,0,0
-pay_fild09.gat,0,0,0,0	monster	彷徨う者	1208,1,0,0,0
+pay_fild09.gat,0,0,0,0	monster	彷徨う者	1208,1,3600000,1800000,0
 
 //フェイヨン迷いの森 １０(pay_fild10.gat)
 pay_fild10.gat,0,0,0,0	monster	ポポリン	1031,20,0,0,0
@@ -1316,7 +1315,6 @@ pay_dun03.gat,179,131,0,0	monster	マンドラゴラ	1020,1,300000,100000,1
 pay_dun03.gat,179,132,0,0	monster	マンドラゴラ	1020,1,300000,100000,1
 pay_dun03.gat,179,133,0,0	monster	マンドラゴラ	1020,1,300000,100000,1
 pay_dun03.gat,179,134,0,0	monster	マンドラゴラ	1020,1,300000,100000,1
-pay_dun03.gat,0,0,0,0	monster	ムナック	1026,5,0,0,0
 pay_dun03.gat,57,65,0,0	monster	ヒドラ	1068,1,600000,300000,1
 pay_dun03.gat,58,69,0,0	monster	ヒドラ	1068,1,600000,300000,1
 pay_dun03.gat,59,64,0,0	monster	ヒドラ	1068,1,600000,300000,1
@@ -1335,10 +1333,11 @@ pay_dun03.gat,69,68,0,0	monster	ヒドラ	1068,1,600000,300000,1
 pay_dun03.gat,71,64,0,0	monster	ヒドラ	1068,1,600000,300000,1
 pay_dun03.gat,71,67,0,0	monster	ヒドラ	1068,1,600000,300000,1
 pay_dun03.gat,228,61,0,0	monster	赤い草	1078,1,600000,300000,1
-pay_dun03.gat,138,42,0,0	monster	青い草	1079,1,600000,300000,1
+pay_dun03.gat,138,42,0,0	monster	青い草	1079,1,600000,900000,1
 pay_dun03.gat,120,186,0,0	monster	緑色草	1080,1,600000,300000,1
 pay_dun03.gat,88,35,0,0	monster	黄色草	1081,1,600000,300000,1
-pay_dun03.gat,0,0,0,0	monster	白蓮玉	1138,5,0,0,0
+pay_dun03.gat,49,264,0,6	monster	白い草	1082,2,600000,300000,1
+pay_dun03.gat,225,62,6,12	monster	白い草	1082,6,600000,300000,1
 pay_dun03.gat,0,0,0,0	monster	ソヒー	1170,45,0,0,0
 pay_dun03.gat,115,190,0,0	monster	ソヒー	1170,2,300000,100000,1
 pay_dun03.gat,219,185,0,0	monster	ソヒー	1170,2,300000,100000,1
@@ -1356,7 +1355,6 @@ pay_dun03.gat,161,117,0,0	monster	ウィスパー	1185,1,1800000,0,1
 pay_dun03.gat,81,61,0,0	monster	ウィスパー	1185,1,1800000,0,1
 pay_dun03.gat,84,63,0,0	monster	ウィスパー	1185,1,1800000,0,1
 pay_dun03.gat,89,147,0,0	monster	巨大ウィスパー	1186,1,14400000,0,1
-pay_dun03.gat,0,0,0,0	monster	ボンゴン	1188,5,0,0,0
 pay_dun03.gat,0,0,0,0	monster	天下大将軍	1277,3,0,0,0
 
 //フェイヨン地下寺院(pay_dun04.gat)
@@ -1666,9 +1664,9 @@ alde_dun03.gat,184,61,30,30	monster	ペノメナ	1216,10,300000,150000,0
 alde_dun03.gat,194,37,8,8	monster	ペノメナ	1216,3,300000,150000,0
 
 //アルデバラン時計塔地下 ４Ｆ(alde_dun04.gat)
-alde_dun04.gat,0,0,0,0	monster	バースリー	1102,20,0,0,0
-alde_dun04.gat,0,0,0,0	monster	ジョーカー	1131,15,0,0,0
-alde_dun04.gat,0,0,0,0	monster	ウィスパー	1179,20,0,0,0
+alde_dun04.gat,0,0,0,0	monster	バースリー	1102,50,0,0,0
+alde_dun04.gat,0,0,0,0	monster	ジョーカー	1131,5,0,0,0
+alde_dun04.gat,0,0,0,0	monster	ウィスパー	1179,10,0,0,0
 alde_dun04.gat,0,0,0,0	monster	ミステルテイン	1203,1,0,0,0
 alde_dun04.gat,0,0,0,0	monster	オーガトゥース	1204,1,7200000,3600000,0
 alde_dun04.gat,0,0,0,0	monster	エクスキューショナー	1205,3,0,0,0
@@ -1789,7 +1787,7 @@ gl_church.gat,0,0,0,0	monster	グール	1036,25,0,0,0
 gl_church.gat,0,0,0,0	monster	イビルドルイド	1117,15,0,0,0
 gl_church.gat,0,0,0,0	monster	ミミック	1191,10,0,0,0
 gl_church.gat,0,0,0,0	monster	レイス	1192,10,0,0,0
-gl_church.gat,0,0,0,0	monster	ダークイリュージョン	1302,5,0,0,0
+gl_church.gat,0,0,0,0	monster	ダークイリュージョン	1302,1,0,0,0
 
 //グラストヘイム カタコンベ(gl_chyard.gat)
 gl_chyard.gat,0,0,0,0	monster	ゾンビ	1015,20,0,0,0
@@ -2280,23 +2278,3 @@ gon_fild01.gat,0,0,0,0	monster	団子童子	1409,30,0,0,0
 gon_fild01.gat,0,0,0,0	monster	老人参	1413,1,60000,120000,0
 gon_fild01.gat,0,0,0,0	monster	コウ	1415,10,0,0,0
 gon_fild01.gat,0,0,0,0	monster	チャッキー	1417,18,0,0,0
-
-//洛陽フィールド(lou_fild01.gat)
-lou_fild01.gat,0,0,0,0	monster	ビックフット	1060,1,0,0,0
-lou_fild01.gat,0,0,0,0	monster	キャラメル	1103,1,0,0,0
-lou_fild01.gat,0,0,0,0	monster	マンティス	1139,1,0,0,0
-
-//王陵(lou_dun01.gat)
-lou_dun01.gat,0,0,0,0	monster	サイドワインダー	1037,1,0,0,0
-lou_dun01.gat,0,0,0,0	monster	ホロン	1129,1,0,0,0
-lou_dun01.gat,0,0,0,0	monster	レイブオルマイ	1306,1,0,0,0
-lou_dun01.gat,0,0,0,0	monster	チャッキー	1417,1,0,0,0
-
-//王陵内部(lou_dun02.gat)
-lou_dun02.gat,0,0,0,0	monster	ムナック	1026,1,0,0,0
-lou_dun02.gat,0,0,0,0	monster	ボンゴン	1188,1,0,0,0
-
-//センヤンググング(lou_dun03.gat)
-lou_dun03.gat,0,0,0,0	monster	彷徨う者	1208,1,0,0,0
-lou_dun03.gat,0,0,0,0	monster	天邪仙人	1412,1,0,0,0
-lou_dun03.gat,0,0,0,0	monster	天仙娘々	1416,1,0,0,0
