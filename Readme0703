@@ -1,4 +1,27 @@
 --------------
+//0731 by ぽぽぽ
+
+・服の色を保存するかbattle_athena.confで選択できるように。
+　弊害があるので保存しないようにと書いてあったのでデフォルトでは保存しません。
+・スクリプト追加
+　strcharinfo(1)	自分のパーティー名を取得します。
+　strcharinfo(2)	自分のギルド名を取得します。
+　getcharid(1)		自分のパーティーIDを取得します。
+　getcharid(2)		自分のギルドIDを取得します。
+　getpartyname(ID)	IDで指定したパーティーの名前を取得します。
+　getguildname(ID)	IDで指定したギルドの名前を取得します。
+	(map/)
+	battle.h
+	battle.c
+		battle_config_read()修正
+	pc.c
+		pc_makesavestatus()修正
+	script.c
+		buildin_strcharinfo()修正
+		buildin_getcharid()、buildin_getpartyname()、buildin_getpartyname_sub()
+		buildin_getguildname()、buildin_getguildname_sub()追加
+
+--------------
 //0730 by ぴざまん
 
 ・ストームガストの凍結時間を本鯖にあわせて修正(スキルレベルに関係なく一定の凍結時間(10秒)になります)

@@ -25,6 +25,8 @@
 #include "skill.h"
 #include "chat.h"
 #include "battle.h"
+#include "party.h"
+#include "guild.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -83,6 +85,9 @@ int buildin_viewpoint(struct script_state *st);
 int buildin_countitem(struct script_state *st);
 int buildin_checkweight(struct script_state *st);
 int buildin_readparam(struct script_state *st);
+int buildin_getcharid(struct script_state *st);
+int buildin_getpartyname(struct script_state *st);
+int buildin_getguildname(struct script_state *st);
 int buildin_strcharinfo(struct script_state *st);
 int buildin_getequipname(struct script_state *st);
 int buildin_getequipisequiped(struct script_state *st);
@@ -144,6 +149,7 @@ int buildin_pvpon(struct script_state *st);
 int buildin_pvpoff(struct script_state *st);
 int buildin_gvgon(struct script_state *st);
 int buildin_gvgoff(struct script_state *st);
+int buildin_emotion(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -176,6 +182,9 @@ struct {
 	{buildin_countitem,"countitem","i"},
 	{buildin_checkweight,"checkweight","ii"},
 	{buildin_readparam,"readparam","i"},
+	{buildin_getcharid,"getcharid","i"},
+	{buildin_getpartyname,"getpartyname","i"},
+	{buildin_getguildname,"getguildname","i"},
 	{buildin_strcharinfo,"strcharinfo","i"},
 	{buildin_getequipname,"getequipname","i"},
 	{buildin_getequipisequiped,"getequipisequiped","i"},
@@ -236,6 +245,7 @@ struct {
 	{buildin_pvpoff,"pvpoff","s"},
 	{buildin_pvpon,"gvgon","s"},
 	{buildin_pvpoff,"gvgoff","s"},
+	{buildin_emotion,"emotion","i"},
 	{NULL,NULL,NULL}
 };
 enum {
@@ -534,7 +544,8 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 	p=skip_space(p);
 
 #ifdef DEBUG_FUNCIN
-	printf("parse_simpleexpr %s\n",p);
+	if(battle_config.etc_log)
+		printf("parse_simpleexpr %s\n",p);
 #endif
 	if(*p==';' || *p==','){
 		disp_error_message("unexpected expr end",p);
@@ -582,7 +593,8 @@ unsigned char* parse_simpleexpr(unsigned char *p)
 	}
 
 #ifdef DEBUG_FUNCIN
-	printf("parse_simpleexpr end %s\n",p);
+	if(battle_config.etc_log)
+		printf("parse_simpleexpr end %s\n",p);
 #endif
 	return p;
 }
@@ -597,7 +609,8 @@ unsigned char* parse_subexpr(unsigned char *p,int limit)
 	char *tmpp;
 
 #ifdef DEBUG_FUNCIN
-	printf("parse_subexpr %s\n",p);
+	if(battle_config.etc_log)
+		printf("parse_subexpr %s\n",p);
 #endif
 	p=skip_space(p);
 
@@ -652,7 +665,8 @@ unsigned char* parse_subexpr(unsigned char *p,int limit)
 		p=skip_space(p);
 	}
 #ifdef DEBUG_FUNCIN
-	printf("parse_subexpr end %s\n",p);
+	if(battle_config.etc_log)
+		printf("parse_subexpr end %s\n",p);
 #endif
 	return p;  /* return first untreated operator */
 }
@@ -664,7 +678,8 @@ unsigned char* parse_subexpr(unsigned char *p,int limit)
 unsigned char* parse_expr(unsigned char *p)
 {
 #ifdef DEBUG_FUNCIN
-	printf("parse_expr %s\n",p);
+	if(battle_config.etc_log)
+		printf("parse_expr %s\n",p);
 #endif
 	switch(*p){
 	case ')': case ';': case ':': case '[': case ']':
@@ -674,7 +689,8 @@ unsigned char* parse_expr(unsigned char *p)
 	}
 	p=parse_subexpr(p,-1);
 #ifdef DEBUG_FUNCIN
-	printf("parse_expr end %s\n",p);
+	if(battle_config.etc_log)
+		printf("parse_expr end %s\n",p);
 #endif
 	return p;
 }
@@ -808,10 +824,6 @@ unsigned char* parse_script(unsigned char *src,int line)
 	}
 	for(p++;p && *p && *p!='}';){
 		p=skip_space(p);
-#ifdef DEBUG_DISP
-		disp_error_message("test",p);
-#endif
-
 		// labelだけ特殊処理
 		tmpp=skip_space(skip_word(p));
 		if(*tmpp==':'){
@@ -969,7 +981,8 @@ void push_val(struct script_stack *stack,int type,int val)
 			exit(1);
 		}
 	}
-	//printf("push (%d,%d)-> %d\n",type,val,stack->sp);
+//	if(battle_config.etc_log)
+//		printf("push (%d,%d)-> %d\n",type,val,stack->sp);
 	stack->stack_data[stack->sp].type=type;
 	stack->stack_data[stack->sp].u.num=val;
 	stack->sp++;
@@ -989,7 +1002,8 @@ void push_str(struct script_stack *stack,int type,unsigned char *str)
 			exit(1);
 		}
 	}
-	//printf("push (%d,%x)-> %d\n",type,str,stack->sp);
+//	if(battle_config.etc_log)
+//		printf("push (%d,%x)-> %d\n",type,str,stack->sp);
 	stack->stack_data[stack->sp].type=type;
 	stack->stack_data[stack->sp].u.str=str;
 	stack->sp++;
@@ -1528,6 +1542,91 @@ int buildin_readparam(struct script_state *st)
 
 	return 0;
 }
+/*==========================================
+ *キャラ関係のID取得
+ *------------------------------------------
+ */
+int buildin_getcharid(struct script_state *st)
+{
+	int num;
+	struct map_session_data *sd;
+
+	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	sd=map_id2sd(st->rid);
+	if(num==1)
+		push_val(st->stack,C_INT,sd->status.party_id);
+	if(num==2)
+		push_val(st->stack,C_INT,sd->status.guild_id);
+	return 0;
+}
+/*==========================================
+ *指定IDのPT名取得
+ *------------------------------------------
+ */
+char *buildin_getpartyname_sub(int party_id)
+{
+	struct party *p;
+	
+	p=NULL;		
+	p=party_search(party_id);
+	
+	if(p!=NULL){
+		char *buf;
+		buf=malloc(24);
+		if(buf==NULL){
+			if(battle_config.error_log)
+				printf("out of memory : buildin_getguildname_sub\n");
+			exit(1);
+		}
+		strcpy(buf,p->name);
+		return buf;
+	}
+
+	return 0;
+}
+int buildin_getpartyname(struct script_state *st)
+{
+	char *name;
+	int party_id;
+	
+	party_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	name=buildin_getpartyname_sub(party_id);
+	if(name!=0)
+		push_str(st->stack,C_STR,name);
+	return 0;
+}
+/*==========================================
+ *指定IDのギルド名取得
+ *------------------------------------------
+ */
+char *buildin_getguildname_sub(int guild_id)
+{
+	struct guild *g=NULL;
+	g=guild_search(guild_id);
+	
+	if(g!=NULL){
+		char *buf;
+		buf=malloc(24);
+		if(buf==NULL){
+			if(battle_config.error_log)
+				printf("out of memory : buildin_getguildname_sub\n");
+			exit(1);
+		}
+		strcpy(buf,g->name);
+		return buf;
+	}
+
+	return 0;
+}
+int buildin_getguildname(struct script_state *st)
+{
+	char *name;
+	int guild_id=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	name=buildin_getguildname_sub(guild_id);
+	if(name!=0)
+		push_str(st->stack,C_STR,name);
+	return 0;
+}
 
 /*==========================================
  * キャラクタの名前
@@ -1549,6 +1648,18 @@ int buildin_strcharinfo(struct script_state *st)
 		}
 		strcpy(buf,sd->status.name);
 		push_str(st->stack,C_STR,buf);
+	}
+	if(num==1){
+		char *buf;
+		buf=buildin_getpartyname_sub(sd->status.party_id);
+		if(buf!=0)
+			push_str(st->stack,C_STR,buf);
+	}
+	if(num==2){
+		char *buf;
+		buf=buildin_getguildname_sub(sd->status.guild_id);
+		if(buf!=0)
+			push_str(st->stack,C_STR,buf);
 	}
 
 	return 0;
@@ -2318,7 +2429,8 @@ int buildin_sc_end(struct script_state *st)
 	int type;
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	skill_status_change_end(map_id2bl(st->rid),type,-1);
-//	printf("sc_end : %d %d\n",st->rid,type);
+//	if(battle_config.etc_log)
+//		printf("sc_end : %d %d\n",st->rid,type);
 	return 0;
 }
 
@@ -2395,7 +2507,12 @@ int buildin_changebase(struct script_state *st)
 	vclass = conv_num(st,& (st->stack->stack_data[st->start+2]));
 	if(vclass == 22 && !battle_config.wedding_modifydisplay)
 		return 0;
+	
+	if(vclass==22)
+				pc_unequipitem(sd,sd->equip_index[9],1);	// 装備外し
+		
 	sd->view_class = vclass;
+	
 	return 0;
 }
 
@@ -2633,6 +2750,20 @@ int buildin_gvgoff(struct script_state *st)
 
 	return 0;
 }
+/*==========================================
+ *	NPCエモーション
+ *------------------------------------------
+ */
+
+int buildin_emotion(struct script_state *st)
+{
+	int type;
+	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	if(type < 0 || type > 33)
+		return 0;
+	clif_emotion(map_id2bl(st->oid),type);
+	return 0;
+}
 
 //
 // 実行部main
@@ -2668,7 +2799,8 @@ int get_com(unsigned char *script,int *pos)
 void unget_com(int c)
 {
 	if(unget_com_data!=-1){
-		printf("unget_com can back only 1 data\n");
+		if(battle_config.error_log)
+			printf("unget_com can back only 1 data\n");
 	}
 	unget_com_data=c;
 }
@@ -2832,7 +2964,8 @@ int run_func(struct script_state *st)
 	end_sp=st->stack->sp;
 	for(i=end_sp-1;i>=0 && st->stack->stack_data[i].type!=C_ARG;i--);
 	if(i==0){
-		printf("なんか変\n");
+		if(battle_config.error_log)
+			printf("function not found\n");
 		st->stack->sp=0;
 		st->state=END;
 		return 0;
@@ -2843,32 +2976,35 @@ int run_func(struct script_state *st)
 
 	func=st->stack->stack_data[st->start].u.num;
 #ifdef DEBUG_RUN
-	printf("run_func : %s? (%d(%d))\n",str_buf+str_data[func].str,func,str_data[func].type);
-	printf("stack dump :");
-	for(i=0;i<end_sp;i++){
-		switch(st->stack->stack_data[i].type){
-		case C_INT:
-			printf(" int(%d)",st->stack->stack_data[i].u.num);
-			break;
-		case C_NAME:
-			printf(" name(%s)",str_buf+str_data[st->stack->stack_data[i].u.num].str);
-			break;
-		case C_ARG:
-			printf(" arg");
-			break;
-		case C_POS:
-			printf(" pos(%d)",st->stack->stack_data[i].u.num);
-			break;
-		default:
-			printf(" %d,%d",st->stack->stack_data[i].type,st->stack->stack_data[i].u.num);
+	if(battle_config.etc_log) {
+		printf("run_func : %s? (%d(%d))\n",str_buf+str_data[func].str,func,str_data[func].type);
+		printf("stack dump :");
+		for(i=0;i<end_sp;i++){
+			switch(st->stack->stack_data[i].type){
+			case C_INT:
+				printf(" int(%d)",st->stack->stack_data[i].u.num);
+				break;
+			case C_NAME:
+				printf(" name(%s)",str_buf+str_data[st->stack->stack_data[i].u.num].str);
+				break;
+			case C_ARG:
+				printf(" arg");
+				break;
+			case C_POS:
+				printf(" pos(%d)",st->stack->stack_data[i].u.num);
+				break;
+			default:
+				printf(" %d,%d",st->stack->stack_data[i].type,st->stack->stack_data[i].u.num);
+			}
 		}
+		printf("\n");
 	}
-	printf("\n");
 #endif
 	if(str_data[func].func){
 		str_data[func].func(st);
 	} else {
-		printf("run_func : %s? (%d(%d))\n",str_buf+str_data[func].str,func,str_data[func].type);
+		if(battle_config.error_log)
+			printf("run_func : %s? (%d(%d))\n",str_buf+str_data[func].str,func,str_data[func].type);
 		push_val(st->stack,C_INT,0);
 	}
 
@@ -2908,7 +3044,8 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 		switch(c=get_com(script,&st.pos)){
 		case C_EOL:
 			if(stack.sp){
-				printf("stack.sp !=0\n");
+				if(battle_config.error_log)
+					printf("stack.sp !=0\n");
 				stack.sp=0;
 			}
 			rerun_pos=st.pos;
@@ -2969,7 +3106,8 @@ int run_script(unsigned char *script,int pos,int rid,int oid)
 			break;
 
 		default:
-			printf("unknown command : %d @ %d\n",c,pos);
+			if(battle_config.error_log)
+				printf("unknown command : %d @ %d\n",c,pos);
 			st.state=END;
 			break;
 		}

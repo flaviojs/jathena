@@ -336,6 +336,9 @@ skill_delay_attack_enable
 	スキルディレイの間攻撃できるかどうかです。yesにすればスキルディレイの間スキルは使えないけど攻撃はできます。
 	デフォルトはnoです。
 
+left_cardfix_to_right
+	二刀流の左手武器の種族、属性、Sizeのダメージ補正を右手武器に適用するかどうかです。これをyesにすると左手武器には種族、属性、Sizeのダメージ補正が掛からなくなります。デフォルトはnoです。
+
 player_skill_add_range
 	プレイヤーのスキル射程から敵が離れた時どれぐらいの距離までスキルを使用可能にするかを決めます。スキルの射程+player_skill_add_rangeまでスキルが届きます。デフォルトは0ですが少しは入れた方がいいです。
 
@@ -433,6 +436,11 @@ gm_all_skill
 	全てのスキルを覚えられるようにするGMのレベルを設定します。
 	これを0以外にすると、そのGMレベル以上のGMはJOBやスキル所得条件に関係なく全スキルが覚えられます。(クェストスキルも含めて)
 	デフォルトは 0 です。0の場合はGMではない全てのキャラの意味ではなく全てのGMが全てのスキルを覚えられないと言うことです。
+
+player_skillfree
+	スキルツリーに関係なくスキルを上げることができるかどうかです。
+	これをyesにすればプレイヤーの職業で習うことができるスキル全てを
+	スキルツリーに関係なく上げることができます。デフォルトはnoです。
 
 weapon_produce_rate
 	武器製造スキルでの製造成功率を百分率で調整します。
@@ -545,6 +553,12 @@ shop_exp
 	計算式は適度に作った物です。
 	デフォルトは0です。
 
+combo_delay_rate
+	モンクのコンボディレイの時間の倍率です。（100で通常、200で倍になります。）
+	ただ注意するべきなのは高く設定するのがいいことではないことです。
+	コンボディレイが長いとコンボの繋ぎはよくなりますがその長くなった
+	時間の間は行動できないからです。デフォルトは100です。
+
 item_check
 	アイテムのチェックを行うかどうかです。
 	ログイン時とマップ移動時に所持アイテムに不正アイテムがないかチェックします。
@@ -608,7 +622,33 @@ max_cart_weight
 	 カートの最大重量を設定します。
 	デフォルトは8000です。最大は1000000で最小は100です。
 
+player_skill_log
+	プレイヤーのスキル使用を表示するかどうかです。
+	デフォルトはnoです。
 
+monster_skill_log
+	モンスターのスキル使用を表示するかどうかです。
+	デフォルトはnoです。
+
+battle_log
+	戦闘関係の物を表示するかどうかです。
+	デフォルトはnoです。
+
+save_log
+	キャラの保存に関する物を表示するかどうか
+	デフォルトはnoです。
+
+error_log
+	エラーを表示するかどうかです。
+	デフォルトはyesです。
+
+etc_log
+	スキル、戦闘、キャラ保存、エラー以外の物を表示するかどうか
+	デフォルトはyesです。
+
+save_clothcolor
+	服の色を保存するかどうか、有効にすると問題があるかもしれません。
+	デフォルトはnoです。
 
 < 例 >
 
@@ -620,6 +660,7 @@ casting_rate: 100
 delay_rate: 100
 delay_dependon_dex: no
 skill_delay_attack_enable: no
+left_cardfix_to_right: no
 player_skill_add_range: 0
 skill_out_range_consume: yes
 monster_skill_add_range: 0
@@ -643,6 +684,7 @@ mvp_item_rate: 100
 mvp_exp_rate: 100
 atcommand_gm_only: no
 gm_all_skill: 0
+player_skillfree: no
 weapon_produce_rate: 100
 monster_active_enable: yes
 monster_damage_delay_rate: 100
@@ -667,6 +709,7 @@ sanctuary_type: 0
 finger_offensive_type: 0
 heal_exp: 0
 shop_exp: 0
+combo_delay_rate: 100
 item_check: on
 wedding_modifydisplay: no
 natural_healhp_interval:4000
@@ -680,6 +723,12 @@ max_hp: 32500
 max_sp: 32500
 max_parameter: 99
 max_cart_weight: 8000
+player_skill_log: off
+monster_skill_log: off
+battle_log: off
+save_log: off
+error_log: on
+etc_log: on
 
 
 =====================================================================ghos6. atcommand_athena.conf

@@ -293,7 +293,8 @@ static int pc_walktoxy_sub(struct map_session_data *);
 int pc_makesavestatus(struct map_session_data *sd)
 {
 	// 服の色は色々弊害が多いので保存対象にはしない
-	sd->status.clothes_color=0;
+	if(battle_config.save_clothcolor==0)
+		sd->status.clothes_color=0;
 
 	// 死亡状態だったのでhpを1、位置をセーブ場所に変更
 	if(pc_isdead(sd)){

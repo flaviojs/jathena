@@ -31,7 +31,7 @@ struct Damage  battle_calc_misc_attack(
 int battle_attr_fix(int damage,int atk_elem,int def_elem);
 
 // ダメージ最終計算
-int battle_calc_damage(struct block_list *bl,int damage,int flag);
+int battle_calc_damage(struct block_list *bl,int damage,int skillnum,int skilllv,int flag);
 enum {	// 最終計算のフラグ
 	BF_WEAPON	= 0x0001,
 	BF_MAGIC	= 0x0002,
@@ -76,8 +76,11 @@ int battle_get_mdef(struct block_list *bl);
 int battle_get_flee2(struct block_list *bl);
 int battle_get_def2(struct block_list *bl);
 int battle_get_mdef2(struct block_list *bl);
+int battle_get_baseatk(struct block_list *bl);
 int battle_get_atk(struct block_list *bl);
 int battle_get_atk2(struct block_list *bl);
+int battle_get_speed(struct block_list *bl);
+int battle_get_adelay(struct block_list *bl);
 int battle_get_amotion(struct block_list *bl);
 int battle_get_dmotion(struct block_list *bl);
 int battle_get_element(struct block_list *bl);
@@ -109,7 +112,7 @@ enum {
 };
 int battle_check_target( struct block_list *src, struct block_list *target,int flag);
 
-int battle_check_range(struct block_list *src,int x,int y,int range);
+int battle_check_range(struct block_list *src,struct block_list *bl,int range);
 
 
 // 設定
@@ -120,6 +123,7 @@ extern struct Battle_Config {
 	int enemy_perfect_flee;
 	int cast_rate,delay_rate,delay_dependon_dex;
 	int sdelay_attack_enable;
+	int left_cardfix_to_right;
 	int pc_skill_add_range;
 	int skill_out_range_consume;
 	int mob_skill_add_range;
@@ -138,6 +142,7 @@ extern struct Battle_Config {
 	int mvp_item_rate,mvp_exp_rate;
 	int mvp_hp_rate;
 	int atc_gmonly,gm_allskill;
+	int pc_skillfree;
 	int wp_rate;
 	int monster_active_enable;
 	int monster_damage_delay_rate;
@@ -161,7 +166,7 @@ extern struct Battle_Config {
 	int sanctuary_type;
 	int finger_offensive_type;
 	int heal_exp,shop_exp;
-	int asuradelay;
+	int combo_delay_rate;
 	int item_check;
 	int wedding_modifydisplay;
 	int natural_healhp_interval;
@@ -175,6 +180,13 @@ extern struct Battle_Config {
 	int max_sp;
 	int max_parameter;
 	int max_cart_weight;
+	int pc_skill_log;
+	int mob_skill_log;
+	int battle_log;
+	int save_log;
+	int error_log;
+	int etc_log;
+	int save_clothcolor;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"
