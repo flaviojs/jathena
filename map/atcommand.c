@@ -1358,7 +1358,7 @@ z [0`4]•ž‚ÌF
 int msg_config_read(const char *cfgName)
 {
 	int i,msg_number;
-	char line[1024],msg[1024];
+	char line[1024],w1[512],w2[1024];
 	FILE *fp;
 
 	fp=fopen(cfgName,"r");
@@ -1369,11 +1369,17 @@ int msg_config_read(const char *cfgName)
 	while(fgets(line,1020,fp)){
 		if(line[0] == '/' && line[1] == '/')
 			continue;
-		i=sscanf(line,"%d: %[^\r\n]",&msg_number,msg);
-		if(i!=2)
+		i=sscanf(line,"%d: %[^\r\n]",&msg_number,w2);
+		if(i!=2){
+			if( sscanf(line,"%s: %[^\r\n]",w1,w2)!=2 )
+				continue;
+			if( strcmpi(w1,"import")==0 ){
+				msg_config_read(w2);
+			}
 			continue;
+		}
 		if(msg_number>=0&&msg_number<=200)
-			strcpy(msg_table[msg_number],msg);
+			strcpy(msg_table[msg_number],w2);
 		//printf("%d:%s\n",msg_number,msg);
 	}	
 	fclose(fp);
@@ -1386,9 +1392,12 @@ int atcommand_config_read(const char *cfgName)
 	char line[1024],w1[1024],w2[1024];
 	FILE *fp;
 
-	memset(&atcommand_config,0,sizeof(atcommand_config));
-	atcommand_config.kickall = 99;
-
+	static int count=0;
+	if( (count++)==0 ){
+		memset(&atcommand_config,0,sizeof(atcommand_config));
+		atcommand_config.kickall = 99;
+	}
+	
 	if(battle_config.atc_gmonly > 0) {
 		fp=fopen(cfgName,"r");
 		if(fp==NULL){
@@ -1487,6 +1496,9 @@ int atcommand_config_read(const char *cfgName)
 			for(i=0;i<sizeof(data)/(sizeof(data[0]));i++)
 				if(strcmpi(w1,data[i].str)==0)
 					*data[i].val=atoi(w2);
+
+			if( strcmpi(w1,"import")==0 )
+				atcommand_config_read(w2);
 		}
 		fclose(fp);
 	}

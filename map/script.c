@@ -3725,6 +3725,9 @@ int script_config_read(char *cfgName)
 		if(strcmpi(w1,"refine_posword")==0) {
 			set_posword(w2);
 		}
+		if(strcmpi(w1,"import")==0){
+			script_config_read(w2);
+		}
 	}
 	fclose(fp);
 

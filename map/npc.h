@@ -24,6 +24,7 @@ int npc_enable(const char *name,int flag);
 int npc_get_new_npc_id(void);
 
 void npc_addsrcfile(char *);
+void npc_delsrcfile(char *);
 int do_init_npc(void);
 int npc_event_do_oninit(void);
 

@@ -1,4 +1,52 @@
 --------------------
+//0889 by 胡蝶蘭
+
+・各種confファイルで別ファイルをインポートできるようにした
+	・自分のサーバー用の設定を別ファイルに記述できるようになります。
+	・全て「import: ファイル名」形式で記述します。
+	・各種confファイル（login,char,map,inter,atcommand,battle）の最後に
+	  conf/import/*_conf を読むように指定したので、そこに自分用の設定を
+	  書いておけば、変更部分のみオーバーライドします。
+	  msg,scriptのconfについては、この限りではありませんが、import命令の
+	  処理は追加されているので、自分でimport命令を書けば動きます。
+	・新しいスナップショットが出た場合などに、このconf/importフォルダを
+	  昔のAthenaからコピーするだけで自分用の設定を適用できるようになります.
+
+・map_athena.confのmapとnpcで追加したファイルを削除できるようにした
+	・上に関連する変更です。
+	・delmap,delnpc命令を使用すれば、map,npc命令で追加したファイルを
+	  読み込まないように指定できます。ここでファイル名ではなく、
+	  all と指定するとそれまでに指定されたファイルを全て読み込まなくします.
+	・map,npc命令で、ファイル名にclearを指定すると、
+	  delmap,delnpcのallと同等の動作をするようになりました。
+
+・login_athena.confのallowとdenyをクリアできるようにｓた
+	・allowおよびdeny命令でclearを指定すると以前のホスト情報を全削除します.
+
+	(conf/)
+	各種confファイルの最後にimport命令追加
+	(conf/import)
+	*.txt
+		インポートされるファイル。これらに自分用の設定を書くとよい。
+	(login/)
+	login.c
+		login_read_config()修正
+	(char/)
+	char.c/inter.c
+		char_read_config(),inter_read_config()修正
+	(map/)
+	map.c
+		map_read_config(),map_addmap()修正、map_delmap()追加
+	npc.c
+		npc_addsrcfile()修正,npc_delsrcfile(),npc_clearsrcfile()追加
+	battle.c/atcommand.c/script.c
+		battle_read_config(),atcommand_read_config(),
+		msg_read_config(),script_read_config()修正
+	(doc/)
+	conf_ref.txt
+		修正
+
+--------------------
 //0891 by (凸)
 
 ・「スキル使用の後は、しばらくお待ちください」を表示するかどうか設定できるようにした。

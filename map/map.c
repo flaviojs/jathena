@@ -1263,12 +1263,38 @@ int map_readallmap(void)
  */
 int map_addmap(char *mapname)
 {
+	if( strcmpi(mapname,"clear")==0 ){
+		map_num=0;
+		return 0;
+	}
+
 	if(map_num>=MAX_MAP_PER_SERVER-1){
 		printf("too many map\n");
 		return 1;
 	}
 	memcpy(map[map_num].name,mapname,24);
 	map_num++;
+	return 0;
+}
+/*==========================================
+ * “Ç‚İ‚Şmap‚ğíœ‚·‚é
+ *------------------------------------------
+ */
+int map_delmap(char *mapname)
+{
+	int i;
+	
+	if( strcmpi(mapname,"all")==0 ){
+		map_num=0;
+		return 0;
+	}
+	
+	for(i=0;i<map_num;i++){
+		if(strcmp(map[i].name,mapname)==0){
+			memmove(map+i,map+i+1,sizeof(map[0])*(map_num-i-1));
+			map_num--;
+		}
+	}
 	return 0;
 }
 
@@ -1322,12 +1348,18 @@ int map_config_read(char *cfgName)
 			pc_set_gm_account_fname(w2);
 		} else if(strcmpi(w1,"map")==0){
 			map_addmap(w2);
+		} else if(strcmpi(w1,"delmap")==0){
+			map_delmap(w2);
 		} else if(strcmpi(w1,"npc")==0){
 			npc_addsrcfile(w2);
+		} else if(strcmpi(w1,"delnpc")==0){
+			npc_delsrcfile(w2);
 		} else if(strcmpi(w1,"data_grf")==0){
 			grfio_setdatafile(w2);
 		} else if(strcmpi(w1,"sdata_grf")==0){
 			grfio_setsdatafile(w2);
+		} else if(strcmpi(w1,"adata_grf")==0){
+			grfio_setadatafile(w2);
 		} else if(strcmpi(w1,"autosave_time")==0){
 			autosave_interval=atoi(w2)*1000;
 			if(autosave_interval <= 0)
@@ -1336,6 +1368,8 @@ int map_config_read(char *cfgName)
 			strcpy(motd_txt,w2);
 		} else if(strcmpi(w1,"help_txt")==0){
 			strcpy(help_txt,w2);
+		} else if(strcmpi(w1,"import")==0){
+			map_config_read(w2);
 		}
 	}
 	fclose(fp);

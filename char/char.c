@@ -1434,6 +1434,9 @@ int char_config_read(const char *cfgName)
 		else if(strcmpi(w1,"char_log_filename")==0){
 			strcpy(char_log_filename,w2);
 		}
+		else if(strcmpi(w1,"import")==0){
+			char_config_read(w2);
+		}
 	}
 	fclose(fp);
 

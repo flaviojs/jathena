@@ -215,7 +215,7 @@ int npc_event_do_clock(int tid,unsigned int tick,int id,int data)
 		c+=npc_event_doall(buf);
 	}
 	if(t->tm_mday!= ev_tm_b.tm_mday){
-		sprintf(buf,"OnHour%02d%02d",t->tm_mon+1,t->tm_mday);
+		sprintf(buf,"OnDay%02d%02d",t->tm_mon+1,t->tm_mday);
 		c+=npc_event_doall(buf);
 	}
 	memcpy(&ev_tm_b,t,sizeof(ev_tm_b));
@@ -591,13 +591,32 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 //
 
 /*==========================================
- *
+ * 読み込むnpcファイルのクリア
  *------------------------------------------
  */
-// 読み込むnpcファイルの設定
+void npc_clearsrcfile()
+{
+	struct npc_src_list *p=npc_src_first;
+
+	while( p ){
+		struct npc_src_list *p2=p;
+		p=p->next;
+		free(p2);
+	}
+	npc_src_first=NULL;
+}
+/*==========================================
+ * 読み込むnpcファイルの追加
+ *------------------------------------------
+ */
 void npc_addsrcfile(char *name)
 {
 	struct npc_src_list *new;
+
+	if( strcmpi(name,"clear")==0 ){
+		npc_clearsrcfile();
+		return;
+	}
 
 	new=malloc(sizeof(*new)+strlen(name));
 	if(new==NULL){
@@ -613,12 +632,32 @@ void npc_addsrcfile(char *name)
 
 	npc_src_last=new;
 }
-
 /*==========================================
- *
+ * 読み込むnpcファイルの削除
  *------------------------------------------
  */
-// warp行読み込み
+void npc_delsrcfile(char *name)
+{
+	struct npc_src_list *p=npc_src_first,**lp=&npc_src_first;
+
+	if( strcmpi(name,"all")==0 ){
+		npc_clearsrcfile();
+		return;
+	}
+
+	for( ; p; lp=&p->next,p=p->next ){
+		if( strcmp(p->name,name)==0 ){
+			*lp=p->next;
+			free(p);
+			break;
+		}
+	}
+}
+
+/*==========================================
+ * warp行解析
+ *------------------------------------------
+ */
 static int npc_parse_warp(char *w1,char *w2,char *w3,char *w4)
 {
 	int x,y,xs,ys,to_x,to_y,m;
@@ -688,10 +727,9 @@ static int npc_parse_warp(char *w1,char *w2,char *w3,char *w4)
 }
 
 /*==========================================
- *
+ * shop行解析
  *------------------------------------------
  */
-// shop行読み込み
 static int npc_parse_shop(char *w1,char *w2,char *w3,char *w4)
 {
 	char *p;
@@ -767,10 +805,9 @@ static int npc_parse_shop(char *w1,char *w2,char *w3,char *w4)
 }
 
 /*==========================================
- *
+ * script行解析
  *------------------------------------------
  */
-// script行読み込み
 static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line,FILE *fp,int *lines)
 {
 	int x,y,dir,m,xs,ys,class;
@@ -926,7 +963,7 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 }
 
 /*==========================================
- *
+ * mob行解析
  *------------------------------------------
  */
 int npc_parse_mob(char *w1,char *w2,char *w3,char *w4)
@@ -1011,7 +1048,7 @@ int npc_parse_mob(char *w1,char *w2,char *w3,char *w4)
 }
 
 /*==========================================
- * マップフラグの読み込み
+ * マップフラグ行の解析
  *------------------------------------------
  */
 static int npc_parse_mapflag(char *w1,char *w2,char *w3,char *w4)

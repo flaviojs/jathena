@@ -30,6 +30,12 @@ key: value
 // この行はコメントなので、処理されません
 
 
+< 複数の同じ項目 >
+
+同じ項目を複数書くと、特に明記されてない限り後に書いたものが優先されます。
+login_athena.confの allow 、deny および map_athena.confの map 、npc などは
+複数行書くと別の処理をします。
+
 
 ==========================================================================
 1. conf/login_athena.conf
@@ -84,6 +90,7 @@ allow
 	表記はIPアドレスの前方一致やネットマスク付きのIPアドレスを記述します。
 	ホスト名の後方一致はサポートしていません。
 	また、IPアドレスの変わりに all と記述すると全てのホストになります。
+	clear と記述するとそれまでに追加した allow ホストを全て削除します。
 	複数行書くことが出来ます。省略可能です。
 	アクセスコントロールを有効にするには少なくとも１つ以上の
 	allow か denyが必要です(order指定だけでは機能しません)。
@@ -96,6 +103,9 @@ deny
 login_log_filename
 	ログインサーバーのログファイルを指定します。
 	省略可能で、デフォルトはlog/login.logです。
+
+import
+	その行を別ファイルの中身と置き換えます。
 
 < 例 >
 
@@ -195,6 +205,9 @@ char_log_filename
 	キャラクターサーバーのログファイルを指定します。
 	省略可能で、デフォルトはlog/char.logです。
 
+import
+	その行を別ファイルの中身と置き換えます。
+
 
 < 例 >
 userid: s1
@@ -264,6 +277,9 @@ inter_log_filename
 	インターサーバーのログファイルを指定します。
 	省略可能で、デフォルトはlog/inter.logです。
 
+import
+	その行を別ファイルの中身と置き換えます。
+
 
 < 例 >
 storage_txt: save/storage.txt
@@ -330,14 +346,34 @@ sdata_grf
 	省略可能で、デフォルトは ./sdata.grf です。
 	grf-files.txtがある場合そちらの設定が優先されます。
 
+adata_grf
+	αデータファイル adata.grf へのパスです。
+	省略可能で、デフォルトは ./adata.grf です。
+	grf-files.txtがある場合そちらの設定が優先されます。
+
 npc
 	読み込むnpcデータファイルへのパスです。
 	複数指定可能で、指定した順にロードします。
+	clear を指定するとそれまでに登録したパスを全て削除します。
+
+delnpc
+	読み込まないnpcファイルへのパスです。
+	指定したパスはnpcで指定されたデータファイルリストから削除されます。
+	all を指定すると全て削除します( npc: clear と同義)。
 
 map
 	このマップが担当するマップファイル名です。
 	複数指定可能で、指定した順にロードします。
 	存在しないマップを指定した場合エラーになります。
+	clear を指定するとそれまでに登録したファイル名を全て削除します。
+
+delmap
+	読み込まないマップファイルへのパスです。
+	指定したファイルはmapで指定されたリストから削除されます。
+	all を指定すると全て削除します( map: clear と同義)。
+
+import
+	その行を別ファイルの中身と置き換えます。
 
 < 例 >
 
@@ -352,15 +388,17 @@ gm_account_filename: conf/GM_account.txt
 water_height: conf/water_height.txt
 data_grf: ./data.grf
 sdata_grf: ./sdata.grf
-npc: conf/npc_warp.txt
-npc: conf/npc_warp25.txt
-npc: conf/npc_warp3.txt
-npc: conf/npc_monster3J.txt
+npc: conf/warp/npc_warp.txt
+npc: conf/warp/npc_warp25.txt
+npc: conf/warp/npc_warp3.txt
+npc: conf/mob/npc_monster3J.txt
 map: prontera.gat
 map: prt_castle.gat
-
 （npc、mapは多いので省略）
-
+delnpc: conf/sample/npc_test.txt
+npc: clear
+delmap: prontera.gat
+delmap: all
 
 ==========================================================================
 5. conf/battle_athena.conf
@@ -972,6 +1010,9 @@ display_delay_skill_fail
 	スキル使用のディレイ中に「スキル使用の後は、しばらくお待ちください」を表示するかどうか。
 	デフォルトはyesです。
 
+import
+	その行を別ファイルの中身と置き換えます。
+
 < 例 >
 
 warp_point_debug: no
@@ -1261,6 +1302,8 @@ agitstart
 agitend
 	@コマンド @agitend
 
+import
+	その行を別ファイルの中身と置き換えます。
 
 
 < 例 >

@@ -1030,27 +1030,44 @@ int login_config_read(const char *cfgName)
 			if(strcmpi(w2,"mutual-failture")==0) access_order=ACO_MUTUAL_FAILTURE;
 		}
 		else if(strcmpi(w1,"allow")==0){
-			if(access_allow)
-				access_allow=realloc( access_allow, (access_allownum+1)*ACO_STRSIZE);
-			else
-				access_allow=malloc( ACO_STRSIZE );
-			if(strcmpi(w2,"all")==0)
-				access_allow[(access_allownum++)*ACO_STRSIZE]=0;
-			else if(w2[0])
-				strcpy( access_allow+(access_allownum++)*ACO_STRSIZE,w2 );
+			if( strcmpi(w2,"clear")==0 ){
+				if(access_allow)
+					free(access_allow);
+				access_allow=NULL;
+				access_allownum=0;
+			}else{		
+				if(access_allow)
+					access_allow=realloc( access_allow, (access_allownum+1)*ACO_STRSIZE);
+				else
+					access_allow=malloc( ACO_STRSIZE );
+				if(strcmpi(w2,"all")==0)
+					access_allow[(access_allownum++)*ACO_STRSIZE]=0;
+				else if(w2[0])
+					strcpy( access_allow+(access_allownum++)*ACO_STRSIZE,w2 );
+			}
 		}
 		else if(strcmpi(w1,"deny")==0){
-			if(access_deny)
-				access_deny=realloc( access_deny,(access_denynum+1)*ACO_STRSIZE);
-			else
-				access_deny=malloc( ACO_STRSIZE );
-			if(strcmpi(w2,"all")==0)
-				access_deny[(access_denynum++)*ACO_STRSIZE]=0;
-			else if(w2[0])
-				strcpy( access_deny+(access_denynum++)*ACO_STRSIZE,w2 );
+			if( strcmpi(w2,"clear")==0 ){
+				if(access_deny)
+					free(access_deny);
+				access_deny=NULL;
+				access_denynum=0;
+			}else{
+				if(access_deny)
+					access_deny=realloc( access_deny,(access_denynum+1)*ACO_STRSIZE);
+				else
+					access_deny=malloc( ACO_STRSIZE );
+				if(strcmpi(w2,"all")==0)
+					access_deny[(access_denynum++)*ACO_STRSIZE]=0;
+				else if(w2[0])
+					strcpy( access_deny+(access_denynum++)*ACO_STRSIZE,w2 );
+			}
 		}
 		else if(strcmpi(w1,"login_log_filename")==0){
 			strcpy(login_log_filename,w2);
+		}
+		else if(strcmpi(w1,"import")==0){
+			login_config_read(w2);
 		}
 	}
 	fclose(fp);
