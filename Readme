@@ -1,4 +1,18 @@
 --------------
+//0549 by Kalen
+
+・map_athena.conf
+	オリジナルスクリプト、季節限定スクリプトを整頓
+	shop3.txt追加
+
+・各種NPC追加＆修正
+	npc_event_yuno.txt	[追加]ジュノーイベント(青石5個GET)
+	npc_cTower.txt		[追加]地上地下の鍵NPC
+	npc_town_yuno.txt	[修正]台詞修正
+
+	npc_event_carnival.txt	[追加]旧鯖カーニバルイベント時のNPC
+
+--------------
 //0548 by huge
 
 ・矢を装備した時の表示バグ問題を修正。
