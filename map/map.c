@@ -1323,6 +1323,7 @@ int do_init(int argc,char *argv[])
 	battle_config_read((argc>2)? argv[2]:BATTLE_CONF_FILENAME);
 	atcommand_config_read((argc>3)? argv[3]:ATCOMMAND_CONF_FILENAME);
 	script_config_read((argc>4)? argv[4]:SCRIPT_CONF_NAME);
+	msg_config_read((argc>5)? argv[5]:MSG_CONF_NAME);
 
 	atexit(do_final);
 

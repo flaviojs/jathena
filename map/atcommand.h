@@ -80,6 +80,8 @@ extern struct Atcommand_Config {
 } atcommand_config;
 
 #define ATCOMMAND_CONF_FILENAME	"conf/atcommand_athena.conf"
+#define MSG_CONF_NAME	"conf/msg_athena.conf"
 int atcommand_config_read(const char *cfgName);
+int msg_config_read(const char *cfgName);
 
 #endif

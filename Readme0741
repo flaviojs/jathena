@@ -1,4 +1,18 @@
 --------------
+//0758 by hack
+ÅEPut GM messages into msg_table which is loaded from msg_athena.conf.
+(Easy to translate into other language)
+	(map/)
+	atcommand.h
+	atcommand.c
+		msg_conf_read()	Read conf/msg_athena.conf
+		Put messages into msg_table which is loaded from msg_athena.conf.
+	map.c
+		do_init()
+	(conf/)
+	msg_athena.conf	Store the message of atcommand, easy to translate into other language.
+	
+--------------
 //0757 by Michael
 	(map/)
 	script.c 
