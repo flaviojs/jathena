@@ -6488,6 +6488,10 @@ void clif_parse_UseSkillToPos(int fd,struct map_session_data *sd)
 	skillnum = RFIFOW(fd,4);
 	skilllv = RFIFOW(fd,2);
 	if(RFIFOW(fd,0)==0x190){
+		if(pc_issit(sd)){
+			clif_skill_fail(sd,RFIFOW(fd,4),0,0);
+			return;
+		}
 		memcpy(talkie_mes,RFIFOP(fd,10),80);
 	}
 

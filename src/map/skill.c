@@ -4817,6 +4817,89 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 }
 
 /*==========================================
+ * 範囲内キャラ存在確認判定処理(foreachinarea)
+ *------------------------------------------
+ */
+
+static int skill_check_condition_char_sub(struct block_list *bl,va_list ap)
+{
+	int *c;
+	struct block_list *src;
+	struct map_session_data *sd=(struct map_session_data*)bl;
+	struct map_session_data *ssd;
+	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
+	struct pc_base_job ss_class;
+
+	src=va_arg(ap,struct block_list *);
+	c=va_arg(ap,int *);
+	ssd=(struct map_session_data*)src;
+	ss_class = pc_calc_base_job(ssd->status.class);
+
+	switch(ssd->skillid){
+	case PR_BENEDICTIO:				/* 聖体降福 */
+		if(sd != ssd && (s_class.job == 4 || s_class.job == 8) && (sd->bl.x == ssd->bl.x - 1 || sd->bl.x == ssd->bl.x + 1))
+			(*c)++;
+		break;
+	case BD_LULLABY:				/* 子守歌 */
+	case BD_RICHMANKIM:				/* ニヨルドの宴 */
+	case BD_ETERNALCHAOS:			/* 永遠の混沌 */
+	case BD_DRUMBATTLEFIELD:		/* 戦太鼓の響き */
+	case BD_RINGNIBELUNGEN:			/* ニーベルングの指輪 */
+	case BD_ROKISWEIL:				/* ロキの叫び */
+	case BD_INTOABYSS:				/* 深淵の中に */
+	case BD_SIEGFRIED:				/* 不死身のジークフリード */
+	case BD_RAGNAROK:				/* 神々の黄昏 */
+		if(sd != ssd && ((ss_class.job==19 && s_class.job==20) || (ss_class.job==20 && s_class.job==19)) && pc_checkskill(sd,ssd->skillid) > 0 && (*c)==0)
+			(*c)=pc_checkskill(sd,ssd->skillid);
+		break;
+	}
+	return 0;
+}
+/*==========================================
+ * 範囲内キャラ存在確認判定後スキル使用処理(foreachinarea)
+ *------------------------------------------
+ */
+
+static int skill_check_condition_use_sub(struct block_list *bl,va_list ap)
+{
+	int *c;
+	struct block_list *src;
+	struct map_session_data *sd=(struct map_session_data*)bl;
+	struct map_session_data *ssd;
+	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
+	struct pc_base_job ss_class;
+	int skillid,skilllv;
+
+	src=va_arg(ap,struct block_list *);
+	c=va_arg(ap,int *);
+	ssd=(struct map_session_data*)src;
+	ss_class = pc_calc_base_job(ssd->status.class);
+	skillid=ssd->skillid;
+	skilllv=ssd->skilllv;
+	switch(skillid){
+	case BD_LULLABY:				/* 子守歌 */
+	case BD_RICHMANKIM:				/* ニヨルドの宴 */
+	case BD_ETERNALCHAOS:			/* 永遠の混沌 */
+	case BD_DRUMBATTLEFIELD:		/* 戦太鼓の響き */
+	case BD_RINGNIBELUNGEN:			/* ニーベルングの指輪 */
+	case BD_ROKISWEIL:				/* ロキの叫び */
+	case BD_INTOABYSS:				/* 深淵の中に */
+	case BD_SIEGFRIED:				/* 不死身のジークフリード */
+	case BD_RAGNAROK:				/* 神々の黄昏 */
+		if(sd != ssd && ((ss_class.job==19 && s_class.job==20) || (ss_class.job==20 && s_class.job==19)) && pc_checkskill(sd,skillid) > 0 && (*c)==0){
+			ssd->sc_data[SC_DANCING].val4=bl->id;
+			clif_skill_nodamage(bl,bl,skillid,skilllv,1);
+			skill_status_change_start(bl,SC_DANCING,skillid,ssd->sc_data[SC_DANCING].val2,gettick(),src->id,1000*181,0);
+			sd->skillid_dance=sd->skillid=skillid;
+			sd->skilllv_dance=sd->skilllv=skilllv;
+			(*c)++;
+		}
+		break;
+	}
+	return 0;
+}
+
+/*==========================================
  * スキル使用条件（偽で使用失敗）
  *------------------------------------------
  */
@@ -4956,6 +5039,19 @@ int skill_check_condition(struct map_session_data *sd,int type)
 		if(sd->sc_data[SC_DANCING].timer==-1 || DIFF_TICK(gettick(),sd->sc_data[SC_DANCING].val3) <= skill_get_time2(skill,lv)){ //ダンス中で使用後5秒以上のみ？
 			clif_skill_fail(sd,skill,0,0);
 			return 0;
+		}
+		break;
+	case PR_BENEDICTIO:				/* 聖体降福 */
+		{
+			int range=1;
+			int c=0;
+			map_foreachinarea(skill_check_condition_char_sub,sd->bl.m,
+				sd->bl.x-range,sd->bl.y-range,
+				sd->bl.x+range,sd->bl.y+range,BL_PC,&sd->bl,&c);
+			if(c<2){
+				clif_skill_fail(sd,skill,0,0);
+				return 0;
+			}
 		}
 		break;
 	}
@@ -5164,6 +5260,7 @@ int skill_delayfix( struct block_list *bl, int time )
 
 	return (time>0)?time:0;
 }
+
 /*==========================================
  * スキル使用（ID指定）
  *------------------------------------------
@@ -5241,6 +5338,33 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 
 	sd->skillid = skill_num;
 	sd->skilllv = skill_lv;
+
+	switch(skill_num){ //事前にレベルが変わったりするスキル
+	case BD_LULLABY:				/* 子守歌 */
+	case BD_RICHMANKIM:				/* ニヨルドの宴 */
+	case BD_ETERNALCHAOS:			/* 永遠の混沌 */
+	case BD_DRUMBATTLEFIELD:		/* 戦太鼓の響き */
+	case BD_RINGNIBELUNGEN:			/* ニーベルングの指輪 */
+	case BD_ROKISWEIL:				/* ロキの叫び */
+	case BD_INTOABYSS:				/* 深淵の中に */
+	case BD_SIEGFRIED:				/* 不死身のジークフリード */
+	case BD_RAGNAROK:				/* 神々の黄昏 */
+		{
+			int range=1;
+			int c=0;
+			map_foreachinarea(skill_check_condition_char_sub,sd->bl.m,
+				sd->bl.x-range,sd->bl.y-range,
+				sd->bl.x+range,sd->bl.y+range,BL_PC,&sd->bl,&c);
+			if(c<1){
+				clif_skill_fail(sd,skill_num,0,0);
+				return 0;
+			}else{
+				sd->skilllv=(c + skill_lv)/2;
+			}
+		}
+		break;
+	}
+
 	if(!skill_check_condition(sd,0)) return 0;
 
 	/* 射程と障害物チェック */
@@ -7132,6 +7256,7 @@ void skill_stop_dancing(struct block_list *src)
 }
 
 
+
 /*==========================================
  * スキルユニット初期化
  *------------------------------------------
@@ -7267,6 +7392,24 @@ struct skill_unit_group *skill_initunitgroup(struct block_list *src,
 			sd->skilllv_dance=skilllv;
 		}
 		skill_status_change_start(src,SC_DANCING,skillid,(int)group,gettick(),0,1000*181,0);
+		switch(skillid){ //合奏スキルは相方をダンス状態にする
+		case BD_LULLABY:				/* 子守歌 */
+		case BD_RICHMANKIM:				/* ニヨルドの宴 */
+		case BD_ETERNALCHAOS:			/* 永遠の混沌 */
+		case BD_DRUMBATTLEFIELD:		/* 戦太鼓の響き */
+		case BD_RINGNIBELUNGEN:			/* ニーベルングの指輪 */
+		case BD_ROKISWEIL:				/* ロキの叫び */
+		case BD_INTOABYSS:				/* 深淵の中に */
+		case BD_SIEGFRIED:				/* 不死身のジークフリード */
+		case BD_RAGNAROK:				/* 神々の黄昏 */
+			{
+				int range=1;
+				int c=0;
+				map_foreachinarea(skill_check_condition_use_sub,sd->bl.m,
+					sd->bl.x-range,sd->bl.y-range,
+					sd->bl.x+range,sd->bl.y+range,BL_PC,&sd->bl,&c);
+			}
+		}
 	}
 	return group;
 }
@@ -7284,8 +7427,16 @@ int skill_delunitgroup(struct skill_unit_group *group)
 		return 0;
 
 	if( skill_is_danceskill(group->skill_id) ){
-		if(src)
+		if(src){
+			struct status_change *sc_data = battle_get_sc_data(src);
+			if(sc_data && sc_data[SC_DANCING].val4) { //合奏相手が存在する
+				struct block_list *bl=map_id2bl(sc_data[SC_DANCING].val4);
+				struct status_change *dsc_data = battle_get_sc_data(bl);
+				if(dsc_data && sc_data[SC_DANCING].timer!=-1)
+					skill_status_change_end(bl,SC_DANCING,-1);
+			}
 			skill_status_change_end(src,SC_DANCING,-1);
+		}
 	}
 
 	group->alive_count=0;

@@ -1,4 +1,31 @@
 --------------------
+//0997 by (凸)
+・二人で合奏、三人で聖体を実装
+	合奏 バード・ダンサーが隣接したセルにいて同じスキルを持っている時に発動
+		スキルレベルは両者のスキルレベルの中間
+		本鯖仕様が分からないけど斜め隣接もOK
+	聖体 使用者のX軸で-1と+1の場所に一人ずつアコライトかプリーストがいる時に発動すると思う(未テスト)
+		使用者 ○ アコプリ ●
+		OK ●○●
+
+		NG ●
+		   ○●
+・トーキーボックスを使って設置時に座っていた時はスキル使用失敗にしてみた
+
+	(db/)
+	item_db.txt 村正の呪い率を5%に(by e2さん)
+	(map/)
+	skill.c
+		skill_check_condition_char_sub() 追加
+		skill_check_condition_use_sub() 追加
+		skill_check_condition() 変更
+		skill_use_id() 変更
+		skill_initunitgroup() 変更
+		skill_delunitgroup() 変更
+	clif.c
+		clif_parse_UseSkillToPos() 変更
+
+--------------------
 //0996 by (凸)
 ・アドリブの5秒制限をcast_db.txtのupkeep_time2で制御できるように変更
 ・村正で自分を呪わせるためにbonus2 bAddEff2を追加
