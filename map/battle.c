@@ -3086,7 +3086,9 @@ struct Damage battle_calc_magic_attack(
 			break;
 		case MG_FIREWALL:	// ファイヤーウォール
 			if( t_ele!=3 && !battle_check_undead(t_race,t_ele) )
-				blewcount|=0x10000;
+				blewcount |= 0x10000;
+			else
+				blewcount = 0;
 			MATK_FIX( 1,2 );
 			break;
 		case MG_THUNDERSTORM:	// サンダーストーム

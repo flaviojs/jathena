@@ -4042,17 +4042,18 @@ int skill_check_condition(struct map_session_data *sd,int type)
 
 	if( sd->opt1>0) {
 		clif_skill_fail(sd,sd->skillid,0,0);
-		return 0;
-	}
-	if(pc_is90overweight(sd)) {
-		clif_skill_fail(sd,sd->skillid,9,0);
+		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
 	}
 
-	if(sd->skillid == AC_MAKINGARROW &&	sd->state.make_arrow_flag == 1)
+	if(sd->skillid == AC_MAKINGARROW &&	sd->state.make_arrow_flag == 1) {
+		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
-	if(sd->skillid == AM_PHARMACY &&	sd->state.produce_flag == 1)
+	}
+	if(sd->skillid == AM_PHARMACY &&	sd->state.produce_flag == 1) {
+		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
+	}
 
 	if(sd->skillitem == sd->skillid) {	/* ƒAƒCƒeƒ€‚Ìê‡–³ğŒ¬Œ÷ */
 		if(type&1)
@@ -4065,6 +4066,10 @@ int skill_check_condition(struct map_session_data *sd,int type)
 	}
 	if(sd->sc_data[SC_AUTOCOUNTER].timer != -1 && sd->skillid != KN_AUTOCOUNTER) {
 		clif_skill_fail(sd,sd->skillid,0,0);
+		return 0;
+	}
+	if(pc_is90overweight(sd)) {
+		clif_skill_fail(sd,sd->skillid,9,0);
 		return 0;
 	}
 	skill = sd->skillid;

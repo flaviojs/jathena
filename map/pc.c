@@ -3111,9 +3111,7 @@ int pc_stop_walking(struct map_session_data *sd,int type)
 		clif_fixpos(&sd->bl);
 	if(type&0x02 && battle_config.pc_damage_delay) {
 		unsigned int tick = gettick();
-		int delay = sd->dmotion;
-		if(battle_config.pc_damage_delay_rate != 100)
-			delay = delay*battle_config.pc_damage_delay_rate/100;
+		int delay = battle_get_dmotion(&sd->bl);
 		if(sd->canmove_tick < tick)
 			sd->canmove_tick = tick + delay;
 	}
@@ -3860,7 +3858,7 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	}
 
 	// •à ‚¢‚Ä‚¢‚½‚ç‘«‚ðŽ~‚ß‚é
-	if(sd->sc_data[SC_ENDURE].timer == -1)
+	if(sd->sc_data[SC_ENDURE].timer == -1 && !sd->special_state.infinite_endure)
 		pc_stop_walking(sd,3);
 	// ‰‰‘t/ƒ_ƒ“ƒX‚Ì’†’f
 	if(damage > sd->status.max_hp>>2)

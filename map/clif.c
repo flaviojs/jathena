@@ -3221,6 +3221,7 @@ int clif_skill_fail(struct map_session_data *sd,int skill_id,int type,int btype)
 	WFIFOB(fd,8) = 0;
 	WFIFOB(fd,9) = type;
 	WFIFOSET(fd,packet_len_table[0x110]);
+	printf("skill id = %d , type = %d\n",skill_id,btype);
 	return 0;
 }
 
@@ -6158,7 +6159,13 @@ void clif_parse_UseSkillToId(int fd,struct map_session_data *sd)
 	if(sd->sc_data[SC_TRICKDEAD].timer != -1 && skillnum != NV_TRICKDEAD) return;
 	if(sd->invincible_timer != -1)
 		pc_delinvincibletimer(sd);
-	if(sd->skillitem == -1) {
+	if(sd->skillitem >= 0 && sd->skillitem == skillnum) {
+		if(skilllv != sd->skillitemlv)
+			skilllv = sd->skillitemlv;
+		skill_use_id(sd,RFIFOL(fd,6),skillnum,skilllv);
+	}
+	else {
+		sd->skillitem = sd->skillitemlv = -1;
 		if(skillnum == MO_EXTREMITYFIST) {
 			if((sd->sc_data[SC_COMBO].timer == -1 || sd->sc_data[SC_COMBO].val1 != MO_COMBOFINISH)) {
 				if(!sd->state.skill_flag ) {
@@ -6179,11 +6186,6 @@ void clif_parse_UseSkillToId(int fd,struct map_session_data *sd)
 			if(sd->state.skill_flag)
 				sd->state.skill_flag = 0;
 		}
-	}
-	else {
-		if(skilllv > sd->skillitemlv)
-			skilllv = sd->skillitemlv;
-		skill_use_id(sd,RFIFOL(fd,6),skillnum,skilllv);
 	}
 }
 
@@ -6211,17 +6213,18 @@ void clif_parse_UseSkillToPos(int fd,struct map_session_data *sd)
 	if(sd->sc_data[SC_TRICKDEAD].timer != -1 && skillnum != NV_TRICKDEAD) return;
 	if(sd->invincible_timer != -1)
 		pc_delinvincibletimer(sd);
-	if(sd->skillitem == -1) {
+	if(sd->skillitem >= 0 && sd->skillitem == skillnum) {
+		if(skilllv != sd->skillitemlv)
+			skilllv = sd->skillitemlv;
+		skill_use_pos(sd,RFIFOW(fd,6),RFIFOW(fd,8),skillnum,skilllv);
+	}
+	else {
+		sd->skillitem = sd->skillitemlv = -1;
 		if( (lv = pc_checkskill(sd,skillnum)) > 0) {
 			if(skilllv > lv)
 				skilllv = lv;
 			skill_use_pos(sd,RFIFOW(fd,6),RFIFOW(fd,8),skillnum,skilllv);
 		}
-	}
-	else {
-		if(skilllv > sd->skillitemlv)
-			skilllv = sd->skillitemlv;
-		skill_use_pos(sd,RFIFOW(fd,6),RFIFOW(fd,8),skillnum,skilllv);
 	}
 }
 

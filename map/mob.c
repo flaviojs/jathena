@@ -792,10 +792,8 @@ int mob_stop_walking(struct mob_data *md,int type)
 	if(type&0x01)
 		clif_fixmobpos(md);
 	if(type&0x02) {
-		int delay=mob_db[md->class].dmotion;
+		int delay=battle_get_dmotion(&md->bl);
 		unsigned int tick = gettick();
-		if(battle_config.monster_damage_delay_rate != 100)
-			delay = delay*battle_config.monster_damage_delay_rate/100;
 		if(md->canmove_tick < tick)
 			md->canmove_tick = tick + delay;
 	}
@@ -1597,8 +1595,6 @@ int mob_catch_delete(struct mob_data *md)
 	mob_changestate(md,MS_DEAD,0);
 	clif_clearchar_area(&md->bl,0);
 	map_delblock(&md->bl);
-	if(mob_get_viewclass(md->class) <= 1000)
-		clif_clearchar_delay(gettick()+3000,&md->bl,0);
 	mob_setdelayspawn(md->bl.id);
 	return 0;
 }

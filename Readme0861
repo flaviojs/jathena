@@ -1,4 +1,27 @@
 --------------------
+//0876 by 死神
+
+・細かいバグ修正。
+・@コマンドにテストの為に入れていた物が入っていたので修正。
+・ハンマーフォールの射程を5から4に修正(本鯖射程は不明)とリザレクションが無属性だったのを聖属性に修正。
+	(db/)
+	skill_db.txt 修正。
+	(map/)
+	mob.c
+		mob_catch_delete()、mob_stop_walking() 修正。
+	storage.c
+		storage_additem() 修正。
+	pc.c
+		pc_damage()、pc_stop_walking() 修正。
+	clif.c
+		clif_parse_UseSkillToId()、clif_parse_UseSkillToPos() 修正。
+	battle.c
+		battle_calc_magic_attack() 修正。
+	skill.c
+		skill_check_condition() 修正。
+	atcommand.c 修正。
+
+--------------------
 //0875 by 胡蝶蘭
 
 ・party_share_levelをinter_athena.confに移した

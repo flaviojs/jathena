@@ -149,7 +149,7 @@ int storage_additem(struct map_session_data *sd,struct storage *stor,struct item
 				break;
 			}
 		}
-		if(i<0)
+		if(i>=MAX_STORAGE)
 			return 1;
 	}
 	return 0;
