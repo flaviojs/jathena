@@ -505,6 +505,12 @@ attribute_recover
 	属性によって攻撃されても回復するかどうかです。noの場合は-属性を
 	0にします。デフォルトはyesです。
 
+item_auto_get
+	アイテム自動取得機能を使用するかどうかです。
+	yesにするとアイテムドロップをモンスターに一番多くダメージを与えたキャラが
+	自動でアイテムを取得するようになります。
+	デフォルトはnoです。
+
 flooritem_lifetime
 	床に落ちたアイテムが消えるまでかかる時間です。単位はms(ミリ秒)です。
 	デフォルトは60000(60秒)で最小は1000(1秒)です。1000未満ならデフォルトにセットされます。
@@ -1061,6 +1067,11 @@ vending_max_value
 	露店で置けるアイテム価格の最高値です。
 	デフォルトは10000000です。
 
+show_steal_in_same_party
+	スティール成功時、画面内のPTメンバー(自分含む)に
+	スティールしたアイテムの情報を公開するかどうかです。
+	デフォルトはnoです。
+
 import
 	その行を別ファイルの中身と置き換えます。
 
@@ -1083,6 +1094,7 @@ player_damage_delay_rate: 100
 defunit_not_enemy: yes
 random_monster_checklv: yes
 attribute_recover: yes
+item_auto_get: no
 flooritem_lifetime: 60000
 item_first_get_time: 10000
 item_second_get_time: 7000
@@ -1201,6 +1213,7 @@ chat_warpportal: no
 mob_warpportal: no
 dead_branch_active: no
 vending_max_value: 10000000
+show_steal_in_same_party: no
 
 ==========================================================================
 6. atcommand_athena.conf

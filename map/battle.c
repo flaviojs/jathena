@@ -4051,6 +4051,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.vending_max_value = 10000000;
 		battle_config.pet_lootitem = 1;
 		battle_config.pet_weight = 1000;
+		battle_config.show_steal_in_same_party = 0;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4203,6 +4204,7 @@ int battle_config_read(const char *cfgName)
 			{ "vending_max_value", 			&battle_config.vending_max_value		},
 			{ "pet_lootitem", 				&battle_config.pet_lootitem				},
 			{ "pet_weight", 				&battle_config.pet_weight				},
+			{ "show_steal_in_same_party", 			&battle_config.show_steal_in_same_party		},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

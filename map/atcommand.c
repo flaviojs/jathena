@@ -2585,6 +2585,17 @@ atcommand_mapexit(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
+	struct map_session_data *pl_sd = NULL;
+	int i = 0;
+	for (i = 0; i < fd_max; i++) {
+		if (session[i] &&
+			(pl_sd = session[i]->session_data) && pl_sd->state.auth) {
+			if (sd->status.account_id != pl_sd->status.account_id)
+				clif_GM_kick(sd, pl_sd, 0);
+			}
+		}
+	clif_GM_kick(sd, sd, 0);
+	
 	exit(1);
 }
 

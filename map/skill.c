@@ -3543,10 +3543,13 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		count=81;
 		limit=skill_get_time(skillid,skilllv);
 		range=5;
-		target=BCT_PARTY;
+		target=BCT_NOENEMY;
 		if(src->type == BL_PC)
-			val1 = pc_checkskill((struct map_session_data *)src,BA_MUSICALLESSON);
-		val2 = battle_get_vit(src);
+			val1 = ((pc_checkskill((struct map_session_data *)src,BA_MUSICALLESSON))&0xffff)<<16;
+		else
+			val1 = 0;
+		val1 |= (battle_get_vit(src))&0xffff;
+		val2 = gettick();
 		break;
 	case DC_SERVICEFORYOU:		/* サービスフォーユー */
 		count=81;
@@ -4025,7 +4028,6 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0xa7:	/* 口笛 */
 	case 0xa8:	/* 夕陽のアサシンクロス */
 	case 0xa9:	/* ブラギの詩 */
-	case 0xaa:	/* イドゥンの林檎 */
 	case 0xab:	/* 自分勝手なダンス */
 	case 0xac:	/* ハミング */
 	case 0xad:	/* 私を忘れないで… */
@@ -4048,6 +4050,29 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 			}
 		} break;
 
+	case 0xaa:	/* イドゥンの林檎 */
+		{
+			struct skill_unit *unit2;
+			struct status_change *sc_data=battle_get_sc_data(bl);
+			int type=SkillStatusChangeTable[sg->skill_id];
+			if(sg->src_id == bl->id)
+				break;
+			if(sc_data[type].timer==-1)
+				skill_status_change_start(bl,type,src->group->skill_lv,(src->group->val1)>>16,(src->group->val1)&0xffff,
+					(int)src,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
+			else if((unit2=(struct skill_unit *)sc_data[type].val4)!=src){
+				if( DIFF_TICK(sg->tick,unit2->group->tick)>0 )
+					skill_status_change_start(bl,type,src->group->skill_lv,(src->group->val1)>>16,(src->group->val1)&0xffff,
+						(int)src,skill_get_time2(src->group->skill_id,src->group->skill_lv),0);
+				ts->tick-=sg->interval;
+			}
+			if(DIFF_TICK(tick,sg->val2)>=6000){
+				int heal=30+src->group->skill_lv*5+((src->group->val1)>>16)*5+((src->group->val1)&0xfff)/2;
+				clif_skill_nodamage(&src->bl,bl,AL_HEAL,heal,1);
+				battle_heal(NULL,bl,heal,0,0);
+				sg->val2=tick;
+			}
+		} break;
 /*	default:
 		if(battle_config.error_log)
 			printf("skill_unit_onplace: Unknown skill unit id=%d block=%d\n",sg->unit_id,bl->id);
@@ -5543,7 +5568,6 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			case SC_SIEGFRIED:			/* 不死身のジークフリード */
 			case SC_WHISTLE:			/* 口笛 */
 			case SC_ASSNCROS:			/* 夕陽のアサシンクロス */
-			case SC_APPLEIDUN:			/* イドゥンの林檎 */
 			case SC_HUMMING:			/* ハミング */
 			case SC_DONTFORGETME:		/* 私を忘れないで */
 			case SC_FORTUNE:			/* 幸運のキス */
@@ -5554,11 +5578,13 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			case SC_SPEEDPOTION0:		/* 増速ポーション */
 			case SC_SPEEDPOTION1:
 			case SC_SPEEDPOTION2:
+			case SC_APPLEIDUN:			/* イドゥンの林檎 */
 			case SC_DANCING:			/* ダンス/演奏中 */
 			case SC_RIDING:
 			case SC_BLADESTOP_WAIT:
 				calc_flag = 1;
 				break;
+
 			case SC_DEVOTION:		/* ディボーション */
 				{
 					struct map_session_data *md = map_id2sd(sc_data[type].val1);

@@ -2699,6 +2699,32 @@ int pc_item_identify(struct map_session_data *sd,int idx)
 }
 
 /*==========================================
+ * スティル品公開
+ *------------------------------------------
+ */
+int pc_show_steal(struct block_list *bl,va_list ap)
+{
+	struct map_session_data *sd=va_arg(ap,struct map_session_data *);
+	int itemid=va_arg(ap,int);
+	int type=va_arg(ap,int);
+
+	struct item_data *item=NULL;
+	char output[100];
+
+	if(!type){
+		if((item=itemdb_exists(itemid))==NULL)
+			sprintf(output,"%sがUnknown_Itemをスティールしました",sd->status.name);
+		else
+			sprintf(output,"%sが%sをスティールしました",sd->status.name,item->jname);
+		clif_displaymessage( ((struct map_session_data *)bl)->fd, output);
+	}else{
+		sprintf(output,"%sは重量オーバーによりアイテムを取得できませんでした",sd->status.name);
+		clif_displaymessage( ((struct map_session_data *)bl)->fd, output);
+	}
+
+	return 0;
+}
+/*==========================================
  *
  *------------------------------------------
  */
@@ -2723,8 +2749,13 @@ int pc_steal_item(struct map_session_data *sd,struct block_list *bl)
 							tmp_item.amount = 1;
 							tmp_item.identify = 1;
 							flag = pc_additem(sd,&tmp_item,1);
-							if(flag)
+							if(battle_config.show_steal_in_same_party)
+								party_foreachsamemap(pc_show_steal,sd,1,sd,tmp_item.nameid,0);
+							if(flag){
+								if(battle_config.show_steal_in_same_party)
+									party_foreachsamemap(pc_show_steal,sd,1,sd,tmp_item.nameid,1);
 								clif_additem(sd,0,0,flag);
+							}
 							md->state.steal_flag = 1;
 							return 1;
 						}
@@ -4024,6 +4055,8 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	skill_castcancel(&sd->bl,0);	// 詠唱の中止
 	clif_clearchar_area(&sd->bl,1);
 	skill_unit_out_all(&sd->bl,gettick(),1);
+	if(sd->sc_data[SC_BLADESTOP].timer!=-1)//白刃は事前に解除
+		skill_status_change_end(&sd->bl,SC_BLADESTOP,-1);
 	skill_status_change_clear(&sd->bl,0);	// ステータス異常を解除する
 	clif_updatestatus(sd,SP_HP);
 	pc_calcstatus(sd,0);

@@ -1,4 +1,31 @@
 --------------------
+//0965 by ぴざまん
+・@mapexit実行時全セッションをkickするように変更。
+・白刃取り時に片方が倒れても、もう片方の白刃が解除されない問題修正。(未テスト)
+・スティール情報公開機能実装。(未テスト)
+　スティールに成功すると、何をスティールしたのか
+　画面内のPTメンバー全員に知らせる機能です。
+　battle_athena.confのshow_steal_in_same_partyで設定できます。
+　オリジナルアップデートの為、デフォルトはnoにしています。
+・イドゥンの林檎の回復効果実装。
+
+	(conf/)
+	battle_athena.confに項目追加。
+	(map/)
+	atcommand.c
+		atcommand_mapexit() 修正。
+	pc.c
+		pc_steal_item() 修正。
+		pc_show_steal() 追加。
+	skill.c
+		skill_unitsetting()、skill_unit_onplace() 修正。
+	battle.c
+		battle_config_read() 修正。
+	battle.h 修正。
+	(doc/)
+	conf_ref.txt 抜けてたのを色々追加。
+
+--------------------
 //0964 by (凸)
 
 ・この前追加したskill_tree2.txtを廃止したので削除してください
