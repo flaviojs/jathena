@@ -977,7 +977,7 @@ int do_init_npc(void)
 		lines=0;
 		while(fgets(line,1020,fp)){
 			char w1[1024],w2[1024],w3[1024],w4[1024],mapname[1024];
-			int i,j,w4pos;
+			int i,j,w4pos,count;
 			if(line[0] == '/' && line[1] == '/')
 				continue;
 			// 不要なスペースやタブの連続は詰める
@@ -994,8 +994,8 @@ int do_init_npc(void)
  					line[j++]=line[i];
 			}
 			// 最初はタブ区切りでチェックしてみて、ダメならスペース区切りで確認
-			if(sscanf(line,"%[^\t]\t%[^\t]\t%[^\t]\t%n%[^\t\r\n]",w1,w2,w3,&w4pos,w4)!=4 &&
-			   sscanf(line,"%s%s%s%n%s",w1,w2,w3,&w4pos,w4)!=4){
+			if((count=sscanf(line,"%[^\t]\t%[^\t]\t%[^\t]\t%n%[^\t\r\n]",w1,w2,w3,&w4pos,w4)) < 3 &&
+			   (count=sscanf(line,"%s%s%s%n%s",w1,w2,w3,&w4pos,w4)) < 3){
 				continue;
 			}
 			sscanf(w1,"%[^,]",mapname);
@@ -1004,15 +1004,15 @@ int do_init_npc(void)
 				// "mapname" is not assigned to this server
 				continue;
 			}
-			if(strcmp(w2,"warp")==0){
+			if(strcmp(w2,"warp")==0 && count > 3){
 				npc_parse_warp(w1,w2,w3,w4);
-			} else if(strcmp(w2,"shop")==0){
+			} else if(strcmp(w2,"shop")==0 && count > 3){
 				npc_parse_shop(w1,w2,w3,w4);
-			} else if(strcmp(w2,"script")==0){
+			} else if(strcmp(w2,"script")==0 && count > 3){
 				npc_parse_script(w1,w2,w3,w4,line+w4pos,fp,&lines);
-			} else if(strcmp(w2,"monster")==0){
+			} else if(strcmp(w2,"monster")==0 && count > 3){
 				npc_parse_mob(w1,w2,w3,w4);
-			} else if(strcmp(w2,"mapflag")==0){
+			} else if(strcmp(w2,"mapflag")==0 && count >= 3){
 				npc_parse_mapflag(w1,w2,w3,w4);
 			}
 		}

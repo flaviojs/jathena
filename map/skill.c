@@ -287,8 +287,8 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	switch(skillid){
 	case 0:					/* 通常攻撃 */
 		/* 自動鷹 */
-		if( sd && pc_isfalcon(sd) && (skill=pc_checkskill(sd,HT_BLITZBEAT))>0 &&
-			rand()%1000 <= sd->paramc[5]*10/3+1 && sd->status.weapon != 11) {
+		if( sd && pc_isfalcon(sd) && sd->status.weapon == 11 && (skill=pc_checkskill(sd,HT_BLITZBEAT))>0 &&
+			rand()%1000 <= sd->paramc[5]*10/3+1 ) {
 			int lv=(sd->status.job_level+9)/10;
 			skill_castend_damage_id(src,bl,HT_BLITZBEAT,(skill<lv)?skill:lv,tick,0xf00000);
 		}
@@ -2749,7 +2749,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
  */
 int skill_check_condition( struct map_session_data *sd )
 {
-	int j=0,sp=0,zeny=0,spiritball=0,tick,arrow_id=0;
+	int j=0,sp=0,zeny=0,spiritball=0,tick;
 	int	i[3]={0,0,0},
 		item_id[3]={0,0,0},
 		item_amount[3]={0,0,0};
@@ -2836,17 +2836,12 @@ int skill_check_condition( struct map_session_data *sd )
 			break;
 
 
-		case AC_SHOWER:		// アローシャワー
-			item_amount[0] =7;
 		case AC_DOUBLE:		// ダブルストレイフィング
-			item_amount[0]+=1;
+		case AC_SHOWER:		// アローシャワー
 		case AC_CHARGEARROW:		// チャージアロー
-			item_amount[0]+=1;
-			arrow_id=pc_checkequip(sd,0x8000);
-
 			if( sd->status.weapon != 11) {
 				clif_skill_fail(sd,sd->skillid,6,0);	// 弓
-			     	return 0;
+			     	return 0; 
 			}
 			break;
 
@@ -2888,8 +2883,7 @@ int skill_check_condition( struct map_session_data *sd )
 			break;
 
 		case HT_BLITZBEAT:		/* ブリッツビート */
-			if(!pc_isfalcon(sd) ||	/* 鷹がいないか弓を装備していない */
-			(sd->status.weapon != 11)) {
+			if(!pc_isfalcon(sd)) {		/* 鷹がいない */
 				clif_skill_fail(sd,sd->skillid,0,0);
 				return 0;
 			}
@@ -3002,6 +2996,7 @@ int skill_check_condition( struct map_session_data *sd )
 			}
 			break;
 
+	//		case RG_BACKSTAP:	// バックスタブ
 		case RG_RAID:		// サプライズアタック
 			if(!pc_ishiding(sd)) {		// ハイディング状態
 				clif_skill_fail(sd,sd->skillid,0,0);
@@ -3019,11 +3014,6 @@ int skill_check_condition( struct map_session_data *sd )
 		if( spiritball > 0 && sd->spiritball < spiritball) {
 			clif_skill_fail(sd,sd->skillid,0,0);		// 氣球不足
 			return 0;
-		}
-		if(arrow_id){
-			if(sd->status.inventory[(pc_search_inventory(sd,arrow_id))].amount < item_amount[0])
-				clif_arrow_fail(sd,0);
-			pc_delitem(sd,(pc_search_inventory(sd,arrow_id)),item_amount[0]-1,0);	// 矢消費
 		}
 
 		if(!pc_check_equip_dcard(sd,4132) && 
@@ -3582,25 +3572,22 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			/* ボスには効かない */
 			return 0;
 		}
-		if(type==SC_STONE || type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
-			mob_stop_walking(md,1);
 	}else if(bl->type==BL_PC){
 		sd=(struct map_session_data *)bl;
-		
+
 		if(SC_STONE<=type && type<=SC_BLIND){	/* カードによる耐性 */
 			if(sd->reseff[type-SC_STONE] && rand()%100<sd->reseff[type-SC_STONE]){
 				printf("PC %d skill_sc_start: cardによる異常耐性発動\n",sd->bl.id);
 				return 0;
 			}
 		}
-		if(type==SC_STONE || type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
-			pc_stop_walking(sd,1);
 	}else{
 		printf("skill_status_change_start: neither MOB nor PC !\n");
 		return 0;
 	}
-	
-	
+	if(type==SC_STONE || type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
+		battle_stopwalking(bl,1);
+
 	if(sc_data[type].timer != -1){	/* すでに同じ異常になっている場合タイマ解除 */
 		(*sc_count)--;
 		delete_timer(sc_data[type].timer, skill_status_change_timer);
