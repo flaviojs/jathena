@@ -884,7 +884,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->flee += (skill*3)>>1;
 	if( (skill=pc_checkskill(sd,BS_WEAPONRESEARCH))>0)	// 武器研究の命中率増加
 		sd->hit += skill*2;
-
+	if(sd->skilltimer!=-1 && (skill=pc_checkskill(sd,SA_FREECAST))>0){ // フリ?キャスト
+		sd->aspd += sd->aspd*(10-skill)/20;
+		sd->speed = sd->speed + (15-skill) * 0.1 * DEFAULT_WALK_SPEED;
+	}
 	if(sd->status.option&2 && (skill = pc_checkskill(sd,RG_TUNNELDRIVE))>0 )	// トンネルドライブ	// トンネルドライブ
 		sd->speed += sd->speed*(20-skill)/40;
 	if (pc_iscarton(sd) && (skill=pc_checkskill(sd,MC_PUSHCART))>0)	// カートによる速度低下

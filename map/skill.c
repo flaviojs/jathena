@@ -1719,7 +1719,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 	if( sd->skilltimer != tid )	/* タイマIDの確認 */
 		return 0;
 	sd->skilltimer=-1;
-	
+	pc_calcstatus(sd,0);	
 	bl=map_id2bl(sd->skilltarget);
 	if(bl==NULL || bl->prev==NULL)
 		return 0;
@@ -2746,7 +2746,7 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 	if( sd->skilltimer != tid )	/* タイマIDの確認 */
 		return 0;
 	sd->skilltimer=-1;
-
+	pc_calcstatus(sd,0);
 	if(pc_isdead(sd))
 		return 0;
 	
@@ -3269,8 +3269,11 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	sd->skilllv		= skill_lv;
 	sd->canact_tick = tick + casttime + delay;
 	sd->canmove_tick = tick;
-	if(casttime > 0)
+	if(casttime > 0) {
+		sd->skilltimer = 1;
+		pc_calcstatus(sd,0);
 		sd->skilltimer = add_timer( tick+casttime, skill_castend_id, sd->bl.id, 0 );
+	}
 	else {
 		sd->skilltimer = -1;
 		skill_castend_id(sd->skilltimer,tick,sd->bl.id,0);
@@ -3327,8 +3330,11 @@ int skill_use_pos( struct map_session_data *sd,
 	tick=gettick();
 	sd->canact_tick = tick + casttime + delay;
 	sd->canmove_tick = tick;
-	if(casttime > 0)
-		sd->skilltimer = add_timer( tick+casttime, skill_castend_pos, sd->bl.id, 0 );
+	if(casttime > 0) {
+		sd->skilltimer = 1;
+		pc_calcstatus(sd,0);
+		sd->skilltimer = add_timer( tick+casttime, skill_castend_id, sd->bl.id, 0 );
+	}
 	else {
 		sd->skilltimer = -1;
 		skill_castend_pos(sd->skilltimer,tick,sd->bl.id,0);

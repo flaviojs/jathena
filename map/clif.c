@@ -4628,7 +4628,7 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 		return;
 	}
 
-	if(sd->skilltimer!=-1)
+	if(sd->skilltimer!=-1 && pc_checkskill(sd,SA_FREECAST) <= 0) // フリーキャスト
 		return;
 
 	if(sd->chatID)
