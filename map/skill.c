@@ -1028,7 +1028,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		return 0;
 	if(sd && pc_isdead(sd))
 		return 0;
-	if(dstsd && pc_isdead(dstsd))
+	if(dstsd && pc_isdead(dstsd) && skillid != ALL_RESURRECTION)
 		return 0;
 
 	switch(skillid)
@@ -1589,7 +1589,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 		return 0;
 	if(sd->bl.m != bl->m || pc_isdead(sd))
 		return 0;
-	
+
 	if(!skill_check_condition( sd ))		/* 使用条件チェック */
 		return 0;
 		
