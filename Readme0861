@@ -1,5 +1,11 @@
 --------------------
-//0868 by 死神
+//0870 by shuto
+
+・mapflagの攻城戦MAPにnomemo追加
+・ギルド宝箱で、宝箱出現と同時にMAP鯖が落ちる問題修正(by ぴざまん)
+
+--------------------
+//0869 by 死神
 
 ・battle_athena.confにplayer_land_skill_limit、monster_land_skill_limit、party_skill_penaly 追加。
 ・char_athena.confにparty_share_level 追加。

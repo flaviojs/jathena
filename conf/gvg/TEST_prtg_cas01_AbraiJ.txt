@@ -406,13 +406,13 @@ LStartg2:
 }
 
 //ƒMƒ‹ƒh•ó” (Žb’è)
-prtg_cas01.gat,10,209,0	script	t_box_p1	-1,{
+prtg_cas01.gat,10,209,0 script t_box_p1s -1,{
 OnClock0000:
-	killmonster "prtg_cas01.gat","T_BOX_P1";
-	if (getcastledata("prtg_cas01.gat",1) == 0) end;
-	set @Economy,getcastledata("prtg_cas01.gat",2);
-	set @boxnum,2+@Economy/100000;
-	areamonster "prtg_cas01.gat",6,204,15,213,"•ó” ",1324,@boxnum,"T_BOX_P1";
-	areamonster "prtg_cas01.gat",6,204,15,213,"•ó” ",1325,@boxnum,"T_BOX_P1";
-	end;
+killmonster "prtg_cas01.gat","t_box_p1";
+if (getcastledata("prtg_cas01.gat",1) == 0) end;
+set $boxnum,2+getcastledata("prtg_cas01.gat",2)/100000;
+areamonster "prtg_cas01.gat",6,204,15,213,"•ó” ",1324,$boxnum,"t_box_p1";
+areamonster "prtg_cas01.gat",6,204,15,213,"•ó” ",1325,$boxnum,"t_box_p1";
+end;
 }
+
