@@ -316,7 +316,7 @@ L1:
 Lnyuinp:
 		next;
 		input @nyunum;
-		if (@nyunum == 0) goto Lend2;
+		if (@nyunum <= 0) goto Lend2;
 		if (@nyunum > 100) goto LError1;
 		set @nyupri,@nyunum*8;
 		if (Zeny < @nyupri) goto LError2;

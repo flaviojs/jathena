@@ -39,7 +39,7 @@ L1:
 Linput:
 		input @choconum;
 		if (@choconum > 5) goto LError;
-		if (@choconum == 0) goto Lend;
+		if (@choconum <= 0) goto Lend;
 		set @chocoprice,@choconum*5000;
 		if (Zeny < @chocoprice) goto LError2;
 			set Zeny,Zeny-@chocoprice;

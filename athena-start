@@ -34,6 +34,10 @@ check_account() {
 		mkdir ./save
 	fi
 
+	if [ ! -d ./log ]; then
+		mkdir ./log
+	fi
+
 	if [ ! -f ./save/account.txt ]; then
 		for i in `seq 0 4`
 		do

@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-// スクリプト : Event_Potion v1.0
+// スクリプト : Event_Potion v1.1
 //----------------------------------------------------------------------
 
 prontera.gat,73,140,0	script	牛乳商人	86,{
@@ -18,7 +18,7 @@ prontera.gat,73,140,0	script	牛乳商人	86,{
 			mes "どれだけ交換しますか？";
 			next;
 			input @CHANGE_NUM;
-			if (@CHANGE_NUM == 0) goto L_MENU_2;
+			if (@CHANGE_NUM <= 0) goto L_MENU_2;
 	L_ROOT_1:
 			set @CHANGE_ZENY,@CHANGE_NUM;
 			set @CHANGE_ZENY,@CHANGE_ZENY*15;
@@ -200,7 +200,7 @@ payon_in01.gat,174,113,3	script	マルクハンセン	86,{
 				if (@BUY_NUM <= @BOTTLE) goto L_SUB_1_2;
 				set @BUY_NUM,@BOTTLE;
 	L_SUB_1_2:
-				if (@BUY_NUM == 0) goto L_ROOT_1_1;
+				if (@BUY_NUM <= 0) goto L_ROOT_1_1;
 				mes "[商人 マルクハンセン]";
 				mes "いくつほどほしいのでしょうか？";
 				next;
@@ -210,7 +210,7 @@ payon_in01.gat,174,113,3	script	マルクハンセン	86,{
 				mes "君が持っているアイテムでは最大 " + @BUY_NUM + " 個までできるんだ";
 				next;
 				input @BUY_NUM;
-				if (@BUY_NUM == 0) goto L_MENU_1_5;
+				if (@BUY_NUM <= 0) goto L_MENU_1_5;
 	L_SUB_1_3:
 				set @BUY_ZENY,@BUY_NUM;
 				set @BUY_ZENY,@BUY_ZENY*3;
@@ -362,7 +362,7 @@ alberta_in.gat,16,28,4	script	薬師おじいさん	61,{
 			if (@BUY_NUM <= @BOTTLE) goto L_SUB_1_3;
 			set @BUY_NUM,@BOTTLE;
 	L_SUB_1_3:
-			if (@BUY_NUM == 0) goto L_ROOT_1_1;
+			if (@BUY_NUM <= 0) goto L_ROOT_1_1;
 			mes "[製薬師 おじいさん]";
 			mes "どのくらい欲しい?";
 			next;
@@ -372,7 +372,7 @@ alberta_in.gat,16,28,4	script	薬師おじいさん	61,{
 			mes "君が持っている材料では、" + @BUY_NUM + " 個ぐらい造れそうだな.";
 			next;
 			input @BUY_NUM;
-			if (@BUY_NUM == 0) goto L_MENU_1_7;
+			if (@BUY_NUM <= 0) goto L_MENU_1_7;
 	L_SUB_1_4:
 			set @BUY_ZENY,@BUY_NUM;
 			set @BUY_ZENY,@BUY_ZENY*@BUY_PRICE;

@@ -150,7 +150,7 @@ geffen_in.gat,110,172,0	script	クリストファー	63,{
 			mes "いらないのなら０でいいぞ。";
 			next;
 			input @BUY_NUM;
-			if (@BUY_NUM == 0) goto L_MENU_2E;
+			if (@BUY_NUM <= 0) goto L_MENU_2E;
 				set @BUY_ZENY,@BUY_NUM;
 				set @BUY_ZENY,@BUY_ZENY*@BUY_PRICE;
 				if (Zeny < @BUY_ZENY) goto L_ROOT_2_1;
@@ -197,7 +197,7 @@ geffen_in.gat,110,172,0	script	クリストファー	63,{
 			mes "いらないのなら０でいいぞ。";
  			next;
 			input @BUY_NUM;
-			if (@BUY_NUM == 0) goto L_MENU_2E;
+			if (@BUY_NUM <= 0) goto L_MENU_2E;
 				set @BUY_ZENY,@BUY_NUM;
 				set @BUY_ZENY,@BUY_ZENY*@BUY_PRICE;
 				if (Zeny < @BUY_ZENY) goto L_ROOT_2_1;

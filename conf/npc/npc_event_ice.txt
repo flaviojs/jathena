@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-// スクリプト : Event_Ice v1.0
+// スクリプト : Event_Ice v1.1
 //----------------------------------------------------------------------
 
 morocc.gat,160,143,4	script	アイスクリーム商人	85,{
@@ -18,7 +18,7 @@ morocc.gat,160,143,4	script	アイスクリーム商人	85,{
 	L_ROOT_1:
 			next;
 			input @CHANGE_NUM;
-			if (@CHANGE_NUM == 0) goto L_MENU_1;
+			if (@CHANGE_NUM <= 0) goto L_MENU_1;
 			if (@CHANGE_NUM >= 11) goto L_MENU_2;
 			set @CHANGE_ZENY,@CHANGE_NUM;
 			set @CHANGE_ZENY,@CHANGE_ZENY*100;
@@ -102,7 +102,7 @@ alberta.gat,106,65,4	script	アイスクリーム商人	85,{
 	L_ROOT_1:
 			next;
 			input @CHANGE_NUM;
-			if (@CHANGE_NUM == 0) goto L_MENU_1;
+			if (@CHANGE_NUM <= 0) goto L_MENU_1;
 			if (@CHANGE_NUM >= 11) goto L_MENU_2;
 			set @CHANGE_ZENY,@CHANGE_NUM;
 			set @CHANGE_ZENY,@CHANGE_ZENY*100;
@@ -186,7 +186,7 @@ moc_fild16.gat,88,304,4	script	アイスクリーム商人	85,{
 	L_ROOT_1:
 			next;
 			input @CHANGE_NUM;
-			if (@CHANGE_NUM == 0) goto L_MENU_1;
+			if (@CHANGE_NUM <= 0) goto L_MENU_1;
 			if (@CHANGE_NUM >= 11) goto L_MENU_2;
 			set @CHANGE_ZENY,@CHANGE_NUM;
 			set @CHANGE_ZENY,@CHANGE_ZENY*100;

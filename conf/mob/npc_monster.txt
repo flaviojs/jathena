@@ -1,4 +1,4 @@
-//npc_monster.txt＠AthenaDB計画 2004/04/09 03:31:31 +0900 (JST)
+//npc_monster.txt＠AthenaDB計画 2004/04/20 21:33:27 +0900 (JST)
 
 //おもちゃ分類所(xmas_dun02.gat)
 xmas_dun02.gat,0,0,0,0	monster	クッキー	1246,20,0,0,0
@@ -1350,11 +1350,11 @@ pay_dun03.gat,243,220,0,0	monster	ソヒー	1170,2,300000,100000,1
 pay_dun03.gat,71,243,0,0	monster	ソヒー	1170,2,300000,100000,1
 pay_dun03.gat,85,178,0,0	monster	ソヒー	1170,2,300000,100000,1
 pay_dun03.gat,86,248,0,0	monster	ソヒー	1170,2,300000,100000,1
-pay_dun03.gat,154,112,0,0	monster	ウィスパー	1179,1,1800000,0,1
-pay_dun03.gat,161,117,0,0	monster	ウィスパー	1179,1,1800000,0,1
-pay_dun03.gat,81,61,0,0	monster	ウィスパー	1179,1,1800000,0,1
-pay_dun03.gat,84,63,0,0	monster	ウィスパー	1179,1,1800000,0,1
 pay_dun03.gat,0,0,0,0	monster	九尾狐	1180,10,0,0,0
+pay_dun03.gat,154,112,0,0	monster	ウィスパー	1185,1,1800000,0,1
+pay_dun03.gat,161,117,0,0	monster	ウィスパー	1185,1,1800000,0,1
+pay_dun03.gat,81,61,0,0	monster	ウィスパー	1185,1,1800000,0,1
+pay_dun03.gat,84,63,0,0	monster	ウィスパー	1185,1,1800000,0,1
 pay_dun03.gat,89,147,0,0	monster	巨大ウィスパー	1186,1,14400000,0,1
 pay_dun03.gat,0,0,0,0	monster	ボンゴン	1188,5,0,0,0
 pay_dun03.gat,0,0,0,0	monster	天下大将軍	1277,3,0,0,0
@@ -1764,6 +1764,8 @@ gl_cas02.gat,182,65,3,3	monster	カーリッツバーグ	1132,1,360000,180000,1
 gl_cas02.gat,189,20,1,1	monster	カーリッツバーグ	1132,1,360000,180000,0
 gl_cas02.gat,45,177,3,3	monster	カーリッツバーグ	1132,1,360000,180000,1
 gl_cas02.gat,0,0,0,0	monster	レイドリック	1163,45,0,0,0
+gl_cas02.gat,102,180,0,0	monster	ウィスパー	1185,1,1800000,900000,1
+gl_cas02.gat,105,180,0,0	monster	ウィスパー	1185,1,1800000,900000,1
 gl_cas02.gat,83,80,2,2	monster	ミミック	1191,1,360000,180000,1
 gl_cas02.gat,83,84,2,2	monster	ミミック	1191,1,360000,180000,1
 gl_cas02.gat,185,11,8,8	monster	ライドワード	1195,4,120000,60000,1
@@ -2278,3 +2280,23 @@ gon_fild01.gat,0,0,0,0	monster	団子童子	1409,30,0,0,0
 gon_fild01.gat,0,0,0,0	monster	老人参	1413,1,60000,120000,0
 gon_fild01.gat,0,0,0,0	monster	コウ	1415,10,0,0,0
 gon_fild01.gat,0,0,0,0	monster	チャッキー	1417,18,0,0,0
+
+//洛陽フィールド(lou_fild01.gat)
+lou_fild01.gat,0,0,0,0	monster	ビックフット	1060,1,0,0,0
+lou_fild01.gat,0,0,0,0	monster	キャラメル	1103,1,0,0,0
+lou_fild01.gat,0,0,0,0	monster	マンティス	1139,1,0,0,0
+
+//王陵(lou_dun01.gat)
+lou_dun01.gat,0,0,0,0	monster	サイドワインダー	1037,1,0,0,0
+lou_dun01.gat,0,0,0,0	monster	ホロン	1129,1,0,0,0
+lou_dun01.gat,0,0,0,0	monster	レイブオルマイ	1306,1,0,0,0
+lou_dun01.gat,0,0,0,0	monster	チャッキー	1417,1,0,0,0
+
+//王陵内部(lou_dun02.gat)
+lou_dun02.gat,0,0,0,0	monster	ムナック	1026,1,0,0,0
+lou_dun02.gat,0,0,0,0	monster	ボンゴン	1188,1,0,0,0
+
+//センヤンググング(lou_dun03.gat)
+lou_dun03.gat,0,0,0,0	monster	彷徨う者	1208,1,0,0,0
+lou_dun03.gat,0,0,0,0	monster	天邪仙人	1412,1,0,0,0
+lou_dun03.gat,0,0,0,0	monster	天仙娘々	1416,1,0,0,0

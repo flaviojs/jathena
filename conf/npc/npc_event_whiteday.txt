@@ -56,7 +56,7 @@ L0_3:
 Linput:
 	input @maplenum;
 	if (@maplenum > 5) goto LError;
-	if (@maplenum == 0) goto Lend;
+	if (@maplenum <= 0) goto Lend;
 	set @maplePriceT,@maplePrice*@maplenum;
 	if (Zeny < @maplePriceT) goto LError2;
 		set Zeny,Zeny-@maplePriceT;

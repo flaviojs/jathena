@@ -1,4 +1,4 @@
-//item_db.txt＠AthenaDB計画 2004/04/09 03:32:36 +0900 (JST)
+//item_db.txt＠AthenaDB計画 2004/04/20 21:30:18 +0900 (JST)
 //ID,Name,Jname,Type,Price,Sell,Weight,ATK,DEF,Range,Slot,Job,Gender,Loc,wLV,eLV,View,{UseScript},{EquipScript}
 501,Red_Potion,赤ポーション,0,50,,70,,,,,10477567,2,,,,,{ itemheal rand(45,64),0; },{}
 502,Orange_Potion,紅ポーション,0,200,,100,,,,,10477567,2,,,,,{ itemheal rand(105,144),0; },{}
@@ -438,7 +438,7 @@
 1162,Broad_Sword_,ブロードソード,4,65000,,2000,140,,1,2,16514,2,34,3,33,3,{},{ bonus bDef,5; }
 1163,Claymore,クレイモア,4,74000,,2500,180,,1,0,16512,2,34,3,33,3,{},{}
 1164,Muramasa,村正,4,20,,1000,155,,1,0,16514,2,34,4,48,3,{},{ bonus bCritical,30; bonus bAspdAddRate,8; }
-1165,Masamune,正宗,4,20,,1000,200,,1,0,16514,2,34,4,48,3,{},{ bonus bFleeRate,30; bonus bStr,-5; bonus bAspd,2; bonus bDefRate,-50; bonus bDef2Rate,-50; }
+1165,Masamune,正宗,4,20,,1000,200,,1,0,16514,2,34,4,48,3,{},{ bonus bFlee,30; bonus bStr,-5; bonus bAspd,2; bonus bDefRate,-50; bonus bDef2Rate,-50; }
 1166,Dragon_Slayer,ドラゴンスレイヤー,4,20,,1300,150,,1,0,16514,2,34,4,48,3,{},{ bonus bIgnoreDefRace,9; bonus2 bAddRace,9,15; }
 1167,Schweizersabel,シュバイチェルシャベル,4,20,,1600,160,,1,0,16514,2,34,4,48,3,{},{ bonus bAtkEle,4; skill 20,3; bonus bDef,1; bonus3 bAutoSpell,20,3,25; }
 1168,Zweihander,ツヴァイハンダー,4,20,,2200,200,,1,0,16514,2,34,4,48,3,{},{}
@@ -1381,6 +1381,7 @@
 7251,Unknown_Item,勝利の心,3,,,10,,,,,,,,,,,{},{}
 7252,Unknown_Item,漢方薬剤,3,,,10,,,,,,,,,,,{},{}
 7253,Unknown_Item,金色の大極旗,3,,,10,,,,,,,,,,,{},{}
+7254,Unknown_Item,デジタル印画券,3,,,10,,,,,,,,,,,{},{}
 9001,Poring_Egg,ポリンの卵,7,20,,0,,,,,,,,,,,{},{}
 9002,Drops_Egg,ドロップスの卵,7,20,,0,,,,,,,,,,,{},{}
 9003,Poporing_Egg,ポポリンの卵,7,20,,0,,,,,,,,,,,{},{}
@@ -1430,3 +1431,4 @@
 10018,Monkey_Circlet,サルのリング,8,20,,0,,,,,,,,,,,{},{}
 10019,Red_Scarf,赤いマフラー,8,20,,0,,,,,,,,,,,{},{}
 10020,Grave_Keeper's_Sword,道士の剣,8,20,,0,,,,,,,,,,,{},{}
+11000,Unknown_Item,プロンテラ歴史書物,3,,,0,,,,,,,,,,,{},{}
