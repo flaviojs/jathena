@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 
 #include "core.h"
 #include "socket.h"
@@ -36,6 +37,7 @@ char userid[24];
 char passwd[24];
 char server_name[20];
 char login_ip_str[16];
+int login_ip;
 int login_port = 6900;
 char char_ip_str[16];
 int char_ip;
@@ -1201,7 +1203,7 @@ int send_users_tologin(int tid,unsigned int tick,int id,int data)
 int check_connect_login_server(int tid,unsigned int tick,int id,int data)
 {
   if(login_fd<=0 || session[login_fd]==NULL){
-    login_fd=make_connection(inet_addr(login_ip_str),login_port);
+    login_fd=make_connection(login_ip,login_port);
     session[login_fd]->func_parse=parse_tologin;
     WFIFOW(login_fd,0)=0x2710;
     memcpy(WFIFOP(login_fd,2),userid,24);
@@ -1226,6 +1228,7 @@ void do_final(void)
 int do_init(int argc,char **argv)
 {
 	int i;
+	struct hostent *h=NULL;
 	if(argc < 2) argv[1] = CHAR_CONF_NAME;
 	if(argv[1]){
 		char line[1024],w1[1024],w2[1024];
@@ -1249,11 +1252,23 @@ int do_init(int argc,char **argv)
 			} else if(strcmpi(w1,"server_name")==0){
 				memcpy(server_name,w2,16);
 			} else if(strcmpi(w1,"login_ip")==0){
-				memcpy(login_ip_str,w2,16);
+				h = gethostbyname (w2);
+				if(h != NULL) { 
+					printf("Login server IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+					sprintf(login_ip_str,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+				}
+				else
+					memcpy(login_ip_str,w2,16);
 			} else if(strcmpi(w1,"login_port")==0){
 				login_port=atoi(w2);
 			} else if(strcmpi(w1,"char_ip")==0){
-				memcpy(char_ip_str,w2,16);
+				h = gethostbyname (w2);
+				if(h != NULL) { 
+					printf("Character server IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+					sprintf(char_ip_str,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+				}
+				else
+					memcpy(char_ip_str,w2,16);
 			} else if(strcmpi(w1,"char_port")==0){
 				char_port=atoi(w2);
 			} else if(strcmpi(w1,"char_maintenance")==0){
@@ -1281,6 +1296,7 @@ int do_init(int argc,char **argv)
 		fclose(fp);
 	}
 
+	login_ip=inet_addr(login_ip_str);
 	char_ip=inet_addr(char_ip_str);
 
 	for(i=0;i<MAX_MAP_SERVERS;i++)
@@ -1296,11 +1312,11 @@ int do_init(int argc,char **argv)
 
 	make_listen_port(char_port);
 
-	i=add_timer_interval(gettick()+10,check_connect_login_server,0,0,10*1000);
+	i=add_timer_interval(gettick()+1000,check_connect_login_server,0,0,10*1000);
 
-	i=add_timer_interval(gettick()+10,send_users_tologin,0,0,5*1000);
+	i=add_timer_interval(gettick()+1000,send_users_tologin,0,0,5*1000);
 
-	i=add_timer_interval(gettick()+10,mmo_char_sync_timer,0,0,autosave_interval);
+	i=add_timer_interval(gettick()+autosave_interval,mmo_char_sync_timer,0,0,autosave_interval);
 
 	return 0;
 }

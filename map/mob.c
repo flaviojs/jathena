@@ -1435,7 +1435,7 @@ int mob_deleteslave_sub(struct block_list *bl,va_list ap)
 	struct mob_data *md = (struct mob_data *)bl;
 	int id;
 	id=va_arg(ap,int);
-	if( md->master_id == id )
+	if(md->master_id > 0 && md->master_id == id )
 		mob_damage(NULL,md,md->hp);
 	return 0;
 }
@@ -1637,35 +1637,31 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 	
 	// mvp処理
 	if( mob_db[md->class].mexp ){
-		int i,j,flag = 0;
+		int flag = 0;
 		clif_mvp_effect(mvp_sd);					// エフェクト
-		for(i=0;i<3;i++) {
-			if(mob_db[md->class].mvpitem[i].nameid > 0) {
-				flag = 1;
-				break;
+		for(i=0;i<3;i++){
+			struct item item;
+			int ret;
+			if( mob_db[md->class].mvpitem[i].nameid <=0 ||
+				mob_db[md->class].mvpitem[i].p<rand()%10000 )
+				continue;
+			memset(&item,0,sizeof(item));
+			item.nameid=mob_db[md->class].mvpitem[i].nameid;
+			item.identify=1;
+			clif_mvp_item(mvp_sd,item.nameid);
+			if(mvp_sd->weight*2 > mvp_sd->max_weight)
+				map_addflooritem(&item,1,mvp_sd->bl.m,mvp_sd->bl.x,mvp_sd->bl.y);
+			else if((ret = pc_additem(mvp_sd,&item,1))) {
+				clif_additem(sd,0,0,ret);
+				map_addflooritem(&item,1,mvp_sd->bl.m,mvp_sd->bl.x,mvp_sd->bl.y);
 			}
+			flag = 1;
+			break;
 		}
-		if(flag) {
-			for(i=flag=0;i<3;i++){
-				struct item item;
-				j=rand()%3;
-				if( mob_db[md->class].mvpitem[j].nameid <=0 ||
-					mob_db[md->class].mvpitem[j].p<rand()%10000 )
-					continue;
-				memset(&item,0,sizeof(item));
-				item.nameid=mob_db[md->class].mvpitem[j].nameid;
-				item.identify=1;
-				clif_mvp_item(mvp_sd,item.nameid);
-				if(mvp_sd->weight*2 > mvp_sd->max_weight)
-					map_addflooritem(&item,1,mvp_sd->bl.m,mvp_sd->bl.x,mvp_sd->bl.y);
-				else if(pc_additem(mvp_sd,&item,1))
-					map_addflooritem(&item,1,mvp_sd->bl.m,mvp_sd->bl.x,mvp_sd->bl.y);
-				flag = 1;
-				break;
-			}
-		}
-		if(!flag)
+		if(!flag) {
 			clif_mvp_exp(mvp_sd,mob_db[md->class].mexp);	// 無条件で経験値
+			pc_gainexp(mvp_sd,mob_db[md->class].mexp,0);
+		}
 	}
 
 	if(md->npc_event[0]){	// SCRIPT実行
@@ -1675,8 +1671,8 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 
 	clif_clearchar_area(&md->bl,1);
 	map_delblock(&md->bl);
-	mob_setdelayspawn(md->bl.id);
 	mob_deleteslave(md);
+	mob_setdelayspawn(md->bl.id);
 
 	return 0;
 }

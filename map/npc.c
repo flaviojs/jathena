@@ -370,8 +370,7 @@ int npc_buysellsel(struct map_session_data *sd,int id,int type)
 int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 {
 	struct npc_data *nd;
-	int i,j,w,z,itemamount,new=0;
-	itemamount = 0;
+	int i,j,w,z,skill,itemamount=0,new=0;
 
 	if(npc_checknear(sd,sd->npc_shopid))
 		return 3;
@@ -427,8 +426,8 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 		z = z * pc_checkskill(sd,MC_DISCOUNT) / ((1 + 300 / itemamount) * 4000) * battle_config.shop_exp;
 		pc_gainexp(sd,0,z);
 	}*/
-	if(battle_config.shop_exp > 0 && z > 0 && pc_checkskill(sd,MC_DISCOUNT)) {
-		z = (int)(log((double)z) * (double)battle_config.shop_exp/100.);
+	if(battle_config.shop_exp > 0 && z > 0 && (skill = pc_checkskill(sd,MC_DISCOUNT)) > 0) {
+		z = (int)(log((double)z * (double)skill) * (double)battle_config.shop_exp/100.);
 		if(z <= 0)
 			z = 1;
 		pc_gainexp(sd,0,z);
@@ -443,8 +442,7 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
  */
 int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 {
-	int i,z,itemamount;
-	itemamount = 0;
+	int i,z,skill,itemamount=0;
 
 	if(npc_checknear(sd,sd->npc_shopid))
 		return 1;
@@ -471,8 +469,8 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 		z = z * pc_checkskill(sd,MC_OVERCHARGE) / ((1 + 500 / itemamount) * 4000) * battle_config.shop_exp ;
 		pc_gainexp(sd,0,z);
 	}*/
-	if(battle_config.shop_exp > 0 && z > 0 && pc_checkskill(sd,MC_OVERCHARGE)) {
-		z = (int)(log((double)z) * (double)battle_config.shop_exp/100.);
+	if(battle_config.shop_exp > 0 && z > 0 && (skill = pc_checkskill(sd,MC_OVERCHARGE)) > 0) {
+		z = (int)(log((double)z * (double)skill) * (double)battle_config.shop_exp/100.);
 		if(z <= 0)
 			z = 1;
 		pc_gainexp(sd,0,z);

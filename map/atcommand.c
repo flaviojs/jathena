@@ -25,6 +25,7 @@ struct Atcommand_Config atcommand_config;
 int atcommand(int fd,struct map_session_data *sd,char *message)
 {
 	int gm_level = pc_isGM(sd);
+	int flag;
 	char s_flag=0;
 	//＠コマンドGM専用化
 //	if (battle_config.atc_gmonly && !gm_level ) return 0;
@@ -342,7 +343,8 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 					memset(&item_tmp,0,sizeof(item_tmp));
 					item_tmp.nameid=x;
 					item_tmp.identify=1;
-					pc_additem(sd,&item_tmp,a2);
+					if((flag = pc_additem(sd,&item_tmp,a2)))
+						clif_additem(sd,0,0,flag);
 				}
 				clif_displaymessage(fd,"アイテムゲトー(　・∀・)");
 			} else {
@@ -594,21 +596,22 @@ z [0～4]服の色
 // 右手=2 左手=32 両手=34 頭=256/257/768/769 体=16 肩=4 足=64
 		if(strcmpi(command,"@refine")==0 && gm_level >= atcommand_config.refine){
 			i1=i2=0;
-			sscanf(message,"%s%d%d",command,&i1,&i2);
-			for(i=0;i< MAX_INVENTORY;i++){
-				if( sd->status.inventory[i].nameid &&	// 該当個所の装備を精錬する
-				    (sd->status.inventory[i].equip==i1) ){
-					if(i2<=0 || i2>10 )i2=1;
-					if( sd->status.inventory[i].refine<10 ){
-						sd->status.inventory[i].refine+=i2;
-						if(sd->status.inventory[i].refine>10)
-							sd->status.inventory[i].refine=10;
-						pc_unequipitem(sd,i);	// 装備解除
-						clif_refine(fd,sd,0,i,sd->status.inventory[i].refine);	// 精錬エフェクト とりあえず必ず成功
-						clif_delitem(sd,i,1);	// 精錬前アイテム消失
-						clif_additem(sd,i,1,0);	// 精錬後アイテム所得
-						pc_equipitem(sd,i,i1);	// 再装備（含ステータス計算）
-						clif_misceffect(&sd->bl,3); // 他人にも成功を通知
+			if(sscanf(message,"%s%d%d",command,&i1,&i2) >= 3 && i1 > 0) {
+				for(i=0;i< MAX_INVENTORY;i++){
+					if( sd->status.inventory[i].nameid &&	// 該当個所の装備を精錬する
+					    (sd->status.inventory[i].equip==i1) ){
+						if(i2<=0 || i2>10 ) i2=1;
+						if( sd->status.inventory[i].refine<10 ){
+							sd->status.inventory[i].refine+=i2;
+							if(sd->status.inventory[i].refine>10)
+								sd->status.inventory[i].refine=10;
+							pc_unequipitem(sd,i);	// 装備解除
+							clif_refine(fd,sd,0,i,sd->status.inventory[i].refine);	// 精錬エフェクト とりあえず必ず成功
+							clif_delitem(sd,i,1);	// 精錬前アイテム消失
+							clif_additem(sd,i,1,0);	// 精錬後アイテム所得
+							pc_equipitem(sd,i,i1);	// 再装備（含ステータス計算）
+							clif_misceffect(&sd->bl,3); // 他人にも成功を通知
+						}
 					}
 				}
 			}
@@ -619,29 +622,31 @@ z [0～4]服の色
 // 別に属性＋星のかけら３個でもつかえます。
 		if(strcmpi(command,"@produce")==0 && gm_level >= atcommand_config.produce){
 			i1=i2=i3=0;
-			sscanf(message,"%s%s%d%d",command,temp0,&i2,&i3);
-			if( (i1=atoi(temp0))==0){
-				struct item_data *item_data=itemdb_searchname(temp0);
-				if(item_data)
-					i1=item_data->nameid;
+			if(sscanf(message,"%s%s%d%d",command,temp0,&i2,&i3) >= 2) {
+				if( (i1=atoi(temp0))==0){
+					struct item_data *item_data=itemdb_searchname(temp0);
+					if(item_data)
+						i1=item_data->nameid;
+				}
+				if( (i1<=500 || i1>1099) && (i1<4001 || i1>4148) &&
+					(i1<7001 || i1>10019) && itemdb_isequip(i1)){
+					struct item tmp_item;
+					if(i2<0 || i2>4) i2=0;	// 属性範囲
+					if(i3<0 || i3>3 ) i3=0;	// 星のかけら個数
+					memset(&tmp_item,0,sizeof(tmp_item));
+					tmp_item.nameid=i1;
+					tmp_item.amount=1;
+					tmp_item.identify=1;
+					tmp_item.card[0]=0x00ff; // 製造武器フラグ
+					tmp_item.card[1]=((i3*5)<<8)+i2;	// 属性とつよさ
+					*((unsigned long *)(&tmp_item.card[2]))=sd->char_id;	// キャラID
+					clif_produceeffect(sd,0,i1);// 製造エフェクトパケット
+					clif_misceffect(&sd->bl,3); // 他人にも成功を通知（精錬成功エフェクトと同じでいいの？）
+					if((flag = pc_additem(sd,&tmp_item,1)))
+						clif_additem(sd,0,0,flag);
+				}else
+					printf("@produce NOT WEAPON [%d]\n",i1);
 			}
-			if( (i1<=500 || i1>1099) && (i1<4001 || i1>4148) &&
-				(i1<7001 || i1>10019) && itemdb_search(i1)){
-				struct item tmp_item;
-				if(i2<0 || i2>4) i2=0;	// 属性範囲
-				if(i3<0 || i3>3 ) i3=0;	// 星のかけら個数
-				memset(&tmp_item,0,sizeof(tmp_item));
-				tmp_item.nameid=i1;
-				tmp_item.amount=1;
-				tmp_item.identify=1;
-				tmp_item.card[0]=0x00ff; // 製造武器フラグ
-				tmp_item.card[1]=((i3*5)<<8)+i2;	// 属性とつよさ
-				*((unsigned long *)(&tmp_item.card[2]))=sd->char_id;	// キャラID
-				pc_additem(sd,&tmp_item,1);
-				clif_produceeffect(sd,0,i1);// 製造エフェクトパケット
-				clif_misceffect(&sd->bl,3); // 他人にも成功を通知（精錬成功エフェクトと同じでいいの？）
-			}else
-				printf("@produce NOT WEAPON [%d]\n",i1);
 			return 1;
 		}
 // 任意位置メモ @memo 番号 番号は0~2
@@ -1145,14 +1150,6 @@ z [0～4]服の色
 				sd->spiritball = x;
 				clif_spiritball(sd);
 			}
-			return 1;
-		}
-
-		if(strcmpi(command, "@test") == 0){
-			sscanf(message, "%s %d", command, &x);
-			WFIFOW(sd->fd,0)=0x199;
-			WFIFOW(sd->fd,2)=x;
-			WFIFOSET(sd->fd,4);
 			return 1;
 		}
 

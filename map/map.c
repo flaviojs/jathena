@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <netdb.h>
 
 #include "core.h"
 #include "timer.h"
@@ -1073,6 +1074,7 @@ int map_config_read(char *cfgName)
 	int i;
 	char line[1024],w1[1024],w2[1024];
 	FILE *fp;
+	struct hostent *h=NULL;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -1090,10 +1092,20 @@ int map_config_read(char *cfgName)
 		} else if(strcmpi(w1,"passwd")==0){
 			chrif_setpasswd(w2);
 		} else if(strcmpi(w1,"char_ip")==0){
+			h = gethostbyname (w2);
+			if(h != NULL) { 
+				printf("Character sever IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+				sprintf(w2,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+			}
 			chrif_setip(w2);
 		} else if(strcmpi(w1,"char_port")==0){
 			chrif_setport(atoi(w2));
 		} else if(strcmpi(w1,"map_ip")==0){
+			h = gethostbyname (w2);
+			if(h != NULL) { 
+				printf("Map server IP address : %s -> %d.%d.%d.%d\n",w2,(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+				sprintf(w2,"%d.%d.%d.%d",(unsigned char)h->h_addr[0],(unsigned char)h->h_addr[1],(unsigned char)h->h_addr[2],(unsigned char)h->h_addr[3]);
+			}
 			clif_setip(w2);
 		} else if(strcmpi(w1,"map_port")==0){
 			clif_setport(atoi(w2));

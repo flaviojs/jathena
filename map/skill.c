@@ -4400,7 +4400,7 @@ int skill_produce_mix( struct map_session_data *sd,
 	int nameid, int slot1, int slot2, int slot3 )
 {
 	int slot[3];
-	int i,sc,ele,idx,equip,wlv,make_per;
+	int i,sc,ele,idx,equip,wlv,make_per,flag;
 
 	if( !(idx=skill_can_produce_mix(sd,nameid,-1)) )	/* 条件不足 */
 		return 0;
@@ -4495,8 +4495,10 @@ int skill_produce_mix( struct map_session_data *sd,
 		}
 		clif_produceeffect(sd,0,nameid);/* 製造エフェクトパケット */
 		clif_misceffect(&sd->bl,3); /* 他人にも成功を通知（精錬成功エフェクトと同じでいいの？） */
-		if(pc_additem(sd,&tmp_item,1))
+		if((flag = pc_additem(sd,&tmp_item,1))) {
+			clif_additem(sd,0,0,flag);
 			map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
+		}
 	}
 	else {
 		/* 失敗 */

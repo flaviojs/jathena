@@ -222,12 +222,13 @@ int storage_storageadd(struct map_session_data *sd,int index,int amount)
 int storage_storageget(struct map_session_data *sd,int index,int amount)
 {
 	struct storage *stor;
+	int flag;
 
 	stor=&storage[account2storage(sd->status.account_id)];
 	if(stor->storage_status == 1) { //  storage open
 		if(index>=0 && index<MAX_STORAGE) { // valid index
 			if( (amount <= stor->storage[index].amount) && (amount > 0) ) { //valid amount
-				if(pc_additem(sd,&stor->storage[index],amount)==0){
+				if((flag = pc_additem(sd,&stor->storage[index],amount)) == 0){
 /*					stor->storage[index].amount -= amount; // new amount of item in storage
 					// send packet
 					clif_storageitemremoved(sd,index,amount);
@@ -241,6 +242,8 @@ int storage_storageget(struct map_session_data *sd,int index,int amount)
 */
 					storage_delitem(sd,stor,index,amount);
 				}
+				else
+					clif_additem(sd,0,0,flag);
 			} // valid amount
 		}// valid index
 	}// storage open

@@ -381,6 +381,7 @@ int pet_performance(struct map_session_data *sd)
 int pet_return_egg(struct map_session_data *sd)
 {
 	struct item tmp_item;
+	int flag;
 
 	if(sd->status.pet_id && sd->pet_npcdata) {
 		pet_remove_map(sd);
@@ -397,8 +398,10 @@ int pet_return_egg(struct map_session_data *sd)
 		tmp_item.identify = 1;
 		tmp_item.card[0] = 0xff00;
 		*((long *)(&tmp_item.card[2])) = sd->pet.pet_id;
-		if(pc_additem(sd,&tmp_item,1))
+		if((flag = pc_additem(sd,&tmp_item,1))) {
+			clif_additem(sd,0,0,flag);
 			map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
+		}
 
 		sd->petDB = NULL;
 	}
@@ -577,7 +580,7 @@ int pet_get_egg(int account_id,int pet_id,int flag)
 {
 	struct map_session_data *sd;
 	struct item tmp_item;
-	int i;
+	int i,ret;
 
 	if(!flag) {
 		sd = map_id2sd(account_id);
@@ -591,8 +594,10 @@ int pet_get_egg(int account_id,int pet_id,int flag)
 			tmp_item.identify = 1;
 			tmp_item.card[0] = 0xff00;
 			*((long *)(&tmp_item.card[2])) = pet_id;
-			if(pc_additem(sd,&tmp_item,1))
+			if((ret = pc_additem(sd,&tmp_item,1))) {
+				clif_additem(sd,0,0,ret);
 				map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
+			}
 		}
 		else
 			intif_delete_petdata(pet_id);
@@ -667,7 +672,7 @@ int pet_equipitem(struct map_session_data *sd,int index)
 int pet_unequipitem(struct map_session_data *sd)
 {
 	struct item tmp_item;
-	int nameid;
+	int nameid,flag;
 
 	if(sd->petDB == NULL)
 		return 1;
@@ -681,8 +686,10 @@ int pet_unequipitem(struct map_session_data *sd)
 	memset(&tmp_item,0,sizeof(tmp_item));
 	tmp_item.nameid = nameid;
 	tmp_item.identify = 1;
-	if(pc_additem(sd,&tmp_item,1))
+	if((flag = pc_additem(sd,&tmp_item,1))) {
+		clif_additem(sd,0,0,flag);
 		map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y);
+	}
 
 	return 0;
 }

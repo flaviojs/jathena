@@ -1,5 +1,48 @@
 --------------
-//0553 by NOCTURNE
+//0555 by 死神
+
+・細かい修正とプレゼントボックス、古い巻物のバグ修正。
+・@コマンド@refine、@produce少し修正。
+・サーバーのIPにDNS名を使えるように変更。(今さらですがYareから
+持ってきた物です。)
+・スティール計算式変更とMVPアイテム処理変更。
+・店NPCを利用によるジョブ経験値獲得計算式変更。
+	獲得ジョブ経験値 = ln(金*スキルレベル) * shop_exp / 100
+・ほとんどテストしてないのでバグの可能性があります。
+	help.txt 修正。
+	(/conf)
+	atcommand_athena.conf 修正。
+	battle_athena.conf 修正。
+	(/db)
+	item_db.txt 修正。
+	(/doc)
+	conf_ref.txt 修正。
+	(/char)
+	char.c
+		do_init()、check_connect_login_server() 修正と少し修正。
+	(/map)
+	mob.c
+		mob_damage() 修正。
+	pc.c
+		pc_getitemfromcart()、pc_steal_item() 修正。
+	pet.c
+		pet_return_egg()、pet_get_egg()、pet_unequipitem() 修正。
+	script.c
+		buildin_getitem() 修正。
+	skill.c
+		skill_produce_mix() 修正。
+	storage.c
+		storage_storageget() 修正。
+	atcommand.c 修正。
+	map.c
+		map_config_read() 修正と少し修正。
+	chrif.c
+		check_connect_char_server()、do_init_chrif()、chrif_setip() 修正と少し修正。
+	npc.c
+		npc_buylist()、npc_selllist() 修正。
+
+--------------
+//0554 by NOCTURNE
 ・サーバーSnapShot
 ・too/addaccountの削除
 ・help.txtの更新
