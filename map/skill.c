@@ -2751,9 +2751,16 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0x95:	/* サンドマン */
 	case 0x96:	/* フラッシャー */
 	case 0x94:	/* ショックウェーブトラップ */
-	case 0x91:	/* アンクルスネア */
 		skill_additional_effect(ss,bl,sg->skill_id,sg->skill_lv,BF_MISC,tick);
 		if(sg->val2==0){
+			sg->limit=DIFF_TICK(tick,sg->tick)
+				+((sg->unit_id==0x91)?sg->val1/((battle_get_mode(bl)&0x20)?5:1):500);
+			sg->val2=bl->id;
+		}
+		break;
+	case 0x91:	/* アンクルスネア */
+		if(sg->val2==0){
+			skill_additional_effect(ss,bl,sg->skill_id,sg->skill_lv,BF_MISC,tick);
 			sg->limit=DIFF_TICK(tick,sg->tick)
 				+((sg->unit_id==0x91)?sg->val1/((battle_get_mode(bl)&0x20)?5:1):500);
 			sg->val2=bl->id;
@@ -2858,7 +2865,8 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 			}
 		} break;
 
-	case 0x91:	/* アンクルスネア */
+	/*
+	case 0x91:	// アンクルスネア
 		{
 			struct block_list *target=map_id2bl(sg->val2);
 			if( target==bl )
@@ -2866,6 +2874,8 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 			sg->limit=DIFF_TICK(tick,sg->tick)+1000;
 		}
 		break;
+		*/
+	
 
 	case 0x9e:	/* 子守唄 */
 	case 0x9f:	/* ニヨルドの宴 */
