@@ -633,7 +633,7 @@ static void disp_error_message(const char *mes,const unsigned char *pos)
 				else
 					printf("\'%c\'",linestart[i]);
 			}
-			printf("\n");
+			printf("\a\n");
 			if(lineend)
 				*lineend=c;
 			return;
@@ -3631,9 +3631,9 @@ int buildin_warpwaitingpc(struct script_state *st)
 	if( st->end > st->start+5 )
 		n=conv_num(st,& (st->stack->stack_data[st->start+5]));
 
-	
 	for(i=0;i<n;i++){
-		struct map_session_data *sd=cd->usersd[i];
+		struct map_session_data *sd=cd->usersd[0];	// リスト先頭のPCを次々に。
+		
 		mapreg_setreg(add_str("$@warpwaitingpc")+(i<<24),sd->bl.id);
 	
 		if(strcmp(str,"Random")==0)

@@ -1470,6 +1470,11 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 	if( mode&1 && mob_can_move(md) &&	// 移動可能MOB&動ける状態にある
 		(md->master_id==0 || md->master_dist>10) ){	//取り巻きMOBじゃない
 
+		if( DIFF_TICK(md->next_walktime,tick) > + 7000 && 
+			(md->walkpath.path_len==0 || md->walkpath.path_pos>=md->walkpath.path_len) ){
+			md->next_walktime = tick + 3000*rand()%2000;
+		}
+
 		// ランダム移動
 		if( mob_randomwalk(md,tick) )
 			return 0;
@@ -1545,15 +1550,16 @@ static int mob_ai_sub_lazy(void * key,void * data,va_list app)
 				mob_randomwalk(md,tick);
 		
 			// 召喚MOBでなく、BOSSでもないMOBは時々、沸きなおす
-			else if( rand()%1000<MOB_LAZYWARPPERC && md->x0<=0 &&
+			else if( rand()%1000<MOB_LAZYWARPPERC && md->x0<=0 && md->master_id!=0 &&
 				mob_db[md->class].mexp <= 0 && !(mob_db[md->class].mode & 0x20))
 				mob_spawn(md->bl.id);
 			
 		}else{
 			// 同じマップにすらPCがいないので、とっても適当な処理をする
 		
-			// 召喚MOBでない場合、時々移動する（歩行ではなくワープで処理軽減）
-			if( md->x0<=0 && rand()%1000<MOB_LAZYWARPPERC )
+			// 召喚MOBでない、BOSSでもないMOBは場合、時々ワープする
+			if( rand()%1000<MOB_LAZYWARPPERC && md->x0<=0 && md->master_id!=0 &&
+				mob_db[md->class].mexp <= 0 && !(mob_db[md->class].mode & 0x20))
 				mob_warp(md,-1,-1,-1,-1);
 		}
 	

@@ -1,4 +1,36 @@
 --------------------
+//0948 by 胡蝶蘭
+
+・warpwaitingpcが正しくPCを転送できない問題を修正
+・スクリプトの読み込み時にエラーまたは警告が出る場合、警告音を鳴らすように。
+  （流れたログを見ない人対策です）
+
+	(map/)
+	script.c
+		buildin_warpwaitingpc()修正
+		disp_error_message()修正
+
+・atcommand.c修正
+	・atcommand_athena.confのmapmoveを読むように
+	・@strなどの省略時の必須レベルを0に。
+	・@paramは使わないのでコメント化
+	
+	(map/)
+	atcommand.c
+		該当個所修正
+
+・mobが最大15秒ほど移動しない場合がある問題修正
+	・手抜きでないmob処理で、移動しない時間が7秒以上続かないように修正
+
+	(map/)
+	mob.c
+		mob_ai_sub_hard()修正
+
+・快速船員の伊豆港行きの判別式修正 (by ID:F8nKKuY)
+	(conf/npc/)
+	npc_town_comodo.txt
+
+--------------------
 //0947 by (凸)
 ・取り巻きは取り巻きを召喚しないように修正
 ・露天の販売価格の上限をbattle_athena.confで設定できるように修正

@@ -1252,7 +1252,7 @@ cmd_fild07.gat,299,83,4	script	快速船員	100,{
 			warp "alberta",192,169;
 			end;
 	L_MENU_1:
-		if (Zeny < 800) goto L_SUB_2;
+		if (Zeny >= 800) goto L_SUB_2;
 		 	mes "[ザイン]";
 		 	mes "お客様の所持金が、";
 		 	mes "こちら快速船のご利用に";
@@ -1289,7 +1289,7 @@ cmd_fild07.gat,94,134,4	script	快速船員	100,{
 			warp "alberta",192,169;
 			end;
 	L_MENU_1:
-		if (Zeny < 800) goto L_SUB_2;
+		if (Zeny >= 800) goto L_SUB_2;
 		 	mes "[サルマネ]";
 		 	mes "お客様の所持金が、";
 		 	mes "こちら快速船のご利用に";
