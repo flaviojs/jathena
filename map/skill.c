@@ -735,10 +735,14 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case MO_FINGEROFFENSIVE:	/* Žw’e */
-		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
-		for(i=1;i<sd->spiritball_old;i++)
-			skill_addtimerskill(sd,tick,i*250,bl->id,0,0,skillid,skilllv,BF_WEAPON,flag);
-		sd->skillcanmove_tick = tick + (sd->spiritball_old-1)*250;
+		if(!battle_config.finger_offencive_type)
+			skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+		else {
+			skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+			for(i=1;i<sd->spiritball_old;i++)
+				skill_addtimerskill(sd,tick,i*250,bl->id,0,0,skillid,skilllv,BF_WEAPON,flag);
+			sd->skillcanmove_tick = tick + (sd->spiritball_old-1)*250;
+		}
 
 		break;
 
@@ -1624,7 +1628,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 				clif_skill_poseffect(src,skillid,skilllv,tmpx,tmpy,tick);
 				skill_unitsetting(src,skillid,skilllv,tmpx,tmpy,0);
 			}
-			else
+			else if(sd)
 				skill_addtimerskill(sd,tick,i*1000,0,tmpx,tmpy,skillid,skilllv,BF_MAGIC,flag);
 		}
 		break;

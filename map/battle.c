@@ -1142,9 +1142,14 @@ struct Damage battle_calc_weapon_attack(
 //				md->hp = mob_db[md->class].max_hp/75;
 				break;
 			case MO_FINGEROFFENSIVE:	//Žw’e
-				damage = damage * (100 + 50 * skill_lv) / 100;// * sd->spiritball_old;
-				div_ = 1;
-//				div_ = sd->spiritball_old;
+				if(!battle_config.finger_offencive_type) {
+					damage = damage * (100 + 50 * skill_lv) / 100 * sd->spiritball_old;
+					div_ = sd->spiritball_old;
+				}
+				else {
+					damage = damage * (100 + 50 * skill_lv) / 100;
+					div_ = 1;
+				}
 				break;
 			case MO_INVESTIGATE:	// ”­ ™¤
 				damage = damage*(100+ 75*skill_lv)/100 * (battle_get_def(target) + battle_get_def2(target))/100;
@@ -1821,6 +1826,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.pet_catch_rate=100;
 	battle_config.pet_rename=0;
 	battle_config.pet_hungry_delay_rate=100;
+	battle_config.finger_offencive_type=0;
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
 		printf("file not found: %s\n",cfgName);
@@ -1858,7 +1864,8 @@ int battle_config_read(const char *cfgName)
 			{	"ghost_time",		&battle_config.ghost_time		},
 			{	"pet_catch_rate",		&battle_config.pet_catch_rate		},
 			{	"pet_rename",			&battle_config.pet_rename			},
-			{	"pet_hungry_delay_rate",&battle_config.pet_hungry_delay_rate},
+			{	"pet_hungry_delay_rate",&battle_config.pet_hungry_delay_rate	},
+			{ "finger_offencive_type",&battle_config.finger_offencive_type	},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

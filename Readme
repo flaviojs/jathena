@@ -1,4 +1,17 @@
 --------------
+//0516 by 死神
+
+・モンスターのメテオによる鯖ダウンを臨時に防いで置きました。(テストはしてません。) モンスターのスキルについてちょっと分析不足ですので分析した後に修正して置きます。
+・スキル指弾の仕様をbattle_athena.confで決めるように変更。(0515の物がちょっともったいなかったので...)
+	skill.c
+		skill_castend_pos2() 修正。
+	battlc.h、battle.c
+		battle_configにfinger_offencive_type 追加。
+		battle_calc_weapon_attack() 修正。
+	battle_athena.conf 修正。
+	conf_ref.txt 修正。
+
+--------------
 //0515 by 死神
 
 ・スキルメテオと指弾修正とパケット修正、0512の落とし物修正と少しだけの仕様変更です。

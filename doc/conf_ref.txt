@@ -406,6 +406,11 @@ pet_hungry_delay_rate
 	ペットの腹が減る時間の倍率です。
 	倍率が高いと腹が減り難くなります。デフォルトは100です。
 
+finger_offencive_type
+	スキル指弾の表示タイプを決定します。
+	0は本サーバー仕様で1はアテナ仕様です。デフォルトは0です。
+
+
 < 例 >
 
 pvp: on
@@ -436,6 +441,7 @@ ghost_time: 5000
 pet_catch_rate: 100
 pet_rename: no
 pet_hungry_delay_rate: 100
+finger_offencive_type: 0
 
 ==========================================================================
 
