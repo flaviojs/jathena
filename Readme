@@ -1,4 +1,16 @@
 --------------
+//0568 by 引退人
+
+・アクアベネディクタ水場判定など
+・ウォーターボール水場判定（read_gat(m,x,y)==3で水場と判定）
+	skill.c
+		skill_castend_nodamage_id()
+			case AL_HOLYWATER:	アクアベネディクタ（聖水取得）
+		skill_check_condition()
+			case AL_HOLYWATER:	アクアベネディクタ（水場判定）
+			case WZ_WATERBALL:	ウォーターボール（水場判定）
+
+--------------
 //0567 by るるる
 
 ・アコライトのアクアベネディクタを仮実装（水場限定使用のみ未実装）

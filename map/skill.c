@@ -1223,7 +1223,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case AL_INCAGI:			/* 速度増加 */
 	case AL_DECAGI:			/* 速度減少 */
 	case AL_BLESSING:		/* ブレッシング */
-	case AL_HOLYWATER:		/* アクアベネディクタ */
 	case KN_TWOHANDQUICKEN:	/* ツーハンドクイッケン */
 	case CR_SPEARQUICKEN:	/* スピアクイッケン */
 	case PR_IMPOSITIO:		/* イムポシティオマヌス */
@@ -1473,6 +1472,20 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		}else if( bl->type==BL_MOB )
 			mob_warp((struct mob_data *)bl,-1,-1,3);
 		break;
+
+	case AL_HOLYWATER:			/* アクアベネディクタ */
+	{
+		int eflag;
+		struct item item_tmp;
+		memset(&item_tmp,0,sizeof(item_tmp));
+		item_tmp.nameid=523;	// 聖水
+		item_tmp.identify=1;
+		eflag = pc_additem(sd,&item_tmp,1);
+		if(eflag)
+			clif_additem(sd,0,0,eflag);
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		break;
+	}
 
 	case WZ_FROSTNOVA:			/* フロストノヴァ */
 		skill_area_temp[1]=bl->id;
@@ -2844,6 +2857,10 @@ int skill_check_condition( struct map_session_data *sd )
 			break;
 
 		case AL_HOLYWATER:	/* アクアベネディクタ */
+			if(read_gat(sd->bl.m,sd->bl.x,sd->bl.y)!=3){	//水場判定
+				clif_skill_fail(sd,sd->skillid,0,0);
+				return 0;
+			}
 			item_id[0]=713;			//	空きビン;
 			item_amount[0]+=1;
 			break;
@@ -2851,6 +2868,12 @@ int skill_check_condition( struct map_session_data *sd )
 			item_id[0]=523;			//	聖水;
 			item_amount[0]+=1;
 			break;
+
+		case WZ_WATERBALL:	/* ウォーターボール */
+			if(read_gat(sd->bl.m,sd->bl.x,sd->bl.y)!=3){	//水場判定
+				clif_skill_fail(sd,sd->skillid,0,0);
+				return 0;
+			}
 
 		case MC_MAMMONITE:		/* メマーナイト */
 			zeny = sd->skilllv*100;
@@ -3051,15 +3074,6 @@ int skill_check_condition( struct map_session_data *sd )
 				if(i[j] != 0) {
 					pc_delitem(sd,i[j],item_amount[j],0);		// アイテム消費
 				}
-			}
-			if(sd->skillid == AL_HOLYWATER) {	// アクアベネディクタ
-				struct item temp_item;
-				memset(&temp_item,0,sizeof(temp_item));
-				temp_item.nameid = 523;		// 聖水
-				temp_item.amount = 1;
-				temp_item.identify = 1;
-				pc_additem(sd,&temp_item,1);
-				clif_additem(sd,0,0,1);
 			}
 		}
 
