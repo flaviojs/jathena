@@ -1524,6 +1524,13 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->matk1 = sd->matk1*(100+2*sd->sc_data[SC_MAGICPOWER].val1)/100;
 			sd->matk2 = sd->matk2*(100+2*sd->sc_data[SC_MAGICPOWER].val1)/100;
 		}
+		if(sd->sc_data[SC_INCATK].timer!=-1)	//item 682—p
+			sd->watk += sd->sc_data[SC_INCATK].val1;
+		if(sd->sc_data[SC_INCMATK].timer!=-1){	//item 683—p
+			sd->matk1 += sd->sc_data[SC_INCMATK].val1;
+			sd->matk2 += sd->sc_data[SC_INCMATK].val1;
+		}
+
 		// ASPD/ˆÚ“®‘¬“x•Ï‰»Œn
 		if(sd->sc_data[SC_TWOHANDQUICKEN].timer != -1 && sd->sc_data[SC_QUAGMIRE].timer == -1 && sd->sc_data[SC_DONTFORGETME].timer == -1)	// 2HQ
 			aspd_rate -= 30;

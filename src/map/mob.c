@@ -3182,6 +3182,8 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 						return 0;
 				}
 			}
+			if(ms[i].emotion >= 0)
+				clif_emotion(&md->bl,ms[i].emotion);
 			return 1;
 		}
 	}
@@ -3572,7 +3574,7 @@ static int mob_readskilldb(void)
 				continue;
 	
 			memset(sp,0,sizeof(sp));
-			for(i=0,p=line;i<17 && p;i++){
+			for(i=0,p=line;i<18 && p;i++){
 				sp[i]=p;
 				if((p=strchr(p,','))!=NULL)
 					*p++=0;
@@ -3627,6 +3629,7 @@ static int mob_readskilldb(void)
 			ms->val[2]=atoi(sp[14]);
 			ms->val[3]=atoi(sp[15]);
 			ms->val[4]=atoi(sp[16]);
+			ms->emotion=(sp[17]=="")?-1:atoi(sp[17]);
 			mob_db[mob_id].maxskill=i+1;
 		}
 		fclose(fp);

@@ -294,6 +294,9 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_SPIDERWEB			=180,		/* スパイダーウェッブ */
 	SC_MEMORIZE				=181,		/* メモライズ */
 
+	SC_INCATK				=185,	//item 682用
+	SC_INCMATK				=186,	//item 683用
+
 };
 extern int SkillStatusChangeTable[];
 

@@ -1,5 +1,30 @@
+--------------------
+//1028 by (凸)
+・ウンバラ以降、Mobがスキルを使用するときにエモーションを出すようになったので、mob_skill_dbを拡張
+	サンプルでオークウォーリアーが喫煙すると「/…」を出すのとオークレディが速度を使うと「/ちゅ」を出します
+・アイテム682,683を使用すると30秒間ATKやMATKが増えるらしいのでそれっぽく
+・job_db2.txtに謎の行が2行あったのを削除
+・範囲魔法などでスキルユニット相手にステータス変更をかけようとした場合にnullpoが出たのを修正
 
-----------------------------------------
+	(db/)
+	const.txt SC_INCATK SC_INCMATK追加
+	item_db.txt ↑を682,683に追加
+	job_db2.txt 謎の2行を削除
+	mob_skill_db.txt Emotion追加
+	(map/)
+	mob.c
+		mobskill_use() スキル使用時にエモーションを出すように変更
+		mob_readskilldb() Emotionを読み込むように変更
+	mob.h 変更
+	pc.c
+		pc_calcstatus() 変更
+	skill.c
+		
+		skill_status_change_end() 変更
+		skill_status_change_start() 変更とNULLチェック修正
+	skill.h 変更
+	
+--------------------
 //1027 by Ni+S
 ・getitemname関数追加
 ・スクリプトにgetitemname関数を追加
@@ -9,7 +34,7 @@
 	script.c
 		getitemname()追加
 
-----------------------------------------
+--------------------
 //1026 by (凸)
 ・1023で入れてなかったclif.hを同梱
 ・バイオプラントとスフィアーマインで出したmobを倒すとmob_timer_delete()でnullpoが出る問題を解決したつもり
@@ -47,7 +72,7 @@
 	(db/)
 	produce_db.txt 変更
 
-----------------------------------------
+--------------------
 //1023 by (凸)
 ・1022でエンバグしたnpc_parse_script()を戻し
 ・スパイラルピアースの重量追加ダメージ計算式をちょっと変更

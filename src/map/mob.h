@@ -12,6 +12,7 @@ struct mob_skill {
 	short cond1,cond2;
 	short target;
 	int val[5];
+	short emotion;
 };
 
 struct mob_db {

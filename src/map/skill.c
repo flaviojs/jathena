@@ -6587,17 +6587,16 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 	short *sc_count, *option, *opt1, *opt2;
 
 	nullpo_retr(0, bl);
-	nullpo_retr(0, sc_data=battle_get_sc_data(bl));
-	nullpo_retr(0, sc_count=battle_get_sc_count(bl));
-	nullpo_retr(0, option=battle_get_option(bl));
-	nullpo_retr(0, opt1=battle_get_opt1(bl));
-	nullpo_retr(0, opt2=battle_get_opt2(bl));
-
 	if(bl->type!=BL_PC && bl->type!=BL_MOB) {
 		if(battle_config.error_log)
 			printf("skill_status_change_end: neither MOB nor PC !\n");
 		return 0;
 	}
+	nullpo_retr(0, sc_data=battle_get_sc_data(bl));
+	nullpo_retr(0, sc_count=battle_get_sc_count(bl));
+	nullpo_retr(0, option=battle_get_option(bl));
+	nullpo_retr(0, opt1=battle_get_opt1(bl));
+	nullpo_retr(0, opt2=battle_get_opt2(bl));
 
 	if((*sc_count)>0 && sc_data[type].timer!=-1 &&
 		(sc_data[type].timer==tid || tid==-1) ){
@@ -6658,6 +6657,8 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			case SC_TRUESIGHT:		/* トゥルーサイト */
 			case SC_SPIDERWEB:		/* スパイダーウェッブ */
 			case SC_MAGICPOWER:		/* 魔法力増幅 */
+			case SC_INCATK:		//item 682用
+			case SC_INCMATK:	//item 683用
 				calc_flag = 1;
 				break;
 			case SC_BERSERK:			/* バーサーク */
@@ -7086,14 +7087,14 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 	int scdef=0;
 
 	nullpo_retr(0, bl);
+	if(bl->type == BL_SKILL)
+		return 0;
 	nullpo_retr(0, sc_data=battle_get_sc_data(bl));
 	nullpo_retr(0, sc_count=battle_get_sc_count(bl));
 	nullpo_retr(0, option=battle_get_option(bl));
 	nullpo_retr(0, opt1=battle_get_opt1(bl));
 	nullpo_retr(0, opt2=battle_get_opt2(bl));
 
-	if(bl->type == BL_SKILL)
-		return 0;
 
 	race=battle_get_race(bl);
 	mode=battle_get_mode(bl);
@@ -7456,6 +7457,12 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			calc_flag = 1;
 			tick = 1000 * tick;
 			val2 = 5*(2+type-SC_SPEEDPOTION0);
+			break;
+
+		case SC_INCATK:		//item 682用
+		case SC_INCMATK:	//item 683用
+			calc_flag = 1;
+			tick = 1000 * tick;
 			break;
 
 		/* option1 */
