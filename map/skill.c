@@ -210,6 +210,9 @@ struct skill_produce_db skill_produce_db[MAX_SKILL_PRODUCE_DB];
 /* 矢作成スキルデータベース */
 struct skill_arrow_db skill_arrow_db[MAX_SKILL_ARROW_DB];
 
+/* アブラカダブラ発動スキルデータベース */
+struct skill_abra_db skill_abra_db[MAX_SKILL_ABRA_DB];
+
 int	skill_get_hit( int id ){ return skill_db[id].hit; }
 int	skill_get_inf( int id ){ return skill_db[id].inf; }
 int	skill_get_pl( int id ){ return skill_db[id].pl; }
@@ -239,7 +242,7 @@ int skill_frostjoke_scream(struct block_list *bl,va_list ap);
 int skill_status_change_timer_sub(struct block_list *bl, va_list ap );
 int skill_attack_area(struct block_list *bl,va_list ap);
 int skill_is_danceskill(int id);
-int skill_abra_dataset(void);
+int skill_abra_dataset(int skilllv);
 
 static int distance(int x0,int y0,int x1,int y1)
 {
@@ -1862,7 +1865,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 	case SA_ABRACADABRA:
 		do{
-			abra_skillid=skill_abra_dataset();
+			abra_skillid=skill_abra_dataset(skilllv);
 		}while(abra_skillid == 0);
 		abra_skilllv=skill_get_max(abra_skillid)>pc_checkskill(sd,SA_ABRACADABRA)?pc_checkskill(sd,SA_ABRACADABRA):skill_get_max(abra_skillid);
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
@@ -1895,18 +1898,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 	case SA_LEVELUP:
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		if(sd && dstsd && sd->status.base_level<MAX_LEVEL){
-			sd->status.base_exp = 0;
-			sd->status.base_level ++;
-			clif_updatestatus(sd,SP_BASELEVEL);
-			clif_updatestatus(sd,SP_NEXTBASEEXP);
-			sd->status.status_point += (sd->status.base_level+14) / 5 ;
-			clif_updatestatus(sd,SP_STATUSPOINT);
-			pc_calcstatus(sd,0);
-			pc_heal(sd,sd->status.max_hp,sd->status.max_sp);
-			clif_misceffect(&sd->bl,0);
-			party_send_movemap(sd);
-		}
+		if (sd && pc_nextbaseexp(sd)) pc_gainexp(sd,pc_nextbaseexp(sd)*10/100,0);
 		break;
 
 	case SA_INSTANTDEATH:
@@ -3093,7 +3085,10 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 			my = y + (rand()%10 - 5);
 			id=mob_once_spawn(sd,"this",mx,my,"フローラ",1118,1,"");
 			if( (md=(struct mob_data *)map_id2bl(id)) !=NULL ){
+				mob_exclusion_add(md,1,sd->bl.id);
 				md->master_id=sd->bl.id;
+				md->hp=2210+skilllv*200;
+				md->state.special_mob_ai=1;
 				add_timer(gettick()+30000+skilllv*10000,mob_timer_delete,id,0);
 			}
 		}
@@ -3107,7 +3102,10 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 			my = y + (rand()%10 - 5);
 			id=mob_once_spawn(sd,"this",mx,my,"イクラ",1142,1,"");
 			if( (md=(struct mob_data *)map_id2bl(id)) !=NULL ){
+				mob_exclusion_add(md,1,sd->bl.id);
 				md->master_id=sd->bl.id;
+				md->hp=1000+skilllv*200;
+				md->state.special_mob_ai=2;
 				add_timer(gettick()+30000,mob_timer_delete,id,0);
 			}
 		}
@@ -5154,12 +5152,11 @@ int skill_frostjoke_scream(struct block_list *bl,va_list ap)
  *アブラカダブラの使用スキル決定(決定スキルがダメなら0を返す)
  *------------------------------------------
  */
-int skill_abra_dataset(void)
+int skill_abra_dataset(int skilllv)
 {
 	int skill = rand()%331;
-
-	//アブラ固有スキルの適当な確率判定(30%)
-	if((skill >= SA_MONOCELL && skill <= SA_COMA) && rand()%100 < 30) return 0;
+	//dbに基づくレベル・確率判定
+	if(skill_abra_db[skill].req_lv > skilllv || rand()%10000 >= skill_abra_db[skill].per) return 0;
 	//NPCスキルはダメ
 	if(skill >= NPC_PIERCINGATT && skill <= NPC_SUMMONMONSTER) return 0;
 	//演奏スキルはダメ
@@ -6926,6 +6923,7 @@ int skill_arrow_create( struct map_session_data *sd,int nameid)
  * cast_db.txt スキルの詠唱時間とディレイデータ
  * produce_db.txt アイテム作成スキル用データ
  * create_arrow_db.txt 矢作成スキル用データ
+ * abra_db.txt アブラカダブラ発動スキルデータ
  *------------------------------------------
  */
 int skill_readdb(void)
@@ -7272,6 +7270,39 @@ int skill_readdb(void)
 	}
 	fclose(fp);
 	printf("read db/create_arrow_db.txt done (count=%d)\n",k);
+
+	memset(skill_abra_db,0,sizeof(skill_abra_db));
+	fp=fopen("db/abra_db.txt","r");
+	if(fp==NULL){
+		printf("can't read db/abra_db.txt\n");
+		return 1;
+	}
+	k=0;
+	while(fgets(line,1020,fp)){
+		char *split[16];
+		if(line[0]=='/' && line[1]=='/')
+			continue;
+		memset(split,0,sizeof(split));
+		for(j=0,p=line;j<13 && p;j++){
+			split[j]=p;
+			p=strchr(p,',');
+			if(p) *p++=0;
+		}
+		if(split[0]==NULL)
+			continue;
+		i=atoi(split[0]);
+		if(i<=0)
+			continue;
+
+		skill_abra_db[i].req_lv=atoi(split[2]);
+		skill_abra_db[i].per=atoi(split[3]);
+
+		k++;
+		if(k >= MAX_SKILL_ABRA_DB)
+			break;
+	}
+	fclose(fp);
+	printf("read db/abra_db.txt done (count=%d)\n",k);
 
 	return 0;
 }

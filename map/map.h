@@ -311,6 +311,7 @@ struct mob_data {
 		unsigned master_check : 1 ;
 		unsigned change_walk_target : 1 ;
 		unsigned walk_easy : 1 ;
+		unsigned special_mob_ai : 3 ;
 	} state;
 	int timer;
 	short to_x,to_y;

@@ -374,7 +374,7 @@
 291,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_MONOCELL#モノーセル#
 292,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_CLASSCHANGE#クラスチェンジ#
 293,0,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_SUMMONMONSTER#サモンモンスター#
-294,8,6,16,0,1,1,1,yes,0,0,0,magic,0	// SA_REVERSEORCISH#リバースオキシー#
+294,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_REVERSEORCISH#リバースオキシー#
 295,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_DEATH#デス#
 296,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_FORTUNE#フォーチュン#
 297,8,6,1,0,1,1,1,yes,0,0,0,magic,0	// SA_TAMINGMONSTER#テイミングモンスター#
@@ -382,7 +382,7 @@
 299,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_GRAVITY#グラビティ#
 300,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_LEVELUP#レベルアップ#
 301,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_INSTANTDEATH#即死#
-302,8,6,16,0,1,1,1,yes,0,0,0,magic,0	// SA_FULLRECOVERY#完全回復#
+302,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_FULLRECOVERY#完全回復#
 303,8,6,4,0,1,1,1,yes,0,0,0,magic,0	// SA_COMA#コーマ#
 
 // ダンサーバード共通

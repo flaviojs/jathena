@@ -1261,7 +1261,7 @@ int buildin_warp(struct script_state *st)
 	if(strcmp(str,"Random")==0)
 		pc_randomwarp(sd,3);
 	else if(strcmp(str,"SavePoint")==0){
-		if(map[sd->bl.m].flag.noteleport)	// ƒeƒŒƒ|‹Ö~
+		if(map[sd->bl.m].flag.noreturn)	// ’±‹Ö~
 			return 0;
 
 		pc_setpos(sd,sd->status.save_point.map,

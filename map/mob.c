@@ -39,6 +39,8 @@ static int mob_makedummymobdb(int);
 static int mob_timer(int,unsigned int,int,int);
 int mobskill_use(struct mob_data *md,unsigned int tick,int event);
 int mobskill_deltimer(struct mob_data *md );
+int mob_skillid2skillidx(int class,int skillid);
+int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx);
 
 /*==========================================
  * mobを名前で検索
@@ -1737,6 +1739,28 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 				md->dmglog[minpos].dmg=(damage*battle_config.pet_attack_exp_rate)/100;
 			}
 		}
+		if(src && src->type == BL_MOB && ((struct mob_data*)src)->state.special_mob_ai){
+			struct mob_data *md2 = (struct mob_data *)src;
+			for(i=0,minpos=0,mindmg=0x7fffffff;i<DAMAGELOG_SIZE;i++){
+				if(md->dmglog[i].id==md2->master_id)
+					break;
+				if(md->dmglog[i].id==0){
+					minpos=i;
+					mindmg=0;
+				}
+				else if(md->dmglog[i].dmg<mindmg){
+					minpos=i;
+					mindmg=md->dmglog[i].dmg;
+				}
+			}
+			if(i<DAMAGELOG_SIZE)
+				md->dmglog[i].dmg+=damage;
+			else {
+				md->dmglog[minpos].id=md2->master_id;
+				md->dmglog[minpos].dmg=damage;
+			}
+		}
+
 	}
 
 	md->hp-=damage;
@@ -1745,6 +1769,12 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 		skill_status_change_end(&md->bl, SC_HIDING, -1);
 	if(md->option&4 )
 		skill_status_change_end(&md->bl, SC_CLOAKING, -1);
+
+	if(md->state.special_mob_ai == 2){//スフィアーマイン
+		md->state.special_mob_ai++;
+		if(mob_skillid2skillidx(md->class,NPC_SELFDESTRUCTION))
+			mobskill_use_id(md,&md->bl,mob_skillid2skillidx(md->class,NPC_SELFDESTRUCTION));//自爆詠唱開始
+	}
 
 	if(md->hp>0){
 		return 0;
@@ -2277,6 +2307,21 @@ int mob_counttargeted(struct mob_data *md,struct block_list *src)
 	return c;
 }
 
+/*==========================================
+ *MOBskillから該当skillidのskillidxを返す
+ *------------------------------------------
+ */
+int mob_skillid2skillidx(int class,int skillid)
+{
+	int i;
+	for(i=0;i<MAX_MOBSKILL;i++){
+		if((&mob_db[class].skill[i])->skill_id == skillid)
+			return i;
+	}
+	return 0;
+
+}
+
 //
 // MOBスキル
 //
@@ -2709,6 +2754,9 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 	int i,max_hp = battle_get_max_hp(&md->bl);
 
 	if(battle_config.mob_skill_use == 0 || md->skilltimer != -1)
+		return 0;
+
+	if(md->state.special_mob_ai)
 		return 0;
 
 	for(i=0;i<mob_db[md->class].maxskill;i++){

@@ -1,4 +1,26 @@
 --------------------
+//0900 by ぴざまん
+
+・アブラカダブラのランダムスキル発動率をabra_db.txtで設定できるように。
+・スフィアーマインとバイオプラントの微修正。
+・Noreturnマップで蝶が消費だけされるバグ修正。
+・一部のアブラ固有スキルが正しく動作しなかったバグ修正。
+	(map/)
+	mob.c
+		mob_damage()、mobskill_use() 修正。
+		mob_skillid2skillidx() 追加。
+	skill.c
+		skill_readdb()、skill_abra_dataset() 修正。
+		skill_castend_nodamage_id()、skill_castend_pos2() 修正。
+	script.c
+		buildin_warp() 修正。
+
+	skill.h 修正。
+	map.h 修正。
+	(db/)
+	abra_db.txt 追加。
+	skill_db.txt 修正。
+--------------------
 //0899 by 胡蝶蘭
 
 ・取り巻きMOBの処理修正
