@@ -4774,6 +4774,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.making_arrow_name_input = 1;
 		battle_config.holywater_name_input = 1;
 		battle_config.display_delay_skill_fail = 1;
+		battle_config.display_snatcher_skill_fail = 1;
 		battle_config.chat_warpportal = 0;
 		battle_config.mob_warpportal = 0;
 		battle_config.dead_branch_active = 0;
@@ -4789,6 +4790,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.gx_cardfix = 0;
 		battle_config.gx_dupele = 1;
 		battle_config.gx_disptype = 1;
+		battle_config.devotion_level_difference = 10;
 		battle_config.player_skill_partner_check = 1;
 		battle_config.hide_GM_session = 0;
 		battle_config.unit_movement_type = 0;
@@ -4946,6 +4948,7 @@ int battle_config_read(const char *cfgName)
 			{ "making_arrow_name_input",	&battle_config.making_arrow_name_input	},
 			{ "holywater_name_input",		&battle_config.holywater_name_input		},
 			{ "display_delay_skill_fail",	&battle_config.display_delay_skill_fail	},
+			{ "display_snatcher_skill_fail",	&battle_config.display_snatcher_skill_fail	},
 			{ "chat_warpportal", 			&battle_config.chat_warpportal			},
 			{ "mob_warpportal", 			&battle_config.mob_warpportal			},
 			{ "dead_branch_active", 		&battle_config.dead_branch_active		},
@@ -4961,6 +4964,7 @@ int battle_config_read(const char *cfgName)
 			{ "gx_cardfix",					&battle_config.gx_cardfix				},
 			{ "gx_dupele", 					&battle_config.gx_dupele				},
 			{ "gx_disptype", 				&battle_config.gx_disptype				},
+			{ "devotion_level_difference", &battle_config.devotion_level_difference	},
 			{ "player_skill_partner_check",	&battle_config.player_skill_partner_check},
 			{ "hide_GM_session",			&battle_config.hide_GM_session			},
 			{ "unit_movement_type",			&battle_config.unit_movement_type		},

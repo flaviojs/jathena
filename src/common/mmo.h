@@ -248,6 +248,14 @@ enum {
 
 };
 
+enum {
+	GD_SKILLBASE=10000,
+	GD_APPROVAL=10000,
+	GD_KAFRACONTACT,
+	GD_GUARDIANRESEARCH,
+	GD_CHARISMA,
+	GD_EXTENSION,
+};
 #ifndef strcmpi
 #define strcmpi strcasecmp
 #endif

@@ -2824,8 +2824,9 @@ int pc_useitem(struct map_session_data *sd,int n)
 		if(sd->inventory_data[n])
 			run_script(sd->inventory_data[n]->use_script,0,sd->bl.id,0);
 
-		clif_useitemack(sd,n,amount-1,1);
 		pc_delitem(sd,n,1,1);
+		amount = sd->status.inventory[n].amount;
+		clif_useitemack(sd,n,amount,1);
 	}
 
 	return 0;

@@ -1,4 +1,4 @@
-// $Id: char2.c,v 1.4 2003/06/29 05:50:51 lemit Exp $
+// $Id: char.c,v 1.4 2004/09/15 00:25:29 running_pinata Exp $
 // original : char2.c 2003/03/14 11:58:35 Rev.1.5
 #define DUMP_UNKNOWN_PACKET	1
 
@@ -1361,6 +1361,7 @@ static int char_mapif_init(int fd)
 int parse_char(int fd)
 {
 	int i,ch;
+	unsigned short cmd;
 	struct char_session_data *sd;
 
 	if(login_fd<0)
@@ -1374,21 +1375,29 @@ int parse_char(int fd)
 	}
 	sd=session[fd]->session_data;
 	while(RFIFOREST(fd)>=2){
+		cmd = RFIFOW(fd,0);
 		// crc32のスキップ用
 		if(	sd==NULL			&&	// 未ログインor管理パケット
 			RFIFOREST(fd)>=4	&&	// 最低バイト数制限 ＆ 0x7530,0x7532管理パケ除去
 			RFIFOREST(fd)<=21	&&	// 最大バイト数制限 ＆ サーバーログイン除去
-			RFIFOW(fd,0)!=0x20b	&&	// md5通知パケット除去
+			cmd!=0x20b	&&	// md5通知パケット除去
 			(RFIFOREST(fd)<6 || RFIFOW(fd,4)==0x65)	){	// 次に何かパケットが来てるなら、接続でないとだめ
 			RFIFOSKIP(fd,4);
+			cmd = RFIFOW(fd,0);
 			printf("parse_char : %d crc32 skipped\n",fd);
 			if(RFIFOREST(fd)==0)
 				return 0;
 		}
-		if(RFIFOW(fd,0)<30000 && RFIFOW(fd,0)!=0x187)
-			printf("parse_char : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
-				
-		switch(RFIFOW(fd,0)){
+
+		if(cmd<30000 && cmd!=0x187)
+			printf("parse_char : %d %d %d\n",fd,RFIFOREST(fd),cmd);
+
+		// 不正パケットの処理
+		if (sd == NULL && cmd != 0x65 && cmd != 0x20b && cmd != 0x187 &&
+					 cmd != 0x2af8 && cmd != 0x7530 && cmd != 0x7532)
+			cmd = 0xffff;	// パケットダンプを表示させる
+		
+		switch(cmd){
 		case 0x20b:		//20040622暗号化ragexe対応
 			if(RFIFOREST(fd)<19)
 				return 0;

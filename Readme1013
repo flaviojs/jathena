@@ -1,4 +1,38 @@
 --------------------
+//1061 by lizorett (2004/11/11)
+・不正なギルドスキルパケットを受けた場合にmap/charサーバが落ちる問題を修正
+・不正なパケットを受けた場合にcharサーバが落ちる問題を修正
+・結婚したキャラを削除するとcharサーバが落ちる問題を修正
+・青箱を一つだけ持った状態で青箱から青箱がでると、青箱が消えるたように見える
+ (リログすると見える)問題を修正
+・スナッチャーのスキル失敗を表示しないようにできる設定を追加
+・デボーションのレベル制限(10レベル差)を変更できる設定を追加
+
+    (src/common)
+		mmo.h
+			ギルドスキルのenumを追加(src/map/skill.hから移動)
+    (src/map)
+		skill.h
+			ギルドスキルのenumを削除(src/common/mmo.hに移動)
+		guild.c
+			guild_checkskill スキルの範囲チェックを追加
+			guild_skillup スキルの範囲チェックを追加
+		skill.c
+			skill_additional_effect display_snatcher_skill_failの処理を追加
+			skill_castend_nodamage_id devotion_level_differenceの処理を追加
+		battle.c
+			display_snatcher_skill_fail,devotion_level_differenceの初期化を追加
+	(src/char)
+		int_guild.c
+			guild_checkskill スキルの範囲チェックを追加
+			mapif_parse_GuildSkillUp スキルの範囲チェックを追加
+		char.c
+			parse_char 不正なパケットを受けた場合にはダンプするよう修正
+			char_divorce i<MAX_INVENTORYをj<MAX_INVENTORYに変更
+	(conf)
+		battle_athena.conf
+			display_snatcher_skill_fail,devotion_level_differenceを追加
+--------------------
 //1060 by mosya
 ・モンスターがスキル詠唱中に座標ズレを起こす問題を修正
 ・MOBのAI変更。前衛がタゲを取っているのに、後衛に攻撃をしにゆくのを修正

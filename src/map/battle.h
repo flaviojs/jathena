@@ -253,6 +253,7 @@ extern struct Battle_Config {
 	int making_arrow_name_input;
 	int holywater_name_input;
 	int display_delay_skill_fail;
+	int display_snatcher_skill_fail;
 	int chat_warpportal;
 	int mob_warpportal;
 	int dead_branch_active;
@@ -272,6 +273,7 @@ extern struct Battle_Config {
 	int gx_cardfix;
 	int gx_dupele;
 	int gx_disptype;
+	int devotion_level_difference;
 	int player_skill_partner_check;
 	int hide_GM_session;
 	int unit_movement_type;

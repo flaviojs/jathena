@@ -468,7 +468,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			if((skill*15 + 55) + (skill2 = pc_checkskill(sd,TF_STEAL))*10 > rand()%1000) {
 				if(pc_steal_item(sd,bl))
 					clif_skill_nodamage(src,bl,TF_STEAL,skill2,1);
-				else
+				else if (battle_config.display_snatcher_skill_fail)
 					clif_skill_fail(sd,skillid,0,0);
 			}
 		break;
@@ -2385,7 +2385,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			lv = (lv<0)?-lv:lv;
 			if((dstsd->bl.type!=BL_PC)	// 相手はPCじゃないとだめ
 			 ||(sd->bl.id == dstsd->bl.id)	// 相手が自分はだめ
-			 ||(lv > 10)			// レベル差±10まで
+			 ||(lv > battle_config.devotion_level_difference)	// レベル差
 			 ||(!sd->status.party_id && !sd->status.guild_id)	// PTにもギルドにも所属無しはだめ
 			 ||((sd->status.party_id != dstsd->status.party_id)	// 同じパーティーか、
 			  &&(sd->status.guild_id != dstsd->status.guild_id))	// 同じギルドじゃないとだめ
@@ -9620,7 +9620,6 @@ void skill_reload(void)
 	*/
 	do_init_skill();
 }
-
 
 /*==========================================
  * スキル関係初期化処理
