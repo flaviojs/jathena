@@ -7096,11 +7096,6 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			*opt3 &= ~1024;
 			break;
 		case SC_ASSUMPTIO:		/* アスムプティオ */
-			/* キリエが掛かっていたら解除して */
-			if(sc_data[SC_KYRIE].timer!=-1)
-				skill_status_change_end(bl,SC_KYRIE,-1);
-			/* アスムのフラグを立てる */
-
 			*opt3 &= ~2048;
 			break;
 		}
@@ -7175,7 +7170,11 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	case SC_SIGHT:	/* サイト */
 	case SC_RUWACH:	/* ルアフ */
 		{
-			const int range=10;
+			//const int range=10; 修正前は両方10x10だったのです
+			// スキル修正: サイトの範囲=7x7 ルアフの範囲=5x5
+			int range = 5;
+			if ( type == SC_SIGHT ) range = 7;
+
 			map_foreachinarea( skill_status_change_timer_sub,
 				bl->m, bl->x-range, bl->y-range, bl->x+range,bl->y+range,0,
 				bl,type,tick);
@@ -8107,6 +8106,11 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			calc_flag = 1;
 			break;
 		case SC_ASSUMPTIO:		/* アスムプティオ */
+			/* キリエが掛かっていたら解除して */
+			if(sc_data[SC_KYRIE].timer!=-1)
+				skill_status_change_end(bl,SC_KYRIE,-1);
+
+			/* アスムのフラグを立てる */
 			*opt3 |= 2048;
 			break;
 		case SC_MARIONETTE:		/* マリオネットコントロール */

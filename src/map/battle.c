@@ -1624,9 +1624,13 @@ int battle_addmastery(struct map_session_data *sd,struct block_list *target,int 
 
 	nullpo_retr(0, sd);
 
-	// デーモンベイン(+3 ～ +30) vs 不死 or 悪魔 (死人は含めない？)
-	if((skill = pc_checkskill(sd,AL_DEMONBANE)) > 0 && (battle_check_undead(race,battle_get_elem_type(target)) || race==6) ) 
-		damage += (skill * 3);
+	// デーモンベイン vs 不死 or 悪魔 (死人は含めない？)
+	// DB修正前: SkillLv * 3
+	// DB修正後: floor( ( 3 + 0.05 * BaseLv ) * SkillLv )
+	if((skill = pc_checkskill(sd,AL_DEMONBANE)) > 0 && (battle_check_undead(race,battle_get_elem_type(target)) || race==6) ) {
+		//damage += (skill * 3);
+		damage += floor( ( 3 + 0.05 * sd->status.base_level ) * skill ); // sdの内容は保証されている
+	}
 
 	// ビーストベイン(+4 ～ +40) vs 動物 or 昆虫
 	if((skill = pc_checkskill(sd,HT_BEASTBANE)) > 0 && (race==2 || race==4) ) 
@@ -2567,9 +2571,15 @@ static struct Damage battle_calc_mob_weapon_attack(
 					}
 				}
 				t_def = def2*8/10;
+				/* ディバインプロテクションスキルを持っているのはPCだけなのでここだけで良い（？
+				   DPスキル修正前: SkillLv*3
+				           修正後: round( ( 3 + 0.04 * BaseLv ) * SkillLv ) */
 				if(battle_check_undead(s_race,battle_get_elem_type(src)) || s_race==6)
-					if(tsd && (skill=pc_checkskill(tsd,AL_DP)) > 0 )
-						t_def += skill*3;
+					if(tsd && (skill=pc_checkskill(tsd,AL_DP)) > 0 ){
+						//t_def += skill*3;
+						// tsdの内容は保証されている
+						t_def += round( ( 3 + 0.04 * tsd->status.base_level ) * skill );
+					}
 
 				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
 				if(battle_config.monster_defense_type) {
