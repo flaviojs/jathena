@@ -435,7 +435,8 @@ int grfio_size(char *fname)
 			entry = filelist_modify(&lentry);
 		} else if (entry==NULL) {
 			printf("%s not found\n", fname);
-			exit(1);	//return 0;
+			// exit(1);
+			return 0;
 		}
 	}
 	return entry->declen;
@@ -520,7 +521,8 @@ errret:
 	if (buf!=NULL) free(buf);
 	if (buf2!=NULL) free(buf2);
 	if (in!=NULL) fclose(in);
-	exit(1);	//return NULL;
+	// exit(1);
+	return NULL;
 }
 
 /*==========================================
@@ -883,9 +885,10 @@ void grfio_init(char *fname)
 	result  = grfio_add(data_file);		// Standard data file
 	result2 = grfio_add(sdata_file);	// Sakray addon data file
 	result3 = grfio_add(adata_file);	// alpha data file
-
+/*
 	if (result!=0 && result2!=0 && result3!=0) {
 		printf("not grf file readed exit!!\n");
 		exit(1);			// リソースが一つも読めなければ終了
 	}
+*/
 }

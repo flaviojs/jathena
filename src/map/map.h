@@ -578,8 +578,8 @@ extern int agit_flag;
 
 //------bitmap使用とgrfファイル使用両方対応できるために追加、また、
 //セルの取得や設定は列挙型CELL_CHK*とCELL_SET*を使った方が意図がわかりやすいので変更してみた
-extern int (*map_getcell)(int,int,int,CELL_CHK);
-extern int (*map_getcellp)(struct map_data*,int,int,CELL_CHK);
+int map_getcell(int,int,int,CELL_CHK);
+int map_getcellp(struct map_data*,int,int,CELL_CHK);
 extern int map_read_flag;//セル情報のソース判定フラグ、0ならgrfファイル、1ならビットマップファイル
 
 extern char motd_txt[];
