@@ -32,3 +32,5 @@ ama_dun01.gat,234,143,0	warp	warp8008	1,1,ama_dun02.gat,31,41
 ama_dun02.gat,29,41,0	warp	warp8009	1,1,ama_dun01.gat,231,143
 ama_dun02.gat,196,124,0	warp	warp8010	1,1,ama_dun03.gat,119,14
 ama_dun03.gat,119,9,0	warp	warp8011	1,1,ama_dun02.gat,196,121
+ama_in02.gat,59,160,0	warp	amax001	1,1,ama_in02.gat,215,152
+ama_in02.gat,215,149,0	warp	amax002	1,1,ama_in02.gat,59,156

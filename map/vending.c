@@ -83,7 +83,7 @@ void vending_purchasereq(struct map_session_data *sd,int len,int id,unsigned cha
 		index=*(short*)(p+2+4*i)-2;
 		pc_additem(sd,&vsd->status.cart[index],amount);
 		vsd->vending[vend_list[i]].amount-=amount;
-		pc_cart_delitem(vsd,index,amount);
+		pc_cart_delitem(vsd,index,amount,0);
 		clif_vendingreport(vsd,index,amount);
 	}
 }

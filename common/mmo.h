@@ -39,7 +39,7 @@ struct item {
 	short card[4];
 };
 struct point{
-	char map[16];
+	char map[24];
 	short x,y;
 };
 struct skill {
@@ -81,7 +81,8 @@ struct mmo_charstatus {
 
 	char name[24];
 	unsigned char base_level,job_level;
-	short str,agi,vit,int_,dex,luk,char_num,sex;
+	short str,agi,vit,int_,dex,luk;
+	unsigned char char_num,sex;
 
 	struct point last_point,save_point,memo_point[10];
 	struct item inventory[MAX_INVENTORY],cart[MAX_CART];
@@ -106,7 +107,7 @@ struct gm_account {
 
 struct party_member {
 	int account_id;
-	char name[24],map[16];
+	char name[24],map[24];
 	int leader,online,lv;
 	struct map_session_data *sd;
 };
@@ -174,7 +175,7 @@ enum {
 
 	GMI_POSITION	=0,		// メンバーの役職変更
 	GMI_EXP			=1,		// メンバーのEXP
-	
+
 };
 
 #ifndef strcmpi

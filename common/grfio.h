@@ -1,7 +1,7 @@
 #ifndef	_GRFIO_H_
 #define	_GRFIO_H_
 
-void grfio_init(void);			// GRFIO Initialize
+void grfio_init(char*);			// GRFIO Initialize
 int grfio_add(char*);			// GRFIO Resource file add
 void* grfio_read(char*);		// GRFIO data file read
 void* grfio_reads(char*,int*);	// GRFIO data file read & size get

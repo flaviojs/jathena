@@ -100,7 +100,7 @@ int clif_moboutsight(struct block_list *,va_list);	// map_forallinmovearea callb
 int clif_petoutsight(struct block_list *bl,va_list ap);
 int clif_petinsight(struct block_list *bl,va_list ap);
 
-
+int clif_skillinfo(struct map_session_data *sd,int skillid,int type,int range);
 int clif_skillinfoblock(struct map_session_data *sd);
 int clif_skillup(struct map_session_data *sd,int skill_num);
 

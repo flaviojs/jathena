@@ -1,5 +1,2197 @@
 --------------
-//0587 by Kalen
+//0702 by ぽぽぽ
+
+・ファーマシーのエフェクトを本来のものに変更
+・スクリプトでの埋め込み変数にBaseExp,JobExp,NextBaseExp,NextJobExp追加
+	(map/)
+	skill.c
+		skill_produce_mix() 修正。
+	pc.c
+		pc_readparam()、pc_setparam() 修正。
+	(db/)
+		const.txt 修正。
+
+--------------
+//0701 by ぴざまん
+
+・ステータス異常判別式導入。各ステータス異常の発動率がVIT/INT/MDEFに影響するようになります。持続時間短縮はまた今度で_|￣|○
+・不死に凍結が効いたバグ修正。
+	(map/)
+	skill.c
+		skill_additional_effect()、skill_castend_nodamage_id() 修正。
+
+--------------
+//0700 by 南
+
+・697のバグ修正。
+　　　　(db/)
+        mob_db.txt
+
+--------------
+//0699 by 死神
+
+・装備のボーナスクリティカルは自分の間違いだったのでbCriticalRateをbCriticalに変更。それと0695で書き忘れですがASPDを上げるカードや装備の一部をbAspdAddRateからbAspdRateに変更しました。みすとれ巣のシミュレーターによるとドッペルカードは複数でも一つしか適用されないみたいだったので。
+	(db/)
+	item_db.txt
+
+--------------
+//0698 by 死神
+
+・一部のキャラに重量が０になってカプラなど何もＰＣ，ＮＣＰが表示されなくなるバグ修正。(それだけ)
+	(common/)
+	mmo.h 修正。
+	(map/)
+	clif.c
+		clif_updatestatus() 修正。
+	pc.c
+		pc_calcstatus() 修正。
+
+--------------
+//0697 by 南
+
+・mob_db修正
+　ドロップを中心に修正。
+　　　　(db/)
+        mob_db.txt
+
+--------------
+//0696 by 死神
+
+・バグ修正。
+・テレポートやワープ等の時スキルユニットから抜ける処理が入って
+なかったのでSAFETYWALL等によって鯖落ちが起こったようです。(確か報告も
+あったと思いますが...) よって修正はしましたが確認はしてません。報告を
+お願いします。
+・スキルによる吹き飛ばし処理をちょっと修正とモンスターのコードを少し修正。
+多分変になったことはないと思いますが変だったら報告してください。
+・その他細かい修正。
+	(map/)
+	skill.h 修正。
+	skill.c
+		skill_blown()、skill_attack()、skill_unit_move() 修正。
+		skill_castend_nodamage_id()、skill_castend_damage_id() 修正。
+		skill_unit_out_all()、skill_unit_out_all_sub() 追加。
+	mob.c
+		mob_stop_walking()、mob_spawn()、mob_warp() 修正。
+		mob_can_move()、mob_changestate() 修正。
+	map.h 修正。
+	pc.c
+		pc_setpos() 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack() 修正。
+
+--------------
+//0695 by 死神
+
+・少し修正。
+・プレイヤーの基本パラメータを2byteに拡張。
+・item_db.txtをラグナゲートの説明に合わせて修正。
+・bAddEffとbResEffの確率を百分率から万分率に変更。
+・スクリプトstatusupとstatusup2追加。
+statusup bStr; のように使って機能はステータスポイントを減らして
+基本パラメータを1上げる。
+statusup2 bInt,n; のように使って機能はステータスポイントを減らさずに
+基本パラメータをn上げる。
+・その他細かい修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(db/)
+	item_db.txt 修正。
+	const.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	conf_ref.txt 修正。
+	(common/)
+	mmo.h 修正。
+	(char/)
+	char.c
+		mmo_char_send006b()、parse_char() 修正。
+	(map/)
+	map.h 修正。
+	clif.h 修正。
+	clif.c
+		clif_initialstatus()、clif_updatestatus() 修正。
+	pc.h 修正。
+	pc.c
+		pc_bonus()、pc_calcstatus()、pc_equippoint()、pc_equipitem() 修正。
+		pc_jobchange()、pc_checkbaselevelup()、pc_statusup() 修正。
+		pc_statusup2() 追加。
+	battle.h 修正。
+	battle.c
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack()、battle_config_read() 修正。
+	skill.c
+		skill_additional_effect()、skill_status_change_start() 修正。
+	script.c
+		buildin_statusup()、buildin_statusup2() 追加。
+	atcommnad.c 修正。
+
+--------------
+//0694 by 死神
+
+・バグ修正と細かい修正。
+・bCriticalRateが正しく適用されなかった問題修正。
+・ペットによるステータスボーナス追加。ステータスボーナスは装備の
+スクリプトによって設定します。ただペットによるボーナスはカードによる物と同じ扱いをします。そして属性の適用は一番優先順位低いです。今は何も入ってませんが...
+	(conf/)
+	battle_athena.conf 修正。
+	(db/)
+	const.txt 修正。
+	pet_db.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	conf_ref.txt 修正。
+	db_ref.txt 修正。
+	(map/)
+	map.h 修正。
+	map.c
+		map_quit() 修正。
+	battle.h 修正。
+	battle.c
+		battle_calc_pc_weapon_attack()、battle_weapon_attack() 修正。
+		battle_calc_magic_attack()、battle_calc_misc_attack() 修正。
+		battle_config_read() 修正。
+	pc.c
+		pc_calcstatus()、pc_bonus()、pc_setpos()、pc_authok() 修正。
+		pc_damage()、pc_autosave_sub() 修正。
+	pet.h 修正。
+	pet.c
+		pet_hungry()、pet_birth_process()、pet_recv_petdata()、pet_food() 修正。
+		pet_return_egg()、pet_ai_sub_hard()、read_petdb() 修正。
+	clif.c
+		clif_sendegg()、clif_parse_LoadEndAck() 修正。
+	atcommand.c 修正。
+	makefile 修正。
+
+--------------
+//0693 by 胡蝶蘭
+
+・SC_*の列挙表をリナンバリング
+	クライアントに通知するのを64未満から128未満に増やした
+	パケット情報に合うようにリナンバー
+	StatusChangeの配列を128から192に増やしたのでメモリ使用量が増えます。
+	
+	(db/)
+	const.txt
+		SC_* の数値を変更
+	(map/)
+	skill.h
+		SC_* の列挙の数値を変更
+	map.h
+		MAX_STATUSCHANGEを128から192に増やした
+	skill.c
+		skill_status_change_start(),skill_status_change_end(),
+		skill_status_change_clear()の通知処理を変更
+
+・演奏/ダンスの処理を変更
+	演奏/ダンス中かどうかをSC_DANCINGで判定するように変更
+	（判定処理が多少高速化されたはず）
+	ワープ(マップ移動や蝿など)すると演奏/ダンスを中断するように変更
+	
+	skill.h/skill.c
+		skill_check_dancing()削除、skill_stop_dancing()追加
+		skill_delunitgroup(),skill_initunitgroup()変更
+		skill_status_change_start()変更
+		skill_castend_nodamage_id()変更
+		書き損じがあるかも・・
+	pc.c
+		pc_calcstatus(),pc_setpos(),pc_damage()変更
+
+・不協和音スキルの修正
+	(db/)
+	skill_db.txt
+		不協和音スキルのHIT数修正
+	(map/)
+	skill.c
+		skill_status_change_timer()変更
+	battle.c
+		battle_calc_misc_attack()修正
+
+--------------
+//0692 by 胡蝶蘭
+
+・アドリブスキルが使用できない問題修正（skill_dbの添付し忘れ）
+	(db/)
+	skill_db.txt
+		アドリブの消費SPを1に修正
+
+・mob_db2.txtがあればmob_db.txtにオーバーライドするように
+	オリジナルmobを作ってる人は使うと便利かもしれません。
+
+	mob.c
+		mob_readdb()
+
+・鯖落ちバグ報告時のためのスタックバックトレースログ所得方法を紹介
+	鯖落ちバグの報告時に、この情報をコピペすると開発者が喜びます。
+	Cygwinでcoreの吐かせる方法も紹介してます。
+
+	(doc/)
+		coredump_report.txt
+
+--------------
+//0691 by 胡蝶蘭
+
+・item_db2.txtがあればitem_db.txtにオーバーライドするように
+	オリジナルアイテムを作ってる人は使うと便利かもしれません。
+
+	itemdb.c
+		itemdb_readdb()修正
+
+・演奏/ダンス系スキル仮実装
+	・演奏/ダンス中は移動が遅く、スキルも使えないようになりました
+	・アドリブスキルで演奏/ダンスを中断できるようになりました
+	・演奏/ダンスは石化などの異常、MHPの1/4以上のダメージで中断します
+	・キャラクターグラフィックは演奏/ダンスしません
+	・演奏/ダンス中のSP消費は未実装です
+	・移動しても効果範囲はついてきません
+	・重複しても不協和音などに変化しません
+	・エフェクトが出ても効果は未実装のものがあります
+	・ほとんど未テストなので多数の不都合があると思います
+
+	skill.h
+		SC_* の列挙表を修正
+	skill.c
+		skill_check_dancing()追加
+		SkillStatusChangeTable[]修正
+		skill_unit_onout(), skill_status_change_start(),
+		skill_status_change_timer(),skill_unitsetting(),
+		skill_castend_id(),skill_castend_pos(),skill_castend_map(),
+		skill_castend_nodamage_id()修正
+		その他は忘れました
+	pc.c
+		pc_calcstatus(),pc_damage()修正
+
+--------------
+//0690 by 波浪
+
+・細かい修正
+	(db/)
+	item_db.txt 錐とメギンギョルドのbonusを修正。
+	(doc/)
+	item_bonus.txt 修正。
+
+--------------
+//0689 by 死神
+
+・倉庫バグ修正と細かい修正。
+	(map/)
+	pc.c
+		pc_modifybuyvalue()、pc_modifysellvalue() 修正。
+	storage.c
+		storage_storageopen() 修正。
+		storage_storage_quit()、storage_storage_save() 修正。
+
+--------------
+//0688 by 聖
+
+・ディスカウント、コムパルションディスカウント、オーバーチャージが適用されなかった問題を修正。
+	(map/)
+	pc.c
+		pc_modifybuyvalue() 修正。
+		pc_modifysellvalue() 修正。
+
+--------------
+//0687 by 死神
+
+・少し修正。
+・battle_athena.confに項目追加。(詳しいことはconf_ref.txtで)
+・item_avail.txtの処理を変更。アイテムIDの後に0を入れると今まで通りに使用不可能になるが0以外の数値を入れると使用不可能ではなくその数値をアイテムのIDとして見た目だけをそれに変更します。よって鞍落ちアイテムを別の物に表示して鞍落ちを防ぐことができます。(表示だけ変えて鯖の処理は本当のアイテムIDの物として認識します。修正は全てしたと思いますが抜けた所があるかも知りませので見た目変更したアイテムで鞍落ちが起こったら報告してください。) 鯖の処理はこれが限界です。(少なくとも自分には) アイテムが同じ物が二つ表示されて間違い安いとかどうこうとかの文句を言いたい人は鞍作れよ。以上。
+・ジルタスとアリスのコマントアウト解除。item_avail.txtで卵をルビーとアクアマリンで表示して捕獲アイテムも他の物に表示するように変更しています。
+・ダメージ計算のバグ修正。(大した物じゃありませんが弓だけちょっと問題があったようです。)
+・青箱等のアイテムで得た装備品は未鑑定になるように変更。
+・装備ボーナスの内部処理修正と少し変更。(詳しいことはitem_bonus.txtで)
+・キャラ鯖にテータを送る時キャラ、倉庫、ペットのテータを同時に送るように変更。(キャラ鯖とマップ鯖の間の転送量が増えるかも知りれませんがデータを同期化の為です。)
+・FWの動作間隔を0.25秒から0.1秒に変更。(これで摺り抜は少し減るはずです。)
+・カートレボリュションでどんな状態異常もかからないように変更。
+	(conf/)
+	battle_athena.conf 修正。
+	(db/)
+	const.txt 修正。
+	item_avail.txt 修正。
+	pet_db.txt 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	item_bonus.txt 修正。
+	(map/)
+	map.h 修正。
+	map.c
+		map_quit() 修正。
+	battle.h 修正。
+	battle.c
+		battle_calc_pc_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pet_weapon_attack()、battle_calc_magic_attack() 修正。
+		battle_get_dmotion()、battle_config_read() 修正。
+	pc.c
+		pc_calcstatus()、pc_bonus()、pc_bonus3()、pc_setpos() 修正。
+		pc_makesavestatus()、pc_autosave_sub()、pc_modifybuyvalue() 修正。
+		pc_modifysellvalue()、pc_stop_walking() 修正。
+	skill.c
+		skill_additional_effect()、skill_unitsetting() 修正。
+	clif.c
+		clif_buylist()、clif_selllist()、clif_set009e()、clif_set0078() 修正。
+		clif_set007b()、clif_additem()、clif_itemlist()、clif_equiplist() 修正。
+		clif_storageitemlist()、clif_storageequiplist()、clif_changelook() 修正。
+		clif_arrow_create_list()、clif_useitemack()、clif_tradeadditem() 修正。
+		clif_storageitemadded()、clif_getareachar_item() 修正。
+		clif_skill_produce_mix_list()、clif_cart_additem()、clif_cart_itemlist() 修正。
+		clif_cart_equiplist()、clif_vendinglist()、clif_openvending() 修正。
+		clif_produceeffect()、clif_sendegg()、clif_pet_equip()、clif_mvp_item() 修正。
+		clif_pet0078()、clif_pet007b() 修正。
+	itemdb.h 修正。
+	itemdb.c
+		itemdb_searchrandomid()、itemdb_search()、itemdb_readdb() 修正。
+		itemdb_read_itemavail()、itemdb_read_itemvaluedb() 修正。
+		itemdb_equippoint() 削除。
+	storage.h 修正。
+	storage.c
+		storage_storage_quitsave() ->storage_storage_quit()に変更と修正。
+		storage_storageclose() 修正。
+	atcommand.c 修正。
+	pet.c
+		pet_change_name()、pet_equipitem()、pet_unequipitem() 修正。
+		pet_birth_process()、pet_return_egg() 修正。
+	script.c
+		buildin_getitem() 修正。
+	mob.c
+		mob_stop_walking() 修正。
+	makefile 修正。
+
+--------------
+//0686 by 聖
+
+・細かい修正。
+	(map/)
+	pc.h 修正。
+
+--------------
+//0685 by 波浪
+
+・0683、0684でのbonusの追加にともなってitem_db.txtを修正
+・他色々修正
+	(db/)
+	item_db.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+
+--------------
+//0684 by 死神
+
+・細かい修正。
+・死んだふりの時スキルとアイテムが使えないように変更。
+・bInfiniteEndure追加。機能は無限インデュア。
+・ダメージ表示の処理少し変更。
+	(db/)
+	const.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	(map/)
+	map.h 修正。
+	pc.c
+		pc_calcstatus() 修正。
+		pc_equipitem()、pc_unequipitem() 修正。
+	clif.c
+		clif_parse_UseItem()、clif_parse_UseSkillToId() 修正。
+		clif_parse_UseSkillToPos()、clif_parse_UseSkillMap() 修正。
+		clif_damage()、clif_skill_damage()、clif_skill_damage2() 修正。
+		clif_parse_LoadEndAck() 修正。
+	skill.c
+		skill_status_change_timer() 修正。
+
+--------------
+//0683 by 死神
+
+・バグ修正とbonus追加。
+・倉庫バグ、属性バグ修正とその他のバグ修正。
+・スクリプトbonus3追加。今はbAddMonsterDropItemだけが対応になっています。
+・bonus bRestartFullRecover;n;等でnは無意味だけど消すのはちょっとまずいですので0にして入れた方がいいです。bonusは2つの数値が必要なスクリプトなので。
+・bDefRatioAtkを防御無視に変更。
+・0677で書き忘れ。
+・武器の属性適用優先順位を製造>カード>武器に変更。製造が最優先です。(属性がある時に話です。属性がない場合属性ある物に上書きされたりはしません。)
+・装備で適用される効果の優先順位を右手>左手>体>頭上>頭中>頭下>ローブ>靴>アクセサリー1>アクセサリー2>矢に設定。(本鯖仕様がどうなのか分かることができそうな物でもないのでアテナの仕様と言うことで。) 右手が最優先です。
+・武器の射程を右手と左手の武器の中で長い物を適用するように変更。
+	(db/)
+	const.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	(map/)
+	map.h 修正。
+	battle.c
+		battle_calc_pc_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pet_weapon_attack()、battle_calc_magic_attack() 修正。
+		battle_damage() 修正。
+	pc.c
+		pc_autosave_sub()、pc_calcstatus() 修正。
+		pc_bonus()、pc_bonus2() 修正。
+		pc_bonus3() 追加。
+	script.c
+		buildin_bonus3() 追加。
+	mob.c
+		mob_once_spawn()、mob_damage() 修正。
+	storage.h 修正。
+	storage.c
+		storage_storage_save() 追加
+	atcommand.c 修正。
+
+--------------
+//0682 by 聖
+
+・スピードアップポーション系のバグ修正
+	(map/)
+	pc.c
+		pc_calcstatus() 修正。
+
+--------------
+//0681 by 死神
+
+・装備バグ修正。
+	(map/)
+	pc.c
+		pc_equipitem() 修正。
+
+--------------
+//0680 by 聖
+
+・細かい修正。
+・「@monster」コマンドでモンスターIDの指定に「-1」、「-2」等を指定すると
+　モンスターをランダムで召還できる機能を追加。
+	(map/)
+	mob.c
+	atcommand.c
+
+--------------
+//0679 by 波浪
+
+・0676で新しいアイテム効果が実装されたので、item_db.txtを修正(bonus bAddMonsterDropItem,n,x; は、種族判定ができないのでとりあえず保留しました。)
+・他色々修正
+	(db/)
+	item_db.txt
+	job_db1.txt
+	(doc/)
+	item_bonus.txt
+
+--------------
+//0678 by 聖
+
+・召還関連の細かい修正。
+	(map/)
+	mob.c
+		mob_once_spawn_area() 修正。
+
+--------------
+//0677 by 死神
+
+・細かい修正。
+・アイテム売買によって得られる経験値をカードによるスキルでは得られないように修正。
+・毒に掛かると自然回復できないように修正。
+・0676で書き忘れ。製造武器の場合製造によって与えた属性が武器の属性より優先して適用されるように変更。(製造武器が無属性の場合は適用されません。)
+	(doc/)
+	item_bonus.txt 誤字修正。
+	(map/)
+	npc.c
+		npc_buylist()、npc_selllist() 修正。
+	pc.c
+		pc_calcstatus()、pc_natural_heal_sub() 修正。
+
+--------------
+//0676 by 死神
+
+・色々と修正。
+・battle_athena.confに項目追加。(詳しいことはconf_ref.txtで)
+・みすとれ巣を参考してダメージ計算を少し修正。
+・装備bonusに色々と追加。(詳しいことはitem_bonus.txtで)
+・自動セーブする時(キャラ鯖にデータを送る時)倉庫のデータも送るように変更。
+・0667で言い忘れ。カートを外してもアイテムが消えないように変更。(本鯖で消えるのが仕様だと思っていたけど修正されたみたいなので。)
+・取引要請を受ける側は基本スキルをチェックしないように修正。(受ける側の基本スキルチェックは自分が入れた物ではないです。いつの間にか入っていたので削除しました。)
+・防具の精錬ボーナスを端数無視に変更。(これが本鯖の仕様みたいなので)
+・アンクルの処理少し変更。(かからないと言う報告がありましたので...)
+・プレイヤーのステータス計算で問題ありそうな所修正。
+・カードのIDで機能が決まっていたカードもスクリプトによって変えることができるように変更。(詳しいことはitem_bonus.txtで)
+・aspd計算方法少し変更。
+・矢にbCritical、bAtkEle、bHit、bAddEle、bAddRace、bAddSize、bAddEffを適用できるように変更。矢を使うスキルや弓による攻撃だけに矢のbCritical、bAtkEle、bHit、bAddEle、bAddRace、bAddSize、bAddEffが適用されるように修正。
+・キリの実装に為に修正はしましたがキリが防御無視なのかどうかがわからなかったので防御無視はしないようになっています。
+・テストした物はbAddMonsterDropItemとbGetZenyNumだけなので正常に動作するかどうかの報告が欲しい所です。(ついでにitem_dbの修正も...これで吸収系とオートスペル系以外は殆ど実装できるはずです。多分...)
+・その他は覚えてないけど修正した所が少しあるかも...
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	item_bonus.txt 修正。
+	(db/)
+	const.txt 修正。
+	(char/)
+	inter.c
+		inter_init() 修正。
+	int_storage.c
+		mapif_parse_SaveStorage() 修正。
+	(map/)
+	trade.c
+		trade_traderequest() 修正。
+	pc.h 修正。
+	pc.c
+		pc_autosave_sub()、pc_calcstatus() 修正。
+		pc_bonus()、pc_bonus2() 修正。
+		pc_setrestartvalue()、pc_setequipindex() 修正。
+		pc_check_equip_wcard()、pc_check_equip_dcard()、pc_check_equip_card() 削除
+		その他修正。
+	skill.h 修正。
+	skill.c 修正。
+		skill_castend_nodamage_id()、skill_unit_onplace() 修正。
+		skill_check_condition()、skill_additional_effect() 修正。
+		skill_attack()、skill_status_change_start() 修正。
+	map.h 修正。
+	battle.h 修正。
+	battle.c
+		battle_get_def()、battle_get_mdef2() 修正。
+		battle_weapon_attack()、battle_damage() 修正。
+		battle_calc_magic_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pet_weapon_attack() 修正。
+		battle_calc_misc_attack()、battle_config_read() 修正。
+	mob.c
+		mob_damage() 修正。
+	pet.c
+		pet_target_check() 修正。
+	clif.c
+		clif_set0078()、clif_set007b()、clif_changelook() 修正。
+	atcommand.c 修正。
+
+--------------
+//0675 by 波浪
+
+・韓鯖で村正の効果が変更されたので報告を元にitem_db.txtを修正
+・job_db1.txtを修正
+	(db/)
+	item_db.txt
+	job_db1.txt
+
+--------------
+//0674 by npc
+
+・ファーマシーの仮実装。
+	(db/)
+	produce_db.txt
+	(map/)
+	skill.c
+
+--------------
+//0673 by 南
+
+・集中力向上に装備品の補正が入っていなかったのを修正。
+　　　　　(map/)　　　
+　　　　　 pc.c
+
+--------------
+//0672 by 南
+
+・集中力向上に装備品の補正が入っていなかったのを修正。
+　　　　　(map/)　　　
+　　　　　 pc.c
+
+--------------
+//0672 by 聖
+
+・モンスター系のバグ修正(すみません、まだ残ってました(^^; )
+	(map/)
+	mob.c
+
+--------------
+//0671 by 聖
+
+・IDチェック範囲の修正他。
+・@monsterで数を指定しなくても召還できるように修正。
+	(map/)
+	atcommand.c
+	battle.c
+	battle.h
+	mob.c
+	pet.c
+	(conf/)
+	battle_athena.conf
+	(doc/)
+	conf_ref.txt
+
+--------------
+//0670 by RR
+
+・モンスタードロップ率を修正(本鯖準拠、DBでの設定+1/10000)。
+・落下率０に設定したアイテムを落とすかどうかをbattle_athena.confで設定可能に。
+	(map/)
+	mob.c
+		mob_damage() 修正。
+	battle.c
+	battle.h
+	(conf/)
+	battle_athena.conf
+
+--------------
+//0669 by 聖
+
+・モンスタードロップの修正。
+	(map/)
+	mob.c
+		mob_damage() 修正。
+
+--------------
+//0668 by 聖
+
+・モンスターIDの範囲チェックを修正。
+	(map/)
+	mob.c
+		mob_db、mob_once_spawn()、mob_once_spawn_area()、
+		mob_summonslave()、mob_read_randommonster()、mob_readdb() 修正。
+
+--------------
+//0667 by 死神
+
+・最大HP計算式をミストレ巣を参考して修正。(多分これで本鯖にあっていると思います。)
+・防具の精錬ボーナスを0.7に変更。(今は端数を四捨五入していますが本鯖が端数無視なら修正しておきます。)
+・@refineコマンドで装備場所IDに0を入れると装備している全ての装備を精錬するように変更。
+・その他細かい修正。
+	(db/)
+	item_db.txt
+		7140、7142を元に戻して0666の物はコマントアウトしました。
+	job_db1.txt 修正。
+	refine_db.txt 修正。
+	(map/)
+	mob.c
+		mob_once_spawn() 修正。
+	itemdb.c
+		itemdb_read_randomitem() 修正。
+	pet.c
+		pet_food() 修正。
+	pc.c
+		pc_readdb()、do_init_pc()、pc_calcstatus()、pc_setoption() 修正。
+		pc_calc_sigma() 追加。
+		その他修正。
+	map.h 修正。
+	battle.c
+		battle_calc_magic_attack()、battle_calc_misc_attack() 修正。
+	atcommand.c 修正。
+
+--------------
+//0666 by 聖
+
+・ランダムアイテムの細かい修正。
+・battle_athena.confの項目追加。
+・古木の枝で召還するモンスターの確率を設定出来るようにしました。
+・モンスター召還アイテムを複数作る事が出来るようにしました。
+・召還アイテムのサンプルとして
+　生命の種子をポリン系召還、
+　エンブリオをMVPボス系召還にしてみました。
+　あまりいいサンプルを思いつかなかったので、
+　何かいい案を思いついた人は書き換えてやってください(^^;
+	(conf/)
+	battle_athena.conf
+	(doc/)
+	conf_ref.txt
+	(map/)
+	mob.h
+		mob_db 修正。
+	mob.c
+		mob_once_spawn()、mob_makedummymobdb()、mob_readdb() 修正。
+		mob_readbranch() -> mob_read_randommonster()に変更。
+	battle.h
+		battle_config 修正。
+	battle.c
+		battle_config_read() 修正。
+	itemdb.c
+		itemdb_read_randomitem() 修正。
+	(db/)
+	item_db.txt
+	item_bluebox.txt
+	item_cardalbum.txt
+	item_giftbox.txt
+	item_scroll.txt
+	item_violetbox.txt
+	mob_branch.txt
+	mob_poring.txt 追加。
+	mob_boss.txt 追加。
+
+--------------
+//0665 by J
+
+・怨霊武士の取り巻きがカブキ忍者になっていたのを酒天狗に修正。
+・オットーにフェイクエンジェルが出すはずの取り巻きがついてたのを修正。
+	(db/)
+	mob_skill_db.txt
+
+--------------
+//0664 by 聖
+
+・精錬失敗時他のプレーヤーにもエフェクトが表示されるように修正。
+	(map/)
+	script.c
+		buildin_failedrefitem() 修正。
+
+--------------
+//0663 by lide
+
+・ブランディッシュスピア修正
+	(map/)
+	battle.c
+	skill.c
+
+--------------
+//0662 by 死神
+
+・細かい修正とバグ修正。
+・プロボックによってモンスターは乗算防御と減算防御が減るように修正してプレイヤーは減算防御だけ減るように修正。
+・スクリプトgetgmlevel追加。機能はそのNPCと話しているプレイヤーのGMレベルを返します。
+・0659の書き忘れですがペットのパフォマンスの種類が親密度によって増えるように変更しました。
+	(map/)
+	clif.c
+	pc.c
+	script.c
+
+--------------
+//0661 by 死神
+
+・細かい修正。
+・接続した時のペットのメッセージを親密度がきわめて親しいの時のみに出るように変更。
+・0659で書き忘れですがペットの支援攻撃は親密度がきわめて親しいの時のみに発生します。(それと親密度によって支援攻撃確率が少し変化します。)
+・ジルタスとアリスの卵のIDをitem_db.txtに合わせました。(自分が作ったpet_db.txtの方が自分勝手に設定していた物でしたので。て言うか未実装アイテムだから番号がわからなかっただけですが...)
+・pet_db.txtのattack_rateが正しく適用されなかったバグ修正。
+	(db/)
+	pet_db.txt
+	(map/)
+	clif.c
+		clif_parse_LoadEndAck() 修正。
+	pc.c
+		pc_attack_timer() 修正。
+
+--------------------
+//0660 by いど
+
+・サーバーsnapshot
+
+--------------
+//0659 by 死神
+
+・ペットを色々と修正。(ペットのコードをほとんど変えました。)
+・手動的だったペットの動きをモンスターのようにAIとして処理。
+・接続した時のペットのメッセージ実装。(本鯖はどうなのかわかりませんが
+Athenaは接続すると100%話すようになっています。)
+・ペットのスペシャルパフォマンス実装。(ただ台詞がちょっと変です。いくら探しても該当するパケットが見つからなかったので。)
+・ペットの台詞を他のペットの物に変更する機能追加。(詳しいことはdb_ref.txtとpet_db.txtで。)
+・ペットによる支援攻撃変更。pet_db.txtで攻撃する時と攻撃を受けた時の支援攻撃
+確率を別々に設定できます。攻撃する時の場合攻撃する度にチェックをしますので
+攻撃速度が速いと支援攻撃を受けやすくなります。攻撃を受けた時も同じです。(こちらはダメージを喰らう度になりますが。) 支援攻撃確率はソヒー、ジルタス、アリスだけ自分勝手に設定しています。(他のは全部1%に。ペットの支援攻撃は同じモンスターにはできないようになっています。そしてペットの戦闘能力はモンスターと同じです。)
+・/hideコマンド実装。
+・プロボックによって乗算防御も減るように修正。
+・フリーキャストのバグ修正。
+・ノービスのステータスボーナス削除。
+・battle_athena.confの項目追加と削除。
+・修正したファイルだけ。未テストした物もかなりありますので問題があったら報告をお願いします。
+	(conf/)
+	battle_athena.conf
+	(doc/)
+	conf_ref.txt
+	db_ref.txt 追加。(今説明が入っているのはpet_db.txtのみです。 )
+	client_packet.txt
+	(db/)
+	pet_db.txt
+	job_db2.txt
+	(map)
+	clif.h
+	clif.c
+	map.h
+	map.c
+	pet.h
+	pet.c
+	pc.c
+	mob.h
+	mob.c
+	npc.c
+	atcommand.c
+	skill.c
+	battle.h
+	battle.c
+
+--------------
+//0658 by huge
+
+・ペットがとどめをさすと、飼い主に経験値が入るようにしました。
+・固定値ダメージじゃ味が無いのでATK1～ATK2の間で乱数を取るようにしました。
+・あと、ペットがとどめをさすかどうかの設定を、battle_athena.confに加えました。
+
+	(conf/)
+	battle_athena.conf pet_finish追加。
+	(map/)
+	battle.c
+		battle_config_read() 修正。
+	battle.h 修正。
+	pet.c
+		pet_attack() 修正。
+	(doc/)
+	conf_ref.txt 説明追記。
+
+--------------
+//0657 by huge
+
+・ペットによる攻撃を実装。
+・ペットを持っていて、ペットが装備品をつけてて、さらにランダムによる判定で発動します。
+・ただの遊び心ですｗ
+・battle_athena.confで頻度を設定できます。詳細はdocで。
+
+	(conf/)
+	battle_athena.conf pet_attack追加。
+
+	(map/)
+	battle.c
+		battle_config_read() 修正。
+	battle.h 修正。
+	pc.c
+		pc_attack_timer() 修正。
+	pet.c
+	pet.h
+		pet_attack() 追加。
+	(doc/)
+	conf_ref.txt 説明追記。
+
+ とりあえず、ペットが動いてるなぁって感じと、ダメ回数を増やした程度です。
+
+--------------
+//0656 by 死神
+
+・グランドクロスの修正。(おいおい何度目だ...)
+・グランドクロス計算式間違いで修正。(÷3がまずかったみたいです。)
+でもまだ反射ダメージがみすとれ巣よりちょっと高いです。(10ぐらいだから
+関係ないかも)
+・モンクの気球を必中に修正。(自分の間違いのようですので...)
+	(map/)
+	skill.c 修正。
+	battle.c 修正。
+
+--------------
+//0655 by 死神
+
+・グランドクロスの修正。
+・自分なりに情報を収集してみた結果グランドクロス反射ダメージは
+プレイヤーキャラがそのキャラ自身にグランドクロスを使った時の
+ダメージだそうなので修正しました。(みすとれ巣の計算とはかなり違うような
+気もしますが...)
+・魔法とトラップ、鷹の攻撃にも属性耐性と種族耐性を適用するように修正。
+(本鯖の仕様にあっているかどうかは不明ですが適用した方が正しいと思ったので
+修正しました。)
+	(map/)
+	skill.c 修正。
+	map.h 修正。
+	battle.c 修正。
+
+--------------
+//0654 by 死神
+
+・グランドクロスの修正と細かい修正。(計算式間違いで修正。)
+・0653で書き忘れ。気功による追加ダメージは必中ではないらしいので
+修練の加算と同じ所に計算するように変更しました。
+・カートにバグがありそうだったのでちょっと修正。
+・ダメージ計算をほんの少し修正。(ダメージ量が変わったりはしません。)
+	(map/)
+	battle.c
+		battle_calc_magic_attack() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+	skill.c
+		pc_damage_feedback() -> skill_damage_feedback()に変更。
+		skill_unit_timer() 修正。
+	pc.c
+		pc_setoption() 修正。
+	atcommand.c 修正。
+
+--------------
+//0653 by 死神
+
+・0652の修正と細かい修正。今まで通り未テストも多いです。
+・グランドクロスの処理修正。(本鯖にあっているかどうかの自身はありません。)
+ラグナーゲートの説明によると始めに現在HPの20%が消耗されてその後敵に与えた
+ダメージの中で一番高い物が戻ってくるようです。そしてその戻ってきた
+ダメージは聖の属性を持ちトラストによって聖の耐性が50%になっているので
+半分を喰らうことになるようです。(聖の耐性上がる装備をしていれば戻ってくる
+ダメージは受けないようです。)
+問題なのはプレイヤーの防御属性を計算するかどうかです。今は防御属性計算の
+後で聖の属性を計算しています。そして戻ってくるダメージはHPバーは減るけど
+表示はされません。本鯖の方がどうなのか不明なので...
+それと一応モンスターもグランドクロスの使用が可能です。ただモンスターの場合
+現在HPの20%消耗の後のダメージは受けません。(モンスターが使う
+グランドクロスのテストはしてません。)
+・ダメージによるディレイ中にまたディレイがかからないように修正。(大した意味はないかも...)
+・値段がゼロのアイテムも売れるように変更。
+・@コマンドhealの処理少し修正。
+・移動コード少し修正。
+	(map/)
+	clif.c
+		clif_selllist() 修正。
+	battle.c
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_calc_magic_attack()、battle_calc_misc_attack() 修正。
+	skill.c
+		skill_additional_effect()、skill_unit_onplace()  修正。
+		skill_status_change_start()、skill_unit_onplace() 修正。
+		skill_castend_damage_id()、skill_castend_id()、skill_attack() 修正。
+		skill_unitsetting()、skill_check_condition() 修正。
+		skill_use_id()、skill_use_pos() 修正。
+	npc.c
+		npc_parse_script() 修正。
+	pc.h 修正。
+	pc.c
+		pc_walk()、pc_walktoxy_sub()、pc_stop_walking() 修正。
+	map.h 修正。
+	mob.h 修正。
+	mob.c
+		mob_stop_walking()、mob_changestate()、mob_walk() 修正。
+	pet.c
+		pet_changestate() 修正。
+	atcommand.c 修正。
+	(db/)
+	skill_db.txt グランドクロス修正。
+	cast_db.txt グランドクロス修正。
+
+--------------
+//0652 by 月詠み
+
+・グランドクロスを仮実装
+	(db/)
+	skill_db.txt
+	cast_db.txt
+	(map/)
+	battle.c
+		Damage  battle_calc_misc_attack
+		Damage  battle_calc_magic_attack
+	skill.c
+		skill_additional_effect
+		skill_castend_damage_id
+		skill_castend_pos2
+		skill_unit_group *skill_unitsetting
+		skill_unit_onplace
+		skill_check_condition
+
+--------------
+//0651 by 波浪
+
+・item_db.txtを修正
+	(db/)
+	item_db.txt
+		装備品のアイテム効果を修正
+
+--------------
+//0650 by 死神
+
+・三段掌の発動条件を弓と二刀流以外に変更。
+・表示をせずに内部で処理だけするNPCのCLASSを111から32767に変更。
+・細かい修正。
+	(map/)
+	clif.c
+		clif_getareachar_npc()、clif_spawnnpc()、clif_pcoutsight() 修正。
+	npc.h 修正。
+	battle.c
+		battle_calc_pc_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+
+--------------
+//0649 by 波浪
+
+・DBとDOC修正
+	(db/)
+	item_db.txt
+		グングニールはLV4武器なので、韓国のデータにあわせて風属性ではなくします。
+	mob_db.txt
+	size_fix.txt
+		楽器は大型に対して75%だそうです。
+	(doc/)
+	item_bonus.txt
+
+--------------
+//0648 by 死神
+
+・ショップの値段に-を入れると鯖が落ちる問題修正。(itemdbの初期化をnpcより
+先にするように変更。) それだけです。
+	(map/)
+	map.c
+		do_init()
+
+--------------
+//0647 by nini
+
+・item_db修正
+・スナッチャー仕様変更。弓以外のすべての武器で出るようになってます。
+	(/map/)
+	battle.c
+		三段掌の発動条件追加
+	skill.c
+		スナッチャーの発動条件追加
+	(/db/)
+	item_db.txt
+		シルクハットにSP上昇追加
+
+--------------
+//0646 by last
+
+・item_db.txtの修正(属性関連)
+	(/db/)
+	item_db.txt
+
+--------------
+//0645 by るるる（＆ree_ron）
+
+・item_value_db.txtにディスカウント＆オーバーチャージ等のスキルによる価格変動を受けるかどうかのフラグメントを追加。
+　実際の形式はサンプルとして用意したitem_value_db.sample.txtを見てください。（設定価格は完全に独断と偏見です）
+　同様のサンプルとしてＮＰＣ設置スクリプトも添付しておきます。
+・item_value_db.txtのアイテム価格設定で、売値と買値の設定を独立。（item_db.txtは従来どおり買値は売値の半額として自動処理）
+・ＮＰＣショップにて、１ＮＰＣで扱えるアイテム数を最大64から最大100に変更。（クラ自体は120ぐらいまで可能ですが）
+	(/db)
+	item_value_db.txt
+		カラム数を整理しただけです。内容はまったく変更していません。
+	(/map/)
+	clif.c
+		clif_buylist() clif_selllist()  変更
+	itemdb.h
+		item_data 構造体変更
+		itemdb_value_buy() itemdb_value_sell() itemdb_value_notdc() itemdb_value_notoc() マクロ追加
+	itemdb.c
+		itemdb_search() itemdb_readdb() itemdb_read_itemvaluedb()  変更
+		itemdb_sellvalue()  削除
+	npc.c
+		npc_buylist() npc_selllist() npc_parse_shop()  変更
+	(/sample/)
+		オマケです。次回SnapShotには含まないで宜しいです。
+
+コメント
+原型は私の友人ree_ronが行い、私が更に細かいミスを直しただけですが、テストはしましたので大丈夫でしょう。
+元々この処理を導入する理由として、特定アイテムの売値が1z固定にできないものか、という点だったからです。
+そしてやっていくうちに、ＮＰＣショップを利用したレアアイテムの販売とかで本鯖露店に近いことが出来るのではないか、
+ということが判ってきたわけです。
+それで一応はデータを用意しましたが、あくまでもサンプルとして利用してください。もし可能ならば、
+さらに修正を加えてアテナ独自として本採用としたデータをパッチアップしてくれればとも思いますがｗ
+
+
+--------------
+//0644 by nini
+
+・DBの間違い、643で追加されたスクリプト追加。
+	(/db/)
+	item_db.txt
+	cast_db.txt
+		チャージアローのキャスト追加。
+	exp_guild.txt
+		46-50までのexp抜けに追加。
+	size_fix.txt
+		楽器、鞭、ナックルのサイズ補正修正。
+
+--------------
+//0643 by 死神
+
+・色々と修正。
+・bMVPaddAtkRate削除。bAddRaceで処理するように変更。
+・bIgnoreDefEleとbIgnoreDefRace追加。
+bonus bIgnoreDefEle,n;	n属性の敵の防御無視
+bonus bIgnoreDefRace,n;	n種族の敵の防御無視
+・bMatkRate追加。魔法攻撃力を+n%上げます。よってbattle.cで計算していたロッドによる魔法攻撃力増幅の計算はなくしました。ステータス画面に上がった数値は表示されません。ダメージ計算の時に適用しています。
+・bCriticalDefに-を入れるとクリティカルを喰らう確率が上がるように変更。
+・NPC番号111は透明NPCですが落とし穴等のことを考えて表示を一切せずに
+内部で処理だけするように変更。(flagを使うと何とかなりそうですがその
+処理が全然わからなかったので透明NPCにクリックや名前の表示もできないように変更しました。)
+・ショップの値段に-を入れるとitem_db.txtもしくはitem_value_db.txtの物を使うように変更。
+・スキルルアフのエフェクトがサイトと同じだったので修正。ついでにルアフの
+ダメージも修正。
+・みすとれ巣によるとモンスター情報で表示される防御と魔法防御は乗算ではなく減算みたいなので修正。
+・他力本願ですがitem_db.txtの修正をお願いします。(全てのロッドにbonus bMatkRate,15; を入れる必要があります。その他の修正も必要です。)
+・テストしていない物もかなりありますので問題があったら報告してください。
+	(map/)
+	map.h 修正。
+	map.c
+		map_quit() 修正。
+	pc.h 修正。
+	pc.c
+		pc_walk()、pc_stop_walking()、pc_setpos()、pc_authok() 修正。
+		pc_calcstatus()、pc_bonus()、pc_natural_heal_sub() 修正。
+	npc.h 修正。
+	npc.c
+		npc_touch_areanpc()、npc_parse_shop() 修正。
+	clif.c
+		clif_quitsave()、clif_getareachar_npc()、clif_spawnnpc() 修正。
+		clif_skill_estimation() 修正。
+	battle.c
+		battle_calc_magic_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_calc_mob_weapon_attack() 修正。
+	mob.c
+		mobskill_use() 修正。
+	skill.c
+		skill_status_change_end()、skill_status_change_timer() 修正。
+		skill_status_change_start() 修正。
+	(db/)
+	const.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+
+--------------
+//0642 by 死神
+
+・装備バグ修正。(それだけ)
+	(map/)
+	pc.c
+		pc_authok()、pc_checkitem() 修正。
+
+--------------
+//0641 by 死神
+
+・bAspdRateとbSpeedRateのバグ修正。(それだけ)0640で計算をちょっと変えて見ましたがそれがまずかったみたいです。今度も計算式を変えましたがもう大丈夫だと思います。(多分)
+	(map/)
+	pc.c
+		pc_calcstatus()、pc_bonus()、pc_delitem()
+
+--------------
+//0640 by 死神
+
+・バグ修正と少し修正。
+・みすとれ巣を参考してダメージ計算を少し修正。
+・battle_athena.confに項目追加。(詳しいことはconf_ref.txtで)
+・キャラのHPとSPを2byteから4byteに変更。(テストはしていますがバグが出る
+可能性もかなりあります。ただキャラセレクト画面でHPやSPが32768を越える時
+表示は32768になるけど内部の処理は正常に動きますのでそれはバグではありません。
+パケットの長さのせいでそれ以外手段がなかったので...)
+・bCriticalDef(クリティカルを喰らわない確率+n%)の処理変更。100にすれば
+クリティカルを喰らわないようになります。)
+・bInnerAtkをbBaseAtkに変更。みすとれ巣でカードの攻撃は基本攻撃力の方に足されるとありましたので変更しました。今度は上がった攻撃力が表示されます。
+・bDoubleRateの処理変更。確率を足さずに一番高い物だけ適用します。それと左手
+装備の場合無視するように変更しまた。(左手はダブルが適用されませんので)
+・bDoubleAddRate追加。機能はダブルアタック確率+n%(武器無視)です。
+左手装備は無視されます。
+・0635で攻撃力表示を本鯖にあわせました。そして今度は弓だけではなく
+楽器とムチもdexによって攻撃力が上がるように変更しました。
+・装備した武器が消えるバグ修正の為に少し修正はしましたが本当に
+大丈夫なのかは不明です。報告をお願いします。
+	(conf/)
+	battle_athena.conf 修正。
+	(db/)
+	const.txt 修正。
+	item_db.txt 修正。
+	(doc/)
+	item_bonus.txt 修正。
+	conf_ref.txt 修正。
+	(map/)
+	map.h 修正。
+	pc.c
+		pc_calcstatus()、pc_bonus()、pc_equipitem() 修正。
+	battle.h 修正。
+	battle.c
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_config_read() 修正。
+	clif.c
+		clif_updatestatus()、clif_parse_LoadEndAck()、clif_party_hp() 修正。
+	(common/)
+	mmo.h 修正。
+	(char/)
+	char.c
+		mmo_char_send006b()、parse_char() 修正。
+
+--------------
+//0639 by 胡蝶蘭
+
+・ladminの修正など
+	・プロンプトの入力にTerm::ReadLineを使うようにした
+	　（入力履歴やコマンドラインの編集が可能に）
+	・POSIX関係の処理の例外エラーをトラップするようにしました
+	　（POSIXが全く使えない環境でも最低限、動くようになったかもしれない）
+	・細部修正
+
+	(tool/)
+	ladmin
+		Ver.1.04に。
+
+・MODバージョンがおかしい問題を修正
+	(common/)
+	version.h
+		ATHENA_MOD_VERSIONが８進数で記述されている問題を修正
+		数字の頭に0をつけると８進数になるので注意してください
+
+--------------
+//0638 by 波浪
+
+・0635・0637で新しくアイテム効果が実装されたので、それに伴ってitem_db.txtを修正
+・item_bonus.txtを修正
+	(db/)
+	item_db.txt 修正
+	(doc/)
+	item_bonus.txt 修正
+
+--------------
+//0637 by 死神
+
+・0635のバグ修正。
+・battle_athena.confに項目追加。(詳しいことはconf_ref.txtを見てください。)
+・時間が遅すぎて0635で説明してなかったです。(寝不足だったので...)
+まず仕様が変わったのは二刀流のダメージを武器別に完全に分けて行うように
+変更とアサシンじゃなくても左手修練を覚えていれば二刀流を使えるように
+変更しました。それとダメージの計算をちょっと修正。
+そしてbonusに追加されたのは
+bonus bInnerAtk,n;		内部攻撃力+n
+カードの引き上げダメージ用です。表示はされないけどダメージに計算されます。
+bonus bSpeed,n;		移動速度+n
+移動速度をn上げます。
+bonus bAspd,n;		攻撃速度+n
+攻撃速度をn上げます。
+bonus bSpeedRate,n;		移動速度+n%
+移動速度をn%上げます。
+bonus bAspdRate,n;		攻撃速度+n%
+攻撃速度をn%上げます。
+bonus bHPrecovRate,n;	HP自動回復率+n%
+自動回復するHPの量をn%上げます。スキルによる回復には影響がありません。本鯖の仕様とあっているかは不明です。
+bonus bSPrecovRate,n;	SP自動回復率+n%
+自動回復するSPの量をn%上げます。スキルによる回復には影響がありません。本鯖の仕様とあっているかは不明です。
+bonus bCriticalDef,n;		クリティカルを喰らわない確率+n%
+クリティカルの耐性をn上げます。10000以上にするとクリティカルを喰らいません。
+bonus bMVPaddAtkRate,n;	MVPモンスターにn%の追加ダメージ
+ボスモンスターにn%の追加ダメージを与えます。深淵の騎士カード用。
+bonus bNearAtkDef,n;		近距離攻撃のダメージをn%の減らす
+全て近距離攻撃のダメージをn%の減らします。(魔法とトラップ、鷹を除く)
+bonus bLongAtkDef,n;	遠距離攻撃のダメージをn%の減らす
+全て遠距離攻撃のダメージをn%の減らします。(魔法とトラップ、鷹を除く)
+bonus bDoubleRate,n;	ダブルアタック確率+n%(武器無視)
+武器に関係なく発動するダブルアタック確率をn%上げます。
+ダブルアタックスキルと別の判定を行う為ダブルアタックスキルが
+あってもスキルによるダブルアタック確率が上がるわけではありません。
+サイドワインダーカード用。
+	(map/)
+	pc.c
+		pc_bonus()、pc_calcstatus() 修正。
+		pc_natural_heal_sub() 修正。
+	battle.h
+		struct Battle_Config {} 修正。
+	battle.c
+		battle_calc_pc_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_config_read() 修正。
+	(db/)
+	skill_db.txt
+		スティールのSPを10に修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+
+--------------
+//0636 by Sin
+
+・デバッグ用ポタ子さんスクリプト(npc_pota.txt)のアマツ・コンロンへの対応。
+　すでに自力実装されていらっしゃる方々も多いかと思いますが…。
+　コンロンダンジョンの名前がわからないため「崑崙D1」などとさせていただいています。
+	(conf/)	npc_pota.txt
+
+--------------
+//0635 by 死神
+
+・battle_athena.confに項目追加。(詳しいことはconf_ref.txtを見てください。)
+・bonusにbInnerAtk(カード等で表示はされないけど実際には攻撃力に反映される物用です。)等を追加。他のはitem_bonus.txtを見てください。(追加はしたけどitem_db.txtは殆んど修正してません。)
+・その他バグ修正や仕様変更もやりましたが一々書く時間がないので...
+	(map/)
+	makeile 修正。
+	pc.c 修正。
+	map.h 修正。
+	clif.c 修正。
+	battle.h 修正。
+	battle.c 修正。
+	itemdb.c 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	item_bonus.txt 修正。
+	(db/)
+	const.txt 修正。
+	item_db.txt 修正。
+
+--------------
+//0634 by 死神
+
+・weddingクラスには転職できないように修正。
+・スーパーノービスの為にexpテーブルをbase 4つjob 4つに拡張。
+exp.txtが変わりスーパーノービスだけの経験値を設定できます。(exp.txtの
+4つ目がスーパーノービスのbase expで8つ目がjob expです。今は2次職業の物を
+コピーした物に過ぎませんが。) exp.txtの設定方法も知らない方はいないと
+思いますので説明は省略します。
+・スーパーノービスは転生のテストの為に韓国サクライだけ実装している物と
+思われますが(転生が実装されればなくなると予測しています。)それを
+実装していいのかと思ったりもしますが...
+・結婚衣裳は既に0629で実装しているのにまたパッチとして
+アップされるのもちょっと変(？)ですね。そういえば説明してなかったんですね。
+・装備専用スクリプトであるchangebaseの追加によってタキシードと
+ウェディングドレスが実装しています。これは職業を変更せずに見た目だけ
+変える物です。weddingクラス以外の適用も可能で変装セットとかも作れる
+わけですが内部処理は変更せずに見た目だけ変えているので0631で説明したように
+装備できない物を装備している場合鞍落ちが起こる可能性がありますので
+他の職業で使うのはお勧めしません。仮実装なのは今の仕様はタキシードと
+ウェディングドレスを装備するだけで見た目が変わるからです。韓国サクライの
+方では何かの条件が必要だと思っているのでその条件がまだ実装されいないから
+仮実装です。それにweddingクラスを職業にしてしまうと結婚するとスキル等が
+リセットされるか変になるかのどちらなので変だと思ってなかったのでしょうか？
+	help.txt 修正。
+	(db/)
+	job_db1.txt 修正。
+	exp.txt 修正。
+	(map/)
+	pc.c
+		pc_jobchange()、pc_readdb() 修正。
+		pc_nextbaseexp()、pc_nextjobexp() 修正。
+
+--------------
+//0633 by 波浪
+
+・装備の設定修正。結婚衣裳の職は、実際に転職するのではなくペコナイト(13)、ペコクルセ(21)のように画像を使うだけだと思うので
+　何も装備できない設定にしました。スパノビはノビが装備できるものだけ設定しました。
+・古木の枝の出現モンスターを追加
+・アマツのモンスの沸き具合を本鯖に近くなるように修正(まだまだ違いますが・・・)
+	(conf/)
+	npc_monster.txt		モンス名修正
+	npc_monster_amatsu.txt	修正
+	(db/)
+	item_avail.txt		鞍落ちアイテム追加
+	item_db.txt		装備設定を修正、他多数
+	mob_branch.txt		修正
+	mob_db.txt		モンス名修正
+	skill_tree.txt		修正
+
+--------------
+//0632 by nini
+
+・@jobchangeで結婚衣裳とスーパーノービスになれるように。(注意：韓国桜井クライアントのみ)
+・Sノビのステ、スキルなども暫定追加。(ノービスのコピーですが)
+　とりあえず見た目だけということで、結婚衣裳でも攻撃できますが(ただしノーモーション)、本来はできません。
+・上にあわせてitem_db編集。
+　結婚衣裳で武器もつとact、sprエラー出すので、結婚衣裳では武器を持てないようにした(はず)。
+	(db/)
+	job_db1.txt
+	job_db2.txt
+	item_db.txt
+		結婚衣裳、Sノビのデータ
+	skill_tree.txt
+		Sノビのスキル
+	(map/)
+	map.h
+		MAX_PC_CLASSに追加
+
+--------------
+//0631 by 死神
+
+・細かい修正。
+・タキシードとウェディングドレスの表示をbattle_athena.confで設定できる
+ように変更。
+・武器グラパッチについてですがパッチ前は使えない職業が装備をしても表示は
+されないだけで鞍落ちまでは起こらなかったけど武器グラパッチの後はその武器を
+装備することができない職業(本鯖で)が装備してしまった場合鞍落ちが起こる
+ことがありますので注意してください。
+	(db/)
+	item_db.txt
+		1161、2338、7170 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(map/)
+	battle.h
+		struct Battle_Configにwedding_modifydisplay 追加。
+	battle.c
+		battle_config_read() 修正。
+	pc.h
+		pc_cart_delitem() 修正。
+	pc.c
+		pc_jobchange()、pc_additem()、pc_delitem()、pc_cart_delitem() 修正。
+		pc_checkitem()、pc_getitemfromcart() 修正。
+	clif.c
+		clif_changelook()、clif_send()、clif_parse_GlobalMessage() 修正。
+	script.c
+		buildin_changebase() 修正。
+	storage.c
+		storage_storageaddfromcart() 修正。
+	vending.c
+		vending_purchasereq() 修正。
+
+--------------
+//0630 by 引退人
+
+・ギルド脱退時にcharサーバが落ちることがあるのを修正
+・water_height.txtを更新
+・0627に関連してmodifydisplay関連を削除
+	(char/)
+	int_guild.c
+		mapif_guild_leaved()のバッファ容量が足りなかったので、
+		unsigned char buf[64]; -> unsigned char buf[128];
+		と修正。
+	(conf/)
+	battle_athena.conf
+		equip_modifydisplayを削除
+	water_height.txt
+		prt_fild04.gatとmoc_fild01.gatの分を追加
+	(doc/)
+	conf_ref.txt
+		equip_modifydisplayの説明を削除
+	(map/)
+	battle.h
+		struct Battle_Config からequip_modifydisplayを削除
+
+--------------
+//0629 by 死神
+
+・0627のバグ一部修正と新しい移動パケットに対応。(自分の間違いでした。
+モンスターやNPCも新しい移動パケットを使うと思っていたのですが
+新しい移動パケットはプレイヤーのみのようです。)
+・タキシードとウェディングドレス仮実装。(韓国のサクライ鞍じゃないと
+鞍落ちされます。使用する時はitem_db.txtのコマントアウトされている
+2338と7170を解除して使ってください。)
+・SP回復アイテムもintによって効果が増えるように変更。
+・0627で書き忘れですがカートのアイテム計算とitemdb_を呼ぶのを最小化する
+処理を入ってるせいでpc_additem()、pc_delitem()、pc_cart_additem()、pc_cart_delitem()以外の方法でカートアイテムやアイテムに変動がある場合
+正常に動作する保証がないので修正のさいには注意してください。
+	readme0754をreadme0574に修正。
+	makefile 修正。
+	(map/)
+	map.h 修正。
+	clif.c 修正。
+	pc.c 修正。
+	battle.c 修正。
+	mob.c 修正。
+	script.c 修正。
+	(db/)
+	item_db.txt 修正。
+	class_equip_db.txt 修正。
+	skill_db.txt 修正。(誤字を治しただけです。)
+	(conf/)
+	npc_event_doll.txt 修正。(流浪人さんありがとうございます。)
+
+--------------
+//0628 by NOCTURNE
+
+・snapshot
+・snapshotからsnapshotまでのReadme分割
+・要望が多かったのでsnap作成（プログラム的な変更点は無し
+
+--------------
+//0627 by 死神
+
+・コードの最適化と少し修正。(少しは軽くなると思います。)
+・ @modifydisplayコマンド削除。
+・新しい移動パケットに対応だと思ったら0x1d8、0x1d9、0x1daパケットの一部が
+0x78、0x79、0x7bと変わってるみたいです。つまり今のままでは対応できません。
+X,Yの座標の部分の書式が変わったのかと予測はしていますが...
+情報を求みます。(makefileのDPACKETVERを4にすれば0x1d8、0x1d9、0x1daを
+使いますが座標がずれたらしく何も標示されません。)
+・100000からだったchar_idを150000からに変更。(ペットの卵の問題で武器の名前がちょっと変になったので修正しました。)
+・ペットのコード少し修正。(pet_idをcard[2]とcard[3]からcard[1]とcard[2]に変更しました。よって前に作った卵は使えません。鞍でcard[3]の機能が変わったので
+仕方なく修正しました。今度はconvertツールがありません。作る時間がなかったので...)
+・最適化の為に修正した所が多いですが全て正常動作する保証はありません。
+鯖落ちバグが発生したら報告お願いします。(batte.cはまだ最適化してません。)
+カートのアイテム計算やアイテムの重量の計算を最初にだけするようにしているので表示に少し問題があるかも...
+・修正したファイルだけ書いておきます。
+	makefile
+	help.txt
+	(common/)
+	mmo.h
+	(map/)
+	map.h
+	atcommnad.h
+	atcommnad.c
+	pc.h
+	pc.c
+	clif.c
+	script.c
+	trade.c
+	itemdb.h
+	itemdb.c
+	battle.h
+	battle.c
+	pet.c
+	map.c
+	mob.c
+	(char/)
+	char.c
+	(conf/)
+	battle_athena-conf
+	atcommand_athena.conf 
+
+--------------
+//0626 by 引退人
+
+・パケット長テーブル（新移動パケットなど）修正
+	(doc/)
+	client_packet.txt	パケット解析スレ Mさんの情報を反映
+	conf_ref.txt		0624に合わせて修正
+	(map/)
+	clif.c
+		packet_len_table[]	client_packet.txtに合わせて修正
+
+--------------
+//0625 by 引退人
+
+・@hide透明化をBOSSなどに見破られないように修正
+	(map/)
+	pc.h
+		#define pc_iscarton(sd)	修正
+		#define pc_isinvisible(sd)	追加
+	mob.c
+		mob_attack()
+		mob_target()
+		mob_ai_sub_hard_activesearch()
+		mob_ai_sub_hard_mastersearch()
+		mob_ai_sub_hard()
+			透明（pc_isinvisible(sd)!=0）で死人と同様に判定されるように修正
+	(conf/)
+	npc_cTower.txt	修正（thx to holyzardさん）
+
+--------------
+//0624 by るるる
+
+・武器画像表示処理の一新（新移動パケット使用）
+・上と関連して、@modifydisplayコマンドを設けた
+　　　　機能としては、現在のアサシン武器などのがおかしい場合に、または気に入らないとかで、
+　　　　キャラ毎に旧パケを使用するようにしている。
+
+	(map/)
+	atcommand.c
+		atcommand()  @modifydisplayコマンドを追加
+	atcommand.h
+		struct Atcommand_Config {
+'7d  変更
+	clif.c
+		clif_set0078_and01d8() , clif_set007b_and01da()  関数名＆処理の変更
+		clif_spawnpc() , clif_movechar() , clif_changelook() , clif_getareachar_pc() , 
+		clif_fixpcpos() , clif_parse_LoadEndAck()  変更
+	map.h
+		struct map_session_data ・b}  変更
+	pc.c
+		pc_setnewpc() , pc_calcstatus() , pc_equiplookall() , pc_changelook()  変更
+
+	(conf/)
+	atcommand_athena.conf
+		equip_modifydisplay  追加
+
+	変更箇所は全てキーワード「modifydisplay」でサーチすればほぼわかるかと。
+
+コメント：もうこれで問題は無いはず。実は大いなる勘違いをしてた個所があったのは内緒（マテw
+
+--------------
+//0623 by 引退人
+
+・@hideで透明化（見られない＆MOBにタゲられない）するように修正など
+	(map/)
+	atcommand.c
+		@hideのoption設定を0x04から0x40に変更
+	mob.c
+		mob_attack()
+		mob_target()
+		mob_ai_sub_hard_activesearch()
+		mob_ai_sub_hard_mastersearch()
+		mob_ai_sub_hard()
+			option判定を0x06から0x46に修正
+	(conf/)
+	npc_event_potion.txt	MORISON_MEAT修正（thx to holyzardさん）
+
+--------------
+//0622 by 引退人
+
+・mobがスキル使用に失敗した場合、通常攻撃するように
+	(map/)
+	mob.c
+		mobskill_use_id()	スキル使用失敗で0、成功で1を返すように修正
+		mobskill_use_pos()	スキル使用失敗で0、成功で1を返すように修正
+		mobskill_use()		上記を反映して失敗時には0を返すように修正
+
+--------------
+//0621 by 胡蝶蘭
+
+・アイテムチェックを行うかどうかconf/battle_athena.cnfに書けるように
+・アイテムチェックで不正と判断するかどうかをdb/item_avail.txtに書けるように
+・@itemcheckで明示的にアイテムチェックできるように
+
+	デバグやテストなどで色々なアイテムIDを使用したい場合は
+	アイテムチェックを無効にして下さい。(item_check: off)
+	無効にした場合でも@itemcheckコマンドでチェックすることが出来ます。
+	cnfファイルは用意してないので必要なら各自適当に書き換えてください。
+
+	(db/)
+	item_avail.txt
+		新規追加。不正アイテムの列挙に使用。未完成。他力本願。
+		item_db.txtに定義されてるが実際には使用できないアイテムを書く。
+	(doc/)
+	conf_ref.txt
+		battle_athena.cnfとatcommand_athena.cnfの説明修正
+	(map/)
+	itemdb.c/itemdb.h
+		itemdb_availableマクロ追加
+		itemdb_read_itemavail()追加
+		itemdb_readdb()でavailable=1にするように
+		itemdb_search()で存在しないIDはavailable=0でデータを作るように
+		do_init_itemdb()でitemdb_read_itemavail()を呼ぶように
+	pc.c/pc.h
+		pc_checkitem()をエクスポート
+		pc_checkitem()でavailableとbattleconfigをチェックするように
+	atcommand.c/atcommand.h
+		@itemでbattleconfigをチェックするように
+		@itemcheckコマンド追加
+		atcommandconfigにitemcheckメンバ追加
+	battle.c/battle.h
+		battle_configにitem_checkメンバ追加
+
+・ladminの修正など
+	アカウント追加、パスワード変更の際にパスワードを省略すると、
+	パスワード用のエコーしない専用プロンプトで入力できます（＆入力確認）。
+	追加の際にパスワードが表示されたら困る場合などに。
+	パスワード入力中はCtrl+Cが効かないので注意してください。
+
+	パスワードの不正文字の表示が、何文字目かで表示するようになりました。
+	その他微妙にチェック追加など。
+
+	Cygwinでしか動作確認していません。POSIXモジュールを使っているので、
+	POSIXでない(＆エミュレーションもできない)プラットフォームだと
+	動かないかもしれません。
+	UNIX系ではnkfなどで改行コードを変換しないとだめかも？
+
+	(tool/)
+	ladmin
+		Ver.1.03に。
+
+-------------
+//0620 by 月詠み
+
+・ホーリークロス実装
+
+	(db)
+		skill_db.txt 修正
+	(map)
+		skill.c
+			skill_additional_effect()修正(コメントのみ)
+		battle.c
+			Damage battle_calc_weapon_attack()修正
+
+-------------
+//0619 by るるる
+
+・パッチ0617のでやり忘れと微妙な修正
+
+	clif.c
+		clif_movechar(),clif_parse_LoadEndAck() 修正
+
+--------------
+//0618 by nini
+
+・リザレクションの詠唱、ディレイ追加。回復量修正。
+・消費SP修正
+・アローシャワーの範囲を5*5にして2セル吹き飛ばし。
+・チャージアローの使用武器条件無し。
+・スピアスタブの飛距離を6セルに。
+	(/db)
+		cast_db.txt 修正
+		skill_db.txt 修正
+	(/map)
+		battle.c
+			battle_calc_weapon_attack() 修正
+		skill.c
+			skill_castend_damage_id() 修正
+			skill_check_condition() 修正
+			skill_castend_nodamage_id() 修正
+
+--------------
+//0617 by るるる
+
+・武器画像表示で他キャラが表示されないのを「とりあえず」修正
+・靴表示のパケットを送信停止（現時点ではムダ。コメントしただけですが）
+	clif.c
+		clif_spawnpc(),clif_getareachar_pc(),clif_fixpcpos(),clif_changelook()修正
+	pc.c
+		clif_changelook()がある部分を修正（武器ー＞盾と順になるように処理の入れ替え）
+
+コメント。
+新マップ移動パケ(0x1d8～0x1da）を色々とやったが、そのパケ１つで武器表示が新式のに対応してる
+というわけではないっぽい。旧移動パケだと自分以外のキャラが移動すると旧式表示になってしなう。
+更に、新武器表示パケは武器と盾の同時処理が出来てない。おそらくクライアントの問題だと思う。
+とりあえず、キャラが動くたびに新武器パケ＝＞旧盾パケの２つの装備パケを送ることで解決させている。
+本鯖ではどうなのかの実際のところのデータが無いため、これ以上のことはムリ。
+
+--------------
+//0616 by 胡蝶蘭
+
+・water_height.txtを読んでいないとサーバーが落ちるバグ修正
+	map.c
+		map_waterheight()修正
+
+・PCのマップ移動時のアイテムチェックでアイテムIDの存在をチェックするように修正
+・一部の＠コマンドでアイテムIDの存在をチェックするように修正
+	pc.c
+		pc_checkitem()修正
+		pc_authok()修正 pc_checkitem()追加
+	clif.c
+		clif_parse_LoadEndAck()修正
+	itemdb.c
+		itemdb_exists()追加（itemdb_searchと同じだが、dbに存在しない
+			場合は新しいデータを作らずにNULLを返す）
+		itemdb_read_classequipdb()修正 itemdb_search=>itemdb_exists
+		itemdb_read_itemnametable()修正 itemdb_search=>itemdb_exists
+		itemdb_read_itemvaluedb()修正 itemdb_search=>itemdb_exists
+	atcommand.c
+		@item修正 itemdb_search=>itemdb_exists
+		@produce修正 itemdb_existsでチェックするように
+
+--------------
+//0615 by 波浪
+
+・アイテムDATA大幅修正
+　主な修正箇所は、回復アイテムの回復量の修正、消費アイテムをclass_equip_db.txt無しでも使用できる様に修正、
+　装備品の装備可能職を全て修正、カード効果を修正、etc・・・です。
+
+--------------
+//0614 by Nikita
+
+・アイテムDATAの修正（主に回復量）
+・スキル解毒の射程修正
+・0612の細かい修正
+	(conf/)
+		npc_town_prontera.txt 修正
+	(db/)
+		item_db.txt 修正
+		skill_db.txt 修正
+
+--------------
+//0613 by 引退人
+・checkweight修正
+	(conf/)
+		npc_event_making.txt checkweight部分を修正
+		npc_event_potion.txt ポーション、ジュースNPCのcheckweight修正
+
+--------------
+//0612 by nini
+
+・アイテムDATA修正
+	(db/)
+		item_db.txt 修正
+	(conf/)
+		npc_town_***.txt 修正
+		R.O.M776さんを参照しました。
+
+--------------
+//0611 by 死神
+
+・アイテム使用条件があわない時0xa8パケットを送るように変更。(バグ報告スレッド 243のno nameさん情報提供ありがとうございます。)
+・QMで集中力向上と速度上昇、アドレナリンラッシュ、ラウドボイス、スピアクイッケン、ツーハンドクイッケンを解除するように修正。
+・速度上昇と速度減少で逆のスキルが解除されるように修正。
+・0609で書き忘れ。モンスターがQMの範囲から抜けても効果が維持するように
+変更とブレッシングで呪いと石化が解除されるように修正。
+	clif.c
+		clif_useitemack() 修正。
+	skill.c
+		skill_status_change_start() 修正。
+	pc.c
+		pc_insert_card() 修正。(これはカードバグとは関係ない修正です。そのバグの修正は自分が05xx当たりで修正しましたので。)
+
+--------------
+//0610 by 波浪
+
+・アイテムDATA修正
+	(db/)
+		item_db.txt 修正
+
+--------------
+//0609 by 死神
+
+・色々と修正。
+・モンスターが止まるように動く問題修正。
+・指弾のディレイ修正。
+・矢作成のコード片付け。
+・敵がスキル範囲から逃げた場合スキルが失敗するように変更。
+・class_equip_db.txtの仕様変更。
+	性別と装備レベルも設定可能に変更と使用アイテムの使用職業、性別と使用
+	レベルの設定ができるように変更。(ただデータが多いせいで修正した
+	class_equip_db.txtはサンプル程度の物です。埋めてください。他力本願ですが...)
+	それとアイテム使用条件があわないとアイテムが使わないようにしては
+	いますが01c8パケットの<type>を0にしてもアイテムを使用した時と同じ
+	エフェクトが出ます。本鯖のアイテム使用パケットが分からないままじゃ
+	こうするしかなかったのですが...
+・battle_athena.confに項目追加。
+・その他スキル少し修正と細かい修正。
+・修正した所を全て覚えてませんのでファイルだけ。
+	(map/)
+	clif.c 修正。
+	mob.c 修正。
+	mob.h 修正。
+	pc.c 修正。
+	map.h 修正。
+	skill.c 修正。
+	skill.h 修正。
+	itemdb.c 修正。
+	battle.c 修正。
+	battle.h 修正。
+	(conf/)
+	battle_athena.conf 修正。
+	(db/)
+	cast_db.txt 修正。
+	skill_db.txt 修正。
+	create_arrow_db.txt 修正。
+	class_equip_db.txt 修正。
+	item_db.txt 修正。
+	(doc/)
+	client_packet.txt 修正。
+	conf_ref.txt 修正。
+
+--------------
+//0608 by sk
+・アマツNPC追加
+	(conf/)
+		npc_town_amatsu.txt 城内NPC追加
+		npc_warp_amatsu.txt 城内ワープポイント追加
+
+--------------
+//0607 by J
+・アサルトタートルの手下召喚のバグ修正(報告ありがとうございます るるるさん)
+	(db/)
+		mob_skill_db.txt アサルトの修正ついでにテレポを使うMOBのスキルディレイも修正
+
+--------------
+//0606 by 引退人
+・スキルレベル最大値以上にクリックした時点で他スキルが上げられなくなるバグを修正（Thanx to 227さん）
+	(map/)
+	clif.c
+		clif_skillup()
+		スキルレベルが最大値のとき、パケット末尾を0にするように修正
+
+--------------
+//0605 by るるる
+
+・武器属性付与スキルの不都合修正
+	武器を持ち替えたり外したりした場合も、属性付与を解除するようにしました。
+	但し、素手＝＞武器装備のみ状態維持します。
+・スピアクイッケンのステータスアイコンを正しく表示
+・２ＨＱ、スピアクイッケン、アドレナリンラッシュで該当以外の武器持ち替えで状態消滅
+	スピアクイッケンは未確認ですが、２ＨＱは確実なので２ＨＱと不公平な仕様とは
+	考えにくいので同様なパターンとしました。本鯖と相違がある場合は報告願います。
+・敵のＱＭで集中力向上と速度上昇を解除
+	ＱＭで影響するスキルはこれ２つだけかな？　私の記憶と掲示板での報告とで
+	判断したのですが、もし相違がありましたら報告願います。
+
+	(map/)
+	clif.c
+		clif_parse_UnequipItem()  修正
+	pc.c
+		pc_checkallowskill() pc_equipitem()  修正
+	skill.h
+		skill_encchant_eremental_end()  追加
+	skill.c
+		skill_status_change_start() skill_status_change_end()
+		skill_status_change_clear() skill_encchant_eremental_end()  修正
+	その他細かいところ少々
+
+--------------
+//0604 by J
+・MOBスキル再修正
+・MOBDB修正
+	(db/)
+	mob_skill_db.txt
+		アークエンジェリングとタートルジェネラルが1回に2種類までしか
+		MOBを出さなかったのを修正
+	mob_db.txt 
+		ロードオブデスのドロップでエラーが出るのを修正(未確認)
+		怨霊武士のドロップとMVPを追加(未確認)
+--------------
+//0603 by 引退人
+・新規アイテム時にも所持可能個数チェックをするように修正
+	(map/)
+	pc.c
+		pc_checkadditem()
+			新規アイテム時にMAX_AMOUNTを超えていたら
+			ADDITEM_OVERAMOUNTを返すように修正
+
+--------------
+//0602 by 引退人
+・Geffen鍛冶屋で落ちる問題を修正
+	(conf/)
+	npc_town_geffen.txt	if (!checkweight(,)) から if (!(checkweight(,))) に修正
+
+--------------
+//0601 by J
+・MOBスキルの危ない所をいくらか修正
+・覚醒と狂気の使える職を修正
+・ゲフェニアダンジョンの配置をカボチャイベントで入れたときの配置に修正
+	ただしボスがDOP2体ではなくドラキュラにしています。
+	(conf/)
+		npc_monster.txt モンスター配置微変更
+	(db/)
+		mob_skill_db.txt	怪しい設定などの修正
+		item_db.txt		増速POTの修正
+
+--------------
+//0600 by 引退人
+・プロンテラ精錬所の横のファンに話し掛けると固まる問題を修正
+・MOBスキル取り込み（Thanx to Jさん）
+	(conf/)
+		npc_event_skillget.txt	ファンのLabelを修正
+		npc_town_prontera.txt	ファンが重複していたので削除
+	(db/)
+		mob_skill_db.txt	ジュノー以降のMOBスキル追加
+
+--------------
+//0599 by るるる
+
+・セージの武器属性付与スキルの不都合修正とステータスアイコン表示
+	アスペルシオとエンチャントポイズンとで多重にかかってしまってたので、
+	最後に付与したもの１つになるようにしました。
+	そのついでにステータスアイコンも表示するようにもしました。
+	（未テストですが、アイコン出なかったスピアクイッケンもでるはずです。）
+・アイテムDBにて、増速ポーションの使用制限を追加
+	Jazzさん提供です。
+	それと私の趣味でラグナロクTシャツをアレナニしましたがｗ　気に入らなければ
+	消すなり元通りに修正するなりしてしちゃってくださいませ～。
+
+	(conf/)
+		battle_athena.conf  598での入れ忘れ
+	(map/)
+		skill_encchant_eremental_end()  追加
+		skill_status_change_end() skill_status_change_start() skill_status_change_clear()  修正
+	(db/)
+		iten_db.txt  修正
+
+--------------
+//0598 by るるる
+
+・装備武器の画像変更に対応
+	一応ながらクルセイダーの両手槍とかプリーストの鈍器とかはテストしましたが、
+	全ての職をチェックはいません。またこの時点ではクライアント自体の表示データに
+	問題の有るのが多いのも付け加えておきます。
+	あと、靴も一応は対応しました。但しこれは現時点では本鯖すらも未対応なのですが。
+	表示が化けて嫌だという場合は従来のやり方も出来ます。
+
+	(conf/)
+	battle_athena.conf
+		オプション equip_modifydisplay を追加
+	(map/)
+	battle.h
+		Battle_Config  修正
+	battle.c
+		battle_config_read()  修正
+	clif.c
+		packet_len_table[]  clif_changelook()  修正
+	map.h
+		enum {} 修正
+	pc.c
+		pc_calcstatus() pc_equiplookall() pc_changelook()  修正
+	(common/)
+	mmo.h
+		mmo_charstatus {}  修正
+
+--------------
+//0597 by 波浪
+
+・アマツに関する修正＆微修正
+	(conf/)
+	npc_mob_job.txt
+	npc_monster.txt
+	npc_monster30.txt
+		モンス名修正
+	npc_monster_amatsu.txt
+		追加（モンス数がかなり手抜きです・・・
+	npc_town_amatsu.txt
+			ショップNPCを統合（npc_shop3.txtを消してもOKです
+	(db/)
+	mob_db.txt
+		アマツのモンスデータを現在分かる範囲で修正＆草ときのこのdef,mdefを修正
+
+--------------
+//0596 by 死神
+
+・0595の修正と細かい修正。
+・フリーキャストでキャストしている間は攻撃可能ですがキャストした後の
+ディレイタイムでは攻撃できないようになっています。本鯖の仕様がどうなのかは
+わかりません。
+・動いているPCにモンスターが攻撃できない問題修正。(テストしてませんが
+多分これで大丈夫かと。)
+	(map/)
+	skill.h
+		SC_FREECAST 削除。
+	skill.c
+		skill_use_id()、skill_use_pos() 修正。
+		skill_castend_id()、skill_castend_pos() 修正。
+		その他少し修正。
+	pc.c
+		calc_next_walk_step()、pc_attack_timer()、pc_calcstatus() 修正。
+	clif.c
+		 clif_parse_ActionRequest()、clif_parse() 修正。
+	map.h
+		struct map_session_dataにprev_speed追加。
+	mob.c
+		mob_ai_sub_hard()、mob_changestate()、mob_attack() 修正。
+
+--------------
+//0595 by PRevEv
+・フリーキャスト修正、実装(キャスティング中攻撃もできます。)
+	(/map)
+	pc.c
+		pc_calcstatus() 修正。
+		calc_next_walk_step() 修正。
+		pc_attack_timer() 修正。
+	skill.c
+		skill_castend_id()、skill_castend_pos()、skill_use_id()、skill_use_pos() 修正。
+
+--------------
+//0594 by 死神
+
+・韓国鞍のパーティ問題修正と細かい修正。
+・@partyコマンド修正と@guildコマンド追加。
+・battle_athena.confにguild_emperium_check追加。
+・スキル使用が失敗してもディレイがかかる問題修正。
+	help.txt 修正。
+	(map/)
+	clif.c
+		clif_parse_CreateParty2() 追加。
+		clif_parse_ItemIdentify() 修正。
+		その他少し修正。
+	atcommand.h、atcommand.c 修正。
+	battle.h
+		struct Battle_Configにguild_emperium_check追加。
+	battle.c
+		battle_config_read() 修正。
+	guild.c
+		guild_create()、guild_created() 修正。
+	skill.c
+		skill_castend_id()、skill_castend_pos() 修正。
+	Makefile 修正。
+	(doc/)
+	client_packet.txt
+		パケット0x01e8 追加。
+	conf_ref.txt 修正。
+	(conf/)
+	atcommand_athena.conf 修正。
+	battle_athena.conf 修正。
+
+--------------
+//0593 by 死神
+
+・メテオとバミリオンのダメージ修正と細かい修正。
+・メテオの隕石が落ちてくる範囲を7*7から5*5に変更。(これで中央は全ての隕石の
+ダメージを受けることになります。)
+・自動回復計算式変更。
+	スキルレベル*5 + (max_hp/50)から
+	スキルレベル*5 + (max_hp*スキルレベル/500)に変更。(SPと息吹も同じように変更。)
+・GM右クリック命令「使用者強制終了」でatcommand_athena.confのkickの
+レベルをチェックするように変更。
+	(db/)
+	skill_db.txt
+		スキル気功のspを10から8に修正。
+	(map/)
+	map.c
+		NO_WATERを100から1000000に変更。
+	battle.c
+		battle_calc_magic_attack() 修正。
+	skill.c
+		skill_castend_pos2() 修正。
+	pc.c
+		pc_natural_heal_hp()、pc_natural_heal_sp()、pc_spirit_heal() 修正。
+	clif.c
+		clif_parse_GMKick() 修正。
+	(doc/)
+		conf_ref.txt 修正。
+
+--------------
+//0592 by 引退人
+
+・水場の有り無しをwater_height.txtだけで決めるように変更。npc_water.txtは不要に。
+・カードスキルではレベル上げできないようになったため不要になった処理を削除。
+	(conf/)
+	map_athena.conf
+		npc: conf/npc_water.txt 消去
+	water_height.txt
+		デフォルト高さ3のマップ分を追加＆all_waterを高さ-100としてコメントで追加
+	(map/)
+	map.c
+		waterlistはmap_readwater()内でメモリ確保
+		gat設定後は不要なのでmap_readallmap()でメモリ開放しています
+	map.h
+		struct map_dataのflagからwater_flagを消去
+	npc.c
+		npc_parse_mapflag()
+			マップフラグwaterとall_waterを消去
+	pc.c
+		pc_skillup()
+			裏でスキルLvUPできなくなったのでskill[id].flagの分は消去
+	skill.c
+		skill_check_condition()
+			map_getcellで水場判定するように修正
+
+--------------
+//0591 by CHRIS
+
+・モンクが氣弾をもっているとき、氣弾*3の必中ダメージが入る様になりました。─　battle.c修正
+・モンクスキル「指弾」と「発勁」と「気孔」の詠唱時間が正しく修正されました。─　cast_db.txt修正
+
+--------------
+//0590 by 死神
+
+・grf-files.txtやconfファイル、account.txtファイルの名前と位置を変えるように変更。
+・マップ移動による鯖落ちを防ぐ為に修正。(マップが二度ロードされて鯖落ちが
+起こったとの報告を受けたので。)
+・0586をちょっと修正。装備によるスキルの場合レベル上げができないように修正。
+ただ装備によるスキルをスキルポイントを使って上げる時は装備を外す必要が
+あります。
+・@partyちょっと修正。(名前に空白があっても大丈夫なように。)
+・水場の高さをwater_height.txtで読み込むように変更。
+・confファイルで設定する物をファイルのパスに空白があっても大丈夫な
+ように変更。
+・GM右クリック命令「使用者強制終了」でモンスターを倒せるように変更。
+(原因は不明ですがこれでモンスターを殺すと鯖がめちゃくちゃに遅くなることが
+あります。)
+・その他少し修正。
+・テストは殆んどしてませんので注意してください。
+	athena-start 修正。
+	(map/)
+	pc.c
+		pc_skill()、pc_resetskill()、pc_setpos()、pc_read_gm_account() 修正。
+		pc_set_gm_account_fname() 追加。
+	pc.h
+		pc_set_gm_account_fname() 追加。
+	clif.c
+		clif_skillinfoblock()、clif_parse_LoadEndAck()、clif_parse_GMKick() 修正。
+		clif_changemap() 修正。
+	atcommand.c
+		@partty 修正。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+	map.c
+		map_config_read()、map_readwater() 修正。
+	script.c
+		script_config_read()、do_init_script() 修正。
+	script.h
+		script_config_read() 追加。
+	(common/)
+	version.h 修正。
+	grfio.h
+	grfio.c
+		grfio_init() 修正。
+	mmo.h
+		GRF_PATH_FILENAME 追加。
+	(conf/)
+	map_athena.conf 修正。
+	npc_water.txt 修正。
+	water_height.txt 追加。
+	login_athena.conf 修正。
+	(login/)
+	login.c
+		login_config_read()、read_gm_account() 修正。
+	(char/)
+	char.c
+		do_init() 修正。
+		char_config_read() 追加。
+	inter.c
+		inter_config_read() 修正。
+	(doc/)
+	conf_ref.txt 修正。
+
+--------------
+//0589 by 胡蝶蘭
+
+・GMの右クリックで切断される問題を修正
+	とりあえず01dfパケットを無視するようにしました。
+	なんとなくこのパケットはチャット禁止回数とは関係無いような気も……
+
+	clif.c
+		clif_parse_GMReqNoChatCount()追加
+
+・startをathena.shでなくathena-startを使うように変更
+	start
+		athena.sh => athena-start startに置き換えしただけ
+
+--------------
+//0588 by Kalen
 
 ・AmatsuNPC追加
 
@@ -1050,7 +3242,7 @@ set Zeny - 10000,0; --> set Zeny,Zeny-10000; 修正
 	char_athena.conf 修正。
 	map_athena.conf 修正。
 
-----------------
+--------------
 //0524 by huge
 
 ・ローグ トンネルドライブ実装
@@ -1063,11 +3255,11 @@ set Zeny - 10000,0; --> set Zeny,Zeny-10000; 修正
 	speed += speed * (20-スキルレベル)/40
 	と、しました。本鯖仕様が分かる方居ましたら修正お願いします。
 
-----------------
+--------------
 //0523 by NOCTURNE
 
 ・npc_event_rental.txtにクルセイダー用のペコペコ管理兵を追加
-----------------
+--------------
 //0522 by 波浪
 
 ・mob_db.txtをジュノー後のデータに修正
@@ -7724,7 +9916,3 @@ item_db.txtの書き換えのみです。
 
 
 (c) 2003 Athena Project.
-$Id: README,v 1.8 2003/07/12 12:43:15 motoko Exp $
-
-
-

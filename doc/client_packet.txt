@@ -34,10 +34,10 @@
     3,  3, 35,  5, 11, 26, -1,  4,  4,  6, 10, 12,  6, -1,  4,  4,
    11,  7, -1, 67, 12, 18,114,  6,  3,  6, 26, 26, 26, 26,  2,  3,
 #0x01C0
-    2, 14, 10, -1, 22, 22,  4,  2, 13, 97,  0,  9,  9,  0,  0,  0,
-    8,  0,  10, 35,  6,  8,  4, 11, 54, 53, 60,  2, -1, 47,  0,  0,
-    0,  8,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  33,  0,
-    0,  0,  0,  0,  7
+    2, 14, 10, -1, 22, 22,  4,  2, 13, 97,  0,  9,  9, 29,  6, 28,
+    8, 14, 10, 35,  6,  8,  4, 11, 54, 53, 60,  2, -1, 47, 33,  6,
+    0,  8,  0,  0,  0,  0,  0,  0, 28,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  7,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 
 S クライアントから見て送信
 R クライアントから見て受信
@@ -301,9 +301,9 @@ R 00ca <type>.B
 R 00cb <type>.B
 	NPCへ売却終了。type=00成功
 S 00cc <ID>.l
-　	GM用右クリックメニュー「（name）使用者強制終了」使用
+	GM用右クリックメニュー「（name）使用者強制終了」使用
 R 00cd <ID？>.l
-　	GM用右クリックメニュー「（name）使用者強制終了」の応答
+	GM用右クリックメニュー「（name）使用者強制終了」の応答
 	<ID>が0の場合は失敗と表示。(このパケットはただの応答です。接続終了の機能はありません。)
 S 00cf <nick>.24B <type>.B
 	type=00 nickからの発言受け付け拒否 (/ex nick)
@@ -413,10 +413,10 @@ S 00ff <ID>.l <fail>.l
 	パーティに誘われた時の返答。fail=1 ok返答?
 S 0100
 	パーティ脱退要求
-S 0101 <exp>.w <item?>.w
-	パーティ設定変更
-R 0102 <exp>.w <item?>.w
+R 0101 <exp>.w <item?>.w
 	パーティ設定現状? exp=2の場合は公平配分設定失敗?
+S 0102 <exp>.w <item?>.w
+	パーティ設定変更
 R 0104 <ID>.l ?.l <X>.w <Y>.w <offline>.B <party name>.24B <nick>.24B <map name>.16B
 	パーティ1人分情報更新
 R 0105 <ID>.l <nick>.24B <fail>.B
@@ -564,7 +564,7 @@ R 013d <type>.w <val>.w
 	HP回復スキル/SP回復スキルによる回復
 	type=5ならHP type=7ならSP
 R 013c <index>.w
-　　	装備している矢
+	装備している矢
 
 R 013e <src ID>.l <dst ID>.l <X>.w <Y>.w <lv?>.w ?.w <wait>.l
 	スキル詠唱中。PC/NPCが相手の場合は(X,Y)は0。場所がターゲットの場合はdst IDは0になる
@@ -602,14 +602,14 @@ R 014C <len>.w (<type>.l <guildID>.l <guild name>.24B).*
 	type=0 同盟
 	type=1 敵対
 S 014D
-　　	ギルド情報表示開始？
+	ギルド情報表示開始？
 R 014E <type?>.l
-　　	type=0x57 一般ギルド団員
-　　	type=0xD7 ギルドマスター
+	type=0x57 一般ギルド団員
+	type=0xD7 ギルドマスター
 S 014F <page>.l
-　　	ギルド表示タブ送信
+	ギルド表示タブ送信
 R 0150 <guildID>.l <guildLv>.l <接続数>.l <定員>.l <Avl.lvl>.l <経験値>.l <next_exp>.l <上納ポイント>.l <性向左右VW>.l <性向上下RF>.l <人数？>.l <guild name>.24B <guild master>.24B <本拠地>.16B
-　　	ギルド情報
+	ギルド情報
 S 0151 <guild ID>.l
 	エンブレム要求
 R 0152 <len>.w <guild ID>.l <emblem ID(変更回数？)>.l <emblem data>.?B
@@ -623,13 +623,13 @@ S 0155 <len>.w {<accID>.l <charaID>.l <index>.l}.12B*
 R 0156 <len>.w {<accID>.l <charaID>.l <index>.l}.12B*
 	役職変更通知
 S 0159 <guildID>.l <accID>.l <charID>.l <mess>.40B
-　　	ギルド脱退送信
+	ギルド脱退送信
 R 015A <nic>.24B <mess>.40B
-　　	ギルド脱退(全員)受信
+	ギルド脱退(全員)受信
 S 015B <guildID>.l <accID>.l <charID>.l <mess>.40B
-　　	ギルド追放送信
+	ギルド追放送信
 R 015C <nick>.24B <mess>.40B <アカウントＩＤ>.24B
-　　	ギルド追放（全員）受信
+	ギルド追放（全員）受信
 S 015D <guild name>.24B <?>.16B
 	ギルド解散
 R 015E <fail>.l
@@ -645,7 +645,7 @@ R 0162 <len>.w <skill_point>.w {<skill ID>.w <target type>.w ?.w <lv>.w <sp>.w <
 R 0163 <len>.w { <nick>.24B <アカウントＩＤ>.24B <追放理由>.40B }.88B*
 	ギルド追放リスト
 S 0165 <myaccID>.l <guild name>.24B
-　　	ギルド作成
+	ギルド作成
 R 0166 <len>.w {<index>.l <name>.24B }.28B*
 	職位名リスト
 R 0167 <type>.b
@@ -655,40 +655,40 @@ R 0167 <type>.b
 	type = 2 同名のギルドがある
 	type = 3 エンペリウム無し
 S 0168 <TargetAccID>.l <sourceAccID>.l <myCharactorID>.l
-　　	ギルド勧誘
+	ギルド勧誘
 R 0169 <type>.B
-　　	ギルド勧誘結果
+	ギルド勧誘結果
 	type = 0 他のギルドに加入している
 	type = 1 拒否された
 	type = 2 加入した
 	type = 3 定員を超過
 R 016A <guild ID>.l <guild name>.24B
-　　	ギルド勧誘された
+	ギルド勧誘された
 S 016B <guild ID>.l <type>.l
-　　	ギルド勧誘返信
-　　	type=0 拒否する
-　　	type=1 許諾する
+	ギルド勧誘返信
+	type=0 拒否する
+	type=1 許諾する
 R 016c <guild ID>.l <emblem ID>.l <mode>.l ?.5B <guild name>.24B
 	login時ギルド情報
 	mode=自分の所属職位のmode
 R 016d <ID>.l <charactor ID>.l <online>.l
 	ギルドメンバがloginした抜けた等
 S 016E <guildID>.l <mess1>.60B <mess2>.120B
-　　	ギルド告知設定
+	ギルド告知設定
 R 016F <mess1>.60B <mess2>.120B
-　　	ギルド告知
+	ギルド告知
 S 0170 <TargetAccID>.l <sourceAccID>.l <myCharactorID>.l
-　　	同盟要請勧誘
+	同盟要請勧誘
 R 0171 <SorceAccID>.l <guild name>.24B
-　　	同盟要請勧誘された
+	同盟要請勧誘された
 S 0172 <SorceAccID>.l <type>.l
-　　	同盟要請返信
-　　	type=0 拒否する
-　　	type=1 許諾する
+	同盟要請返信
+	type=0 拒否する
+	type=1 許諾する
 R 0173 <type>.B
 	type = 0 すでに同盟関係
-　　	type = 1 同盟拒否された
-　　	type = 2 同盟成功
+	type = 1 同盟拒否された
+	type = 2 同盟成功
 	type = 3 相手ギルドの同盟ギルド数が超過
 	type = 4 自分のギルドの同盟ギルド数が超過
 R 0174 <len>.w {<index>.l <mode>.l <index>.l <exp_mode>.l <nickname>.24B}.40B*
@@ -700,13 +700,13 @@ S 0178 <index>.w
 R 0179 <index>.w <fail>.B
 	アイテム鑑定結果。fail=00で成功。fail=01ってあるのか?
 S 017A <index>.w
-　　	カードＷクリック
+	カードＷクリック
 R 017B <len>.w {<index>.w}*
-　　	カード挿入できるアイテムIndex番号
+	カード挿入できるアイテムIndex番号
 S 017C <SrcIndex>.w <DescIndex>.w
-　　	Src をDescに突っ込む
+	Src をDescに突っ込む
 R 017D <DescIndex>.w <SrcIndex>.w <fail>.b
-　　	Src をDescに突っ込み<fail> 0=成功 1=失敗？
+	Src をDescに突っ込み<fail> 0=成功 1=失敗？
 S 017e <len>.w <message>.?B
 	ギルド内メッセージ発言
 R 017f <len>.w <message>.?B
@@ -747,6 +747,8 @@ S 018e <MakeItemID>.w <slot1ItemID>.w <slot2ItemID>,w <slot3.ItemID>.w
 	製造アイテムの選択
 R 018f <flag>.w [00] <MakeItemID>.w
 	製造結果(flag = 00なら成功 01なら失敗)
+S 0190 <skill lv>.w <skill code>.w <x & y>.l <message>.80b
+	メッセージ(トーキーボックス）
 R 0191 <ID>.l <message>.80B
 	トーキーボックスのメッセージ
 R 0192 <x & y>.l <type>.w <mapname>.16b
@@ -848,21 +850,25 @@ S 0197 <type>.w
 	type=0 /resetstate
 	type=1 /resetskill
 	効能は無し?
+R 0199 <type>.w
+	type=1 pvpモード開始?
+	type=3 gvgモード開始?
+R 019a <ID>.l <rank>.l <num>.l
+	pvp順位 rank/num
 R 019b <ID>.l <type>.l
 	他人のlvupや武器精錬等の表示?
 	type=0 base lvup?
 	type=1 job lvup?
 	type=2 武器精錬失敗
 	type=3 武器精錬成功
-R 0199 <type>.w
-　　	type=1 pvpモード開始?
-	type=3 gvgモード開始?
-R 019a <ID>.l <rank>.l <num>.l
-　　	pvp順位 rank/num
+
+R 019d <?>.4B
+	GMコマンド/hide
+
 S 0149 <ID>.l <type>.B <time>.w
-　	GM用右クリックメニュー「チャット禁止時間を下げる（解ける）」使用 → type=00
-　	GM用右クリックメニュー「チャット禁止時間を上げる（掛ける）」使用 → type=01
-	　timeは分単位です（確か
+	GM用右クリックメニュー「チャット禁止時間を下げる（解ける）」使用 → type=00
+	GM用右クリックメニュー「チャット禁止時間を上げる（掛ける）」使用 → type=01
+	timeは分単位です（確か
 
 R 019e
 	捕獲モンスター決め
@@ -910,13 +916,16 @@ R 01aa <ID>.l <emotion>.l
 	34以上のとき：発言テーブル？
 R 01ac <object id>.l
 	アンクルの発動(≠設置)時のみ毎回出現(機能は謎)
-R 01ad <len>.l <item>.l*
+R 01ad <len>.l <item>.w
 	矢作りの作成可能ITEM表受信
-S 01ae <itemID>.l
+S 01ae <itemID>.w
 	矢作りで使う材料送信
 S 01af <type>.w
 	チェンジカート（カート選択）
 	type=1	ノーマルカート
+R 01b0 <monster id>.l <?>.b <new monster code>.l
+	油のクラスチェンジ
+	<new monster code>はチェンジ後のコード(1001～)をdwordで
 S 01b2 <len>.w <message>.80B <flag>.B {<index>.w <amount>.w <value>.l}.8B*
 	露店開設
 	flag ： 0=キャンセル , 1=オープン
@@ -955,9 +964,30 @@ R 01c9 <dst ID>.l <src ID>.l <X>.w <Y>.w <type>.B <fail>.B ?.81b
 	0xB1 デモンストレーション、0xB2～0xBF 表示無し
 	他情報求む
 	?.81bは謎。
+R 01cd (<sid>.l)x7
+	オートスペル選択肢受信
+	<sid>x7 には NB,CB,FB,LB,SS,FBL,FD の順でスキルコードがdwordで入る
+	まだ選択できないスキルの部分は <sid> = 0x00000000 が入る
+S 01ce <sid>.l
+	オートスペル選択肢送信
+R 01cf <crusader id>.l <target id>.l <?>.18b
+	献身状態ターゲットON/OFF。献身が切れると <target id> が 0x00000000 になる
 
 R 01d0 <ID>.l <num>.w 
 	<num> : 気功の数(非Lv)
+R 01d1 <monk id>.l <target monster id>.l <bool>.l
+	白羽取り状態ON/OFF。<bool> は白刃取り成立時に 0x00000001 解除時に 0x00000000 が来る
+R 01d2 <id>.l <delay>.l
+	モンクのコンボディレイ(msec)
+	三段・連打は基本ディレイ1000(+300)、猛龍は基本ディレイ700(+300)
+R 01d7 <ID>.l <equip point>.b <item id1>.w <item id2>.w
+	装備グラフィック <equip point> は 02手と09足のみ確認。id2は左手
+R 01d8 <ID>.l <speed>.w <opt1>.w <opt2>.w <option>.w <class>.w <hair>.w <item id1>.w <item id2>.w <head option bottom>.w <head option top>.w <head option mid>.w <hair color>.w ?.w <head dir>.w <guild>.l <emblem>.l <manner>.w <karma>.B <sex>.B <X_Y_dir>.3B ?.B ?.B <sit>.B <Lv>.B ?.B
+	マップロード時&移動時用、向き付き用キャラ情報?(0078の上位バージョン)
+R 01d9 <ID>.l <speed>.w <opt1>.w <opt2>.w <option>.w <class>.w <hair>.w <item id1>.w <item id2>.w.<head option bottom>.w <head option top>.w <head option mid>.w <hair color>.w ?.w <head dir>.w <guild>.l <emblem>.l <manner>.w <karma>.B <sex>.B <X_Y_dir>.3B ?.B ?.B <Lv>.B ?.B
+	テレポ等の表示範囲内沸きキャラ用、向き付き無しキャラ情報?(0079の上位バージョン)
+R 01da <ID>.l <speed>.w <opt1>.w <opt2>.w <option>.w <class>.w <hair>.<item id1>.w <item id2>.w <head option bottom>.w <server tick>.l <head option top>.w <head option mid>.w <hair color>.w ?.w <head dir>.w <guild>.l <emblem>.l <manner>.w <karma>.B <sex>.B <X_Y_X_Y>.5B ?.B ?.B ?.B <Lv>.B ?.B
+	表示範囲内キャラ移動情報(007bの上位バージョン)
 S 01db
 	暗号化key要求
 R 01dc <len>.w <key>.?B
@@ -971,7 +1001,7 @@ S 01dd <version>.l <account name>.24B <md5 binary>.16B <version2>.1B
 		<passwordencrypt2>の時は
 		"<key><password>"に対してmd5計算としている所を
 		"<password><key>"と変更する
-R 01de <skill ID>.w <src ID>.l <dst ID>.l <server tick>.l <src speed>.l <dst speed>.l <param1>.I <param2>.w <param3>.w <type>.B
+R 01de <skill ID>.w <src ID>.l <dst ID>.l <server tick>.l <src speed>.l <dst speed>.l <param1>.l <param2>.w <param3>.w <type>.B
 	攻撃系スキルエフェクト@(0114の上位バーション？)
 	type=04 火壁で観測 type=06とほぼ同じ?
 	type=05 NB/FBlの分散したダメージ用？
@@ -979,5 +1009,14 @@ R 01de <skill ID>.w <src ID>.l <dst ID>.l <server tick>.l <src speed>.l <dst spe
 	type=07 ダメージ表示無し？
 	type=08 連打もの? param1はダメージ合計、param2はlevel、param3は分割数と予想
 	type=09 ダメージモーションなしにダメージだけ表示される物(インデュア)と思ったのだがダメージモーションが出る物。(機能は謎)
+S 01df <ID>.|
+	GM右クリックによるIDのチャット禁止回数参照？
+
 R 01e1 <ID>.l <num>.w 
 	<num> : 気功の数(非Lv) 一度表示したら後どんなnumが来ても無視される。
+
+S 01e8 <party name>.24B <item1>B <item2>B
+	<item1>アイテム収集方法。0で個人別、1でパーティ公有
+	<item2>アイテム分配方法。0で個人別、1でパーティに均等分配
+	(00f9の上位バーション)
+

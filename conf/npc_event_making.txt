@@ -14,7 +14,7 @@ payon_in01.gat,103,111,4	script	おばあさん	103,{
 		mes "お願い，青年さんよ ..";
 		next;
 		menu "渡す",-,"断る",L_MENU_1;
-			if (checkweight(2293,1)) goto L_START_2;
+			if (!(checkweight(2293,1))) goto L_START_2;
 			delitem 1049,4;
 			mes "[フェイヨンおばあさん]";
 			mes "本当にありがとう ~ 青年さん． もう上着がつくれる ~";
@@ -192,7 +192,7 @@ alberta_in.gat,122,53,4	script	青年	47,{
 	mes "もし 20 本ぐらい もってましたら .. 僕が今までコレクターをしながら、 一生懸命集めた^3355FF' 鹿の角 '^000000 と交換してあげます。";
 	next;
 	menu "交換しましょう",-,"別に欲しくありません",L_MENU_1;
-		if (checkweight(2284,1)) goto L_START_1;
+		if (!(checkweight(2284,1))) goto L_START_1;
 		if (countitem(923)<20) goto L_SUB_1;
 		delitem 923,20;
 		mes "[チェロキ]";
@@ -245,7 +245,7 @@ morocc_in.gat,142,100,4	script	ステアー	89,{
 		if (countitem(1019)<50) goto L_SUB_1;
 		if (countitem(983)<1) goto L_SUB_1;
 		if (Zeny < 91100) goto L_SUB_1;
-		if (checkweight(2272,1)) goto L_START_1;
+		if (!(checkweight(2272,1))) goto L_START_1;
 		delitem 1019,50;
 		delitem 983,1;
 		set Zeny,Zeny-91100;
@@ -391,7 +391,7 @@ alberta_in.gat,59,139,4	script	学生帽爺	120,{
  			close;
 	L_MENU_1:
 		if (countitem(1030)<10) goto L_SUB_2;
-		if (checkweight(5016,1)) goto L_START_1;
+		if (!(checkweight(5016,1))) goto L_START_1;
 			delitem 1030,10;
 			getitem 5016,1;
 			mes "[爺]";
@@ -468,7 +468,7 @@ prt_in.gat,38,108,4	script	学者帽先生	53,{
 		mes "もし、くださるのなら…わ、わたくしの一番大切な物を貴方に…";
 		close;
 	L_MENU_1:
-		if (checkweight(5012,1)) goto L_START_1;
+		if (!(checkweight(5012,1))) goto L_START_1;
 		if (countitem(710)<1) goto L_SUB_2;
 		if (countitem(703)<1) goto L_SUB_2;
 		if (countitem(704)<1) goto L_SUB_2;
@@ -551,7 +551,7 @@ payon_in02.gat,25,71,4	script	酸素マスク青年	86,{
 			close;
 	L_MENU_1:
 		if (countitem(701)<5) goto L_SUB_2;
-		if (checkweight(5004,1)) goto L_START_1;
+		if (!(checkweight(5004,1))) goto L_START_1;
 		delitem 701,5;
 		mes "[青年]";
 		mes "くはははは！やっと手に入れたぞ！オラオラ！（叫ぶ）";

@@ -11,6 +11,7 @@
 #include "socket.h"
 #include "timer.h"
 #include "map.h"
+#include "battle.h"
 #include "chrif.h"
 #include "clif.h"
 #include "intif.h"
@@ -149,10 +150,11 @@ int chrif_recvmap(int fd)
 	port=RFIFOW(fd,8);
 	for(i=12,j=0;i<RFIFOW(fd,2);i+=16,j++){
 		map_setipport(RFIFOP(fd,i),ip,port);
-//		printf("recv map %d %s\n",j,RFIFOP(fd,i));
+//		if(battle_config.etc_log)
+//			printf("recv map %d %s\n",j,RFIFOP(fd,i));
 	}
-	printf("recv map on %d.%d.%d.%d:%d (%d maps)\n",
-		p[0],p[1],p[2],p[3],port,j);
+	if(battle_config.etc_log)
+		printf("recv map on %d.%d.%d.%d:%d (%d maps)\n",p[0],p[1],p[2],p[3],port,j);
 
 	return 0;
 }
@@ -185,7 +187,8 @@ int chrif_changemapserverack(int fd)
 	if(sd==NULL || sd->status.char_id!=RFIFOL(fd,10) )
 		return -1;
 	if(RFIFOL(fd,6)==1){
-		printf("map server change failed.\n");
+		if(battle_config.error_log)
+			printf("map server change failed.\n");
 		pc_authfail(sd->fd);
 		return 0;
 	}
@@ -274,7 +277,8 @@ int chrif_changegm(int id,const char *pass,int len)
 	WFIFOW(char_fd,2)=len+8;
 	WFIFOL(char_fd,4)=id;
 	memcpy(WFIFOP(char_fd,8),pass,len);
-//	printf("chrif_changegm: %d %s %d\n",WFIFOL(char_fd,4),WFIFOP(char_fd,8),WFIFOW(char_fd,2));
+//	if(battle_config.etc_log)
+//		printf("chrif_changegm: %d %s %d\n",WFIFOL(char_fd,4),WFIFOP(char_fd,8),WFIFOW(char_fd,2));
 	WFIFOSET(char_fd,len+8);
 	return 0;
 }
@@ -287,7 +291,8 @@ int chrif_changedgm(int fd)
 	int oldacc,newacc;
 	oldacc=RFIFOL(fd,2);
 	newacc=RFIFOL(fd,6);
-	printf("chrif_changedgm %d -> %d\n",oldacc,newacc);
+	if(battle_config.etc_log)
+		printf("chrif_changedgm %d -> %d\n",oldacc,newacc);
 	if(newacc>0){
 		struct map_session_data *sd=map_id2sd(oldacc);
 		if(sd!=NULL){	// GM•ÏX‚É‚æ‚é‹­§Ø’f
@@ -353,7 +358,8 @@ int chrif_parse(int fd)
 		case 0x2b0b: chrif_changedgm(fd); break;
 
 		default:
-			printf("chrif_parse : unknown packet %d %d\n",fd,RFIFOW(fd,0));
+			if(battle_config.error_log)
+				printf("chrif_parse : unknown packet %d %d\n",fd,RFIFOW(fd,0));
 			close(fd);
 			session[fd]->eof=1;
 			return 0;

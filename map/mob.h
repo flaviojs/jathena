@@ -1,6 +1,8 @@
 #ifndef _MOB_H_
 #define _MOB_H_
 
+#define MAX_RANDOMMONSTER 3
+
 struct mob_skill {
 	short state;
 	short skill_id,skill_lv;
@@ -13,6 +15,7 @@ struct mob_skill {
 };
 
 struct mob_db {
+	int view_class;
 	char name[24],jname[24];
 	int lv;
 	int max_hp,max_sp;
@@ -26,7 +29,7 @@ struct mob_db {
 	int mexp,mexpper;
 	struct { int nameid,p; } dropitem[8];
 	struct { int nameid,p; } mvpitem[3];
-	int summonflag;
+	int summonper[MAX_RANDOMMONSTER];
 	int maxskill;
 	struct mob_skill skill[MAX_MOBSKILL];
 };
@@ -76,8 +79,10 @@ int mob_target(struct mob_data *md,struct block_list *bl,int dist);
 int mob_stop_walking(struct mob_data *md,int type);
 int mob_stopattack(struct mob_data *);
 int mob_spawn(int);
-int mob_damage(struct map_session_data *,struct mob_data*,int);
+int mob_damage(struct block_list *,struct mob_data*,int,int);
+int mob_changestate(struct mob_data *md,int state,int type);
 int mob_heal(struct mob_data*,int);
+int mob_get_viewclass(struct mob_data *md);
 int do_init_mob(void);
 
 int mob_delete(struct mob_data *md);

@@ -7,6 +7,7 @@
 #include "timer.h"
 #include "pc.h"
 #include "map.h"
+#include "battle.h"
 #include "intif.h"
 #include "clif.h"
 #include "socket.h"
@@ -54,12 +55,12 @@ int party_created(int account_id,int fail,int party_id,char *name)
 		sd->status.party_id=party_id;
 		if((p=numdb_search(party_db,party_id))!=NULL){
 			printf("party: id already exists!\n");
-			exit(0);
+			exit(1);
 		}
 		p=malloc(sizeof(struct party));
 		if(p==NULL){
 			printf("party: out of memory!\n");
-			exit(0);
+			exit(1);
 		}
 		memset(p,0,sizeof(struct party));
 		p->party_id=party_id;
@@ -97,8 +98,8 @@ int party_check_member(struct party *p)
 				}
 				if(f){
 					sd->status.party_id=0;
-					printf("party: check_member %d[%s] is not member\n",
-						sd->status.account_id,sd->status.name);
+					if(battle_config.error_log)
+						printf("party: check_member %d[%s] is not member\n",sd->status.account_id,sd->status.name);
 				}
 			}
 		}
@@ -129,7 +130,7 @@ int party_recv_info(struct party *sp)
 		p=malloc(sizeof(struct party));
 		if(p==NULL){
 			printf("party: out of memory!\n");
-			exit(0);
+			exit(1);
 		}
 		numdb_insert(party_db,sp->party_id,p);
 		
@@ -142,7 +143,7 @@ int party_recv_info(struct party *sp)
 		struct map_session_data *sd = map_id2sd(p->member[i].account_id);
 		p->member[i].sd=(sd!=NULL && sd->status.party_id==p->party_id)?sd:NULL;
 	}
-	
+
 	clif_party_info(p,-1);
 
 	for(i=0;i<MAX_PARTY;i++){	// Ý’èî•ñ‚Ì‘—M
@@ -208,7 +209,8 @@ int party_member_added(int party_id,int account_id,int flag)
 {
 	struct map_session_data *sd= map_id2sd(account_id),*sd2;
 	if(sd==NULL && flag==0){
-		printf("party: member added error %d is not online\n",account_id);
+		if(battle_config.error_log)
+			printf("party: member added error %d is not online\n",account_id);
 		intif_party_leave(party_id,account_id); // ƒLƒƒƒ‰‘¤‚É“o˜^‚Å‚«‚È‚©‚Á‚½‚½‚ß’E‘Þ—v‹‚ðo‚·
 		return 0;
 	}
@@ -352,7 +354,8 @@ int party_recv_movemap(int party_id,int account_id,char *map,int online,int lv)
 		}
 	}
 	if(i==MAX_PARTY){
-		printf("party: not found member %d on %d[%s]",account_id,party_id,p->name);
+		if(battle_config.error_log)
+			printf("party: not found member %d on %d[%s]",account_id,party_id,p->name);
 		return 0;
 	}
 	

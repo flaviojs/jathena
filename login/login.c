@@ -36,6 +36,9 @@ int server_num;
 int new_account_flag = 0;
 int login_port = 6900;
 
+char account_filename[1024] = "account.txt";
+char GM_account_filename[1024] = "conf/GM_account.txt";
+
 struct mmo_char_server server[MAX_SERVERS];
 int server_fd[MAX_SERVERS];
 
@@ -97,7 +100,7 @@ int read_gm_account()
 
 	gm_account_db = numdb_init();
 
-	if( (fp=fopen("conf/GM_account.txt","r"))==NULL )
+	if( (fp=fopen(GM_account_filename,"r"))==NULL )
 		return 1;
 	while(fgets(line,sizeof(line),fp)){
 		if(line[0] == '/' && line[1] == '/')
@@ -108,7 +111,7 @@ int read_gm_account()
 			exit(0);
 		}
 		if(sscanf(line,"%d %d",&p->account_id,&p->level) != 2 || p->level <= 0) {
-			printf("gm_account: broken data [conf/GM_account.txt] line %d\n",c);
+			printf("gm_account: broken data [%s] line %d\n",GM_account_filename,c);
 		}
 		else {
 			if(p->level > 99)
@@ -128,7 +131,7 @@ int mmo_auth_init(void)
 	FILE *fp;
 	int i,account_id,logincount,state;
 	char line[1024],userid[24],pass[24],lastlogin[24],sex;
-	fp=fopen("account.txt","r");
+	fp=fopen(account_filename,"r");
 	auth_dat=malloc(sizeof(auth_dat[0])*256);
 	auth_max=256;
 	if(fp==NULL)
@@ -173,7 +176,7 @@ void mmo_auth_sync(void)
 {
 	FILE *fp;
 	int i;
-	fp=fopen("account.txt","w");
+	fp=fopen(account_filename,"w");
 	if(fp==NULL)
 		return;
 	for(i=0;i<auth_num;i++){
@@ -733,7 +736,7 @@ int login_config_read(const char *cfgName)
 		if(line[0] == '/' && line[1] == '/')
 			continue;
 
-		i=sscanf(line,"%[^:]:%s",w1,w2);
+		i=sscanf(line,"%[^:]: %[^\r\n]",w1,w2);
 		if(i!=2)
 			continue;
 
@@ -748,6 +751,12 @@ int login_config_read(const char *cfgName)
 		}
 		else if(strcmpi(w1,"login_port")==0){
 			login_port=atoi(w2);
+		}
+		else if(strcmpi(w1,"account_filename")==0){
+			strcpy(account_filename,w2);
+		}
+		else if(strcmpi(w1,"gm_account_filename")==0){
+			strcpy(GM_account_filename,w2);
 		}
 	}
 	fclose(fp);

@@ -13,7 +13,7 @@ LWarp:
 	mes "[ポタ子]";
 	mes "まずは地域を選んでください。";
 	next;
-	menu "プロンテラ",LWprn,"モロク",LWmor,"グラストヘイム",LWgla,"アルデバラン",LWald,"ゲフェン",LWgef,"イズルード",LWizl,"アルベルタ",LWalv,"フェイヨン",LWpay,"ルティエ",LWxms,"コモド",LWcom,"ジュノー",LWyun,"ギルドダンジョン",LWgui,"やっぱやめる。",LEnd1;
+	menu "プロンテラ",LWprn,"モロク",LWmor,"グラストヘイム",LWgla,"アルデバラン",LWald,"ゲフェン",LWgef,"イズルード",LWizl,"アルベルタ",LWalv,"フェイヨン",LWpay,"ルティエ",LWxms,"コモド",LWcom,"ジュノー",LWyun,"アマツ",LWama,"コンロン",LWgon,"ギルドダンジョン",LWgui,"やっぱやめる。",LEnd1;
 LWprn:	mes "[ポタ子]";
 	mes "行きたい場所を選んでください。";
 	next;
@@ -279,6 +279,32 @@ LWyd1:
 	end;
 LWyd2:
 	warp "mag_dun02",47,30;
+	end;
+LWama:  mes "[ポタ子]";
+	mes "行きたい場所を選んでください。";
+	next;
+	menu "畳の迷宮",LWam1,"地下戦場跡",LWam2,"アマツ地下神社",LWam3,"やっぱやめる。",LEnd1;
+LWam1:
+	warp "ama_dun01",228,9;
+	end;
+LWam2:
+	warp "ama_dun02",31,41;
+	end;
+LWam3:
+	warp "ama_dun03",195,123;
+	end;
+LWgon:  mes "[ポタ子]";
+	mes "行きたい場所を選んでください。";
+	next;
+	menu "崑崙D1",LWgo1,"崑崙D2",LWgo2,"崑崙D3",LWgo3,"やっぱやめる。",LEnd1;
+LWgo1:
+	warp "gon_dun01",154,45;
+	end;
+LWgo2:
+	warp "gon_dun02",26,114;
+	end;
+LWgo3:
+	warp "gon_dun03",68,8;
 	end;
 LWgui:	mes "[ポタ子]";
 	mes "行きたい場所を選んでください。";

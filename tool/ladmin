@@ -1,15 +1,24 @@
 #!/usr/bin/perl
 
 ##########################################################################
-# Athenaのログインサーバー保守ツール Ver.1.02
+# Athenaのログインサーバー保守ツール Ver.1.04
 #
 # 　起動中のAthenaのlogin.exeに接続してアカウントの保守を行うツール.
 # 　アカウントの追加、削除、パスワードの変更、リスト表示ができます.
 #
+##########################################################################
+#----------------------------------説明書---------------------------------
+# 設定
+#   以下の変数を正しく設定します。
+# 　（ログイン鯖のIP、ポート、管理者パスワード）
 #-------------------------------------------------------------------------
-# 設定方法
-# 　ログイン鯖のIP、ポート、管理者パスワードを正しく設定します.
-#
+
+my($loginserverip)="127.0.0.1";			#ログイン鯖のIP
+my($loginserverport)=6900;			#ログイン鯖のポート
+my($loginserveradminpassword)="admin";		#ログイン鯖の管理者パスワード
+
+my($connecttimeout)=10;				# 接続タイムアウト(秒)
+
 #-------------------------------------------------------------------------
 # プロンプトによる作業
 # 　引数なしで起動するとプロンプトがでます。コマンドは後述。
@@ -25,17 +34,19 @@
 #		アカウント名での検索などはできません
 #
 #	search	keyword			アカウント検索
-#	search	--expr keyword		アカウント正規表現検索
+#	search	--regex keyword		アカウント正規表現検索
 #		キーワードがマッチするアカウントのリストを表示します
 #
 #	add	userid gender passwd	アカウント追加
 #		ID,性別,passです。性別は MかFです(最初の１文字で判断)
 #		<例> add testname Male testpass
+#		passwdを省略するとキーボードからエコー無しでタイプできます
 #	
 #	del	userid			アカウント削除
 #		警告がでるのでそこでyを入力すると削除します
 #
 #	passwd	userid newpassword	アカウントパスワード変更
+#		newpasswordを省略するとキーボードからタイプできます
 #
 #	state	userid newstate		アカウントのバン状態変更
 #		newstateがbならバン、uまたはnならバン解除です
@@ -51,7 +62,7 @@
 #	--passwd	userid newpasswd	パスワードの変更(-p)
 #	--list		start_id end_id		アカウントリスト表示(-l)
 #	--search	keyword			アカウント検索(-s)
-#	--search	--expr keyword		アカウント正規表現検索(-s)
+#	--search	--regex keyword		正規表現検索(-s -e)
 #	--state		userid newstate		バン状態変更(-t)
 #	<例> ./ladmin --addaccount testname Male testpass
 #
@@ -66,42 +77,79 @@
 #	passwdaccount	userid newpasswd	パスワードの変更
 #	listaccount	start_id end_id		アカウントリスト表示
 #	searchaccount	keyword			アカウント検索
-#	searchaccount	--expr keyword		アカウント正規表現検索
+#	searchaccount	--regex keyword		アカウント正規表現検索
 #	stateaccount	userid newstate		バン状態変更
 #	<例> ./addaccount testname Male testpass
+#
+#-------------------------------------------------------------------------
+# UNIX系OSでの使用について
+# 　コマンドとして実行するにはファイルに実行権が必要です。また改行コードを
+# 　変更する必要があります。perlを直接起動するなら必要ありません
+# 　実行には関係ありませんが、説明やコメントはシフトJISで書いているので
+# 　日本語エンコードをEUC-JPにしてください。
+#   <コマンドの準備の例>
+#       $ mv ladmin ladmin_org
+#       $ nkf -eLu ladmin_org > ladmin
+#       $ chmod 700 ladmin
+#   <Perlを直接起動する例>
+#       $ perl ladmin
 #
 ##########################################################################
 
 
-$loginserverip="127.0.0.1";		#ログイン鯖のIP
-$loginserverport=6900;			#ログイン鯖のポート
-$loginserveradminpassword="admin";	#ログイン鯖の管理者パスワード
-
-$connecttimeout=10;	# 接続タイムアウト(秒)
-
-#-------------------------------設定ここまで-----------------------------
 
 
 
 
 
 
-
-
+use strict;
 use IO::Socket;
+use Term::ReadLine;
+eval {	use POSIX qw(:termios_h); };
 
-$ver="1.02";
+my($ver)="1.04";
 
+
+
+# termiosの初期処理
+my($termios,$orgterml,$termlecho,$termlnoecho)=();
+eval{
+	$termios=POSIX::Termios->new();
+	$termios->getattr(fileno(STDIN));
+	$orgterml=$termios->getlflag();
+	$termlecho=ECHO | ECHOK | ICANON;
+	$termlnoecho=$orgterml & ~$termlecho;
+};
+
+# パスワード入力用
+sub cbreak(){
+	if($termios){
+		$termios->setlflag($termlnoecho);
+		$termios->setcc(VTIME,1);
+		$termios->setattr(fileno(STDIN),TCSANOW);
+	}
+}
+# 復帰
+sub cooked(){
+	if($termios){
+		$termios->setlflag($orgterml);
+		$termios->setcc(VTIME,0);
+		$termios->setattr(fileno(STDIN),TCSANOW);
+	}
+}
+END{ cooked() }
 
 print "Athena login-server administration tool Ver.$ver\n";
 
+# シンボリックリンク作成
 if( $ARGV[0] eq "--makesymlink" ){
-	symlink "ladmin","addaccount";
-	symlink "ladmin","delaccount";
-	symlink "ladmin","passwdaccount";
-	symlink "ladmin","listaccount";
-	symlink "ladmin","searchaccount";
-	symlink "ladmin","stateaccount";
+	symlink $0,"addaccount";
+	symlink $0,"delaccount";
+	symlink $0,"passwdaccount";
+	symlink $0,"listaccount";
+	symlink $0,"searchaccount";
+	symlink $0,"stateaccount";
 	print "Symbolic link created.\n";
 	exit(0);
 }
@@ -164,53 +212,52 @@ if( $0=~/addaccount$/ ||
 	exit($r);
 }
 
+my($term)= new Term::ReadLine "ladmin";
+
 # ログインできたのでプロンプトのループ
 while(1){
 	# プロンプト表示と入力
-	print "ladmin> ";
-	$cmd=<STDIN>;
+	my($cmd)=$term->readline("ladmin> ");
 	chomp $cmd;
+	$cmd=~s/\x1b\[\d*\w//g;
 	$cmd=~s/[\x00-\x1f]//g;
-	my(@cmdlist)=split / /,$cmd;
+	my(@cmdlist)=split /\s+/,$cmd;
 	
 	$cmdlist[0]="help" if( $cmdlist[0] eq "?" );
 	
-	if( eval{ ""=~/$cmdlist[0]/; }, $@ ){
-		print "Command Error: Regular-Expression compiling failed.\n";
-		next;
-	}
 
 	# コマンド解析
 	eval{
-		if("help"=~/^$cmdlist[0]/ ){
+		if("help"=~/^\Q$cmdlist[0]/ ){
 			print << "EOD";
   add username gender password -- add account
   del username                 -- delete account
   passwd username new_password -- change password of account
   list [start_id [end_id] ]    -- list account
   search expr                  -- search account
-  search -e expr               -- search account by regular-expression
+  search -r expr               -- search account by regular-expression
   state username newstate      -- change status of account (bann)
   help                         -- this help
   quit                         -- quit
 EOD
-		}elsif("quit"=~/^$cmdlist[0]/){
+		}elsif("quit"=~/^\Q$cmdlist[0]/){
 			last;
-		}elsif("add"=~/^$cmdlist[0]/){
+		}elsif("add"=~/^\Q$cmdlist[0]/){
 			addaccount($cmdlist[1],$cmdlist[2],$cmdlist[3]);
-		}elsif("del"=~/^$cmdlist[0]/){
+		}elsif("del"=~/^\Q$cmdlist[0]/){
 			delaccount($cmdlist[1]);
-		}elsif("passwd"=~/^$cmdlist[0]/){
+		}elsif("passwd"=~/^\Q$cmdlist[0]/){
 			changepasswd($cmdlist[1],$cmdlist[2]);
-		}elsif("list"=~/^$cmdlist[0]/ || $cmdlist[0] eq "ls"){
+		}elsif("list"=~/^\Q$cmdlist[0]/ || $cmdlist[0] eq "ls"){
 			listaccount(int($cmdlist[1]),int($cmdlist[2]));
-		}elsif("search"=~/^$cmdlist[0]/){
+		}elsif("search"=~/^\Q$cmdlist[0]/){
 			searchaccount($cmdlist[1],$cmdlist[2]);
-		}elsif("state"=~/^$cmdlist[0]/){
+		}elsif("state"=~/^\Q$cmdlist[0]/){
 			changestate($cmdlist[1],$cmdlist[2]);
 		}elsif($cmdlist[0]){
 			print "Unknown command [".$cmdlist[0]."]\n";
 		}
+#		$term->addhistory($cmd) if $cmdlist[0];
 	};
 	if($@){
 		print "Error [".$cmdlist[0]."]\n$@";
@@ -266,8 +313,12 @@ sub addaccount(){
 		print "Illeagal gender [$sex] please input M or F.\n";
 		return 103;
 	}
+	if($passwd eq ""){
+		return 108 if( ($passwd=typepasswd()) eq "" );
+	}
 	if($passwd=~/[\x00-\x1f]/){
-		print "Illeagal charactor found in password ".$`."[$&]$'\n";
+		my($c)=length($`)+1;
+		print "Illeagal charactor found in password (".makeordinal($c)." charactor).\n";
 		return 104;
 	}
 	if(length($passwd)<4){
@@ -318,9 +369,21 @@ sub delaccount(){
 # アカウントパスワード変更
 sub changepasswd(){
 	my($userid,$passwd)= @_;
+	if($userid eq ""){
+		print "Please input account id.\n";
+		return 136;
+	}
+	if($passwd eq ""){
+		return 134 if( ($passwd=typepasswd()) eq "" );
+	}
 	if(length($passwd)<4){
 		print "New password too short or long. please input 4-24bytes.!\n";
 		return 131;
+	}
+	if($passwd=~/[\x00-\x1f]/){
+		my($c)=length($`)+1;
+		print "Illeagal charactor found in password (".makeordinal($c)." charactor).\n";
+		return 135;
 	}
 	print $so pack("v2a24a24", 0x7934,52, $userid,$passwd);
 	$so->flush();
@@ -343,12 +406,16 @@ sub changepasswd(){
 sub searchaccount(){
 	my($p1,$p2)= @_;
 	my($exp,$st,$n)=("",0,0);
-	if($p1 eq"-e" || $p1 eq"--expr"){
+	if($p1 eq"-e" || $p1 eq"-r" || $p1 eq"--regex" || $p1 eq"--expr"){
 		$exp=$p2;
 	}else{
+		my($c)=0;
 		$exp=$p1;
 		$exp=~s/([\@])/\\$1/g;
-		$exp=~s/([\*\?])/\.$1/g;
+		$c+= $exp=~s/([\-\[\]])/\\$1/g;
+		$c+= $exp=~s/([\*\?])/.$1/g;
+		$c+= $exp=~s/\\\[(.)\\\-(.)\\\]/[$1-$2]/g;
+		$exp="^$exp\$" if $c;
 	}
 	if( eval{ ""=~/$exp/; }, $@ ){
 		print "Regular-Expression compiling failed.\n";
@@ -439,4 +506,27 @@ sub readso(){
 		exit(3);
 	}
 	return $buf;
+}
+
+
+# パスワード入力
+sub typepasswd {
+	my($passwd1,$passwd2);
+	cbreak();
+	print "type password > "; $passwd1=<STDIN>; chomp($passwd1); print "\n";
+	print "verify password > "; $passwd2=<STDIN>; chomp($passwd2); print "\n";
+	cooked();
+	if($passwd1 ne $passwd2){
+		print "Password verification failed. Please input same password.\n";
+		return "";
+	}
+	return $passwd1;
+}
+# 序数作成
+sub makeordinal {
+	my($c)= shift;
+	if($c%10<4 && $c%10!=0 && ($c<10 || $c>20) ){
+		return $c.("st","nd","rd")[$c%10-1];
+	}
+	return $c."th";
 }

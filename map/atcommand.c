@@ -608,7 +608,8 @@ z [0～4]服の色
 				if( (i1=atoi(temp0))==0 )
 					i1=mobdb_searchname(temp0);
 				if( i2 <= 0 ) i2 = 1;
-				printf("%s name=%s id=%d count=%d (%d,%d)\n", command, temp1, i1, i2, x, y);
+				if(battle_config.etc_log)
+					printf("%s name=%s id=%d count=%d (%d,%d)\n", command, temp1, i1, i2, x, y);
 
 				for(i=0;i<i2;i++) {
 					int mx,my;
@@ -680,8 +681,11 @@ z [0～4]服の色
 					clif_misceffect(&sd->bl,3); // 他人にも成功を通知（精錬成功エフェクトと同じでいいの？）
 					if((flag = pc_additem(sd,&tmp_item,1)))
 						clif_additem(sd,0,0,flag);
-				}else
-					printf("@produce NOT WEAPON [%d]\n",i1);
+				}
+				else {
+					if(battle_config.error_log)
+						printf("@produce NOT WEAPON [%d]\n",i1);
+				}
 			}
 			return 1;
 		}

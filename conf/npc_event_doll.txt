@@ -63,7 +63,7 @@ L21:
 	mes "ほら、隠しておいたキャンディ。";
 	next;
 	delitem 741,1;
-	additem 529,1;
+	getitem 529,1;
 	mes "[ちびっこ]";
 	mes "ヘヘッ";
 	mes "たくさん食べるとママに叱られるから、";
@@ -89,7 +89,7 @@ L22:
 	mes "コレあげる。";
 	next;
 	delitem 742,1;
-	additem 530,1;
+	getitem 530,1;
 	mes "[ちびっこ]";
 	mes "たくさん食べると虫歯になるから";
 		if (Sex == 0) mes "おねぇちゃんも";
@@ -118,7 +118,7 @@ L23:
 	mes "はいどうぞ！";
 	next;
 	delitem 740,1;
-	additem 530,1;
+	getitem 530,1;
 	mes "[ちびっこ]";
 	mes "これはサンタさんにもらった";
 	mes "キャンディなんだよ～";
@@ -144,7 +144,7 @@ L24:
 	mes "あったかな……";
 	next;
 	delitem 752,1;
-	additem 532,7;
+	getitem 532,7;
 	mes "[ちびっこ]";
 	mes "うちにいっぱいあるから";
 		if (Sex == 0) mes "おねぇちゃんにもおすそわけ～";
@@ -165,8 +165,8 @@ L25:
 	mes "もらうー。キノコは食べないけど……";
 	mes "あたしも何かプレゼントするね。";
 	next;
-	delitem 740,1;
-	additem 538,5;
+	delitem 743,1;
+	getitem 538,5;
 	mes "[ちびっこ]";
 	mes "これ、ママが作ったの";
 		if (Sex == 0) mes "おねぇちゃんもどうぞ！";
@@ -190,7 +190,7 @@ L26:
 	mes "これあげる！";
 	next;
 	delitem 751,1;
-	additem 522,2;
+	getitem 522,2;
 	mes "[ちびっこ]";
 	mes "ママに内緒で森に入ったら";
 	mes "こんな実を見つけたの。";
@@ -214,7 +214,7 @@ L27:
 		if (Sex == 1) mes "おにいちゃんにも何かあげる～";
 	next;
 	delitem 750,1;
-	additem 526,2;
+	getitem 526,2;
 	mes "[ちびっこ]";
 	mes "これはわたしが病気になった時";
 	mes "パパがくれたの。";
@@ -238,8 +238,8 @@ L28:
 		if (Sex == 0) mes "おねぇちゃん、ありがと！";
 		if (Sex == 1) mes "おにいちゃん、ありがと！";
 	next;
-	delitem 740,1;
-	additem 539,3;
+	delitem 754,1;
+	getitem 539,3;
 	mes "[ちびっこ]";
 	mes "おばあちゃんの手作りケーキあげる！";
 		if (Sex == 0) mes "おねぇちゃんは";
@@ -266,8 +266,8 @@ L29:
 		if (Sex == 1) mes "そうだ！おにいちゃんに";
 	mes "お礼したいの。";
 	next;
-	delitem 740,1;
-	additem 608,1;
+	delitem 753,1;
+	getitem 608,1;
 	mes "[ちびっこ]";
 	mes "これはパパと他の村に行く途中に";
 	mes "拾ったの。何かの種みたい。";

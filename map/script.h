@@ -27,6 +27,7 @@ int run_script(unsigned char *,int,int,int);
 
 struct dbt* script_get_label_db();
 
+int script_config_read(char *cfgName);
 int do_init_script();
 
 #endif

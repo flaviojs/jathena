@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "map.h"
+#include "battle.h"
 
 #ifdef MEMWATCH
 #include "memwatch.h"
@@ -190,12 +191,14 @@ int path_blownpos(int m,int x0,int y0,int dx,int dy,int count)
 		return -1;
 	md=&map[m];
 
-	if(count>10){	// 最大10マスに制限
-		printf("path_blownpos: count too many %d !\n",count);
-		count=10;
+	if(count>15){	// 最大10マスに制限
+		if(battle_config.error_log)
+			printf("path_blownpos: count too many %d !\n",count);
+		count=15;
 	}
 	if(dx>1 || dx<-1 || dy>1 || dy<-1){
-		printf("path_blownpos: illeagal dx=%d or dy=%d !\n",dx,dy);
+		if(battle_config.error_log)
+			printf("path_blownpos: illeagal dx=%d or dy=%d !\n",dx,dy);
 		dx=(dx>=0)?1:((dx<0)?-1:0);
 		dy=(dy>=0)?1:((dy<0)?-1:0);
 	}

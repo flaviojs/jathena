@@ -41,7 +41,7 @@ int inter_party_fromstr(char *str,struct party *p)
 	memset(p,0,sizeof(struct party));
 	
 //	printf("sscanf party main info\n");
-	s=sscanf(str,"%d\t%s\t%d,%d\t",&tmp_int[0],
+	s=sscanf(str,"%d\t%[^\t]\t%d,%d\t",&tmp_int[0],
 		tmp_str,&tmp_int[1],&tmp_int[2]);
 	if(s!=4)
 		return 1;
@@ -61,7 +61,7 @@ int inter_party_fromstr(char *str,struct party *p)
 			return 1;
 //		printf("sscanf party member info %d\n",i);
 
-		s=sscanf(str+1,"%d,%d\t%s\t",
+		s=sscanf(str+1,"%d,%d\t%[^\t]\t",
 			&tmp_int[0],&tmp_int[1],tmp_str);
 		if(s!=3)
 			return 1;

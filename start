@@ -1,6 +1,6 @@
 # /bin/bash
 
-./athena.sh
+./athena-start start
 sleep 30
 
 while [ true ] ; do
@@ -19,7 +19,7 @@ date
 	date
 	printf "Restoration:"
 	date
-	./athena.sh
+	./athena-start start
 	else
 	printf "Check Miss Sorry:"
 	date

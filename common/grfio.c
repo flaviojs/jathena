@@ -846,41 +846,32 @@ void grfio_final(void)
  * Grfio : Initialize
  *------------------------------------------
  */
-void grfio_init(void)
+void grfio_init(char *fname)
 {
 	FILE *data_conf;
-	char line[1024],w1[1024],w2[1024],*w3;
+	char line[1024],w1[1024],w2[1024];
 	int result,result2,result3;
 
-	data_conf = fopen("conf/grf-files.txt", "r");
+	data_conf = fopen(fname, "r");
 		
 	// grf-files.txt Ç™Ç†ÇÈÇ»ÇÁì«Ç›çûÇﬁ
 	if( data_conf!=NULL ) {
 		while(fgets(line,1020,data_conf)) {
-			if(sscanf(line,"%[^:]: %[^\n]", w1, w2) == 2) {
-				if(strcmp(w1,"data") == 0) {
-					w3 = strchr(w2,'\r');
-					if(w3) *w3 = 0;
+			if(sscanf(line,"%[^:]: %[^\r\n]", w1, w2) == 2) {
+				if(strcmp(w1,"data") == 0)
 					strcpy(data_file, w2);
-				}
-				else if(strcmp(w1,"sdata") == 0) {
-					w3 = strchr(w2,'\r');
-					if(w3) *w3 = 0;
+				else if(strcmp(w1,"sdata") == 0)
 					strcpy(sdata_file, w2);
-				}
-				else if(strcmp(w1,"adata") == 0) {
-					w3 = strchr(w2,'\r');
-					if(w3) *w3 = 0;
+				else if(strcmp(w1,"adata") == 0)
 					strcpy(adata_file, w2);
-				}
 			}
 		}
 		fclose(data_conf);
-		printf("read conf/grf-files.txt done\n");
+		printf("read %s done\n",fname);
 	
 	} // end of reading grf-files.txt
-	
-	
+
+
 	hashinit();	// hashÉeÅ[ÉuÉãèâä˙âª
 
 	filelist = NULL;     filelist_entrys = filelist_maxentry = 0;

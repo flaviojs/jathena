@@ -11,7 +11,9 @@ C_SRV_C=./conf/char_athena.conf
 C_SRV_C2=./conf/inter_athena.conf
 M_SRV_C=./conf/map_athena.conf
 M_SRV_C2=./conf/battle_athena.conf
-
+M_SRV_C3=./conf/atcommand_athena.conf
+M_SRV_C4=./conf/script_athena.conf
+M_SRV_C5=./conf/grf-files.txt
 
 print_start() {
 #	more << EOF
@@ -38,7 +40,7 @@ check_account() {
 
 check_files() {
 
-	for i in ${L_SRV} ${C_SRV} ${M_SRV} ${L_SRV_C} ${C_SRV_C} ${C_SRV_C2} ${M_SRV_C} ${M_SRV_C2}
+	for i in ${L_SRV} ${C_SRV} ${M_SRV} ${L_SRV_C} ${C_SRV_C} ${C_SRV_C2} ${M_SRV_C} ${M_SRV_C2} ${M_SRV_C3} ${M_SRV_C4} ${M_SRV_C5}
 	do
 		if [ ! -f ./$i ]; then
     		echo "$i does not exist, or can't run."
@@ -64,7 +66,7 @@ case $1 in
 #		exec ./${C_SRV} ${C_SRV_C} ${C_SRV_C2} > /dev/null&
 #		exec ./${M_SRV} ${M_SRV_C} ${M_SRV_C2} > /dev/null&
 		exec ./${C_SRV} ${C_SRV_C} ${C_SRV_C2}&
-		exec ./${M_SRV} ${M_SRV_C} ${M_SRV_C2}&
+		exec ./${M_SRV} ${M_SRV_C} ${M_SRV_C2} ${M_SRV_C3} ${M_SRV_C4} ${M_SRV_C5}&
 
 		echo "Now Started Athena."
 ;;

@@ -28,6 +28,8 @@ extern struct Atcommand_Config {
 	int kami;
 	int heal;
 	int item;
+	int itemreset;
+	int itemcheck;
 	int lvup;
 	int joblvup;
 	int help;
@@ -74,6 +76,7 @@ extern struct Atcommand_Config {
 	int lostskill;
 	int spiritball;
 	int party;
+	int guild;
 } atcommand_config;
 
 #define ATCOMMAND_CONF_FILENAME	"conf/atcommand_athena.conf"

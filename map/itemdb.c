@@ -37,7 +37,8 @@ int itemdb_searchname_sub(void *key,void *data,va_list ap)
 	char *str;
 	str=va_arg(ap,char *);
 	dst=va_arg(ap,struct item_data **);
-	if(strcmpi(item->name,str)==0 || strcmp(item->jname,str)==0)
+	if( strcmpi(item->name,str)==0 || strcmp(item->jname,str)==0 ||
+		memcmp(item->name,str,24)==0 || memcmp(item->jname,str,24)==0 )
 		*dst=item;
 	return 0;
 }
@@ -79,7 +80,7 @@ int itemdb_searchrandomid(int flags)
 		list=data[flags].list;
 
 		if(count > 0) {
-			for(i=0;i<MAX_RANDITEM;i++) {
+			for(i=0;i<count;i++) {
 				index = rand()%count;
 				if(	rand()%1000000 < list[index].per) {
 					nameid = list[index].nameid;
@@ -88,7 +89,6 @@ int itemdb_searchrandomid(int flags)
 			}
 		}
 	}
-//	printf("get %d\n",nameid);
 	return nameid;
 }
 
@@ -239,7 +239,7 @@ static int itemdb_readdb(void)
 			printf("can't read %s\n",filename[i]);
 			exit(1);
 		}
-		
+
 		while(fgets(line,1020,fp)){
 			if(line[0]=='/' && line[1]=='/')
 				continue;
@@ -256,7 +256,7 @@ static int itemdb_readdb(void)
 			if(nameid<=0 || nameid>=20000)
 				continue;
 			ln++;
-	
+
 			//ID,Name,Jname,Type,Price,Sell,Weight,ATK,DEF,Range,Slot,Job,Gender,Loc,wLV,eLV,View
 			id=itemdb_search(nameid);
 			memcpy(id->name,str[1],24);
@@ -278,7 +278,6 @@ static int itemdb_readdb(void)
 			id->class=atoi(str[11]);
 			id->sex=atoi(str[12]);
 			if(id->equip != atoi(str[13])){
-				//printf("%d : equip point %d -> %d\n",nameid,id->equip,atoi(str[13]));
 				id->equip=atoi(str[13]);
 			}
 			id->wlv=atoi(str[14]);
@@ -288,10 +287,10 @@ static int itemdb_readdb(void)
 			id->flag.value_notdc=0;
 			id->flag.value_notoc=0;
 			id->view_id=0;
-	
+
 			id->use_script=NULL;
 			id->equip_script=NULL;
-	
+
 			if((p=strchr(np,'{'))==NULL)
 				continue;
 			id->use_script = parse_script(p,0);

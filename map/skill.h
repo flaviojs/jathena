@@ -85,10 +85,9 @@ struct skill_unit_group *skill_check_dancing( struct block_list *src );
 void skill_stop_dancing(struct block_list *src);
 
 // 詠唱キャンセル
-int skill_castcancel( struct block_list *sd );
+int skill_castcancel(struct block_list *bl,int type);
 
-#define skill_calc_heal(bl,skill_lv)	\
-	(( battle_get_lv(bl)+battle_get_int(bl) )/8 *(4+ skill_lv*8))
+#define skill_calc_heal(bl,skill_lv) (( battle_get_lv(bl)+battle_get_int(bl) )/8 *(4+ skill_lv*8))
 
 // その他
 int skill_check_cloaking(struct block_list *bl);
@@ -189,6 +188,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_SPEARSQUICKEN		=68,
 	SC_EXPLOSIONSPIRITS		=86,
 	SC_STEELBODY			=87,
+	SC_COMBO					=89,
 	SC_FLAMELAUNCHER		=90,
 	SC_FROSTWEAPON			=91,
 	SC_LIGHTNINGLOADER		=92,
