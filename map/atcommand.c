@@ -1146,9 +1146,8 @@ atcommand_model(
 		cloth_color >= MIN_CLOTH_COLOR && cloth_color <= MAX_CLOTH_COLOR) {
 				//•‚ÌF•ÏX
 		if (cloth_color != 0 &&
-			(sd->status.class == 12 || sd->status.class == 14 ||
-			 sd->status.class == 15 || sd->status.class == 16 ||
-			 sd->status.class == 17 || sd->status.class == 21)) {
+			sd->status.sex == 1 &&
+			(sd->status.class == 12 ||  sd->status.class == 17)) {
 					//•‚ÌF–¢À‘•E‚Ì”»’è
 					clif_displaymessage(fd,msg_table[35]);
 				} else {

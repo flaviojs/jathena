@@ -14,7 +14,7 @@ OnAgitBreak:
 	set @GIDg1,getcharid(2);
 	if (@GIDg1 <= 0) end;
 	SetCastleData "gefg_cas01.gat",1,@GIDg1;
-	Announce "Ô [" + GetCastleName("gefg_cas01.gat") + "]‚ð [" + GetGuildName(@GIDg1) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½";
+	Announce "Ô [" + GetCastleName("gefg_cas01.gat") + "]‚ð [" + GetGuildName(@GIDg1) + "]ƒMƒ‹ƒh‚ªè—Ì‚µ‚Ü‚µ‚½",0;
 	MapAnnounce "gefg_cas01.gat","ƒGƒ“ƒyƒŠƒEƒ€‚ª”j‰ó‚³‚ê‚Ü‚µ‚½",17;
 	End;
 OnAgitEliminate:

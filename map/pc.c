@@ -723,7 +723,7 @@ int pc_calc_skilltree(struct map_session_data *sd)
 		int skill_point = pc_calc_skillpoint(sd);
 		if(skill_point < 9)
 			c = 0;
-		else if(skill_point < 48 && c > 6) {
+		else if(sd->status.skill_point >= sd->status.job_level && skill_point < 58 && c > 6) {
 			switch(c) {
 				case 7:
 				case 14:

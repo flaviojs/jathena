@@ -90,11 +90,6 @@ Lno2:
 	mes "ま、長い旅路ですからね。";
 	mes "では、ご機嫌よう～。";
 	close;
-OnInit:
-	set $hinamatsuri,1;
-	disablenpc "カプラ職員#amatsunomal";
-	disablenpc "カプラ職員#alberta2";
-	end;
 }
 //==============================================================================
 alberta.gat,218,82,3	script	アマツ貿易商	757,{
@@ -369,4 +364,344 @@ Lno2:
 	mes "まぁ、遠いですしね。";
 	mes "では、また会いましょう。";
 	close;
+}
+//==============================================================================
+amatsu.gat,102,149,4	script	カプラ職員#amatsuevent	112,{
+	cutin "kafra_06",2;
+	mes "[カプラ職員]";
+	mes "やっぱりひなあられは";
+	mes "おいひいれすね～(モグモグ)";
+	mes "雛祭りの間だけ、テーリングの";
+	mes "お姉ちゃんに代わってもらっちゃい";
+	mes "ました。ふふ……";
+	next;
+	mes "[カプラ職員]";
+	mes "そうそう、お客様はミス・アマツの";
+	mes "蛍ちゃんにはもう会われましたか？";
+	mes "私、こっちに来てすぐにお友達に";
+	mes "なっちゃったんですよ～。";
+	mes "こんなにひなあられをもらっちゃ";
+	mes "って……エヘヘ。";
+	next;
+	mes "[カプラ職員]";
+	mes "さて、お仕事もしないと……";
+	mes "お客様、何をお手伝いいたしましょう？";
+	next;
+	menu "位置セーブサービス",L1,"倉庫サービス",L2,"カートサービス",L4,"カプラポイント確認",L5,"終了",L7;
+L1:
+	savepoint "amatsu.gat",116,94;
+	mes "[カプラ職員]";
+	mes "セーブしました。";
+	mes "ご利用ありがとうございます。";
+	goto L_EXIT;
+L2:
+	if(basicskillcheck(0) > 0 && getskilllv(1) < 6) goto Lerror2_1;
+	if (Zeny < 80) goto Lerror2_2;
+		set Zeny,Zeny-80;
+		openstorage;
+		goto L_EXIT;
+	Lerror2_1:
+		mes "[カプラ職員]";
+		mes "倉庫は基本スキルレベル6を";
+		mes "習得してから利用可能となります。";
+		goto L_EXIT;
+	Lerror2_2:
+		mes "[カプラ職員]";
+		mes "お客様、お金が足りません。";
+		mes "倉庫利用料金は 80 Zenyです。";
+		goto L_EXIT;
+L4:
+	if (!((Class == 5) || (Class == 10) || (Class == 18))) goto Lerror4_1;
+	mes "[カプラ職員]";
+	mes "カート利用料金は 700 Zenyです。";
+	mes "また、カートを利用するには";
+	mes "｢プッシュカート｣スキルが必要です。";
+	mes "そのスキルがないとカートを利用";
+	mes "できずにお金だけ消えてしまいます。";
+	mes "準備はよろしいですか？";
+	next;
+	menu "利用する",L4_1,"取り消し",-;
+		mes "[カプラ職員]";
+		mes "ありがとうございました。";
+		mes "またご利用くださいませ。";
+		goto L_EXIT;
+	L4_1:
+		if (Zeny < 700) goto Lerror4_2;
+		set Zeny,Zeny-700;
+		setcart;
+		goto L_EXIT;
+	Lerror4_1:
+		mes "[カプラ職員]";
+		mes "申し訳ございません。";
+		mes "カートは商人とブラックスミス、";
+		mes "そしてアルケミスト専用の";
+		mes "サービスです。";
+		goto L_EXIT;
+	Lerror4_2:
+		mes "[カプラ職員]";
+		mes "お客様、お金が足りません。";
+		mes "カート利用料金は 800 Zenyです。";
+		goto L_EXIT;
+//Cart already have
+//Lerror4_3:
+//mes "[カプラ職員]";
+//mes "お客様は現在カートを";
+//mes "利用されています。";
+//goto L_EXIT;
+L5:
+	mes "[カプラ職員]";
+	mes strcharinfo(0) + " 様の獲得ポイントは、";
+	mes "" + KF_PIT + " 点です。";
+	next;
+	mes "[カプラ職員]";
+	mes "カプラポイントは当カプラサービスの";
+	mes "本社で賞品と引き換えが可能です。";
+	mes "今後ともカプラサービスをよろしく";
+	mes "お願い致します。";
+	goto L_EXIT;
+L7:
+	mes "[カプラ職員]";
+	mes "我々カプラサービスは、より完璧な";
+	mes "サービスと管理業務を目指し";
+	mes "お客様が安心してご利用いただけるよう";
+	mes "いつも最善を尽くしています。";
+	mes "（株）カプラサービスをご利用いただき";
+	mes "ありがとうございました。";
+L_EXIT:
+	cutin "kafra_05",255;
+	close;
+OnInit:
+	disablenpc "カプラ職員#amatsunomal";
+	disablenpc "カプラ職員#alberta2";
+	disablenpc "ミス・アマツ#nomal";
+	end;
+}
+
+amatsu.gat,207,91,4	script	ミス・アマツ	758,{
+
+	mes "[蛍ちゃん]";
+	mes "いつも満開の美しい花が";
+	mes "旅人を出迎える静かな村";
+	mes "アマツによくいらして下さいました。";
+	mes "ただいま、アマツは";
+	mes "雛祭りの真っ最中です。";
+	mes "雛壇では、記念撮影が出来ます。";
+	next;
+	mes "[蛍ちゃん]";
+	mes "あと臨時ですが";
+	mes "新しいカプラさんもいらしてます。";
+	mes "可愛らしい方ですので、";
+	mes "ご挨拶してあげてくださいませ。";
+	next;
+	mes "[蛍ちゃん]";
+	mes "あ、自己紹介が遅れました";
+	mes "私は、第13代ミス・アマツ";
+	mes "｢蛍｣と申します。アマツ代表として";
+	mes "村の案内を仰せつかっております。";
+	mes "また、雛祭り期間は特別な場所への";
+	mes "ご案内もさせていただいております。";
+	next;
+	menu "城",L1,"道具店",L2,"武器店",L3,"居酒屋",L4,"独りぼっちのお雛様",Le_1,"火竜の住処",Le_2,"天",Le_3,"キノコ半島",Le_4,"展望台",Le_5,"キノコがいっぱい",Le_6,"ちょっと休憩",Le_7,"知識の泉",Le_8,"砂漠のオアシス",Le_9,"別荘",Le_10,"謎の遺跡",Le_11,"迷子になる森",Le_12,"水辺でチクタク",Le_13,"孤独な剣",Le_14,"甲羅の屋根",Le_15,"時計と羽と鍵",Le_16;
+Le_1:
+	set @gonum,1;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff独りぼっちのお雛様^000000ですね。";
+	goto LchooseArare;
+Le_2:
+	set @gonum,2;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff火竜の住処^000000ですね。";
+	goto LchooseHisimochi;
+Le_3:
+	set @gonum,3;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff天^000000ですね。";
+	goto LchooseHisimochi;
+Le_4:
+	set @gonum,4;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ffキノコ半島^000000ですね。";
+	goto LchooseArare;
+Le_5:
+	set @gonum,5;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff展望台^000000ですね。";
+	goto LchooseHisimochi;
+Le_6:
+	set @gonum,6;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ffキノコがいっぱい^000000ですね。";
+	goto LchooseArare;
+Le_7:
+	set @gonum,7;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ffちょっと休憩^000000ですね。";
+	goto LchooseHisimochi;
+Le_8:
+	set @gonum,8;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff知識の泉^000000ですね。";
+	goto LchooseHisimochi;
+Le_9:
+	set @gonum,9;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff砂漠のオアシス^000000ですね。";
+	goto LchooseArare;
+Le_10:
+	set @gonum,10;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff別荘^000000ですね。";
+	goto LchooseArare;
+Le_11:
+	set @gonum,11;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff謎の遺跡^000000ですね。";
+	goto LchooseArare;
+Le_12:
+	set @gonum,12;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff,迷子になる森^000000ですね。";
+	goto LchooseHisimochi;
+Le_13:
+	set @gonum,13;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff水辺でチクタク^000000ですね。";
+	goto LchooseBoth;
+Le_14:
+	set @gonum,14;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff孤独な剣^000000ですね。";
+	goto LchooseBoth;
+Le_15:
+	set @gonum,15;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff甲羅の屋根^000000ですね。";
+	goto LchooseBoth;
+Le_16:
+	set @gonum,16;
+	mes "[蛍ちゃん]";
+	mes "はい、^3355ff時計と羽と鍵^000000ですね。";
+	goto LchooseBoth;
+LchooseArare:
+	mes "そこへ向かうためには、";
+	mes "^ff0000ひなあられが1個^000000必要です。";
+	mes "よろしいですか？";
+	next;
+	menu "はい",-,"いいえ",Levend;
+		if (countitem(542)<1) goto LErrorArare;
+		goto Lwarp;
+LchooseHisimochi:
+	mes "そこへ向かうためには、";
+	mes "^ff0000菱餅が1個^000000必要です。";
+	mes "よろしいですか？";
+	next;
+	menu "はい",-,"いいえ",Levend;
+		if (countitem(543)<1) goto LErrorHisimochi;
+		goto Lwarp;
+LchooseBoth:
+	mes "そこへ向かうためには、";
+	mes "^ff0000ひなあられが1個^000000と";
+	mes "^ff0000菱餅が1個^000000必要です。";
+	mes "よろしいですか？";
+	next;
+	menu "はい",-,"いいえ",Levend;
+		if ((countitem(542) < 1) || (countitem(543) < 1)) goto LErrorBoth;
+		goto Lwarp;
+Lwarp:
+	mes "[蛍ちゃん]";
+	mes "はい、では";
+	mes "お気をつけて";
+	mes "いってらっしゃいませ。";
+	next;
+	if ((@gonum == 1) || (@gonum == 4) || (@gonum == 6) || (@gonum == 9) || (@gonum == 10) || (@gonum == 11)) delitem 542,1;
+	if ((@gonum == 2) || (@gonum == 3) || (@gonum == 5) || (@gonum == 7) || (@gonum == 8) || (@gonum == 12)) delitem 543,1;
+	if ((@gonum == 13) || (@gonum == 14) || (@gonum == 15) || (@gonum == 16)) delitem 542,1;
+	if ((@gonum == 13) || (@gonum == 14) || (@gonum == 15) || (@gonum == 16)) delitem 543,1;
+	if (@gonum == 1) warp "ama_dun03.gat",120,204;
+	if (@gonum == 2) warp "mag_dun02.gat",151,194;
+	if (@gonum == 3) warp "gonryun.gat",36,90;
+	if (@gonum == 4) warp "pay_fild05.gat",92,153;
+	if (@gonum == 5) warp "gef_fild12.gat",247,180;
+	if (@gonum == 6) warp "gef_fild02.gat",87,49;
+	if (@gonum == 7) warp "cmd_fild07.gat",155,357;
+	if (@gonum == 8) warp "yuno_in02.gat",93,205;
+	if (@gonum == 9) warp "moc_fild11.gat",198,215;
+	if (@gonum == 10) warp "yuno_fild02.gat",92,211;
+	if (@gonum == 11) warp "cmd_fild04.gat",129,261;
+	if (@gonum == 12) warp "prt_maze02.gat",105,80;
+	if (@gonum == 13) warp "alde_dun04.gat",164,143;
+	if (@gonum == 14) warp "glast_01.gat",44,363;
+	if (@gonum == 15) warp "tur_dun03.gat",56,36;
+	if (@gonum == 16) warp "c_tower4.gat",42,38;
+	end;
+LErrorArare:
+	mes "[蛍ちゃん]";
+	mes "すみません……";
+	mes "足りないようなのですが……";
+	mes "ご希望の場所に送って";
+	mes "差し上げるためには、^ff0000ひなあられ^000000が";
+	mes "どうしても必要なのです。";
+	mes "誠に申し訳ありません……";
+	close;
+LErrorHisimochi:
+	mes "[蛍ちゃん]";
+	mes "すみません……";
+	mes "足りないようなのですが……";
+	mes "ご希望の場所に送って";
+	mes "差し上げるためには、^ff0000菱餅^000000が";
+	mes "どうしても必要なのです。";
+	mes "誠に申し訳ありません……";
+	close;
+LErrorBoth:
+	mes "[蛍ちゃん]";
+	mes "すみません……";
+	mes "足りないようなのですが……";
+	mes "ご希望の場所に送って";
+	mes "差し上げる為には、";
+	next;
+	mes "[蛍ちゃん]";
+	mes "^ff0000ひなあられと";
+	mes "菱餅^000000が";
+	mes "どうしても必要なのです。";
+	mes "誠に申し訳ありません……";
+	close;
+Levend:
+	mes "[蛍ちゃん]";
+	mes "そうですか……";
+	mes "Ｗちゃん、残念がるな……";
+	mes "あ、いえ、こちらの話です。";
+	mes "すみません。";
+	mes "気が変わりましたら、是非どうぞ。";
+	close;
+L1:
+		viewpoint 1,85,235,0,0xFF3355;
+		mes "[蛍ちゃん]";
+		mes "ミニマップの";
+		mes "^FF3355+^000000部分が";
+		mes "城でございます。";
+		goto LEnd;
+L2:
+		viewpoint 1,96,118,1,0xCE6300;
+		mes "[蛍ちゃん]";
+		mes "ミニマップの";
+		mes "^CE6300+^000000部分が";
+		mes "道具店になります。";
+		goto LEnd;
+L3:
+		viewpoint 1,132,117,2,0x55FF33;
+		mes "[蛍ちゃん]";
+		mes "ミニマップの";
+		mes "^55FF33+^000000部分が";
+		mes "武器店になります。";
+		goto LEnd;
+L4:
+		viewpoint 1,217,116,3,0x3355FF;
+		mes "[蛍ちゃん]";
+		mes "ミニマップの";
+		mes "^3355FF+^000000部分が";
+		mes "居酒屋になります。";
+LEnd:
+		mes "それでは、アマツで";
+		mes "楽しい時間をお過ごし下さいませ。";
+		close;
 }

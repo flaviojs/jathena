@@ -1,4 +1,28 @@
 --------------------
+//0910 by RR
+・スクリプトの間違いを修正
+(conf/gvg/)
+	ev_agit_payg.txt
+	ev_agit_gefg.txt
+
+・ひな祭りに一度入ったらマップ変数が残ったままになるので、マップ変数を使わないよう変更
+(一時的マップ変数にすれば問題ないとも言えますが、
+town_guideとtown_kafraに時期限定の物が常駐してしまうのが気になったので、
+それらをevent_hinamatsuriへ移動し、普段のをdisableしています)
+	(conf/npc/)
+	npc_event_hinamatsuri
+	npc_town_guide
+	npc_town_kafra
+
+・スキルリセット時のスキル取得制限判定をスキルポイント48以上消費から、
+	スキルポイント58以上消費か残りスキルポイントがJOBLEVELより小さくなったときに変更
+・@model時の服色染色制限を緩和(男アサ、ローグのみへ)
+	(map/)
+	pc.c pc_calc_skilltree()
+	atcommand.c atcommand_model()
+
+
+--------------------
 //0909 by 胡蝶蘭
 
 ・NPCチャット関係の命令追加
