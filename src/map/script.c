@@ -211,6 +211,8 @@ int buildin_requestguildinfo(struct script_state *st);
 int buildin_getequipcardcnt(struct script_state *st);
 int buildin_successremovecards(struct script_state *st);
 int buildin_failedremovecards(struct script_state *st);
+int buildin_marriage(struct script_state *st);
+int buildin_divorce(struct script_state *st);
 
 void push_val(struct script_stack *stack,int type,int val);
 int run_func(struct script_state *st);
@@ -352,6 +354,8 @@ struct {
 	{buildin_getequipcardcnt,"getequipcardcnt","i"},
 	{buildin_successremovecards,"successremovecards","i"},
 	{buildin_failedremovecards,"failedremovecards","ii"},
+	{buildin_marriage,"marriage","s"},
+	{buildin_divorce,"divorce",""},
 	{NULL,NULL,NULL}
 };
 enum {
@@ -4336,6 +4340,29 @@ int buildin_failedremovecards(struct script_state *st)
 	return 0;
 }
 
+int buildin_marriage(struct script_state *st)
+{
+	char *partner=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	struct map_session_data *sd=script_rid2sd(st);
+	struct map_session_data *p_sd=map_nick2sd(partner);
+
+	if(sd==NULL || p_sd==NULL || pc_marriage(sd,p_sd) < 0){
+		push_val(st->stack,C_INT,0);
+		return 0;
+	}
+	push_val(st->stack,C_INT,1);
+	return 0;
+}
+int buildin_divorce(struct script_state *st)
+{
+	struct map_session_data *sd=script_rid2sd(st);
+	if(sd==NULL || pc_divorce(sd) < 0){
+		push_val(st->stack,C_INT,0);
+		return 0;
+	}
+	push_val(st->stack,C_INT,1);
+	return 0;
+}
 
 //
 // é¿çsïîmain

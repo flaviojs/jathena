@@ -272,6 +272,7 @@ extern struct Battle_Config {
 	int gx_disptype;
 	int player_skill_partner_check;
 	int hide_GM_session;
+	int unit_movement_type;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

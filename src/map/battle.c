@@ -4870,6 +4870,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.gx_disptype = 1;
 		battle_config.player_skill_partner_check = 1;
 		battle_config.hide_GM_session = 0;
+		battle_config.unit_movement_type = 0;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -5035,7 +5036,7 @@ int battle_config_read(const char *cfgName)
 			{ "gx_disptype", 				&battle_config.gx_disptype				},
 			{ "player_skill_partner_check",	&battle_config.player_skill_partner_check},
 			{ "hide_GM_session",	&battle_config.hide_GM_session},
-
+			{ "unit_movement_type",	&battle_config.unit_movement_type},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

@@ -729,7 +729,8 @@ int pc_authok(int id,struct mmo_charstatus *st)
 	// 通知
 	clif_authok(sd);
 	map_addnickdb(sd);
-
+	if( map_charid2nick(sd->status.char_id)==NULL )
+		map_addchariddb(sd->status.char_id,sd->status.name);
 
 	// ステータス初期計算など
 	pc_calcstatus(sd,1);
@@ -6025,7 +6026,8 @@ int pc_calc_pvprank_timer(int tid,unsigned int tick,int id,int data)
  * sdは結婚しているか(既婚の場合は相方のchar_idを返す)
  *------------------------------------------
  */
-int pc_ismarried(struct map_session_data *sd){
+int pc_ismarried(struct map_session_data *sd)
+{
 	if(sd == NULL)
 		return -1;
 	if(sd->status.partner_id > 0)
@@ -6037,7 +6039,8 @@ int pc_ismarried(struct map_session_data *sd){
  * sdがdstsdと結婚(dstsd→sdの結婚処理も同時に行う)
  *------------------------------------------
  */
-int pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd){
+int pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd)
+{
 	if(sd == NULL || dstsd == NULL || sd->status.partner_id > 0 || dstsd->status.partner_id > 0)
 		return -1;
 	sd->status.partner_id=dstsd->status.char_id;
@@ -6050,7 +6053,8 @@ int pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd){
  * sdが離婚(相手はsd->status.partner_idに依る)(相手も同時に離婚・結婚指輪自動剥奪)
  *------------------------------------------
  */
-int pc_divorce(struct map_session_data *sd){
+int pc_divorce(struct map_session_data *sd)
+{
 	if(sd == NULL || !pc_ismarried(sd))
 		return -1;
 
@@ -6076,6 +6080,27 @@ int pc_divorce(struct map_session_data *sd){
 		return -1;
 	}
 	return 0;
+}
+
+/*==========================================
+ * sdの相方のmap_session_dataを返す
+ *------------------------------------------
+ */
+struct map_session_data *pc_get_partner(struct map_session_data *sd)
+{
+	if(sd == NULL || !pc_ismarried(sd))
+		return NULL;
+
+	struct map_session_data *p_sd = NULL;
+	char *nick=map_charid2nick(sd->status.partner_id);
+
+	if (nick==NULL)
+		return NULL;
+
+	if((p_sd=map_nick2sd(nick)) == NULL )
+		return NULL;
+
+	return p_sd;
 }
 
 //

@@ -917,6 +917,7 @@ int map_quit(struct map_session_data *sd)
 
 	numdb_erase(id_db,sd->bl.id);
 	strdb_erase(nick_db,sd->status.name);
+	numdb_erase(charid_db,sd->status.char_id);
 
 	return 0;
 }

@@ -3283,6 +3283,30 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		break;
 
+	case WE_MALE:				/* 君だけは護るよ */
+		if(sd && dstsd){
+			int gain_hp=0;
+			gain_hp=sd->status.hp*15/100;// 15%
+			clif_skill_nodamage(src,bl,skillid,gain_hp,1);
+			battle_heal(NULL,src,-gain_hp,0,0);
+			battle_heal(NULL,bl,gain_hp,0,0);
+		}
+		break;
+	case WE_FEMALE:				/* あなたの為に犠牲になります */
+		if(sd && dstsd){
+			int gain_sp=0;
+			gain_sp=sd->status.sp*15/100;// 15%
+			clif_skill_nodamage(src,bl,skillid,gain_sp,1);
+			battle_heal(NULL,src,0,-gain_sp,0);
+			battle_heal(NULL,bl,0,gain_sp,0);
+		}
+		break;
+
+	case WE_CALLPARTNER:			/* あなたに会いたい */
+		if(sd)
+			skill_unitsetting(src,skillid,skilllv,sd->bl.x,sd->bl.y,0);
+		break;
+
 	case PF_HPCONVERSION:			/* ライフ置き換え */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		if(sd){
@@ -4067,6 +4091,11 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		range=1;
 		target=BCT_ENEMY;
 		break;
+	case WE_CALLPARTNER:		/* あなたに会いたい */
+		limit=skill_get_time(skillid,skilllv);
+		range=-1;
+		break;
+
 	case HP_BASILICA:			/* バジリカ */
 		limit=skill_get_time(skillid,skilllv);
 		interval = 300;
@@ -4868,7 +4897,18 @@ int skill_unit_onlimit(struct skill_unit *src,unsigned int tick)
 		map_setcell(src->bl.m,src->bl.x,src->bl.y,src->val2);
 		clif_changemapcell(src->bl.m,src->bl.x,src->bl.y,src->val2,1);
 		break;
+	case 0xb2:	/* あなたに会いたい */
+		{
+			struct map_session_data *sd = NULL;
+			struct map_session_data *p_sd = NULL;
+			if((sd = (struct map_session_data *)(map_id2bl(sg->src_id))) == NULL)
+				return 0;
+			if((p_sd = pc_get_partner(sd)) == NULL)
+				return 0;
 
+			pc_setpos(p_sd,map[src->bl.m].name,src->bl.x,src->bl.y,3);
+		}
+		break;
 	}
 	return 0;
 }
@@ -5781,6 +5821,24 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	case SA_SPELLBREAKER:
 		forcecast=1;
 		break;
+	case WE_MALE:
+	case WE_FEMALE:
+//	case WE_CALLPARTNER:
+		{
+		struct map_session_data *p_sd = NULL;
+		if((p_sd = pc_get_partner(sd)) == NULL)
+			return 0;
+		target_id = p_sd->bl.id;
+		//rangeをもう1回検査
+		range = skill_get_range(skill_num,skill_lv);
+		if(range < 0)
+			range = battle_get_range(&sd->bl) - (range + 1);
+		if(!battle_check_range(&sd->bl,&p_sd->bl,range) ){
+			return 0;
+			}
+		}
+		break;
+
 	case PF_MEMORIZE:				/* メモライズ */
 		casttime = 12000;
 		break;
@@ -8576,52 +8634,102 @@ int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int
 		return 0;
 
 	if(group->unit!=NULL){
-		int i;
-		for(i=0;i<group->unit_count;i++){
-			struct skill_unit *unit=&group->unit[i];
-			if(unit->alive && !(m==unit->bl.m && dx==0 && dy==0)){
-				int range=unit->range;
-				map_delblock(&unit->bl);
-				unit->bl.m = m;
-				unit->bl.x += dx;
-				unit->bl.y += dy;
-				map_addblock(&unit->bl);
-				clif_skill_setunit(unit);
-				if(range>0){
-					if(range<7)
-						range=7;
-					map_foreachinarea( skill_unit_move_unit_group_sub, unit->bl.m,
-						unit->bl.x-range,unit->bl.y-range,unit->bl.x+range,unit->bl.y+range,0,
-						&unit->bl,gettick() );
+		if(!battle_config.unit_movement_type){
+			int i;
+			for(i=0;i<group->unit_count;i++){
+				struct skill_unit *unit=&group->unit[i];
+				if(unit->alive && !(m==unit->bl.m && dx==0 && dy==0)){
+					int range=unit->range;
+					map_delblock(&unit->bl);
+					unit->bl.m = m;
+					unit->bl.x += dx;
+					unit->bl.y += dy;
+					map_addblock(&unit->bl);
+					clif_skill_setunit(unit);
+					if(range>0){
+						if(range<7)
+							range=7;
+						map_foreachinarea( skill_unit_move_unit_group_sub, unit->bl.m,
+							unit->bl.x-range,unit->bl.y-range,unit->bl.x+range,unit->bl.y+range,0,
+							&unit->bl,gettick() );
+					}
+				}
+			}
+		}else{
+			int i,j,r_flag[group->unit_count],s_flag[group->unit_count],m_flag[group->unit_count];
+			memset(r_flag,0,sizeof(r_flag));// 残留フラグ
+			memset(m_flag,0,sizeof(m_flag));// 移動フラグ
+			memset(s_flag,0,sizeof(s_flag));// 継承フラグ
+			struct skill_unit *unit1;
+			struct skill_unit *unit2;
+
+			//先にフラグを全部決める
+			for(i=0;i<group->unit_count;i++){
+				unit1=&group->unit[i];
+				int move_check=0;// かぶりフラグ
+				for(j=0;j<group->unit_count;j++){
+					unit2=&group->unit[j];
+					if(unit1->bl.m==m && unit1->bl.x+dx==unit2->bl.x && unit1->bl.y+dy==unit2->bl.y){
+						//移動先にユニットがかぶってたら
+						s_flag[i]=1;// 移動前のユニットナンバーの継承フラグon
+						r_flag[j]=1;// かぶるユニットナンバーの残留フラグon
+						move_check=1;//ユニットがかぶった。
+						break;
+					}
+				}
+				if(!move_check)// ユニットがかぶってなかったら
+					m_flag[i]=1;// 移動前ユニットナンバーの移動フラグon
+			}
+
+			//フラグに基づいてユニット移動
+			for(i=0;i<group->unit_count;i++){
+				unit1=&group->unit[i];
+				if(m_flag[i]){// 移動フラグがonで
+					if(!r_flag[i]){// 残留フラグがoffなら
+						//単純移動(rangeも継承の必要無し)
+						int range=unit1->range;
+						map_delblock(&unit1->bl);
+						unit1->bl.m = m;
+						unit1->bl.x += dx;
+						unit1->bl.y += dy;
+						map_addblock(&unit1->bl);
+						clif_skill_setunit(unit1);
+						if(range > 0){
+							if(range < 7)
+								range = 7;
+							map_foreachinarea( skill_unit_move_unit_group_sub, unit1->bl.m,
+								unit1->bl.x-range,unit1->bl.y-range,unit1->bl.x+range,unit1->bl.y+range,0,
+								&unit1->bl,gettick() );
+						}
+					}else{// 残留フラグがonなら
+						//空ユニットになるので、継承可能なユニットを探す
+						for(j=0;j<group->unit_count;j++){
+							unit2=&group->unit[j];
+							if(s_flag[j] && !r_flag[j]){
+								// 継承移動(range継承付き)
+								int range=unit1->range;
+								map_delblock(&unit2->bl);
+								unit2->bl.m = m;
+								unit2->bl.x = unit1->bl.x + dx;
+								unit2->bl.y = unit1->bl.y + dy;
+								unit2->range = unit1->range;
+								map_addblock(&unit2->bl);
+								clif_skill_setunit(unit2);
+								if(range > 0){
+									if(range < 7)
+										range = 7;
+									map_foreachinarea( skill_unit_move_unit_group_sub, unit2->bl.m,
+										unit2->bl.x-range,unit2->bl.y-range,unit2->bl.x+range,unit2->bl.y+range,0,
+										&unit2->bl,gettick() );
+								}
+								s_flag[j]=0;// 継承完了したのでoff
+								break;
+							}
+						}
+					}
 				}
 			}
 		}
-/*
-		int i,j,r_flag[group->unit_count],c_flag[group->unit_count],m_flag[group->unit_count];
-		memset(r_flag,0,sizeof(r_flag));
-		memset(m_flag,0,sizeof(m_flag));
-		memset(c_flag,0,sizeof(c_flag));
-		for(i=0;i<group->unit_count;i++){
-			struct skill_unit *unit1=&group->unit[i];
-			int checked=0;
-			for(j=0;j<group->unit_count;j++){
-				struct skill_unit *unit2=&group->unit[j];
-				if(checked)
-					continue;
-				if(unit1->bl.m==m
-					&& unit1->bl.x+dx==unit2->bl.x && unit1->bl.y+dy==unit2->bl.y){
-					unit1->bl.m = m;
-					unit1->bl.x += dx;
-					unit1->bl.y += dy;
-					r_flag[j]=i;
-					m_flag[j]=1;
-					checked=1;
-				}else{
-				}
-			}
-			
-		}
-*/		
 	}
 	return 0;
 }

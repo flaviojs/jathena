@@ -1,4 +1,4 @@
-//skill_db.txt＠AthenaDB計画 2004/05/31 15:27:06 +0900 (JST)
+//skill_db.txt＠AthenaDB計画 2004/06/06 14:27:11 +0900 (JST)
 //id,range,hit,inf,pl,nk,max,list_num,castcancel,cast_defence_rate,inf2,maxcount,skill_type,blow_count
 1,0,0,0,0,0,9,0,no,0,0,0,none,0	//NV_BASIC#基本スキル#
 2,0,0,0,0,0,10,0,no,0,0,0,weapon,0	//SM_SWORD#剣修練#
@@ -381,9 +381,9 @@
 329,0,6,4,0,1,10,1,no,0,0,0,misc,0	//DC_FORTUNEKISS#幸運のキス#
 330,0,6,4,0,1,10,1,no,0,0,0,misc,0	//DC_SERVICEFORYOU#サービスフォーユー#
 
-//334,0,0,4,0,1,1,1,yes,0,0,0,magic,0	//WE_MALE#あなただけは_守って#
-//335,0,0,4,0,1,1,1,yes,0,0,0,magic,0	//WE_FEMALE#あなたの_ため_犠牲しますよ#
-//336,0,0,4,0,1,1,1,yes,0,0,0,magic,0	//WE_CALLPARTNER#あなたを_会いたいです#
+334,8,6,4,0,1,1,1,yes,0,0,0,magic,0	//WE_MALE#君だけは護るよ#
+335,8,6,4,0,1,1,1,yes,0,0,0,magic,0	//WE_FEMALE#あなたに尽くします#
+336,8,6,4,0,1,1,1,yes,0,0,1,magic,0	//WE_CALLPARTNER#あなたに逢いたい#
 
 //338,0,0,0,0,0,0,0,no,0,0,0,none,0	//NPC_DARKCROSS#ダーククロス#
 

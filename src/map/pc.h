@@ -140,6 +140,12 @@ int pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick)
 int pc_calc_pvprank(struct map_session_data *sd);
 int pc_calc_pvprank_timer(int tid,unsigned int tick,int id,int data);
 
+int pc_ismarried(struct map_session_data *sd);
+int pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd);
+int pc_divorce(struct map_session_data *sd);
+struct map_session_data *pc_get_partner(struct map_session_data *sd);
+
+
 struct pc_base_job{
 	int job; //E‹ÆA‚½‚¾‚µ“]¶E‚â—{qE‚Ìê‡‚ÍŒ³‚ÌE‹Æ‚ğ•Ô‚·(”pƒvƒŠ¨ƒvƒŠ)
 	int type; //ƒmƒr 0, ˆêŸE 1, “ñŸE 2, ƒXƒpƒmƒr 3

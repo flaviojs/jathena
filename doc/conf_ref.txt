@@ -1098,6 +1098,10 @@ player_skill_partner_check
 hide_GM_session
 	GMアカウントのキャラクターを@コマンド等で表示の対象にするかどうかです。
 	デフォルトはnoです
+unit_movement_type
+	ユニット移動処理方法を選択します。
+	0で本鯖仕様(回線負荷→重、鯖処理→軽)、1でAthena仕様(回線負荷→軽、鯖処理→重)
+	デフォルトは0(本鯖仕様)です
 
 import
 	その行を別ファイルの中身と置き換えます。
@@ -1247,6 +1251,7 @@ pc_atack_attr_none: no
 mob_atack_attr_none: yes
 player_skill_partner_check: yes
 hide_GM_session: no
+unit_movement_type: 0
 
 ==========================================================================
 6. atcommand_athena.conf
