@@ -169,6 +169,8 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_WATERBALL			=142,
 	SC_ANKLE				=143,
 	SC_DANCING				=144,
+	SC_KEEPING			=145,
+	SC_BARRIER			=146,
 
 	SC_TRICKDEAD			=29,
 	SC_PROVOKE				= 0,
@@ -178,6 +180,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_CONCENTRATE			= 3,
 	SC_HIDING				= 4,
 	SC_LOUD					=30,
+	SC_HALLUCINATION	=34,
 	SC_RUWACH				=151,
 	SC_INCREASEAGI			=12,
 	SC_DECREASEAGI			=13,

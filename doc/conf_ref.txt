@@ -594,6 +594,9 @@ pet_hungry_delay_rate
 	ペットの腹が減る時間の倍率です。
 	倍率が高いと腹が減り難くなります。デフォルトは100です。
 
+pet_hungry_friendly_decrease
+	ペットの腹が完全に減った時減る親密度の量です。デフォルトは5です。
+
 pet_status_support
 	ペットによるステータスボーナスを適用するかどうかです。yesにすると
 	ペットを持ってる時ペット毎に設定されているステータスボーナスが
@@ -895,6 +898,7 @@ pet_catch_rate: 100
 pet_rename: no
 pet_friendly_rate: 100
 pet_hungry_delay_rate: 100
+pet_hungry_friendly_decrease: 5
 pet_status_support: no
 pet_support: no
 pet_support_rate: 100

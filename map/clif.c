@@ -2691,8 +2691,16 @@ int clif_damage(struct block_list *src,struct block_list *dst,unsigned int tick,
 	unsigned char buf[256];
 	struct status_change *sc_data = battle_get_sc_data(dst);
 
-	if(type != 4 && sc_data && sc_data[SC_ENDURE].timer != -1)
-		type = 9;
+	if(sc_data) {
+		if(type != 4 && sc_data[SC_ENDURE].timer != -1)
+			type = 9;
+		if(sc_data[SC_HALLUCINATION].timer != -1) {
+			if(damage > 0)
+				damage = damage*(1+rand()%10) + rand()%100;
+			if(damage2 > 0)
+				damage2 = damage2*(1+rand()%10) + rand()%100;
+		}
+	}
 
 	WBUFW(buf,0)=0x8a;
 	WBUFL(buf,2)=src->id;
@@ -3163,8 +3171,12 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,
 	unsigned char buf[64];
 	struct status_change *sc_data = battle_get_sc_data(dst);
 
-	if(type != 5 && sc_data && sc_data[SC_ENDURE].timer != -1)
-		type = 9;
+	if(sc_data) {
+		if(type != 5 && sc_data[SC_ENDURE].timer != -1)
+			type = 9;
+		if(sc_data[SC_HALLUCINATION].timer != -1 && damage > 0)
+			damage = damage*(1+rand()%10) + rand()%100;
+	}
 
 #if PACKETVER < 3
 	WBUFW(buf,0)=0x114;
@@ -3205,8 +3217,12 @@ int clif_skill_damage2(struct block_list *src,struct block_list *dst,
 	unsigned char buf[64];
 	struct status_change *sc_data = battle_get_sc_data(dst);
 
-	if(sc_data && sc_data[SC_ENDURE].timer != -1)
-		type = 9;
+	if(sc_data) {
+		if(type != 5 && sc_data[SC_ENDURE].timer != -1)
+			type = 9;
+		if(sc_data[SC_HALLUCINATION].timer != -1 && damage > 0)
+			damage = damage*(1*rand()%10) + rand()%100;
+	}
 
 	WBUFW(buf,0)=0x115;
 	WBUFW(buf,2)=skill_id;
@@ -3364,7 +3380,7 @@ int clif_skill_estimation(struct map_session_data *sd,struct block_list *dst)
 	WBUFW(buf,16)=battle_get_mdef2(&md->bl) - (mob_db[md->class].vit>>1);
 	WBUFW(buf,18)=battle_get_elem_type(&md->bl);
 	for(i=0;i<9;i++)
-		WBUFB(buf,20+i)= battle_attr_fix(100,i+1,mob_db[md->class].element);
+		WBUFB(buf,20+i)= battle_attr_fix(100,i+1,md->def_ele);
 
 	if(sd->status.party_id>0)
 		clif_send(buf,packet_len_table[0x18c],&sd->bl,PARTY_AREA);
@@ -4453,7 +4469,7 @@ int clif_pet_emotion(struct pet_data *pd,int param)
 	return 0;
 }
 
-int clif_pet_performance(struct pet_data *pd,int param)
+int clif_pet_performance(struct block_list *bl,int param)
 {
 	unsigned char buf[16];
 
@@ -4461,10 +4477,10 @@ int clif_pet_performance(struct pet_data *pd,int param)
 
 	WBUFW(buf,0)=0x1a4;
 	WBUFB(buf,2)=4;
-	WBUFL(buf,3)=pd->bl.id;
+	WBUFL(buf,3)=bl->id;
 	WBUFL(buf,7)=param;
 
-	clif_send(buf,packet_len_table[0x1a4],&pd->bl,AREA);
+	clif_send(buf,packet_len_table[0x1a4],bl,AREA);
 
 	return 0;
 }

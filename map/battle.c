@@ -495,6 +495,8 @@ int battle_get_def(struct block_list *bl)
 
 	if(def < 1000000) {
 		if(sc_data) {
+			if( sc_data[SC_KEEPING].timer!=-1)
+				def = 100;
 			if( sc_data[SC_PROVOKE].timer!=-1 && bl->type != BL_PC)
 				def = (def*(100 - 6*sc_data[SC_PROVOKE].val1)+50)/100;
 			if( sc_data[SC_DRUMBATTLE].timer!=-1 && bl->type != BL_PC)
@@ -531,6 +533,8 @@ int battle_get_mdef(struct block_list *bl)
 
 	if(mdef < 1000000) {
 		if(sc_data) {
+			if(sc_data[SC_BARRIER].timer != -1)
+				mdef = 100;
 			if(sc_data[SC_FREEZE].timer != -1 || (sc_data[SC_STONE].timer != -1 && sc_data[SC_STONE].val2 == 0))
 				mdef = mdef*125/100;
 		}
@@ -1074,7 +1078,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 
 	if(sc_count!=NULL && *sc_count>0){
 
-		if(sc_data[SC_SAFETYWALL].timer!=-1 && damage>0 &&
+		if(sc_data[SC_SAFETYWALL].timer!=-1 && damage>0 && skill_num != NPC_DARKBREATH &&
 			flag&BF_WEAPON && flag&BF_SHORT ){
 			// セーフティウォール
 			struct skill_unit *unit=(struct skill_unit*)sc_data[SC_SAFETYWALL].val2;
@@ -1370,7 +1374,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 		damage = 0;
 	atkmin = battle_get_atk(src);
 	atkmax = battle_get_atk2(src);
-	if( mob_db[pd->class].range>3 )
+	if(skill_num == 0 && mob_db[pd->class].range>3 )
 		flag=(flag&~BF_RANGEMASK)|BF_LONG;
 
 	if(atkmin > atkmax) atkmin = atkmax;
@@ -1495,6 +1499,13 @@ static struct Damage battle_calc_pet_weapon_attack(
 			case NPC_GUIDEDATTACK:
 				hitrate = 1000000;
 				break;
+			case NPC_RANGEATTACK:
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
+				break;
+			case NPC_DARKBREATH:
+				damage = 500 + (skill_lv-1)*1000 + rand()%1000;
+				if(damage > 9999) damage = 9999;
+				break;
 			case RG_BACKSTAP:	// バックスタブ
 				damage = damage*(300+ 40*skill_lv)/100;
 				hitrate = 1000000;
@@ -1557,7 +1568,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST) {	//DEF, VIT無視
+			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != NPC_DARKBREATH) {	//DEF, VIT無視
 				int t_def;
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
@@ -1727,7 +1738,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		damage = 0;
 	atkmin = battle_get_atk(src);
 	atkmax = battle_get_atk2(src);
-	if( mob_db[md->class].range>3 )
+	if(skill_num == 0 && mob_db[md->class].range>3 )
 		flag=(flag&~BF_RANGEMASK)|BF_LONG;
 
 	if(atkmin > atkmax) atkmin = atkmax;
@@ -1878,6 +1889,13 @@ static struct Damage battle_calc_mob_weapon_attack(
 			case NPC_GUIDEDATTACK:
 				hitrate = 1000000;
 				break;
+			case NPC_RANGEATTACK:
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
+				break;
+			case NPC_DARKBREATH:
+				damage = 500 + (skill_lv-1)*1000 + rand()%1000;
+				if(damage > 9999) damage = 9999;
+				break;
 			case RG_BACKSTAP:	// バックスタブ
 				damage = damage*(300+ 40*skill_lv)/100;
 				hitrate = 1000000;
@@ -1940,7 +1958,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER) {	//DEF, VIT無視
+			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && skill_num != NPC_DARKBREATH) {	//DEF, VIT無視
 				int t_def;
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
@@ -2516,6 +2534,13 @@ static struct Damage battle_calc_pc_weapon_attack(
 			case NPC_GUIDEDATTACK:
 				hitrate = 1000000;
 				break;
+			case NPC_RANGEATTACK:
+				flag=(flag&~BF_RANGEMASK)|BF_LONG;
+				break;
+			case NPC_DARKBREATH:
+				damage = 500 + (skill_lv-1)*1000 + rand()%1000;
+				if(damage > 9999) damage = 9999;
+				break;
 			case RG_BACKSTAP:	// バックスタブ
 				damage = damage*(300+ 40*skill_lv)/100;
 				damage2 = damage2*(300+ 40*skill_lv)/100;
@@ -2629,7 +2654,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 		if( skill_num!=NPC_CRITICALSLASH ){
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
-			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER) {	//DEF, VIT無視
+			if ( skill_num != MO_INVESTIGATE && skill_num != MO_EXTREMITYFIST && skill_num != KN_AUTOCOUNTER && skill_num != NPC_DARKBREATH) {	//DEF, VIT無視
 				int t_def;
 				if(battle_config.vit_penaly_type > 0) {
 					if(target_count >= battle_config.vit_penaly_count) {
@@ -3763,6 +3788,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.pet_rename=0;
 	battle_config.pet_friendly_rate=100;
 	battle_config.pet_hungry_delay_rate=100;
+	battle_config.pet_hungry_friendly_decrease=5;
 	battle_config.pet_status_support=0;
 	battle_config.pet_attack_support=0;
 	battle_config.pet_damage_support=0;
@@ -3885,6 +3911,7 @@ int battle_config_read(const char *cfgName)
 			{ "pet_rename",				&battle_config.pet_rename		},
 			{ "pet_friendly_rate",		&battle_config.pet_friendly_rate	},
 			{ "pet_hungry_delay_rate",	&battle_config.pet_hungry_delay_rate	},
+			{ "pet_hungry_friendly_decrease",	&battle_config.pet_hungry_friendly_decrease	},
 			{ "pet_status_support",	&battle_config.pet_status_support },
 			{ "pet_attack_support",	&battle_config.pet_attack_support },
 			{ "pet_damage_support",	&battle_config.pet_damage_support },

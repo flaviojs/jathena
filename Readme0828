@@ -1,5 +1,47 @@
 --------------------
+//0850 by 死神
+
+・NPCスキル実装。(ハルシネーション、キーピング、リック、メンタルブレイカー、プロボケーション、バリヤー、ダークブレッシング、ダークブレス)
+・スキル自爆の制限はmob_skill_db.txtでやればいいものなので取り戻し。
+・battle_athena.confにpet_hungry_friendly_decrease追加。
+・ペットの腹が完全に減ると支援攻撃を中止するように変更。
+・属性変更スキルが作動しなかった問題修正。
+・メンタルブレイカーは10+スキルレベル*5%のSPを減らす。(攻撃は通常武器スキル攻撃)
+・リックは必中でSP-100、スタン確率スキルレベル*5%。(ダメージは無し、bNoWeaponDamageで無効)
+・プロボケーションはモーションが準備されてないモンスターは入れてもなんの効果もなし。
+・ダークブレッシングはかかるとHPが1になる。耐性は魔法防御で適用。
+・ダークブレスは500+(スキルレベル-1)*1000+rand(0,1000)のダメージ。回避できるが防御無視で近距離物理攻撃だがセイフティウォールは無視して闇属性攻撃。(本鯖の計算式にあっている可能性はないかも。ただダメージ量と命中補正以外は本鯖合わせ)
+・NPCスキルの維持時間は適度に設定。
+・モンスターの属性攻撃とガイデッドアタックがセイフティウォールを無視するとの報告を受けたのですが修正するかどうかはちょっと微妙。(スプラッシュアタックもセイフティウォール無視かも)
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	(db/)
+	cast_db.txt 修正。
+	skill_db.txt 修正。
+	(map/)
+	mob.c
+		mob_damage() 修正。
+	clif.h 修正。
+	clif.c
+		clif_skill_estimation()、clif_damage()、clif_skill_damage() 修正。
+		clif_skill_damage2()、clif_pet_performance() 修正。
+	pet.c
+		pet_performance()、pet_target_check()、pet_hungry() 修正。
+	skill.h 修正。
+	skill.c
+		skill_additional_effect()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_status_change_start() 修正。
+	battle.h 修正。
+	battle.c
+		battle_get_def()、battle_get_mdef()、battle_calc_damage() 修正。
+		battle_calc_pet_weapon_attack()、battle_calc_mob_weapon_attack() 修正。
+		battle_calc_pc_weapon_attack()、battle_config_read() 修正。
+
+--------------------
 //0849 by lapis
+
 ・街中のテストギルドフラグの表示がおかしかったのを修正。
 ・ギルドメンバーは旗からアジトに飛べるように修正。
 	(conf/gvg)
@@ -9,7 +51,7 @@
 //0848 by huge
 
 ・スキル自爆を、HPが全回復している時は使えないよう修正。
-・スフィアマイン・バイオプラント･･･ターゲット変更できない...。
+・スフィアマイン・バイオプラント・・・ターゲット変更できない...。
 ・mobにターゲット無視IDを設定できるようにしました。(Gv用mobに使える？)
 	(map/)
 	map.h 修正。

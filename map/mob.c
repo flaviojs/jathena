@@ -1973,7 +1973,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	clif_clearchar_area(&md->bl,1);
 	map_delblock(&md->bl);
 	if(mob_get_viewclass(md->class) <= 1000)
-		clif_clearchar_delay(tick+5000,&md->bl,0);
+		clif_clearchar_delay(tick+3000,&md->bl,0);
 	mob_deleteslave(md);
 	mob_setdelayspawn(md->bl.id);
 	map_freeblock_unlock();

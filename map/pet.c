@@ -269,7 +269,7 @@ int pet_target_check(struct map_session_data *sd,struct block_list *bl,int type)
 	struct mob_data *md;
 	int rate,mode,race;
 
-	if(bl && pd && bl->type == BL_MOB && sd->pet.intimate > 900 && pd->class != battle_get_class(bl)
+	if(bl && pd && bl->type == BL_MOB && sd->pet.intimate > 900 && sd->pet.hungry > 0 && pd->class != battle_get_class(bl)
 		&& pd->state.state != MS_DELAY) {
 		mode=mob_db[pd->class].mode;
 		race=mob_db[pd->class].race;
@@ -448,8 +448,10 @@ static int pet_hungry(int tid,unsigned int tick,int id,int data)
 	sd->pet.hungry--;
 	t = sd->pet.intimate;
 	if(sd->pet.hungry < 0) {
+		if(sd->pd->target_id > 0)
+			pet_stopattack(sd->pd);
 		sd->pet.hungry = 0;
-		sd->pet.intimate--;
+		sd->pet.intimate -= battle_config.pet_hungry_friendly_decrease;
 		if(sd->pet.intimate <= 0) {
 			sd->pet.intimate = 0;
 			if(battle_config.pet_status_support && t > 0) {
@@ -536,7 +538,7 @@ int pet_remove_map(struct map_session_data *sd)
 int pet_performance(struct map_session_data *sd)
 {
 	pet_stop_walking(sd->pd,2000<<8);
-	clif_pet_performance(sd->pd,rand()%pet_performance_val(sd) + 1);
+	clif_pet_performance(&sd->pd->bl,rand()%pet_performance_val(sd) + 1);
 
 	return 0;
 }

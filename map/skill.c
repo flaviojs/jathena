@@ -107,7 +107,13 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+	-1,
+	SC_KEEPING,
+	-1,-1,
+	SC_BARRIER,
+	-1,-1,
+	SC_HALLUCINATION,
+	-1,-1,
 /* 210- */
 	-1,-1,-1,-1,-1,
 	SC_STRIPWEAPON,
@@ -333,7 +339,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 
 	if(src->type==BL_PC)
 		sd=(struct map_session_data *)src;
-	else if(bl->type==BL_MOB)
+	else if(src->type==BL_MOB)
 		md=(struct mob_data *)src;
 
 	luk = battle_get_luk(bl);
@@ -501,6 +507,13 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	case NPC_BLINDATTACK:
 		if(rand()%100 < sc_def_int)
 			skill_status_change_start(bl,sc[skillid-NPC_POISON],skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
+		break;
+	case NPC_MENTALBREAKER:
+		if(dstsd) {
+			int sp = dstsd->status.max_sp*(10+skilllv)/100;
+			if(sp < 1) sp = 1;
+			pc_heal(dstsd,0,-sp);
+		}
 		break;
 	}
 
@@ -1278,7 +1291,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case NPC_HOLYATTACK:
 	case NPC_DARKNESSATTACK:
 	case NPC_TELEKINESISATTACK:
-	case NPC_LICK:
+	case NPC_DARKBREATH:
 		skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 	case KN_BRANDISHSPEAR:		/* ブランディッシュスピア */
@@ -1528,8 +1541,8 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case WZ_SIGHTRASHER:
-		clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		skill_castend_pos2(src,bl->x,bl->y,skillid,skilllv,tick,0);
+		clif_skill_nodamage(src,src,skillid,skilllv,1);
+		skill_castend_pos2(src,src->x,src->y,skillid,skilllv,tick,0);
 		skill_status_change_end(src,SC_SIGHT,-1);
 		break;
 
@@ -1570,29 +1583,26 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case NPC_SELFDESTRUCTION:	/* 自爆 */
-		{
-			struct mob_data* mb=(struct mob_data*)src;
-			if(!mb || mb->hp == mob_db[mb->class].max_hp) break;
-			if(flag&1){
-				/* 個別にダメージを与える */
-				if(src->type==BL_MOB){
-					mb->hp=skill_area_temp[2];
-					if(bl->id!=skill_area_temp[1])
-						skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
-					mb->hp=1;
-				}
-			}else{
-				skill_area_temp[1]=bl->id;
-				skill_area_temp[2]=battle_get_hp(src);
-				/* まずターゲットに攻撃を加える */
-				skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
-				/* その後ターゲット以外の範囲内の敵全体に処理を行う */
-				map_foreachinarea(skill_area_sub,
-					bl->m,bl->x-5,bl->y-5,bl->x+5,bl->y+5,0,
-					src,skillid,skilllv,tick, flag|BCT_ALL|1,
-					skill_castend_damage_id);
-				battle_damage(src,src,1);
+		if(flag&1){
+			/* 個別にダメージを与える */
+			if(src->type==BL_MOB){
+				struct mob_data* mb=(struct mob_data*)src;
+				mb->hp=skill_area_temp[2];
+				if(bl->id!=skill_area_temp[1])
+					skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
+				mb->hp=1;
 			}
+		}else{
+			skill_area_temp[1]=bl->id;
+			skill_area_temp[2]=battle_get_hp(src);
+			/* まずターゲットに攻撃を加える */
+			skill_attack(BF_MISC,src,src,bl,skillid,skilllv,tick,flag );
+			/* その後ターゲット以外の範囲内の敵全体に処理を行う */
+			map_foreachinarea(skill_area_sub,
+				bl->m,bl->x-5,bl->y-5,bl->x+5,bl->y+5,0,
+				src,skillid,skilllv,tick, flag|BCT_ALL|1,
+				skill_castend_damage_id);
+			battle_damage(src,src,1);
 		}
 		break;
 
@@ -2515,6 +2525,55 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				md->def_ele=rand()%9;	/* 不死属性は除く */
 			md->def_ele+=(1+rand()%4)*20;	/* 属性レベルはランダム */
 		}
+		break;
+
+	case NPC_PROVOCATION:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		clif_pet_performance(src,1);
+		break;
+
+	case NPC_HALLUCINATION:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
+		break;
+
+	case NPC_KEEPING:
+	case NPC_BARRIER:
+		{
+			int skill_time = skill_get_time(skillid,skilllv);
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_time,0 );
+			mob_changestate((struct mob_data *)src,MS_DELAY,skill_time);
+		}
+		break;
+
+	case NPC_DARKBLESSING:
+		{
+			int sc_def = 100 - battle_get_mdef(bl);
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
+				break;
+			if(battle_get_elem_type(bl) == 7)
+				break;
+			if(rand()%100 < sc_def) {
+				if(dstsd) {
+					int hp = battle_get_hp(bl)-1;
+					pc_heal(dstsd,-hp,0);
+				}
+				else if(dstmd)
+					dstmd->hp = 1;
+			}
+		}
+		break;
+
+	case NPC_LICK:
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_weapon_damage )
+			break;
+		if(dstsd)
+			pc_heal(dstsd,0,-100);
+		if(rand()%100 < (skilllv*5)*sc_def_vit/100)
+			skill_status_change_start(bl,SC_STAN,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
 
 	case NPC_SUICIDE:			/* 自決 */
@@ -5399,7 +5458,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			calc_flag = 1;
 			val2 = 14 + val1;
 			tick = 60000;
-			clif_emotion(bl,9);
+			clif_emotion(bl,4);
 			break;
 		case SC_SLOWPOISON:
 			if(sc_data[SC_POISON].timer == -1 )
@@ -5712,6 +5771,11 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_DEFENDER:
 			calc_flag = 1;
 			val2 = 5 + val1*15;
+			break;
+
+		case SC_KEEPING:
+		case SC_BARRIER:
+		case SC_HALLUCINATION:
 			break;
 
 		default:
