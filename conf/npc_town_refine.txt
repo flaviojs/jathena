@@ -313,11 +313,11 @@ L_REFINE_2:
 			goto L_REFINE_5;
 L_REFINE_3:
 	if (getequipweaponlv(@part) > 3) goto L_REFINE_4;
-		mes "[フレドリックヘルマンソン]"
-		mes "レベル3の武器を精錬したいのかい？"
-		mes "精錬するため、 ^ff9999オリデオコン^000000と"
-		mes "手数料25000Zenyが必要だな。"
-		mes "続けるのか？"
+		mes "[フレドリックヘルマンソン]";
+		mes "レベル3の武器を精錬したいのかい？";
+		mes "精錬するため、 ^ff9999オリデオコン^000000と";
+		mes "手数料25000Zenyが必要だな。";
+		mes "続けるのか？";
 		next;
 		menu "はい",-,"いいえ",L_CANCEL_3;
 			if (getequippercentrefinery(@part) == 100) goto L_3_SUB;
@@ -716,11 +716,11 @@ L_REFINE_2:
 			goto L_REFINE_5;
 L_REFINE_3:
 	if (getequipweaponlv(@part) > 3) goto L_REFINE_4;
-		mes "[ホルグレン]"
-		mes "レベル3の武器を精錬したいのかい？"
-		mes "精錬するため、 ^ff9999オリデオコン^000000と"
-		mes "手数料25000Zenyが必要だな。"
-		mes "続けるのか？"
+		mes "[ホルグレン]";
+		mes "レベル3の武器を精錬したいのかい？";
+		mes "精錬するため、 ^ff9999オリデオコン^000000と";
+		mes "手数料25000Zenyが必要だな。";
+		mes "続けるのか？";
 		next;
 		menu "はい",-,"いいえ",L_CANCEL_3;
 			if (getequippercentrefinery(@part) == 100) goto L_3_SUB;
@@ -1903,11 +1903,11 @@ L_REFINE_2:
 			goto L_REFINE_5;
 L_REFINE_3:
 	if (getequipweaponlv(@part) > 3) goto L_REFINE_4;
-		mes "[ディスタブ]"
-		mes "レベル3の武器を精錬したいのかい？"
-		mes "精錬するため、 ^ff9999オリデオコン^000000と"
-		mes "手数料25000Zenyが必要だな。"
-		mes "続けるのか？"
+		mes "[ディスタブ]";
+		mes "レベル3の武器を精錬したいのかい？";
+		mes "精錬するため、 ^ff9999オリデオコン^000000と";
+		mes "手数料25000Zenyが必要だな。";
+		mes "続けるのか？";
 		next;
 		menu "はい",-,"いいえ",L_CANCEL_3;
 			if (getequippercentrefinery(@part) == 100) goto L_3_SUB;

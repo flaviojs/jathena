@@ -962,24 +962,25 @@ int map_setipport(char *name,unsigned long ip,int port)
 
 // 初期化周り
 /*==========================================
- * 水場ファイルの第4列で水場高さ設定（ちゃんとした水場判定が実装されるまでのつなぎとして・・・）
+ * 水場ファイルの第4列で水場高さ設定
  *------------------------------------------
  */
 static struct {
 	char mapname[24];
 	int waterheight;
-} waterlist[512];
+} *waterlist=NULL;
+static int wmap_max=0;
 
 static int map_waterheight(char *mapname)
 {
 	int n;
-	for(n=0;waterlist[n].mapname[0] && n<512;n++)
+	for(n=0;waterlist[n].mapname[0] && n<wmap_max;n++)
 		if(strcmp(waterlist[n].mapname,mapname)==0)
 			return waterlist[n].waterheight;
-	return 3;
+	return 127;
 }
 
-static int map_readwater(char *watertxt)
+static void map_readwater(char *watertxt)
 {
 	char line[1024];
 	FILE *fp;
@@ -988,24 +989,43 @@ static int map_readwater(char *watertxt)
 	fp=fopen(watertxt,"r");
 	if(fp==NULL){
 		printf("file not found: %s\n",watertxt);
-		return 1;
+		return;
 	}
-	while(fgets(line,1020,fp) && n<512){
+	while(fgets(line,1020,fp)){
 		char w1[1024],w2[1024],w3[1024];
-		int wh=3,count;
+		int wh,count;
 		if(line[0] == '/' && line[1] == '/')
 			continue;
 		if((count=sscanf(line,"%s%s%s%d",w1,w2,w3,&wh)) < 3){
 			continue;
 		}
-		if(strcmpi(w2,"mapflag")==0 && strcmpi(w3,"water")==0 && count >= 4){
+		if(strcmpi(w2,"mapflag")==0 && strcmpi(w3,"water")==0){
+			if(wmap_max==0){
+				waterlist=malloc(sizeof(waterlist[0])*16);
+				if(waterlist==NULL){
+					printf("out of memory : map_readwater\n");
+					exit(1);
+				}
+				memset(waterlist,0,sizeof(waterlist[0])*16);
+				wmap_max=16;
+			}else if(n>=wmap_max){
+				waterlist=realloc(waterlist,sizeof(waterlist[0])*(wmap_max+16));
+				if(waterlist==NULL){
+					printf("out of memory : map_readwater\n");
+					exit(1);
+				}
+				memset(&waterlist[wmap_max],0,sizeof(waterlist[0])*16);
+				wmap_max+=16;
+			}
 			strcpy(waterlist[n].mapname,w1);
-			waterlist[n].waterheight = wh;
+			if(count==4)
+				waterlist[n].waterheight=wh;
+			else
+				waterlist[n].waterheight=3;
 			n++;
 		}
 	}
 	fclose(fp);
-	return 0;
 }
 
 /*==========================================
@@ -1040,7 +1060,7 @@ static int map_readmap(int m,char *fn)
 	for(y=0;y<ys;y++){
 		p=(struct gat_1cell*)(gat+y*xs*20+14);
 		for(x=0;x<xs;x++){
-			if(p->type==0){
+			if(wh!=127 && p->type==0){
 				// 水場判定
 				map[m].gat[x+y*xs]=(p->high[0]>wh || p->high[1]>wh || p->high[2]>wh || p->high[3]>wh) ? 3 : 0;
 			} else {
@@ -1096,6 +1116,7 @@ int map_readallmap(void)
 		sprintf(fn,"data\\%s",map[i].name);
 		map_readmap(i,fn);
 	}
+	free(waterlist);
 	return 0;
 }
 

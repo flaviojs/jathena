@@ -1,4 +1,22 @@
 --------------
+//0581 by 引退人
+・水場高さ設定関連を少し修正
+	(/map)
+	map.c
+		map_waterheight()
+		map_readwater()
+		map_readmap()
+			waterlist[512] -> *waterlistにして、mallocでメモリ確保するように修正。
+		map_readallmap()
+			free(waterlist);追加
+
+・バグ報告スレッドの修正パッチを取り込み
+	(conf/)
+	npc_town_refine.txt セミコロン抜け修正
+	(db/)
+	item_db.txt 1161,バルムン修正
+
+--------------
 //0580 by PRevEv
 ・フリーキャスト仮実装(キャスティング中攻撃は不可能)
 	(/map)
@@ -8,6 +26,17 @@
 		pc_calcstatus() 修正。
 	skill.c
 		skill_castend_id()、skill_castend_pos()、skill_use_id()、skill_use_pos() 修正。
+--------------
+//0579 by Aの人
+・ログインを弾く処理を仮実装
+	conf/login.c
+		auth_dat構造体にstateを追加
+		mmo_auth関数修正
+		mmo_auth_new関数修正
+		mmo_auth_sync関数修正
+		mmo_auth_init関数修正
+
+	この値を変更するツール、改善策。他力本願です（＞＜；
 --------------
 //0578 by 引退人
 ・バグ報告スレッドの修正パッチを取り込みなど（thanx to るるるさん,Athefansさん,sageさん,zupportさん）
