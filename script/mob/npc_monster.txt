@@ -2278,3 +2278,43 @@ gon_fild01.gat,0,0,0,0	monster	団子童子	1409,30,0,0,0
 gon_fild01.gat,0,0,0,0	monster	老人参	1413,1,60000,120000,0
 gon_fild01.gat,0,0,0,0	monster	コウ	1415,10,0,0,0
 gon_fild01.gat,0,0,0,0	monster	チャッキー	1417,18,0,0,0
+
+//ウンバラ追加分
+//ルルカ森(um_fild01.gat)
+um_fild01.gat,0,0,0,0	monster	ステムワーム	1215,15,0,0,0
+um_fild01.gat,0,0,0,0	monster	ウータンファイター	1499,40,0,0,0
+um_fild01.gat,0,0,0,0	monster	ドリヤード	1493,15,0,0,0
+um_fild01.gat,0,0,0,0	monster	ハーピー	1376,25,0,0,0
+
+//フムガ森(um_fild02.gat)
+um_fild02.gat,0,0,0,0	monster	ダスティネス	1114,25,0,0,0
+um_fild02.gat,0,0,0,0	monster	ビートル	1494,15,0,0,0
+um_fild02.gat,0,0,0,0	monster	ウータンファイター	1499,30,0,0,0
+um_fild02.gat,0,0,0,0	monster	ウータンシューター	1498,20,0,0,0
+
+//カララ沼(um_fild03.gat)
+um_fild03.gat,0,0,0,0	monster	ペスト	1256,25,0,0,0
+//um_fild03.gat,0,0,0,0	monster	フェアリーフ	????,30,0,0,0
+um_fild03.gat,0,0,0,0	monster	アリゲーター	1271,15,0,0,0
+um_fild03.gat,0,0,0,0	monster	ドラゴンテイル	1321,20,0,0,0
+um_fild03.gat,0,0,0,0	monster	グリフォン	1447,1,150000,150000,0
+
+//フムガジャングル(um_fild04.gat)
+um_fild04.gat,0,0,0,0	monster	スタイナー	1174,25,0,0,0
+um_fild04.gat,0,0,0,0	monster	ビートル	1494,20,0,0,0
+um_fild04.gat,0,0,0,0	monster	ウータンシューター	1498,20,0,0,0
+um_fild04.gat,0,0,0,0	monster	ウータンファイター	1499,30,0,0,0
+um_fild04.gat,0,0,0,0	monster	チョコ	1214,1,0,0,0
+
+//大樹の道(um_dun01.gat)
+um_dun01.gat,0,0,0,0	monster	スタイナー	1174,35,0,0,0
+um_dun01.gat,0,0,0,0	monster	ダスティネス	1114,15,0,0,0
+um_dun01.gat,0,0,0,0	monster	ウータンファイター	1499,30,0,0,0
+um_dun01.gat,0,0,0,0	monster	フレイムシューター	1495,20,0,0,0 
+
+//深奥の密林(um_dun02.gat)
+um_dun02.gat,0,0,0,0	monster	ウータンファイター	1499,35,0,0,0
+um_dun02.gat,0,0,0,0	monster	ウータンシューター	1498,25,0,0,0
+um_dun02.gat,0,0,0,0	monster	ドリヤード	1493,10,0,0,0
+um_dun02.gat,0,0,0,0	monster	ウドゥンゴーレム	1497,25,0,0,0
+um_dun02.gat,0,0,0,0	monster	フレイムシューター	1495,25,0,0,0
