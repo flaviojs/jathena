@@ -1720,7 +1720,7 @@ int battle_addmastery(struct map_session_data *sd,struct block_list *target,int 
 			}
 			// アドバンスドカタール研究
 			if((skill = pc_checkskill(sd,ASC_KATAR)) > 0) {
-				damage += damage*(10+(skill * 2))/100;
+				damage += dmg*(10+(skill * 2))/100;
 			}
 			
 			break;
@@ -2595,8 +2595,8 @@ static struct Damage battle_calc_mob_weapon_attack(
 			damage=damage*cardfix/100;
 	}
 	if(t_sc_data && t_sc_data[SC_ASSUMPTIO].timer != -1){ //アシャンプティオ
-		if(!map[target->m].flag.pvp)
-			damage=damage/3;
+		if(map[target->m].flag.pvp)
+			damage=damage*2/3;
 		else
 			damage=damage/2;
 	}
@@ -3577,9 +3577,9 @@ static struct Damage battle_calc_pc_weapon_attack(
 			damage2=damage2*cardfix/100; //ディフェンダー補正による左手ダメージ減少
 		}
 		if(t_sc_data[SC_ASSUMPTIO].timer != -1){ //アスムプティオ
-			if(!map[target->m].flag.pvp){
-				damage=damage/3;
-				damage2=damage2/3;
+			if(map[target->m].flag.pvp){
+				damage=damage*2/3;
+				damage2=damage2*2/3;
 			}else{
 				damage=damage/2;
 				damage2=damage2/2;

@@ -2117,7 +2117,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			if (sd){
 				s_class = pc_calc_base_job(sd->status.class);
 				if((skill=pc_checkskill(sd,HP_MEDITATIO))>0) // メディテイティオ 
-					heal += heal*(skill*2/100);
+					heal += heal*(skill*2)/100;
 				if(sd && dstsd && sd->status.partner_id == dstsd->status.char_id && s_class.job == 23 && sd->status.sex == 0) //自分も対象もPC、対象が自分のパートナー、自分がスパノビ、自分が♀なら
 					heal = heal*2;	//スパノビの嫁が旦那にヒールすると2倍になる
 			}
