@@ -33,7 +33,7 @@ static const int packet_len_table[]={
 	-1, 7, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	35,-1,11,15, 34,29, 7,-1,  0, 0, 0, 0,  0, 0,  0, 0,
 	10,-1,15, 0, 79,19, 7,-1,  0,-1,-1,-1, 14,67,186,-1,
-	 8, 8, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
+	22, 8, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
 	 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,
@@ -777,24 +777,36 @@ int intif_parse_DeletePetOk(int fd)
 int intif_parse_GuildCastleInfo(int fd)
 {
 	int c_id=RFIFOW(fd,2);
-	int g_id=RFIFOL(fd,4);
 	struct guild_castle *gc=guild_castle_search(c_id);
 	if(gc==NULL){
 		return 0;
 	}
-	gc->guild_id = g_id;
+	gc->guild_id = RFIFOL(fd,4);
+	gc->economy = RFIFOB(fd,8);
+	gc->eco_num = RFIFOW(fd,9);
+	gc->defense = RFIFOB(fd,11);
+	gc->def_num = RFIFOW(fd,12);
+	gc->kafra = RFIFOB(fd,14);
+	gc->guardian[0] = RFIFOB(fd,15);
+	gc->guardian[1] = RFIFOB(fd,16);
+	gc->guardian[2] = RFIFOB(fd,17);
+	gc->guardian[3] = RFIFOB(fd,18);
+	gc->guardian[4] = RFIFOB(fd,19);
+	gc->guardian[5] = RFIFOB(fd,20);
+	gc->guardian[6] = RFIFOB(fd,21);
+
+	gc->initflag=1;//inter‚Ö‚Ìî•ñæ“¾Š®—¹
+
 	return 0;
 }
 
-int intif_parse_GuildCastleChange(int fd)
+int intif_parse_GuildCastleChangeErr(int fd)
 {
+/*
 	int c_id=RFIFOW(fd,2);
 	int g_id=RFIFOL(fd,4);
-	struct guild_castle *gc=guild_castle_search(c_id);
-	if(gc==NULL){
-		return 0;
-	}
-	gc->guild_id = g_id;
+*/
+	printf("intif: Error Packet Returned! : Castle change Error\n");
 	return 0;
 }
 //-----------------------------------------------------------------
@@ -853,7 +865,7 @@ int intif_parse(int fd)
 	case 0x383e:	intif_parse_GuildNotice(fd); break;
 	case 0x383f:	intif_parse_GuildEmblem(fd); break;
 	case 0x3840:	intif_parse_GuildCastleInfo(fd); break;
-	case 0x3841:	intif_parse_GuildCastleChange(fd); break;
+	case 0x3841:	intif_parse_GuildCastleChangeErr(fd); break;
 	case 0x3880:	intif_parse_CreatePet(fd); break;
 	case 0x3881:	intif_parse_RecvPetData(fd); break;
 	case 0x3882:	intif_parse_SavePetOk(fd); break;

@@ -1,4 +1,35 @@
 --------------------
+//0799 by ぴざまん
+
+・GvG実装の為にinter-map間の通信仕様変更
+・0798のコンパイルエラー修正(byバグ報告スレ82氏)
+	(login/)
+	login.c
+		parse_login() 修正。
+	(map/)
+	intif.c
+		packet_len_table[] 修正。
+		intif_parse_GuildCastleInfo() 修正。
+		intif_parse_GuildCastleChange()をintif_parse_GuildCastleChangeErr()に改名・修正。
+		intif_parse() 修正。
+	guild.c
+		guild_read_castledb() 修正。
+
+	(char/)
+	inter.c
+		inter_send_packet_length[] 修正。
+	int_guild.c
+		inter_guildcastle_tostr() 修正。
+		inter_guildcastle_fromstr() 修正。
+		mapif_parse_GuildChangeCastle() 修正。
+		mapif_parse_GuildCastleInfo() 修正。
+		mapif_guild_castle_info() 修正。
+		mapif_guild_change_castle()をmapif_guild_change_castle_err()に改名・修正。
+	(common/)
+	mmo.h 修正。
+	version.h 修正。
+
+--------------------
 //0798 by 胡蝶蘭
 
 ・login-serverのログイン失敗パケットの長さがおかしかったのを修正

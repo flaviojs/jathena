@@ -76,6 +76,8 @@ static int guild_read_castledb(void)
 		gc->emp_x=atoi(str[3]);
 		gc->emp_y=atoi(str[4]);
 
+		gc->initflag=0;		//まだ問い合わせてない
+
 		numdb_insert(castle_db,gc->castle_id,gc);
 
 		//占領ギルド問い合わせはGVG開始時に。

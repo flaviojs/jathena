@@ -640,6 +640,7 @@ int parse_login(int fd)
 {
   struct mmo_account account;
   int result,i;
+  struct timeval tv;
 
   if(session[fd]->eof){
     for(i=0;i<MAX_SERVERS;i++)

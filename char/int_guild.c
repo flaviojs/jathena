@@ -240,8 +240,11 @@ int inter_guildcastle_tostr(char *str,struct guild_castle *gc)
 //	int i,c;
 	int len;
 	
-	len=sprintf(str,"%d,%d",
-		gc->castle_id,gc->guild_id);
+	len=sprintf(str,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+		gc->castle_id,gc->guild_id,gc->economy,gc->eco_num,
+		gc->defense,gc->def_num,gc->kafra,gc->guardian[0],
+		gc->guardian[1],gc->guardian[2],gc->guardian[3],
+		gc->guardian[4],gc->guardian[5],gc->guardian[6]);
 	return 0;
 }
 // ギルド城データの文字列からの変換
@@ -251,10 +254,26 @@ int inter_guildcastle_fromstr(char *str,struct guild_castle *gc)
 	int tmp_int[16];
 	
 	memset(gc,0,sizeof(struct guild_castle));
-	if( sscanf(str,"%d,%d",&tmp_int[0],&tmp_int[1]) <2 )
+	if( sscanf(str,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+		&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],&tmp_int[4],
+		&tmp_int[5],&tmp_int[6],&tmp_int[7],&tmp_int[8],&tmp_int[9],
+		&tmp_int[10],&tmp_int[11],&tmp_int[12],&tmp_int[13]) <14 )
 		return 1;
 	gc->castle_id=tmp_int[0];
 	gc->guild_id=tmp_int[1];
+	gc->economy=tmp_int[2];
+	gc->eco_num=tmp_int[3];
+	gc->defense=tmp_int[4];
+	gc->def_num=tmp_int[5];
+	gc->kafra=tmp_int[6];
+	gc->guardian[0]=tmp_int[7];
+	gc->guardian[1]=tmp_int[8];
+	gc->guardian[2]=tmp_int[9];
+	gc->guardian[3]=tmp_int[10];
+	gc->guardian[4]=tmp_int[11];
+	gc->guardian[5]=tmp_int[12];
+	gc->guardian[6]=tmp_int[13];
+
 	return 0;
 }
 
@@ -709,17 +728,31 @@ int mapif_guild_emblem(struct guild *g)
 	return 0;
 }
 
-int mapif_guild_castle_info(int castle_id,int guild_id)
+int mapif_guild_castle_info(struct guild_castle *gc)
 {
-	unsigned char buf[16];
+	unsigned char buf[64];
+
 	WBUFW(buf, 0)=0x3840;
-	WBUFW(buf, 2)=castle_id;
-	WBUFL(buf, 4)=guild_id;
-	mapif_sendall(buf,8);
+	WBUFW(buf, 2)=gc->castle_id;
+	WBUFL(buf, 4)=gc->guild_id;
+	WBUFB(buf, 8)=gc->economy;
+	WBUFW(buf, 9)=gc->eco_num;
+	WBUFB(buf, 11)=gc->defense;
+	WBUFW(buf, 12)=gc->def_num;
+	WBUFB(buf, 14)=gc->kafra;
+	WBUFB(buf, 15)=gc->guardian[0];
+	WBUFB(buf, 16)=gc->guardian[1];
+	WBUFB(buf, 17)=gc->guardian[2];
+	WBUFB(buf, 18)=gc->guardian[3];
+	WBUFB(buf, 19)=gc->guardian[4];
+	WBUFB(buf, 20)=gc->guardian[5];
+	WBUFB(buf, 21)=gc->guardian[6];
+
+	mapif_sendall(buf,22);
 	return 0;
 }
 
-int mapif_guild_change_castle(int castle_id,int guild_id)
+int mapif_guild_change_castle_err(int castle_id,int guild_id)
 {
 	unsigned char buf[16];
 	WBUFW(buf, 0)=0x3841;
@@ -1082,19 +1115,28 @@ int mapif_parse_GuildCastleInfo(int fd,int castle_id)
 {
 	struct guild_castle *gc=numdb_search(castle_db,castle_id);
 	if(gc==NULL){
-		return mapif_guild_castle_info(castle_id,0);
+		printf("GC_info_err: no such castle!id:%d\n",castle_id);
+		return 0;
 	}
-	return mapif_guild_castle_info(gc->castle_id,gc->guild_id);
+	return mapif_guild_castle_info(gc);
 }
 int mapif_parse_GuildChangeCastle(int fd,int castle_id,int guild_id)
 {
 	struct guild_castle *gc=numdb_search(castle_db,castle_id);
 	if(gc==NULL){
-		return mapif_guild_change_castle(castle_id,guild_id);
+		return mapif_guild_change_castle_err(castle_id,guild_id);
 	}
+
 	gc->guild_id = guild_id;
+/*
+	gc->economy = 0;
+	gc->eco_num = 0;
+	gc->defense = 0;
+	gc->def_num = 0;
+*/	
+
 	inter_guild_save();
-	return mapif_guild_change_castle(gc->castle_id,gc->guild_id);
+	return mapif_guild_castle_info(gc);//成功したらcastle_infoで新データを返す
 }
 // ギルドチェック要求
 int mapif_parse_GuildCheck(int fd,int guild_id,int account_id,int char_id)

@@ -168,6 +168,12 @@ struct guild_castle {
 	int guild_id;
 	int emp_x,emp_y;	//エンペリウムの座標
 	char m_name[24],c_name[24];
+	int economy,eco_num;
+	int defense,def_num;
+	int kafra;
+	int guardian[7];
+	int initflag;		//内部処理用
+	
 };
 
 enum {
