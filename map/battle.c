@@ -4049,6 +4049,8 @@ int battle_config_read(const char *cfgName)
 		battle_config.mob_warpportal = 0;
 		battle_config.dead_branch_active = 0;
 		battle_config.vending_max_value = 10000000;
+		battle_config.pet_lootitem = 1;
+		battle_config.pet_weight = 1000;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4199,6 +4201,8 @@ int battle_config_read(const char *cfgName)
 			{ "mob_warpportal", 			&battle_config.mob_warpportal			},
 			{ "dead_branch_active", 		&battle_config.dead_branch_active		},
 			{ "vending_max_value", 			&battle_config.vending_max_value		},
+			{ "pet_lootitem", 				&battle_config.pet_lootitem				},
+			{ "pet_weight", 				&battle_config.pet_weight				},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')
@@ -4273,6 +4277,8 @@ int battle_config_read(const char *cfgName)
 			battle_config.guild_exp_limit = 99;
 		if(battle_config.guild_exp_limit < 0)
 			battle_config.guild_exp_limit = 0;
+		if(battle_config.pet_weight < 0)
+			battle_config.pet_weight = 0;
 
 		add_timer_func_list(battle_delay_damage_sub,"battle_delay_damage_sub");
 	}

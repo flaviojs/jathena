@@ -1,4 +1,47 @@
 --------------------
+//0955 by huge
+・ペットのルート機能。
+  ・仕様はmobのルートに近い感じですが、射程を短くしてます。
+  ・拾ったアイテムは、パフォーマンスをすると床に落とします。
+  ・卵に戻したり、ログオフしたときはPCの手元に入るようにしました。(重量超過はドロップ)
+  ・拾える個数はルートmob同様の10個ですが、11個目は拾いに行きません。
+  ・ルート権の問題から、アイテムにfirst_idが入っていて、それが飼い主以外だったら、何秒経とうと拾いません。(未確認)
+  ・それと、荷物持ちにされると可哀想なので、重量制限もつけました。これはconfで設定可能です。
+・atcommandで、@whereがうまく働いてなかったので修正(またウチだけかなぁ･･･）
+・@memoでmemoする時は、mapflagを無視するように。
+・スフィアマインの名前だけ修正。
+
+	(conf/)
+	battle_athena.conf
+		pet_lootitem,pet_weight 追加
+	(doc/)
+	conf_ref.txt 修正
+	(map/)
+	atcommand.c
+		atcommand_memo() 修正
+		atcommand_where() 修正
+	battle.c
+		battle_config_read() 修正
+	battle.h 修正
+	map.c
+		map_quit() 修正
+	map.h
+		pet_data{} 修正
+	pc.c
+		pc_memo() 修正
+	pet.c
+		pet_performance() 修正
+		pet_return_egg() 修正
+		pet_data_init() 修正
+		pet_ai_sub_hard() 修正
+		pet_lootitem_drop() 追加
+		pet_delay_item_drop2() 追加
+		pet_ai_sub_hard_lootsearch() 追加
+	pet.h 修正
+	skill.c
+		skill_castend_pos2() 修正
+
+--------------------
 //0954 by (凸)
 ・object_del.batで各server.exeも削除するようにした
 ・For English User Forum >>11 kingboさんの修正を取り込み

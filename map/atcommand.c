@@ -496,13 +496,13 @@ atcommand_where(
 {
 	char character[100];
 	char output[200];
-	struct map_session_data *pl_sd = map_nick2sd(character);
-	
+	struct map_session_data *pl_sd = NULL;
 	if (!message || !*message)
 		return -1;
 	memset(character, '\0', sizeof character);
-	sscanf(message, "%99[^\n]", character);
-	if (pl_sd == NULL) {
+	if (sscanf(message, "%99[^\n]", character) < 1)
+		return -1;
+	if ((pl_sd = map_nick2sd(character)) == NULL) {
 		snprintf(output, sizeof output, "%s %d %d",
 			sd->mapname, sd->bl.x, sd->bl.y);
 		clif_displaymessage(fd, output);
@@ -1575,7 +1575,7 @@ atcommand_memo(
 	position = atoi(message);
 	if (position < MIN_PORTAL_MEMO || position > MAX_PORTAL_MEMO)
 		position = MIN_PORTAL_MEMO;
-	pc_memo(sd, position);
+	pc_memo(sd, position+MIN_PORTAL_MEMO);
 	return 0;
 }
 

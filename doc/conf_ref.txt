@@ -747,6 +747,13 @@ pet_attack_exp_to_master
 pet_attack_exp_rate
 	ペットが与えたダメージの分の経験値を主人が収得する時の倍率です。
 	デフォルトは100です。
+pet_lootitem
+	ペットがアイテムをルートするかどうかの設定です。
+	デフォルトはnoです。
+
+pet_weight
+	ペットにルートさせるときの重量制限です。
+	デフォルトは1000です。
 
 skill_min_damage
 	スキルを使った時ダメージが連打数より未満の場合全てミスになるか1ダメージになるかを決定します。
@@ -1127,6 +1134,8 @@ pet_support: no
 pet_support_rate: 100
 pet_attack_exp_to_master: no
 pet_attack_exp_rate: no
+pet_lootitem: no
+pet_weight: 1000
 skill_min_damage: no
 finger_offensive_type: 0
 heal_exp: 0

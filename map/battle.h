@@ -254,6 +254,8 @@ extern struct Battle_Config {
 	int mob_warpportal;
 	int dead_branch_active;
 	int vending_max_value;
+	int pet_lootitem;
+	int pet_weight;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

@@ -2927,7 +2927,9 @@ int pc_memo(struct map_session_data *sd,int i)
 	int skill=pc_checkskill(sd,AL_WARP);
 	int j;
 
-	if(map[sd->bl.m].flag.nomemo){
+	if(i>=MIN_PORTAL_MEMO)
+		i-=MIN_PORTAL_MEMO;
+	else if(map[sd->bl.m].flag.nomemo){
 		clif_skill_teleportmessage(sd,1);
 		return 0;
 	}
@@ -5471,7 +5473,6 @@ static int pc_autosave_sub(struct map_session_data *sd,va_list ap)
 
 	return 0;
 }
-
 
 /*==========================================
  * ©“®ƒZ[ƒu (timerŠÖ”)

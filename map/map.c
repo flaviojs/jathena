@@ -818,6 +818,7 @@ int map_quit(struct map_session_data *sd)
 	clif_clearchar_area(&sd->bl,2);
 
 	if(sd->status.pet_id && sd->pd) {
+		pet_lootitem_drop(sd->pd,sd);
 		pet_remove_map(sd);
 		if(sd->pet.intimate <= 0) {
 			intif_delete_petdata(sd->status.pet_id);

@@ -379,6 +379,9 @@ struct pet_data {
 	int target_id;
 	int move_fail_count;
 	unsigned int attackabletime,next_walktime,last_thinktime;
+	struct item *lootitem;
+	short lootitem_count;
+	short lootitem_weight;
 	struct map_session_data *msd;
 };
 

@@ -3192,7 +3192,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 
 			mx = x + (rand()%10 - 5);
 			my = y + (rand()%10 - 5);
-			id=mob_once_spawn(sd,"this",mx,my,"イクラ",1142,1,"");
+			id=mob_once_spawn(sd,"this",mx,my,"マリンスフィア",1142,1,"");
 			if( (md=(struct mob_data *)map_id2bl(id)) !=NULL ){
 				mob_exclusion_add(md,1,sd->bl.id);
 				md->master_id=sd->bl.id;

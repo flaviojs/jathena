@@ -531,11 +531,25 @@ int pet_remove_map(struct map_session_data *sd)
 	}
 	return 0;
 }
+struct delay_item_drop {
+	int m,x,y;
+	int nameid,amount;
+	struct map_session_data *first_sd,*second_sd,*third_sd;
+};
+
+struct delay_item_drop2 {
+	int m,x,y;
+	struct item item_data;
+	struct map_session_data *first_sd,*second_sd,*third_sd;
+};
 
 int pet_performance(struct map_session_data *sd)
 {
+	struct pet_data *pd=sd->pd;
 	pet_stop_walking(sd->pd,2000<<8);
 	clif_pet_performance(&sd->pd->bl,rand()%pet_performance_val(sd) + 1);
+	// ルートしたItemを落とさせる
+	pet_lootitem_drop(pd,NULL);
 
 	return 0;
 }
@@ -546,6 +560,7 @@ int pet_return_egg(struct map_session_data *sd)
 	int flag;
 
 	if(sd->status.pet_id && sd->pd) {
+		struct pet_data *pd=sd->pd;
 		pet_remove_map(sd);
 		sd->status.pet_id = 0;
 		sd->pd = NULL;
@@ -569,6 +584,8 @@ int pet_return_egg(struct map_session_data *sd)
 			else
 				pc_calcstatus(sd,2);
 		}
+		// ルートしたItemを落とさせる
+		pet_lootitem_drop(pd,sd);
 
 		intif_save_petdata(sd->status.account_id,&sd->pet);
 		pc_makesavestatus(sd);
@@ -639,6 +656,11 @@ int pet_data_init(struct map_session_data *sd)
 	if(interval <= 0)
 		interval = 1;
 	sd->pet_hungry_timer = add_timer(gettick()+interval,pet_hungry,sd->bl.id,0);
+	pd->lootitem=calloc(sizeof(struct item)*LOOTITEM_SIZE, 1);
+	if(pd->lootitem)
+		memset(pd->lootitem,0,sizeof(pd->lootitem));
+	pd->lootitem_count = 0;
+	pd->lootitem_weight = 0;
 
 	return 0;
 }
@@ -995,7 +1017,7 @@ static int pet_ai_sub_hard(struct pet_data *pd,unsigned int tick)
 {
 	struct map_session_data *sd = pd->msd;
 	struct mob_data *md = NULL;
-	int dist,i,dx,dy,ret;
+	int dist,i=0,dx,dy,ret;
 	int mode,race;
 
 	if(pd->bl.prev == NULL || sd == NULL || sd->bl.prev == NULL)
@@ -1007,7 +1029,13 @@ static int pet_ai_sub_hard(struct pet_data *pd,unsigned int tick)
 
 	if(pd->state.state == MS_DELAY || pd->bl.m != sd->bl.m)
 		return 0;
-
+	// ペットによるルート
+	if(!pd->target_id && pd->lootitem_count < LOOTITEM_SIZE)
+		map_foreachinarea(pet_ai_sub_hard_lootsearch,pd->bl.m,
+						  pd->bl.x-AREA_SIZE*2,pd->bl.y-AREA_SIZE*2,
+						  pd->bl.x+AREA_SIZE*2,pd->bl.y+AREA_SIZE*2,
+						  BL_ITEM,pd,&i);
+	
 	if(sd->pet.intimate > 0) {
 		dist = distance(sd->bl.x,sd->bl.y,pd->bl.x,pd->bl.y);
 		if(dist > 12) {
@@ -1022,7 +1050,7 @@ static int pet_ai_sub_hard(struct pet_data *pd,unsigned int tick)
 			if(pet_walktoxy(pd,pd->to_x,pd->to_y))
 				pet_randomwalk(pd,tick);
 		}
-		else if(pd->target_id > 0) {
+		else if(pd->target_id - MAX_FLOORITEM > 0) {
 			mode=mob_db[pd->class].mode;
 			race=mob_db[pd->class].race;
 			md=(struct mob_data *)map_id2bl(pd->target_id);
@@ -1073,6 +1101,52 @@ static int pet_ai_sub_hard(struct pet_data *pd,unsigned int tick)
 				pet_changestate(pd,MS_ATTACK,0);
 			}
 		}
+		else if(pd->target_id > 0){	// ルート処理
+			struct block_list *bl_item;
+			struct flooritem_data *fitem;
+
+			bl_item = map_id2bl(pd->target_id);
+			if(bl_item == NULL || bl_item->type != BL_ITEM ||bl_item->m != pd->bl.m ||
+				 (dist=distance(pd->bl.x,pd->bl.y,bl_item->x,bl_item->y))>=5){
+				 // 遠すぎるかアイテムがなくなった
+ 				pet_unlocktarget(pd);
+			}
+			else if(dist){
+				if(pd->timer != -1 && pd->state.state!=MS_ATTACK && (DIFF_TICK(pd->next_walktime,tick)<0 || distance(pd->to_x,pd->to_y,bl_item->x,bl_item->y) <= 0))
+					return 0; // 既に移動中
+
+				pd->next_walktime=tick+500;
+				dx=bl_item->x - pd->bl.x;
+				dy=bl_item->y - pd->bl.y;
+
+				ret=pet_walktoxy(pd,pd->bl.x+dx,pd->bl.y+dy);
+			}
+			else{	// アイテムまでたどり着いた
+				fitem = (struct flooritem_data *)bl_item;
+				if(pd->state.state==MS_ATTACK)
+					return 0; // 攻撃中
+				if(pd->state.state==MS_WALK){	// 歩行中なら停止
+					pet_stop_walking(pd,1);
+				}
+				if(pd->lootitem_count < LOOTITEM_SIZE){
+					memcpy(&pd->lootitem[pd->lootitem_count++],&fitem->item_data,sizeof(pd->lootitem[0]));
+					pd->lootitem_weight += itemdb_search(fitem->item_data.nameid)->weight*fitem->item_data.amount;
+				}
+				else if(pd->lootitem_count >= LOOTITEM_SIZE) {
+					pet_unlocktarget(pd);
+					return 0;
+				}
+				else {
+					if(pd->lootitem[0].card[0] == (short)0xff00)
+						intif_delete_petdata(*((long *)(&pd->lootitem[0].card[1])));
+					for(i=0;i<LOOTITEM_SIZE-1;i++)
+						memcpy(&pd->lootitem[i],&pd->lootitem[i+1],sizeof(pd->lootitem[0]));
+					memcpy(&pd->lootitem[LOOTITEM_SIZE-1],&fitem->item_data,sizeof(pd->lootitem[0]));
+				}
+				map_clearflooritem(bl_item->id);
+				pet_unlocktarget(pd);
+			}
+		}
 		else {
 			if(dist <= 3 || (pd->timer != -1 && pd->state.state == MS_WALK && distance(pd->to_x,pd->to_y,sd->bl.x,sd->bl.y) < 3) )
 				return 0;
@@ -1107,6 +1181,89 @@ static int pet_ai_hard(int tid,unsigned int tick,int id,int data)
 {
 	clif_foreachclient(pet_ai_sub_foreachclient,tick);
 
+	return 0;
+}
+
+int pet_ai_sub_hard_lootsearch(struct block_list *bl,va_list ap)
+{
+	struct pet_data* pd;
+	int dist,*itc;
+
+	pd=va_arg(ap,struct pet_data *);
+	itc=va_arg(ap,int *);
+
+	if( !pd->target_id ){//battle_config.monster_loot_type == 1 && 
+		struct flooritem_data *fitem = (struct flooritem_data *)bl;
+		struct map_session_data *sd = NULL;
+		// ルート権無し
+		if(fitem && fitem->first_get_id>0)
+			sd = map_id2sd(fitem->first_get_id);
+		// 重量オーバー
+		if((pd->lootitem_weight + (itemdb_search(fitem->item_data.nameid))->weight * fitem->item_data.amount) > battle_config.pet_weight)
+			return 0;
+
+		if(!pd->lootitem || (pd->lootitem_count >= LOOTITEM_SIZE) || (sd && sd->pd != pd))
+			return 0;
+		if(bl->m == pd->bl.m && (dist=distance(pd->bl.x,pd->bl.y,bl->x,bl->y))<5){
+			if( pet_can_reach(pd,bl->x,bl->y)		// 到達可能性判定
+				 && rand()%1000<1000/(++(*itc)) ){	// 範囲内PCで等確率にする
+				pd->target_id=bl->id;
+			}
+		}
+	}
+	return 0;
+}
+int pet_lootitem_drop(struct pet_data *pd,struct map_session_data *sd)
+{
+	int i,flag=0;
+
+	if(pd){
+		if(pd->lootitem) {
+			for(i=0;i<pd->lootitem_count;i++) {
+				struct delay_item_drop2 *ditem;
+
+				ditem=calloc(sizeof(*ditem), 1);
+				if(ditem==NULL){
+					printf("out of memory : pet_lootitem_drop\n");
+					exit(1);
+				}
+				memcpy(&ditem->item_data,&pd->lootitem[i],sizeof(pd->lootitem[0]));
+				ditem->m = pd->bl.m;
+				ditem->x = pd->bl.x;
+				ditem->y = pd->bl.y;
+				ditem->first_sd = 0;
+				ditem->second_sd = 0;
+				ditem->third_sd = 0;
+				// 落とさないで直接PCのItem欄へ
+				if(sd){
+					if((flag = pc_additem(sd,&ditem->item_data,ditem->item_data.amount))){
+						clif_additem(sd,0,0,flag);
+						map_addflooritem(&ditem->item_data,ditem->item_data.amount,ditem->m,ditem->x,ditem->y,ditem->first_sd,ditem->second_sd,ditem->third_sd,0);
+					}
+					free(ditem);
+				}
+				else
+					add_timer(gettick()+540+i,pet_delay_item_drop2,(int)ditem,0);
+			}
+			pd->lootitem=NULL;
+			pd->lootitem=calloc(sizeof(struct item)*LOOTITEM_SIZE, 1);
+			memset(pd->lootitem,0,sizeof(pd->lootitem));
+			pd->lootitem_count = 0;
+			pd->lootitem_weight = 0;
+		}
+	}
+	return 1;
+}
+
+int pet_delay_item_drop2(int tid,unsigned int tick,int id,int data)
+{
+	struct delay_item_drop2 *ditem;
+
+	ditem=(struct delay_item_drop2 *)id;
+
+	map_addflooritem(&ditem->item_data,ditem->item_data.amount,ditem->m,ditem->x,ditem->y,ditem->first_sd,ditem->second_sd,ditem->third_sd,0);
+
+	free(ditem);
 	return 0;
 }
 
@@ -1203,3 +1360,4 @@ int do_init_pet(void)
 
 	return 0;
 }
+
