@@ -34,6 +34,8 @@ extern struct Atcommand_Config {
 	int gm;
 	int pvpoff;
 	int pvpon;
+	int gvgoff;
+	int gvgon;
 	int model;
 	int go;
 	int monster;

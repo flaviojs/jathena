@@ -122,6 +122,8 @@ extern struct Battle_Config {
 	int item_rate,base_exp_rate,job_exp_rate;
 	int death_penalty_type;
 	int death_penalty_base,death_penalty_job;
+	int restart_hp_rate;
+	int restart_sp_rate;
 	int mvp_item_rate,mvp_exp_rate;
 	int mvp_hp_rate;
 	int atc_gmonly,gm_allskill;
@@ -138,7 +140,7 @@ extern struct Battle_Config {
 	int pet_hungry_delay_rate;
 	int skill_min_damage;
 	int sanctury_type;
-	int finger_offencive_type;
+	int finger_offensive_type;
 	int heal_exp,shop_exp;
 } battle_config;
 

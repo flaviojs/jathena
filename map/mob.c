@@ -673,6 +673,11 @@ int mob_target(struct mob_data *md,struct block_list *bl,int dist)
 	struct map_session_data *sd;
 	int mode=mob_db[md->class].mode,race=mob_db[md->class].race;
 
+
+	if(!mode) {
+		md->target_id = 0;
+		return 0;
+	}
 	// タゲ済みでタゲを変える気がないなら何もしない
 	if( (md->target_id > 0 && md->state.targettype == ATTACKABLE) && ( !(mode&0x04) || rand()%100>25) )
 		return 0;
@@ -1012,6 +1017,9 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 	if( md->opt1>0 || md->state.state==MS_DELAY){
 		return 0;
 	}
+
+	if(!mode && md->target_id > 0)
+		md->target_id = 0;
 
 	if(md->attacked_id > 0 && mode&0x08){	// リンクモンスター
 		sd=map_id2sd(md->attacked_id);
@@ -1612,7 +1620,7 @@ int mob_damage(struct map_session_data *sd,struct mob_data *md,int damage)
 			}
 		}
 		if(flag) {
-			for(i=flag=0;i<6;i++){
+			for(i=flag=0;i<3;i++){
 				struct item item;
 				j=rand()%3;
 				if( mob_db[md->class].mvpitem[j].nameid <=0 ||

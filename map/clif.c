@@ -2525,7 +2525,7 @@ int clif_skillinfoblock(struct map_session_data *sd)
 			WFIFOW(fd,len+8) = skill_get_sp(id,sd->status.skill[i].lv);
 			WFIFOW(fd,len+10)= skill_get_range(id);
 			memset(WFIFOP(fd,len+12),0,24);
-			if(!(skill_get_inf2(id)&0x01) || battle_config.quest_skill_learn == 1 || (battle_config.gm_allskill == 1 && pc_isGM(sd) > 0) ) 
+			if(!(skill_get_inf2(id)&0x01) || battle_config.quest_skill_learn == 1 || (battle_config.gm_allskill > 0 && pc_isGM(sd) >= battle_config.gm_allskill) ) 
 				WFIFOB(fd,len+36)= 
 					(sd->status.skill[i].lv < skill_get_max(id) &&
 					 sd->status.skill[i].flag==0 )? 1:0;
@@ -2819,9 +2819,9 @@ int clif_skill_estimation(struct map_session_data *sd,struct block_list *dst)
 	WBUFW(buf, 4)=mob_db[md->class].lv;
 	WBUFW(buf, 6)=mob_db[md->class].size;
 	WBUFL(buf, 8)=md->hp;
-	WBUFW(buf,12)=mob_db[md->class].def;
+	WBUFW(buf,12)=(mob_db[md->class].def < 10000)? mob_db[md->class].def:100;
 	WBUFW(buf,14)=mob_db[md->class].race;
-	WBUFW(buf,16)=mob_db[md->class].mdef;
+	WBUFW(buf,16)=(mob_db[md->class].mdef < 10000)? mob_db[md->class].mdef:99;
 	WBUFW(buf,18)=mob_db[md->class].element%10;
 	for(i=0;i<9;i++)
 		WBUFB(buf,20+i)= battle_attr_fix(100,i+1,mob_db[md->class].element);

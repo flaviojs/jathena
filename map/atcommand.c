@@ -451,9 +451,12 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 //PVP解除　　ただ、マップ移動しないと解除されません。
 //「@pvpoff」と入力
 		if (strcmpi(command, "@pvpoff") == 0 && gm_level >= atcommand_config.pvpoff) {
+			struct block_list bl;
+			bl.m = sd->bl.m;
+			bl.id = 0;
 			map[sd->bl.m].flag.pvp = 0;
 			clif_send0199(sd->bl.m,0);
-			clif_pvpset(sd,0,0);
+			clif_pvpset((struct map_session_data *)&bl,0,0);
 			for(i=0;i<fd_max;i++){	//人数分ループ
 				if(session[i] && (pl_sd=session[i]->session_data) && pl_sd->state.auth){
 					if(sd->bl.m == pl_sd->bl.m && pl_sd->pvp_timer != -1) {
@@ -484,6 +487,23 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			clif_displaymessage(fd,"Kill Kill Kill Kill Kill Kill～～～～～～～～(゜Д゜#)");
 			return 1;
 		}
+
+//@gvgoff
+		if (strcmpi(command, "@gvgoff") == 0 && gm_level >= atcommand_config.gvgoff) {
+			map[sd->bl.m].flag.gvg = 0;
+			clif_send0199(sd->bl.m,0);
+			clif_displaymessage(fd,"guild vg guild off");
+			return 1;
+		}
+
+//@gvgon
+		if (strcmpi(command, "@gvgon") == 0 && gm_level >= atcommand_config.gvgon) {
+			map[sd->bl.m].flag.gvg = 1;
+			clif_send0199(sd->bl.m,3);
+			clif_displaymessage(fd,"guild vg guild on");
+			return 1;
+		}
+
 //髪型、髪の色、服の色、変更
 //「@model x y z」のように値を入力、ただしこれらを変更した状態で2HQを使うとエラーが・・・(´Д｀)　解明しだい直します。
 /*	例：@model 15 4 0
@@ -1183,6 +1203,8 @@ int atcommand_config_read(const char *cfgName)
 				{ "GM",&atcommand_config.gm },
 				{ "pvpoff",&atcommand_config.pvpoff },
 				{ "pvpon",&atcommand_config.pvpon },
+				{ "gvgoff",&atcommand_config.gvgoff },
+				{ "gvgon",&atcommand_config.gvgon },
 				{ "model",&atcommand_config.model },
 				{ "go",&atcommand_config.go },
 				{ "monster",&atcommand_config.monster },

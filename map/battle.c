@@ -1143,7 +1143,7 @@ struct Damage battle_calc_weapon_attack(
 //				md->hp = mob_db[md->class].max_hp/75;
 				break;
 			case MO_FINGEROFFENSIVE:	//w’e
-				if(!battle_config.finger_offencive_type) {
+				if(!battle_config.finger_offensive_type) {
 					if(src->type == BL_PC) {
 						damage = damage * (100 + 50 * skill_lv) / 100 * sd->spiritball_old;
 						div_ = sd->spiritball_old;
@@ -1377,11 +1377,9 @@ struct Damage battle_calc_weapon_attack(
 		damage-=damage2;
 	}
 
-	if(def1 >= 10000 && damage > 0) {
-		if(div_ < 255)
-			damage = div_;
-		else
-			damage = 3;
+	if(def1 >= 10000) {
+		if(damage > 0)
+			damage = 1;
 		if(damage2 > 0)
 			damage2 = 1;
 	}
@@ -1556,7 +1554,7 @@ struct Damage  battle_calc_magic_attack(
 	damage=battle_calc_damage(target,damage,aflag);	// ÅIC³
 
 	if(mdef1 >= 10000 && damage > 0) {
-		damage = div_;
+		damage = 1;
 	}
 	if(battle_config.skill_min_damage) {
 		if(damage > 0 && damage < div_)
@@ -1870,6 +1868,8 @@ int battle_config_read(const char *cfgName)
 	battle_config.death_penalty_type=0;
 	battle_config.death_penalty_base=0;
 	battle_config.death_penalty_job=0;
+	battle_config.restart_hp_rate=0;
+	battle_config.restart_sp_rate=0;
 	battle_config.mvp_item_rate=100;
 	battle_config.mvp_exp_rate=100;
 	battle_config.mvp_hp_rate=100;
@@ -1888,7 +1888,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.pet_hungry_delay_rate=100;
 	battle_config.skill_min_damage=0;
 	battle_config.sanctury_type=0;
-	battle_config.finger_offencive_type=0;
+	battle_config.finger_offensive_type=0;
 	battle_config.heal_exp=0;
 	battle_config.shop_exp=0;
 	fp=fopen(cfgName,"r");
@@ -1915,6 +1915,8 @@ int battle_config_read(const char *cfgName)
 			{	"death_penalty_type",			&battle_config.death_penalty_type			},
 			{	"death_penalty_base",			&battle_config.death_penalty_base			},
 			{	"death_penalty_job",			&battle_config.death_penalty_job			},
+			{ "restart_hp_rate", &battle_config.restart_hp_rate },
+			{ "restart_sp_rate", &battle_config.restart_sp_rate },
 			{	"mvp_hp_rate",			&battle_config.mvp_hp_rate			},
 			{	"mvp_item_rate",		&battle_config.mvp_item_rate		},
 			{	"mvp_exp_rate",			&battle_config.mvp_exp_rate			},
@@ -1933,7 +1935,7 @@ int battle_config_read(const char *cfgName)
 			{ "pet_hungry_delay_rate", &battle_config.pet_hungry_delay_rate	},
 			{ "skill_min_damage", &battle_config.skill_min_damage },
 			{ "sanctury_type", &battle_config.sanctury_type },
-			{ "finger_offencive_type", &battle_config.finger_offencive_type	},
+			{ "finger_offensive_type", &battle_config.finger_offensive_type	},
 			{ "heal_exp", &battle_config.heal_exp	},
 			{ "shop_exp", &battle_config.shop_exp	},
 
@@ -1952,6 +1954,14 @@ int battle_config_read(const char *cfgName)
 
 	if(battle_config.flooritem_lifetime < 1000)
 		battle_config.flooritem_lifetime = LIFETIME_FLOORITEM*1000;
+	if(battle_config.restart_hp_rate < 0)
+		battle_config.restart_hp_rate = 0;
+	else if(battle_config.restart_hp_rate > 100)
+		battle_config.restart_hp_rate = 100;
+	if(battle_config.restart_sp_rate < 0)
+		battle_config.restart_sp_rate = 0;
+	else if(battle_config.restart_sp_rate > 100)
+		battle_config.restart_sp_rate = 100;
 
 	add_timer_func_list(battle_delay_damage_sub,"battle_delay_damage_sub");
 

@@ -1,4 +1,30 @@
 --------------
+//0537 by 死神
+
+・スティールバグ修正とbattle_athena.confの項目追加、仕様変更と細かい修正です。
+(スティールは計算式に問題があったので修正して確率を更に落としました。)
+	battle.h
+		finger_offencive_typeをfinger_offensive_typeに修正。(英語スペル間違いで修正しました。)
+		struct battle_configにrestart_hp_rate、restart_sp_rate 追加。
+	battle.c
+		battle_calc_weapon_attack()、battle_calc_magic_attack() 修正。
+	skill.c
+		skill_attack() 修正。
+		clif_skill_nodamage()にスキルレベルを送るように変更。(Mさんの指摘により修正。)
+	clif.c
+		clif_skill_estimation() 修正。
+	conf_ref.txt
+		finger_offencive_typeをfinger_offensive_typeに修正と少し追加。
+	mob.c
+		mob_ai_sub_hard()、mob_target()、mob_damage() 修正。
+	pc.c
+		pc_steal_item() 修正。
+	atcommnad.c、atcommnd.h
+		@コマンド@gvgon , @gvgoff 追加。
+	battle_athena.conf
+		finger_offencive_typeをfinger_offensive_typeに修正と少し追加。
+
+--------------
 //0536 by hogefuga3 (真*kyocs & Athena staff)
 
 ・新GRFファイルフォーマット対応
@@ -14,7 +40,7 @@
 
 ・0533の問題がありそうな部分全て修正。修正した所を全部チェックしてなかったので修正したファイルだけ...
 ・スクリプトsetmapflagnosave 追加。
-	setmapflagnosave マップ名、セーブするアップ名、座標(X、Y)
+	setmapflagnosave マップ名、セーブするマップ名、座標(X、Y)
 		nosaveフラグをonにします。
 ・battle_athena.confに追加と一部仕様変更。(詳しくはconf_ref.txtを参考してください。)
 ・モンスターのdefとmdefが10000以上の場合全ての攻撃(クリティカル含めて)が1ダメージになるように変更。(トラップやブリッツの場合両方が10000以上の場合のみ1になります。) 草とキノコに１ダメージ固定は削除しました。(元々本鯖でも1固定ではないです。精練等による引き上げダメージはそのまま出ますので... 固定したいのならdefとmdefを10000にしてください。実はこれはクリスタルに為に作ろうとした物ですが...)

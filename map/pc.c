@@ -207,14 +207,30 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 		sd->status.hp=sd->status.max_hp;
 		sd->status.sp=sd->status.max_sp;
 	}
-	else if(sd->status.class == 0) {	// ノービス
-		sd->status.hp=(sd->status.max_hp)/2;
-	}
 	else {
-		sd->status.hp = 1;
+		if(sd->status.class == 0 && battle_config.restart_hp_rate < 50) {	// ノービス
+			sd->status.hp=(sd->status.max_hp)/2;
+		}
+		else {
+			if(battle_config.restart_hp_rate <= 0)
+				sd->status.hp = 1;
+			else {
+				sd->status.hp = sd->status.max_hp * battle_config.restart_hp_rate /100;
+				if(sd->status.hp <= 0)
+					sd->status.hp = 1;
+			}
+		}
+		if(battle_config.restart_sp_rate > 0) {
+			int sp = sd->status.max_sp * battle_config.restart_sp_rate /100;
+			if(sd->status.sp < sp)
+				sd->status.sp = sp;
+		}
 	}
 	if(!type)
 		clif_updatestatus(sd,SP_HP);
+	if(!type)
+		clif_updatestatus(sd,SP_SP);
+
 
 	if(!(battle_config.death_penalty_type&1) ) {
 		if(sd->status.class && !map[sd->bl.m].flag.nopenalty){
@@ -466,7 +482,7 @@ int pc_calc_skilltree(struct map_session_data *sd)
 	for(i=0;i<MAX_SKILL;i++)
 		sd->status.skill[i].id=0;
 	
-	if (battle_config.gm_allskill && pc_isGM(sd) ){
+	if (battle_config.gm_allskill > 0 && pc_isGM(sd) >= battle_config.gm_allskill){
 		// 全てのスキル
 		for(i=1;i<158;i++)
 			sd->status.skill[i].id=i;
@@ -1684,22 +1700,24 @@ int pc_steal_item(struct map_session_data *sd,struct block_list *bl)
 		md=(struct mob_data *)bl;
 		if(!md->state.steal_flag && mob_db[md->class].mexp <= 0) {
 			skill = pc_checkskill(sd,TF_STEAL) * 50;
-			for(i=0;i<8;i++) {
-				j = rand()%8;
-				itemid = mob_db[md->class].dropitem[j].nameid;
-				if(itemid > 0 && itemdb_type(itemid) != 6) {
-					rate = (mob_db[md->class].dropitem[j].p * (sd->status.base_level*4 + sd->paramc[4]*3 + skill*50))/1000;
-					if(rand()%10000 < rate) {
-						struct item tmp_item;
-						memset(&tmp_item,0,sizeof(tmp_item));
-						tmp_item.nameid = itemid;
-						tmp_item.amount = 1;
-						tmp_item.identify = 1;
-						flag = pc_additem(sd,&tmp_item,1);
-						if(flag)
-							clif_additem(sd,0,0,flag);
-						md->state.steal_flag = 1;
-						return 1;
+			if(skill < rand()%1000) {
+				for(i=0;i<4;i++) {
+					j = rand()%8;
+					itemid = mob_db[md->class].dropitem[j].nameid;
+					if(itemid > 0 && itemdb_type(itemid) != 6) {
+						rate = (mob_db[md->class].dropitem[j].p * (sd->status.base_level*4 + sd->paramc[4]*3 + skill))/1000;
+						if(rand()%10000 < rate) {
+							struct item tmp_item;
+							memset(&tmp_item,0,sizeof(tmp_item));
+							tmp_item.nameid = itemid;
+							tmp_item.amount = 1;
+							tmp_item.identify = 1;
+							flag = pc_additem(sd,&tmp_item,1);
+							if(flag)
+								clif_additem(sd,0,0,flag);
+							md->state.steal_flag = 1;
+							return 1;
+						}
 					}
 				}
 			}
