@@ -209,13 +209,16 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 /* 370- */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 /* 380- */
-	SC_TURESIGHT,
+	SC_TRUESIGHT,
 	-1,-1,
 	SC_WINDWALK,
-	-1,-1,-1,
+	SC_MELTDOWN,
+	-1,-1,
 	SC_CARTBOOST,-1,-1,
 /* 390- */
-	-1,-1,-1,-1,-1,-1,-1,-1,
+	SC_REJECTSWORD,
+	-1,-1,-1,-1,-1,
+	SC_MARIONETTE,-1,
 	SC_HEADCRUSH,
 	SC_JOINTBEAT,
 /* 400- */
@@ -305,7 +308,7 @@ int skill_get_unit_id(int id,int flag)
 	case WZ_STORMGUST:		return 0x86;				/* ストームガスト(とりあえずLoVと同じで処理) */
 	case CR_GRANDCROSS:		return 0x86;				/* グランドクロス */
 	case WZ_FIREPILLAR:		return (flag==0)?0x87:0x88;	/* ファイアーピラー */
-	case HT_TALKIEBOX:		return 0x99;	/* トーキーボックス */
+	case HT_TALKIEBOX:		return 0x99;				/* トーキーボックス */
 	case WZ_ICEWALL:		return 0x8d;				/* アイスウォール */
 	case WZ_QUAGMIRE:		return 0x8e;				/* クァグマイア */
 	case HT_BLASTMINE:		return 0x8f;				/* ブラストマイン */
@@ -579,8 +582,8 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			int race=battle_get_race(bl);
 			if( !(battle_check_undead(race,battle_get_elem_type(bl)) || race == 6) && rand()%100 < (2*skilllv+10)*sc_def_vit/100 )
 				skill_status_change_start(bl,SC_HEADCRUSH,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
-			break;
 		}
+			break;
 	case LK_JOINTBEAT:				/* ジョイントビート */
 		//条件が良く分からないので適当に
 		if( rand()%100 < (2*skilllv+10)*sc_def_vit/100 )
@@ -594,6 +597,12 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			battle_stopwalking(bl,1);
 			skill_status_change_start(bl,SC_SPIDERWEB,skilllv,0,0,0,sec,0);
 		}
+		break;
+	case ASC_METEORASSAULT:			/* メテオアサルト */
+		if( rand()%100 < (15 + skilllv*5)*sc_def_vit/100 ) //状態異常は詳細が分からないので適当に
+			skill_status_change_start(bl,SC_STAN,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
+		if( rand()%100 < (10+3*skilllv)*sc_def_int/100 )
+			skill_status_change_start(bl,SC_BLIND,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
 	}
 
@@ -1586,6 +1595,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 	case AS_GRIMTOOTH:		/* グリムトゥース */
 	case MC_CARTREVOLUTION:	/* カートレヴォリューション */
 	case NPC_SPLASHATTACK:	/* スプラッシュアタック */
+	case ASC_METEORASSAULT:	/* メテオアサルト */
 		if(flag&1){
 			/* 個別にダメージを与える */
 			if(bl->id!=skill_area_temp[1]){
@@ -1604,7 +1614,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 			if( skillid==SM_MAGNUM){
 				x=src->x;
 				y=src->y;
-			}else if(skillid==AC_SHOWER)	/* アローシャワー範囲 */
+			}else if(skillid==AC_SHOWER || skillid==ASC_METEORASSAULT)	/* アローシャワー、メテオアサルト範囲5*5 */
 				ar=2;
 			else if(skillid==NPC_SPLASHATTACK)	/* スプラッシュアタックは範囲7*7 */
 				ar=3;
@@ -1912,8 +1922,12 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		{
 			int heal=skill_calc_heal( src, skilllv );
 			int heal_get_jobexp;
+			int skill;
 			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
 				heal=0;	/* 黄金蟲カード（ヒール量０） */
+			if((skill=pc_checkskill(sd,HP_MEDITATIO))>0) // メディテイティオ 
+				heal += heal*(skill*2/100);
+
 			clif_skill_nodamage(src,bl,skillid,heal,1);
 			heal_get_jobexp = battle_heal(NULL,bl,heal,0,0);
 
@@ -2106,6 +2120,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case SA_FROSTWEAPON:	/* フロストウェポン */
 	case SA_LIGHTNINGLOADER:/* ライトニングローダー */
 	case SA_SEISMICWEAPON:	/* サイズミックウェポン */
+	case CG_MARIONETTE:		/* マリオネットコントロール */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
 			break;
@@ -2138,6 +2153,8 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case HP_ASSUMPTIO:		/*  */
 	case WS_CARTBOOST:		/* カートブースト */
 	case SN_SIGHT:			/* トゥルーサイト */
+	case WS_MELTDOWN:		/* メルトダウン */
+	case ST_REJECTSWORD:	/* リジェクトソード */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
 		break;
@@ -2281,7 +2298,18 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		}
 		break;
-
+	case WS_CREATECOIN:				/* クリエイトコイン */
+		if(sd) {
+			clif_skill_produce_mix_list(sd,64);
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		}
+		break;
+	case WS_CREATENUGGET:			/* 塊製造 */
+		if(sd) {
+			clif_skill_produce_mix_list(sd,128);
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		}
+		break;
 	case BS_HAMMERFALL:		/* ハンマーフォール */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_weapon_damage )
@@ -3244,6 +3272,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case AS_VENOMDUST:			/* ベノムダスト */
 	case AM_DEMONSTRATION:			/* デモンストレーション */
 	case PF_SPIDERWEB:			/* スパイダーウェッブ */
+	case PF_FOGWALL:			/* フォグウォール */
 		skill_unitsetting(src,skillid,skilllv,x,y,0);
 		break;
 
@@ -3720,11 +3749,15 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		break;
 	case HP_BASILICA:			/* バジリカ */
 		limit=skill_get_time(skillid,skilllv);
-		val2=skilllv+1;
-		interval = -1;
+		interval = 300;
+		range=3;
 		break;
 	case PA_GOSPEL:		/* ゴスペル */
 		count=49;
+		limit=skill_get_time(skillid,skilllv);
+		break;
+	case PF_FOGWALL:	/* フォグウォール */
+		count=15;
 		limit=skill_get_time(skillid,skilllv);
 		break;
 	};
@@ -3927,8 +3960,12 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 				range=-1;	/* 中心じゃない場合は範囲を-1にオーバーライド */
 			break;
 		case PA_GOSPEL:		/* ゴスペル */
-			ux+=(i%7-2);
-			uy+=(i/7-2);
+			ux+=(i%7-3);
+			uy+=(i/7-3);
+			break;
+		case PF_FOGWALL:	/* フォグウォール */
+			ux+=(i%5-2);
+			uy+=(i/5-1);
 			break;
 		}
 		//直上スキルの場合設置座標上にランドプロテクターがないかチェック
@@ -4237,6 +4274,17 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 //		if(bl->type == BL_PC && rand()%100 < sg->skill_lv)
 //			pc_break_weapon((struct map_session_data *)bl);
 		break;
+	case 0xb2:				/* あなたを_会いたいです */
+	case 0xb3:				/* ゴスペル */
+	case 0xb6:				/* フォグウォール */
+	//とりあえず何もしない
+		break;
+	case 0xb4:				/* バジリカ */
+		{
+			int c = skill_get_blewcount(sg->skill_id,sg->skill_lv);
+			skill_blown(&src->bl,bl,c); //吹き飛ばしてみる
+		}
+			break;
 	case 0xb7:	/* スパイダーウェッブ */
 		if(sg->val2==0){
 			skill_additional_effect(ss,bl,sg->skill_id,sg->skill_lv,BF_MISC,tick);
@@ -5826,7 +5874,7 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			case SC_BERSERK:			/* バーサーク */
 			case SC_ASSUMPTIO:			/* アシャンプティオ */
 			case SC_WINDWALK:		/* ウインドウォーク */
-			case SC_TURESIGHT:		/* トゥルーサイト */
+			case SC_TRUESIGHT:		/* トゥルーサイト */
 			case SC_SPIDERWEB:		/* スパイダーウェッブ */
 				calc_flag = 1;
 				break;
@@ -6270,6 +6318,8 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			calc_flag = 1;
 			if(sc_data[SC_DECREASEAGI].timer!=-1 )
 				skill_status_change_end(bl,SC_DECREASEAGI,-1);
+			if(sc_data[SC_WINDWALK].timer!=-1 )	/* ウインドウォーク */
+				skill_status_change_end(bl,SC_WINDWALK,-1);
 			break;
 		case SC_DECREASEAGI:		/* 速度減少 */
 			calc_flag = 1;
@@ -6353,6 +6403,12 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 				skill_status_change_end(bl,SC_ADRENALINE,-1);
 			if(sc_data[SC_LOUD].timer!=-1 )
 				skill_status_change_end(bl,SC_LOUD,-1);
+			if(sc_data[SC_TRUESIGHT].timer!=-1 )	/* トゥルーサイト */
+				skill_status_change_end(bl,SC_TRUESIGHT,-1);
+			if(sc_data[SC_WINDWALK].timer!=-1 )	/* ウインドウォーク */
+				skill_status_change_end(bl,SC_WINDWALK,-1);
+			if(sc_data[SC_CARTBOOST].timer!=-1 )	/* カートブースト */
+				skill_status_change_end(bl,SC_CARTBOOST,-1);
 			break;
 		case SC_FLAMELAUNCHER:		/* フレームランチャー */
 			skill_encchant_eremental_end(bl,SC_FLAMELAUNCHER);
@@ -6475,6 +6531,12 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 				skill_status_change_end(bl,SC_ADRENALINE,-1);
 			if(sc_data[SC_ASSNCROS].timer!=-1 )
 				skill_status_change_end(bl,SC_ASSNCROS,-1);
+			if(sc_data[SC_TRUESIGHT].timer!=-1 )	/* トゥルーサイト */
+				skill_status_change_end(bl,SC_TRUESIGHT,-1);
+			if(sc_data[SC_WINDWALK].timer!=-1 )	/* ウインドウォーク */
+				skill_status_change_end(bl,SC_WINDWALK,-1);
+			if(sc_data[SC_CARTBOOST].timer!=-1 )	/* カートブースト */
+				skill_status_change_end(bl,SC_CARTBOOST,-1);
 			break;
 		case SC_FORTUNE:			/* 幸運のキス */
 			calc_flag = 1;
@@ -6641,16 +6703,20 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_TENSIONRELAX:	/* テンションリラックス */
 		case SC_BERSERK:		/* バーサーク */
 		case SC_ASSUMPTIO:		/*  */
-		case SC_CARTBOOST:		/* カートブースト */
 		case SC_HEADCRUSH:		/* ヘッドクラッシュ */
 		case SC_JOINTBEAT:		/* ジョイントビート */
+		case SC_MELTDOWN:		/* メルトダウン */
+		case SC_REJECTSWORD:	/* リジェクトソード */
+		case SC_MARIONETTE:		/* マリオネットコントロール */
+
 			//とりあえず手抜き
 			break;
 		case SC_WINDWALK:		/* ウインドウォーク */
 			calc_flag = 1;
 			val2 = (val1 / 2); //Flee上昇率
 			break;
-		case SC_TURESIGHT:		/* トゥルーサイト */
+		case SC_CARTBOOST:		/* カートブースト */
+		case SC_TRUESIGHT:		/* トゥルーサイト */
 		case SC_SPIDERWEB:		/* スパイダーウェッブ */
 			calc_flag = 1;
 			break;
@@ -7297,7 +7363,7 @@ int skill_can_produce_mix( struct map_session_data *sd, int nameid, int trigger 
 		return 0;
 
 	if(trigger>=0){
-		if(trigger==32 || trigger==16){
+		if(trigger==32 || trigger==16 || trigger==64){
 			if(skill_produce_db[i].itemlv!=trigger)	/* ファーマシー＊ポーション類と溶鉱炉＊鉱石以外はだめ */
 				return 0;
 		}else{
@@ -7467,13 +7533,16 @@ int skill_produce_mix( struct map_session_data *sd,
 			*((unsigned long *)(&tmp_item.card[2]))=sd->char_id;	/* キャラID */
 		}
 
-		if(skill_produce_db[idx].req_skill!=AM_PHARMACY) {	//武器製造の場合
+		if(skill_produce_db[idx].req_skill!=AM_PHARMACY && skill_produce_db[idx].req_skill!=WS_CREATECOIN) {	//武器製造の場合
 			clif_produceeffect(sd,0,nameid);/* 武器製造エフェクトパケット */
 			clif_misceffect(&sd->bl,3); /* 他人にも成功を通知（精錬成功エフェクトと同じでいいの？） */
 		}
-		else {	//ファーマシーの場合
+		else if(skill_produce_db[idx].req_skill==AM_PHARMACY){	//ファーマシーの場合
 			clif_produceeffect(sd,2,nameid);/* 製薬エフェクトパケット */
-			clif_misceffect(&sd->bl,5); /* 他人にも失敗を通知*/
+			clif_misceffect(&sd->bl,5); /* 他人にも成功を通知*/
+		}else{
+			clif_produceeffect(sd,0,nameid);/* 不明なのでとりあえず製造エフェクトパケット */
+			clif_misceffect(&sd->bl,3); /* 他人にも成功を通知*/
 		}
 
 		if((flag = pc_additem(sd,&tmp_item,1))) {
@@ -7486,9 +7555,12 @@ int skill_produce_mix( struct map_session_data *sd,
 			clif_produceeffect(sd,1,nameid);/* 武器製造失敗エフェクトパケット */
 			clif_misceffect(&sd->bl,2); /* 他人にも失敗を通知 */
 		}
-		else {	//ファーマシーの場合
+		else if(skill_produce_db[idx].req_skill==AM_PHARMACY){	//ファーマシーの場合
 			clif_produceeffect(sd,3,nameid);/* 製薬失敗エフェクトパケット */
 			clif_misceffect(&sd->bl,6); /* 他人にも失敗を通知*/
+		}else{
+			clif_produceeffect(sd,1,nameid);/* 不明なのでとりあえず製造失敗エフェクトパケット */
+			clif_misceffect(&sd->bl,2); /* 他人にも失敗を通知*/
 		}
 	}
 	return 0;

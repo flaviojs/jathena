@@ -22,7 +22,10 @@ static struct dbt *guild_storage_db;
  * 倉庫内アイテムソート
  *------------------------------------------
  */
-int storage_comp_item(const struct item* i1, const struct item* i2){
+int storage_comp_item(const void *_i1, const void *_i2){
+struct item *i1=(struct item *)_i1;
+struct item *i2=(struct item *)_i2;
+
 	if (i1->nameid == i2->nameid) {
 		return 0;
 	} else if (!(i1->nameid) || !(i1->amount)){

@@ -1201,7 +1201,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->paramb[1]-=(sd->status.agi+sd->paramb[1]+sd->parame[1])/2;
 			sd->paramb[4]-=(sd->status.dex+sd->paramb[4]+sd->parame[4])/2;
 		}
-		if(sd->sc_data[SC_TURESIGHT].timer!=-1){	// トゥルーサイト
+		if(sd->sc_data[SC_TRUESIGHT].timer!=-1){	// トゥルーサイト
 			sd->paramb[0]+= 5;
 			sd->paramb[1]+= 5;
 			sd->paramb[2]+= 5;
@@ -1302,6 +1302,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(sd->sc_data[SC_WINDWALK].timer!=-1) 	//ウィンドウォーク時はLv*2%減算
 			sd->speed -= sd->speed *(sd->sc_data[SC_WINDWALK].val1*2)/100;
 	}
+	if ((sd->sc_data[SC_CARTBOOST].timer!=-1))	// カートブースト
+		sd->speed -= (DEFAULT_WALK_SPEED * 20)/100;
 
 	if((skill=pc_checkskill(sd,CR_TRUST))>0) { // フェイス
 		sd->status.max_hp += skill*200;
@@ -1324,21 +1326,31 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	if(sd->sprate!=100)
 		sd->status.max_sp = sd->status.max_sp*sd->sprate/100;
 
+	if((skill=pc_checkskill(sd,HP_MEDITATIO))>0) // メディテイティオ 
+		sd->status.max_sp += sd->status.max_sp*skill/100;
+
 	if(sd->status.max_sp < 0 || sd->status.max_sp > battle_config.max_sp)
 		sd->status.max_sp = battle_config.max_sp;
 
+	//自然回復HP
 	sd->nhealhp = 1 + (sd->paramc[2]/5) + (sd->status.max_hp/200);
-	if((skill=pc_checkskill(sd,SM_RECOVERY)) > 0) {
+	if((skill=pc_checkskill(sd,SM_RECOVERY)) > 0) {	/* HP回復力向上 */
 		sd->nshealhp = skill*5 + (sd->status.max_hp*skill/500);
 		if(sd->nshealhp > 0x7fff) sd->nshealhp = 0x7fff;
 	}
+	//自然回復SP
 	sd->nhealsp = 1 + (sd->paramc[3]/6) + (sd->status.max_sp/100);
 	if(sd->paramc[3] >= 120)
 		sd->nhealsp += ((sd->paramc[3]-120)>>1) + 4;
-	if((skill=pc_checkskill(sd,MG_SRECOVERY)) > 0) {
+	if((skill=pc_checkskill(sd,MG_SRECOVERY)) > 0) { /* SP回復力向上 */
 		sd->nshealsp = skill*3 + (sd->status.max_sp*skill/500);
 		if(sd->nshealsp > 0x7fff) sd->nshealsp = 0x7fff;
 	}
+	if((skill=pc_checkskill(sd,HP_MEDITATIO)) > 0) { // メディテイティオ 
+		sd->nshealsp += 3*skill*(sd->status.max_sp)/100;
+		if(sd->nshealsp > 0x7fff) sd->nshealsp = 0x7fff;
+	}
+	
 	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0) {
 		sd->nsshealhp = skill*4 + (sd->status.max_hp*skill/500);
 		sd->nsshealsp = skill*2 + (sd->status.max_sp*skill/500);
@@ -1466,8 +1478,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->flee += sd->flee*(sd->sc_data[SC_WINDWALK].val2)/100;
 		if(sd->sc_data[SC_SPIDERWEB].timer!=-1) //スパイダーウェブ
 			sd->flee -= sd->flee*50/100;
-		if(sd->sc_data[SC_TURESIGHT].timer!=-1) //トゥルーサイト
-			sd->hit += 3*(sd->sc_data[SC_TURESIGHT].val1);
+		if(sd->sc_data[SC_TRUESIGHT].timer!=-1) //トゥルーサイト
+			sd->hit += 3*(sd->sc_data[SC_TRUESIGHT].val1);
 		if(sd->sc_data[SC_CONCENTRATION].timer!=-1) //コンセントレーション
 			sd->hit += (sd->hit*(10*(sd->sc_data[SC_CONCENTRATION].val1)))/100;
 
@@ -1528,8 +1540,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		if(sd->sc_data[SC_CURSE].timer!=-1)
 			sd->speed += 450;
 
-		if(sd->sc_data[SC_TURESIGHT].timer!=-1) //トゥルーサイト
-			sd->critical += sd->critical*(sd->sc_data[SC_TURESIGHT].val1)/100;
+		if(sd->sc_data[SC_TRUESIGHT].timer!=-1) //トゥルーサイト
+			sd->critical += sd->critical*(sd->sc_data[SC_TRUESIGHT].val1)/100;
 
 /*		if(sd->sc_data[SC_VOLCANO].timer!=-1)	// エンチャントポイズン(属性はbattle.cで)
 			sd->addeff[2]+=sd->sc_data[SC_VOLCANO].val2;//% of granting

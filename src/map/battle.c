@@ -194,7 +194,7 @@ int battle_get_str(struct block_list *bl)
 			if(battle_check_undead(race,battle_get_elem_type(bl)) || race==6 )	str >>= 1;	// 悪 魔/不死
 			else str += sc_data[SC_BLESSING].val1;	// その他
 		}
-		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+		if(sc_data[SC_TRUESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
 			str += 5;
 	}
 	if(str < 0) str = 0;
@@ -231,7 +231,7 @@ int battle_get_agi(struct block_list *bl)
 
 		if(sc_data[SC_QUAGMIRE].timer!=-1 )	// クァグマイア
 			agi >>= 1;
-		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+		if(sc_data[SC_TRUESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
 			agi += 5;
 	}
 	if(agi < 0) agi = 0;
@@ -255,7 +255,7 @@ int battle_get_vit(struct block_list *bl)
 	if(sc_data) {
 		if(sc_data[SC_STRIPARMOR].timer != -1 && bl->type!=BL_PC)
 			vit = vit*60/100;
-		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+		if(sc_data[SC_TRUESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
 			vit += 5;
 	}
 
@@ -287,7 +287,7 @@ int battle_get_int(struct block_list *bl)
 		}
 		if( sc_data[SC_STRIPHELM].timer != -1 && bl->type != BL_PC)
 			int_ = int_*90/100;
-		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+		if(sc_data[SC_TRUESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
 			int_ += 5;
 	}
 	if(int_ < 0) int_ = 0;
@@ -322,7 +322,7 @@ int battle_get_dex(struct block_list *bl)
 
 		if(sc_data[SC_QUAGMIRE].timer!=-1 )	// クァグマイア
 			dex >>= 1;
-		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+		if(sc_data[SC_TRUESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
 			dex += 5;
 	}
 	if(dex < 0) dex = 0;
@@ -350,7 +350,7 @@ int battle_get_luk(struct block_list *bl)
 			luk += 30;
 		if(sc_data[SC_CURSE].timer!=-1 )		// 呪い
 			luk=0;
-		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
+		if(sc_data[SC_TRUESIGHT].timer!=-1 && bl->type != BL_PC)	// トゥルーサイト
 			luk += 5;
 	}
 	if(luk < 0) luk = 0;
@@ -407,8 +407,8 @@ int battle_get_hit(struct block_list *bl)
 					+sc_data[SC_HUMMING].val3)/100;
 		if(sc_data[SC_BLIND].timer!=-1 && bl->type != BL_PC)		// 呪い
 			hit -= hit*25/100;
-		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC)		// トゥルーサイト
-			hit += 3*(sc_data[SC_TURESIGHT].val1);
+		if(sc_data[SC_TRUESIGHT].timer!=-1 && bl->type != BL_PC)		// トゥルーサイト
+			hit += 3*(sc_data[SC_TRUESIGHT].val1);
 		if(sc_data[SC_CONCENTRATION].timer!=-1 && bl->type != BL_PC) //コンセントレーション
 			hit += (hit*(10*(sc_data[SC_CONCENTRATION].val1)))/100;
 	}
@@ -463,8 +463,8 @@ int battle_get_critical(struct block_list *bl)
 					+sc_data[SC_FORTUNE].val3)*10;
 		if(sc_data[SC_EXPLOSIONSPIRITS].timer!=-1 && bl->type != BL_PC)
 			critical += sc_data[SC_EXPLOSIONSPIRITS].val2;
-		if(sc_data[SC_TURESIGHT].timer!=-1 && bl->type != BL_PC) //トゥルーサイト
-			critical += critical*sc_data[SC_TURESIGHT].val1/100;
+		if(sc_data[SC_TRUESIGHT].timer!=-1 && bl->type != BL_PC) //トゥルーサイト
+			critical += critical*sc_data[SC_TRUESIGHT].val1/100;
 	}
 	if(critical < 1) critical = 1;
 	return critical;
@@ -1884,8 +1884,13 @@ static struct Damage battle_calc_pet_weapon_attack(
 				break;
 			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
 				damage = damage*(100+ 20*skill_lv)/100;
+				break;
 			case LK_JOINTBEAT:				/* ジョイントビート */
 				damage = damage*(50+ 10*skill_lv)/100;
+				break;
+			case ASC_METEORASSAULT:			/* メテオアサルト */
+				damage = damage*(40+ 40*skill_lv)/100;
+				break;
 			}
 		}
 
@@ -1955,6 +1960,9 @@ static struct Damage battle_calc_pet_weapon_attack(
 	// 属 性の適用
 	if(skill_num != 0 || s_ele != 0 || !battle_config.pet_attack_attr_none)
 		damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
+
+	if(skill_num==PA_PRESSURE) /* プレッシャー 必中? */
+		damage = 700+100*skill_lv;
 
 	// インベナム修正
 	if(skill_num==TF_POISON){
@@ -2132,8 +2140,8 @@ static struct Damage battle_calc_mob_weapon_attack(
 		// ソニックブロー
 		if( sc_data!=NULL && sc_data[SC_OVERTHRUST].timer!=-1)	// オーバートラスト
 			damage += damage*(5*sc_data[SC_OVERTHRUST].val1)/100;
-		if( sc_data!=NULL && sc_data[SC_TURESIGHT].timer!=-1)	// トゥルーサイト
-			damage += damage*(2*sc_data[SC_TURESIGHT].val1)/100;
+		if( sc_data!=NULL && sc_data[SC_TRUESIGHT].timer!=-1)	// トゥルーサイト
+			damage += damage*(2*sc_data[SC_TRUESIGHT].val1)/100;
 
 		if(skill_num>0){
 			int i;
@@ -2323,8 +2331,13 @@ static struct Damage battle_calc_mob_weapon_attack(
 				break;
 			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
 				damage = damage*(100+ 20*skill_lv)/100;
+				break;
 			case LK_JOINTBEAT:				/* ジョイントビート */
 				damage = damage*(50+ 10*skill_lv)/100;
+				break;
+			case ASC_METEORASSAULT:			/* メテオアサルト */
+				damage = damage*(40+ 40*skill_lv)/100;
+				break;
 			}
 		}
 
@@ -2412,11 +2425,23 @@ static struct Damage battle_calc_mob_weapon_attack(
 		if(cardfix != 100)
 			damage=damage*cardfix/100;
 	}
+	if(t_sc_data && t_sc_data[SC_ASSUMPTIO].timer != -1){ //アシャンプティオ
+		if(!map[tsd->bl.m].flag.pvp)
+			damage=damage/3;
+		else
+			damage=damage/2;
+	}
+
 	if(damage < 0) damage = 0;
 
 	// 属 性の適用
 	if(skill_num != 0 || s_ele != 0 || !battle_config.mob_attack_attr_none)
 		damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
+
+	if(sc_data!=NULL && sc_data[SC_AURABLADE].timer!=-1)	/* オーラブレード 必中 */
+		damage += sc_data[SC_AURABLADE].val1 * 10;
+	if(skill_num==PA_PRESSURE) /* プレッシャー 必中? */
+		damage = 700+100*skill_lv;
 
 	// インベナム修正
 	if(skill_num==TF_POISON){
@@ -2756,9 +2781,9 @@ static struct Damage battle_calc_pc_weapon_attack(
 			damage += damage*(5*sc_data[SC_OVERTHRUST].val1)/100;
 			damage2 += damage2*(5*sc_data[SC_OVERTHRUST].val1)/100;
 		}
-		if( sc_data!=NULL && sc_data[SC_TURESIGHT].timer!=-1){	// トゥルーサイト
-			damage += damage*(2*sc_data[SC_TURESIGHT].val1)/100;
-			damage2 += damage2*(2*sc_data[SC_TURESIGHT].val1)/100;
+		if( sc_data!=NULL && sc_data[SC_TRUESIGHT].timer!=-1){	// トゥルーサイト
+			damage += damage*(2*sc_data[SC_TRUESIGHT].val1)/100;
+			damage2 += damage2*(2*sc_data[SC_TRUESIGHT].val1)/100;
 		}
 
 		if(skill_num>0){
@@ -3060,9 +3085,15 @@ static struct Damage battle_calc_pc_weapon_attack(
 			case LK_HEADCRUSH:				/* ヘッドクラッシュ */
 				damage = damage*(100+ 20*skill_lv)/100;
 				damage2 = damage2*(100+ 20*skill_lv)/100;
+				break;
 			case LK_JOINTBEAT:				/* ジョイントビート */
 				damage = damage*(50+ 10*skill_lv)/100;
 				damage2 = damage2*(50+ 10*skill_lv)/100;
+				break;
+			case ASC_METEORASSAULT:			/* メテオアサルト */
+				damage = damage*(40+ 40*skill_lv)/100;
+				damage2 = damage2*(40+ 40*skill_lv)/100;
+				break;
 			}
 		}
 		if(da == 2) { //三段掌が発動しているか
@@ -3300,6 +3331,15 @@ static struct Damage battle_calc_pc_weapon_attack(
 	}
 //ディフェンダーによるダメージ減衰処理ここまで
 
+	if(t_sc_data && t_sc_data[SC_ASSUMPTIO].timer != -1){ //アシャンプティオ
+		if(!map[tsd->bl.m].flag.pvp){
+			damage=damage/3;
+			damage2=damage2/3;
+		}else{
+			damage=damage/2;
+			damage2=damage2/2;
+		}
+	}
 	if(damage < 0) damage = 0;
 	if(damage2 < 0) damage2 = 0;
 
@@ -3313,9 +3353,14 @@ static struct Damage battle_calc_pc_weapon_attack(
 	damage += sd->spiritball*3;
 	damage2 += sd->spiritball*3;
 
-	if(sc_data!=NULL && sc_data[SC_AURABLADE].timer!=-1)	/* オーラブレード 必中 */
+	if(sc_data!=NULL && sc_data[SC_AURABLADE].timer!=-1){	/* オーラブレード 必中 */
 		damage += sc_data[SC_AURABLADE].val1 * 10;
 		damage2 += sc_data[SC_AURABLADE].val1 * 10;
+	}
+	if(skill_num==PA_PRESSURE){ /* プレッシャー 必中? */
+		damage = 700+100*skill_lv;
+		damage2 = 700+100*skill_lv;
+	}
 
 	// >二刀流の左右ダメージ計算誰かやってくれぇぇぇぇえええ！
 	// >map_session_data に左手ダメージ(atk,atk2)追加して

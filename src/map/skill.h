@@ -178,7 +178,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_SIGNUMCRUCIS			=11,
 	SC_INCREASEAGI			=12,
 	SC_DECREASEAGI			=13,
-	SC_SLOWPOISON				=14,
+	SC_SLOWPOISON			=14,
 	SC_IMPOSITIO			=15,
 	SC_SUFFRAGIUM			=16,
 	SC_ASPERSIO				=17,
@@ -196,7 +196,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_TRICKDEAD			=29,
 	SC_LOUD					=30,
 	SC_ENERGYCOAT			=31,
-	SC_HALLUCINATION	=34,
+	SC_HALLUCINATION		=34,
 	SC_WEIGHT50				=35,
 	SC_WEIGHT90				=36,
 	SC_SPEEDPOTION0			=37,
@@ -219,7 +219,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_SPEARSQUICKEN		=68,
 	SC_EXPLOSIONSPIRITS		=86,
 	SC_STEELBODY			=87,
-	SC_COMBO					=89,
+	SC_COMBO				=89,
 	SC_FLAMELAUNCHER		=90,
 	SC_FROSTWEAPON			=91,
 	SC_LIGHTNINGLOADER		=92,
@@ -231,7 +231,7 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_BERSERK				=108, /* バーサーク */
 	SC_ASSUMPTIO			=110, /* アシャンプティオ */
 	SC_MAGICPOWER			=113, /* 魔法力増幅 */
-	SC_TURESIGHT			=115, /* トゥルーサイト */
+	SC_TRUESIGHT			=115, /* トゥルーサイト */
 	SC_WINDWALK				=116, /* ウインドウォーク */
 	SC_MELTDOWN				=117, /* メルトダウン */
 	SC_CARTBOOST			=118, /* カートブースト */

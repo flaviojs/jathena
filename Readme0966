@@ -1,4 +1,72 @@
 --------------------
+//0977 by (凸)
+・転生スキルを修正したり色々
+	アサシンクロス メテオアサルト エフェクトが違う？
+	ロードナイト プレッシャー 必中ダメージにしてみた
+	ロードナイト オーラブレードの必中damage2が他でも適用されていたのを修正
+	ロードナイト ゴスペル エフェクト出現位置の調整
+	ハイプリースト アシャンプティオ 効果実装
+	ハイプリースト メディテイティオ 効果実装
+	ハイプリースト バジリカ SGみたいにMobが侵入しようとすると吹き飛ばされるようにした
+	ホワイトスミス カートブースト 効果実装
+	ホワイトスミス メルトダウン エフェクトと状態異常時間だけ(実際の状態変化は無し)
+	ホワイトスミス クリエイトコイン 名前入りの金貨とか作れるだけ
+	ストーカー リジェクトソード エフェクトと状態異常時間だけ(実際の状態変化は無し)
+	クラウン・ジプシー マリオネットコントロール エフェクトと状態異常時間だけ(実際の状態変化は無し)
+	プロフェッサー フォグウォール エフェクトと有効時間だけ
+	スナイパー ウインドウォーク 速度上昇とQM、私を忘れないでがかかると解除されるようにした
+	スナイパー トゥルーサイト QM、私を忘れないでで解除されるようにしてみた
+・トゥルーサイトの綴り間違いを修正
+・storage.cでコンパイル警告が出ないようにしたつもり
+
+	(db/)
+	cast_db.txt
+	skill_db.txt
+	skill_require_db.txt
+	produce_db.txt
+	(map/)
+	battle.c
+		battle_get_str() 修正
+		battle_get_agi() 修正
+		battle_get_vit() 修正
+		battle_get_int() 修正
+		battle_get_dex() 修正
+		battle_get_luk() 修正
+		battle_get_flee() 修正
+		battle_get_hit() 修正
+		battle_get_critical() 修正
+		battle_get_baseatk() 修正
+		battle_get_atk() 修正
+		battle_get_atk2() 修正
+		battle_get_def() 修正
+		battle_get_def2() 修正
+		battle_get_speed() 修正
+		battle_calc_damage() 修正
+		battle_calc_pet_weapon_attack() 変更
+		battle_calc_mob_weapon_attack() 変更
+		battle_calc_pc_weapon_attack() 変更
+	pc.c
+		pc_calcstatus() 修正
+	skill.c
+		skill_get_unit_id() 修正
+		skill_additional_effect() 修正
+		skill_castend_nodamage_id() 修正
+		skill_castend_pos2() 修正
+		skill_unit_group() 修正
+		skill_unit_onplace() 修正
+		skill_unit_onout() 修正
+		skill_castend_pos() 修正
+		skill_check_condition() 修正
+		skill_status_change_end() 修正
+		skill_status_change_start() 修正
+		skill_can_produce_mix() 修正
+		skill_produce_mix() 修正
+	skill.h 修正
+	storage.c
+		storage_comp_item() 修正
+	storage.h 修正
+
+--------------------
 //0976 by (凸)
 ・転生スキルを修正したり色々
 ・準備だけして実装できてないスキルもあります
