@@ -2198,7 +2198,13 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 
 	if(md->skillid == PR_LEXAETERNA) {
 		struct status_change *sc_data = battle_get_sc_data(bl);
-		if(sc_data && (sc_data[SC_STONE].timer != -1 || sc_data[SC_FREEZE].timer != -1))
+		if(sc_data && (sc_data[SC_FREEZE].timer != -1 || (sc_data[SC_STONE].timer != -1 && sc_data[SC_STONE].val2 == 0)))
+			return 0;
+	}
+	else if(md->skillid == RG_BACKSTAP) {
+		int dir = map_calc_dir(&md->bl,bl->x,bl->y),t_dir = battle_get_dir(bl);
+		int dist = distance(md->bl.x,md->bl.y,bl->x,bl->y);
+		if(bl->type != BL_SKILL && (dist == 0 || map_check_dir(dir,t_dir)))
 			return 0;
 	}
 	range = skill_get_range(md->skillid,md->skilllv);

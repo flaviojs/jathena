@@ -501,9 +501,11 @@ int battle_get_def(struct block_list *bl)
 				def += sc_data[SC_DRUMBATTLE].val3;
 			if(sc_data[SC_POISON].timer!=-1 && bl->type != BL_PC)
 				def = def*75/100;
+			if(sc_data[SC_SIGNUMCRUCIS].timer!=-1 && bl->type != BL_PC)
+				def -= sc_data[SC_SIGNUMCRUCIS].val2;
 			if(sc_data[SC_ETERNALCHAOS].timer!=-1 && bl->type != BL_PC)
 				def = 0;
-			if(sc_data[SC_FREEZE].timer != -1 || sc_data[SC_STONE].timer != -1)
+			if(sc_data[SC_FREEZE].timer != -1 || (sc_data[SC_STONE].timer != -1 && sc_data[SC_STONE].val2 == 0))
 				def >>= 1;
 		}
 		if(skilltimer != -1) {
@@ -529,7 +531,7 @@ int battle_get_mdef(struct block_list *bl)
 
 	if(mdef < 1000000) {
 		if(sc_data) {
-			if(sc_data[SC_FREEZE].timer != -1 || sc_data[SC_STONE].timer != -1)
+			if(sc_data[SC_FREEZE].timer != -1 || (sc_data[SC_STONE].timer != -1 && sc_data[SC_STONE].val2 == 0))
 				mdef = mdef*125/100;
 		}
 	}
@@ -555,6 +557,8 @@ int battle_get_def2(struct block_list *bl)
 			def2 = (def2*(100 - 6*sc_data[SC_PROVOKE].val1)+50)/100;
 		if(sc_data[SC_POISON].timer!=-1 && bl->type != BL_PC)
 			def2 = def2*75/100;
+		if(sc_data[SC_SIGNUMCRUCIS].timer!=-1 && bl->type != BL_PC)
+			def2 -= sc_data[SC_SIGNUMCRUCIS].val2;
 	}
 	if(def2 < 1) def2 = 1;
 	return def2;
@@ -719,15 +723,13 @@ int battle_get_element(struct block_list *bl)
 		ret=20+((struct map_session_data *)bl)->def_ele;	// 防御属性Lv1
 	else if(bl->type==BL_PET)
 		ret = mob_db[((struct pet_data *)bl)->class].element;
-	else if(bl->type==BL_SKILL)
-		ret = skill_get_pl(((struct skill_unit *)bl)->group->skill_id)|0x20;
 
 	if(sc_data) {
 		if( sc_data[SC_BENEDICTIO].timer!=-1 )	// 聖体降福
 			ret=26;
 		if( sc_data[SC_FREEZE].timer!=-1 )	// 凍結
 			ret=21;
-		if( sc_data[SC_STONE].timer!=-1 )
+		if( sc_data[SC_STONE].timer!=-1 && sc_data[SC_STONE].val2==0)
 			ret=22;
 	}
 
@@ -945,26 +947,24 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 		
 	if(damage<0)
 		return battle_heal(bl,target,-damage,0);
-	
+
 	if( (sc_count=battle_get_sc_count(target))!=NULL && *sc_count>0){
 		// 凍結、石化、睡眠を消去
 		if(sc_data[SC_FREEZE].timer!=-1)
 			skill_status_change_end(target,SC_FREEZE,-1);
-		if(sc_data[SC_STONE].timer!=-1)
+		if(sc_data[SC_STONE].timer!=-1 && sc_data[SC_STONE].val2==0)
 			skill_status_change_end(target,SC_STONE,-1);
 		if(sc_data[SC_SLEEP].timer!=-1)
 			skill_status_change_end(target,SC_SLEEP,-1);
 	}
 
-
 	if(target->type==BL_MOB){	// MOB
-
 		struct mob_data *md=(struct mob_data *)target;
 		if(md->skilltimer!=-1 && md->state.skillcastcancel)	// 詠唱妨害
 			skill_castcancel(target,0);
 		return mob_damage(bl,md,damage,0);
-
-	}else if(target->type==BL_PC){	// PC
+	}
+	else if(target->type==BL_PC){	// PC
 
 		struct map_session_data *tsd=(struct map_session_data *)target;
 
@@ -993,7 +993,8 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 
 		return pc_damage(bl,tsd,damage);
 
-	}else if(target->type==BL_SKILL)
+	}
+	else if(target->type==BL_SKILL)
 		return skill_unit_ondamaged((struct skill_unit *)target,bl,damage,gettick());
 	return 0;
 }
@@ -1065,7 +1066,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 	struct mob_data *md=NULL;
 	struct status_change *sc_data,*sc;
 	short *sc_count;
-	int i,class = battle_get_class(bl);
+	int class = battle_get_class(bl);
 
 	if(bl->type==BL_MOB) md=(struct mob_data *)bl;
 	else sd=(struct map_session_data *)bl;
@@ -1165,13 +1166,6 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 		}
 		else if(damage > 0 && damage < 3)
 			damage = 3;
-	}
-
-	if(	damage>0 && sc_data!=NULL && (
-		sc_data[i=SC_STONE].timer!=-1	||	// 石化
-		sc_data[i=SC_FREEZE].timer!=-1	||	// 凍結
-		sc_data[i=SC_SLEEP].timer!=-1	)){	// 睡眠
-		skill_status_change_end( bl, i, -1 );	// ダメージ受けたら解ける
 	}
 
 	if( md!=NULL && md->hp>0 && damage > 0 )	// 反撃などのMOBスキル判定
@@ -1598,10 +1592,18 @@ static struct Damage battle_calc_pet_weapon_attack(
 	if(	hitrate < 1000000 &&			// 必中攻撃
 		(t_sc_data != NULL && (t_sc_data[SC_SLEEP].timer!=-1 ||	// 睡眠は必中
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
-		t_sc_data[SC_FREEZE].timer!=-1 ) ) )	// 凍結は必中
+		t_sc_data[SC_FREEZE].timer!=-1 || (t_sc_data[SC_STONE].timer!=-1 && t_sc_data[SC_STONE].val2==0) ) ) )	// 凍結は必中
 		hitrate = 1000000;
 	if(type == 0 && rand()%100 >= hitrate)
 		damage = 0;
+	if( target->type!=BL_PC && t_sc_data) {
+		int cardfix=100;
+		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG)
+			cardfix=cardfix*(100-t_sc_data[SC_DEFENDER].val2)/100;
+		if(cardfix != 100)
+			damage=damage*cardfix/100;
+	}
+	if(damage < 0) damage = 0;
 
 	// 属 性の適用
 	damage=battle_attr_fix(damage, s_ele, battle_get_element(target) );
@@ -1973,7 +1975,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if(	hitrate < 1000000 &&			// 必中攻撃
 		(t_sc_data != NULL && (t_sc_data[SC_SLEEP].timer!=-1 ||	// 睡眠は必中
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
-		t_sc_data[SC_FREEZE].timer!=-1 ) ) )	// 凍結は必中
+		t_sc_data[SC_FREEZE].timer!=-1 || (t_sc_data[SC_STONE].timer!=-1 && t_sc_data[SC_STONE].val2==0) ) ) )	// 凍結は必中
 		hitrate = 1000000;
 	if(type == 0 && rand()%100 >= hitrate)
 		damage = 0;
@@ -1997,6 +1999,13 @@ static struct Damage battle_calc_mob_weapon_attack(
 			}
 		}
 		damage=damage*cardfix/100;
+	}
+	else if(t_sc_data) {
+		int cardfix=100;
+		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG)
+			cardfix=cardfix*(100-t_sc_data[SC_DEFENDER].val2)/100;
+		if(cardfix != 100)
+			damage=damage*cardfix/100;
 	}
 	if(damage < 0) damage = 0;
 
@@ -2697,7 +2706,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	if(	hitrate < 1000000 && // 必中攻撃
 		(t_sc_data != NULL && (t_sc_data[SC_SLEEP].timer!=-1 ||	// 睡眠は必中
 		t_sc_data[SC_STAN].timer!=-1 ||		// スタンは必中
-		t_sc_data[SC_FREEZE].timer!=-1 ) ) )	// 凍結は必中
+		t_sc_data[SC_FREEZE].timer!=-1 || (t_sc_data[SC_STONE].timer!=-1 && t_sc_data[SC_STONE].val2==0) ) ) )	// 凍結は必中
 		hitrate = 1000000;
 	if(type == 0 && rand()%100 >= hitrate)
 		damage = damage2 = 0;
@@ -2793,6 +2802,15 @@ static struct Damage battle_calc_pc_weapon_attack(
 		}
 		damage=damage*cardfix/100;
 		damage2=damage2*cardfix/100;
+	}
+	else if(t_sc_data) {
+		cardfix=100;
+		if(t_sc_data[SC_DEFENDER].timer != -1 && flag&BF_LONG)
+			cardfix=cardfix*(100-t_sc_data[SC_DEFENDER].val2)/100;
+		if(cardfix != 100) {
+			damage=damage*cardfix/100;
+			damage2=damage2*cardfix/100;
+		}
 	}
 	if(damage < 0) damage = 0;
 	if(damage2 < 0) damage2 = 0;
@@ -3035,7 +3053,7 @@ struct Damage battle_calc_magic_attack(
 			MATK_FIX( 100+skill_lv*10, 100);
 			break;
 		case WZ_FIREPILLAR:	// ファイヤーピラー
-			if(mdef1 < 10000)
+			if(mdef1 < 1000000)
 				mdef1=mdef2=0;	// MDEF無視
 			MATK_FIX( 1,5 );
 			matk1+=50;
@@ -3048,7 +3066,7 @@ struct Damage battle_calc_magic_attack(
 		case WZ_METEOR:
 			break;
 		case WZ_JUPITEL:	// ユピテルサンダー
-			blewcount=(skill_lv>6)? 7:skill_lv+1;
+			blewcount=2+(skill_lv>>1);
 			break;
 		case WZ_VERMILION:	// ロードオブバーミリオン
 			MATK_FIX( skill_lv*20+80, 100 );
@@ -3414,6 +3432,24 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 					f = skill_castend_damage_id(src,target,sd->autospell_id,skilllv,tick,flag);
 				if(!f) pc_heal(sd,0,-sp);
 			}
+		}
+		if(sd && sd->state.attack_type == BF_WEAPON && src != target && (wd.damage > 0 || wd.damage2 > 0)) {
+			int hp = 0,sp = 0;
+			if(sd->hp_drain_rate > 0 && sd->hp_drain_per > 0 && rand()%100 < sd->hp_drain_rate) {
+				if(wd.damage > 0)
+					hp += (wd.damage * sd->hp_drain_per)/100;
+				if(wd.damage2 > 0)
+					hp += (wd.damage2 * sd->hp_drain_per)/100;
+				if(hp < 1) hp = 1;
+			}
+			if(sd->sp_drain_rate > 0 && sd->sp_drain_per > 0 && rand()%100 < sd->sp_drain_rate) {
+				if(wd.damage > 0)
+					sp += (wd.damage * sd->sp_drain_per)/100;
+				if(wd.damage2 > 0)
+					sp += (wd.damage2 * sd->sp_drain_per)/100;
+				if(sp < 1) sp = 1;
+			}
+			if(hp > 0 || sp > 0) pc_heal(sd,hp,sp);
 		}
 		if(t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1 && t_sc_data[SC_AUTOCOUNTER].val4 > 0) {
 			if(t_sc_data[SC_AUTOCOUNTER].val3 == src->id)

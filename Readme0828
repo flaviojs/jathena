@@ -1,4 +1,43 @@
 --------------------
+//0842 by 死神
+
+・スキル関係の修正と細かい修正。
+・aegis鯖で色々と検証した物を適用。
+・メテオの範囲を7*7、LoV13*13、SG11*11、FN5*5に修正。
+・シグナム実装。(ただPVPでプレイヤーにかかるかどうかがわからなかったので
+かかる方向で実装。)これで1次職業のスキルはクリアかも...
+・装備スクリプトにbHPDrainRateとbSPDrainRate追加。
+・その他細かい修正少し。
+	(doc/)
+	item_bonus.txt 修正。
+	(db/)
+	cast_db.txt 修正。
+	item_db.txt 修正。
+	const.txt 修正。
+	(map/)
+	map.h 修正。
+	skill.c
+		skill_castend_damage_id()、skill_castend_nodamage_id() 修正。
+		skill_unitsetting()、skill_castend_pos2()、skill_castend_id() 修正。
+		skill_status_change_start()、skill_status_change_timer() 修正。
+		skill_status_change_end()、skill_unit_onplace() 修正。
+		skill_frostjoke_scream()、skill_attack() 修正。
+		skill_attack_area() 追加。
+	battle.c
+		battle_calc_magic_attack()、battle_get_element()、battle_get_def() 修正。
+		battle_get_def2()、battle_get_mdef()、battle_damage() 修正。
+		battle_calc_damage()、battle_calc_pet_weapon_attack() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_weapon_attack() 修正。
+	mob.c
+		mobskill_castend_id() 修正。
+	pc.c
+		pc_calcstatus()、pc_bonus2()、pc_attack_timer() 修正。
+	clif.c
+		clif_spawnmob()、clif_spawnpet()、clif_spawnnpc() 修正。
+		clif_parse_ActionRequest() 修正。
+
+--------------------
 //0841 by Kalen
 
 ・水溶液が作れなかったので追加

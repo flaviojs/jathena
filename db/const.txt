@@ -132,6 +132,8 @@ bMdef2Rate	1057
 bSplashRange	1058
 bSplashAddRange	1059
 bAutoSpell	1060
+bHPDrainRate	1061
+bSPDrainRate	1062
 bRestartFullRecover	2000
 bNoCastCancel	2001
 bNoSizeFix	2002

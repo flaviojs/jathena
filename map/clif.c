@@ -886,6 +886,16 @@ int clif_spawnnpc(struct npc_data *nd)
 	if(nd->class == INVISIBLE_CLASS)
 		return 0;
 
+	memset(buf,0,packet_len_table[0x7c]);
+
+	WBUFW(buf,0)=0x7c;
+	WBUFL(buf,2)=nd->bl.id;
+	WBUFW(buf,6)=nd->speed;
+	WBUFW(buf,20)=nd->class;
+	WBUFPOS(buf,36,nd->bl.x,nd->bl.y);
+
+	clif_send(buf,packet_len_table[0x7c],&nd->bl,AREA);
+
 	len = clif_npc0078(nd,buf);
 	clif_send(buf,len,&nd->bl,AREA);
 
@@ -900,6 +910,20 @@ int clif_spawnmob(struct mob_data *md)
 {
 	unsigned char buf[64];
 	int len;
+
+	memset(buf,0,packet_len_table[0x7c]);
+
+	WBUFW(buf,0)=0x7c;
+	WBUFL(buf,2)=md->bl.id;
+	WBUFW(buf,6)=md->speed;
+	WBUFW(buf,8)=md->opt1;
+	WBUFW(buf,10)=md->opt2;
+	WBUFW(buf,12)=md->option;
+	WBUFW(buf,20)=mob_get_viewclass(md->class);
+
+	WBUFPOS(buf,36,md->bl.x,md->bl.y);
+
+	clif_send(buf,packet_len_table[0x7c],&md->bl,AREA);
 
 	len = clif_mob0078(md,buf);
 	clif_send(buf,len,&md->bl,AREA);
@@ -917,6 +941,16 @@ int clif_spawnpet(struct pet_data *pd)
 {
 	unsigned char buf[64];
 	int len;
+
+	memset(buf,0,packet_len_table[0x7c]);
+
+	WBUFW(buf,0)=0x7c;
+	WBUFL(buf,2)=pd->bl.id;
+	WBUFW(buf,6)=pd->speed;
+	WBUFW(buf,20)=mob_get_viewclass(pd->class);
+	WBUFPOS(buf,36,pd->bl.x,pd->bl.y);
+
+	clif_send(buf,packet_len_table[0x7c],&pd->bl,AREA);
 
 	len = clif_pet0078(pd,buf);
 	clif_send(buf,len,&pd->bl,AREA);
@@ -5271,7 +5305,7 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 		clif_clearchar_area(&sd->bl,1);
 		return;
 	}
-	if(sd->npc_id!=0 || sd->opt1 > 0 || sd->sc_data[SC_AUTOCOUNTER].timer != -1) return;
+	if(sd->npc_id!=0 || sd->opt1 > 0 || sd->status.option&2 || sd->sc_data[SC_AUTOCOUNTER].timer != -1) return;
 
 	tick=gettick();
 
@@ -5281,7 +5315,7 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 	case 0x00:	// once attack
 	case 0x07:	// continuous attack
 		if(sd->vender_id != 0) return;
-		if(!battle_config.sdelay_attack_enable && (sd->skilltimer == -1 || pc_checkskill(sd,SA_FREECAST) <= 0) ) {
+		if(!battle_config.sdelay_attack_enable && pc_checkskill(sd,SA_FREECAST) <= 0 ) {
 			if(DIFF_TICK(tick , sd->canact_tick) < 0) {
 				clif_skill_fail(sd,1,4,0);
 				return;

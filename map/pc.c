@@ -958,6 +958,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->double_add_rate = sd->perfect_hit_add = sd->get_zeny_add_num = 0;
 	sd->splash_range = sd->splash_add_range = 0;
 	sd->autospell_id = sd->autospell_lv = sd->autospell_rate = 0;
+	sd->hp_drain_rate = sd->hp_drain_per = sd->sp_drain_rate = sd->sp_drain_per = 0;
 
 	for(i=0;i<10;i++) {
 		index = sd->equip_index[i];
@@ -1321,6 +1322,12 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->wlv >= 4)
 				sd->watk_ += sd->sc_data[SC_NIBELUNGEN].val2;
 		}
+		if(sd->sc_data[SC_SIGNUMCRUCIS].timer!=-1) {
+			sd->def -= sd->sc_data[SC_SIGNUMCRUCIS].val2;
+			sd->def2 -= sd->sc_data[SC_SIGNUMCRUCIS].val2;
+			if(sd->def < 0) sd->def = 0;
+			if(sd->def2 < 1) sd->def2 = 1;
+		}
 		if(sd->sc_data[SC_ETERNALCHAOS].timer!=-1)	// エターナルカオス
 			sd->def=0;
 
@@ -1401,7 +1408,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->speed = (sd->speed * 125) / 100;
 		}
 		if(sd->sc_data[SC_DEFENDER].timer != -1) {
-			sd->long_attack_def_rate += 5 + sd->sc_data[SC_DEFENDER].val1*15;
+			sd->long_attack_def_rate += sd->sc_data[SC_DEFENDER].val2;
 			sd->aspd += (550 - sd->sc_data[SC_DEFENDER].val1*50);
 			sd->speed = (sd->speed * (155 - sd->sc_data[SC_DEFENDER].val1*5)) / 100;
 		}
@@ -1984,6 +1991,18 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 				sd->add_mdef_classrate[sd->add_mdef_class_count] += val;
 				sd->add_mdef_class_count++;
 			}
+		}
+		break;
+	case SP_HP_DRAIN_RATE:
+		if(sd->state.lr_flag != 2) {
+			sd->hp_drain_rate += type2;
+			sd->hp_drain_per += val;
+		}
+		break;
+	case SP_SP_DRAIN_RATE:
+		if(sd->state.lr_flag != 2) {
+			sd->sp_drain_rate += type2;
+			sd->sp_drain_per += val;
 		}
 		break;
 	default:
@@ -3219,7 +3238,7 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 	if(sd->skilltimer != -1 && pc_checkskill(sd,SA_FREECAST) <= 0)
 		return 0;
 
-	if(!battle_config.sdelay_attack_enable && sd->skilltimer == -1) {
+	if(!battle_config.sdelay_attack_enable && pc_checkskill(sd,SA_FREECAST) <= 0) {
 		if(DIFF_TICK(tick , sd->canact_tick) < 0) {
 			clif_skill_fail(sd,1,4,0);
 			return 0;
@@ -3263,7 +3282,7 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 			else
 				sd->attackabletime = tick + (sd->aspd<<1);
 		}
-		if(sd->attackabletime <= tick) sd->attackabletime = tick + 20;
+		if(sd->attackabletime <= tick) sd->attackabletime = tick + (battle_config.max_aspd<<1);
 	}
 
 	if(sd->state.attack_continue) {

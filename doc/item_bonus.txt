@@ -125,6 +125,9 @@ bonus2 bAddDamageClass,n,x;		クラスnのモンスターにx%のダメージ追加(物理攻撃のみ)
 bonus2 bAddMagicDamageClass,n,x;	クラスnのモンスターにx%の魔法ダメージ追加、プレイヤーの場合はn職業にx%の魔法ダメージ追加
 bonus2 bAddDefClass,n,x;		クラスnのモンスターにx%のダメージ軽減(物理攻撃のみ)、プレイヤーの場合はn職業にx%のダメージ軽減
 bonus2 bAddMDefClass,n,x;		クラスnのモンスターにx%の魔法ダメージ軽減、プレイヤーの場合はn職業にx%の魔法ダメージ軽減
+bonus2 bHPDrainRate,n,x;		敵に与えたダメージをn%確率でx%をHPに吸収。(nとxは+される)
+bonus2 bSPDrainRate,n,x;		敵に与えたダメージをn%確率でx%をSPに吸収。(nとxは+される)
+
 
 
 bonus3 bAddMonsterDropItem,n,x,y;	物理攻撃でモンスターを倒した時モンスターの種族がxならアイテムnを落とす確率y%(モンスターが落とすアイテムとは無関係の物、高い物だけ適用)
