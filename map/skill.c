@@ -1794,6 +1794,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case DC_DONTFORGETME:		/* 私を忘れないで… */
 	case DC_FORTUNEKISS:		/* 幸運のキス */
 	case DC_SERVICEFORYOU:		/* サービスフォーユー */
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_unitsetting(src,skillid,skilllv,src->x,src->y,0);
 		break;
 
