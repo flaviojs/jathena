@@ -1,4 +1,33 @@
 --------------------
+//1045 by TEILU
+
+・スティール、スティールコイン、スナッチャーの失敗メッセージが
+  レベルが１～９の時に変だったので修正。
+	(map/)
+	skill.c
+
+・精錬の可否を情報サイトを元にＤＢに設定。（頭装備はrusiさん作成分を使用）
+	(db/)
+	item_db.txt
+
+・ファイアーウォールが制限数を超えたときにスキル使用失敗が
+  出るタイミングを変更。
+	(map/)
+	skill.c
+
+・アブラカタブラ専用スキルをgm_all_skill設定時に表示できるように変更。
+  battle_athena.confのgm_all_skill_add_abraにyesを設定すれば
+  スキルリストに表示されるようになります。
+	(conf/)
+	battle_athena.conf
+	(db/)
+	skill_require_db.txt
+	(map/)
+	battle.c
+	battle.h
+	pc.c
+
+--------------------
 //1044 by TEILU
 
 ・1042で@itemidentifyの権限の設定を忘れていたので追加。

@@ -828,6 +828,10 @@ int pc_calc_skilltree(struct map_session_data *sd)
 			sd->status.skill[i].id=i;
 		for(i=210;i<291;i++)
 			sd->status.skill[i].id=i;
+		if(battle_config.gm_allskill_addabra){ // アブラカタブラ専用スキル
+			for(i=291;i<304;i++)
+				sd->status.skill[i].id=i;
+		}
 		for(i=304;i<337;i++)
 			sd->status.skill[i].id=i;
 		if(battle_config.enable_upper_class){ //confで無効でなければ読み込む
@@ -4224,6 +4228,10 @@ int pc_allskillup(struct map_session_data *sd)
 			sd->status.skill[i].lv=skill_get_max(i);
 		for(i=210;i<291;i++)
 			sd->status.skill[i].lv=skill_get_max(i);
+		if(battle_config.gm_allskill_addabra) {
+			for(i=291;i<304;i++)
+				sd->status.skill[i].lv=skill_get_max(i);
+		}
 		for(i=304;i<MAX_SKILL;i++)
 			sd->status.skill[i].lv=skill_get_max(i);
 	}

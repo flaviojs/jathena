@@ -160,6 +160,7 @@ extern struct Battle_Config {
 	int monster_max_aspd;
 	int atc_gmonly;
 	int gm_allskill;
+	int gm_allskill_addabra;
 	int gm_allequip;
 	int gm_skilluncond;
 	int skillfree;

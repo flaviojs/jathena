@@ -457,7 +457,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 				if(pc_steal_item(sd,bl))
 					clif_skill_nodamage(src,bl,TF_STEAL,skill2,1);
 				else
-					clif_skill_fail(sd,TF_STEAL,skill2,0);
+					clif_skill_fail(sd,skillid,0,0);
 			}
 		break;
 
@@ -2671,7 +2671,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			if(pc_steal_item(sd,bl))
 				clif_skill_nodamage(src,bl,skillid,skilllv,1);
 			else
-				clif_skill_fail(sd,skillid,skilllv,0);
+				clif_skill_fail(sd,skillid,0x0a,0);
 		}
 		break;
 
@@ -2685,7 +2685,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				mob_target((struct mob_data *)bl,src,range);
 			}
 			else
-				clif_skill_fail(sd,skillid,skilllv,0);
+				clif_skill_fail(sd,skillid,0,0);
 		}
 		break;
 
@@ -5855,6 +5855,25 @@ int skill_use_pos( struct map_session_data *sd,
 	sd->skillx = skill_x;
 	sd->skilly = skill_y;
 	if(!skill_check_condition(sd,0)) return 0;
+
+	/* 数制限 */
+	if(battle_config.pc_land_skill_limit) {
+		// とりあえずファイアーウォールだけ
+		if(skill_num == MG_FIREWALL) {
+			int maxcount = skill_get_maxcount(skill_num);
+			if(maxcount > 0) {
+				int i,c;
+				for(i=c=0;i<MAX_SKILLUNITGROUP;i++) {
+					if(sd->skillunit[i].alive_count > 0 && sd->skillunit[i].skill_id == skill_num)
+						c++;
+				}
+				if(c >= maxcount) {
+					clif_skill_fail(sd,skill_num,0,0);
+					return 0;
+				}
+			}
+		}
+	}
 
 	/* 射程と障害物チェック */
 	bl.type = BL_NUL;
