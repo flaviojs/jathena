@@ -168,7 +168,7 @@ int mob_once_spawn_area(struct map_session_data *sd,char *mapname,
 	max=(y1-y0+1)*(x1-x0+1)*3;
 	if(max>1000)max=1000;
 
-	if(m<0 || amount<=0 || class<=1000 || class>2000)	// ’l‚ªˆÙí‚È‚ç¢Š«‚ğ~‚ß‚é
+	if(m<0 || amount<=0 || (class>=0 && class<=1000) || class>2000)	// ’l‚ªˆÙí‚È‚ç¢Š«‚ğ~‚ß‚é
 		return 0;
 
 	for(i=0;i<amount;i++){
