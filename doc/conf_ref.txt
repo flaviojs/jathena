@@ -1,5 +1,5 @@
 ==========================================================================
- Athena dev 2.1.1 mod0659 現在のconfのリファレンス＋α
+ Athena dev 2.1.1 mod0763 現在のconfのリファレンス＋α
 --------------------------------------------------------------------------
 
 < このファイルは何？ >
@@ -987,8 +987,10 @@ charjlvl
 	@コマンド @charjlvl
 kick
 	@コマンド @kickとGM右クリック命令「使用者強制終了」
+allskill
+	@コマンド @allskill
 questskill
-	@コマンド @questskil
+	@コマンド @questskill
 lostskill
 	@コマンド @lostskill
 spiritball
@@ -997,6 +999,10 @@ party
 	@コマンド @party
 guild
 	@コマンド @guild
+gvgstart
+	@コマンド @gvgstart
+gvgend
+	@コマンド @gvgend
 
 
 
@@ -1016,7 +1022,7 @@ save: 1
 load: 1
 speed: 1
 storage: 1
-option:1
+option: 1
 hide: 1
 jobchange: 1
 die: 1
@@ -1024,11 +1030,11 @@ kill: 1
 alive: 1
 kami: 1
 heal: 1
-item:1
+item: 1
 itemreset: 1
 itemcheck: 1
 lvup: 1
-joblvup:1
+joblvup: 1
 help: 1
 gm: 1
 pvpoff: 1
@@ -1068,11 +1074,14 @@ raisemap: 1
 charbaselvl: 1
 charjlvl: 1
 kick: 1
+allskill: 1
 questskill: 1
 lostskill: 1
 spiritball: 1
 party: 1
 guild: 1
+gvgstart: 1
+gvgend: 1
 
 
 ==========================================================================

@@ -1175,6 +1175,11 @@ z [0`4]•ž‚ÌF
 			return 1;
 		}
 
+		if(strcmpi(command, "@allskill") == 0 && gm_level >= atcommand_config.allskill){
+			pc_allskillup(sd);
+			return 1;
+		}
+
 		if(strcmpi(command, "@questskill") == 0 && gm_level >= atcommand_config.questskill){
 			sscanf(message, "%s %d", command, &x);
 			if(skill_get_inf2(x)&0x01){

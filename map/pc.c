@@ -1379,7 +1379,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		}
 		if(sd->sc_data[SC_PROVIDENCE].timer!=-1){	// プロヴィデンス
 			sd->subele[6] += sd->sc_data[SC_PROVIDENCE].val2;	// 対 聖属性
-			sd->subrace[6] += sd->sc_data[SC_PROVIDENCE].val2;	// 対 ?魔
+			sd->subrace[6] += sd->sc_data[SC_PROVIDENCE].val2;	// 対 悪魔
 		}
 
 		// その他
@@ -2950,7 +2950,7 @@ int pc_walktoxy(struct map_session_data *sd,int x,int y)
 
 	if(sd->walktimer != -1 && sd->state.change_walk_target==0){
 		// 現在歩いている最中の目的地変更なのでマス目の中心に来た時に
-		// timer関 ?からpc_walktoxy_subを呼ぶようにする
+		// timer関数からpc_walktoxy_subを呼ぶようにする
 		sd->state.change_walk_target=1;
 	} else {
 		pc_walktoxy_sub(sd);
@@ -3243,7 +3243,7 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
 
 
 /*==========================================
- * 継 ?攻撃停止
+ * 継続攻撃停止
  *------------------------------------------
  */
 int pc_stopattack(struct map_session_data *sd)
@@ -3309,7 +3309,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 
 
 /*==========================================
- * 経 ?値取得
+ * 経験値取得
  *------------------------------------------
  */
 int pc_gainexp(struct map_session_data *sd,int base_exp,int job_exp)
@@ -3566,6 +3566,32 @@ int pc_skillup(struct map_session_data *sd,int skill_num)
 		clif_skillup(sd,skill_num);
 		clif_updatestatus(sd,SP_SKILLPOINT);
 		clif_skillinfoblock(sd);
+	}
+
+	return 0;
+}
+
+
+/*==========================================
+ * /allskill
+ *------------------------------------------
+ */
+int pc_allskillup(struct map_session_data *sd)
+{
+	int i,flag=1;
+	
+	while(flag) {
+		flag=0;
+		for(i=0;i<MAX_SKILL;i++) {
+			if(sd->status.skill[i].id!=0) {
+				while(sd->status.skill[i].lv < skill_get_max(i)) {
+					sd->status.skill[i].lv++;
+					pc_calcstatus(sd,0);
+					clif_skillup(sd,i);
+					flag=1;
+				}
+			}
+		}
 	}
 
 	return 0;

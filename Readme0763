@@ -1,4 +1,25 @@
 --------------------
+//0779 by あゆみ
+
+・全スキル取得コマンドの追加。
+	・GMで全スキルを覚えられるようにしている場合や、スキルの数が多い職業は一部のスキル表示がおかしくなります。その場合はリログして下さい。
+	@allskill : 現在の職業で取得可能な全スキルを取得する。(クエストスキル含む)
+
+	(conf/)
+	battle_athena.conf 修正。
+	help.txt 修正。
+	(map/)
+	atcommand.h 修正。
+	atcommand.c
+		atcommand() 修正。
+	pc.h 修正。
+	pc.c
+		pc_allskillup() 追加。
+	(doc/)
+	conf_ref.txt 修正。
+	help.txt 修正。
+
+--------------------
 //0778 by huge
 
 ・スペルブレイカーの修正
