@@ -125,6 +125,7 @@ struct map_session_data {
 		unsigned gangsterparadise : 1;
 		unsigned produce_flag : 1;
 		unsigned make_arrow_flag : 1;
+		unsigned potionpitcher_flag : 1;
 	} state;
 	struct {
 		unsigned restart_full_recover : 1;
@@ -172,6 +173,7 @@ struct map_session_data {
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
 	int cloneskill_id,cloneskill_lv;
+	int potion_hp,potion_sp,potion_per_hp,potion_per_sp;
 
 	int invincible_timer;
 	unsigned int canact_tick;

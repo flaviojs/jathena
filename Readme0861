@@ -1,4 +1,46 @@
 --------------------
+//0880 by 死神
+
+・ポーションピッチャーを正しく実装とちょっと機能拡張。
+・ポーションピッチャーでレベル別に使えるアイテムをskill_require_db.txtに設定できるようにしました。ただポーションピッチャーで使えるアイテムはitemheal、percentheal、sc_start、sc_end以外の物が入っていると正しく動作しません。
+レベル5までは本鯖に合わせていますが最大レベルを10まで拡張するとレベル6 - マステラの実、7 - ローヤルゼリー、8 - イグドラシルの種、9 - イグドラシルの実、10 - バーサークポーションに設定しています。skill_db.txtを修正すればこれが有効になります。(どこを修正するかもわからない人は諦めることです。) ポーションピッチャーによるアイテム使用は使用条件を無視します。少しはアルケミストに希望ができたかも...(多分無理...)
+・battle_athane.confにproduce_item_name_input、produce_potion_name_input、making_arrow_name_input、holywater_name_input 追加。
+・パーティ員にだけ使うスキルとギルド員にだけ使うスキルを設定できるように修正。
+・その他細かい修正。
+	(conf/)
+	battle_athane.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	db_ref.txt 修正。
+	(db/)
+	skill_db.txt 修正。
+	skill_require_db.txt 修正。
+	(map/)
+	map.h 修正。
+	skill.h 修正。
+	skill.c
+		skill_status_change_timer()、skill_attack()、skill_use_id() 修正。
+		skill_castend_nodamage_id()、skill_castend_damage_id() 修正。
+		skill_castend_id()、skill_castend_pos()、skill_produce_mix() 修正。
+		skill_arrow_create()、skill_check_condition() 修正。
+		skill_status_change_clear()、skill_readdb() 修正。
+	mob.c
+		mobskill_use_id()、mob_changestate() 修正。
+	pc.c
+		pc_itemheal()、pc_percentheal()、pc_calcstatus() 修正。
+	battle.h 修正。
+	battle.c
+		battle_delay_damage()、battle_damage()、battle_heal() 修正。
+		battle_get_adelay()、battle_get_amotion() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_weapon_attack()、battle_config_read() 修正。
+	clif.c
+		clif_skill_fail() 修正。
+	script.c
+		buildin_sc_start()、buildin_sc_end() 修正。
+	makefile 修正。
+
+--------------------
 //0879 by 胡蝶蘭
 
 ・送信FIFOのバッファオーバーフローの脆弱性の修正

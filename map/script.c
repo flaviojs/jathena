@@ -2637,11 +2637,15 @@ int buildin_disablenpc(struct script_state *st)
  */
 int buildin_sc_start(struct script_state *st)
 {
+	struct block_list *bl;
 	int type,tick,val1;
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	tick=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	val1=conv_num(st,& (st->stack->stack_data[st->start+4]));
-	skill_status_change_start(map_id2bl(st->rid),type,val1,0,0,0,tick,0);
+	bl = map_id2bl(st->rid);
+	if(bl->type == BL_PC && ((struct map_session_data *)bl)->state.potionpitcher_flag)
+		bl = map_id2bl(((struct map_session_data *)bl)->skilltarget);
+	skill_status_change_start(bl,type,val1,0,0,0,tick,0);
 	return 0;
 }
 
@@ -2651,9 +2655,13 @@ int buildin_sc_start(struct script_state *st)
  */
 int buildin_sc_end(struct script_state *st)
 {
+	struct block_list *bl;
 	int type;
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	skill_status_change_end(map_id2bl(st->rid),type,-1);
+	bl = map_id2bl(st->rid);
+	if(bl->type == BL_PC && ((struct map_session_data *)bl)->state.potionpitcher_flag)
+		bl = map_id2bl(((struct map_session_data *)bl)->skilltarget);
+	skill_status_change_end(bl,type,-1);
 //	if(battle_config.etc_log)
 //		printf("sc_end : %d %d\n",st->rid,type);
 	return 0;

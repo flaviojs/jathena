@@ -253,7 +253,7 @@ party_share_level
 	省略可能で、デフォルトは10です。
 
 inter_log_filename
-	キャラクターサーバーのログファイルを指定します。
+	インターサーバーのログファイルを指定します。
 	省略可能で、デフォルトはlog/inter.logです。
 
 
@@ -933,6 +933,22 @@ monster_class_change_full_recover
 	回復します。noなら変わる前のHPと最大HPの比率の分のHPになります。
 	デフォルトはnoです。
 
+produce_item_name_input
+	製造で作られた鉄や属性石に製造者の名前を付けるかどうかです。
+	デフォルトはyesです。
+
+produce_potion_name_input
+	製造で作られたポーションに製造者の名前を付けるかどうかです。
+	デフォルトはyesです。
+
+making_arrow_name_input
+	矢作成で作られた矢に製造者の名前を付けるかどうかです。
+	デフォルトはyesです。
+
+holywater_name_input
+	アクアベネディクタで作られた聖水に製造者の名前を付けるかどうかです。
+	デフォルトはyesです。
+
 
 < 例 >
 
@@ -1054,6 +1070,10 @@ player_land_skill_limit: yes
 monster_land_skill_limit: yes
 party_skill_penaly: yes
 monster_class_change_full_recover: no
+produce_item_name_input: yes
+produce_potion_name_input: yes
+making_arrow_name_input: yes
+holywater_name_input: yes
 
 
 =====================================================================ghos6. atcommand_athena.conf

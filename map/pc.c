@@ -471,10 +471,9 @@ int pc_isequip(struct map_session_data *sd,int n)
 {
 	struct item_data *item = sd->inventory_data[n];
 
- 	if( battle_config.gm_allequip>0 &&
-		pc_isGM(sd)>=battle_config.gm_allequip )
+ 	if( battle_config.gm_allequip>0 && pc_isGM(sd)>=battle_config.gm_allequip )
 		return 1;
-		
+
 	if(item == NULL)
 		return 0;
 	if(item->sex != 2 && sd->status.sex != item->sex)
@@ -1164,6 +1163,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->paramc[3]=sd->status.int_+sd->paramb[3]+sd->parame[3];
 	sd->paramc[4]=sd->status.dex+sd->paramb[4]+sd->parame[4];
 	sd->paramc[5]=sd->status.luk+sd->paramb[5]+sd->parame[5];
+	for(i=0;i<6;i++)
+		if(sd->paramc[i] < 0) sd->paramc[i] = 0;
 
 	if(sd->status.weapon == 11 || sd->status.weapon == 13 || sd->status.weapon == 14) {
 		str = sd->paramc[4];
@@ -3250,7 +3251,6 @@ int pc_checkallowskill(struct map_session_data *sd)
 int pc_checkequip(struct map_session_data *sd,int pos)
 {
 	int i;
-	
 	for(i=0;i<11;i++){
 		if(pos & equip_pos[i])
 			return sd->equip_index[i];
@@ -4119,6 +4119,12 @@ int pc_itemheal(struct map_session_data *sd,int hp,int sp)
 	int bonus;
 //	if(battle_config.battle_log)
 //		printf("heal %d %d\n",hp,sp);
+	if(sd->state.potionpitcher_flag) {
+		sd->potion_hp = hp;
+		sd->potion_sp = sp;
+		return 0;
+	}
+
 	if(pc_checkoverhp(sd)) {
 		if(hp > 0)
 			hp = 0;
@@ -4128,7 +4134,7 @@ int pc_itemheal(struct map_session_data *sd,int hp,int sp)
 			sp = 0;
 	}
 	if(hp > 0) {
-		bonus = sd->paramc[2] + 100 + pc_checkskill(sd,SM_RECOVERY)*10;
+		bonus = (sd->paramc[2]<<1) + 100 + pc_checkskill(sd,SM_RECOVERY)*10;
 		if(bonus != 100)
 			hp = hp * bonus / 100;
 		bonus = 100 + pc_checkskill(sd,AM_LEARNINGPOTION)*5;
@@ -4136,7 +4142,7 @@ int pc_itemheal(struct map_session_data *sd,int hp,int sp)
 			hp = hp * bonus / 100;
 	}
 	if(sp > 0) {
-		bonus = sd->paramc[3] + 100 + pc_checkskill(sd,MG_SRECOVERY)*10;
+		bonus = (sd->paramc[3]<<1) + 100 + pc_checkskill(sd,MG_SRECOVERY)*10;
 		if(bonus != 100)
 			sp = sp * bonus / 100;
 		bonus = 100 + pc_checkskill(sd,AM_LEARNINGPOTION)*5;
@@ -4171,6 +4177,12 @@ int pc_itemheal(struct map_session_data *sd,int hp,int sp)
  */
 int pc_percentheal(struct map_session_data *sd,int hp,int sp)
 {
+	if(sd->state.potionpitcher_flag) {
+		sd->potion_per_hp = hp;
+		sd->potion_per_sp = sp;
+		return 0;
+	}
+
 	if(pc_checkoverhp(sd)) {
 		if(hp > 0)
 			hp = 0;
@@ -4624,9 +4636,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int pos)
 	pos = pc_equippoint(sd,n);
 	if(battle_config.battle_log)
 		printf("equip %d(%d) %x:%x\n",nameid,n,id->equip,pos);
-	
-	if( !pc_isequip(sd,n) || !pos ) {
-		
+	if(!pc_isequip(sd,n) || !pos) {
 		clif_equipitemack(sd,n,0,0);	// fail
 		return 0;
 	}

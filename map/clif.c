@@ -3221,7 +3221,6 @@ int clif_skill_fail(struct map_session_data *sd,int skill_id,int type,int btype)
 	WFIFOB(fd,8) = 0;
 	WFIFOB(fd,9) = type;
 	WFIFOSET(fd,packet_len_table[0x110]);
-	printf("skill id = %d , type = %d\n",skill_id,btype);
 	return 0;
 }
 

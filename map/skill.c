@@ -14,6 +14,7 @@
 #include "battle.h"
 #include "party.h"
 #include "itemdb.h"
+#include "script.h"
 
 #define SKILLUNITTIMER_INVERVAL	100
 
@@ -717,11 +718,12 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 			int sp = skill_get_sp(skillid,skilllv);
 			sp = sp * sc_data[SC_MAGICROD].val2 / 100;
 			if(skillid == WZ_WATERBALL && skilllv > 1)
-				sp = sp/(skill_get_time(SA_MAGICROD,sc_data[SC_MAGICROD].val1)/200);
+				sp = sp/((skilllv|1)*(skilllv|1));
 			if(sp > 0x7fff) sp = 0x7fff;
 			else if(sp < 1) sp = 1;
 			((struct map_session_data *)bl)->status.sp += sp;
 			clif_heal(((struct map_session_data *)bl)->fd,SP_SP,sp);
+			((struct map_session_data *)bl)->canact_tick = tick + skill_delayfix(bl, skill_get_delay(SA_MAGICROD,sc_data[SC_MAGICROD].val1));
 		}
 		clif_skill_nodamage(bl,bl,SA_MAGICROD,sc_data[SC_MAGICROD].val1,1);
 	}
@@ -824,7 +826,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	map_freeblock_lock();
 	/* 実際にダメージ処理を行う */
 	if(skillid != KN_BOWLINGBASH || flag)
-		battle_damage(src,bl,damage);
+		battle_damage(src,bl,damage,0);
 	if(skillid == RG_INTIMIDATE && damage > 0 && !(battle_get_mode(bl)&0x20) && !map[src->m].flag.gvg ) {
 		int s_lv = battle_get_lv(src),t_lv = battle_get_lv(bl);
 		int rate = 50 + skilllv * 5;
@@ -852,7 +854,8 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		}
 	}
 	/* ダメージがあるなら追加効果判定 */
-	if(!(bl->prev == NULL || (bl->type == BL_PC && pc_isdead((struct map_session_data *)bl) ) ) ) {
+	if(bl->prev != NULL &&
+		(bl->type != BL_PC || (bl->type == BL_PC && !pc_isdead((struct map_session_data *)bl) ) ) ) {
 		if(damage > 0)
 			skill_additional_effect(src,bl,skillid,skilllv,attack_type,tick);
 		if(bl->type==BL_MOB && src!=bl)	/* スキル使用条件のMOBスキル */
@@ -897,7 +900,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	}
 
 	if((skillid != KN_BOWLINGBASH || flag) && rdamage > 0)
-		battle_damage(bl,src,rdamage);
+		battle_damage(bl,src,rdamage,0);
 
 	if(attack_type&BF_WEAPON && sc_data && sc_data[SC_AUTOCOUNTER].timer != -1 && sc_data[SC_AUTOCOUNTER].val4 > 0) {
 		if(sc_data[SC_AUTOCOUNTER].val3 == dsrc->id)
@@ -1505,9 +1508,9 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 					bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
 					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
 					skill_castend_damage_id);
-				battle_damage(src,bl,damage);
+				battle_damage(src,bl,damage,1);
 				if(rdamage > 0)
-					battle_damage(bl,src,rdamage);
+					battle_damage(bl,src,rdamage,0);
 			}
 			map_freeblock_unlock();
 		}
@@ -1650,7 +1653,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				bl->m,bl->x-5,bl->y-5,bl->x+5,bl->y+5,0,
 				src,skillid,skilllv,tick, flag|BCT_ALL|1,
 				skill_castend_damage_id);
-			battle_damage(src,src,1);
+			battle_damage(src,src,1,0);
 		}
 		break;
 
@@ -1667,7 +1670,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				tbl.x = src->x;
 				tbl.y = src->y;
 				clif_skill_nodamage(&tbl,src,AL_HEAL,heal,1);
-				battle_heal(NULL,src,heal,0);
+				battle_heal(NULL,src,heal,0,0);
 			}
 		}
 		break;
@@ -1742,7 +1745,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
 				heal=0;	/* 黄金蟲カード（ヒール量０） */
 			clif_skill_nodamage(src,bl,skillid,heal,1);
-			heal_get_jobexp = battle_heal(NULL,bl,heal,0);
+			heal_get_jobexp = battle_heal(NULL,bl,heal,0,0);
 			
 			// JOB経験値獲得
 			if(src->type == BL_PC && bl->type==BL_PC && heal > 0 && src != bl){
@@ -2068,13 +2071,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case AL_ANGELUS:		/* エンジェラス */
 	case PR_MAGNIFICAT:		/* マグニフィカート */
 	case PR_GLORIA:			/* グロリア */
-		if(sd == NULL) {
-			clif_skill_nodamage(src,bl,skillid,skilllv,1);
-			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
-				break;
-			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0);
-		}
-		else if(sd->status.party_id==0 || (flag&1) ){
+		if(sd == NULL || sd->status.party_id==0 || (flag&1) ){
 			/* 個別の処理 */
 			clif_skill_nodamage(bl,bl,skillid,skilllv,1);
 			if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage )
@@ -2092,11 +2089,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case BS_ADRENALINE:		/* アドレナリンラッシュ */
 	case BS_WEAPONPERFECT:	/* ウェポンパーフェクション */
 	case BS_OVERTHRUST:		/* オーバートラスト */
-		if(sd == NULL) {
-			clif_skill_nodamage(src,bl,skillid,skilllv,1);
-			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,(src == bl)? 1:0,0,0,skill_get_time(skillid,skilllv),0);
-		}
-		else if(sd->status.party_id==0 || (flag&1) ){
+		if(sd == NULL || sd->status.party_id==0 || (flag&1) ){
 			/* 個別の処理 */
 			clif_skill_nodamage(bl,bl,skillid,skilllv,1);
 			skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,(src == bl)? 1:0,0,0,skill_get_time(skillid,skilllv),0);
@@ -2229,7 +2222,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case NV_FIRSTAID:			/* 応急手当 */
 		clif_skill_nodamage(src,bl,skillid,5,1);
-		battle_heal(NULL,bl,5,0);
+		battle_heal(NULL,bl,5,0,0);
 		break;
 
 	case AL_CURE:				/* キュアー */
@@ -2296,6 +2289,11 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			memset(&item_tmp,0,sizeof(item_tmp));
 			item_tmp.nameid = 523;
 			item_tmp.identify = 1;
+			if(battle_config.holywater_name_input) {
+				item_tmp.card[0] = 0xfe;
+				item_tmp.card[1] = 0;
+				*((unsigned long *)(&item_tmp.card[2]))=sd->char_id;	/* キャラID */
+			}
 			eflag = pc_additem(sd,&item_tmp,1);
 			if(eflag) {
 				clif_additem(sd,0,0,eflag);
@@ -2407,40 +2405,63 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		}
        if(b==0){clif_displaymessage(sd->fd,"Nothing Equiped.");}*/
 		break;
-	/* PotionPitcher added by Tato [17/08/03] */
+	/* PotionPitcher */
 	case AM_POTIONPITCHER:		/* ポーションピッチャー */
 		{
-        int a=0,i,bonus,c=0;
-        bonus=100+(skilllv*10);
-        if(skilllv==1){a=501;}
-        else if(skilllv==2){a=500 > 503;}
-        else if(skilllv==3){a=500 > 504;}
-        else if(skilllv==4){a=500 > 506;}
-        else if(skilllv==5){a=500 > 507;}
-        if(a>0){
-           for(i=0;i<MAX_INVENTORY;i++){
-          if(sd->status.inventory[i].nameid==a){
-                 pc_delitem(sd,i,1,0);
-                 c=1;
-                 if(a==501){a=rand()%15+30;}
-                 else if(a==502){a=rand()%20+70;}
-                 else if(a==503){a=rand()%60+175;}
-                 else if(a==504){a=rand()%80+350;}
-                 else if(a==506){a=1;}
-                 if(a>1){
-                    clif_skill_nodamage(src,bl,skillid,(bonus*a)/100,1);
-                    battle_heal(NULL,bl,(bonus*a)/100,0);
-                 }else{
-                    skill_status_change_end(bl, SC_POISON , -1 );
-                    skill_status_change_end(bl, SC_SILENCE , -1 );
-                    skill_status_change_end(bl, SC_BLIND , -1 );
-                    skill_status_change_end(bl, SC_CONFUSION , -1 );
-                 }
-          }
-       }
-       if(c==0){clif_displaymessage(sd->fd,"Not enough Potions.");}
-        }
-	}
+			struct block_list tbl;
+			int i,x,hp = 0,sp = 0;
+			if(sd) {
+				x = skilllv%11 - 1;
+				i = pc_search_inventory(sd,skill_db[skillid].itemid[x]);
+				if(i < 0 || skill_db[skillid].itemid[x] <= 0) {
+					clif_skill_fail(sd,skillid,0,0);
+					return 1;
+				}
+				if(sd->inventory_data[i] == NULL || sd->status.inventory[i].amount < skill_db[skillid].amount[x]) {
+					clif_skill_fail(sd,skillid,0,0);
+					return 1;
+				}
+				sd->state.potionpitcher_flag = 1;
+				sd->potion_hp = sd->potion_sp = sd->potion_per_hp = sd->potion_per_sp = 0;
+				sd->skilltarget = bl->id;
+				run_script(sd->inventory_data[i]->use_script,0,sd->bl.id,0);
+				pc_delitem(sd,i,skill_db[skillid].amount[x],0);
+				sd->state.potionpitcher_flag = 0;
+				if(sd->potion_per_hp > 0 || sd->potion_per_sp > 0) {
+					hp = battle_get_max_hp(bl) * sd->potion_per_hp / 100;
+					if(dstsd)
+						sp = dstsd->status.max_sp * sd->potion_per_sp / 100;
+				}
+				else {
+					hp = sd->potion_hp * (100 + pc_checkskill(sd,AM_POTIONPITCHER)*10 + pc_checkskill(sd,AM_LEARNINGPOTION)*5)/100;
+					hp = hp * (100 + (battle_get_vit(bl)<<1)) / 100;
+					if(dstsd)
+						hp = hp * (100 + pc_checkskill(dstsd,SM_RECOVERY)*10) / 100;
+					if(sd->potion_sp > 0) {
+						sp = sd->potion_sp * (100 + pc_checkskill(sd,AM_POTIONPITCHER) + pc_checkskill(sd,AM_LEARNINGPOTION)*5)/100;
+						sp = sp * (100 + (battle_get_int(bl)<<1)) / 100;
+						if(dstsd)
+							sp = sp * (100 + pc_checkskill(dstsd,MG_SRECOVERY)*10) / 100;
+					}
+				}
+			}
+			else {
+				hp = (1 + rand()%400) * (100 + skilllv*10) / 100;
+				hp = hp * (100 + (battle_get_vit(bl)<<1)) / 100;
+				if(dstsd)
+					hp = hp * (100 + pc_checkskill(dstsd,SM_RECOVERY)*10) / 100;
+			}
+			tbl.id = 0;
+			tbl.m = src->m;
+			tbl.x = src->x;
+			tbl.y = src->y;
+			clif_skill_nodamage(src,bl,skillid,skilllv,1);
+			if(hp > 0 || (hp <= 0 && sp <= 0))
+				clif_skill_nodamage(&tbl,bl,AL_HEAL,hp,1);
+			if(sp > 0)
+				clif_skill_nodamage(&tbl,bl,MG_SRECOVERY,sp,1);
+			battle_heal(src,bl,hp,sp,0);
+		}
 		break;
 	case AM_CP_WEAPON:
 		break;
@@ -2694,7 +2715,7 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 {
 	struct map_session_data* sd=NULL/*,*target_sd=NULL*/;
 	struct block_list *bl;
-	int range;
+	int range,inf2;
 
 	if( (sd=map_id2sd(id))==NULL || sd->bl.prev == NULL)
 		return 0;
@@ -2709,10 +2730,14 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 		sd->skilltimer=-1;
 	bl=map_id2bl(sd->skilltarget);
 	if(bl==NULL || bl->prev==NULL) {
+		sd->canact_tick = tick;
+		sd->canmove_tick = tick;
 		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
 	}
 	if(sd->bl.m != bl->m || pc_isdead(sd)) {
+		sd->canact_tick = tick;
+		sd->canmove_tick = tick;
 		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
 	}
@@ -2731,6 +2756,29 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 		int dir = map_calc_dir(&sd->bl,bl->x,bl->y),t_dir = battle_get_dir(bl);
 		int dist = distance(sd->bl.x,sd->bl.y,bl->x,bl->y);
 		if(bl->type != BL_SKILL && (dist == 0 || map_check_dir(dir,t_dir))) {
+			clif_skill_fail(sd,sd->skillid,0,0);
+			sd->canact_tick = tick;
+			sd->canmove_tick = tick;
+			sd->skillitem = sd->skillitemlv = -1;
+			return 0;
+		}
+	}
+
+	inf2 = skill_get_inf2(sd->skillid);
+	if( ( (skill_get_inf(sd->skillid)&1) || inf2&4 ) &&	// 彼我敵対関係チェック
+		battle_check_target(&sd->bl,bl, BCT_ENEMY)<=0 ) {
+		sd->canact_tick = tick;
+		sd->canmove_tick = tick;
+		sd->skillitem = sd->skillitemlv = -1;
+		return 0;
+	}
+	if(inf2 & 0xC00 && sd->bl.id != bl->id) {
+		int fail_flag = 1;
+		if(inf2 & 0x400 && battle_check_target(&sd->bl,bl, BCT_PARTY) > 0)
+			fail_flag = 0;
+		if(inf2 & 0x800 && sd->status.guild_id > 0 && sd->status.guild_id == battle_get_guild_id(bl))
+			fail_flag = 0;
+		if(fail_flag) {
 			clif_skill_fail(sd,sd->skillid,0,0);
 			sd->canact_tick = tick;
 			sd->canmove_tick = tick;
@@ -2773,10 +2821,6 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 	if(battle_config.pc_skill_log)
 		printf("PC %d skill castend skill=%d\n",sd->bl.id,sd->skillid);
 	pc_stop_walking(sd,0);
-
-	if( ( (skill_get_inf(sd->skillid)&1) || (skill_get_inf2(sd->skillid)&4) ) &&	// 彼我敵対関係チェック
-		battle_check_target(&sd->bl,bl, BCT_ENEMY)<=0 )
-		return 0;
 
 	switch( skill_get_nk(sd->skillid) )
 	{
@@ -3512,7 +3556,7 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 				if( bl->type==BL_PC && ((struct map_session_data *)bl)->special_state.no_magic_damage)
 					heal=0;	/* 黄金蟲カード（ヒール量０） */
 				clif_skill_nodamage(&src->bl,bl,AL_HEAL,heal,1);
-				battle_heal(NULL,bl,heal,0);
+				battle_heal(NULL,bl,heal,0,0);
 			}
 			else
 				skill_attack(BF_MAGIC,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
@@ -3908,6 +3952,8 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 	}
 	sd->skilltimer=-1;
 	if(pc_isdead(sd)) {
+		sd->canact_tick = tick;
+		sd->canmove_tick = tick;
 		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
 	}
@@ -4038,14 +4084,20 @@ int skill_castend_pos( int tid, unsigned int tick, int id,int data )
 int skill_check_condition(struct map_session_data *sd,int type)
 {
 	int i,hp,sp,hp_rate,sp_rate,zeny,weapon,state,spiritball,skill,lv;
-	int	index[5],itemid[5],amount[5];
+	int	index[10],itemid[10],amount[10];
 
-	if( battle_config.gm_skilluncond>0 &&
-		pc_isGM(sd)>= battle_config.gm_skilluncond )
+	if( battle_config.gm_skilluncond>0 && pc_isGM(sd)>= battle_config.gm_skilluncond ) {
+		sd->skillitem = sd->skillitemlv = -1;
 		return 1;
+	}
 
 	if( sd->opt1>0) {
 		clif_skill_fail(sd,sd->skillid,0,0);
+		sd->skillitem = sd->skillitemlv = -1;
+		return 0;
+	}
+	if(pc_is90overweight(sd)) {
+		clif_skill_fail(sd,sd->skillid,9,0);
 		sd->skillitem = sd->skillitemlv = -1;
 		return 0;
 	}
@@ -4072,10 +4124,6 @@ int skill_check_condition(struct map_session_data *sd,int type)
 		clif_skill_fail(sd,sd->skillid,0,0);
 		return 0;
 	}
-	if(pc_is90overweight(sd)) {
-		clif_skill_fail(sd,sd->skillid,9,0);
-		return 0;
-	}
 	skill = sd->skillid;
 	lv = sd->skilllv;
 	hp=skill_get_hp(skill, lv);	/* 消費HP */
@@ -4086,7 +4134,7 @@ int skill_check_condition(struct map_session_data *sd,int type)
 	weapon = skill_db[skill].weapon;
 	state = skill_db[skill].state;
 	spiritball = (lv <= 0)? 0:skill_db[skill].spiritball[lv-1];
-	for(i=0;i<5;i++) {
+	for(i=0;i<10;i++) {
 		itemid[i] = skill_db[skill].itemid[i];
 		amount[i] = skill_db[skill].amount[i];
 	}
@@ -4246,13 +4294,16 @@ int skill_check_condition(struct map_session_data *sd,int type)
 		break;
 	}
 
-	for(i=0;i<5;i++) {
+	for(i=0;i<10;i++) {
+		int x = lv%11 - 1;
 		index[i] = -1;
 		if(itemid[i] <= 0)
 			continue;
 		if(itemid[i] >= 715 && itemid[i] <= 717 && sd->special_state.no_gemstone)
 			continue;
 		if(((itemid[i] >= 715 && itemid[i] <= 717) || itemid[i] == 1065) && sd->sc_data[SC_INTOABYSS].timer != -1)
+			continue;
+		if(skill == AM_POTIONPITCHER && i != x)
 			continue;
 
 		index[i] = pc_search_inventory(sd,itemid[i]);
@@ -4281,9 +4332,11 @@ int skill_check_condition(struct map_session_data *sd,int type)
 	if(spiritball > 0)				// 氣球消費
 		pc_delspiritball(sd,spiritball,0);
 
-	for(i=0;i<5;i++) {
-		if(index[i] >= 0)
-			pc_delitem(sd,index[i],amount[i],0);		// アイテム消費
+	if(skill != AM_POTIONPITCHER) {
+		for(i=0;i<10;i++) {
+			if(index[i] >= 0)
+				pc_delitem(sd,index[i],amount[i],0);		// アイテム消費
+		}
 	}
 	return 1;
 }
@@ -4415,7 +4468,8 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		pc_stopattack(sd);
 
 	casttime=skill_castfix(&sd->bl, skill_get_cast( skill_num,skill_lv) );
-	delay=skill_delayfix(&sd->bl, skill_get_delay( skill_num,skill_lv) );
+	if(skill_num != SA_MAGICROD)
+		delay=skill_delayfix(&sd->bl, skill_get_delay( skill_num,skill_lv) );
 	sd->state.skillcastcancel = skill_db[skill_num].castcancel;
 
 	switch(skill_num){	/* 何か特殊な処理が必要 */
@@ -5269,7 +5323,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 				break;
 			skill_attack(BF_MAGIC,bl,bl,target,WZ_WATERBALL,sc_data[type].val1,tick,0);
 			if((--sc_data[type].val3)>0) {
-				sc_data[type].timer=add_timer( 200+tick,skill_status_change_timer, bl->id, data );
+				sc_data[type].timer=add_timer( 150+tick,skill_status_change_timer, bl->id, data );
 				return 0;
 			}
 		}
@@ -5801,7 +5855,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 
 		/* ウォーターボール */
 		case SC_WATERBALL:
-			tick=200;
+			tick=150;
 			val3= (val1|1)*(val1|1)-1;
 			break;
 
@@ -5937,7 +5991,7 @@ int skill_status_change_clear(struct block_list *bl,int type)
 	*opt2 = 0;
 	*option &= OPTION_MASK;
 
-	if(!type)
+	if(!type || type&2)
 		clif_changeoption(bl);
 
 	return 0;
@@ -6623,7 +6677,8 @@ int skill_produce_mix( struct map_session_data *sd,
 			tmp_item.card[1]=((sc*5)<<8)+ele;	/* 属性とつよさ */
 			*((unsigned long *)(&tmp_item.card[2]))=sd->char_id;	/* キャラID */
 		}
-		else {
+		else if((battle_config.produce_item_name_input && skill_produce_db[idx].req_skill!=AM_PHARMACY) ||
+			(battle_config.produce_potion_name_input && skill_produce_db[idx].req_skill==AM_PHARMACY)) {
 			tmp_item.card[0]=0x00fe;
 			tmp_item.card[1]=0;
 			*((unsigned long *)(&tmp_item.card[2]))=sd->char_id;	/* キャラID */
@@ -6679,9 +6734,11 @@ int skill_arrow_create( struct map_session_data *sd,int nameid)
 		tmp_item.identify = 1;
 		tmp_item.nameid = skill_arrow_db[index].cre_id[i];
 		tmp_item.amount = skill_arrow_db[index].cre_amount[i];
-		tmp_item.card[0]=0x00fe;
-		tmp_item.card[1]=0;
-		*((unsigned long *)(&tmp_item.card[2]))=sd->char_id;	/* キャラID */
+		if(battle_config.making_arrow_name_input) {
+			tmp_item.card[0]=0x00fe;
+			tmp_item.card[1]=0;
+			*((unsigned long *)(&tmp_item.card[2]))=sd->char_id;	/* キャラID */
+		}
 		if(tmp_item.nameid <= 0 || tmp_item.amount <= 0)
 			continue;
 		if((flag = pc_additem(sd,&tmp_item,tmp_item.amount))) {
@@ -6794,12 +6851,12 @@ int skill_readdb(void)
 		char *split[50], *split2[MAX_SKILL_LEVEL];
 		if(line[0]=='/' && line[1]=='/')
 			continue;
-		for(j=0,p=line;j<19 && p;j++){
+		for(j=0,p=line;j<29 && p;j++){
 			split[j]=p;
 			p=strchr(p,',');
 			if(p) *p++=0;
 		}
-		if(split[18]==NULL || j<19)
+		if(split[28]==NULL || j<29)
 			continue;
 
 		i=atoi(split[0]);
@@ -6899,6 +6956,16 @@ int skill_readdb(void)
 		skill_db[i].amount[3]=atoi(split[16]);
 		skill_db[i].itemid[4]=atoi(split[17]);
 		skill_db[i].amount[4]=atoi(split[18]);
+		skill_db[i].itemid[5]=atoi(split[19]);
+		skill_db[i].amount[5]=atoi(split[20]);
+		skill_db[i].itemid[6]=atoi(split[21]);
+		skill_db[i].amount[6]=atoi(split[22]);
+		skill_db[i].itemid[7]=atoi(split[23]);
+		skill_db[i].amount[7]=atoi(split[24]);
+		skill_db[i].itemid[8]=atoi(split[25]);
+		skill_db[i].amount[8]=atoi(split[26]);
+		skill_db[i].itemid[9]=atoi(split[27]);
+		skill_db[i].amount[9]=atoi(split[28]);
 	}
 	fclose(fp);
 	printf("read db/skill_require_db.txt done\n");

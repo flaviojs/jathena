@@ -618,7 +618,7 @@ int battle_get_adelay(struct block_list *bl)
 		return (((struct map_session_data *)bl)->aspd<<1);
 	else {
 		struct status_change *sc_data=battle_get_sc_data(bl);
-		int adelay=4000,aspd_rate = 100;
+		int adelay=4000,aspd_rate = 100,i;
 		if(bl->type == BL_MOB)
 			adelay = mob_db[((struct mob_data *)bl)->class].adelay;
 		else if(bl->type == BL_PET)
@@ -645,6 +645,8 @@ int battle_get_adelay(struct block_list *bl)
 				aspd_rate += sc_data[SC_DONTFORGETME].val1*3 + sc_data[SC_DONTFORGETME].val2 + (sc_data[SC_DONTFORGETME].val3>>16);
 			if(sc_data[SC_STEELBODY].timer!=-1)	// 金剛
 				aspd_rate += 25;
+			if(	sc_data[i=SC_SPEEDPOTION2].timer!=-1 || sc_data[i=SC_SPEEDPOTION1].timer!=-1 || sc_data[i=SC_SPEEDPOTION0].timer!=-1)
+				aspd_rate -= sc_data[i].val2;
 			if(sc_data[SC_DEFENDER].timer != -1)
 				adelay += (1100 - sc_data[SC_DEFENDER].val1*100);
 		}
@@ -661,7 +663,7 @@ int battle_get_amotion(struct block_list *bl)
 		return ((struct map_session_data *)bl)->amotion;
 	else {
 		struct status_change *sc_data=battle_get_sc_data(bl);
-		int amotion=2000,aspd_rate = 100;
+		int amotion=2000,aspd_rate = 100,i;
 		if(bl->type == BL_MOB)
 			amotion = mob_db[((struct mob_data *)bl)->class].amotion;
 		else if(bl->type == BL_PET)
@@ -688,6 +690,8 @@ int battle_get_amotion(struct block_list *bl)
 				aspd_rate += sc_data[SC_DONTFORGETME].val1*3 + sc_data[SC_DONTFORGETME].val2 + (sc_data[SC_DONTFORGETME].val3>>16);
 			if(sc_data[SC_STEELBODY].timer!=-1)	// 金剛
 				aspd_rate += 25;
+			if(	sc_data[i=SC_SPEEDPOTION2].timer!=-1 || sc_data[i=SC_SPEEDPOTION1].timer!=-1 || sc_data[i=SC_SPEEDPOTION0].timer!=-1)
+				aspd_rate -= sc_data[i].val2;
 			if(sc_data[SC_DEFENDER].timer != -1)
 				amotion += (550 - sc_data[SC_DEFENDER].val1*50);
 		}
@@ -915,27 +919,29 @@ short *battle_get_option(struct block_list *bl)
 struct battle_delay_damage_ {
 	struct block_list *src,*target;
 	int damage;
+	int flag;
 };
 int battle_delay_damage_sub(int tid,unsigned int tick,int id,int data)
 {
 	struct battle_delay_damage_ *dat=(struct battle_delay_damage_ *)data;
 	if( map_id2bl(id)==dat->src && dat->target->prev!=NULL)
-		battle_damage(dat->src,dat->target,dat->damage);
+		battle_damage(dat->src,dat->target,dat->damage,dat->flag);
 	free(dat);
 	return 0;
 }
-int battle_delay_damage(unsigned int tick,struct block_list *src,struct block_list *target,int damage)
+int battle_delay_damage(unsigned int tick,struct block_list *src,struct block_list *target,int damage,int flag)
 {
 	struct battle_delay_damage_ *dat=malloc(sizeof(struct battle_delay_damage_));
 	dat->src=src;
 	dat->target=target;
 	dat->damage=damage;
+	dat->flag=flag;
 	add_timer(tick,battle_delay_damage_sub,src->id,(int)dat);
 	return 0;
 }
 
 // 実際にHPを操作
-int battle_damage(struct block_list *bl,struct block_list *target,int damage)
+int battle_damage(struct block_list *bl,struct block_list *target,int damage,int flag)
 {
 	struct map_session_data *sd=NULL;
 	struct status_change *sc_data=battle_get_sc_data(target);
@@ -957,9 +963,9 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 	}
 		
 	if(damage<0)
-		return battle_heal(bl,target,-damage,0);
+		return battle_heal(bl,target,-damage,0,flag);
 
-	if( (sc_count=battle_get_sc_count(target))!=NULL && *sc_count>0){
+	if(!flag && (sc_count=battle_get_sc_count(target))!=NULL && *sc_count>0){
 		// 凍結、石化、睡眠を消去
 		if(sc_data[SC_FREEZE].timer!=-1)
 			skill_status_change_end(target,SC_FREEZE,-1);
@@ -1009,13 +1015,13 @@ int battle_damage(struct block_list *bl,struct block_list *target,int damage)
 		return skill_unit_ondamaged((struct skill_unit *)target,bl,damage,gettick());
 	return 0;
 }
-int battle_heal(struct block_list *bl,struct block_list *target,int hp,int sp)
+int battle_heal(struct block_list *bl,struct block_list *target,int hp,int sp,int flag)
 {
 	if(hp==0 || target->type == BL_PET)
 		return 0;
 
 	if(hp<0)
-		return battle_damage(bl,target,-hp);
+		return battle_damage(bl,target,-hp,flag);
 
 	if(target->type==BL_MOB)
 		return mob_heal((struct mob_data *)target,hp);
@@ -1781,7 +1787,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	}
 
 	if(tsd && tsd->critical_def)
-		cri = cri * (100 - tsd->critical_def);
+		cri = cri * (100 - tsd->critical_def) / 100;
 
 	if((skill_num == 0 || skill_num == KN_AUTOCOUNTER) && skill_lv >= 0 && battle_config.enemy_critical && (rand() % 1000) < cri) 	// 判定（スキルの場合は無視）
 			// 敵の判定
@@ -2279,7 +2285,7 @@ static struct Damage battle_calc_pc_weapon_attack(
 	}
 
 	if(tsd && tsd->critical_def)
-		cri = cri * (100-tsd->critical_def);
+		cri = cri * (100-tsd->critical_def) / 100;
 
 	if(da == 0 && (skill_num==0 || skill_num == KN_AUTOCOUNTER) && skill_lv >= 0 && //ダブルアタックが発動していない
 		(rand() % 1000) < cri) 	// 判定（スキルの場合は無視）
@@ -3481,8 +3487,9 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		if(sd && sd->splash_range > 0 && (wd.damage > 0 || wd.damage2 > 0) )
 			skill_castend_damage_id(src,target,0,-1,tick,0);
 		map_freeblock_lock();
-		battle_damage(src,target,(wd.damage+wd.damage2));
-		if(!(target->prev == NULL || (target->type == BL_PC && pc_isdead((struct map_session_data *)target) ) ) ) {
+		battle_damage(src,target,(wd.damage+wd.damage2),0);
+		if(target->prev != NULL &&
+			(target->type != BL_PC || (target->type == BL_PC && !pc_isdead((struct map_session_data *)target) ) ) ) {
 			if(wd.damage > 0 || wd.damage2 > 0) {
 				skill_additional_effect(src,target,0,0,BF_WEAPON,tick);
 				if(sd) {
@@ -3600,7 +3607,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		}
 
 		if(rdamage > 0)
-			battle_damage(target,src,rdamage);
+			battle_damage(target,src,rdamage,0);
 		if(t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1 && t_sc_data[SC_AUTOCOUNTER].val4 > 0) {
 			if(t_sc_data[SC_AUTOCOUNTER].val3 == src->id)
 				battle_weapon_attack(target,src,tick,0x8000|t_sc_data[SC_AUTOCOUNTER].val1);
@@ -3930,6 +3937,10 @@ int battle_config_read(const char *cfgName)
 	battle_config.monster_land_skill_limit = 1;
 	battle_config.party_skill_penaly = 1;
 	battle_config.monster_class_change_full_recover = 0;
+	battle_config.produce_item_name_input = 1;
+	battle_config.produce_potion_name_input = 1;
+	battle_config.making_arrow_name_input = 1;
+	battle_config.holywater_name_input = 1;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -4062,6 +4073,10 @@ int battle_config_read(const char *cfgName)
 			{ "monster_land_skill_limit" ,&battle_config.monster_land_skill_limit },
 			{ "party_skill_penaly" ,&battle_config.party_skill_penaly },
 			{ "monster_class_change_full_recover" ,&battle_config.monster_class_change_full_recover },
+			{ "produce_item_name_input" ,&battle_config.produce_item_name_input },
+			{ "produce_potion_name_input" ,&battle_config.produce_potion_name_input },
+			{ "making_arrow_name_input" ,&battle_config.making_arrow_name_input },
+			{ "holywater_name_input" ,&battle_config.holywater_name_input },
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

@@ -51,7 +51,7 @@ MaxLv: ƒXƒLƒ‹‚ÌÅ‘åƒŒƒxƒ‹‚Å‚·B
 list_num: Hit‰ñ”‚ÌƒŠƒXƒg‚Å‚·BƒŒƒxƒ‹•Ê‚Éİ’è‚·‚éê‡‚Íu:v‚ğg‚¢‚Ü‚·B
 castcancel: ƒXƒLƒ‹‚ªƒLƒƒƒ“ƒZƒ‹‚³‚ê‚é‚©‚Ç‚¤‚©‚ğİ’è‚µ‚Ü‚·Byes‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚é•¨‚Åno‚ÍƒLƒƒƒ“ƒZƒ‹‚³‚ê‚È‚¢•¨‚Å‚·B
 cast_defence_rate: ƒLƒƒƒXƒeƒBƒ“ƒO’†‚É’á‰º‚·‚é–hŒä—Í‚Ì”ä—¦‚Å‚·Bƒ{ƒEƒŠƒ“ƒOƒoƒbƒVƒ…‚âƒNƒ‰ƒ“ƒhƒNƒƒX‚Ì‚æ‚¤‚ÉƒXƒLƒ‹ƒLƒƒƒXƒeƒBƒ“ƒO’†‚É–hŒä‚ªŒ¸‚éƒXƒLƒ‹‚Ìİ’è‚Ég‚¢‚Ü‚·B
-inf2: ƒXƒLƒ‹î•ñ2‚Å‚·B1 - ƒNƒFƒXƒgƒXƒLƒ‹A2 - npc ƒXƒLƒ‹A4-“GA8-êŠA16-‘¦”­“®A32-–¡•ûA64-ã©A128-PVPƒ‚[ƒh‚Å©•ª‚ğŠÜ‚Ş‘S‚Ä‚Ì•¨‚Éƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚İ)A256-•’Ê‚Ìg—p‚Å©•ª‚É•K‚¸ƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚İ)A512-©•ª‚É‚Íg‚¤‚±‚Æ‚ª‚Å‚«‚È‚¢ƒXƒLƒ‹B(4A8A16A32A64‚Íˆê•”‚ÌƒAƒNƒeƒBƒuƒXƒLƒ‹‚ªg—pB¡‚Íˆ¢C—…”e–PŒ‚Ì‚İg—pB)
+inf2: ƒXƒLƒ‹î•ñ2‚Å‚·B1 - ƒNƒFƒXƒgƒXƒLƒ‹A2 - npc ƒXƒLƒ‹A4-“GA8-êŠA16-‘¦”­“®A32-–¡•ûA64-ã©A128-PVPƒ‚[ƒh‚Å©•ª‚ğŠÜ‚Ş‘S‚Ä‚Ì•¨‚Éƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚İ)A256-•’Ê‚Ìg—p‚Å©•ª‚É•K‚¸ƒ_ƒ[ƒW‚ª“ü‚éƒXƒLƒ‹(’n–ÊƒXƒLƒ‹‚Ì‚İ)A512-©•ª‚É‚Íg‚¤‚±‚Æ‚ª‚Å‚«‚È‚¢ƒXƒLƒ‹A1024 - ©•ª‚©©•ª‚Ìƒp[ƒeƒB‚É‚µ‚©g‚¦‚È‚¢ƒXƒLƒ‹B2048 - ©•ª‚©©•ª‚ÌƒMƒ‹ƒh‚É‚µ‚©g‚¦‚È‚¢ƒXƒLƒ‹A“¯–¿ƒMƒ‹ƒhƒ`ƒFƒbƒN‚Í–³‚µB(4A8A16A32A64‚Íˆê•”‚ÌƒAƒNƒeƒBƒuƒXƒLƒ‹‚ªg—pB¡‚Íˆ¢C—…”e–PŒ‚Ì‚İg—pB)
 maxcount: ’n–ÊƒXƒLƒ‹‚Ì‚İ‚É“K—p‚³‚ê‚é•¨‚ÅƒXƒLƒ‹‚ğ’u‚¯‚éÅ‘å”‚Å‚·B0‚Í’u‚¯‚È‚¢‚ÆŒ¾‚¤ˆÓ–¡‚Å‚Í‚È‚­§ŒÀ‚ª‚È‚¢•¨‚ÆŒ¾‚¤ˆÓ–¡‚Å‚·B
 skill_type: ƒXƒLƒ‹‚Ìí—Ş‚ğİ’è‚µ‚Ü‚·Bweapon‚Í•ŠíƒXƒLƒ‹‚Åmagic‚Í–‚–@ƒXƒLƒ‹Amisc‚Í•Ší‚Å‚à–‚–@‚Å‚à‚È‚¢ƒXƒLƒ‹‚Å‚·Bnone‚ÍŒˆ‚ß“ï‚µ‚¢•¨“™‚Éİ’è‚µ‚Ü‚·B‚½‚¾‚±‚ê‚ğ•Ï‚¦‚½‚Æ‚µ‚Ä‚àƒXƒLƒ‹‚Ìƒ_ƒ[ƒWŒvZ‚ª‚±‚ê‚É‡‚í‚¹‚Ä•Ï‚í‚é‚í‚¯‚Å‚Í‚È‚­ƒ_ƒ[ƒW‚ÌŒvZ‚ÍƒvƒƒOƒ‰ƒ€ƒŒƒxƒ‹‚Ås‚È‚Á‚Ä‚¢‚Ü‚·B‚±‚ê‚ÍƒXƒyƒ‹ƒuƒŒƒCƒJ[‚Å‰r¥’†~‚³‚ê‚é‚©‚Ç‚¤‚©‚ğİ’è‚·‚éˆ×‚Ì•¨‚Å‚·B(‘¼‚ÌƒXƒLƒ‹‚Å‚±‚Ìİ’è‚ğg—p‚·‚é‰Â”\«‚à‚ ‚è‚Ü‚·‚ª¡‚ÌŠƒXƒyƒ‹ƒuƒŒƒCƒJ[‚Ì‚İ‚Å‚·B) magic‚Éİ’è‚·‚é‚ÆƒXƒyƒ‹ƒuƒŒƒCƒJ[‚Å‰r¥’†~‚³‚ê‚Ü‚·B
 blow_count: ƒXƒLƒ‹‚æ‚éƒmƒbƒNƒoƒbƒN‹——£‚Å‚·BƒŒƒxƒ‹•Ê‚Éİ’è‚·‚éê‡‚Íu:v‚ğg‚¢‚Ü‚·B
@@ -61,7 +61,7 @@ blow_count: ƒXƒLƒ‹‚æ‚éƒmƒbƒNƒoƒbƒN‹——£‚Å‚·BƒŒƒxƒ‹•Ê‚Éİ’è‚·‚éê‡‚Íu:v‚ğg‚¢‚
 3. db/skill_require_db.txt
 --------------------------------------------------------------------------
 
-id,list_hp,list_sp,list_hp_rate,list_sp_rate,list_zeny,list_weapon,state,spiritball,itemid1,amount1,itemid2,amount2,itemid3,amount3,itemid4,amount4,itemid5,amount5
+id,list_hp,list_sp,list_hp_rate,list_sp_rate,list_zeny,list_weapon,state,spiritball,itemid1,amount1,itemid2,amount2,itemid3,amount3,itemid4,amount4,itemid5,amount5,itemid6,amount6,itemid7,amount7,itemid8,amount8,itemid9,amount9,itemid10,amount10
 
 id: ƒXƒLƒ‹‚ÌID‚Å‚·B
 list_hp: ƒXƒLƒ‹g—p‚ÅŒ¸‚éHP‚Ì—Ê‚Å‚·BƒŒƒxƒ‹•Ê‚Éİ’è‚·‚éê‡‚Íu:v‚ğg‚¢‚Ü‚·B
@@ -90,8 +90,8 @@ state:ƒXƒLƒ‹‚ğg—p‚·‚éˆ×‚ÌğŒ‚ğİ’è‚µ‚Ü‚·B•¡”‚Ìİ’è‚Í‚Å‚«‚Ü‚¹‚ñB
 	move_enable: ƒXƒLƒ‹g—pˆÊ’u‚ªˆÚ“®‰Â”\‚ÈêŠ
 	water: ‘«Œ³‚ª…
 spiritball: ƒXƒLƒ‹g—p‚É•K—v‚È‹C’e‚Ì”‚Å‚·BƒŒƒxƒ‹•Ê‚Éİ’è‚·‚éê‡‚Íu:v‚ğg‚¢‚Ü‚·B
-itemid1: ƒXƒLƒ‹g—p‚É•K—v‚ÈƒAƒCƒeƒ€‚ÌID
-amount1: ƒXƒLƒ‹g—p‚É•K—v‚ÈƒAƒCƒeƒ€‚Ì”(”‚ª0‚Ìê‡ƒAƒCƒeƒ€‚ÌID‚ª‚ ‚é‚ÆƒAƒCƒeƒ€‚ÍŒ¸‚ç‚È‚¢‚¯‚ÇG”}‚Æ‚µ‚Ä‚»‚ÌƒAƒCƒeƒ€‚ğ‚Á‚Ä‚¢‚é•K—v‚ª‚ ‚é‚æ‚¤‚É‚È‚è‚Ü‚·B)
+itemid1: ƒXƒLƒ‹g—p‚É•K—v‚ÈƒAƒCƒeƒ€‚ÌIDAƒ|[ƒVƒ‡ƒ“ƒsƒbƒ`ƒƒ[‚Ìê‡ƒŒƒxƒ‹•Ê‚Ég‚¤‚±‚Æ‚É‚È‚éƒAƒCƒeƒ€ID
+amount1: ƒXƒLƒ‹g—p‚É•K—v‚ÈƒAƒCƒeƒ€‚Ì”(”‚ª0‚Ìê‡ƒAƒCƒeƒ€‚ÌID‚ª‚ ‚é‚ÆƒAƒCƒeƒ€‚ÍŒ¸‚ç‚È‚¢‚¯‚ÇG”}‚Æ‚µ‚Ä‚»‚ÌƒAƒCƒeƒ€‚ğ‚Á‚Ä‚¢‚é•K—v‚ª‚ ‚é‚æ‚¤‚É‚È‚è‚Ü‚·B) ƒ|[ƒVƒ‡ƒ“ƒsƒbƒ`ƒƒ[‚Ìê‡ƒŒƒxƒ‹•Ê‚Ég‚¤‚±‚Æ‚É‚È‚éƒAƒCƒeƒ€”
 itemid2: ã“¯
 amount2: ã“¯
 itemid3: ã“¯
@@ -100,6 +100,16 @@ itemid4: ã“¯
 amount4: ã“¯
 itemid5: ã“¯
 amount5: ã“¯
+itemid6: ã“¯
+amount6: ã“¯
+itemid7: ã“¯
+amount7: ã“¯
+itemid8: ã“¯
+amount8: ã“¯
+itemid9: ã“¯
+amount9: ã“¯
+itemid10: ã“¯
+amount10: ã“¯
 
 
 ==========================================================================

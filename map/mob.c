@@ -507,7 +507,7 @@ int mob_changestate(struct mob_data *md,int state,int type)
 		// 死んだのでこのmobへの攻撃者全員の攻撃を止める
 		clif_foreachclient(mob_stopattacked,md->bl.id);
 		skill_unit_out_all(&md->bl,gettick(),1);
-		skill_status_change_clear(&md->bl,1);	// ステータス異常を解除する
+		skill_status_change_clear(&md->bl,2);	// ステータス異常を解除する
 		skill_clear_unitgroup(&md->bl);	// 全てのスキルユニットグループを削除する
 		skill_cleartimerskill(&md->bl);
 		md->hp=md->target_id=md->attacked_id=0;
@@ -2301,13 +2301,13 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 		if(bl->type != BL_SKILL && (dist == 0 || map_check_dir(dir,t_dir)))
 			return 0;
 	}
+	if( ( (skill_get_inf(md->skillid)&1) || (skill_get_inf2(md->skillid)&4) ) &&	// 彼我敵対関係チェック
+		battle_check_target(&md->bl,bl, BCT_ENEMY)<=0 )
+		return 0;
 	range = skill_get_range(md->skillid,md->skilllv);
 	if(range < 0)
 		range = battle_get_range(&md->bl) - (range + 1);
 	if(range + battle_config.mob_skill_add_range < distance(md->bl.x,md->bl.y,bl->x,bl->y))
-		return 0;
-	if( ( (skill_get_inf(md->skillid)&1) || (skill_get_inf2(md->skillid)&4) ) &&	// 彼我敵対関係チェック
-		battle_check_target(&md->bl,bl, BCT_ENEMY)<=0 )
 		return 0;
 
 	md->skilldelay[md->skillidx]=tick;
