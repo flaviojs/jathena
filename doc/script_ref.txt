@@ -342,32 +342,16 @@ AthenaNPCScript
 			position：0,左下、1,中央下、2,右下、255,カットイン消去
 			
 		jobchange命令
-			jobchange <job>;
+			jobchange <job>[, <upper>];
 			
 			job		数値
+			upper		数値
 			
 			職業を変更します。<job>はdb/const.txtを参照してください。
+			<upper>は0=通常,1=転生,2=養子,-1 or 無し=現在の<upper>になります。
 			jobLvは自動で１になります。
 			バードとダンサーには注意してください。
 			
-		jobchange2命令
-			jobchange2 <job>;
-			
-			job		数値
-			
-			職業を転生職に変更します。<job>はdb/const.txtを参照してください。
-			jobLvは自動で１になります。
-			バードとダンサーの転生職には注意してください。
-
-		jobchange3命令
-			jobchange3 <job>;
-			
-			job		数値
-			
-			職業を養子職に変更します。<job>はdb/const.txtを参照してください。
-			jobLvは自動で１になります。
-			バードとダンサーには注意してください。
-
 		input命令
 			input [<variable>];
 			

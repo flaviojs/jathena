@@ -1,4 +1,48 @@
 --------------------
+//0963 by (凸)
+
+・@jobchange2, @jobchange3廃止 @jobchangeに引数追加 @help参照
+	例: @jobchange2 10 → @jobchange 10 1
+・同様に@charjob2, @charjob3廃止 @charjobに引数追加 @help参照
+	例: @charjob2 10 ほげほげ → @charjob 10 1 ほげほげ
+・同様にスクリプトのjobchange2, jobchange3命令廃止 jobchangeに引数追加 script_ref.txt参照
+	例: jobchange2 10; → jobchange 10,1;
+・↑どれも追加された引数は省略可能です。なので、転生ノービスは現状のスクリプトで転生一次職に転職できます。
+	例:	Novice High → @jobchange 10 → Whitesmith
+		Novice → @jobchange 10 → Blacksmith
+・スクリプトから転生しているか判定するためにUpperを追加しました。Upper 0=通常, 1=転生, 2=養子
+	Upper=0の時にBaseLevel=99なら転生させる～とかそういうスクリプト誰か書いてください
+	その時に元の職業は記憶していないので永続変数とかで覚えさせて判定させないと転生後何にでも転職できちゃう？
+・バイオプラントとスフィアマインで呼び出されるMobの名前を--ja--にしてmob_db.txtから読むようにした
+
+	(conf/)
+	help.txt 修正
+	(db/)
+	const.txt
+	(doc/)
+	help.txt 修正
+	script_ref.txt 修正
+	(map/)
+	atcommand.c
+		atcommand_jobchange() 修正
+		atcommand_jobchange2() 削除
+		atcommand_jobchange3() 削除
+		atcommand_character_job() 修正
+		atcommand_character_job2() 削除
+		atcommand_character_job3() 削除
+	map.h 修正
+	pc.c
+		pc_readparam() 修正
+		pc_jobchange() 修正
+	pc.h 修正
+	script.c
+		buildin_jobchange() 修正
+		buildin_jobchange2() 削除
+		buildin_jobchange3() 削除
+	skill.c
+		skill_castend_pos2() 修正
+
+--------------------
 //0962 by (凸)
 
 ・職業は0～23で処理したいので転生職用のスキルツリー追加、eAthenaを参考に拡張

@@ -4090,6 +4090,8 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 int pc_readparam(struct map_session_data *sd,int type)
 {
 	int val=0;
+	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
+
 	switch(type){
 	case SP_SKILLPOINT:
 		val= sd->status.skill_point;
@@ -4107,7 +4109,10 @@ int pc_readparam(struct map_session_data *sd,int type)
 		val= sd->status.job_level;
 		break;
 	case SP_CLASS:
-		val= sd->status.class;
+		val= s_class.job;
+		break;
+	case SP_UPPER:
+		val= s_class.upper;
 		break;
 	case SP_SEX:
 		val= sd->sex;
@@ -4351,20 +4356,40 @@ int pc_percentheal(struct map_session_data *sd,int hp,int sp)
 
 /*==========================================
  * 職変更
+ * 引数	job 職業 0～23
+ *		upper 通常 0, 転生 1, 養子 2, そのまま -1
  *------------------------------------------
  */
-int pc_jobchange(struct map_session_data *sd,int job)
+int pc_jobchange(struct map_session_data *sd,int job, int upper)
 {
 	int i;
+	int b_class = 0;
 	//転生や養子の場合の元の職業を算出する
-	struct pc_base_job s_class = pc_calc_base_job(job);
+	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
 
-	if((sd->status.sex == 0 && s_class.job == 19) ||
-	   (sd->status.sex == 1 && s_class.job == 20) ||
-	   job ==22 || sd->status.class == job) //♀はバードになれない、♂はダンサーになれない、結婚衣裳もお断り
+	if(upper < 0) //現在転生かどうかを判断する
+		upper = s_class.upper;
+
+	if(upper == 0){ //通常職ならjobそのまんま
+		b_class = job;
+	}else if(upper == 1){
+		if(job == 23){ //転生にスパノビは存在しないのでお断り
+			return 1;
+		}else{
+			b_class = job + 4001;
+		}
+	}else if(upper == 2){ //養子に結婚はないけどどうせ次で蹴られるからいいや
+		b_class = (job==23)?job + 4022:job + 4023;
+	}else{
+		return 1;
+	}
+
+	if((sd->status.sex == 0 && job == 19) ||
+	   (sd->status.sex == 1 && job == 20) ||
+	   job ==22 || sd->status.class == b_class) //♀はバードになれない、♂はダンサーになれない、結婚衣裳もお断り
 		return 1;
 
-	sd->status.class = sd->view_class = job;
+	sd->status.class = sd->view_class = b_class;
 	clif_changelook(&sd->bl,LOOK_BASE,sd->view_class);
 
 	sd->status.job_level=1;

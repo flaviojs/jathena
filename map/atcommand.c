@@ -43,8 +43,6 @@ ATCOMMAND_FUNC(guildstorage);
 ATCOMMAND_FUNC(option);
 ATCOMMAND_FUNC(hide);
 ATCOMMAND_FUNC(jobchange);
-ATCOMMAND_FUNC(jobchange2);
-ATCOMMAND_FUNC(jobchange3);
 ATCOMMAND_FUNC(die);
 ATCOMMAND_FUNC(kill);
 ATCOMMAND_FUNC(alive);
@@ -83,8 +81,6 @@ ATCOMMAND_FUNC(pethungry);
 ATCOMMAND_FUNC(petrename);
 ATCOMMAND_FUNC(recall);
 ATCOMMAND_FUNC(character_job);
-ATCOMMAND_FUNC(character_job2);
-ATCOMMAND_FUNC(character_job3);
 ATCOMMAND_FUNC(revive);
 ATCOMMAND_FUNC(character_stats);
 ATCOMMAND_FUNC(character_option);
@@ -128,8 +124,6 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Option,					"@option",			0, atcommand_option },
 	{ AtCommand_Hide,					"@hide",			0, atcommand_hide },
 	{ AtCommand_JobChange,				"@jobchange",		0, atcommand_jobchange },
-	{ AtCommand_JobChange2,				"@jobchange2",		0, atcommand_jobchange2 },
-	{ AtCommand_JobChange3,				"@jobchange3",		0, atcommand_jobchange3 },
 	{ AtCommand_Die,					"@die",				0, atcommand_die },
 	{ AtCommand_Kill,					"@kill",			0, atcommand_kill },
 	{ AtCommand_Alive,					"@alive",			0, atcommand_alive },
@@ -176,8 +170,6 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_PetRename,				"@petrename",		0, atcommand_petrename },
 	{ AtCommand_Recall,					"@recall",			0, atcommand_recall },
 	{ AtCommand_CharacterJob,			"@charjob",			0, atcommand_character_job },
-	{ AtCommand_CharacterJob2,			"@charjob2",		0, atcommand_character_job2 },
-	{ AtCommand_CharacterJob3,			"@charjob3",		0, atcommand_character_job3 },
 	{ AtCommand_Revive,					"@revive",			0, atcommand_revive },
 	{ AtCommand_CharacterStats,			"@charstats",		0, atcommand_character_stats },
 	{ AtCommand_CharacterOption,		"@charoption",		0, atcommand_character_option },
@@ -740,7 +732,7 @@ atcommand_hide(
 }
 
 /*==========================================
- * 
+ * ì]êEÇ∑ÇÈ upperÇéwíËÇ∑ÇÈÇ∆ì]ê∂Ç‚ó{éqÇ…Ç‡Ç»ÇÍÇÈ
  *------------------------------------------
  */
 int
@@ -748,56 +740,16 @@ atcommand_jobchange(
 	const int fd, struct map_session_data* sd,
 	const char* command, const char* message)
 {
-	int job = 0;
+	int job = 0, upper = -1;
 	if (!message || !*message)
 		return -1;
-	job = atoi(message);
+	if (sscanf(message, "%d %d", &job, &upper) < 1)
+		return -1;
+
 	if ((job >= 0 && job < MAX_PC_CLASS)) {
-		if(pc_jobchange(sd, job) == 0)
+		if(pc_jobchange(sd, job, upper) == 0)
 			clif_displaymessage(fd, msg_table[12]);
-				}
-	
-	return 0;
-}
-/*==========================================
- * ì]ê∂êEÇ…ì]êEÇ∑ÇÈÅAÇ∆ÇËÇ†Ç¶Ç∏å©ÇΩñ⁄ÇæÇØ
- *------------------------------------------
- */
-int
-atcommand_jobchange2(
-	const int fd, struct map_session_data* sd,
-	const char* command, const char* message)
-{
-	int job = 0;
-	if (!message || !*message)
-		return -1;
-	job = atoi(message);
-	if ((job >= 0 && job < MAX_PC_CLASS - 2)) { //ì]ê∂êEÇ…åãç•Ç∆ÉXÉpÉmÉrÇÕñ≥Ç¢Ç¡Ç€Ç¢
-		job = job + 4001;
-		if(pc_jobchange(sd, job) == 0)
-			clif_displaymessage(fd, msg_table[12]);
-				}
-	
-	return 0;
-}
-/*==========================================
- * ó{éqâèëgêEÇ…ì]êEÇ∑ÇÈÅAÇ∆ÇËÇ†Ç¶Ç∏å©ÇΩñ⁄ÇæÇØ
- *------------------------------------------
- */
-int
-atcommand_jobchange3(
-	const int fd, struct map_session_data* sd,
-	const char* command, const char* message)
-{
-	int job = 0;
-	if (!message || !*message)
-		return -1;
-	job = atoi(message);
-	if ((job >= 0 && job != 22 && job < MAX_PC_CLASS)) { //ó{éqâèëgÇ…åãç•ÇÕñ≥Ç¢Ç¡Ç€Ç¢
-		job = (job==23)?job + 4022:job + 4023;
-		if(pc_jobchange(sd, job) == 0)
-			clif_displaymessage(fd, msg_table[12]);
-				}
+	}
 	
 	return 0;
 }
@@ -1139,14 +1091,15 @@ atcommand_joblevelup(
 	const char* command, const char* message)
 {
 	int up_level = 50, level = 0;
-	int s_class=pc_calc_base_job(sd->status.class);
+	//ì]ê∂Ç‚ó{éqÇÃèÍçáÇÃå≥ÇÃêEã∆ÇéZèoÇ∑ÇÈ
+	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
 
 	if (!message || !*message)
 		return -1;
 	level = atoi(message);
-	if (s_class == 0)
+	if (s_class.job == 0)
 		up_level -= 40;
-	if ((s_class == 23) || (sd->status.class >= 4001 + 7 && sd->status.class < 4023)) //ÉXÉpÉmÉrÇ∆ì]ê∂ìÒéüêEÇÕJobÉåÉxÉãÇÃç≈çÇÇ™70
+	if ((s_class.job == 23) || (s_class.upper == 1 && s_class.type == 2)) //ÉXÉpÉmÉrÇ∆ì]ê∂ìÒéüêEÇÕJobÉåÉxÉãÇÃç≈çÇÇ™70
 		up_level += 20;
 	if (sd->status.job_level == up_level) {
 		clif_displaymessage(fd, msg_table[23]);
@@ -1979,7 +1932,7 @@ atcommand_recall(
 }
 
 /*==========================================
- * 
+ * ëŒè€ÉLÉÉÉâÉNÉ^Å[Çì]êEÇ≥ÇπÇÈ upperéwíËÇ≈ì]ê∂Ç‚ó{éqÇ‡â¬î\
  *------------------------------------------
  */
 int
@@ -1989,18 +1942,21 @@ atcommand_character_job(
 {
 	char character[100];
 	struct map_session_data* pl_sd = NULL;
-	int job = 0;
+	int job = 0, upper = -1;
 	
 	if (!message || !*message)
 		return -1;
 	
 	memset(character, '\0', sizeof character);
-	if (sscanf(message, "%d %99[^\n]", &job, character) < 2)
-		return -1;
+	if (sscanf(message, "%d %d %99[^\n]", &job, &upper, character) < 3){ //upperéwíËÇµÇƒÇ†ÇÈ
+		upper = -1;
+		if (sscanf(message, "%d %99[^\n]", &job, character) < 2) //upperéwíËÇµÇƒÇ»Ç¢è„Ç…âΩÇ©ë´ÇËÇ»Ç¢
+			return -1;
+	}
 	if ((pl_sd = map_nick2sd(character)) != NULL) {
 		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
 			if ((job >= 0 && job < MAX_PC_CLASS)) {
-				pc_jobchange(pl_sd, job);
+				pc_jobchange(pl_sd, job, upper);
 				clif_displaymessage(fd, msg_table[48]);
 			} else {
 				clif_displaymessage(fd, msg_table[49]);
@@ -2008,79 +1964,7 @@ atcommand_character_job(
 			}
 	} else {
 		clif_displaymessage(fd, msg_table[50]);
-		}
-	
-	return 0;
-}
-/*==========================================
- * atcommand_character_job2
- * ëŒè€ÉLÉÉÉâÇì]ê∂êEÇ…ì]êEÇ≥ÇπÇÈ
- *------------------------------------------
- */
-int
-atcommand_character_job2(
-	const int fd, struct map_session_data* sd,
-	const char* command, const char* message)
-{
-	char character[100];
-	struct map_session_data* pl_sd = NULL;
-	int job = 0;
-	
-	if (!message || !*message)
-		return -1;
-	
-	memset(character, '\0', sizeof character);
-	if (sscanf(message, "%d %99[^\n]", &job, character) < 2)
-		return -1;
-	if ((pl_sd = map_nick2sd(character)) != NULL) {
-		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
-			if ((job >= 0 && job < MAX_PC_CLASS - 2)) { //ì]ê∂êEÇ…åãç•Ç∆ÉXÉpÉmÉrÇÕñ≥Ç¢Ç¡Ç€Ç¢
-				job = job + 4001;
-				pc_jobchange(pl_sd, job);
-				clif_displaymessage(fd, msg_table[48]);
-			} else {
-				clif_displaymessage(fd, msg_table[49]);
-				}
-			}
-	} else {
-		clif_displaymessage(fd, msg_table[50]);
-		}
-	
-	return 0;
-}
-/*==========================================
- * atcommand_character_job3
- * ëŒè€ÉLÉÉÉâÇó{éqêEÇ…ì]êEÇ≥ÇπÇÈ
- *------------------------------------------
- */
-int
-atcommand_character_job3(
-	const int fd, struct map_session_data* sd,
-	const char* command, const char* message)
-{
-	char character[100];
-	struct map_session_data* pl_sd = NULL;
-	int job = 0;
-	
-	if (!message || !*message)
-		return -1;
-	
-	memset(character, '\0', sizeof character);
-	if (sscanf(message, "%d %99[^\n]", &job, character) < 2)
-		return -1;
-	if ((pl_sd = map_nick2sd(character)) != NULL) {
-		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
-			if ((job >= 0 && job != 22 && job < MAX_PC_CLASS)) { //ó{éqâèëgÇ…åãç•ÇÕñ≥Ç¢Ç¡Ç€Ç¢
-				job = (job==23)?job + 4022:job + 4023;
-				pc_jobchange(pl_sd, job);
-				clif_displaymessage(fd, msg_table[48]);
-			} else {
-				clif_displaymessage(fd, msg_table[49]);
-				}
-			}
-	} else {
-		clif_displaymessage(fd, msg_table[50]);
-		}
+	}
 	
 	return 0;
 }
@@ -2442,7 +2326,8 @@ atcommand_character_joblevel(
 	struct map_session_data *pl_sd = NULL;
 	char character[100];
 	int max_level = 50, level = 0;
-	int pl_s_class=0;
+	//ì]ê∂Ç‚ó{éqÇÃèÍçáÇÃå≥ÇÃêEã∆ÇéZèoÇ∑ÇÈ
+	struct pc_base_job pl_s_class;
 	
 	if (!message || !*message)
 		return -1;
@@ -2452,9 +2337,9 @@ atcommand_character_joblevel(
 	if ((pl_sd = map_nick2sd(character)) != NULL) {
 		pl_s_class = pc_calc_base_job(pl_sd->status.class);
 		if (pc_isGM(sd) > pc_isGM(pl_sd)) {
-			if (pl_s_class == 0)
+			if (pl_s_class.job == 0)
 				max_level -= 40;
-			if ((pl_s_class == 23) || (pl_sd->status.class >= 4001 + 7 && pl_sd->status.class < 4023)) //ÉXÉpÉmÉrÇ∆ì]ê∂êEÇÕJobÉåÉxÉãÇÃç≈çÇÇ™70
+			if ((pl_s_class.job == 23) || (pl_s_class.upper == 1 && pl_s_class.type == 2)) //ÉXÉpÉmÉrÇ∆ì]ê∂êEÇÕJobÉåÉxÉãÇÃç≈çÇÇ™70
 				max_level += 20;
 			if (pl_sd->status.job_level == max_level) {
 				clif_displaymessage(fd, msg_table[67]);

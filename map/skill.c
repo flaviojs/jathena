@@ -331,7 +331,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	/* MOB追加効果スキル用 */
 	const int sc[]={
 		SC_POISON, SC_BLIND, SC_SILENCE, SC_STAN,
-		SC_STONE, SC_CURSE, SC_SLEEP 
+		SC_STONE, SC_CURSE, SC_SLEEP
 	};
 	const int sc2[]={
 		MG_STONECURSE,MG_FROSTDIVER,NPC_STUNATTACK,
@@ -856,7 +856,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	}
 	if(damage > 0 && dmg.flag&BF_SKILL && bl->type==BL_PC && pc_checkskill((struct map_session_data *)bl,RG_PLAGIARISM)){
 		struct map_session_data *tsd = (struct map_session_data *)bl;
-		if(!tsd->status.skill[skillid].id && !tsd->status.skill[skillid].id 
+		if(!tsd->status.skill[skillid].id && !tsd->status.skill[skillid].id
 			&& !(skillid > NPC_PIERCINGATT && skillid < NPC_SUMMONMONSTER) ){
 			//既に盗んでいるスキルがあれば該当スキルを消す
 			if (tsd->cloneskill_id && tsd->cloneskill_lv && tsd->status.skill[tsd->cloneskill_id].flag==13){
@@ -1083,7 +1083,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 	struct block_list *src,*target;
 	struct skill_timerskill *skl = NULL;
 	int range;
-	
+
 	src = map_id2bl(id);
 	if(src == NULL || src->prev == NULL)
 		return 0;
@@ -1123,12 +1123,12 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 			return 0;
 
 		switch(skl->skill_id) {
-			case TF_BACKSLIDING:	
+			case TF_BACKSLIDING:
 				clif_skill_nodamage(src,src,skl->skill_id,skl->skill_lv,1);
 				break;
 			case RG_INTIMIDATE:
 				if(src->type == BL_PC && !map[src->m].flag.noteleport) {
-					int x,y,i,j,c;  
+					int x,y,i,j,c;
 					pc_randomwarp(sd,3);
 					for(i=0;i<16;i++) {
 						j = rand()%8;
@@ -1149,7 +1149,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id,int data )
 					}
 				}
 				else if(src->type == BL_MOB && !map[src->m].flag.monster_noteleport) {
-					int x,y,i,j,c;  
+					int x,y,i,j,c;
 					mob_warp(md,-1,-1,-1,3);
 					for(i=0;i<16;i++) {
 						j = rand()%8;
@@ -1774,9 +1774,9 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	sc_def_vit = 100 - (3 + battle_get_vit(bl) + battle_get_luk(bl)/3);
 	sc_def_mdef = 100 - (3 + battle_get_mdef(bl) + battle_get_luk(bl)/3);
 	strip_fix = battle_get_dex(src) - battle_get_dex(bl);
-	
+
 	if(bl->type==BL_PC)
-		dstsd=(struct map_session_data *)bl; 
+		dstsd=(struct map_session_data *)bl;
 	else if(bl->type==BL_MOB){
 		dstmd=(struct mob_data *)bl;
 		if(sc_def_vit>50)
@@ -1811,7 +1811,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 				heal=0;	/* 黄金蟲カード（ヒール量０） */
 			clif_skill_nodamage(src,bl,skillid,heal,1);
 			heal_get_jobexp = battle_heal(NULL,bl,heal,0,0);
-			
+
 			// JOB経験値獲得
 			if(src->type == BL_PC && bl->type==BL_PC && heal > 0 && src != bl && battle_config.heal_exp > 0){
 				heal_get_jobexp = heal_get_jobexp * battle_config.heal_exp / 100;
@@ -2080,7 +2080,9 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case CR_DEVOTION:		/* ディボーション */
 		if(sd && dstsd){
-			int dst_s_class=pc_calc_base_job(dstsd->status.class);
+			//転生や養子の場合の元の職業を算出する
+			struct pc_base_job dst_s_class = pc_calc_base_job(dstsd->status.class);
+
 			int lv = sd->status.base_level-dstsd->status.base_level;
 			lv = (lv<0)?-lv:lv;
 			if((dstsd->bl.type!=BL_PC)	// 相手はPCじゃないとだめ
@@ -2089,7 +2091,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			 ||(!sd->status.party_id && !sd->status.guild_id)	// PTにもギルドにも所属無しはだめ
 			 ||((sd->status.party_id != dstsd->status.party_id)	// 同じパーティーか、
 			  ||(sd->status.guild_id != dstsd->status.guild_id))	// 同じギルドじゃないとだめ
-			 ||(dst_s_class==14||dst_s_class==21)){	// クルセだめ
+			 ||(dst_s_class.job==14||dst_s_class.job==21)){	// クルセだめ
 				clif_skill_fail(sd,skillid,0,0);
 				map_freeblock_unlock();
 				return 1;
@@ -3177,7 +3179,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 
 			mx = x + (rand()%10 - 5);
 			my = y + (rand()%10 - 5);
-			id=mob_once_spawn(sd,"this",mx,my,"フローラ",1118,1,"");
+			id=mob_once_spawn(sd,"this",mx,my,"--ja--",1118,1,"");
 			if( (md=(struct mob_data *)map_id2bl(id)) !=NULL ){
 				mob_exclusion_add(md,1,sd->bl.id);
 				md->master_id=sd->bl.id;
@@ -3194,7 +3196,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 
 			mx = x + (rand()%10 - 5);
 			my = y + (rand()%10 - 5);
-			id=mob_once_spawn(sd,"this",mx,my,"マリンスフィア",1142,1,"");
+			id=mob_once_spawn(sd,"this",mx,my,"--ja--",1142,1,"");
 			if( (md=(struct mob_data *)map_id2bl(id)) !=NULL ){
 				mob_exclusion_add(md,1,sd->bl.id);
 				md->master_id=sd->bl.id;
@@ -3216,7 +3218,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 int skill_castend_map( struct map_session_data *sd,int skill_num, const char *map)
 {
 	int x=0,y=0;
-	
+
 	if( sd==NULL || sd->bl.prev == NULL || pc_isdead(sd))
 		return 0;
 
@@ -3948,6 +3950,14 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 	case 0x91:	/* アンクルスネア */
 		if(sg->val2==0){
 			skill_additional_effect(ss,bl,sg->skill_id,sg->skill_lv,BF_MISC,tick);
+			bl->x = (&src->bl)->x;
+			bl->y = (&src->bl)->y;
+ 			if(bl->type == BL_MOB)
+ 				clif_fixmobpos((struct mob_data *)bl);
+ 			else if(bl->type == BL_PET)
+ 				clif_fixpetpos((struct pet_data *)bl);
+ 			else
+ 				clif_fixpos(bl);
 			clif_01ac(&src->bl);
 			sg->limit=DIFF_TICK(tick,sg->tick) + skill_get_time2(sg->skill_id,sg->skill_lv);
 			sg->val2=bl->id;
@@ -4153,7 +4163,7 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 int skill_unit_ondelete(struct skill_unit *src,struct block_list *bl,unsigned int tick)
 {
 	struct skill_unit_group *sg= src->group;
-	
+
 	if(bl == NULL || bl->prev==NULL || !src->alive)
 		return 0;
 	if( bl->type!=BL_PC && bl->type!=BL_MOB )
@@ -4498,7 +4508,7 @@ int skill_check_condition(struct map_session_data *sd,int type)
 			spiritball = sd->spiritball;
 			sd->spiritball_old = sd->spiritball;
 		}
-		else sd->spiritball_old = lv;	
+		else sd->spiritball_old = lv;
 		break;
 	case MO_CHAINCOMBO:						//連打掌
 		if(sd->sc_data[SC_BLADESTOP].timer==-1){
@@ -4711,7 +4721,7 @@ int skill_delayfix( struct block_list *bl, int time )
 	if(sc_data && sc_data[SC_POEMBRAGI].timer!=-1 )
 		time=time*(100-(sc_data[SC_POEMBRAGI].val1*3+sc_data[SC_POEMBRAGI].val2
 				+(sc_data[SC_POEMBRAGI].val3&0xffff)))/100;
-	
+
 	return (time>0)?time:0;
 }
 /*==========================================
@@ -4897,7 +4907,7 @@ int skill_use_pos( struct map_session_data *sd,
 	struct block_list bl;
 	unsigned int tick;
 	int casttime=0,delay=0,skill,range;
-	
+
 	if(pc_isdead(sd))
 		return 0;
 
@@ -5483,7 +5493,7 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 	struct status_change* sc_data;
 	int opt_flag=0, calc_flag = 0;
 	short *sc_count, *option, *opt1, *opt2;
-	
+
 	sc_data=battle_get_sc_data(bl);
 	sc_count=battle_get_sc_count(bl);
 	option=battle_get_option(bl);
@@ -5498,10 +5508,10 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 
 	if((*sc_count)>0 && sc_data[type].timer!=-1 &&
 		(sc_data[type].timer==tid || tid==-1) ){
-		
+
 		if(tid==-1)	/* タイマから呼ばれていないならタイマ削除をする */
 			delete_timer(sc_data[type].timer,skill_status_change_timer);
-	
+
 		/* 該当の異常を正常に戻す */
 		sc_data[type].timer=-1;
 		(*sc_count)--;
@@ -5643,11 +5653,11 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	struct map_session_data *sd=NULL;
 	struct status_change *sc_data;
 	short *sc_count;
-	
+
 	bl=map_id2bl(id);
 	if(bl==NULL)
 		return 0;
-	
+
 	if(bl->type==BL_PC)
 		sd=(struct map_session_data *)bl;
 
@@ -5744,7 +5754,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 			struct skill_unit *unit=
 				(struct skill_unit *)sc_data[type].val4;
 			struct block_list *src;
-			
+
 			if(!unit || !unit->group)
 				break;
 			src=map_id2bl(unit->group->src_id);
@@ -5904,7 +5914,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_CURSE:
 			scdef=3+battle_get_luk(bl);
 			break;
-		
+
 //		case SC_CONFUSION:
 		default:
 			scdef=0;
@@ -6106,7 +6116,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_AUTOSPELL:			/* オートスペル */
 			val4 = 5 + val1*2;
 			break;
-	
+
 		case SC_VOLCANO:
 			calc_flag = 1;
 			val3 = val1*10;
@@ -6516,10 +6526,10 @@ void skill_stop_dancing(struct block_list *src)
 struct skill_unit *skill_initunit(struct skill_unit_group *group,int idx,int x,int y)
 {
 	struct skill_unit *unit=&group->unit[idx];
-	
+
 	if(!unit->alive)
 		group->alive_count++;
-	
+
 	unit->bl.id=map_addobject(&unit->bl);
 	unit->bl.type=BL_SKILL;
 	unit->bl.m=group->map;
@@ -6742,9 +6752,9 @@ int skill_unitgrouptickset_delete(struct block_list *bl,int group_id)
 	}else{
 		set=((struct mob_data *)bl)->skillunittick;
 	}
-	
+
 	if(set!=NULL){
-	
+
 		for(i=0;i<MAX_SKILLUNITGROUPTICKSET;i++)
 			if( (ts=&set[(i+s)%MAX_SKILLUNITGROUPTICKSET])->group_id == group_id )
 				ts->group_id=0;

@@ -38,6 +38,7 @@ StatusPoint	9	1
 BaseLevel	11	1
 SkillPoint	12	1
 Class		19	1
+Upper		56	1
 Zeny		20	1
 Sex		21	1
 Weight		24	1

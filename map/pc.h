@@ -1,5 +1,3 @@
-// $Id: pc.h 120 2004-04-29 14:57:15Z (å‡¸) $
-
 #ifndef _PC_H_
 #define _PC_H_
 
@@ -112,7 +110,7 @@ int pc_damage(struct block_list *,struct map_session_data*,int);
 int pc_heal(struct map_session_data *,int,int);
 int pc_itemheal(struct map_session_data *sd,int hp,int sp);
 int pc_percentheal(struct map_session_data *sd,int,int);
-int pc_jobchange(struct map_session_data *,int);
+int pc_jobchange(struct map_session_data *,int, int);
 int pc_setoption(struct map_session_data *,int);
 int pc_setcart(struct map_session_data *sd,int type);
 int pc_setfalcon(struct map_session_data *sd);
@@ -142,7 +140,13 @@ int pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick)
 int pc_calc_pvprank(struct map_session_data *sd);
 int pc_calc_pvprank_timer(int tid,unsigned int tick,int id,int data);
 
-int pc_calc_base_job(int b_class);//è»¢ç”Ÿã‚„é¤Šå­è·ã®å…ƒã®è·æ¥­ã‚’è¿”ã™
+struct pc_base_job{
+	int job; //E‹ÆA‚½‚¾‚µ“]¶E‚â—{qE‚Ìê‡‚ÍŒ³‚ÌE‹Æ‚ğ•Ô‚·(”pƒvƒŠ¨ƒvƒŠ)
+	int type; //ƒmƒr 0, ˆêŸE 1, “ñŸE 2, ƒXƒpƒmƒr 3
+	int upper; //’Êí 0, “]¶ 1, —{q 2
+};
+
+struct pc_base_job pc_calc_base_job(int b_class);//“]¶‚â—{qE‚ÌŒ³‚ÌE‹Æ‚ğ•Ô‚·
 
 int pc_read_gm_account(void);
 int pc_setinvincibletimer(struct map_session_data *sd,int);
