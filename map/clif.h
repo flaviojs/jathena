@@ -21,7 +21,8 @@ int clif_charselectok(int);
 int clif_dropflooritem(struct flooritem_data *);
 int clif_clearflooritem(struct flooritem_data *,int);
 int clif_clearchar(struct block_list*,int);	// area or fd
-#define clif_clearchar_area(sd,type) clif_clearchar(sd,type)
+int clif_clearchar_delay(unsigned int,struct block_list *,int);
+#define clif_clearchar_area(bl,type) clif_clearchar(bl,type)
 int clif_clearchar_id(int,int,int);
 int clif_spawnpc(struct map_session_data*);	//area
 int clif_spawnnpc(struct npc_data*);	// area

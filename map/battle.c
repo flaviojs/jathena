@@ -1364,7 +1364,10 @@ static struct Damage battle_calc_pet_weapon_attack(
 
 	luk=battle_get_luk(src);
 
-	damage = battle_get_baseatk(src);
+	if(battle_config.enemy_str)
+		damage = battle_get_baseatk(src);
+	else
+		damage = 0;
 	atkmin = battle_get_atk(src);
 	atkmax = battle_get_atk2(src);
 	if( mob_db[pd->class].range>3 )
@@ -1721,7 +1724,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 	if(battle_config.enemy_str)
 		damage = battle_get_baseatk(src);
 	else
-		damage=0;
+		damage = 0;
 	atkmin = battle_get_atk(src);
 	atkmax = battle_get_atk2(src);
 	if( mob_db[md->class].range>3 )
@@ -3326,7 +3329,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 	struct map_session_data *sd=NULL;
 	struct status_change *sc_data = battle_get_sc_data(src),*t_sc_data=battle_get_sc_data(target);
 	short *opt1;
-	int damage;
+	int damage,rdamage = 0;
 
 	if(src->type == BL_PC)
 		sd = (struct map_session_data *)src;
@@ -3366,38 +3369,31 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		}
 		else
 			wd=battle_calc_weapon_attack(src,target,0,0,0);
-
-		map_freeblock_lock();
 		if((damage = wd.damage + wd.damage2) > 0 && src != target) {
-			int rdamage;
 			if(wd.flag&BF_SHORT) {
 				if(target->type == BL_PC) {
 					struct map_session_data *tsd = (struct map_session_data *)target;
 					if(tsd->short_weapon_damage_return > 0) {
-						rdamage = damage * tsd->short_weapon_damage_return / 100;
+						rdamage += damage * tsd->short_weapon_damage_return / 100;
 						if(rdamage < 1) rdamage = 1;
-						clif_damage(src,src,tick, wd.amotion,0,rdamage,1,4,0);
-						battle_damage(target,src,rdamage);
 					}
 				}
 				if(t_sc_data && t_sc_data[SC_REFLECTSHIELD].timer != -1) {
-					rdamage = damage * t_sc_data[SC_REFLECTSHIELD].val2 / 100;
+					rdamage += damage * t_sc_data[SC_REFLECTSHIELD].val2 / 100;
 					if(rdamage < 1) rdamage = 1;
-					clif_damage(src,src,tick, wd.amotion,0,rdamage,1,4,0);
-					battle_damage(target,src,rdamage);
 				}
 			}
 			else if(wd.flag&BF_LONG) {
 				if(target->type == BL_PC) {
 					struct map_session_data *tsd = (struct map_session_data *)target;
 					if(tsd->long_weapon_damage_return > 0) {
-						rdamage = damage * tsd->long_weapon_damage_return / 100;
+						rdamage += damage * tsd->long_weapon_damage_return / 100;
 						if(rdamage < 1) rdamage = 1;
-						clif_damage(src,src,tick, wd.amotion,0,rdamage,1,4,0);
-						battle_damage(target,src,rdamage);
 					}
 				}
 			}
+			if(rdamage > 0)
+				clif_damage(src,src,tick, wd.amotion,0,rdamage,1,4,0);
 		}
 
 		if (wd.div_ == 255 && src->type == BL_PC)	{ //O’i¶
@@ -3427,6 +3423,7 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		}
 		if(sd && sd->splash_range > 0 && (wd.damage > 0 || wd.damage2 > 0) )
 			skill_castend_damage_id(src,target,0,-1,tick,0);
+		map_freeblock_lock();
 		battle_damage(src,target,(wd.damage+wd.damage2));
 		if(!(target->prev == NULL || (target->type == BL_PC && pc_isdead((struct map_session_data *)target) ) ) ) {
 			if(wd.damage > 0 || wd.damage2 > 0)
@@ -3473,20 +3470,32 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 			}
 			if(wd.flag&BF_WEAPON && src != target && (wd.damage > 0 || wd.damage2 > 0)) {
 				int hp = 0,sp = 0;
-				if(sd->hp_drain_rate > 0 && sd->hp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate)
+				if(sd->hp_drain_rate && sd->hp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->hp_drain_rate) {
 					hp += (wd.damage * sd->hp_drain_per)/100;
-				if(sd->hp_drain_rate_ > 0 && sd->hp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->hp_drain_rate_)
+					if(sd->hp_drain_rate > 0 && hp < 1) hp = 1;
+					else if(sd->hp_drain_rate < 0 && hp > -1) hp = -1;
+				}
+				if(sd->hp_drain_rate_ && sd->hp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->hp_drain_rate_) {
 					hp += (wd.damage2 * sd->hp_drain_per_)/100;
-				if(hp < 1) hp = 1;
-				if(sd->sp_drain_rate > 0 && sd->sp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate)
+					if(sd->hp_drain_rate_ > 0 && hp < 1) hp = 1;
+					else if(sd->hp_drain_rate_ < 0 && hp > -1) hp = -1;
+				}
+				if(sd->sp_drain_rate && sd->sp_drain_per > 0 && wd.damage > 0 && rand()%100 < sd->sp_drain_rate) {
 					sp += (wd.damage * sd->sp_drain_per)/100;
-				if(sd->sp_drain_rate_ > 0 && sd->sp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->sp_drain_rate_)
+					if(sd->sp_drain_rate > 0 && sp < 1) sp = 1;
+					else if(sd->sp_drain_rate < 0 && sp > -1) sp = -1;
+				}
+				if(sd->sp_drain_rate_ && sd->sp_drain_per_ > 0 && wd.damage2 > 0 && rand()%100 < sd->sp_drain_rate_) {
 					sp += (wd.damage2 * sd->sp_drain_per_)/100;
-				if(sp < 1) sp = 1;
-				if(hp > 0 || sp > 0) pc_heal(sd,hp,sp);
+					if(sd->sp_drain_rate_ > 0 && sp < 1) sp = 1;
+					else if(sd->sp_drain_rate_ < 0 && sp > -1) sp = -1;
+				}
+				if(hp || sp) pc_heal(sd,hp,sp);
 			}
 		}
 
+		if(rdamage > 0)
+			battle_damage(target,src,rdamage);
 		if(t_sc_data && t_sc_data[SC_AUTOCOUNTER].timer != -1 && t_sc_data[SC_AUTOCOUNTER].val4 > 0) {
 			if(t_sc_data[SC_AUTOCOUNTER].val3 == src->id)
 				battle_weapon_attack(target,src,tick,0x8000|t_sc_data[SC_AUTOCOUNTER].val1);

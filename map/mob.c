@@ -1607,6 +1607,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	} pt[DAMAGELOG_SIZE];
 	int pnum=0;
 	int mvp_damage,max_hp = battle_get_max_hp(&md->bl);
+	unsigned int tick = gettick();
 	struct map_session_data *mvp_sd=sd ,*second_sd = NULL,*third_sd = NULL;
 
 	if(src && src->type == BL_PC) {
@@ -1625,7 +1626,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	if(md->state.state==MS_DEAD || md->hp<=0) {
 		if(md->bl.prev != NULL) {
 			mob_changestate(md,MS_DEAD,0);
-			mobskill_use(md,gettick(),-1);	// Ž€–SŽžƒXƒLƒ‹
+			mobskill_use(md,tick,-1);	// Ž€–SŽžƒXƒLƒ‹
 			clif_clearchar_area(&md->bl,1);
 			map_delblock(&md->bl);
 			mob_setdelayspawn(md->bl.id);
@@ -1710,7 +1711,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 
 	map_freeblock_lock();
 	mob_changestate(md,MS_DEAD,0);
-	mobskill_use(md,gettick(),-1);	// Ž€–SŽžƒXƒLƒ‹
+	mobskill_use(md,tick,-1);	// Ž€–SŽžƒXƒLƒ‹
 
 	memset(tmpsd,0,sizeof(tmpsd));
 	memset(pt,0,sizeof(pt));
@@ -1809,7 +1810,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 			ditem->first_sd = mvp_sd;
 			ditem->second_sd = second_sd;
 			ditem->third_sd = third_sd;
-			add_timer(gettick()+500+i,mob_delay_item_drop,(int)ditem,0);
+			add_timer(tick+500+i,mob_delay_item_drop,(int)ditem,0);
 		}
 		if(sd && sd->state.attack_type == BF_WEAPON) {
 			for(i=0;i<sd->monster_drop_item_count;i++) {
@@ -1837,7 +1838,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 					ditem->first_sd = mvp_sd;
 					ditem->second_sd = second_sd;
 					ditem->third_sd = third_sd;
-					add_timer(gettick()+520+i,mob_delay_item_drop,(int)ditem,0);
+					add_timer(tick+520+i,mob_delay_item_drop,(int)ditem,0);
 				}
 			}
 			if(sd->get_zeny_num > 0)
@@ -1859,7 +1860,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 				ditem->first_sd = mvp_sd;
 				ditem->second_sd = second_sd;
 				ditem->third_sd = third_sd;
-				add_timer(gettick()+540+i,mob_delay_item_drop2,(int)ditem,0);
+				add_timer(tick+540+i,mob_delay_item_drop2,(int)ditem,0);
 			}
 		}
 	}
@@ -1931,6 +1932,8 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 
 	clif_clearchar_area(&md->bl,1);
 	map_delblock(&md->bl);
+	if(mob_get_viewclass(md->class) <= 1000)
+		clif_clearchar_delay(tick+5000,&md->bl,0);
 	mob_deleteslave(md);
 	mob_setdelayspawn(md->bl.id);
 	map_freeblock_unlock();
@@ -1944,7 +1947,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
  */
 int mob_class_change(struct mob_data *md,int class)
 {
-	unsigned int tick;
+	unsigned int tick = gettick();
 	int i,c,hp_rate,max_hp;
 	if(md->bl.prev == NULL) return 0;
 
@@ -1956,8 +1959,6 @@ int mob_class_change(struct mob_data *md,int class)
 	md->hp = max_hp*hp_rate/100;
 	if(md->hp > max_hp) md->hp = max_hp;
 	else if(md->hp < 1) md->hp = 1;
-
-	tick  = gettick();
 
 	memcpy(md->name,mob_db[class].jname,24);
 	memset(&md->state,0,sizeof(md->state));

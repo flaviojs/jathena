@@ -190,6 +190,8 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 static const int dirx[8]={0,-1,-1,-1,0,1,1,1};
 static const int diry[8]={1,1,0,-1,-1,-1,0,1};
 
+static int rdamage;
+
 /* スキルデータベース */
 struct skill_db skill_db[MAX_SKILL_DB];
 
@@ -656,6 +658,7 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	struct status_change *sc_data=battle_get_sc_data(bl);
 	int type,lv,damage;
 
+	rdamage = 0;
 	if(src == NULL || dsrc == NULL || bl == NULL)
 		return 0;
 	if(dsrc->m != bl->m) return 0;
@@ -734,37 +737,31 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 		}
 	}
 
-	map_freeblock_lock();
 	if(attack_type&BF_WEAPON && damage > 0 && src != bl && src == dsrc) {
-		int rdamage;
 		if(dmg.flag&BF_SHORT) {
 			if(bl->type == BL_PC) {
 				struct map_session_data *tsd = (struct map_session_data *)bl;
 				if(tsd->short_weapon_damage_return > 0) {
-					rdamage = damage * tsd->short_weapon_damage_return / 100;
+					rdamage += damage * tsd->short_weapon_damage_return / 100;
 					if(rdamage < 1) rdamage = 1;
-					clif_damage(src,src,tick, dmg.amotion,0,rdamage,1,4,0);
-					battle_damage(bl,src,rdamage);
 				}
 			}
 			if(sc_data && sc_data[SC_REFLECTSHIELD].timer != -1) {
-				rdamage = damage * sc_data[SC_REFLECTSHIELD].val2 / 100;
+				rdamage += damage * sc_data[SC_REFLECTSHIELD].val2 / 100;
 				if(rdamage < 1) rdamage = 1;
-				clif_damage(src,src,tick, dmg.amotion,0,rdamage,1,4,0);
-				battle_damage(bl,src,rdamage);
 			}
 		}
 		else if(dmg.flag&BF_LONG) {
 			if(bl->type == BL_PC) {
 				struct map_session_data *tsd = (struct map_session_data *)bl;
 				if(tsd->long_weapon_damage_return > 0) {
-					rdamage = damage * tsd->long_weapon_damage_return / 100;
+					rdamage += damage * tsd->long_weapon_damage_return / 100;
 					if(rdamage < 1) rdamage = 1;
-					clif_damage(src,src,tick, dmg.amotion,0,rdamage,1,4,0);
-					battle_damage(bl,src,rdamage);
 				}
 			}
 		}
+		if(rdamage > 0)
+			clif_damage(src,src,tick, dmg.amotion,0,rdamage,1,4,0);
 	}
 
 	if(skillid == WZ_SIGHTRASHER)
@@ -786,8 +783,9 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 			clif_fixpos(bl);
 	}
 
+	map_freeblock_lock();
 	/* 実際にダメージ処理を行う */
-	if(skillid != KN_BOWLINGBASH || flag != 0)
+	if(skillid != KN_BOWLINGBASH || flag)
 		battle_damage(src,bl,damage);
 	if(skillid == RG_INTIMIDATE && damage > 0 && !(battle_get_mode(bl)&0x20) && !map[src->m].flag.gvg ) {
 		int s_lv = battle_get_lv(src),t_lv = battle_get_lv(bl);
@@ -819,18 +817,31 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 	if(src->type == BL_PC && dmg.flag&BF_WEAPON && src != bl && src == dsrc && damage > 0) {
 		struct map_session_data *sd = (struct map_session_data *)src;
 		int hp = 0,sp = 0;
-		if(sd->hp_drain_rate > 0 && sd->hp_drain_per > 0 && dmg.damage > 0 && rand()%100 < sd->hp_drain_rate)
+		if(sd->hp_drain_rate && sd->hp_drain_per > 0 && dmg.damage > 0 && rand()%100 < sd->hp_drain_rate) {
 			hp += (dmg.damage * sd->hp_drain_per)/100;
-		if(sd->hp_drain_rate_ > 0 && sd->hp_drain_per_ > 0 && dmg.damage2 > 0 && rand()%100 < sd->hp_drain_rate_)
+			if(sd->hp_drain_rate > 0 && hp < 1) hp = 1;
+			else if(sd->hp_drain_rate < 0 && hp > -1) hp = -1;
+		}
+		if(sd->hp_drain_rate_ && sd->hp_drain_per_ > 0 && dmg.damage2 > 0 && rand()%100 < sd->hp_drain_rate_) {
 			hp += (dmg.damage2 * sd->hp_drain_per_)/100;
-		if(hp < 1) hp = 1;
-		if(sd->sp_drain_rate > 0 && sd->sp_drain_per > 0 && dmg.damage > 0 && rand()%100 < sd->sp_drain_rate)
+			if(sd->hp_drain_rate_ > 0 && hp < 1) hp = 1;
+			else if(sd->hp_drain_rate_ < 0 && hp > -1) hp = -1;
+		}
+		if(sd->sp_drain_rate > 0 && sd->sp_drain_per > 0 && dmg.damage > 0 && rand()%100 < sd->sp_drain_rate) {
 			sp += (dmg.damage * sd->sp_drain_per)/100;
-		if(sd->sp_drain_rate_ > 0 && sd->sp_drain_per_ > 0 && dmg.damage2 > 0 && rand()%100 < sd->sp_drain_rate_)
+			if(sd->sp_drain_rate > 0 && sp < 1) sp = 1;
+			else if(sd->sp_drain_rate < 0 && sp > -1) sp = -1;
+		}
+		if(sd->sp_drain_rate_ > 0 && sd->sp_drain_per_ > 0 && dmg.damage2 > 0 && rand()%100 < sd->sp_drain_rate_) {
 			sp += (dmg.damage2 * sd->sp_drain_per_)/100;
-		if(sp < 1) sp = 1;
-		if(hp > 0 || sp > 0) pc_heal(sd,hp,sp);
+			if(sd->sp_drain_rate_ > 0 && sp < 1) sp = 1;
+			else if(sd->sp_drain_rate_ < 0 && sp > -1) sp = -1;
+		}
+		if(hp || sp) pc_heal(sd,hp,sp);
 	}
+
+	if((skillid != KN_BOWLINGBASH || flag) && rdamage > 0)
+		battle_damage(bl,src,rdamage);
 
 	if(attack_type&BF_WEAPON && sc_data && sc_data[SC_AUTOCOUNTER].timer != -1 && sc_data[SC_AUTOCOUNTER].val4 > 0) {
 		if(sc_data[SC_AUTOCOUNTER].val3 == dsrc->id)
@@ -1397,7 +1408,7 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case KN_BOWLINGBASH:	/* ボウリングバッシュ */
-		if(flag&3){
+		if(flag&1){
 			/* 個別にダメージを与える */
 			if(bl->id!=skill_area_temp[1])
 				skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,0x0500);
@@ -1433,8 +1444,10 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 					bl->m,bl->x-1,bl->y-1,bl->x+1,bl->y+1,0,
 					src,skillid,skilllv,tick, flag|BCT_ENEMY|1,
 					skill_castend_damage_id);
+				battle_damage(src,bl,damage);
+				if(rdamage > 0)
+					battle_damage(bl,src,rdamage);
 			}
-			battle_damage(src,bl,damage);
 			map_freeblock_unlock();
 		}
 		break;
