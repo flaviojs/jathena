@@ -59,7 +59,6 @@ int battle_weapon_attack( struct block_list *bl,struct block_list *target,
 	 unsigned int tick,int flag);
 
 // 各種パラメータを得る
-int battle_get_mobid(struct block_list *bl);
 int battle_get_lv(struct block_list *bl);
 int battle_get_hp(struct block_list *bl);
 int battle_get_max_hp(struct block_list *bl);
@@ -116,6 +115,7 @@ int battle_check_range(struct block_list *src,int x,int y,int range);
 extern struct Battle_Config {
 	int enemy_critical;
 	int cast_rate,delay_rate,delay_dependon_dex;
+	int sdelay_attack_enable;
 	int defnotenemy;
 	int attr_recover;
 	int flooritem_lifetime;
@@ -130,11 +130,14 @@ extern struct Battle_Config {
 	int mob_skill_use;
 	int mob_count_rate;
 	int quest_skill_learn;
+	int quest_skill_reset;
 	int basic_skill_check;
 	int ghost_time;
 	int pet_catch_rate;
 	int pet_rename;
 	int pet_hungry_delay_rate;
+	int skill_min_damage;
+	int sanctury_type;
 	int finger_offencive_type;
 	int heal_exp,shop_exp;
 } battle_config;

@@ -422,8 +422,14 @@ int npc_buylist(struct map_session_data *sd,int n,unsigned short *item_list)
 	}
 
 	//商人経験値
-	if((sd->status.class == 5) || (sd->status.class == 10) || (sd->status.class == 18)){
+/*	if((sd->status.class == 5) || (sd->status.class == 10) || (sd->status.class == 18)){
 		z = z * pc_checkskill(sd,MC_DISCOUNT) / ((1 + 300 / itemamount) * 4000) * battle_config.shop_exp;
+		pc_gainexp(sd,0,z);
+	}*/
+	if(battle_config.shop_exp > 0 && z > 0 && pc_checkskill(sd,MC_DISCOUNT)) {
+		z = z/battle_config.shop_exp;
+		if(z <= 0)
+			z = 1;
 		pc_gainexp(sd,0,z);
 	}
 
@@ -460,8 +466,14 @@ int npc_selllist(struct map_session_data *sd,int n,unsigned short *item_list)
 	
 
 	//商人経験値
-	if((sd->status.class == 5) || (sd->status.class == 10) || (sd->status.class == 18)){
+/*	if((sd->status.class == 5) || (sd->status.class == 10) || (sd->status.class == 18)){
 		z = z * pc_checkskill(sd,MC_OVERCHARGE) / ((1 + 500 / itemamount) * 4000) * battle_config.shop_exp ;
+		pc_gainexp(sd,0,z);
+	}*/
+	if(battle_config.shop_exp > 0 && z > 0 && pc_checkskill(sd,MC_OVERCHARGE)) {
+		z = z/battle_config.shop_exp;
+		if(z <= 0)
+			z = 1;
 		pc_gainexp(sd,0,z);
 	}
 
@@ -928,8 +940,6 @@ static int npc_parse_mapflag(char *w1,char *w2,char *w3,char *w4)
 	}
 	else if(strcmp(w3,"pvp")==0) {
 		map[m].flag.pvp=1;
-		map[m].flag.pvp_noparty=0;
-		map[m].flag.pvp_noguild=0;
 	}
 	else if(strcmp(w3,"pvp_noparty")==0) {
 		map[m].flag.pvp_noparty=1;
@@ -939,7 +949,6 @@ static int npc_parse_mapflag(char *w1,char *w2,char *w3,char *w4)
 	}
 	else if(strcmp(w3,"gvg")==0) {
 		map[m].flag.gvg=1;
-		map[m].flag.gvg_noparty=0;
 	}
 	else if(strcmp(w3,"gvg_noparty")==0) {
 		map[m].flag.gvg_noparty=1;
@@ -1015,6 +1024,8 @@ int do_init_npc(void)
 	}
 	printf("total %d npcs (%d warp, %d shop, %d script, %d mob)\n",
 		   npc_id-START_NPC_NUM,npc_warp,npc_shop,npc_script,npc_mob);
+
+	add_timer_func_list(npc_event_timer,"npc_event_timer");
 
 	//exit(1);
 

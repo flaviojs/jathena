@@ -132,6 +132,7 @@ int buildin_resetstatus(struct script_state *st);
 int buildin_resetskill(struct script_state *st);
 int buildin_waitingroom(struct script_state *st);
 int buildin_warpwaitingpc(struct script_state *st);
+int buildin_setmapflagnosave(struct script_state *st);
 int buildin_setmapflag(struct script_state *st);
 int buildin_removemapflag(struct script_state *st);
 int buildin_pvpon(struct script_state *st);
@@ -218,6 +219,7 @@ struct {
 	{buildin_resetskill,"resetskill",""},
 	{buildin_waitingroom,"waitingroom","si*"},
 	{buildin_warpwaitingpc,"warpwaitingpc","sii"},
+	{buildin_setmapflag,"setmapflagnosave","ssii"},
 	{buildin_setmapflag,"setmapflag","si"},
 	{buildin_removemapflag,"removemapflag","si"},
 	{buildin_pvpon,"pvpon","s"},
@@ -2341,6 +2343,26 @@ int buildin_warpwaitingpc(struct script_state *st)
  */
 enum { MF_NOMEMO,MF_NOTELEPORT,MF_NOSAVE,MF_NOBRANCH,MF_NOPENALTY,MF_PVP,MF_PVP_NOPARTY,MF_PVP_NOGUILD,MF_GVG,MF_GVG_NOPARTY };
 
+int buildin_setmapflagnosave(struct script_state *st)
+{
+	int m,x,y;
+	char *str,*str2;
+
+	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
+	str2=conv_str(st,& (st->stack->stack_data[st->start+3]));
+	x=conv_num(st,& (st->stack->stack_data[st->start+4]));
+	y=conv_num(st,& (st->stack->stack_data[st->start+5]));
+	m = map_mapname2mapid(str);
+	if(m >= 0) {
+		map[m].flag.nosave=1;
+		memcpy(map[m].save.map,str2,16);
+		map[m].save.x=x;
+		map[m].save.y=y;
+	}
+
+	return 0;
+}
+
 int buildin_setmapflag(struct script_state *st)
 {
 	int m,i;
@@ -2455,6 +2477,7 @@ int buildin_pvpoff(struct script_state *st)
 	if(m >= 0) {
 		struct block_list bl;
 		bl.m = m;
+		bl.id = 0;
 		map[m].flag.pvp = 0;
 		clif_send0199(m,0);
 		clif_pvpset((struct map_session_data *)&bl,0,0);

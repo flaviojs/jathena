@@ -35,7 +35,7 @@ static int max_weight_base[MAX_PC_CLASS];
 static double hp_coefficient[MAX_PC_CLASS];
 static int sp_coefficient[MAX_PC_CLASS];
 static int aspd_base[MAX_PC_CLASS][20];
-static char job_bonus[MAX_PC_CLASS][50];
+static char job_bonus[MAX_PC_CLASS][MAX_LEVEL];
 static int exp_table[6][MAX_LEVEL];
 static struct {
 	int id;
@@ -215,25 +215,31 @@ int pc_setrestartvalue(struct map_session_data *sd,int type)
 	}
 	if(!type)
 		clif_updatestatus(sd,SP_HP);
-	//経験値の減少
-	if(sd->status.class && !map[sd->bl.m].flag.nopenalty){
-		if(battle_config.death_penalty_type && battle_config.death_penalty_base > 0)
-			sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
-		else if(battle_config.death_penalty_base > 0)
-			sd->status.base_exp -= (int)((double)sd->status.base_exp * (double)battle_config.death_penalty_base/10000.);
-		if(sd->status.base_exp < 0)
-			sd->status.base_exp = 0;
-		if(!type)
-			clif_updatestatus(sd,SP_BASEEXP);
-		
-		if(battle_config.death_penalty_type && battle_config.death_penalty_job > 0)
-			sd->status.job_exp -= (int)((double)pc_nextjobexp(sd) * (double)battle_config.death_penalty_job/10000.);
-		else if(battle_config.death_penalty_job > 0)
-			sd->status.job_exp -= (int)((double)sd->status.job_exp * (double)battle_config.death_penalty_job/10000.);
-		if(sd->status.job_exp < 0)
-			sd->status.job_exp = 0;
-		if(!type)
-			clif_updatestatus(sd,SP_JOBEXP);
+
+	if(!(battle_config.death_penalty_type&1) ) {
+		if(sd->status.class && !map[sd->bl.m].flag.nopenalty){
+			if(battle_config.death_penalty_type&2 && battle_config.death_penalty_base > 0)
+				sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
+			else if(battle_config.death_penalty_base > 0) {
+				if(pc_nextbaseexp(sd) > 0)
+					sd->status.base_exp -= (int)((double)sd->status.base_exp * (double)battle_config.death_penalty_base/10000.);
+			}
+			if(sd->status.base_exp < 0)
+				sd->status.base_exp = 0;
+			if(!type)
+				clif_updatestatus(sd,SP_BASEEXP);
+
+			if(battle_config.death_penalty_type&2 && battle_config.death_penalty_job > 0)
+				sd->status.job_exp -= (int)((double)pc_nextjobexp(sd) * (double)battle_config.death_penalty_job/10000.);
+			else if(battle_config.death_penalty_job > 0) {
+				if(pc_nextjobexp(sd) > 0)
+					sd->status.job_exp -= (int)((double)sd->status.job_exp * (double)battle_config.death_penalty_job/10000.);
+			}
+			if(sd->status.job_exp < 0)
+				sd->status.job_exp = 0;
+			if(!type)
+				clif_updatestatus(sd,SP_JOBEXP);
+		}
 	}
 
 	return 0;
@@ -748,7 +754,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	sd->atkmods_[2] = atkmods[2][weapontype2];
 
 	// jobボーナス分
-	for(i=0;i<sd->status.job_level && i<50;i++)
+	for(i=0;i<sd->status.job_level && i<MAX_LEVEL;i++)
 		if(job_bonus[sd->status.class][i])
 			sd->paramb[job_bonus[sd->status.class][i]-1]++;
 
@@ -1674,9 +1680,7 @@ int pc_steal_item(struct map_session_data *sd,struct block_list *bl)
 {
 	if(sd != NULL && bl != NULL && bl->type == BL_MOB) {
 		int i,j,skill,rate,itemid,flag;
-		struct item tmp_item;
 		struct mob_data *md;
-		memset(&tmp_item,0,sizeof(tmp_item));
 		md=(struct mob_data *)bl;
 		if(!md->state.steal_flag && mob_db[md->class].mexp <= 0) {
 			skill = pc_checkskill(sd,TF_STEAL) * 50;
@@ -1684,8 +1688,10 @@ int pc_steal_item(struct map_session_data *sd,struct block_list *bl)
 				j = rand()%8;
 				itemid = mob_db[md->class].dropitem[j].nameid;
 				if(itemid > 0 && itemdb_type(itemid) != 6) {
-					rate = (mob_db[md->class].dropitem[j].p * (sd->status.base_level*5 + sd->paramc[4]*4 + skill*50))/1000;
+					rate = (mob_db[md->class].dropitem[j].p * (sd->status.base_level*4 + sd->paramc[4]*3 + skill*50))/1000;
 					if(rand()%10000 < rate) {
+						struct item tmp_item;
+						memset(&tmp_item,0,sizeof(tmp_item));
 						tmp_item.nameid = itemid;
 						tmp_item.amount = 1;
 						tmp_item.identify = 1;
@@ -2235,30 +2241,32 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 	sd->dir=sd->head_dir=map_calc_dir(&sd->bl, bl->x,bl->y );	// 向き設定
 
 	// 実 際に攻撃する
- 	if (sd->combo_flag == 1) sd->combo_flag = 2;
-	else if (sd->combo_flag == 3) sd->combo_flag = 4;
-	else battle_weapon_attack(&sd->bl,bl,tick,0);
+ 	if (sd->combo_flag == 1)
+ 		sd->combo_flag = 2;
+	else if (sd->combo_flag == 3)
+		sd->combo_flag = 4;
+	else
+		battle_weapon_attack(&sd->bl,bl,tick,0);
 
 	if (sd->triple_delay > 0) {
 		sd->attackabletime = tick + sd->triple_delay;
 		sd->combo_delay1 = tick + sd->triple_delay - 300;
 		sd->triple_delay = 0;
-
-	} else if (sd->combo_flag == 2) {
+	}
+	else if (sd->combo_flag == 2) {
 		sd->attackabletime = tick + sd->combo_delay1;
 		sd->combo_delay2 = tick + sd->combo_delay1 - 300;
 		sd->combo_flag = 0;
-
-	} else if (sd->combo_flag == 4) {
+	}
+	else if (sd->combo_flag == 4) {
 		sd->attackabletime = tick + sd->combo_delay2;
 		sd->combo_delay2 = tick + sd->combo_delay2 - 300;
 		sd->combo_flag = 0;
-
-	} else sd->attackabletime = tick + sd->aspd*2;
+	}
+	else sd->attackabletime = tick + sd->aspd*2;
 
 	if(sd->state.attack_continue){
 		sd->attacktimer=add_timer(sd->attackabletime,pc_attack_timer,sd->bl.id,0);
-
 	}
 
 	return 0;
@@ -2288,7 +2296,7 @@ int pc_attack(struct map_session_data *sd,int target_id,int type)
 		sd->attacktimer=add_timer(sd->attackabletime,pc_attack_timer,sd->bl.id,0);
 	} else {
 		// 本来timer関数なので引数を合わせる
-		pc_attack_timer(-1,gettick(),sd->bl.id,0);		
+		pc_attack_timer(-1,gettick(),sd->bl.id,0);
 	}
 
 	return 0;
@@ -2580,7 +2588,7 @@ int pc_resetskill(struct map_session_data* sd)
 				sd->status.skill_point += skill;
 				sd->status.skill[i].lv = 0;
 			}
-			else
+			else if(battle_config.quest_skill_reset == 1)
 				sd->status.skill[i].lv = 0;
 		}
 	}
@@ -2639,6 +2647,30 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 	skill_status_change_clear(&sd->bl);	// ステータス異常を解除する
 	clif_updatestatus(sd,SP_HP);
 	pc_calcstatus(sd,0);
+
+	if(battle_config.death_penalty_type&1) {
+		if(sd->status.class && !map[sd->bl.m].flag.nopenalty){
+			if(battle_config.death_penalty_type&2 && battle_config.death_penalty_base > 0)
+				sd->status.base_exp -= (int)((double)pc_nextbaseexp(sd) * (double)battle_config.death_penalty_base/10000.);
+			else if(battle_config.death_penalty_base > 0) {
+				if(pc_nextbaseexp(sd) > 0)
+					sd->status.base_exp -= (int)((double)sd->status.base_exp * (double)battle_config.death_penalty_base/10000.);
+			}
+			if(sd->status.base_exp < 0)
+				sd->status.base_exp = 0;
+			clif_updatestatus(sd,SP_BASEEXP);
+
+			if(battle_config.death_penalty_type&2 && battle_config.death_penalty_job > 0)
+				sd->status.job_exp -= (int)((double)pc_nextjobexp(sd) * (double)battle_config.death_penalty_job/10000.);
+			else if(battle_config.death_penalty_job > 0) {
+				if(pc_nextjobexp(sd) > 0)
+					sd->status.job_exp -= (int)((double)sd->status.job_exp * (double)battle_config.death_penalty_job/10000.);
+			}
+			if(sd->status.job_exp < 0)
+				sd->status.job_exp = 0;
+			clif_updatestatus(sd,SP_JOBEXP);
+		}
+	}
 
 	// pvp
 	if( map[sd->bl.m].flag.pvp){
@@ -3887,7 +3919,7 @@ int pc_readdb(void)
 	while(fgets(line,1020,fp)){
 		if(line[0]=='/' && line[1]=='/')
 			continue;
-		for(j=0,p=line;j<50 && p;j++){
+		for(j=0,p=line;j<MAX_LEVEL && p;j++){
 			if(sscanf(p,"%d",&k)==0)
 				break;
 			job_bonus[i][j]=k;
@@ -4055,6 +4087,9 @@ int do_init_pc(void)
 	add_timer_func_list(pc_attack_timer,"pc_attack_timer");
 	add_timer_func_list(pc_natural_heal,"pc_natural_heal");
 	add_timer_func_list(pc_ghost_timer,"pc_ghost_timer");
+	add_timer_func_list(pc_eventtimer,"pc_eventtimer");
+	add_timer_func_list(pc_calc_pvprank_timer,"pc_calc_pvprank_timer");
+	add_timer_func_list(pc_autosave,"pc_autosave");
 	add_timer_func_list(pc_spiritball_timer,"pc_spiritball_timer");
 	add_timer_interval((natural_heal_prev_tick=gettick()+NATURAL_HEAL_INTERVAL),pc_natural_heal,0,0,NATURAL_HEAL_INTERVAL);
 	add_timer(gettick()+autosave_interval,pc_autosave,0,0);

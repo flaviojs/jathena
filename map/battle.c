@@ -21,15 +21,6 @@ struct Battle_Config battle_config;
 
 // 各種パラメータ所得
 
-int battle_get_mobid(struct block_list *bl)
-{
-	if(bl->type==BL_MOB)
-		return mob_db[((struct mob_data *)bl)->class].mobid;
-	else if(bl->type==BL_PC)
-		return -1;
-	else
-		return 0;
-}
 int battle_get_lv(struct block_list *bl)
 {
 	if(bl->type==BL_MOB)
@@ -634,7 +625,7 @@ int battle_calc_damage(struct block_list *bl,int damage,int flag)
 	
 	sc_data=battle_get_sc_data(bl);
 	sc_count=battle_get_sc_count(bl);
-	
+
 	if(sc_count!=NULL && *sc_count>0){
 	
 		if(sc_data[SC_SAFETYWALL].timer!=-1 && damage>0 &&
@@ -692,7 +683,6 @@ int battle_calc_damage(struct block_list *bl,int damage,int flag)
 
 	if( md!=NULL && md->hp>0 )	// 反撃などのMOBスキル判定
 		mobskill_event(md,flag);
-		
 
 	return damage;
 }
@@ -874,6 +864,8 @@ struct Damage battle_calc_weapon_attack(
 	struct mob_data* md=NULL,*tmd=NULL;
 	int hitrate,cri,atkmin,atkmax;
 	int str,dex,luk,item_id;
+	int def1 = battle_get_def(target);
+	int def2 = battle_get_def2(target);
 	struct Damage wd;
 	int damage,damage2,type,div_,blewcount=0;
 	int flag,skill;
@@ -1167,7 +1159,7 @@ struct Damage battle_calc_weapon_attack(
 				}
 				break;
 			case MO_INVESTIGATE:	// 発 勁
-				damage = damage*(100+ 75*skill_lv)/100 * (battle_get_def(target) + battle_get_def2(target))/100;
+				damage = damage*(100+ 75*skill_lv)/100 * (def1 + def2)/100;
 				hitrate = 100000;
 				s_ele = 0;
 				s_ele_ = 0;
@@ -1204,15 +1196,15 @@ struct Damage battle_calc_weapon_attack(
 			// 対 象の防御力によるダメージの減少
 			// ディバインプロテクション（ここでいいのかな？）
 			if ( !(skill_num == MO_INVESTIGATE || skill_num == MO_EXTREMITYFIST)) {	//DEF, VIT無視
-				t_vit = battle_get_def2(target);
+				t_vit = def2;
 				if( src->type==BL_MOB && (s_race==1 || s_race==6) )
 					if(target->type==BL_PC && (skill=pc_checkskill(tsd,AL_DP)) > 0 )
 						t_vit+=skill*3;
 			
 				vitbonusmax = (t_vit/20)*(t_vit/20)-1;
-				damage = damage * (100 - battle_get_def(target)) /100
+				damage = damage * (100 - def1) /100
 					- t_vit - ((vitbonusmax < 1)?0: rand()%vitbonusmax );
-				damage2 = damage2 * (100 - battle_get_def(target)) /100
+				damage2 = damage2 * (100 - def1) /100
 					- t_vit - ((vitbonusmax < 1)?0: rand()%vitbonusmax );
 			}
 		}
@@ -1384,6 +1376,24 @@ struct Damage battle_calc_weapon_attack(
 		if(damage2<=0)damage2=-1;
 		damage-=damage2;
 	}
+
+	if(def1 >= 10000 && damage > 0) {
+		if(div_ < 255)
+			damage = div_;
+		else
+			damage = 3;
+		if(damage2 > 0)
+			damage2 = 1;
+	}
+	if(battle_config.skill_min_damage) {
+		if(div_ < 255) {
+			if(damage > 0 && damage < div_)
+				damage = div_;
+		}
+		else if(damage > 0 && damage < 3)
+			damage = 3;
+	}
+
 	wd.damage=damage;
 	wd.damage2=damage2;
 	wd.type=type;
@@ -1545,6 +1555,14 @@ struct Damage  battle_calc_magic_attack(
 
 	damage=battle_calc_damage(target,damage,aflag);	// 最終修正
 
+	if(mdef1 >= 10000 && damage > 0) {
+		damage = div_;
+	}
+	if(battle_config.skill_min_damage) {
+		if(damage > 0 && damage < div_)
+			damage = div_;
+	}
+
 	md.damage=damage;
 	md.div_=div_;
 	md.amotion=battle_get_amotion(bl);
@@ -1596,13 +1614,7 @@ struct Damage  battle_calc_misc_attack(
 			skill=0;
 		damage=(dex/10+int_/2+skill*3+40)*2;
 		break;
-	
-	case TF_BACKSLIDING:	// バックステップ
-		damage=0;
-		damagefix=0;
-		blewcount=5;
-		break;
-	
+
 	case TF_THROWSTONE:	// 石投げ
 		damage=30;
 		damagefix=0;
@@ -1632,6 +1644,14 @@ struct Damage  battle_calc_misc_attack(
 		damage*=div_;
 	
 	damage=battle_calc_damage(target,damage,aflag);	// 最終修正
+
+	if(battle_get_def(target) >= 10000 && battle_get_mdef(target) >= 10000 && damage > 0) {
+		damage = div_;
+	}
+	if(battle_config.skill_min_damage) {
+		if(damage > 0 && damage < div_)
+			damage = div_;
+	}
 	
 	md.damage=damage;
 	md.div_=div_;
@@ -1653,22 +1673,14 @@ struct Damage battle_calc_attack(	int attack_type,
 	struct Damage d;
 	switch(attack_type){
 	case BF_WEAPON:
-		d=battle_calc_weapon_attack(bl,target,skill_num,skill_lv,flag);
-		break;
+		return battle_calc_weapon_attack(bl,target,skill_num,skill_lv,flag);
 	case BF_MAGIC:
-		d=battle_calc_magic_attack(bl,target,skill_num,skill_lv,flag);
-		break;
+		return battle_calc_magic_attack(bl,target,skill_num,skill_lv,flag);
 	case BF_MISC:
-		d=battle_calc_misc_attack(bl,target,skill_num,skill_lv,flag);
-		break;
+		return battle_calc_misc_attack(bl,target,skill_num,skill_lv,flag);
 	default:
 		printf("battle_calc_attack: unknwon attack type ! %d\n",attack_type);
 		break;
-	}
-	int mobid=battle_get_mobid(target);
-	if(d.damage>=1 && mobid>=1078 && mobid<=1085){
-		d.damage=1;
-		if(d.div_>1) d.damage=d.div_;
 	}
 	return d;
 }
@@ -1694,28 +1706,21 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		// 攻撃対象となりうるので攻撃
 		struct Damage wd;
 		wd=battle_calc_weapon_attack(src,target,0,0,0);
-		int mobid=battle_get_mobid(target);
-		if(wd.damage>=1 && mobid>=1078 && mobid<=1085){
-			wd.damage=1;
-			wd.damage2=0;
+		if (wd.div_ == 255 && src->type == BL_PC)	{ //三段掌
+			sd->skill_old = 0;
+			sd->triple_delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
+			if (sd->triple_delay < sd->aspd*2) sd->triple_delay = sd->aspd*2;
+			if (pc_checkskill(sd, MO_COMBOFINISH)) sd->triple_delay += 300;
+			clif_status_change(src, 0x59, 1);
+			clif_combo_delay(src, sd->triple_delay);
+			clif_skill_damage(src , target , tick , wd.amotion , wd.dmotion , 
+				wd.damage , 3 , MO_TRIPLEATTACK, pc_checkskill(sd,MO_TRIPLEATTACK) , wd.type );
+		}
+		else
 			clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
 				wd.damage, wd.div_ , wd.type, wd.damage2);
-		} else {
-			if (wd.div_ == 255 && src->type == BL_PC) {	//三段掌
-				sd->skill_old = 0;
-				sd->triple_delay = 1000 - 4 * battle_get_agi(src) - 2 *  battle_get_dex(src);
-				if (sd->triple_delay < sd->aspd*2) sd->triple_delay = sd->aspd*2;
-				if (pc_checkskill(sd, MO_COMBOFINISH)) sd->triple_delay += 300;
-				clif_status_change(src, 0x59, 1);
-				clif_combo_delay(src, sd->triple_delay);
-				clif_skill_damage(src , target , tick , wd.amotion , wd.dmotion , 
-					wd.damage , 3 , MO_TRIPLEATTACK, pc_checkskill(sd,MO_TRIPLEATTACK) , wd.type );
-			} else
-				clif_damage(src,target,tick, wd.amotion, wd.dmotion, 
-					wd.damage, wd.div_ , wd.type, wd.damage2);
-			//二刀流左手とカタール追撃のミス表示(無理やり～)
-			if(wd.damage2==-1){wd.damage2=0;clif_damage(src,target,tick+200, wd.amotion, wd.dmotion,0, 1, 0, 0);}
-		}
+		//二刀流左手とカタール追撃のミス表示(無理やり～)
+		if(wd.damage2==-1){wd.damage2=0;clif_damage(src,target,tick+200, wd.amotion, wd.dmotion,0, 1, 0, 0);}
 		battle_damage(src,target,(wd.damage+wd.damage2));
 		if((wd.damage+wd.damage2)>0)
 			skill_additional_effect(src,target,0,0,tick);
@@ -1805,7 +1810,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			return 0;
 		}
 	}
-	
+
 	return 1;	// 該当しないので無関係人物（まあ敵じゃないので味方）
 }
 /*==========================================
@@ -1855,6 +1860,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.cast_rate=100;
 	battle_config.delay_rate=100;
 	battle_config.delay_dependon_dex=0;
+	battle_config.sdelay_attack_enable=0;
 	battle_config.defnotenemy=1;
 	battle_config.attr_recover=1;
 	battle_config.flooritem_lifetime=LIFETIME_FLOORITEM*1000;
@@ -1874,11 +1880,14 @@ int battle_config_read(const char *cfgName)
 	battle_config.mob_skill_use=1;
 	battle_config.mob_count_rate=100;
 	battle_config.quest_skill_learn=0;
+	battle_config.quest_skill_reset=1;
 	battle_config.basic_skill_check=1;
 	battle_config.ghost_time=5000;
 	battle_config.pet_catch_rate=100;
 	battle_config.pet_rename=0;
 	battle_config.pet_hungry_delay_rate=100;
+	battle_config.skill_min_damage=0;
+	battle_config.sanctury_type=0;
 	battle_config.finger_offencive_type=0;
 	battle_config.heal_exp=0;
 	battle_config.shop_exp=0;
@@ -1896,6 +1905,7 @@ int battle_config_read(const char *cfgName)
 			{	"casting_rate",			&battle_config.cast_rate			},
 			{	"delay_rate",			&battle_config.delay_rate			},
 			{	"delay_dependon_dex",	&battle_config.delay_dependon_dex	},
+			{ "skill_delay_attack_enable", &battle_config.sdelay_attack_enable },
 			{	"defunit_not_enemy",	&battle_config.defnotenemy			},
 			{	"attribute_recover",	&battle_config.attr_recover	},
 			{	"flooritem_lifetime",			&battle_config.flooritem_lifetime			},
@@ -1915,14 +1925,17 @@ int battle_config_read(const char *cfgName)
 			{	"mob_skill_use",		&battle_config.mob_skill_use		},
 			{	"mob_count_rate",		&battle_config.mob_count_rate		},
 			{ "quest_skill_learn", &battle_config.quest_skill_learn },
+			{ "quest_skill_reset", &battle_config.quest_skill_reset },
 			{ "basic_skill_check", &battle_config.basic_skill_check },
 			{	"ghost_time",		&battle_config.ghost_time		},
 			{	"pet_catch_rate",		&battle_config.pet_catch_rate		},
 			{	"pet_rename",			&battle_config.pet_rename			},
-			{	"pet_hungry_delay_rate",&battle_config.pet_hungry_delay_rate	},
-			{ "finger_offencive_type",&battle_config.finger_offencive_type	},
-			{ "heal_exp",&battle_config.heal_exp	},
-			{ "shop_exp",&battle_config.shop_exp	},
+			{ "pet_hungry_delay_rate", &battle_config.pet_hungry_delay_rate	},
+			{ "skill_min_damage", &battle_config.skill_min_damage },
+			{ "sanctury_type", &battle_config.sanctury_type },
+			{ "finger_offencive_type", &battle_config.finger_offencive_type	},
+			{ "heal_exp", &battle_config.heal_exp	},
+			{ "shop_exp", &battle_config.shop_exp	},
 
 		};
 		
@@ -1939,6 +1952,8 @@ int battle_config_read(const char *cfgName)
 
 	if(battle_config.flooritem_lifetime < 1000)
 		battle_config.flooritem_lifetime = LIFETIME_FLOORITEM*1000;
+
+	add_timer_func_list(battle_delay_damage_sub,"battle_delay_damage_sub");
 
 	return 0;
 }

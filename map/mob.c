@@ -958,7 +958,7 @@ static int mob_randomwalk(struct mob_data *md,int tick)
 			if(i+1>=retrycount){
 				md->move_fail_count++;
 				if(md->move_fail_count>10){
-					printf("MOB cannot move. random spawn %d\n",md->bl.id);
+					printf("MOB cant move. random spawn %d, class = %d\n",md->bl.id,md->class);
 					md->move_fail_count=0;
 					mob_spawn(md->bl.id);
 				}
@@ -1693,7 +1693,7 @@ int mob_warp(struct mob_data *md,int x,int y,int type)
 		md->bl.x=x;
 		md->bl.y=y;
 	}else
-		printf("MOB %d warp failed\n",battle_get_mobid(&md->bl));
+		printf("MOB %d warp failed, class = %d\n",md->bl.id,md->class);
 
 	md->target_id=0;	// ƒ^ƒQ‚ð‰ðœ‚·‚é
 	md->state.targettype=NONE_ATTACKABLE;
@@ -1702,7 +1702,7 @@ int mob_warp(struct mob_data *md,int x,int y,int type)
 	md->state.skillstate=MSS_IDLE;
 	
 	if(type>0 && i==1000)
-		printf("MOB %d warp to (%d,%d)\n",battle_get_mobid(&md->bl),x,y);
+		printf("MOB %d warp to (%d,%d), class = %d\n",md->bl.id,x,y,md->class);
 	
 	map_addblock(&md->bl);
 	if(type>0)
@@ -1850,7 +1850,7 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 	if(md->bl.m != bl->m)
 		return 0;
 		
-	printf("MOB %d skill castend skill=%d\n",battle_get_mobid(&md->bl),md->skillid);
+	printf("MOB skill castend skill=%d, class = %d\n",md->skillid,md->class);
 
 	switch( skill_get_nk(md->skillid) )
 	{
@@ -1887,7 +1887,7 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 	md->skilltimer=-1;
 	md->skilldelay[md->skillidx]=tick;
 
-	printf("MOB %d skill castend skill=%d\n",battle_get_mobid(&md->bl),md->skillid);
+	printf("MOB skill castend skill=%d, class = %d\n",md->skillid,md->class);
 
 	skill_castend_pos2(&md->bl,md->skillx,md->skilly,md->skillid,md->skilllv,tick,0);
 
@@ -1927,8 +1927,8 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	md->state.skillcastcancel=ms->cancel;
 	md->skilldelay[skill_idx]=gettick();
 	
-	printf("MOB %d skill use target_id=%d skill=%d lv=%d cast=%d\n",
-		battle_get_mobid(&md->bl),target->id,skill_id,skill_lv,casttime);
+	printf("MOB skill use target_id=%d skill=%d lv=%d cast=%d, class = %d\n"
+		,target->id,skill_id,skill_lv,casttime,md->class);
 
 	if( casttime>0 ){ 	// ‰r¥‚ª•K—v
 		struct mob_data *md2;
@@ -1993,8 +1993,8 @@ int mobskill_use_pos( struct mob_data *md,
 	md->skilldelay[skill_idx]=gettick();
 	md->state.skillcastcancel=ms->cancel;
 
-	printf("MOB %d skill use target_pos=(%d,%d) skill=%d lv=%d cast=%d\n",
-		battle_get_mobid(&md->bl),skill_x,skill_y,skill_num,skill_lv,casttime);
+	printf("MOB skill use target_pos=(%d,%d) skill=%d lv=%d cast=%d, class = %d\n",
+		skill_x,skill_y,skill_num,skill_lv,casttime,md->class);
 
 	if( casttime>0 )	// ‰r¥‚ª•K—v
 		clif_skillcasting( &md->bl,
@@ -2217,7 +2217,6 @@ static int mob_readdb(void)
 		if(class>=2000 || class==0)
 			continue;
 
-		mob_db[class].mobid=atoi(str[0]);
 		memcpy(mob_db[class].name,str[1],24);
 		memcpy(mob_db[class].jname,str[2],24);
 		mob_db[class].lv=atoi(str[3]);
@@ -2405,6 +2404,8 @@ int do_init_mob(void)
 	add_timer_func_list(mob_delay_item_drop2,"mob_delay_item_drop2");
 	add_timer_func_list(mob_ai_hard,"mob_ai_hard");
 	add_timer_func_list(mob_ai_lazy,"mob_ai_lazy");
+	add_timer_func_list(mobskill_castend_id,"mobskill_castend_id");
+	add_timer_func_list(mobskill_castend_pos,"mobskill_castend_pos");
 	add_timer_interval(gettick()+100,mob_ai_hard,0,0,MIN_MOBTHINKTIME);
 	add_timer_interval(gettick()+1000,mob_ai_lazy,0,0,MIN_MOBTHINKTIME*10);
 

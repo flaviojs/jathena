@@ -3825,7 +3825,11 @@ int clif_spiritball(struct map_session_data *sd)
 	return 0;
 }
 
-int clif_combo_delay(struct block_list *bl, int wait)
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int clif_combo_delay(struct block_list *bl,int wait)
 {
 	unsigned char buf[32];
 
@@ -3836,6 +3840,7 @@ int clif_combo_delay(struct block_list *bl, int wait)
 
 	return 0;
 }
+
 /*==========================================
  *
  *------------------------------------------
@@ -4525,7 +4530,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	}
 	if(map[sd->bl.m].flag.gvg) {
 		clif_set0199(sd->fd,3);
-	}	
+	}
 	
 	// pet
 	if(sd->status.pet_id && sd->pet_npcdata && sd->pet.intimate > 0) {
@@ -4767,9 +4772,11 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 	switch(RFIFOB(fd,6)){
 	case 0x00:	// once attack
 	case 0x07:	// continuous attack
-		if(DIFF_TICK(tick , sd->canact_tick) < 0) {
-			clif_skill_fail(sd,1,4,0);
-			return;
+		if(!battle_config.sdelay_attack_enable) {
+			if(DIFF_TICK(tick , sd->canact_tick) < 0) {
+				clif_skill_fail(sd,1,4,0);
+				return;
+			}
 		}
 		if(sd->ghost_timer != -1)
 			pc_delghosttimer(sd);
