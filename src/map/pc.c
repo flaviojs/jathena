@@ -960,6 +960,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(sd->subele,0,sizeof(sd->subele));
 	memset(sd->subrace,0,sizeof(sd->subrace));
 	memset(sd->addeff,0,sizeof(sd->addeff));
+	memset(sd->addeff2,0,sizeof(sd->addeff2));
 	memset(sd->reseff,0,sizeof(sd->reseff));
 	memset(&sd->special_state,0,sizeof(sd->special_state));
 	memset(sd->weapon_coma_ele,0,sizeof(sd->weapon_coma_ele));
@@ -988,6 +989,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 	memset(sd->arrow_addrace,0,sizeof(sd->arrow_addrace));
 	memset(sd->arrow_addsize,0,sizeof(sd->arrow_addsize));
 	memset(sd->arrow_addeff,0,sizeof(sd->arrow_addeff));
+	memset(sd->arrow_addeff2,0,sizeof(sd->arrow_addeff2));
 	memset(sd->magic_addele,0,sizeof(sd->magic_addele));
 	memset(sd->magic_addrace,0,sizeof(sd->magic_addrace));
 	memset(sd->magic_subrace,0,sizeof(sd->magic_subrace));
@@ -2043,6 +2045,12 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 			sd->addeff[type2]+=val;
 		else
 			sd->arrow_addeff[type2]+=val;
+		break;
+	case SP_ADDEFF2:
+		if(sd->state.lr_flag != 2)
+			sd->addeff2[type2]+=val;
+		else
+			sd->arrow_addeff2[type2]+=val;
 		break;
 	case SP_RESEFF:
 		if(sd->state.lr_flag != 2)

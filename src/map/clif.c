@@ -5797,10 +5797,9 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 void clif_parse_QuitGame(int fd,struct map_session_data *sd)
 {
 	unsigned int tick=gettick();
-	if(!pc_isdead(sd) && (sd->opt1 || sd->opt2))
-		return;
+
 	WFIFOW(fd,0)=0x18b;
-	if(sd->skilltimer != -1 || (DIFF_TICK(tick , sd->canact_tick) < 0)){
+	if((!pc_isdead(sd) && (sd->opt1 || sd->opt2)) || sd->skilltimer != -1 || (DIFF_TICK(tick , sd->canact_tick) < 0)){
 		WFIFOW(fd,2)=1;
 		WFIFOSET(fd,packet_len_table[0x18b]);
 		return;

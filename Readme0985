@@ -1,4 +1,29 @@
 --------------------
+//0996 by (凸)
+・アドリブの5秒制限をcast_db.txtのupkeep_time2で制御できるように変更
+・村正で自分を呪わせるためにbonus2 bAddEff2を追加
+・呪われていて終了できない時にも「今は終了できません」が表示されるようにした
+・ダンスエフェクト等移動時に効果の適用判断が移動前に行われていたのを移動後に変更＆使わなくていい変数を廃止
+
+	(db/)
+	cast_db.txt
+	const.txt
+	item_db.txt
+	(doc/)
+	item_bonus.txt
+	(src/)
+	clif.c
+		clif_parse_QuitGame() 変更
+	map.h addeff2,arrow_addeff2 追加
+	pc.c
+		pc_calcstatus() 変更
+		pc_bonus2() 変更
+	skill.c
+		skill_additional_effect() 変更
+		skill_check_condition() 変更
+		skill_unit_move_unit_group() 変更
+
+--------------------
 //0995 by (凸)
 ・battle.pet_lootitemのデフォルトがyesになっていたのを修正
 ・battle.pet_lootitemの適用をforeach前でやるように修正

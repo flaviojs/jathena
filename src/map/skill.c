@@ -396,6 +396,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	int rate,luk;
 
 	int sc_def_mdef,sc_def_vit,sc_def_int,sc_def_luk;
+	int sc_def_mdef2,sc_def_vit2,sc_def_int2,sc_def_luk2;
 
 	if(skilllv < 0) return 0;
 
@@ -404,11 +405,18 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	else if(src->type==BL_MOB)
 		md=(struct mob_data *)src;
 
+	//対象の耐性
 	luk = battle_get_luk(bl);
 	sc_def_mdef=100 - (3 + battle_get_mdef(bl) + luk/3);
 	sc_def_vit=100 - (3 + battle_get_vit(bl) + luk/3);
 	sc_def_int=100 - (3 + battle_get_int(bl) + luk/3);
 	sc_def_luk=100 - (3 + luk);
+	//自分の耐性
+	luk = battle_get_luk(src);
+	sc_def_mdef2=100 - (3 + battle_get_mdef(src) + luk/3);
+	sc_def_vit2=100 - (3 + battle_get_vit(src) + luk/3);
+	sc_def_int2=100 - (3 + battle_get_int(src) + luk/3);
+	sc_def_luk2=100 - (3 + luk);
 	if(bl->type==BL_PC)
 		dstsd=(struct map_session_data *)bl;
 	else if(bl->type==BL_MOB){
@@ -629,6 +637,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		int sc_def_card=100;
 
 		for(i=SC_STONE;i<=SC_BLIND;i++){
+			//対象に状態異常
 			if(i==SC_STONE || i==SC_FREEZE)
 				sc_def_card=sc_def_mdef;
 			else if(i==SC_STAN || i==SC_POISON || i==SC_SILENCE)
@@ -650,6 +659,30 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 					if(battle_config.battle_log)
 						printf("PC %d skill_addeff: cardによる異常発動 %d %d\n",sd->bl.id,i,sd->addeff[i-SC_STONE]);
 					skill_status_change_start(bl,i,7,0,0,0,(i==SC_CONFUSION)? 10000+7000:skill_get_time2(sc2[i-SC_STONE],7),0);
+				}
+			}
+			//自分に状態異常
+			if(i==SC_STONE || i==SC_FREEZE)
+				sc_def_card=sc_def_mdef2;
+			else if(i==SC_STAN || i==SC_POISON || i==SC_SILENCE)
+				sc_def_card=sc_def_vit2;
+			else if(i==SC_SLEEP || i==SC_CONFUSION || i==SC_BLIND)
+				sc_def_card=sc_def_int2;
+			else if(i==SC_CURSE)
+				sc_def_card=sc_def_luk2;
+
+			if(!sd->state.arrow_atk) {
+				if(rand()%10000 < (sd->addeff2[i-SC_STONE])*sc_def_card/100 ){
+					if(battle_config.battle_log)
+						printf("PC %d skill_addeff: cardによる異常発動 %d %d\n",src->id,i,sd->addeff2[i-SC_STONE]);
+					skill_status_change_start(src,i,7,0,0,0,(i==SC_CONFUSION)? 10000+7000:skill_get_time2(sc2[i-SC_STONE],7),0);
+				}
+			}
+			else {
+				if(rand()%10000 < (sd->addeff2[i-SC_STONE]+sd->arrow_addeff2[i-SC_STONE])*sc_def_card/100 ){
+					if(battle_config.battle_log)
+						printf("PC %d skill_addeff: cardによる異常発動 %d %d\n",src->id,i,sd->addeff2[i-SC_STONE]);
+					skill_status_change_start(src,i,7,0,0,0,(i==SC_CONFUSION)? 10000+7000:skill_get_time2(sc2[i-SC_STONE],7),0);
 				}
 			}
 		}
@@ -4920,7 +4953,7 @@ int skill_check_condition(struct map_session_data *sd,int type)
 			spiritball--;
 		break;
 	case BD_ADAPTATION:				/* アドリブ */
-		if(sd->sc_data[SC_DANCING].timer==-1 || DIFF_TICK(gettick(),sd->sc_data[SC_DANCING].val3) <= 5000){ //ダンス中で使用後5秒以上のみ？
+		if(sd->sc_data[SC_DANCING].timer==-1 || DIFF_TICK(gettick(),sd->sc_data[SC_DANCING].val3) <= skill_get_time2(skill,lv)){ //ダンス中で使用後5秒以上のみ？
 			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
@@ -7615,12 +7648,15 @@ int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int
 	if(group->unit!=NULL){
 		int i;
 		for(i=0;i<group->unit_count;i++){
-			struct skill_unit *unit=NULL;
-			struct block_list *bl=NULL;
-			unit=&group->unit[i];
-			bl=(struct block_list *)unit;
-			if(unit->alive && !(m==bl->m && dx==0 && dy==0)){
+			struct skill_unit *unit=&group->unit[i];
+			if(unit->alive && !(m==unit->bl.m && dx==0 && dy==0)){
 				int range=unit->range;
+				map_delblock(&unit->bl);
+				unit->bl.m = m;
+				unit->bl.x += dx;
+				unit->bl.y += dy;
+				map_addblock(&unit->bl);
+				clif_skill_setunit(unit);
 				if(range>0){
 					if(range<7)
 						range=7;
@@ -7628,12 +7664,6 @@ int skill_unit_move_unit_group( struct skill_unit_group *group, int m,int dx,int
 						unit->bl.x-range,unit->bl.y-range,unit->bl.x+range,unit->bl.y+range,0,
 						&unit->bl,gettick() );
 				}
-				map_delblock(bl);
-				bl->m = m;
-				bl->x += dx;
-				bl->y += dy;
-				map_addblock(bl);
-				clif_skill_setunit(unit);
 			}
 		}
 	}

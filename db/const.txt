@@ -140,6 +140,8 @@ bShortWeaponDamageReturn	1063
 bLongWeaponDamageReturn	1064
 bWeaponComaEle	1065
 bWeaponComaRace	1066
+bAddEff2	1067
+
 bRestartFullRecover	2000
 bNoCastCancel	2001
 bNoSizeFix	2002

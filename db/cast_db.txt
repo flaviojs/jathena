@@ -1,4 +1,4 @@
-//cast_db.txt＠AthenaDB計画 2004/05/26 00:24:20 +0900 (JST)
+//cast_db.txt＠AthenaDB計画 2004/05/28 10:48:52 +0900 (JST)
 //id,cast_list,delay_list,upkeep_time,upkeep_time2
 
 6,0,0,30000,0	//SM_PROVOKE#プロボック#
@@ -178,6 +178,8 @@
 287,5000,0,180000,180000	//SA_VIOLENTGALE#バイオレントゲイル#
 288,5000,0,180000,180000	//SA_LANDPROTECTOR#ランドプロテクター#
 289,2000,0,0,0	//SA_DISPELL#ディスペル#
+
+304,0,0,0,5000	//BD_ADAPTATION#アドリブ#
 
 306,0,0,60000,15000	//BD_LULLABY#子守歌#
 307,0,0,60000,60000	//BD_RICHMANKIM#ニヨルドの宴#
