@@ -3104,7 +3104,23 @@ int clif_getareachar_skillunit(struct map_session_data *sd,struct skill_unit *un
 	WFIFOW(fd,10)=unit->bl.x;
 	WFIFOW(fd,12)=unit->bl.y;
 	WFIFOB(fd,14)=unit->group->unit_id;
-	WFIFOB(fd,15)=0;
+	WFIFOB(fd,15)=1;
+	WFIFOL(fd,16)=0;
+	WFIFOL(fd,20)=0;
+
+	WFIFOL(fd,32)=0x004f37dd;
+	WFIFOL(fd,36)=0x0012f674;
+	WFIFOL(fd,40)=0x0012f664;
+	WFIFOL(fd,44)=0x0012f654;
+	WFIFOL(fd,48)=0x77527bbc;
+	WFIFOL(fd,56)=0;
+	WFIFOL(fd,60)=0;
+	WFIFOL(fd,64)=0;
+	WFIFOL(fd,68)=0x0048d919;
+	WFIFOL(fd,72)=0x0000003e;
+	WFIFOL(fd,76)=0x0012f66c;
+
+	WFIFOB(fd,96)=0xaa;
 	WFIFOSET(fd,packet_len_table[0x1c9]);
 #endif
 	if(unit->group->skill_id == WZ_ICEWALL)
@@ -3617,7 +3633,23 @@ int clif_skill_setunit(struct skill_unit *unit)
 	WBUFW(buf,10)=unit->bl.x;
 	WBUFW(buf,12)=unit->bl.y;
 	WBUFB(buf,14)=unit->group->unit_id;
-	WBUFB(buf,15)=0;
+	WBUFB(buf,15)=1;
+	WBUFL(buf,16)=0;
+	WBUFL(buf,20)=0;
+
+	WBUFL(buf,32)=0x004f37dd;
+	WBUFL(buf,36)=0x0012f674;
+	WBUFL(buf,40)=0x0012f664;
+	WBUFL(buf,44)=0x0012f654;
+	WBUFL(buf,48)=0x77527bbc;
+	WBUFL(buf,56)=0;
+	WBUFL(buf,60)=0;
+	WBUFL(buf,64)=0;
+	WBUFL(buf,68)=0x0048d919;
+	WBUFL(buf,72)=0x0000003e;
+	WBUFL(buf,76)=0x0012f66c;
+
+	WBUFB(buf,96)=0xaa;
 	clif_send(buf,packet_len_table[0x1c9],&unit->bl,AREA);
 #endif
 	return 0;

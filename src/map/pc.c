@@ -5752,11 +5752,12 @@ static int pc_natural_heal_sub(struct map_session_data *sd,va_list ap)
 	if( (battle_config.natural_heal_weight_rate > 100 || sd->weight*100/sd->max_weight < battle_config.natural_heal_weight_rate) &&
 		!pc_isdead(sd) && 
 		!pc_ishiding(sd) && 
-		sd->sc_data[SC_POISON].timer == -1 &&
-		sd->sc_data[SC_DANCING].timer == -1
+		sd->sc_data[SC_POISON].timer == -1
 	  ){
 		pc_natural_heal_hp(sd);
-		if(sd->sc_data[SC_EXTREMITYFIST].timer == -1) //ˆ¢C—…ó‘Ô‚Å‚ÍSP‚ª‰ñ•œ‚µ‚È‚¢
+		if(sd->sc_data[SC_EXTREMITYFIST].timer == -1 &&	//ˆ¢C—…ó‘Ô‚Å‚ÍSP‚ª‰ñ•œ‚µ‚È‚¢
+		   sd->sc_data[SC_DANCING].timer == -1	//ƒ_ƒ“ƒXó‘Ô‚Å‚ÍSP‚ª‰ñ•œ‚µ‚È‚¢
+		) 
 			pc_natural_heal_sp(sd);
 	}
 	else {

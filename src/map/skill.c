@@ -4841,7 +4841,7 @@ static int skill_check_condition_char_sub(struct block_list *bl,va_list ap)
 
 	switch(ssd->skillid){
 	case PR_BENEDICTIO:				/* ¹‘Ì~•Ÿ */
-		if(sd != ssd && (s_class.job == 4 || s_class.job == 8) && (sd->bl.x == ssd->bl.x - 1 || sd->bl.x == ssd->bl.x + 1))
+		if(sd != ssd && (s_class.job == 4 || s_class.job == 8) && (sd->bl.x == ssd->bl.x - 1 || sd->bl.x == ssd->bl.x + 1) && sd->status.sp >= 10)
 			(*c)++;
 		break;
 	case BD_LULLABY:				/* qç‰Ì */
@@ -4889,6 +4889,11 @@ static int skill_check_condition_use_sub(struct block_list *bl,va_list ap)
 	skillid=ssd->skillid;
 	skilllv=ssd->skilllv;
 	switch(skillid){
+	case PR_BENEDICTIO:				/* ¹‘Ì~•Ÿ */
+		if(sd != ssd && (s_class.job == 4 || s_class.job == 8) && (sd->bl.x == ssd->bl.x - 1 || sd->bl.x == ssd->bl.x + 1) && sd->status.sp >= 10)
+			sd->status.sp -= 10;
+			pc_calcstatus(sd,0);
+		break;
 	case BD_LULLABY:				/* qç‰Ì */
 	case BD_RICHMANKIM:				/* ƒjƒˆƒ‹ƒh‚Ì‰ƒ */
 	case BD_ETERNALCHAOS:			/* ‰i‰“‚Ì¬“× */
@@ -4908,7 +4913,7 @@ static int skill_check_condition_use_sub(struct block_list *bl,va_list ap)
 		   sd->sc_data[SC_DANCING].timer==-1 //ƒ_ƒ“ƒX’†‚¶‚á‚È‚¢
 		  ){
 			ssd->sc_data[SC_DANCING].val4=bl->id;
-			clif_skill_nodamage(bl,bl,skillid,skilllv,1);
+			clif_skill_nodamage(bl,src,skillid,skilllv,1);
 			skill_status_change_start(bl,SC_DANCING,skillid,ssd->sc_data[SC_DANCING].val2,gettick(),src->id,1000*181,0);
 			sd->skillid_dance=sd->skillid=skillid;
 			sd->skilllv_dance=sd->skilllv=skilllv;
@@ -5065,12 +5070,18 @@ int skill_check_condition(struct map_session_data *sd,int type)
 		{
 			int range=1;
 			int c=0;
-			map_foreachinarea(skill_check_condition_char_sub,sd->bl.m,
-				sd->bl.x-range,sd->bl.y-range,
-				sd->bl.x+range,sd->bl.y+range,BL_PC,&sd->bl,&c);
-			if(c<2){
-				clif_skill_fail(sd,skill,0,0);
-				return 0;
+			if(!(type&1)){
+				map_foreachinarea(skill_check_condition_char_sub,sd->bl.m,
+					sd->bl.x-range,sd->bl.y-range,
+					sd->bl.x+range,sd->bl.y+range,BL_PC,&sd->bl,&c);
+				if(c<2){
+					clif_skill_fail(sd,skill,0,0);
+					return 0;
+				}
+			}else{
+				map_foreachinarea(skill_check_condition_use_sub,sd->bl.m,
+					sd->bl.x-range,sd->bl.y-range,
+					sd->bl.x+range,sd->bl.y+range,BL_PC,&sd->bl,&c);
 			}
 		}
 		break;

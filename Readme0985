@@ -1,4 +1,22 @@
 --------------------
+//1001 by (凸)
+・0x1c9でいくつかパケットを見比べて変化のないところを固定値で埋め込み(今後情報が集まると変わる可能性大)
+・ダンス中はSPだけ回復しないように変更
+・聖体で相方のSPが10以下だと使用失敗にして使用したらSPを10減らしてみる(未確認)
+・合奏のスキル使用パケットを若干変更
+
+	(map/)
+	clif.c
+		clif_getareachar_skillunit() 0x1c9の穴埋め開始
+		clif_skill_setunit() 0x1c9の穴埋め開始
+	pc.c
+		pc_natural_heal_sub() ダンス中はSPのみ回復しないように変更
+	skill.c
+		skill_check_condition() 変更
+		skill_check_condition_char_sub() 聖体は相方のSPチェックするように変更
+		skill_check_condition_use_sub() 聖体は相方のSPを減らすように変更
+
+--------------------
 //1000 by ぴざまん
 ・0999の変更取り戻し
 ・トラップの巻き込み実装
