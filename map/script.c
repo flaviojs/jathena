@@ -173,6 +173,7 @@ int buildin_enablewaitingroomevent(struct script_state *st);
 int buildin_disablewaitingroomevent(struct script_state *st);
 int buildin_getwaitingroomstate(struct script_state *st);
 int buildin_warpwaitingpc(struct script_state *st);
+int buildin_attachrid(struct script_state *st);
 int buildin_setmapflagnosave(struct script_state *st);
 int buildin_setmapflag(struct script_state *st);
 int buildin_removemapflag(struct script_state *st);
@@ -300,6 +301,7 @@ struct {
 	{buildin_disablewaitingroomevent,"disablewaitingroomevent","*"},
 	{buildin_getwaitingroomstate,"getwaitingroomstate","i*"},
 	{buildin_warpwaitingpc,"warpwaitingpc","sii*"},
+	{buildin_attachrid,"attachrid","i"},
 	{buildin_setmapflag,"setmapflagnosave","ssii"},
 	{buildin_setmapflag,"setmapflag","si"},
 	{buildin_removemapflag,"removemapflag","si"},
@@ -1073,19 +1075,35 @@ unsigned char* parse_script(unsigned char *src,int line)
 enum {STOP=1,END,RERUNLINE,GOTO};
 
 /*==========================================
+ * ridからsdへの解決
+ *------------------------------------------
+ */
+struct map_session_data *script_rid2sd(struct script_state *st)
+{
+	struct map_session_data *sd=map_id2sd(st->rid);
+	if(!sd){
+		printf("script_rid2sd: fatal error ! player not attached!\n");
+		exit(1);
+	}
+	return sd;
+}
+
+
+/*==========================================
  * 変数の読み取り
  *------------------------------------------
  */
-
 // 変数のデータ拾いのみ
 int get_val(struct script_state*st,struct script_data* data)
 {
-	struct map_session_data *sd;
+	struct map_session_data *sd=NULL;
 	if(data->type==C_NAME){
 		char *name=str_buf+str_data[data->u.num&0x00ffffff].str;
 		char prefix=*name;
 		char postfix=name[strlen(name)-1];
-		sd=map_id2sd(st->rid);
+		
+		if(prefix!='$')
+			sd=script_rid2sd(st);
 		
 		if(postfix=='$'){
 		
@@ -1265,7 +1283,7 @@ void pop_stack(struct script_stack* stack,int start,int end)
 int buildin_mes(struct script_state *st)
 {
 	conv_str(st,& (st->stack->stack_data[st->start+2]));
-	clif_scriptmes(map_id2sd(st->rid),st->oid,st->stack->stack_data[st->start+2].u.str);
+	clif_scriptmes(script_rid2sd(st),st->oid,st->stack->stack_data[st->start+2].u.str);
 	return 0;
 }
 
@@ -1276,6 +1294,10 @@ int buildin_mes(struct script_state *st)
 int buildin_goto(struct script_state *st)
 {
 	int pos;
+
+	if( st->stack->stack_data[st->start+2].type!=C_POS ){
+		printf("script: goto: not label !\n");
+	}
 
 	pos=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	st->pos=pos;
@@ -1290,7 +1312,7 @@ int buildin_goto(struct script_state *st)
 int buildin_next(struct script_state *st)
 {
 	st->state=STOP;
-	clif_scriptnext(map_id2sd(st->rid),st->oid);
+	clif_scriptnext(script_rid2sd(st),st->oid);
 	return 0;
 }
 
@@ -1301,7 +1323,7 @@ int buildin_next(struct script_state *st)
 int buildin_close(struct script_state *st)
 {
 	st->state=END;
-	clif_scriptclose(map_id2sd(st->rid),st->oid);
+	clif_scriptclose(script_rid2sd(st),st->oid);
 	return 0;
 }
 
@@ -1315,7 +1337,7 @@ int buildin_menu(struct script_state *st)
 	int len,i;
 	struct map_session_data *sd;
 
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 
 	if(sd->state.menu_or_input==0){
 		st->state=RERUNLINE;
@@ -1334,7 +1356,7 @@ int buildin_menu(struct script_state *st)
 			strcat(buf,st->stack->stack_data[i].u.str);
 			strcat(buf,":");
 		}
-		clif_scriptmenu(map_id2sd(st->rid),st->oid,buf);
+		clif_scriptmenu(script_rid2sd(st),st->oid,buf);
 		free(buf);
 	} else if(sd->npc_menu==0xff){	// cansel
 		sd->state.menu_or_input=0;
@@ -1346,6 +1368,9 @@ int buildin_menu(struct script_state *st)
 		sd->state.menu_or_input=0;
 		if(sd->npc_menu>0 && sd->npc_menu<(st->end-st->start)/2){
 			int pos;
+			if( st->stack->stack_data[st->start+sd->npc_menu*2+1].type!=C_POS ){
+				printf("script: menu: not label !\n");
+			}
 			pos=conv_num(st,& (st->stack->stack_data[st->start+sd->npc_menu*2+1]));
 			st->pos=pos;
 			st->state=GOTO;
@@ -1388,7 +1413,7 @@ int buildin_warp(struct script_state *st)
 {
 	int x,y;
 	char *str;
-	struct map_session_data *sd=map_id2sd(st->rid);
+	struct map_session_data *sd=script_rid2sd(st);
 
 	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	x=conv_num(st,& (st->stack->stack_data[st->start+3]));
@@ -1456,7 +1481,7 @@ int buildin_heal(struct script_state *st)
 
 	hp=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sp=conv_num(st,& (st->stack->stack_data[st->start+3]));
-	pc_heal(map_id2sd(st->rid),hp,sp);
+	pc_heal(script_rid2sd(st),hp,sp);
 	return 0;
 }
 /*==========================================
@@ -1469,7 +1494,7 @@ int buildin_itemheal(struct script_state *st)
 
 	hp=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sp=conv_num(st,& (st->stack->stack_data[st->start+3]));
-	pc_itemheal(map_id2sd(st->rid),hp,sp);
+	pc_itemheal(script_rid2sd(st),hp,sp);
 	return 0;
 }
 /*==========================================
@@ -1482,7 +1507,7 @@ int buildin_percentheal(struct script_state *st)
 
 	hp=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	sp=conv_num(st,& (st->stack->stack_data[st->start+3]));
-	pc_percentheal(map_id2sd(st->rid),hp,sp);
+	pc_percentheal(script_rid2sd(st),hp,sp);
 	return 0;
 }
 
@@ -1495,7 +1520,7 @@ int buildin_jobchange(struct script_state *st)
 	int job;
 
 	job=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	pc_jobchange(map_id2sd(st->rid),job);
+	pc_jobchange(script_rid2sd(st),job);
 
 	return 0;
 }
@@ -1506,13 +1531,14 @@ int buildin_jobchange(struct script_state *st)
  */
 int buildin_input(struct script_state *st)
 {
-	struct map_session_data *sd;
+	struct map_session_data *sd=NULL;
 	int num=(st->end>st->start+2)?st->stack->stack_data[st->start+2].u.num:0;
 	char *name=(st->end>st->start+2)?str_buf+str_data[num&0x00ffffff].str:"";
 	char prefix=*name;
 	char postfix=name[strlen(name)-1];
 
-	sd=map_id2sd(st->rid);
+	if( prefix!='$' )
+		sd=script_rid2sd(st);
 	if(sd->state.menu_or_input){
 		sd->state.menu_or_input=0;
 		if( postfix=='$' ){
@@ -1549,8 +1575,8 @@ int buildin_input(struct script_state *st)
 		}
 	} else {
 		st->state=RERUNLINE;
-		if(postfix=='$')clif_scriptinputstr(map_id2sd(st->rid),st->oid);
-		else			clif_scriptinput(map_id2sd(st->rid),st->oid);
+		if(postfix=='$')clif_scriptinputstr(script_rid2sd(st),st->oid);
+		else			clif_scriptinput(script_rid2sd(st),st->oid);
 		sd->state.menu_or_input=1;
 	}
 	return 0;
@@ -1588,7 +1614,7 @@ int buildin_if(struct script_state *st)
  */
 int buildin_set(struct script_state *st)
 {
-	struct map_session_data *sd;
+	struct map_session_data *sd=NULL;
 	int num=st->stack->stack_data[st->start+2].u.num;
 	char *name=str_buf+str_data[num&0x00ffffff].str;
 	char prefix=*name;
@@ -1599,7 +1625,9 @@ int buildin_set(struct script_state *st)
 		return 0;
 	}
 
-	sd=map_id2sd(st->rid);
+	if( prefix!='$' )
+		sd=script_rid2sd(st);
+		
 	if( postfix=='$' ){
 		// 文字列
 		char *str = conv_str(st,& (st->stack->stack_data[st->start+3]));
@@ -1664,7 +1692,7 @@ int buildin_setlook(struct script_state *st)
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	val=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
-	pc_changelook(map_id2sd(st->rid),type,val);
+	pc_changelook(script_rid2sd(st),type,val);
 
 	return 0;
 }
@@ -1680,7 +1708,7 @@ int buildin_cutin(struct script_state *st)
 	conv_str(st,& (st->stack->stack_data[st->start+2]));
 	type=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
-	clif_cutin(map_id2sd(st->rid),st->stack->stack_data[st->start+2].u.str,type);
+	clif_cutin(script_rid2sd(st),st->stack->stack_data[st->start+2].u.str,type);
 
 	return 0;
 }
@@ -1699,7 +1727,7 @@ int buildin_viewpoint(struct script_state *st)
 	id=conv_num(st,& (st->stack->stack_data[st->start+5]));
 	color=conv_num(st,& (st->stack->stack_data[st->start+6]));
 
-	clif_viewpoint(map_id2sd(st->rid),st->oid,type,x,y,id,color);
+	clif_viewpoint(script_rid2sd(st),st->oid,type,x,y,id,color);
 
 	return 0;
 }
@@ -1715,7 +1743,7 @@ int buildin_countitem(struct script_state *st)
 
 	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
 
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	for(i=0,count=0;i<MAX_INVENTORY;i++){
 		if(sd->status.inventory[i].nameid==nameid)
 			count+=sd->status.inventory[i].amount;
@@ -1738,7 +1766,7 @@ int buildin_checkweight(struct script_state *st)
 	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	if(itemdb_weight(nameid)*amount + sd->weight > sd->max_weight){
 		push_val(st->stack,C_INT,0);
 	} else {
@@ -1758,7 +1786,7 @@ int buildin_getitem(struct script_state *st)
 	struct item item_tmp;
 	struct map_session_data *sd;
 
-	sd = map_id2sd(st->rid);
+	sd = script_rid2sd(st);
 	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
@@ -1795,7 +1823,7 @@ int buildin_getitem2(struct script_state *st)
 	struct item item_tmp;
 	struct map_session_data *sd;
 
-	sd = map_id2sd(st->rid);
+	sd = script_rid2sd(st);
 	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	iden=conv_num(st,& (st->stack->stack_data[st->start+4]));
@@ -1858,7 +1886,7 @@ int buildin_delitem(struct script_state *st)
 	nameid=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	amount=conv_num(st,& (st->stack->stack_data[st->start+3]));
 
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	for(i=0;i<MAX_INVENTORY;i++){
 		if(sd->status.inventory[i].nameid==nameid){
 			if(sd->status.inventory[i].amount>amount){
@@ -1884,7 +1912,7 @@ int buildin_readparam(struct script_state *st)
 	struct map_session_data *sd;
 
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	push_val(st->stack,C_INT,pc_readparam(sd,type));
 
 	return 0;
@@ -1899,13 +1927,15 @@ int buildin_getcharid(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	if(num==0)
 		push_val(st->stack,C_INT,sd->status.char_id);
 	if(num==1)
 		push_val(st->stack,C_INT,sd->status.party_id);
 	if(num==2)
 		push_val(st->stack,C_INT,sd->status.guild_id);
+	if(num==3)
+		push_val(st->stack,C_INT,sd->status.account_id);
 	return 0;
 }
 /*==========================================
@@ -2044,7 +2074,7 @@ int buildin_strcharinfo(struct script_state *st)
 	struct map_session_data *sd;
 	int num;
 
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	if(num==0){
 		char *buf;
@@ -2090,7 +2120,7 @@ int buildin_getequipname(struct script_state *st)
 		printf("out of memory : buildin_getequipname\n");
 		exit(1);
 	}
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0){
@@ -2117,7 +2147,7 @@ int buildin_getequipisequiped(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0){
 		push_val(st->stack,C_INT,1);
@@ -2138,7 +2168,7 @@ int buildin_getequipisenableref(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0 && num<7 && sd->inventory_data[i] && (num!=1 || sd->inventory_data[i]->def > 1
 	             || (sd->inventory_data[i]->def==1 && sd->inventory_data[i]->equip_script==NULL)
@@ -2162,7 +2192,7 @@ int buildin_getequipisidentify(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0)
 		push_val(st->stack,C_INT,sd->status.inventory[i].identify);
@@ -2182,7 +2212,7 @@ int buildin_getequiprefinerycnt(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0)
 		push_val(st->stack,C_INT,sd->status.inventory[i].refine);
@@ -2202,7 +2232,7 @@ int buildin_getequipweaponlv(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0 && sd->inventory_data[i])
 		push_val(st->stack,C_INT,sd->inventory_data[i]->wlv);
@@ -2222,7 +2252,7 @@ int buildin_getequippercentrefinery(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0)
 		push_val(st->stack,C_INT,pc_percentrefinery(sd,&sd->status.inventory[i]));
@@ -2242,7 +2272,7 @@ int buildin_successrefitem(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0) {
 		ep=sd->status.inventory[i].equip;
@@ -2269,7 +2299,7 @@ int buildin_failedrefitem(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(i >= 0) {
 		sd->status.inventory[i].refine = 0;
@@ -2294,7 +2324,7 @@ int buildin_statusup(struct script_state *st)
 	struct map_session_data *sd;
 
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_statusup(sd,type);
 
 	return 0;
@@ -2310,7 +2340,7 @@ int buildin_statusup2(struct script_state *st)
 
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	val=conv_num(st,& (st->stack->stack_data[st->start+3]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_statusup2(sd,type,val);
 
 	return 0;
@@ -2326,7 +2356,7 @@ int buildin_bonus(struct script_state *st)
 
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	val=conv_num(st,& (st->stack->stack_data[st->start+3]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_bonus(sd,type,val);
 
 	return 0;
@@ -2343,7 +2373,7 @@ int buildin_bonus2(struct script_state *st)
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	type2=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	val=conv_num(st,& (st->stack->stack_data[st->start+4]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_bonus2(sd,type,type2,val);
 
 	return 0;
@@ -2361,7 +2391,7 @@ int buildin_bonus3(struct script_state *st)
 	type2=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	type3=conv_num(st,& (st->stack->stack_data[st->start+4]));
 	val=conv_num(st,& (st->stack->stack_data[st->start+5]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_bonus3(sd,type,type2,type3,val);
 
 	return 0;
@@ -2379,7 +2409,7 @@ int buildin_skill(struct script_state *st)
 	level=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	if( st->end>st->start+4 )
 		flag=conv_num(st,&(st->stack->stack_data[st->start+4]) );
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_skill(sd,id,level,flag);
 
 	return 0;
@@ -2391,7 +2421,7 @@ int buildin_skill(struct script_state *st)
 int buildin_getskilllv(struct script_state *st)
 {
 	int id=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	push_val(st->stack,C_INT, pc_checkskill( map_id2sd(st->rid) ,id) );
+	push_val(st->stack,C_INT, pc_checkskill( script_rid2sd(st) ,id) );
 	return 0;
 }
 /*==========================================
@@ -2409,7 +2439,7 @@ int buildin_basicskillcheck(struct script_state *st)
  */
 int buildin_getgmlevel(struct script_state *st)
 {
-	push_val(st->stack,C_INT, pc_isGM(map_id2sd(st->rid)));
+	push_val(st->stack,C_INT, pc_isGM(script_rid2sd(st)));
 	return 0;
 }
 
@@ -2433,7 +2463,7 @@ int buildin_checkoption(struct script_state *st)
 	struct map_session_data *sd;
 
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 
 	if(sd->status.option & type){
 		push_val(st->stack,C_INT,1);
@@ -2454,7 +2484,7 @@ int buildin_setoption(struct script_state *st)
 	struct map_session_data *sd;
 
 	type=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_setoption(sd,type);
 
 	return 0;
@@ -2468,7 +2498,7 @@ int buildin_setcart(struct script_state *st)
 {
 	struct map_session_data *sd;
 
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_setcart(sd,1);
 
 	return 0;
@@ -2482,7 +2512,7 @@ int buildin_setfalcon(struct script_state *st)
 {
 	struct map_session_data *sd;
 
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_setfalcon(sd);
 
 	return 0;
@@ -2496,7 +2526,7 @@ int buildin_setriding(struct script_state *st)
 {
 	struct map_session_data *sd;
 
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_setriding(sd);
 
 	return 0;
@@ -2514,8 +2544,8 @@ int buildin_savepoint(struct script_state *st)
 	str=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	x=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	y=conv_num(st,& (st->stack->stack_data[st->start+4]));
-	pc_setsavepoint(map_id2sd(st->rid),str,x,y);
-//	pc_setsavepoint(map_id2sd(st->rid),st->stack->stack_data[st->start+2].u.str,x,y);
+	pc_setsavepoint(script_rid2sd(st),str,x,y);
+//	pc_setsavepoint(script_rid2sd(st),st->stack->stack_data[st->start+2].u.str,x,y);
 	return 0;
 }
 
@@ -2525,13 +2555,13 @@ int buildin_savepoint(struct script_state *st)
  */
 int buildin_openstorage(struct script_state *st)
 {
-	storage_storageopen(map_id2sd(st->rid));
+	storage_storageopen(script_rid2sd(st));
 	return 0;
 }
 
 int buildin_guildopenstorage(struct script_state *st)
 {
-	struct map_session_data *sd=map_id2sd(st->rid);
+	struct map_session_data *sd=script_rid2sd(st);
 	int ret;
 	ret = storage_guild_storageopen(sd);
 	push_val(st->stack,C_INT,ret);
@@ -2546,7 +2576,7 @@ int buildin_itemskill(struct script_state *st)
 {
 	int id,lv;
 	char *str;
-	struct map_session_data *sd=map_id2sd(st->rid);
+	struct map_session_data *sd=script_rid2sd(st);
 
 	id=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	lv=conv_num(st,& (st->stack->stack_data[st->start+3]));
@@ -2568,7 +2598,7 @@ int buildin_itemskill(struct script_state *st)
 int buildin_produce(struct script_state *st)
 {
 	int trigger;
-	struct map_session_data *sd=map_id2sd(st->rid);
+	struct map_session_data *sd=script_rid2sd(st);
 
 	if(	sd->state.produce_flag == 1) return 0;
 	trigger=conv_num(st,& (st->stack->stack_data[st->start+2]));
@@ -2584,7 +2614,7 @@ int buildin_monster(struct script_state *st)
 {
 	int class,amount,x,y;
 	char *str,*map,*event="";
-	struct map_session_data *sd=map_id2sd(st->rid);
+	struct map_session_data *sd=script_rid2sd(st);
 
 	map	=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	x	=conv_num(st,& (st->stack->stack_data[st->start+3]));
@@ -2606,7 +2636,7 @@ int buildin_areamonster(struct script_state *st)
 {
 	int class,amount,x0,y0,x1,y1;
 	char *str,*map,*event="";
-	struct map_session_data *sd=map_id2sd(st->rid);
+	struct map_session_data *sd=script_rid2sd(st);
 
 	map	=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	x0	=conv_num(st,& (st->stack->stack_data[st->start+3]));
@@ -2684,7 +2714,7 @@ int buildin_doevent(struct script_state *st)
 {
 	char *event;
 	event=conv_str(st,& (st->stack->stack_data[st->start+2]));
-	npc_event(map_id2sd(st->rid),event);
+	npc_event(script_rid2sd(st),event);
 	return 0;
 }
 /*==========================================
@@ -2697,7 +2727,7 @@ int buildin_addtimer(struct script_state *st)
 	int tick;
 	tick=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	event=conv_str(st,& (st->stack->stack_data[st->start+3]));
-	pc_addeventtimer(map_id2sd(st->rid),tick,event);
+	pc_addeventtimer(script_rid2sd(st),tick,event);
 	return 0;
 }
 /*==========================================
@@ -2708,7 +2738,7 @@ int buildin_deltimer(struct script_state *st)
 {
 	char *event;
 	event=conv_str(st,& (st->stack->stack_data[st->start+2]));
-	pc_deleventtimer(map_id2sd(st->rid),event);
+	pc_deleventtimer(script_rid2sd(st),event);
 	return 0;
 }
 /*==========================================
@@ -2721,7 +2751,7 @@ int buildin_addtimercount(struct script_state *st)
 	int tick;
 	event=conv_str(st,& (st->stack->stack_data[st->start+2]));
 	tick=conv_num(st,& (st->stack->stack_data[st->start+3]));
-	pc_addeventtimercount(map_id2sd(st->rid),event,tick);
+	pc_addeventtimercount(script_rid2sd(st),event,tick);
 	return 0;
 }
 
@@ -3023,7 +3053,7 @@ int buildin_catchpet(struct script_state *st)
 	int pet_id;
 	struct map_session_data *sd;
 	pet_id= conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pet_catch_process1(sd,pet_id);
 	return 0;
 }
@@ -3035,7 +3065,7 @@ int buildin_catchpet(struct script_state *st)
 int buildin_birthpet(struct script_state *st)
 {
 	struct map_session_data *sd;
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	clif_sendegg(sd);
 	return 0;
 }
@@ -3047,7 +3077,7 @@ int buildin_birthpet(struct script_state *st)
 int buildin_resetstatus(struct script_state *st)
 {
 	struct map_session_data *sd;
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_resetstate(sd);
 	return 0;
 }
@@ -3059,7 +3089,7 @@ int buildin_resetstatus(struct script_state *st)
 int buildin_resetskill(struct script_state *st)
 {
 	struct map_session_data *sd;
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	pc_resetskill(sd);
 	return 0;
 }
@@ -3072,7 +3102,7 @@ int buildin_changebase(struct script_state *st)
 {
 	struct map_session_data *sd;
 	int vclass;
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	vclass = conv_num(st,& (st->stack->stack_data[st->start+2]));
 	if(vclass == 22 && !battle_config.wedding_modifydisplay)
 		return 0;
@@ -3092,7 +3122,7 @@ int buildin_changebase(struct script_state *st)
 int buildin_changesex(struct script_state *st)
 {
 	struct map_session_data *sd=NULL;
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 
 	if(sd->status.sex==0){
 		sd->status.sex=1;
@@ -3298,6 +3328,17 @@ int buildin_warpwaitingpc(struct script_state *st)
 	}
 	return 0;
 }
+/*==========================================
+ * RIDのアタッチ
+ *------------------------------------------
+ */
+int buildin_attachrid(struct script_state *st)
+{
+	st->rid=conv_num(st,& (st->stack->stack_data[st->start+2]));
+	push_val(st->stack,C_INT, (map_id2sd(st->rid)!=NULL));
+	return 0;
+}
+
 /*==========================================
  *
  *------------------------------------------
@@ -3709,7 +3750,7 @@ int buildin_getequipcardcnt(struct script_state *st)
 	struct map_session_data *sd;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(sd->status.inventory[i].card[0] == 0x00ff){ // 製造武器はカードなし
 		push_val(st->stack,C_INT,0);
@@ -3739,7 +3780,7 @@ int buildin_successremovecards(struct script_state *st)
 	struct item item_tmp;
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(sd->status.inventory[i].card[0]==0x00ff){ // 製造武器は処理しない
 		return 0;
@@ -3792,7 +3833,7 @@ int buildin_failedremovecards(struct script_state *st)
 
 	num=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	typefail=conv_num(st,& (st->stack->stack_data[st->start+3]));
-	sd=map_id2sd(st->rid);
+	sd=script_rid2sd(st);
 	i=pc_checkequip(sd,equip[num-1]);
 	if(sd->status.inventory[i].card[0]==0x00ff){ // 製造武器は処理しない
 		return 0;
@@ -4069,7 +4110,7 @@ void op_2(struct script_state *st,int op)
 		op_2num(st,op,i1,i2);
 	}else{
 		// si,is => error
-		printf("script: op_2: int&str, str&str not allow.");
+		printf("script: op_2: int&str, str&int not allow.");
 		push_val(st->stack,C_INT,0);
 	}
 }

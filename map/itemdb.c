@@ -234,7 +234,7 @@ static int itemdb_readdb(void)
 {
 	FILE *fp;
 	char line[1024];
-	int ln=0;
+	int ln=0,lines=0;
 	int nameid,j;
 	char *str[32],*p,*np;
 	struct item_data *id;
@@ -251,7 +251,9 @@ static int itemdb_readdb(void)
 			exit(1);
 		}
 
+		lines=0;
 		while(fgets(line,1020,fp)){
+			lines++;
 			if(line[0]=='/' && line[1]=='/')
 				continue;
 			memset(str,0,sizeof(str));
@@ -304,10 +306,10 @@ static int itemdb_readdb(void)
 
 			if((p=strchr(np,'{'))==NULL)
 				continue;
-			id->use_script = parse_script(p,0);
+			id->use_script = parse_script(p,lines);
 			if((p=strchr(p+1,'{'))==NULL)
 				continue;
-			id->equip_script = parse_script(p,0);
+			id->equip_script = parse_script(p,lines);
 		}
 		fclose(fp);
 		printf("read %s done (count=%d)\n",filename[i],ln);
