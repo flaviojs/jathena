@@ -250,15 +250,37 @@ int chrif_sendmapack(int fd)
  */
 int chrif_authreq(struct map_session_data *sd)
 {
+	int i,ip=0;
+	
 	nullpo_retr(-1, sd);
 
+	for(i=0;i<fd_max;i++){
+		if(session[i] && session[i]->session_data==sd){
+			ip=session[i]->client_addr.sin_addr.s_addr;
+			break;
+		}
+	}
 	WFIFOW(char_fd,0) = 0x2afc;
 	WFIFOL(char_fd,2) = sd->bl.id;
 	WFIFOL(char_fd,6) = sd->char_id;
 	WFIFOL(char_fd,10)= sd->login_id1;
-	WFIFOSET(char_fd,14);
+	WFIFOL(char_fd,14)= sd->login_id2;
+	WFIFOL(char_fd,18)= ip;
+	WFIFOSET(char_fd,24);
 
 	return 0;
+}
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int chrif_authok(int fd)
+{
+	struct map_session_data *sd=map_id2sd(RFIFOL(fd,4));
+	if(sd)
+		sd->login_id2=RFIFOL(fd,8);
+		
+	return pc_authok(RFIFOL(fd,4),(struct mmo_charstatus*)RFIFOP(fd,12));
 }
 
 /*==========================================
@@ -267,12 +289,23 @@ int chrif_authreq(struct map_session_data *sd)
  */
 int chrif_charselectreq(struct map_session_data *sd)
 {
+	int i,ip=0;
+	
 	nullpo_retr(-1, sd);
+
+	for(i=0;i<fd_max;i++){
+		if(session[i] && session[i]->session_data==sd){
+			ip=session[i]->client_addr.sin_addr.s_addr;
+			break;
+		}
+	}
 
 	WFIFOW(char_fd,0)=0x2b02;
 	WFIFOL(char_fd,2)=sd->bl.id;
 	WFIFOL(char_fd,6)=sd->login_id1;
-	WFIFOSET(char_fd,10);
+	WFIFOL(char_fd,10)=sd->login_id2;
+	WFIFOL(char_fd,14)=ip;
+	WFIFOSET(char_fd,18);
 	return 0;
 }
 
@@ -469,7 +502,7 @@ int chrif_parse(int fd)
 		switch(cmd){
 		case 0x2af9: chrif_connectack(fd); break;
 		case 0x2afb: chrif_sendmapack(fd); break;
-		case 0x2afd: pc_authok(RFIFOL(fd,4),(struct mmo_charstatus*)RFIFOP(fd,12)); break;
+		case 0x2afd: chrif_authok(fd); break;
 		case 0x2afe: pc_authfail(RFIFOL(fd,2)); break;
 		case 0x2b00: map_setusers(RFIFOL(fd,2)); break;
 		case 0x2b03: clif_charselectok(RFIFOL(fd,2)); break;

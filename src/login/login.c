@@ -23,6 +23,7 @@
 #include "version.h"
 #include "db.h"
 #include "lock.h"
+#include "timer.h"
 
 
 #ifdef PASSWORDENC
@@ -67,7 +68,7 @@ struct login_session_data {
 #define AUTH_FIFO_SIZE 256
 struct {
   int account_id,login_id1,login_id2;
-  int sex,delflag;
+  int ip,sex,delflag,tick;
 } auth_fifo[AUTH_FIFO_SIZE];
 int auth_fifo_pos=0;
 
@@ -501,172 +502,190 @@ int charif_sendallwos(int sfd,unsigned char *buf,unsigned int len)
 
 int parse_fromchar(int fd)
 {
-  int i,id;
+	int i,id;
 
-  for(id=0;id<MAX_SERVERS;id++)
-    if(server_fd[id]==fd)
-      break;
-  if(id==MAX_SERVERS)
-    session[fd]->eof=1;
-  if(session[fd]->eof){
-    for(i=0;i<MAX_SERVERS;i++)
-      if(server_fd[i]==fd)
-	server_fd[i]=-1;
-    close(fd);
-    delete_session(fd);
-    return 0;
-  }
-  while(RFIFOREST(fd)>=2){
-    switch(RFIFOW(fd,0)){
-    case 0x2712:
-      if(RFIFOREST(fd)<15)
-	return 0;
-      for(i=0;i<AUTH_FIFO_SIZE;i++){
-	if(auth_fifo[i].account_id==RFIFOL(fd,2) &&
-	   auth_fifo[i].login_id1==RFIFOL(fd,6) &&
-	   /*auth_fifo[i].login_id2==RFIFOL(fd,10) &&*/
-	   auth_fifo[i].sex==RFIFOB(fd,14) &&
-	   !auth_fifo[i].delflag){
-	  auth_fifo[i].delflag=1;
-//	  printf("%d\n",i);
-	  break;
+	for(id=0;id<MAX_SERVERS;id++)
+		if(server_fd[id]==fd)
+			break;
+	if(id==MAX_SERVERS)
+		session[fd]->eof=1;
+	if(session[fd]->eof){
+		for(i=0;i<MAX_SERVERS;i++)
+			if(server_fd[i]==fd)
+				server_fd[i]=-1;
+		close(fd);
+		delete_session(fd);
+		return 0;
 	}
-      }
-	  
-	  if(i!=AUTH_FIFO_SIZE){	// account_reg送信
-		int p,j,i;
-		for(i=0;i<auth_num;i++){
-			if(auth_dat[i].account_id==RFIFOL(fd,2))
-				break;
-		}
-		if(i<auth_num){
-			WFIFOW(fd,0)=0x2729;
-			WFIFOL(fd,4)=RFIFOL(fd,2);
-			for(p=8,j=0;j<auth_dat[i].account_reg2_num;p+=36,j++){
-				memcpy(WFIFOP(fd,p),auth_dat[i].account_reg2[j].str,32);
-				WFIFOL(fd,p+32)=auth_dat[i].account_reg2[j].value;
+	while(RFIFOREST(fd)>=2){
+		switch(RFIFOW(fd,0)){
+		
+		case 0x2712:	// キャラクター鯖へのログイン認証
+			if(RFIFOREST(fd)<23)
+				return 0;
+			for(i=0;i<AUTH_FIFO_SIZE;i++){
+				int ret=0;
+				if( !(ret=(	auth_fifo[i].account_id==RFIFOL(fd,2) &&
+						auth_fifo[i].login_id1==RFIFOL(fd,6) &&
+					/*auth_fifo[i].login_id2==RFIFOL(fd,10) */ 1 ) ) ){
+#ifdef CMP_AUTHFIFO_LOGIN2
+					printf("login auth_fifo check lid2 %d %x %x\n",i,auth_fifo[i].login_id2,RFIFOL(fd,10));
+				
+					ret=(auth_fifo[i].login_id2==RFIFOL(fd,10));
+#endif
+#ifdef CMP_AUTHFIFO_IP
+					printf("login auth_fifo check ip %d %x %x\n",i,auth_fifo[i].ip,RFIFOL(fd,15));
+					ret|=(auth_fifo[i].ip==RFIFOL(fd,15) );
+#endif
+				}
+				if(	ret &&
+					auth_fifo[i].sex==RFIFOB(fd,14) &&
+					!auth_fifo[i].delflag){
+					auth_fifo[i].delflag=1;
+//				 printf("%d\n",i);
+					break;
+				}
 			}
-			WFIFOW(fd,2)=p;
-			WFIFOSET(fd,p);
-//			printf("account_reg2 send : login->char (auth fifo)\n");
-		}
-	  }
 	  
-      WFIFOW(fd,0)=0x2713;
-      WFIFOL(fd,2)=RFIFOL(fd,2);
-      if(i!=AUTH_FIFO_SIZE){
-	WFIFOB(fd,6)=0;
-      } else {
-	WFIFOB(fd,6)=1;
-      }
-      WFIFOSET(fd,7);
-      RFIFOSKIP(fd,15);
-      break;
-    case 0x2714:
-      //printf("set users %s : %d\n",server[id].name,RFIFOL(fd,2));
-      server[id].users=RFIFOL(fd,2);
-      RFIFOSKIP(fd,6);
-      break;
-	
-	case 0x2720:	// GM
-	  {
-	  	int newacc=0,oldacc,i=0,j;
-		if(RFIFOREST(fd)<4)
-			return 0;
-		if(RFIFOREST(fd)<RFIFOW(fd,2))
-			return 0;
-		oldacc=RFIFOL(fd,4);
-		printf("gm search %d\n",oldacc);
-		if(strcmp(RFIFOP(fd,8),gm_pass)==0 &&
-			(oldacc<gm_start || oldacc>gm_last)){
-			for(j=gm_start,i=0;j<gm_last && i<auth_num;j++){
-				for(i=0;i<auth_num;i++){
-					if(auth_dat[i].account_id==j)
+			if(i!=AUTH_FIFO_SIZE){	// account_reg送信
+				int account_id=auth_fifo[i].account_id;
+				int p,j,x;
+				for(x=0;x<auth_num;x++){
+					if(auth_dat[x].account_id==account_id)
 						break;
 				}
+				if(x<auth_num){
+					WFIFOW(fd,0)=0x2729;
+					WFIFOL(fd,4)=account_id;
+					for(p=8,j=0;j<auth_dat[x].account_reg2_num;p+=36,j++){
+						memcpy(WFIFOP(fd,p),auth_dat[x].account_reg2[j].str,32);
+						WFIFOL(fd,p+32)=auth_dat[x].account_reg2[j].value;
+					}
+					WFIFOW(fd,2)=p;
+					WFIFOSET(fd,p);
+//			printf("account_reg2 send : login->char (auth fifo)\n");
+				}
 			}
-			if(i==auth_num){
-				newacc=j-1;
+	  
+			WFIFOW(fd,0)=0x2713;
+			WFIFOL(fd,2)=RFIFOL(fd,2);
+			if(i!=AUTH_FIFO_SIZE){
+				WFIFOB(fd,6)=0;
+			} else {
+				WFIFOB(fd,6)=1;
+			}
+			WFIFOL(fd,7)=auth_fifo[i].account_id;
+			WFIFOL(fd,11)=auth_fifo[i].login_id1;
+			WFIFOSET(fd,15);
+			RFIFOSKIP(fd,23);
+			break;
+
+		case 0x2714:	// ワールドのユーザー数通知
+			//printf("set users %s : %d\n",server[id].name,RFIFOL(fd,2));
+			server[id].users=RFIFOL(fd,2);
+			RFIFOSKIP(fd,6);
+			break;
+	
+		case 0x2720:	// GM
+			{
+				int newacc=0,oldacc,i=0,j;
+				if(RFIFOREST(fd)<4)
+					return 0;
+				if(RFIFOREST(fd)<RFIFOW(fd,2))
+					return 0;
+				oldacc=RFIFOL(fd,4);
+				printf("gm search %d\n",oldacc);
+				if(strcmp(RFIFOP(fd,8),gm_pass)==0 &&
+					(oldacc<gm_start || oldacc>gm_last)){
+					for(j=gm_start,i=0;j<gm_last && i<auth_num;j++){
+						for(i=0;i<auth_num;i++){
+							if(auth_dat[i].account_id==j)
+								break;
+						}
+					}
+					if(i==auth_num){
+						newacc=j-1;
+						for(i=0;i<auth_num;i++){
+							if(auth_dat[i].account_id==oldacc){
+								auth_dat[i].account_id=newacc;
+							}
+						}
+						printf("change GM! %d=>%d\n",oldacc,newacc);
+					}else
+						printf("change GM error %d %s\n",oldacc,RFIFOP(fd,8));
+				}else
+						printf("change GM error %d %s\n",oldacc,RFIFOP(fd,8));
+		
+				RFIFOSKIP(fd,RFIFOW(fd,2));
+				WFIFOW(fd,0)=0x2721;
+				WFIFOL(fd,2)=oldacc;
+				WFIFOL(fd,6)=newacc;
+				WFIFOSET(fd,10);
+			}
+			return 0;
+
+		case 0x2722:	// changesex
+			{
+				int acc,sex,i=0,j=0;
+				if(RFIFOREST(fd)<4)
+					return 0;
+				if(RFIFOREST(fd)<RFIFOW(fd,2))
+					return 0;
+				acc=RFIFOL(fd,4);
+				sex=RFIFOB(fd,8);
 				for(i=0;i<auth_num;i++){
-					if(auth_dat[i].account_id==oldacc){
-						auth_dat[i].account_id=newacc;
+				//			printf("%d,",auth_dat[i].account_id);
+					if(auth_dat[i].account_id==acc){
+						auth_dat[i].sex=sex;
+						j=1;
 					}
 				}
-				printf("change GM! %d=>%d\n",oldacc,newacc);
-			}else
-				printf("change GM error %d %s\n",oldacc,RFIFOP(fd,8));
-		}else
-				printf("change GM error %d %s\n",oldacc,RFIFOP(fd,8));
-
-		RFIFOSKIP(fd,RFIFOW(fd,2));
-		WFIFOW(fd,0)=0x2721;
-		WFIFOL(fd,2)=oldacc;
-		WFIFOL(fd,6)=newacc;
-		WFIFOSET(fd,10);
-	  }
-	  return 0;
-
-	case 0x2722:	// changesex
-	  {
-	  	int acc,sex,i=0,j=0;
-		if(RFIFOREST(fd)<4)
-			return 0;
-		if(RFIFOREST(fd)<RFIFOW(fd,2))
-			return 0;
-		acc=RFIFOL(fd,4);
-		sex=RFIFOB(fd,8);
-		for(i=0;i<auth_num;i++){
-//			printf("%d,",auth_dat[i].account_id);
-			if(auth_dat[i].account_id==acc){
-				auth_dat[i].sex=sex;
-				j=1;
+				RFIFOSKIP(fd,RFIFOW(fd,2));
+				WFIFOW(fd,0)=0x2723;
+				WFIFOL(fd,2)=acc;
+				WFIFOB(fd,6)=sex;
+				WFIFOSET(fd,7);
 			}
-		}
-		RFIFOSKIP(fd,RFIFOW(fd,2));
-		WFIFOW(fd,0)=0x2723;
-		WFIFOL(fd,2)=acc;
-		WFIFOB(fd,6)=sex;
-		WFIFOSET(fd,7);
-	  }
-	  return 0;
+			return 0;
 
-	case 0x2728: {	// save account_reg
-			int acc,p,i,j;
-			if(RFIFOREST(fd)<4)
-				return 0;
-			if(RFIFOREST(fd)<RFIFOW(fd,2))
-				return 0;
-			acc=RFIFOL(fd,4);
-			for(i=0;i<auth_num;i++){
-				if(auth_dat[i].account_id==acc)
-					break;
-			}
-			if(i<auth_num){
-				unsigned char buf[4096];
-				for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG2_NUM;p+=36,j++){
-					memcpy(auth_dat[i].account_reg2[j].str,RFIFOP(fd,p),32);
-					auth_dat[i].account_reg2[j].value=RFIFOL(fd,p+32);
+		case 0x2728:	// save account_reg
+			{
+				int acc,p,i,j;
+				if(RFIFOREST(fd)<4)
+					return 0;
+				if(RFIFOREST(fd)<RFIFOW(fd,2))
+					return 0;
+				acc=RFIFOL(fd,4);
+				for(i=0;i<auth_num;i++){
+					if(auth_dat[i].account_id==acc)
+						break;
 				}
-				auth_dat[i].account_reg2_num=j;
-				// 他のサーバーへポスト（同垢ログインがなければ送らなくていい）
-				memcpy(WBUFP(buf,0),RFIFOP(fd,0),RFIFOW(fd,2));
-				WBUFW(buf,0)=0x2729;
-				charif_sendallwos(fd,buf,WBUFW(buf,2));
-				// 保存
-				mmo_auth_sync();
-			}
-			RFIFOSKIP(fd,RFIFOW(fd,2));
-//			printf("login: save account_reg (from char)\n");
-		}break;
+				if(i<auth_num){
+					unsigned char buf[4096];
+					for(p=8,j=0;p<RFIFOW(fd,2) && j<ACCOUNT_REG2_NUM;p+=36,j++){
+						memcpy(auth_dat[i].account_reg2[j].str,RFIFOP(fd,p),32);
+						auth_dat[i].account_reg2[j].value=RFIFOL(fd,p+32);
+					}
+					auth_dat[i].account_reg2_num=j;
+					// 他のサーバーへポスト（同垢ログインがなければ送らなくていい）
+					memcpy(WBUFP(buf,0),RFIFOP(fd,0),RFIFOW(fd,2));
+					WBUFW(buf,0)=0x2729;
+					charif_sendallwos(fd,buf,WBUFW(buf,2));
+					// 保存
+					mmo_auth_sync();
+				}
+				RFIFOSKIP(fd,RFIFOW(fd,2));
+	//			printf("login: save account_reg (from char)\n");
+			} break;
 		
-    default:
-	  printf("login: unknown packet %x! (from char).\n",RFIFOW(fd,0));
-      close(fd);
-      session[fd]->eof=1;
-      return 0;
-    }
-  }
-  return 0;
+		default:
+			printf("login: unknown packet %x! (from char).\n",RFIFOW(fd,0));
+			close(fd);
+			session[fd]->eof=1;
+			return 0;
+		}
+	}
+	return 0;
 }
 
 int parse_admin(int fd)
@@ -794,248 +813,250 @@ int parse_admin(int fd)
 
 int parse_login(int fd)
 {
-  struct mmo_account account;
-  int result,i;
-
-  if(session[fd]->eof){
-    for(i=0;i<MAX_SERVERS;i++)
-      if(server_fd[i]==fd)
-				server_fd[i]=-1;
-    close(fd);
-    delete_session(fd);
-    return 0;
-  }
-  while(RFIFOREST(fd)>=2){
-	if(RFIFOW(fd,0)<30000) {
-	  	if(RFIFOW(fd,0) == 0x64 || RFIFOW(fd,0) == 0x01dd)
-			  printf("parse_login : %d %d %d %s\n",fd,RFIFOREST(fd),RFIFOW(fd,0),RFIFOP(fd,6));
-			else
-			  printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
-	}
-	switch(RFIFOW(fd,0)){
-	case 0x204:		//20040622暗号化ragexe対応
-		if(RFIFOREST(fd)<18)
-			return 0;
-		RFIFOSKIP(fd,18);
-		break;
-	case 0x200:		//クライアントでaccountオプション使用時の謎パケットへの対応
-		if(RFIFOREST(fd)<26)
-			return 0;
-		RFIFOSKIP(fd,26);
-		break;
-	case 0x64:		// クライアントログイン要求
-	case 0x01dd:	// 暗号化ログイン要求
-		if(RFIFOREST(fd)< ((RFIFOW(fd,0)==0x64)?55:47))
-			return 0;
-		{
-			unsigned char *p=(unsigned char *)&session[fd]->client_addr.sin_addr;
-			login_log("client connection request %s from %d.%d.%d.%d" RETCODE,
-				RFIFOP(fd,6),p[0],p[1],p[2],p[3]);
-		}
-
-		if( !check_ip(session[fd]->client_addr.sin_addr.s_addr) ){
-		  struct timeval tv;
-			char tmpstr[256];
-			gettimeofday(&tv,NULL);
-			strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&(tv.tv_sec)));
-			sprintf(tmpstr+19,".%03d",(int)tv.tv_usec/1000);
-			login_log("access denied %s" RETCODE, tmpstr);
-			WFIFOW(fd,0)=0x6a;
-			WFIFOB(fd,2)=0x03;
-			WFIFOSET(fd,3);
-		}
-		
-		account.userid = RFIFOP(fd,6);
-		account.passwd = RFIFOP(fd,30);
-#ifdef PASSWORDENC
-		account.passwdenc= (RFIFOW(fd,0)==0x64)?0:PASSWORDENC;
-#else
-		account.passwdenc=0;
-#endif
-		result=mmo_auth(&account,fd);
-		if(result==100){
-			server_num=0;
-			for(i=0;i<MAX_SERVERS;i++){
-				if(server_fd[i]>=0){
-					WFIFOL(fd,47+server_num*32) = server[i].ip;
-					WFIFOW(fd,47+server_num*32+4) = server[i].port;
-					memcpy(WFIFOP(fd,47+server_num*32+6), server[i].name, 20);
-					WFIFOW(fd,47+server_num*32+26) = server[i].users;
-					WFIFOW(fd,47+server_num*32+28) = server[i].maintenance;
-					WFIFOW(fd,47+server_num*32+30) = server[i].new;
-					server_num++;
-				}
-			}
-			WFIFOW(fd,0)=0x69;
-			WFIFOW(fd,2)=47+32*server_num;
-			WFIFOL(fd,4)=account.login_id1;
-			WFIFOL(fd,8)=account.account_id;
-			WFIFOL(fd,12)=account.login_id2;
-			WFIFOL(fd,16)=0;
-			memcpy(WFIFOP(fd,20),account.lastlogin,24);
-			WFIFOB(fd,46)=account.sex;
-			WFIFOSET(fd,47+32*server_num);
-			if(auth_fifo_pos>=AUTH_FIFO_SIZE){
-				auth_fifo_pos=0;
-			}
-			auth_fifo[auth_fifo_pos].account_id=account.account_id;
-			auth_fifo[auth_fifo_pos].login_id1=account.login_id1;
-			auth_fifo[auth_fifo_pos].login_id2=account.login_id2;
-			auth_fifo[auth_fifo_pos].sex=account.sex;
-			auth_fifo[auth_fifo_pos].delflag=0;
-			auth_fifo_pos++;
-		} else {
-			memset(WFIFOP(fd,0),0,23);
-			WFIFOW(fd,0)=0x6a;
-			WFIFOB(fd,2)=result;
-			WFIFOSET(fd,23);
-		}
-		RFIFOSKIP(fd,(RFIFOW(fd,0)==0x64)?55:47);
-		break;
+	struct mmo_account account;
+	int result,i;
 	
-	case 0x01db:	// 暗号化Key送信要求
-	case 0x791a:	// 管理パケットで暗号化key要求
-		{
-			struct login_session_data *ld;
-			if(session[fd]->session_data){
-				printf("login: illeagal md5key request.");
-				close(fd);
-				session[fd]->eof=1;
-				return 0;
-			}
-			ld=session[fd]->session_data=calloc(sizeof(*ld), 1);
-			if(!ld){
-				printf("login: md5key request: out of memory !\n");
-				close(fd);
-				session[fd]->eof=1;
-				return 0;
-			}
-			// 暗号化キー生成
-			memset(ld->md5key,0,sizeof(ld->md5key));
-			ld->md5keylen=rand()%4+12;
-			for(i=0;i<ld->md5keylen;i++)
-			ld->md5key[i]=rand()%255+1;
-	
-			RFIFOSKIP(fd,2);
-			WFIFOW(fd,0)=0x01dc;
-			WFIFOW(fd,2)=4+ld->md5keylen;
-			memcpy(WFIFOP(fd,4),ld->md5key,ld->md5keylen);
-			WFIFOSET(fd,WFIFOW(fd,2));
-		}
-		break;
-		
-	case 0x2710:	// Charサーバー接続要求
-		if(RFIFOREST(fd)<76)
-			return 0;
-		{
-			FILE *logfp=fopen(login_log_filename,"a");
-			if(logfp){
-				unsigned char *p=(unsigned char *)&session[fd]->client_addr.sin_addr;
-				fprintf(logfp,"server connection request %s @ %d.%d.%d.%d:%d (%d.%d.%d.%d)" RETCODE,
-				RFIFOP(fd,60),RFIFOB(fd,54),RFIFOB(fd,55),RFIFOB(fd,56),RFIFOB(fd,57),RFIFOW(fd,58),
-				p[0],p[1],p[2],p[3]);
-				fclose(logfp);
-			}
-		}
-		account.userid = RFIFOP(fd,2);
-		account.passwd = RFIFOP(fd,26);
-		account.passwdenc = 0;
-		result = mmo_auth(&account,fd);
-		if(result == 100 && account.sex==2 && account.account_id<MAX_SERVERS && server_fd[account.account_id]<0){
-			server[account.account_id].ip=RFIFOL(fd,54);
-			server[account.account_id].port=RFIFOW(fd,58);
-			memcpy(server[account.account_id].name,RFIFOP(fd,60),20);
-			server[account.account_id].users=0;
-			server[account.account_id].maintenance=RFIFOW(fd,82);
-			server[account.account_id].new=RFIFOW(fd,84);
-			server_fd[account.account_id]=fd;
-			WFIFOW(fd,0)=0x2711;
-			WFIFOB(fd,2)=0;
-			WFIFOSET(fd,3);
-			session[fd]->func_parse=parse_fromchar;
-			realloc_fifo(fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
-		} else {
-			WFIFOW(fd,0)=0x2711;
-			WFIFOB(fd,2)=3;
-			WFIFOSET(fd,3);
-		}
-		RFIFOSKIP(fd,86);
-		return 0;
-
-	case 0x7530:	// Athena情報所得
-		WFIFOW(fd,0)=0x7531;
-		WFIFOB(fd,2)=ATHENA_MAJOR_VERSION;
-		WFIFOB(fd,3)=ATHENA_MINOR_VERSION;
-		WFIFOB(fd,4)=ATHENA_REVISION;
-		WFIFOB(fd,5)=ATHENA_RELEASE_FLAG;
-		WFIFOB(fd,6)=ATHENA_OFFICIAL_FLAG;
-		WFIFOB(fd,7)=ATHENA_SERVER_LOGIN;
-		WFIFOW(fd,8)=ATHENA_MOD_VERSION;
-		WFIFOSET(fd,10);
-		RFIFOSKIP(fd,2);
-		break;
-	case 0x7532:	// 接続の切断(defaultと処理は一緒だが明示的にするため)
+	if(session[fd]->eof){
+		for(i=0;i<MAX_SERVERS;i++)
+			if(server_fd[i]==fd)
+		server_fd[i]=-1;
 		close(fd);
-		session[fd]->eof=1;
+		delete_session(fd);
 		return 0;
-	
-	case 0x7918:	// 管理モードログイン
-		{
-			struct login_session_data *ld=session[fd]->session_data;
-			if(RFIFOREST(fd)<4 || RFIFOREST(fd)<RFIFOW(fd,2))
+	}
+	while(RFIFOREST(fd)>=2){
+		if(RFIFOW(fd,0)<30000) {
+			if(RFIFOW(fd,0) == 0x64 || RFIFOW(fd,0) == 0x01dd)
+				printf("parse_login : %d %d %d %s\n",fd,RFIFOREST(fd),RFIFOW(fd,0),RFIFOP(fd,6));
+			else
+				printf("parse_login : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
+		}
+		switch(RFIFOW(fd,0)){
+		case 0x204:		//20040622暗号化ragexe対応
+			if(RFIFOREST(fd)<18)
 				return 0;
-
-			WFIFOW(fd,0)=0x7919;
-			WFIFOB(fd,2)=1;
+			RFIFOSKIP(fd,18);
+			break;
+		case 0x200:		//クライアントでaccountオプション使用時の謎パケットへの対応
+			if(RFIFOREST(fd)<26)
+				return 0;
+			RFIFOSKIP(fd,26);
+			break;
+		case 0x64:		// クライアントログイン要求
+		case 0x01dd:	// 暗号化ログイン要求
+			if(RFIFOREST(fd)< ((RFIFOW(fd,0)==0x64)?55:47))
+				return 0;
+			{
+				unsigned char *p=(unsigned char *)&session[fd]->client_addr.sin_addr;
+				login_log("client connection request %s from %d.%d.%d.%d" RETCODE,
+					RFIFOP(fd,6),p[0],p[1],p[2],p[3]);
+			}
+	
+			if( !check_ip(session[fd]->client_addr.sin_addr.s_addr) ){
+			  struct timeval tv;
+				char tmpstr[256];
+				gettimeofday(&tv,NULL);
+				strftime(tmpstr,24,"%Y-%m-%d %H:%M:%S",localtime(&(tv.tv_sec)));
+				sprintf(tmpstr+19,".%03d",(int)tv.tv_usec/1000);
+				login_log("access denied %s" RETCODE, tmpstr);
+				WFIFOW(fd,0)=0x6a;
+				WFIFOB(fd,2)=0x03;
+				WFIFOSET(fd,3);
+			}
 			
-			if(RFIFOW(fd,4)==0){	// プレーン
-				if(strcmp(RFIFOP(fd,6),admin_pass)==0){
-					WFIFOB(fd,2)=0;
-					session[fd]->func_parse=parse_admin;
+			account.userid = RFIFOP(fd,6);
+			account.passwd = RFIFOP(fd,30);
+#ifdef PASSWORDENC
+			account.passwdenc= (RFIFOW(fd,0)==0x64)?0:PASSWORDENC;
+#else
+			account.passwdenc=0;
+#endif
+			result=mmo_auth(&account,fd);
+			if(result==100){
+				server_num=0;
+				for(i=0;i<MAX_SERVERS;i++){
+					if(server_fd[i]>=0){
+						WFIFOL(fd,47+server_num*32) = server[i].ip;
+						WFIFOW(fd,47+server_num*32+4) = server[i].port;
+						memcpy(WFIFOP(fd,47+server_num*32+6), server[i].name, 20);
+						WFIFOW(fd,47+server_num*32+26) = server[i].users;
+						WFIFOW(fd,47+server_num*32+28) = server[i].maintenance;
+						WFIFOW(fd,47+server_num*32+30) = server[i].new;
+						server_num++;
+					}
 				}
-			}else{					// 暗号化
+				WFIFOW(fd,0)=0x69;
+				WFIFOW(fd,2)=47+32*server_num;
+				WFIFOL(fd,4)=account.login_id1;
+				WFIFOL(fd,8)=account.account_id;
+				WFIFOL(fd,12)=account.login_id2;
+				WFIFOL(fd,16)=0;
+				memcpy(WFIFOP(fd,20),account.lastlogin,24);
+				WFIFOB(fd,46)=account.sex;
+				WFIFOSET(fd,47+32*server_num);
+				if(auth_fifo_pos>=AUTH_FIFO_SIZE){
+					auth_fifo_pos=0;
+				}
+				auth_fifo[auth_fifo_pos].account_id=account.account_id;
+				auth_fifo[auth_fifo_pos].login_id1=account.login_id1;
+				auth_fifo[auth_fifo_pos].login_id2=account.login_id2;
+				auth_fifo[auth_fifo_pos].sex=account.sex;
+				auth_fifo[auth_fifo_pos].delflag=0;
+				auth_fifo[auth_fifo_pos].tick=gettick();
+				auth_fifo[auth_fifo_pos].ip=session[fd]->client_addr.sin_addr.s_addr;
+				auth_fifo_pos++;
+			} else {
+				memset(WFIFOP(fd,0),0,23);
+				WFIFOW(fd,0)=0x6a;
+				WFIFOB(fd,2)=result;
+				WFIFOSET(fd,23);
+			}
+			RFIFOSKIP(fd,(RFIFOW(fd,0)==0x64)?55:47);
+			break;
+		
+		case 0x01db:	// 暗号化Key送信要求
+		case 0x791a:	// 管理パケットで暗号化key要求
+			{
+				struct login_session_data *ld;
+				if(session[fd]->session_data){
+					printf("login: illeagal md5key request.");
+					close(fd);
+					session[fd]->eof=1;
+					return 0;
+				}
+				ld=session[fd]->session_data=calloc(sizeof(*ld), 1);
 				if(!ld){
-					printf("login: md5key not created for admin login\n");
-				}else{
-					char md5str[64]="",md5bin[32];
-					if(RFIFOW(fd,4)==1){
-						strcpy(md5str,ld->md5key);
-						strcat(md5str,admin_pass);
-					}else if(RFIFOW(fd,4)==2){
-						strcpy(md5str,admin_pass);
-						strcat(md5str,ld->md5key);
-					};
-					MD5_String2binary(md5str,md5bin);
-					if(memcmp(md5bin,RFIFOP(fd,6),16)==0){
+					printf("login: md5key request: out of memory !\n");
+					close(fd);
+					session[fd]->eof=1;
+					return 0;
+				}
+				// 暗号化キー生成
+				memset(ld->md5key,0,sizeof(ld->md5key));
+				ld->md5keylen=rand()%4+12;
+				for(i=0;i<ld->md5keylen;i++)
+				ld->md5key[i]=rand()%255+1;
+		
+				RFIFOSKIP(fd,2);
+				WFIFOW(fd,0)=0x01dc;
+				WFIFOW(fd,2)=4+ld->md5keylen;
+				memcpy(WFIFOP(fd,4),ld->md5key,ld->md5keylen);
+				WFIFOSET(fd,WFIFOW(fd,2));
+			}
+			break;
+			
+		case 0x2710:	// Charサーバー接続要求
+			if(RFIFOREST(fd)<76)
+				return 0;
+			{
+				FILE *logfp=fopen(login_log_filename,"a");
+				if(logfp){
+					unsigned char *p=(unsigned char *)&session[fd]->client_addr.sin_addr;
+					fprintf(logfp,"server connection request %s @ %d.%d.%d.%d:%d (%d.%d.%d.%d)" RETCODE,
+					RFIFOP(fd,60),RFIFOB(fd,54),RFIFOB(fd,55),RFIFOB(fd,56),RFIFOB(fd,57),RFIFOW(fd,58),
+					p[0],p[1],p[2],p[3]);
+					fclose(logfp);
+				}
+			}
+			account.userid = RFIFOP(fd,2);
+			account.passwd = RFIFOP(fd,26);
+			account.passwdenc = 0;
+			result = mmo_auth(&account,fd);
+			if(result == 100 && account.sex==2 && account.account_id<MAX_SERVERS && server_fd[account.account_id]<0){
+				server[account.account_id].ip=RFIFOL(fd,54);
+				server[account.account_id].port=RFIFOW(fd,58);
+				memcpy(server[account.account_id].name,RFIFOP(fd,60),20);
+				server[account.account_id].users=0;
+				server[account.account_id].maintenance=RFIFOW(fd,82);
+				server[account.account_id].new=RFIFOW(fd,84);
+				server_fd[account.account_id]=fd;
+				WFIFOW(fd,0)=0x2711;
+				WFIFOB(fd,2)=0;
+				WFIFOSET(fd,3);
+				session[fd]->func_parse=parse_fromchar;
+				realloc_fifo(fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
+			} else {
+				WFIFOW(fd,0)=0x2711;
+				WFIFOB(fd,2)=3;
+				WFIFOSET(fd,3);
+			}
+			RFIFOSKIP(fd,86);
+			return 0;
+	
+		case 0x7530:	// Athena情報所得
+			WFIFOW(fd,0)=0x7531;
+			WFIFOB(fd,2)=ATHENA_MAJOR_VERSION;
+			WFIFOB(fd,3)=ATHENA_MINOR_VERSION;
+			WFIFOB(fd,4)=ATHENA_REVISION;
+			WFIFOB(fd,5)=ATHENA_RELEASE_FLAG;
+			WFIFOB(fd,6)=ATHENA_OFFICIAL_FLAG;
+			WFIFOB(fd,7)=ATHENA_SERVER_LOGIN;
+			WFIFOW(fd,8)=ATHENA_MOD_VERSION;
+			WFIFOSET(fd,10);
+			RFIFOSKIP(fd,2);
+			break;
+		case 0x7532:	// 接続の切断(defaultと処理は一緒だが明示的にするため)
+			close(fd);
+			session[fd]->eof=1;
+			return 0;
+		
+		case 0x7918:	// 管理モードログイン
+			{
+				struct login_session_data *ld=session[fd]->session_data;
+				if(RFIFOREST(fd)<4 || RFIFOREST(fd)<RFIFOW(fd,2))
+					return 0;
+	
+				WFIFOW(fd,0)=0x7919;
+				WFIFOB(fd,2)=1;
+				
+				if(RFIFOW(fd,4)==0){	// プレーン
+					if(strcmp(RFIFOP(fd,6),admin_pass)==0){
 						WFIFOB(fd,2)=0;
 						session[fd]->func_parse=parse_admin;
 					}
+				}else{					// 暗号化
+					if(!ld){
+						printf("login: md5key not created for admin login\n");
+					}else{
+						char md5str[64]="",md5bin[32];
+						if(RFIFOW(fd,4)==1){
+							strcpy(md5str,ld->md5key);
+							strcat(md5str,admin_pass);
+						}else if(RFIFOW(fd,4)==2){
+							strcpy(md5str,admin_pass);
+							strcat(md5str,ld->md5key);
+						};
+						MD5_String2binary(md5str,md5bin);
+						if(memcmp(md5bin,RFIFOP(fd,6),16)==0){
+							WFIFOB(fd,2)=0;
+							session[fd]->func_parse=parse_admin;
+						}
+					}
 				}
+				WFIFOSET(fd,3);
+				RFIFOSKIP(fd,RFIFOW(fd,2));
 			}
-			WFIFOSET(fd,3);
-			RFIFOSKIP(fd,RFIFOW(fd,2));
-		}
-		break;
-
-	default:
+			break;
+	
+		default:
 #ifdef DUMP_UNKNOWN_PACKET
-		{
-			int i;
-			printf("---- 00-01-02-03-04-05-06-07-08-09-0A-0B-0C-0D-0E-0F");
-			for(i=0;i<RFIFOREST(fd);i++){
-				if((i&15)==0)
-					printf("\n%04X ",i);
-				printf("%02X ",RFIFOB(fd,i));
+			{
+				int i;
+				printf("---- 00-01-02-03-04-05-06-07-08-09-0A-0B-0C-0D-0E-0F");
+				for(i=0;i<RFIFOREST(fd);i++){
+					if((i&15)==0)
+						printf("\n%04X ",i);
+					printf("%02X ",RFIFOB(fd,i));
+				}
+				printf("\n");
 			}
-			printf("\n");
-		}
 #endif
-		close(fd);
-		session[fd]->eof=1;
-		return 0;
+			close(fd);
+			session[fd]->eof=1;
+			return 0;
+		}
 	}
-  }
-  return 0;
+	return 0;
 }
 
 int login_config_read(const char *cfgName)
@@ -1143,23 +1164,23 @@ void do_final(void)
 
 int do_init(int argc,char **argv)
 {
-  int i;
+	int i;
 
-  login_config_read( (argc>1)?argv[1]:LOGIN_CONF_NAME );
-  srand(time(NULL));
+	login_config_read( (argc>1)?argv[1]:LOGIN_CONF_NAME );
+	srand(time(NULL));
 
-  for(i=0;i<AUTH_FIFO_SIZE;i++){
-    auth_fifo[i].delflag=1;
-  }
-  for(i=0;i<MAX_SERVERS;i++){
-    server_fd[i]=-1;
-  }
-  login_fd = make_listen_port(login_port);
-  mmo_auth_init();
+	for(i=0;i<AUTH_FIFO_SIZE;i++){
+		auth_fifo[i].delflag=1;
+	}
+	for(i=0;i<MAX_SERVERS;i++){
+		server_fd[i]=-1;
+	}
+	login_fd = make_listen_port(login_port);
+	mmo_auth_init();
 	read_gm_account();
-  set_termfunc(mmo_auth_sync);
-  set_defaultparse(parse_login);
+	set_termfunc(mmo_auth_sync);
+	set_defaultparse(parse_login);
 
 	atexit(do_final);
-  return 0;
+	return 0;
 }

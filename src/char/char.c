@@ -63,7 +63,7 @@ struct char_session_data{
 
 #define AUTH_FIFO_SIZE 256
 struct {
-  int account_id,char_id,login_id1,char_pos,delflag,sex;
+  int account_id,char_id,login_id1,login_id2,ip,tick,char_pos,delflag,sex;
 } auth_fifo[AUTH_FIFO_SIZE];
 int auth_fifo_pos=0;
 
@@ -658,6 +658,27 @@ static int char_delete(struct mmo_charstatus *cs,const char *mail)
 	return 0;
 }
 
+// authfifoの比較
+int cmp_authfifo(int i,int account_id,int login_id1,int login_id2,int ip)
+{
+	if(	auth_fifo[i].account_id==account_id &&
+		auth_fifo[i].login_id1==login_id1 )
+		return 1;
+#ifdef CMP_AUTHFIFO_LOGIN2
+//	printf("cmp_authfifo: id2 check %d %x %x = %08x %08x %08x\n",i,auth_fifo[i].login_id2,login_id2,
+//		auth_fifo[i].account_id,auth_fifo[i].login_id1,auth_fifo[i].login_id2);
+	if( auth_fifo[i].login_id2==login_id2 && login_id2>0)
+		return 1;
+#endif
+#ifdef CMP_AUTHFIFO_IP
+//	printf("cmp_authfifo: ip check %d %x %x = %08x %08x %08x\n",i,auth_fifo[i].ip,ip,
+//		auth_fifo[i].account_id,auth_fifo[i].login_id1,auth_fifo[i].login_id2);
+	if(auth_fifo[i].ip==ip && ip!=0 && ip!=-1)
+		return 1;
+#endif
+	return 0;
+}
+
 int parse_tologin(int fd)
 {
 	int i,fdc;
@@ -684,7 +705,7 @@ int parse_tologin(int fd)
 			RFIFOSKIP(fd,3);
 			break;
 		case 0x2713:
-			if(RFIFOREST(fd)<7)
+			if(RFIFOREST(fd)<15)
 				return 0;
 			for(i=0;i<fd_max;i++){
 				if(session[i] && (sd=session[i]->session_data)){
@@ -694,7 +715,7 @@ int parse_tologin(int fd)
 			}
 			fdc=i;
 			if(fdc==fd_max){
-				RFIFOSKIP(fd,7);
+				RFIFOSKIP(fd,15);
 				break;
 			}
 			printf("parse_tologin 2713 : %d\n",RFIFOB(fd,6));
@@ -702,9 +723,11 @@ int parse_tologin(int fd)
 				WFIFOW(fdc,0)=0x6c;
 				WFIFOB(fdc,2)=0x42;
 				WFIFOSET(fdc,3);
-				RFIFOSKIP(fd,7);
+				RFIFOSKIP(fd,15);
 				break;
 			}
+			sd->account_id=RFIFOL(fd,7);
+			sd->login_id1=RFIFOL(fd,11);
 	
 			if(max_connect_user > 0) {
 				if(count_users() < max_connect_user)
@@ -718,7 +741,7 @@ int parse_tologin(int fd)
 			else
 				mmo_char_send006b(fdc,sd);
 			
-			RFIFOSKIP(fd,7);
+			RFIFOSKIP(fd,15);
 			break;
 		
 		case 0x2721: 	// gm reply
@@ -908,13 +931,13 @@ int parse_frommap(int fd)
 			break;
 		// 認証要求
 		case 0x2afc:
-			if(RFIFOREST(fd)<14)
+			if(RFIFOREST(fd)<24)
 				return 0;
-			printf("auth_fifo search %08x %08x %08x\n",RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10));
+			printf("auth_fifo search %08x %08x %08x %08x %08x\n",
+				RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10),RFIFOL(fd,14),RFIFOL(fd,18));
 			for(i=0;i<AUTH_FIFO_SIZE;i++){
-				if(auth_fifo[i].account_id==RFIFOL(fd,2) &&
+				if( cmp_authfifo(i,RFIFOL(fd,2),RFIFOL(fd,10),RFIFOL(fd,14),RFIFOL(fd,18)) &&
 					auth_fifo[i].char_id==RFIFOL(fd,6) &&
-					auth_fifo[i].login_id1==RFIFOL(fd,10) &&
 					!auth_fifo[i].delflag){
 					auth_fifo[i].delflag=1;
 					break;
@@ -930,12 +953,13 @@ int parse_frommap(int fd)
 				WFIFOW(fd,0)=0x2afd;
 				WFIFOW(fd,2)=12+sizeof(char_dat[0]);
 				WFIFOL(fd,4)=RFIFOL(fd,2);
-				WFIFOL(fd,8)=RFIFOL(fd,6);
+			//	WFIFOL(fd,8)=RFIFOL(fd,6);
+				WFIFOL(fd,8)=auth_fifo[i].login_id2;
 				char_dat[auth_fifo[i].char_pos].sex=auth_fifo[i].sex;
 				memcpy(WFIFOP(fd,12),&char_dat[auth_fifo[i].char_pos],sizeof(char_dat[0]));
 				WFIFOSET(fd,WFIFOW(fd,2));
 			}
-			RFIFOSKIP(fd,14);
+			RFIFOSKIP(fd,24);
 			break;
 		// MAPサーバー上のユーザー数受信
 		case 0x2aff:
@@ -960,18 +984,22 @@ int parse_frommap(int fd)
 			break;
 		// キャラセレ要求
 		case 0x2b02:
-			if(RFIFOREST(fd)<10)
+			if(RFIFOREST(fd)<18)
 				return 0;
 
 			if(auth_fifo_pos>=AUTH_FIFO_SIZE){
 				auth_fifo_pos=0;
 			}
-			printf("auth_fifo set %d - %08x %08x\n",auth_fifo_pos,RFIFOL(fd,2),RFIFOL(fd,6));
+			printf("auth_fifo set %d - %08x %08x %08x %08x\n",
+				auth_fifo_pos,RFIFOL(fd,2),RFIFOL(fd,6),RFIFOL(fd,10),RFIFOL(fd,14));
 			auth_fifo[auth_fifo_pos].account_id=RFIFOL(fd,2);
 			auth_fifo[auth_fifo_pos].char_id=0;
 			auth_fifo[auth_fifo_pos].login_id1=RFIFOL(fd,6);
+			auth_fifo[auth_fifo_pos].login_id2=RFIFOL(fd,10);
 			auth_fifo[auth_fifo_pos].delflag=2;
 			auth_fifo[auth_fifo_pos].char_pos=0;
+			auth_fifo[auth_fifo_pos].tick=gettick();
+			auth_fifo[auth_fifo_pos].ip=RFIFOL(fd,14);
 			auth_fifo_pos++;
 			
 			WFIFOW(fd,0)=0x2b03;
@@ -979,7 +1007,7 @@ int parse_frommap(int fd)
 			WFIFOB(fd,6)=0;
 			WFIFOSET(fd,7);
 			
-			RFIFOSKIP(fd,10);
+			RFIFOSKIP(fd,18);
 			
 			break;
 		// マップサーバー間移動要求
@@ -999,6 +1027,8 @@ int parse_frommap(int fd)
 			auth_fifo[auth_fifo_pos].login_id1=RFIFOL(fd,6);
 			auth_fifo[auth_fifo_pos].delflag=0;
 			auth_fifo[auth_fifo_pos].sex=RFIFOB(fd,40);
+			auth_fifo[auth_fifo_pos].tick=gettick();
+			auth_fifo[auth_fifo_pos].ip=session[fd]->client_addr.sin_addr.s_addr;
 			{
 				int i=0;
 				for(i=0;i<char_num;i++){
@@ -1141,6 +1171,7 @@ static int char_mapif_init(int fd)
 	return inter_mapif_init(fd);
 }
 
+
 int parse_char(int fd)
 {
 	int i,ch;
@@ -1157,8 +1188,20 @@ int parse_char(int fd)
 	}
 	sd=session[fd]->session_data;
 	while(RFIFOREST(fd)>=2){
-		if(RFIFOW(fd,0)<30000)
+		// crc32のスキップ用
+		if(	sd==NULL			&&	// 未ログインor管理パケット
+			RFIFOREST(fd)>=4	&&	// 最低バイト数制限 ＆ 0x7530,0x7532管理パケ除去
+			RFIFOREST(fd)<=21	&&	// 最大バイト数制限 ＆ サーバーログイン除去
+			RFIFOW(fd,0)!=0x20b	&&	// md5通知パケット除去
+			(RFIFOREST(fd)<6 || RFIFOW(fd,4)==0x65)	){	// 次に何かパケットが来てるなら、接続でないとだめ
+			RFIFOSKIP(fd,4);
+			printf("parse_char : %d crc32 skipped\n",fd);
+			if(RFIFOREST(fd)==0)
+				return 0;
+		}
+		if(RFIFOW(fd,0)<30000 && RFIFOW(fd,0)!=0x187)
 			printf("parse_char : %d %d %d\n",fd,RFIFOREST(fd),RFIFOW(fd,0));
+				
 		switch(RFIFOW(fd,0)){
 		case 0x20b:		//20040622暗号化ragexe対応
 			if(RFIFOREST(fd)<19)
@@ -1182,10 +1225,12 @@ int parse_char(int fd)
 			WFIFOSET(fd,4);
 
 			for(i=0;i<AUTH_FIFO_SIZE;i++){
-				if(auth_fifo[i].account_id==sd->account_id &&
-				   auth_fifo[i].login_id1==sd->login_id1 &&
+				if(cmp_authfifo(i,sd->account_id,sd->login_id1,sd->login_id2,session[fd]->client_addr.sin_addr.s_addr) &&
 				   auth_fifo[i].delflag==2){
 					auth_fifo[i].delflag=1;
+					sd->account_id=auth_fifo[i].account_id;
+					sd->login_id1=auth_fifo[i].login_id1;
+					sd->login_id2=auth_fifo[i].login_id2;
 					break;
 				}
 			}
@@ -1195,7 +1240,9 @@ int parse_char(int fd)
 				WFIFOL(login_fd,6)=sd->login_id1;
 				WFIFOL(login_fd,10)=sd->login_id2;
 				WFIFOB(login_fd,14)=sd->sex;
-				WFIFOSET(login_fd,15);
+				WFIFOL(login_fd,15)=session[fd]->client_addr.sin_addr.s_addr;
+				WFIFOL(login_fd,19)=sd->account_id;
+				WFIFOSET(login_fd,23);
 			} else {
 				if(max_connect_user > 0) {
 					if(count_users() < max_connect_user)
@@ -1244,10 +1291,12 @@ int parse_char(int fd)
 				if(auth_fifo_pos>=AUTH_FIFO_SIZE){
 					auth_fifo_pos=0;
 				}
-				printf("auth_fifo set %d - %08x %08x %08x\n",auth_fifo_pos,sd->account_id,char_dat[sd->found_char[ch]].char_id,sd->login_id1);
+				printf("auth_fifo set %d - %08x %08x %08x %08x\n",
+					auth_fifo_pos,sd->account_id,char_dat[sd->found_char[ch]].char_id,sd->login_id1,sd->login_id2);
 				auth_fifo[auth_fifo_pos].account_id=sd->account_id;
 				auth_fifo[auth_fifo_pos].char_id=char_dat[sd->found_char[ch]].char_id;
 				auth_fifo[auth_fifo_pos].login_id1=sd->login_id1;
+				auth_fifo[auth_fifo_pos].login_id2=sd->login_id2;
 				auth_fifo[auth_fifo_pos].delflag=0;
 				auth_fifo[auth_fifo_pos].char_pos=sd->found_char[ch];
 				auth_fifo[auth_fifo_pos].sex=sd->sex;
