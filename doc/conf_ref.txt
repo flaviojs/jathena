@@ -847,6 +847,11 @@ monster_attack_direction_change
 	モンスターが攻撃した時方向を変更するかどうかです。本鯖では動けない限り方向が変えらないのですがバグぽい仕様なのでデフォルトはyesです。
 	noにすれば動くことだけで方向が変えるようになります。
 
+player_undead_nofreeze: no
+	プレイヤーが装備等によってアンデッドとして認識されている時
+	氷化するかどうかです。これをyesにすればアンデッドと認識されると
+	氷化しなくないらす。デフォルトはnoです。
+
 
 < 例 >
 
@@ -961,6 +966,7 @@ gvg_misc_attack_damage_rate: 100
 mob_changetarget_byskill: no
 player_attack_direction_change:yes
 monster_attack_direction_change:yes
+player_undead_nofreeze: no
 
 
 =====================================================================ghos6. atcommand_athena.conf

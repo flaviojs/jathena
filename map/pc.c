@@ -3234,7 +3234,8 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 {
 	struct map_session_data *sd;
 	struct block_list *bl;
-//	struct WeaponDamage wd;
+	struct status_change *sc_data;
+	short *opt;
 	int dist,skill,range;
 
 	sd=map_id2sd(id);
@@ -3254,6 +3255,9 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 	if(bl==NULL || bl->prev == NULL)
 		return 0;
 
+	if(bl->type == BL_PC && pc_isdead((struct map_session_data *)bl))
+		return 0;
+
 	// “¯‚¶map‚Å‚È‚¢‚È‚çUŒ‚‚µ‚È‚¢
 	// PC‚ªŽ€‚ñ‚Å‚Ä‚àUŒ‚‚µ‚È‚¢
 	if(sd->bl.m != bl->m || pc_isdead(sd))
@@ -3263,6 +3267,11 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 		return 0;
 
 	if(sd->sc_data[SC_AUTOCOUNTER].timer != -1)
+		return 0;
+
+	if((opt = battle_get_option(bl)) != NULL && *opt&0x46)
+		return 0;
+	if((sc_data = battle_get_sc_data(bl)) != NULL && sc_data[SC_TRICKDEAD].timer != -1)
 		return 0;
 
 	if(sd->skilltimer != -1 && pc_checkskill(sd,SA_FREECAST) <= 0)

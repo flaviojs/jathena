@@ -2320,7 +2320,8 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 		skill_castend_damage_id(&md->bl,bl,md->skillid,md->skilllv,tick,0);
 		break;
 	case 1:// Žx‰‡Œn
-		if( (md->skillid==AL_HEAL || (md->skillid==ALL_RESURRECTION && bl->type != BL_PC)) && battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) )
+		if(!mob_db[md->class].skill[md->skillidx].val[0] &&
+			(md->skillid==AL_HEAL || (md->skillid==ALL_RESURRECTION && bl->type != BL_PC)) && battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) )
 			skill_castend_damage_id(&md->bl,bl,md->skillid,md->skilllv,tick,0);
 		else
 			skill_castend_nodamage_id(&md->bl,bl,md->skillid,md->skilllv,tick,0);
@@ -2627,13 +2628,13 @@ int mob_getfriendstatus_sub(struct block_list *bl,va_list ap)
 {
 	int cond1,cond2;
 	struct mob_data **fr, *md=(struct mob_data *)bl, *mmd;
+	int flag=0;
 	mmd=va_arg(ap,struct mob_data *);
 	if( mmd->bl.id == bl->id )
 		return 0;
 	cond1=va_arg(ap,int);
 	cond2=va_arg(ap,int);
 	fr=va_arg(ap,struct mob_data **);
-	int flag=0;
 	if( cond2==-1 ){
 		int j;
 		for(j=SC_STONE;j<=SC_BLIND && !flag;j++){
@@ -2643,7 +2644,7 @@ int mob_getfriendstatus_sub(struct block_list *bl,va_list ap)
 		flag=( md->sc_data[cond2].timer!=-1 );
 	if( flag^( cond1==MSC_FRIENDSTATUSOFF ) )
 		(*fr)=md;
-		
+
 	return 0;
 }
 struct mob_data *mob_getfriendstatus(struct mob_data *md,int cond1,int cond2)
@@ -2968,7 +2969,7 @@ static int mob_readdb_mobavail(void)
 	char line[1024];
 	int ln=0;
 	int class,j,k;
-	char *str[10],*p,*np;
+	char *str[20],*p,*np;
 	
 	if( (fp=fopen("db/mob_avail.txt","r"))==NULL ){
 		printf("can't read db/mob_avail.txt\n");
@@ -2980,7 +2981,7 @@ static int mob_readdb_mobavail(void)
 			continue;
 		memset(str,0,sizeof(str));
 
-		for(j=0,p=line;j<10;j++){
+		for(j=0,p=line;j<11;j++){
 			if((np=strchr(p,','))!=NULL){
 				str[j]=p;
 				*np=0;
@@ -2997,12 +2998,10 @@ static int mob_readdb_mobavail(void)
 		if(class<=1000 || class>2000)	// ’l‚ªˆÙí‚È‚çˆ—‚µ‚È‚¢B
 			continue;
 		k=atoi(str[1]);
-		if(k >= 0) {
+		if(k >= 0)
 			mob_db[class].view_class=k;
-		}
-		
-		if(mob_db[class].view_class>=0 && mob_db[class].view_class<24)
-		{
+
+		if(mob_db[class].view_class >= 0 && mob_db[class].view_class < MAX_PC_CLASS) {
 			mob_db[class].sex=atoi(str[2]);
 			mob_db[class].hair=atoi(str[3]);
 			mob_db[class].hair_color=atoi(str[4]);
@@ -3011,6 +3010,7 @@ static int mob_readdb_mobavail(void)
 			mob_db[class].head_top=atoi(str[7]);
 			mob_db[class].head_mid=atoi(str[8]);
 			mob_db[class].head_buttom=atoi(str[9]);
+			mob_db[class].option=atoi(str[10])&~0x46;
 		}
 		ln++;
 	}

@@ -1498,7 +1498,7 @@ static struct Damage battle_calc_pet_weapon_attack(
 			case NPC_HOLYATTACK:
 			case NPC_DARKNESSATTACK:
 			case NPC_TELEKINESISATTACK:
-				damage = damage*(100+25*skill_lv)/100;
+				damage = damage*(100+25*(skill_lv-1))/100;
 				break;
 			case NPC_GUIDEDATTACK:
 				hitrate = 1000000;
@@ -1894,7 +1894,7 @@ static struct Damage battle_calc_mob_weapon_attack(
 			case NPC_HOLYATTACK:
 			case NPC_DARKNESSATTACK:
 			case NPC_TELEKINESISATTACK:
-				damage = damage*(100+25*skill_lv)/100;
+				damage = damage*(100+25*(skill_lv-1))/100;
 				break;
 			case NPC_GUIDEDATTACK:
 				hitrate = 1000000;
@@ -3885,6 +3885,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.mob_changetarget_byskill = 0;
 	battle_config.pc_attack_direction_change = 1;
 	battle_config.monster_attack_direction_change = 1;
+	battle_config.pc_undead_nofreeze = 0;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -4010,6 +4011,7 @@ int battle_config_read(const char *cfgName)
 			{ "mob_changetarget_byskill" ,&battle_config.mob_changetarget_byskill },
 			{ "player_attack_direction_change" ,&battle_config.pc_attack_direction_change },
 			{ "monster_attack_direction_change" ,&battle_config.monster_attack_direction_change },
+			{ "player_undead_nofreeze" ,&battle_config.pc_undead_nofreeze },
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

@@ -392,7 +392,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		break;
 
 	case TF_POISON:			/* インベナム */
-		if(!battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) && rand()%100< (2*skilllv+10)*sc_def_vit/100 )
+		if(rand()%100< (2*skilllv+10)*sc_def_vit/100 )
 			skill_status_change_start(bl,SC_POISON,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
 
@@ -405,7 +405,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 	case WZ_FROSTNOVA:		/* フロストノヴァ */
 	case HT_FREEZINGTRAP:	/* フリージングトラップ */
 		rate=skilllv*3+35;
-		if(!battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) && rand()%100 < rate*sc_def_mdef/100)
+		if(rand()%100 < rate*sc_def_mdef/100)
 			skill_status_change_start(bl,SC_FREEZE,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
 
@@ -414,7 +414,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			struct status_change *sc_data = battle_get_sc_data(bl);
 			if(sc_data) {
 				sc_data[SC_FREEZE].val3++;
-				if(!battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) && sc_data[SC_FREEZE].val3 >= 3)
+				if(sc_data[SC_FREEZE].val3 >= 3)
 					skill_status_change_start(bl,SC_FREEZE,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 			}
 		}
@@ -475,7 +475,7 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			skill_status_change_start(bl,SC_BLIND,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
 	case BA_FROSTJOKE:
-		if(!battle_check_undead(battle_get_race(bl),battle_get_elem_type(bl)) && rand()%100 < (15+5*skilllv)*sc_def_mdef/100)
+		if(rand()%100 < (15+5*skilllv)*sc_def_mdef/100)
 			skill_status_change_start(bl,SC_FREEZE,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
 
@@ -1712,45 +1712,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	switch(skillid)
 	{
-#if 0
-	case SM_RECOVERY:			/* SP回復向上 */
-		{
-        int a=0,i,bonus,c=0;
-		bonus=100+(skilllv*10);
-        if(skilllv==1){a=500 > 550;}
-        else if(skilllv==2){a=500 > 551;}
-        else if(skilllv==3){a=500 > 551;}
-        else if(skilllv==4){a=500 > 551;}
-		else if(skilllv==5){a=500 > 551;}
-		else if(skilllv==6){a=500 > 551;}
-		else if(skilllv==7){a=500 > 551;}
-		else if(skilllv==8){a=500 > 551;}
-		else if(skilllv==9){a=500 > 551;}
-        else if(skilllv==10){a=500 > 551;}
-        if(a>0){
-           for(i=0;i<MAX_INVENTORY;i++){
-          if(sd->status.inventory[i].nameid==a){
-                 pc_delitem(sd,i,1,0);
-                 c=1;
-                 if(skilllv==1){a=rand()%15+30;}
-                 else if(skilllv==2){a=rand()%20+70;}
-                 else if(skilllv==3){a=rand()%60+175;}
-                 else if(skilllv==4){a=rand()%80+350;}
-                 else if(skilllv==5){a=rand()%80+350;}
-				 else if(skilllv==6){a=rand()%80+350;}
-				 else if(skilllv==7){a=rand()%80+350;}
-				 else if(skilllv==8){a=rand()%80+350;}
-				 else if(skilllv==9){a=rand()%80+350;}
-				 else if(skilllv==10){a=rand()%80+350;}
-                 if(a>1){
-                    clif_skill_nodamage(src,bl,skillid,(bonus*a)/100,1);
-                    battle_heal(NULL,bl,(bonus*a)/100,0);
-                 }
-          }
-       }
-       if(c==0){clif_displaymessage(sd->fd,"Potions.");}
-#endif
-
 	case AL_HEAL:				/* ヒール */
 		{
 			int heal=skill_calc_heal( src, skilllv );
@@ -2559,7 +2520,8 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 
 	case NPC_PROVOCATION:
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		clif_pet_performance(src,mob_db[md->class].skill[md->skillidx].val[0]);
+		if(md)
+			clif_pet_performance(src,mob_db[md->class].skill[md->skillidx].val[0]);
 		break;
 
 	case NPC_HALLUCINATION:
@@ -5397,10 +5359,9 @@ int skill_encchant_eremental_end(struct block_list *bl,int type)
 int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,int val3,int val4,int tick,int flag)
 {
 	struct map_session_data *sd = NULL;
-	struct mob_data *md = NULL;
 	struct status_change* sc_data;
 	short *sc_count, *option, *opt1, *opt2;
-	int opt_flag = 0, calc_flag = 0;
+	int opt_flag = 0, calc_flag = 0,race, mode, elem, undead_flag;
 
 	if(bl->type == BL_SKILL)
 		return 0;
@@ -5410,24 +5371,21 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 	option=battle_get_option(bl);
 	opt1=battle_get_opt1(bl);
 	opt2=battle_get_opt2(bl);
+	race=battle_get_race(bl);
+	mode=battle_get_mode(bl);
+	elem=battle_get_elem_type(bl);
+	undead_flag=battle_check_undead(race,elem);
 
 	if(sc_data == NULL || sc_count == NULL || option == NULL || opt1 == NULL || opt2 == NULL)
 		return 0;
 
 	if(type == SC_AETERNA && (sc_data[SC_STONE].timer != -1 || sc_data[SC_FREEZE].timer != -1) )
 		return 0;
-	if(bl->type==BL_MOB){
-		int race = battle_get_race(bl);
-		md=(struct mob_data *)bl;
-		if(mob_db[md->class].mode & 0x20 && (type==SC_STONE || type==SC_FREEZE ||
-			type==SC_STAN || type==SC_SLEEP || type==SC_SILENCE || type==SC_QUAGMIRE || type == SC_DECREASEAGI || type == SC_SIGNUMCRUCIS ||
-			(type == SC_BLESSING && (battle_check_undead(race,battle_get_elem_type(bl)) || race == 6))) && !(flag&1)){
-			/* ボスには効かない(ただしカードによる効果は適用される) */
-			return 0;
-		}
-	}
-	else if(bl->type==BL_PC){
+
+	if(bl->type==BL_PC){
 		sd=(struct map_session_data *)bl;
+		if(type==SC_FREEZE && undead_flag && battle_config.pc_undead_nofreeze && !(flag&1))
+			return 0;
 
 		if(SC_STONE<=type && type<=SC_BLIND){	/* カードによる耐性 */
 			if(sd->reseff[type-SC_STONE] > 0 && rand()%10000<sd->reseff[type-SC_STONE]){
@@ -5437,9 +5395,20 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			}
 		}
 	}
-	else{
+	else if(bl->type == BL_MOB) {
+		if(type==SC_FREEZE && undead_flag && !(flag&1))
+			return 0;
+	}
+	else {
 		if(battle_config.error_log)
 			printf("skill_status_change_start: neither MOB nor PC !\n");
+		return 0;
+	}
+
+	if(mode & 0x20 && (type==SC_STONE || type==SC_FREEZE ||
+		type==SC_STAN || type==SC_SLEEP || type==SC_SILENCE || type==SC_QUAGMIRE || type == SC_DECREASEAGI || type == SC_SIGNUMCRUCIS ||
+		(type == SC_BLESSING && (undead_flag || race == 6))) && !(flag&1)){
+		/* ボスには効かない(ただしカードによる効果は適用される) */
 		return 0;
 	}
 	if(type==SC_FREEZE || type==SC_STAN || type==SC_SLEEP)
@@ -5469,8 +5438,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_BLESSING:			/* ブレッシング */
 			{
-				int race = battle_get_race(bl);
-				if(bl->type == BL_PC || (!battle_check_undead(race,battle_get_elem_type(bl)) && race != 6)) {
+				if(bl->type == BL_PC || (!undead_flag && race != 6)) {
 					if(sc_data[SC_CURSE].timer!=-1 )
 						skill_status_change_end(bl,SC_CURSE,-1);
 					if(sc_data[SC_STONE].timer!=-1 && sc_data[SC_STONE].val2 == 0)

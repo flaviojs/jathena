@@ -29,7 +29,7 @@ struct mob_db {
 	struct { int nameid,p; } dropitem[8];
 	struct { int nameid,p; } mvpitem[3];
 	int view_class,sex;
-	short hair,hair_color,weapon,shield,head_top,head_mid,head_buttom;
+	short hair,hair_color,weapon,shield,head_top,head_mid,head_buttom,option;
 	int summonper[MAX_RANDOMMONSTER];
 	int maxskill;
 	struct mob_skill skill[MAX_MOBSKILL];

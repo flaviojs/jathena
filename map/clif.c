@@ -87,8 +87,8 @@ static const int packet_len_table[0x200]={
 //#0x01C0
     2, 14, 10, -1, 22, 22,  4,  2,  13, 97,  0,  9,  9, 30,  6, 28,
     8, 14, 10, 35,  6,  8,  4, 11,  54, 53, 60,  2, -1, 47, 33,  6,
-    0,  8,  0,  0,  0,  0,  0,  0,  28,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  7,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
+    0,  8,  0,  0,  0,  0,  0,  0,  28,  0,  0,  0,  0,  0, -1, -1,
+   -1,  0,  0,  0,  7,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,
 };
 
 // local define
@@ -707,7 +707,7 @@ int clif_mob_class_change(struct mob_data *md,int class)
 	char buf[16];
 	int view = mob_get_viewclass(class);
 
-	if(view > 23) {
+	if(view >= MAX_PC_CLASS) {
 		WBUFW(buf,0)=0x1b0;
 		WBUFL(buf,2)=md->bl.id;
 		WBUFB(buf,6)=1;
@@ -735,8 +735,8 @@ static int clif_mob0078(struct mob_data *md,unsigned char *buf)
 	WBUFW(buf,10)=md->opt2;
 	WBUFW(buf,12)=md->option;
 	WBUFW(buf,14)=mob_get_viewclass(md->class);
-	if(mob_get_viewclass(md->class) < 24)
-	{
+	if(mob_get_viewclass(md->class) < MAX_PC_CLASS) {
+		WBUFW(buf,12)|=mob_db[md->class].option;
 		WBUFW(buf,16)=mob_get_hair(md->class);
 		WBUFW(buf,18)=mob_get_weapon(md->class);
 		WBUFW(buf,20)=mob_get_head_buttom(md->class);
@@ -773,8 +773,8 @@ static int clif_mob007b(struct mob_data *md,unsigned char *buf)
 	WBUFW(buf,10)=md->opt2;
 	WBUFW(buf,12)=md->option;
 	WBUFW(buf,14)=mob_get_viewclass(md->class);
-	if(mob_get_viewclass(md->class) < 24)
-	{
+	if(mob_get_viewclass(md->class) < MAX_PC_CLASS) {
+		WBUFW(buf,12)|=mob_db[md->class].option;
 		WBUFW(buf,16)=mob_get_hair(md->class);
 		WBUFW(buf,18)=mob_get_weapon(md->class);
 		WBUFW(buf,20)=mob_get_head_buttom(md->class);
@@ -830,8 +830,8 @@ static int clif_pet0078(struct pet_data *pd,unsigned char *buf)
 	WBUFL(buf,2)=pd->bl.id;
 	WBUFW(buf,6)=pd->speed;
 	WBUFW(buf,14)=mob_get_viewclass(pd->class);
-	if(mob_get_viewclass(pd->class) < 24)
-	{
+	if(mob_get_viewclass(pd->class) < MAX_PC_CLASS) {
+		WBUFW(buf,12)=mob_db[pd->class].option;
 		WBUFW(buf,16)=mob_get_hair(pd->class);
 		WBUFW(buf,18)=mob_get_weapon(pd->class);
 		WBUFW(buf,20)=mob_get_head_buttom(pd->class);
@@ -841,8 +841,7 @@ static int clif_pet0078(struct pet_data *pd,unsigned char *buf)
 		WBUFW(buf,28)=mob_get_hair_color(pd->class);
 		WBUFB(buf,45)=mob_get_sex(pd->class);
 	}
-	else
-	{
+	else {
 		WBUFW(buf,16)=0x14;
 		if((view = itemdb_viewid(pd->equip)) > 0)
 			WBUFW(buf,20)=view;
@@ -872,8 +871,8 @@ static int clif_pet007b(struct pet_data *pd,unsigned char *buf)
 	WBUFL(buf,2)=pd->bl.id;
 	WBUFW(buf,6)=pd->speed;
 	WBUFW(buf,14)=mob_get_viewclass(pd->class);
-	if(mob_get_viewclass(pd->class) < 24)
-	{
+	if(mob_get_viewclass(pd->class) < MAX_PC_CLASS) {
+		WBUFW(buf,12)=mob_db[pd->class].option;
 		WBUFW(buf,16)=mob_get_hair(pd->class);
 		WBUFW(buf,18)=mob_get_weapon(pd->class);
 		WBUFW(buf,20)=mob_get_head_buttom(pd->class);
@@ -884,8 +883,7 @@ static int clif_pet007b(struct pet_data *pd,unsigned char *buf)
 		WBUFW(buf,32)=mob_get_hair_color(pd->class);
 		WBUFB(buf,49)=mob_get_sex(pd->class);
 	}
-	else
-	{
+	else {
 		WBUFW(buf,16)=0x14;
 		if((view = itemdb_viewid(pd->equip)) > 0)
 			WBUFW(buf,20)=view;
@@ -990,8 +988,7 @@ int clif_spawnmob(struct mob_data *md)
 	unsigned char buf[64];
 	int len;
 
-	if(mob_get_viewclass(md->class) > 23)
-	{
+	if(mob_get_viewclass(md->class) >= MAX_PC_CLASS) {
 		memset(buf,0,packet_len_table[0x7c]);
 
 		WBUFW(buf,0)=0x7c;
@@ -1006,10 +1003,10 @@ int clif_spawnmob(struct mob_data *md)
 
 		clif_send(buf,packet_len_table[0x7c],&md->bl,AREA);
 	}
-	
+
 	len = clif_mob0078(md,buf);
 	clif_send(buf,len,&md->bl,AREA);
-		
+
 	return 0;
 }
 
@@ -1024,8 +1021,7 @@ int clif_spawnpet(struct pet_data *pd)
 	unsigned char buf[64];
 	int len;
 
-	if(mob_get_viewclass(pd->class) > 23)
-	{
+	if(mob_get_viewclass(pd->class) >= MAX_PC_CLASS) {
 		memset(buf,0,packet_len_table[0x7c]);
 
 		WBUFW(buf,0)=0x7c;
@@ -1449,6 +1445,7 @@ int clif_itemlist(struct map_session_data *sd)
 	int i,n,fd=sd->fd,arrow=-1;
 	unsigned char *buf = WFIFOP(fd,0);
 
+#if PACKETVER < 5
 	WBUFW(buf,0)=0xa3;
 	for(i=0,n=0;i<MAX_INVENTORY;i++){
 		if(sd->status.inventory[i].nameid <=0 || sd->inventory_data[i] == NULL || itemdb_isequip2(sd->inventory_data[i]))
@@ -1473,6 +1470,36 @@ int clif_itemlist(struct map_session_data *sd)
 		WBUFW(buf,2)=4+n*10;
 		WFIFOSET(fd,WFIFOW(fd,2));
 	}
+#else
+	WBUFW(buf,0)=0x1ee;
+	for(i=0,n=0;i<MAX_INVENTORY;i++){
+		if(sd->status.inventory[i].nameid <=0 || sd->inventory_data[i] == NULL || itemdb_isequip2(sd->inventory_data[i]))
+			continue;
+		WBUFW(buf,n*18+4)=i+2;
+		if(sd->inventory_data[i]->view_id > 0)
+			WBUFW(buf,n*18+6)=sd->inventory_data[i]->view_id;
+		else
+			WBUFW(buf,n*18+6)=sd->status.inventory[i].nameid;
+		WBUFB(buf,n*18+8)=sd->inventory_data[i]->type;
+		WBUFB(buf,n*18+9)=sd->status.inventory[i].identify;
+		WBUFW(buf,n*18+10)=sd->status.inventory[i].amount;
+		if(sd->inventory_data[i]->equip == 0x8000){
+			WBUFW(buf,n*18+12)=0x8000;
+			if(sd->status.inventory[i].equip) arrow=i;	// ついでに矢装備チェック
+		}
+		else
+			WBUFW(buf,n*18+12)=0;
+		WBUFW(buf,n*18+14)=sd->status.inventory[i].card[0];
+		WBUFW(buf,n*18+16)=sd->status.inventory[i].card[1];
+		WBUFW(buf,n*18+18)=sd->status.inventory[i].card[2];
+		WBUFW(buf,n*18+20)=sd->status.inventory[i].card[3];
+		n++;
+	}
+	if(n){
+		WBUFW(buf,2)=4+n*18;
+		WFIFOSET(fd,WFIFOW(fd,2));
+	}
+#endif
 	if(arrow >= 0)
 		clif_arrowequip(sd,arrow);
 	return 0;
@@ -1545,6 +1572,7 @@ int clif_storageitemlist(struct map_session_data *sd,struct storage *stor)
 	int i,n,fd=sd->fd;
 	unsigned char *buf = WFIFOP(fd,0);
 
+#if PACKETVER < 5
 	WBUFW(buf,0)=0xa5;
 	for(i=0,n=0;i<MAX_STORAGE;i++){
 		if(stor->storage[i].nameid<=0)
@@ -1568,6 +1596,35 @@ int clif_storageitemlist(struct map_session_data *sd,struct storage *stor)
 		WBUFW(buf,2)=4+n*10;
 		WFIFOSET(fd,WFIFOW(fd,2));
 	}
+#else
+	WBUFW(buf,0)=0x1f0;
+	for(i=0,n=0;i<MAX_STORAGE;i++){
+		if(stor->storage[i].nameid<=0)
+			continue;
+		id = itemdb_search(stor->storage[i].nameid);
+		if(itemdb_isequip2(id))
+			continue;
+
+		WBUFW(buf,n*18+4)=i+1;
+		if(id->view_id > 0)
+			WBUFW(buf,n*18+6)=id->view_id;
+		else
+			WBUFW(buf,n*18+6)=stor->storage[i].nameid;
+		WBUFB(buf,n*18+8)=id->type;;
+		WBUFB(buf,n*18+9)=stor->storage[i].identify;
+		WBUFW(buf,n*18+10)=stor->storage[i].amount;
+		WBUFW(buf,n*18+12)=0;
+		WBUFW(buf,n*18+14)=stor->storage[i].card[0];
+		WBUFW(buf,n*18+16)=stor->storage[i].card[1];
+		WBUFW(buf,n*18+18)=stor->storage[i].card[2];
+		WBUFW(buf,n*18+20)=stor->storage[i].card[3];
+		n++;
+	}
+	if(n){
+		WBUFW(buf,2)=4+n*18;
+		WFIFOSET(fd,WFIFOW(fd,2));
+	}
+#endif
 	return 0;
 }
 
@@ -2699,9 +2756,9 @@ int clif_damage(struct block_list *src,struct block_list *dst,unsigned int tick,
 			type = 9;
 		if(sc_data[SC_HALLUCINATION].timer != -1) {
 			if(damage > 0)
-				damage = damage*(1+rand()%10) + rand()%100;
+				damage = damage*(5+sc_data[SC_HALLUCINATION].val1) + rand()%100;
 			if(damage2 > 0)
-				damage2 = damage2*(1+rand()%10) + rand()%100;
+				damage2 = damage2*(5+sc_data[SC_HALLUCINATION].val1) + rand()%100;
 		}
 	}
 
@@ -3178,7 +3235,7 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,
 		if(type != 5 && sc_data[SC_ENDURE].timer != -1)
 			type = 9;
 		if(sc_data[SC_HALLUCINATION].timer != -1 && damage > 0)
-			damage = damage*(1+rand()%10) + rand()%100;
+			damage = damage*(5+sc_data[SC_HALLUCINATION].val1) + rand()%100;
 	}
 
 #if PACKETVER < 3
@@ -3224,7 +3281,7 @@ int clif_skill_damage2(struct block_list *src,struct block_list *dst,
 		if(type != 5 && sc_data[SC_ENDURE].timer != -1)
 			type = 9;
 		if(sc_data[SC_HALLUCINATION].timer != -1 && damage > 0)
-			damage = damage*(1*rand()%10) + rand()%100;
+			damage = damage*(5+sc_data[SC_HALLUCINATION].val1) + rand()%100;
 	}
 
 	WBUFW(buf,0)=0x115;
@@ -3819,6 +3876,7 @@ int clif_cart_itemlist(struct map_session_data *sd)
 	int i,n,fd=sd->fd;
 	unsigned char *buf = WFIFOP(fd,0);
 
+#if PACKETVER < 5
 	WBUFW(buf,0)=0x123;
 	for(i=0,n=0;i<MAX_CART;i++){
 		if(sd->status.cart[i].nameid<=0)
@@ -3841,6 +3899,34 @@ int clif_cart_itemlist(struct map_session_data *sd)
 		WBUFW(buf,2)=4+n*10;
 		WFIFOSET(fd,WFIFOW(fd,2));
 	}
+#else
+	WBUFW(buf,0)=0x1ef;
+	for(i=0,n=0;i<MAX_CART;i++){
+		if(sd->status.cart[i].nameid<=0)
+			continue;
+		id = itemdb_search(sd->status.cart[i].nameid);
+		if(itemdb_isequip2(id))
+			continue;
+		WBUFW(buf,n*18+4)=i+2;
+		if(id->view_id > 0)
+			WBUFW(buf,n*18+6)=id->view_id;
+		else
+			WBUFW(buf,n*18+6)=sd->status.cart[i].nameid;
+		WBUFB(buf,n*18+8)=id->type;
+		WBUFB(buf,n*18+9)=sd->status.cart[i].identify;
+		WBUFW(buf,n*18+10)=sd->status.cart[i].amount;
+		WBUFW(buf,n*18+12)=0;
+		WBUFW(buf,n*18+14)=sd->status.cart[i].card[0];
+		WBUFW(buf,n*18+16)=sd->status.cart[i].card[1];
+		WBUFW(buf,n*18+18)=sd->status.cart[i].card[2];
+		WBUFW(buf,n*18+20)=sd->status.cart[i].card[3];
+		n++;
+	}
+	if(n){
+		WBUFW(buf,2)=4+n*18;
+		WFIFOSET(fd,WFIFOW(fd,2));
+	}
+#endif
 	return 0;
 }
 

@@ -228,6 +228,7 @@ extern struct Battle_Config {
 	int mob_changetarget_byskill;
 	int pc_attack_direction_change;
 	int monster_attack_direction_change;
+	int pc_undead_nofreeze;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"
