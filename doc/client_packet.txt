@@ -490,7 +490,7 @@ R 011a <skill ID>.w <val>.w <dst ID>.l <src ID>.l <fail>.B
 	非ダメージ系スキル表示。ヒールの場合valは回復量
 	fail=00の場合失敗ぽいが、スチール以外では見た事無し
 S 011b <skill ID>.w <map name>.16B
-	011cへの応答。使わない場合"cancel"を送る
+	011cへの応答。使わない場合"cancel"、マップ内ランダムの場合"Random"を送る
 R 011c <skill ID>.w <map1>.16B <map2>.16B <map3>.16B <map4>.16B
 	テレポ/ポタの場所選択。
 	テレポの場合、Random/セーブ場所、ポタの場合、セーブ場所/memo1/memo2/memo3となる

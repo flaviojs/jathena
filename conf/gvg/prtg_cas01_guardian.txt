@@ -1,0 +1,50 @@
+//WoE Castle Guardian Spawn Script by holyAngelX
+//Note, you have to install guardians first for it to spawn.
+
+prtg_cas01.gat,197,197,0	script	Guardian_D01	-1,{
+OnAgitStart:
+	if (GetCastleData("prtg_cas01.gat",10) <= 0) goto NoSpawn;
+	monster "prtg_cas01.gat",196,92,"--ja--",1287,1,"Guardian_D01::OnGuardianDied"; 
+
+	if (GetCastleData("prtg_cas01.gat",11) <= 0) goto NoSpawn;
+	monster "prtg_cas01.gat",113,200,"--ja--",1287,1,"Guardian_D01::OnGuardianDied"; 
+
+	if (GetCastleData("prtg_cas01.gat",12) <= 0) goto NoSpawn;
+	monster "prtg_cas01.gat",111,186,"--ja--",1287,1,"Guardian_D01::OnGuardianDied"; 
+
+	if (GetCastleData("prtg_cas01.gat",13) <= 0) goto NoSpawn;
+	monster "prtg_cas01.gat",76,202,"--ja--",1285,1,"Guardian_D01::OnGuardianDied"; 
+
+	if (GetCastleData("prtg_cas01.gat",14) <= 0) goto NoSpawn;
+	monster "prtg_cas01.gat",90,26,"--ja--",1285,1,"Guardian_D01::OnGuardianDied"; 
+
+	if (GetCastleData("prtg_cas01.gat",15) <= 0) goto NoSpawn;
+	monster "prtg_cas01.gat",58,59,"--ja--",1286,1,"Guardian_D01::OnGuardianDied"; 
+
+	if (GetCastleData("prtg_cas01.gat",16) <= 0) goto NoSpawn;
+	monster "prtg_cas01.gat",112,200,"--ja--",1286,1,"Guardian_D01::OnGuardianDied"; 
+
+	if (GetCastleData("prtg_cas01.gat",17) <= 0) goto NoSpawn;
+	monster "prtg_cas01.gat",101,194,"--ja--",1286,1,"Guardian_D01::OnGuardianDied"; 
+	End;
+
+OnGuardianDied:
+	// event when Guardian died
+	MapAnnounce "prtg_cas01.gat","A Guardian Has Fallen",17;
+	end;	
+
+OnAgitEliminate:
+	// kill all monsters label by Guardian_D01::OnGuardianDied
+	KillMonster "prtg_cas01.gat","Guardian_D01::OnGuardianDied";
+	End;
+
+OnAgitEnd:
+	// kill all monsters label by Guardian_D01::OnGuardianDied
+	KillMonster "prtg_cas01.gat","Guardian_D01::OnGuardianDied";
+	End;
+
+NoSpawn:
+	End;
+
+}
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

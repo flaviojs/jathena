@@ -1019,7 +1019,7 @@ holywater_name_input
 	デフォルトはyesです。
 
 display_delay_skill_fail
-	スキル使用のディレイ中に「スキル使用の後は、しばらくお待ちください」を表示するかどうか。
+	スキル使用のディレイ中に「スキル使用の後は、しばらくお待ちください」を表示するかどうかです。
 	デフォルトはyesです。
 
 chat_warpportal
@@ -1028,6 +1028,10 @@ chat_warpportal
 	
 mob_warpportal
 	MOBをワープポータルで飛ばせるかどうかです。
+	デフォルトはnoです。
+
+dead_branch_active
+	古木の枝などmonster命令でmobidを負数に指定した場合に召喚されるモンスターをアクティブにするかどうかです。
 	デフォルトはnoです。
 
 import
@@ -1162,6 +1166,7 @@ holywater_name_input: yes
 display_delay_skill_fail: yes
 chat_warpportal: no
 mob_warpportal: no
+dead_branch_active: no
 
 
 ==========================================================================

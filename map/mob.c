@@ -93,7 +93,7 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 	int x,int y,const char *mobname,int class,int amount,const char *event)
 {
 	struct mob_data *md=NULL;
-	int m,count,lv=255;
+	int m,count,lv=255,r=class;
 	
 	if( sd )
 		lv=sd->status.base_level;
@@ -153,7 +153,7 @@ int mob_once_spawn(struct map_session_data *sd,char *mapname,
 		md->bl.m=m;
 		md->bl.x=x;
 		md->bl.y=y;
-
+		if(r<0&&battle_config.dead_branch_active) md->mode=21;
 		md->m =m;
 		md->x0=x;
 		md->y0=y;
@@ -424,7 +424,12 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 		return 0;
 	}
 
-	mode=mob_db[md->class].mode;
+
+	if(!md->mode){
+		mode=mob_db[md->class].mode;
+	}else{
+		mode=md->mode;
+	}
 	race=mob_db[md->class].race;
 	if(!(mode&0x20) && (sd->sc_data[SC_TRICKDEAD].timer != -1 ||
 		 ((pc_ishiding(sd) || sd->state.gangsterparadise) && race!=4 && race!=6) ) ) {
@@ -841,8 +846,23 @@ int mob_can_reach(struct mob_data *md,struct block_list *bl,int range)
 	wpd.path_len=0;
 	wpd.path_pos=0;
 	wpd.path_half=0;
+//	if(path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,bl->x,bl->y,0)!=-1)
+//		return 1;
+
 	if(path_search(&wpd,md->bl.m,md->bl.x,md->bl.y,bl->x,bl->y,0)!=-1)
-		return 1;
+	{
+		 //when players are the guild castle member not attack them !
+		if(md->class == 1285 || md->class == 1286 || md->class == 1287) {
+			struct guild *g=guild_search(((struct map_session_data *)bl)->status.guild_id);
+			struct guild_castle *gc=guild_mapname2gc(map[bl->m].name);
+			if(g == NULL)
+				return 1;
+			else if(g->guild_id == gc->guild_id)
+				return 0;
+		}else 
+			return 1;
+	}
+
 	if(bl->type!=BL_PC && bl->type!=BL_MOB)
 		return 0;
 
@@ -867,7 +887,13 @@ int mob_target(struct mob_data *md,struct block_list *bl,int dist)
 	struct map_session_data *sd;
 	struct status_change *sc_data = battle_get_sc_data(bl);
 	short *option = battle_get_option(bl);
-	int mode=mob_db[md->class].mode,race=mob_db[md->class].race;
+	int mode,race=mob_db[md->class].race;
+
+	if(!md->mode){
+		mode=mob_db[md->class].mode;
+	}else{
+		mode=md->mode;
+	}
 
 	if(!mode) {
 		md->target_id = 0;
@@ -912,7 +938,11 @@ static int mob_ai_sub_hard_activesearch(struct block_list *bl,va_list ap)
 
 	md=va_arg(ap,struct mob_data *);
 	pcc=va_arg(ap,int *);
-	mode=mob_db[md->class].mode;
+	if(!md->mode){
+		mode=mob_db[md->class].mode;
+	}else{
+		mode=md->mode;
+	}
 
 	// アクティブでターゲット射程内にいるなら、ロックする
 	if( mode&0x04  && !mob_exclusion_check(md,sd)){
@@ -947,7 +977,11 @@ static int mob_ai_sub_hard_lootsearch(struct block_list *bl,va_list ap)
 
 	md=va_arg(ap,struct mob_data *);
 	itc=va_arg(ap,int *);
-	mode=mob_db[md->class].mode;
+	if(!md->mode){
+		mode=mob_db[md->class].mode;
+	}else{
+		mode=md->mode;
+	}
 
 	if( !md->target_id && mode&0x02){
 		if(!md->lootitem || (battle_config.monster_loot_type == 1 && md->lootitem_count >= LOOTITEM_SIZE) )
@@ -1196,7 +1230,11 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 		return 0;
 	}
 
-	mode=mob_db[md->class].mode;
+	if(!md->mode){
+		mode=mob_db[md->class].mode;
+	}else{
+		mode=md->mode;
+	}
 	race=mob_db[md->class].race;
 
 	// 異常

@@ -247,6 +247,7 @@ extern struct Battle_Config {
 	int display_delay_skill_fail;
 	int chat_warpportal;
 	int mob_warpportal;
+	int dead_branch_active;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

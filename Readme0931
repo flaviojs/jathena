@@ -1,4 +1,43 @@
 --------------------
+//0943 by (凸)
+・battle_athena.confでdead_branch_activeをyesにすると古木の枝で召喚されるモンスターがアクティブになるように変更
+・微妙に変更したclient_packet.txtを同梱
+
+	(conf/)
+	battle_athena.conf
+		dead_branch_active追加
+	(doc/)
+	client_packet.txt 修正
+	conf_ref.txt 修正
+	(map/)
+	battle.c
+		battle_config_read() 修正
+	battle.h 修正
+	map.h 修正
+	mob.c
+		mob_once_spawn() 修正
+		mob_attack() 修正
+		mob_target() 修正
+		mob_ai_sub_hard_lootsearch() 修正
+		mob_ai_sub_hard() 修正
+		
+・英語スレのkingboさんの変更を同梱
+	code by kingbo 2004/4/16 PM 09:47
+
+	support guildcastle guardian
+	maybe still have problems..need to try
+	Good Luck Q^^Q
+	P.S: sorry my poor english ^^a
+
+	(map/)
+	mob.c
+		mob_can_reach() fix
+	battle.c
+		battle_calc_damage() fix
+
+	(conf/gvg/)
+		prtg_cas01_guardian.txt
+--------------------
 //0942 by 胡蝶蘭
 
 ・アクセスコントロールで不正なメモリにアクセスする場合があるバグを修正

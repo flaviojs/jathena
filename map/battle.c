@@ -1193,7 +1193,8 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 		}
 	}
 
-	if(class == 1288) {
+	if(class == 1288 || class == 1287 || class == 1286 || class == 1285) {
+//	if(class == 1288) {
 		if(flag&BF_SKILL)
 			damage=0;
 		if(src->type == BL_PC) {
@@ -4013,6 +4014,7 @@ int battle_config_read(const char *cfgName)
 		battle_config.display_delay_skill_fail = 1;
 		battle_config.chat_warpportal = 0;
 		battle_config.mob_warpportal = 0;
+		battle_config.dead_branch_active = 0;
 	}
 	
 	fp=fopen(cfgName,"r");
@@ -4156,6 +4158,7 @@ int battle_config_read(const char *cfgName)
 			{ "display_delay_skill_fail",	&battle_config.display_delay_skill_fail	},
 			{ "chat_warpportal", 			&battle_config.chat_warpportal			},
 			{ "mob_warpportal", 			&battle_config.mob_warpportal			},
+			{ "dead_branch_active", 			&battle_config.dead_branch_active			},
 		};
 		
 		if(line[0] == '/' && line[1] == '/')
