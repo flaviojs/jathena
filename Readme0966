@@ -1,4 +1,32 @@
 --------------------
+//0982 by (凸)
+・転生スキルの～
+	ストーカー リジェクトソード 相手がPCの場合は剣じゃなければ跳ね返さない予定
+	プロフェッサー メモライズ 12秒の固定キャストタイム、その後スキル使用のキャストタイムが3回だけ1/3になる
+	プロフェッサー ライフ置き換え HPを10%減らしてSPを増やす。減ったHPのエフェクトは無しにしてみた
+・見切りと回避率増加のFlee上昇がステータス変化時にしか反映されていなかったのを修正
+・0981で自分以外は歩いたら服の色が戻ってしまうのをなんとかしたつもり
+
+	(db/)
+	skill_require_db.txt
+	(map/)
+	battle.c
+		battle_calc_damage() 修正
+	clif.c
+		clif_movechar() 修正
+		clif_getareachar_pc() 修正
+	pc.c
+		pc_calcstatus() 修正
+	skill.c
+		SkillStatusChangeTable 変更
+		skill_castend_nodamage_id() 変更
+		skill_use_id() 変更
+		skill_use_pos() 変更
+		skill_status_change_timer() 変更
+		skill_status_change_start() 変更
+	skill.h 変更
+	
+--------------------
 //0981 by (凸)
 ・転生スキルの～
 	ストーカー リジェクトソード 一定確率でダメージを半分にして減らした分を相手に跳ね返すようにした…が、跳ね返したダメージのエフェクト出ません

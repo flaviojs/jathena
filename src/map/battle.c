@@ -1418,8 +1418,9 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 				clif_skill_nodamage(bl,bl,LK_PARRYING,sc_data[SC_PARRYING].val1,1);
 			}
 		}
-		// && (struct map_session_data *)src->status.weapon == (1 || 2 || 3))
-		if(sc_data[SC_REJECTSWORD].timer!=-1 && damage > 0 && flag&BF_WEAPON && ((src->type==BL_PC || src->type==BL_MOB ))){	// リジェクトソード 
+		// リジェクトソード
+		if(sc_data[SC_REJECTSWORD].timer!=-1 && damage > 0 && flag&BF_WEAPON &&
+		  ((src->type==BL_PC && ((struct map_session_data *)src)->status.weapon == (1 || 2 || 3)) || src->type==BL_MOB )){
 			if(rand()%100 < (10+5*sc_data[SC_REJECTSWORD].val1)){ //反射確率は10+5*Lv
 				damage = damage*50/100;
 				battle_damage(bl,src,damage,0);

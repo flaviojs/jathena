@@ -228,7 +228,9 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 	SC_HEADCRUSH,
 	SC_JOINTBEAT,
 /* 400- */
-	-1,-1,-1,-1,-1,
+	-1,-1,-1,
+	SC_MEMORIZE,
+	-1,
 	SC_SPIDERWEB,
 	-1,-1,-1,-1,
 /* 410- */
@@ -2174,6 +2176,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case WS_MELTDOWN:		/* メルトダウン */
 	case ST_REJECTSWORD:	/* リジェクトソード */
 	case HW_MAGICPOWER:		/* 魔法力増幅 */
+	case PF_MEMORIZE:		/* メモライズ */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
 		break;
@@ -3085,6 +3088,16 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		break;
 
+	case PF_HPCONVERSION:			/* ライフ置き換え */
+		clif_skill_nodamage(src,bl,skillid,skilllv,1);
+		if(sd){
+			i=sd->status.hp/10; //基本はHPの10%
+			sd->status.hp -= i; //HPを減らす
+			i=i*20*skilllv/100;
+			sd->status.sp += i; //SPを増やす
+			clif_heal(sd->fd,SP_SP,i);
+		}
+		break;
 	default:
 		map_freeblock_unlock();
 		return 1;
@@ -5160,6 +5173,16 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 	case SA_SPELLBREAKER:
 		forcecast=1;
 		break;
+	case PF_MEMORIZE:				/* メモライズ */
+		casttime = 12000;
+		break;
+	}
+
+	//メモライズ状態ならキャストタイムが1/3
+	if(sd->sc_data[SC_MEMORIZE].timer != -1 && casttime > 0){
+		casttime = casttime/3;
+		if((--sd->sc_data[SC_MEMORIZE].val2)<=0)
+			skill_status_change_end(&sd->bl, SC_MEMORIZE, -1);
 	}
 
 	if(battle_config.pc_skill_log)
@@ -5273,6 +5296,12 @@ int skill_use_pos( struct map_session_data *sd,
 
 //	if(sd->skillitem == skill_num)
 //		casttime = delay = 0;
+	//メモライズ状態ならキャストタイムが1/3
+	if(sd->sc_data[SC_MEMORIZE].timer != -1 && casttime > 0){
+		casttime = casttime/3;
+		if((--sd->sc_data[SC_MEMORIZE].val2)<=0)
+			skill_status_change_end(&sd->bl, SC_MEMORIZE, -1);
+	}
 
 	if( casttime>0 )	/* 詠唱が必要 */
 		clif_skillcasting( &sd->bl,
@@ -6188,6 +6217,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	case SC_WEIGHT90:
 	case SC_MAGICPOWER:		/* 魔法力増幅 */
 	case SC_REJECTSWORD:	/* リジェクトソード */
+	case SC_MEMORIZE:	/* メモライズ */
 
 		if(sc_data[type].timer==tid)
 			sc_data[type].timer=add_timer( 1000*600+tick,skill_status_change_timer, bl->id, data );
@@ -6758,6 +6788,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 			break;
 		case SC_REJECTSWORD:	/* リジェクトソード */
 			val2 = 3; //3回攻撃を跳ね返す
+			break;
+		case SC_MEMORIZE:		/* メモライズ */
+			val2 = 3; //3回詠唱を1/3にする
 			break;
 
 		default:

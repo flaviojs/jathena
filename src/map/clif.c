@@ -1105,6 +1105,8 @@ int clif_movechar(struct map_session_data *sd)
 
 	len = clif_set007b(sd,WFIFOP(fd,0));
 	clif_send(WFIFOP(fd,0),len,&sd->bl,AREA_WOS);
+	if(sd->status.clothes_color > 0)
+		clif_changelook(&sd->bl,LOOK_CLOTHES_COLOR,sd->status.clothes_color);
 
 	return 0;
 }
@@ -2886,6 +2888,9 @@ void clif_getareachar_pc(struct map_session_data* sd,struct map_session_data* ds
 		clif_set01e1(dstsd,WFIFOP(sd->fd,0));
 		WFIFOSET(sd->fd,packet_len_table[0x1e1]);
 	}
+	if(dstsd->status.clothes_color > 0)
+		clif_changelook(&dstsd->bl,LOOK_CLOTHES_COLOR,dstsd->status.clothes_color);
+
 }
 
 /*==========================================

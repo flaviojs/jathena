@@ -1377,6 +1377,12 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->subrace[9]+=skill;
 	}
 
+	//Flee上昇
+	if( (skill=pc_checkskill(sd,TF_MISS))>0 )	// 回避率増加
+		sd->flee += skill*3;
+	if( (skill=pc_checkskill(sd,MO_DODGE))>0 )	// 見切り
+		sd->flee += (skill*3)>>1;
+
 	// スキルやステータス異常による残りのパラメータ補正
 	if(sd->sc_count){
 		// ATK/DEF変化形
@@ -1462,10 +1468,6 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			aspd_rate -= sd->sc_data[i].val2;
 
 		// HIT/FLEE変化系
-		if( (skill=pc_checkskill(sd,TF_MISS))>0 )	// 回避率増加
-			sd->flee += skill*3;
-		if( (skill=pc_checkskill(sd,MO_DODGE))>0 )	// 見切り
-			sd->flee += (skill*3)>>1;
 		if(sd->sc_data[SC_WHISTLE].timer!=-1){  // 口笛
 			sd->flee += sd->flee * (sd->sc_data[SC_WHISTLE].val1
 					+sd->sc_data[SC_WHISTLE].val2+(sd->sc_data[SC_WHISTLE].val3>>16))/100;
