@@ -887,8 +887,8 @@ int mapif_parse_GuildLeave(int fd,int guild_id,int account_id,int char_id,int fl
 		for(i=0;i<MAX_GUILD;i++){
 			if( g->member[i].account_id==account_id &&
 				g->member[i].char_id==char_id){
-				printf("%d %d\n",i, (int)(&g->member[i]));
-				printf("%d %s\n",i, g->member[i].name);
+//				printf("%d %d\n",i, (int)(&g->member[i]));
+//				printf("%d %s\n",i, g->member[i].name);
 				
 				if(flag){	// ’Ç•ú‚Ìê‡’Ç•úƒŠƒXƒg‚É“ü‚ê‚é
 					int j;
@@ -908,8 +908,8 @@ int mapif_parse_GuildLeave(int fd,int guild_id,int account_id,int char_id,int fl
 				}
 				
 				mapif_guild_leaved(guild_id,account_id,char_id,flag,g->member[i].name,mes);
-				printf("%d %d\n",i, (int)(&g->member[i]));
-				printf("%d %s\n",i, (&g->member[i])->name);
+//				printf("%d %d\n",i, (int)(&g->member[i]));
+//				printf("%d %s\n",i, (&g->member[i])->name);
 				memset(&g->member[i],0,sizeof(struct guild_member));
 				
 				if( guild_check_empty(g)==0 )

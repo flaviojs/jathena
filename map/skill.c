@@ -5492,6 +5492,7 @@ int skill_unit_timer_sub_ondelete( struct block_list *bl, va_list ap )
 int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 {
 	struct skill_unit *unit=(struct skill_unit *)bl;
+	struct block_list *ss;
 	struct skill_unit_group *group;
 	int range;
 	unsigned int tick;
@@ -5500,6 +5501,7 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 	if(!unit->alive)
 		return 0;
 	group=unit->group;
+	ss=map_id2bl(group->src_id);
 	range=(unit->range!=0)?unit->range:group->range;
 
 	/* onplaceイベント呼び出し */
@@ -5512,7 +5514,7 @@ int skill_unit_timer_sub( struct block_list *bl, va_list ap )
 	if(unit->alive &&
 		(DIFF_TICK(tick,group->tick)>=group->limit ||
 		 DIFF_TICK(tick,group->tick)>=unit->limit) ){
-		if((group->unit_id >= 0x8f && group->unit_id <= 0x98) && group->unit_id != 0x92) {
+		if((group->unit_id >= 0x8f && group->unit_id <= 0x98) && group->unit_id != 0x92 && ss->type == BL_PC) {
 			struct item item_tmp;
 			memset(&item_tmp,0,sizeof(item_tmp));
 			item_tmp.nameid=1065;

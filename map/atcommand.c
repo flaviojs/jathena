@@ -342,11 +342,13 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			if( (x=atoi(temp0))>0 ){
 				if(battle_config.item_check){
 					x=(( (item_data=itemdb_exists(x)) && itemdb_available(x))?x:0);
-				}else
+				}else{
 					item_data=itemdb_search(x);
-			}else if( (item_data=itemdb_searchname(temp0))!=NULL )
+				}
+			}else if( (item_data=itemdb_searchname(temp0))!=NULL ){
 				x=(!battle_config.item_check ||
 				 itemdb_available(item_data->nameid))?item_data->nameid:0;
+			}
 			
 			if( x>0 ) {
 				int a1=1,a2=y,i;

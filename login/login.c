@@ -435,7 +435,7 @@ int parse_fromchar(int fd)
 	   auth_fifo[i].sex==RFIFOB(fd,14) &&
 	   !auth_fifo[i].delflag){
 	  auth_fifo[i].delflag=1;
-	  printf("%d\n",i);
+//	  printf("%d\n",i);
 	  break;
 	}
       }
@@ -499,7 +499,7 @@ int parse_fromchar(int fd)
 		acc=RFIFOL(fd,4);
 		sex=RFIFOB(fd,8);
 		for(i=0;i<auth_num;i++){
-			printf("%d,",auth_dat[i].account_id);
+//			printf("%d,",auth_dat[i].account_id);
 			if(auth_dat[i].account_id==acc){
 				auth_dat[i].sex=sex;
 				j=1;
@@ -715,9 +715,10 @@ int parse_login(int fd)
 			auth_fifo[auth_fifo_pos].delflag=0;
 			auth_fifo_pos++;
 		} else {
+			memset(WFIFOP(fd,0),0,23);
 			WFIFOW(fd,0)=0x6a;
 			WFIFOB(fd,2)=result;
-			WFIFOSET(fd,3);
+			WFIFOSET(fd,23);
 		}
 		RFIFOSKIP(fd,(RFIFOW(fd,0)==0x64)?55:47);
 		break;

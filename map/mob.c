@@ -1825,11 +1825,11 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 
 	// mvp処理
 	if(mvp_sd && mob_db[md->class].mexp > 0 ){
+		int j;
 		int mexp = mob_db[md->class].mexp*(9+count)/10;
 		clif_mvp_effect(mvp_sd);					// エフェクト
-		clif_mvp_exp(mvp_sd,mexp);	// 無条件で経験値
-		pc_gainexp(mvp_sd,mexp,0);
-		for(i=0;i<3;i++){
+		for(j=0;j<3;j++){
+			i = rand() % 3;
 			struct item item;
 			int ret;
 			int drop_rate;
@@ -1842,7 +1842,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 				continue;
 			memset(&item,0,sizeof(item));
 			item.nameid=mob_db[md->class].mvpitem[i].nameid;
-			item.identify=1;
+			item.identify=!itemdb_isequip(item.nameid);
 			clif_mvp_item(mvp_sd,item.nameid);
 			if(mvp_sd->weight*2 > mvp_sd->max_weight)
 				map_addflooritem(&item,1,mvp_sd->bl.m,mvp_sd->bl.x,mvp_sd->bl.y,mvp_sd,second_sd,third_sd,1);
@@ -1851,6 +1851,10 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 				map_addflooritem(&item,1,mvp_sd->bl.m,mvp_sd->bl.x,mvp_sd->bl.y,mvp_sd,second_sd,third_sd,1);
 			}
 			break;
+		}
+		if(j == 3){
+			clif_mvp_exp(mvp_sd,mexp);	// アイテムが貰えなかった場合は経験値
+			pc_gainexp(mvp_sd,mexp,0);
 		}
 	}
 

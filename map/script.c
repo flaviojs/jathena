@@ -2181,10 +2181,16 @@ int buildin_itemskill(struct script_state *st)
 	int id,lv;
 	char *str;
 	struct map_session_data *sd=map_id2sd(st->rid);
+	unsigned int tick=gettick();
 	id=conv_num(st,& (st->stack->stack_data[st->start+2]));
 	lv=conv_num(st,& (st->stack->stack_data[st->start+3]));
 	str=conv_str(st,& (st->stack->stack_data[st->start+4]));
-	
+
+	// 詠唱中にスキルアイテムは使用できない
+	if(sd->skilltimer != -1 || DIFF_TICK(tick , sd->canact_tick) < 0){
+		return 0;
+	}
+
 	sd->skillitem=id;
 	sd->skillitemlv=lv;
 	clif_item_skill(sd,id,lv,str);

@@ -1,4 +1,37 @@
 --------------------
+//0810 by 聖
+
+・MVPの処理を変更。(確率で10000があっても、他のアイテムも出るようにしました)
+・MVPで装備を入手した場合、鑑定済みで入手していた問題を修正。
+・スキル詠唱中にイグ葉や拡大鏡を使うとプレーヤーの使用可能な
+　全スキルのLVが1に固定されてしまう問題を修正。
+・オークアーチャー等、モンスターによる罠スキルの有効期限が切れたときに、
+　設置用トラップが出る問題を修正。
+・ログインエラー(パスワード入力ミスやBAN等)のエラーメッセージが
+　正しくクライアントに通知されない問題を修正。
+・その他細かな修正。
+	(common/)
+	version.h 修正。
+	(login/)
+	login.c
+		parse_login() 修正。
+		parse_fromchar() 修正。
+	(char/)
+	int_guild.c
+		mapif_parse_GuildLeave() 修正。
+	(map/)
+	itemdb.c
+		itemdb_read_itemnametable() 修正。
+	atcommand.c
+		atcommand() 修正。
+	skill.c
+		skill_unit_timer_sub() 修正。
+	script.c
+		buildin_itemskill() 修正。
+	mob.c
+		mob_damage() 修正。
+
+--------------------
 //0809 by Kalen
 
 ・東湖城ワープポイント修正
