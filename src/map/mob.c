@@ -2867,6 +2867,11 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 	case SA_SPELLBREAKER:
 		forcecast=1;
 		break;
+	case NPC_SUMMONSLAVE:
+	case NPC_SUMMONMONSTER:
+		if(md->master_id!=0)
+			return 0;
+		break;
 	}
 
 	if(battle_config.mob_skill_log)

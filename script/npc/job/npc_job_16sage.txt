@@ -1241,6 +1241,7 @@ L_Menu5_1:
 	mes "入学のお申し込みですね？";
 	next;
 	if (JobLevel < 40) goto L_Menu5_9;
+	if (SkillPoint > 0) goto L_Menu5_10;
 	if ((countitem(1006) >= 1) && (countitem(1007) >= 1)) goto L_Menu5_4;
 	if (Zeny < 70000) goto L_Menu5_2;
 		set Zeny,Zeny-70000;
@@ -1252,6 +1253,7 @@ L_Menu5_1:
 		next;
 	L_Menu5_5:
 		if (JobLevel < 40) goto L_Menu5_9;
+		if (SkillPoint > 0) goto L_Menu5_10;
 		mes "[メテウス=シルプ]";
 		mes "それでは、入学申込書を作成します。";
 		mes "こちらにサインしてください。";
@@ -1375,6 +1377,12 @@ L_Menu5_1:
 		mes "[メテウス=シルプ]";
 		mes "まだJobLvが足りないようです。";
 		mes "もう少し勉強をしてから";
+		mes "いらしてください。";
+		close;
+	L_Menu5_10:
+		mes "[メテウス=シルプ]";
+		mes "スキルポイントが余っているようです。";
+		mes "スキルポイントを使い切ってから";
 		mes "いらしてください。";
 		close;
 //==================================
