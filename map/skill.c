@@ -2081,7 +2081,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			if(map[sd->bl.m].flag.noteleport)	/* ƒeƒŒƒ|‹Ö~ */
 				break;
 			if( sd->skilllv==1 )
-				pc_randomwarp(sd,3);
+				clif_skill_warppoint(sd,sd->skillid,"Random","","","");
 			else{
 				clif_skill_warppoint(sd,sd->skillid,"Random",
 					sd->status.save_point.map,"","");
@@ -3646,6 +3646,10 @@ int skill_check_condition(struct map_session_data *sd,int type)
 	}
 	if( spiritball > 0 && sd->spiritball < spiritball) {
 		clif_skill_fail(sd,skill,0,0);		// Ÿ†‹…•s‘«
+		return 0;
+	}
+	if( sd->weight*100/sd->max_weight >= 90) {
+		clif_skill_fail(sd,skill,9,0);
 		return 0;
 	}
 

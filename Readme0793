@@ -1,4 +1,22 @@
 --------------------
+//0818 by あゆみ
+
+・テレポートスキルLv1で、選択ウインドウが出てこないバグを修正。
+・重量が90％以上の場合でも、一部のスキルが使用可能だったバグを修正。
+・@allskillコマンドの修正とか。
+
+	(conf/)
+	msg_athena.conf 修正。
+	(map/)
+	atcommand.c
+		atcommand() 修正。
+	pc.c
+		pc_allskillup() 修正。
+	skill.c
+		skill_castend_nodamage_id() 修正。
+		skill_check_condition() 修正。
+
+--------------------
 //0817 by huge
 
 ・ディボーションの処理修正

@@ -2019,15 +2019,6 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 		pc_calcstatus(sd,0);
 		clif_skillinfoblock(sd);
 	}
-	/*else if(sd->status.skill[id].lv < level){	// 覚えられるがlvが小さいなら
-		if(sd->status.skill[id].id==id)
-			sd->status.skill[id].flag=sd->status.skill[id].lv+2;	// lvを記憶
-		else {
-			sd->status.skill[id].id=id;
-			sd->status.skill[id].flag=1;	// cardスキルとする
-		}
-		sd->status.skill[id].lv=level;
-	}*/
 	else {
 		if(battle_config.gm_allskill>0 && pc_isGM(sd)>=battle_config.gm_allskill) {	// GMで全てのスキルを取得するようにしているかを判断
 			if(sd->status.skill[id].lv < level) {	// 覚えられるがlvが小さいなら
@@ -3627,7 +3618,7 @@ int pc_allskillup(struct map_session_data *sd)
 			if(sd->status.skill[i].id==i) {	// 覚えられる場合で
 				if(sd->status.skill[i].flag)	// cardスキルの場合は
 					for(j=0;j<100;j++)
-						if(skill_tree[sd->status.class][j].id==i)	// 現在の職業で覚えられるスキルかを判断
+						if((battle_config.gm_allskill>0 && pc_isGM(sd)>=battle_config.gm_allskill) || skill_tree[sd->status.class][j].id==i)	// 現在の職業で覚えられるスキルかを判断
 							sd->status.skill[i].flag=0;	// cardスキルを解除し、lv上げへ
 				if(!sd->status.skill[i].flag && sd->status.skill[i].lv < skill_get_max(i)) {	// cardスキルではなく、lvが小さいなら
 					sd->status.skill[i].lv=skill_get_max(i);	// lvを最大にして

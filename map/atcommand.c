@@ -1178,6 +1178,7 @@ z [0`4]•ž‚ÌF
 
 		if(strcmpi(command, "@allskill") == 0 && gm_level >= atcommand_config.allskill){
 			pc_allskillup(sd);
+			clif_displaymessage(fd,msg_table[76]);
 			return 1;
 		}
 
