@@ -9,10 +9,10 @@
 #include <string.h>
 
 
-char pet_txt[256]="pet.txt";
+char pet_txt[1024]="pet.txt";
 
 static struct dbt *pet_db;
-static int pet_newid = 10000;
+static int pet_newid = 100;
 
 int inter_pet_tostr(char *str,struct s_pet *p)
 {

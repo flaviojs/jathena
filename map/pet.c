@@ -269,8 +269,8 @@ int pet_target_check(struct map_session_data *sd,struct block_list *bl,int type)
 	struct mob_data *md;
 	int rate,mode,race;
 
-	if(bl && pd && bl->type == BL_MOB && sd->pet.intimate > 900 &&
-		pd->class != battle_get_class(bl) && pd->state.state != MS_DELAY) {
+	if(bl && pd && bl->type == BL_MOB && sd->pet.intimate > 900 && pd->class != battle_get_class(bl)
+		&& pd->state.state != MS_DELAY) {
 		mode=mob_db[pd->class].mode;
 		race=mob_db[pd->class].race;
 		md=(struct mob_data *)bl;
@@ -416,9 +416,9 @@ int pet_stop_walking(struct pet_data *pd,int type)
 		pd->walkpath.path_len=0;
 		pd->to_x=pd->bl.x;
 		pd->to_y=pd->bl.y;
-		if(type&0x01)
-			clif_fixpetpos(pd);
 	}
+	if(type&0x01)
+		clif_fixpetpos(pd);
 	if(type&~0xff)
 		pet_changestate(pd,MS_DELAY,type>>8);
 	else
@@ -607,6 +607,7 @@ int pet_data_init(struct map_session_data *sd)
 
 	pd->n = 0;
 	pd->bl.m = sd->bl.m;
+	pd->bl.prev = pd->bl.next = NULL;
 	pd->bl.x = pd->to_x = sd->bl.x;
 	pd->bl.y = pd->to_y = sd->bl.y;
 	pet_calc_pos(pd,sd->bl.x,sd->bl.y,sd->dir);

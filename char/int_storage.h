@@ -6,6 +6,6 @@ int inter_storage_save();
 
 int inter_storage_parse_frommap(int fd);
 
-extern char storage_txt[256];
+extern char storage_txt[1024];
 
 #endif

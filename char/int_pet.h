@@ -7,6 +7,6 @@ int inter_pet_delete(int pet_id);
 
 int inter_pet_parse_frommap(int fd);
 
-extern char pet_txt[256];
+extern char pet_txt[1024];
 
 #endif

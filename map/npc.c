@@ -627,6 +627,7 @@ static int npc_parse_warp(char *w1,char *w2,char *w3,char *w4)
 	nd->bl.id=npc_id++;
 	nd->n=map_addnpc(m,nd);
 
+	nd->bl.prev = nd->bl.next = NULL;
 	nd->bl.m=m;
 	nd->bl.x=x;
 	nd->bl.y=y;
@@ -718,6 +719,7 @@ static int npc_parse_shop(char *w1,char *w2,char *w3,char *w4)
 	}
 	nd->u.shop_item[pos++].nameid=0;
 
+	nd->bl.prev = nd->bl.next = NULL;
 	nd->bl.m = m;
 	nd->bl.x = x;
 	nd->bl.y = y;
@@ -864,7 +866,8 @@ static int npc_parse_script(char *w1,char *w2,char *w3,char *w4,char *first_line
 		memcpy(nd->name,w3,24);
 		memcpy(nd->exname,w3,24);
 	}
-	
+
+	nd->bl.prev = nd->bl.next = NULL;
 	nd->bl.m = m;
 	nd->bl.x = x;
 	nd->bl.y = y;

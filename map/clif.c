@@ -1890,7 +1890,7 @@ int clif_changeoption(struct block_list* bl)
 	for(i=0;i<sizeof(omask)/sizeof(omask[0]);i++){
 		if( option&omask[i] ){
 			if( sc_data[scnum[i]].timer==-1)
-				skill_status_change_start(bl,scnum[i],0,0);
+				skill_status_change_start(bl,scnum[i],0,0,0,0);
 		}else{
 			skill_status_change_end(bl,scnum[i],-1);
 		}
@@ -2575,6 +2575,21 @@ int clif_clearchar_skillunit(struct skill_unit *unit,int fd)
  *
  *------------------------------------------
  */
+int clif_01ac(struct block_list *bl)
+{
+	char buf[32];
+
+	WBUFW(buf, 0) = 0x1ac;
+	WBUFL(buf, 2) = bl->id;
+
+	clif_send(buf,packet_len_table[0x1ac],bl,AREA);
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
  int clif_getareachar(struct block_list* bl,va_list ap)
 {
 	struct map_session_data *sd;
@@ -2776,8 +2791,12 @@ int clif_skillinfo(struct map_session_data *sd,int skillid,int type,int range)
 	WFIFOW(fd,6) = 0;
 	WFIFOW(fd,8) = sd->status.skill[skillid].lv;
 	WFIFOW(fd,10) = skill_get_sp(id,sd->status.skill[skillid].lv);
-	if(range < 0)
-		WFIFOW(fd,12)= skill_get_range(id);
+	if(range < 0) {
+		range = skill_get_range(id,sd->status.skill[skillid].lv);
+		if(range < 0)
+			range = battle_get_range(&sd->bl) - (range + 1);
+		WFIFOW(fd,12)= range;
+	}
 	else
 		WFIFOW(fd,12)= range;
 	memset(WFIFOP(fd,14),0,24);
@@ -2796,7 +2815,7 @@ int clif_skillinfo(struct map_session_data *sd,int skillid,int type,int range)
 int clif_skillinfoblock(struct map_session_data *sd)
 {
 	int fd=sd->fd;
-	int i,c,len=4,id;
+	int i,c,len=4,id,range;
 	WFIFOW(fd,0)=0x10f;
 	for ( i = c = 0; i < MAX_SKILL; i++){
 		if( (id=sd->status.skill[i].id)!=0 ){
@@ -2805,7 +2824,10 @@ int clif_skillinfoblock(struct map_session_data *sd)
 			WFIFOW(fd,len+4) = 0;
 			WFIFOW(fd,len+6) = sd->status.skill[i].lv;
 			WFIFOW(fd,len+8) = skill_get_sp(id,sd->status.skill[i].lv);
-			WFIFOW(fd,len+10)= skill_get_range(id);
+			range = skill_get_range(id,sd->status.skill[i].lv);
+			if(range < 0)
+				range = battle_get_range(&sd->bl) - (range + 1);
+			WFIFOW(fd,len+10)= range;
 			memset(WFIFOP(fd,len+12),0,24);
 			if(!(skill_get_inf2(id)&0x01) || battle_config.quest_skill_learn == 1 || (battle_config.gm_allskill > 0 && pc_isGM(sd) >= battle_config.gm_allskill) )
 				WFIFOB(fd,len+36)= (sd->status.skill[i].lv < skill_get_max(id) && sd->status.skill[i].flag ==0 )? 1:0;
@@ -2826,12 +2848,15 @@ int clif_skillinfoblock(struct map_session_data *sd)
  */
 int clif_skillup(struct map_session_data *sd,int skill_num)
 {
-	int fd=sd->fd;
+	int range,fd=sd->fd;
 	WFIFOW(fd,0) = 0x10e;
 	WFIFOW(fd,2) = skill_num;
 	WFIFOW(fd,4) = sd->status.skill[skill_num].lv;
 	WFIFOW(fd,6) = skill_get_sp(skill_num,sd->status.skill[skill_num].lv);
-	WFIFOW(fd,8) = skill_get_range(skill_num);
+	range = skill_get_range(skill_num,sd->status.skill[skill_num].lv);
+	if(range < 0)
+		range = battle_get_range(&sd->bl) - (range + 1);
+	WFIFOW(fd,8) = range;
 	WFIFOB(fd,10) = (sd->status.skill[skill_num].lv < skill_get_max(sd->status.skill[skill_num].id)) ? 1 : 0;
 	WFIFOSET(fd,packet_len_table[0x10e]);
 	return 0;
@@ -3431,14 +3456,17 @@ int clif_item_identified(struct map_session_data *sd,int idx,int flag)
  */
 int clif_item_skill(struct map_session_data *sd,int skillid,int skilllv,const char *name)
 {
-	int fd=sd->fd;
+	int range,fd=sd->fd;
 	WFIFOW(fd, 0)=0x147;
 	WFIFOW(fd, 2)=skillid;
 	WFIFOW(fd, 4)=skill_get_inf(skillid);
 	WFIFOW(fd, 6)=0;
 	WFIFOW(fd, 8)=skilllv;
 	WFIFOW(fd,10)=skill_get_sp(skillid,skilllv);
-	WFIFOW(fd,12)=skill_get_range(skillid);
+	range = skill_get_range(skillid,skilllv);
+	if(range < 0)
+		range = battle_get_range(&sd->bl) - (range + 1);
+	WFIFOW(fd,12)=range;
 	memcpy(WFIFOP(fd,14),name,24);
 	WFIFOB(fd,38)=0;
 	WFIFOSET(fd,packet_len_table[0x147]);
@@ -4894,13 +4922,13 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	if(sd->status.hp<sd->status.max_hp>>2 && pc_checkskill(sd,SM_AUTOBERSERK)>0 &&
 		(sd->sc_data[SC_PROVOKE].timer==-1 || sd->sc_data[SC_PROVOKE].val2==0 ))
 		// オートバーサーク発動
-		skill_status_change_start(&sd->bl,SC_PROVOKE,10,1);
+		skill_status_change_start(&sd->bl,SC_PROVOKE,10,1,0,0);
 	// option
 	clif_changeoption(&sd->bl);
 	if(sd->sc_data[SC_TRICKDEAD].timer != -1)
 		skill_status_change_end(&sd->bl,SC_TRICKDEAD,-1);
 	if(sd->special_state.infinite_endure && sd->sc_data[SC_ENDURE].timer == -1)
-		skill_status_change_start(&sd->bl,SC_ENDURE,10,1);
+		skill_status_change_start(&sd->bl,SC_ENDURE,10,1,0,0);
 
 	map_foreachinarea(clif_getareachar,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,0,sd);
 }
@@ -4939,8 +4967,8 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 	if(sd->canmove_tick > gettick())
 		return;
 
-	// ステータス異常やハイディング中(トンネルドライブ無)・オートカウンターで動けない
-	if(sd->opt1 > 0 || sd->sc_data[SC_ANKLE].timer!=-1 || sd->sc_data[SC_AUTOCOUNTER].timer!=-1)
+	// ステータス異常やハイディング中(トンネルドライブ無)で動けない
+	if(sd->opt1 > 0 || sd->sc_data[SC_ANKLE].timer !=-1 || sd->sc_data[SC_AUTOCOUNTER].timer!=-1)
 		return;
 	if( (sd->status.option&2) && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0)
 		return;
@@ -5116,7 +5144,7 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 		clif_clearchar_area(&sd->bl,1);
 		return;
 	}
-	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0) return;
+	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0 || sd->sc_data[SC_AUTOCOUNTER].timer != -1) return;
 
 	tick=gettick();
 
@@ -5148,8 +5176,8 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 			clif_skill_fail(sd,1,0,2);
 		break;
 	case 0x03:	// standup
-		pc_setstand(sd);
 		skill_gangsterparadise(sd,0);/* ギャングスターパラダイス解除 */
+		pc_setstand(sd);
 		WFIFOW(fd,0)=0x8a;
 		WFIFOL(fd,2)=sd->bl.id;
 		WFIFOB(fd,26)=3;
@@ -5237,7 +5265,7 @@ void clif_parse_TakeItem(int fd,struct map_session_data *sd)
 		return;
 	}
 
-	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0) return;
+	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0|| sd->sc_data[SC_AUTOCOUNTER].timer!=-1) return;
 
 	if(fitem==NULL || fitem->bl.m != sd->bl.m)
 		return;
@@ -5255,7 +5283,7 @@ void clif_parse_DropItem(int fd,struct map_session_data *sd)
 		clif_clearchar_area(&sd->bl,1);
 		return;
 	}
-	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0)return;
+	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0|| sd->sc_data[SC_AUTOCOUNTER].timer!=-1)return;
 	pc_dropitem(sd,RFIFOW(fd,2)-2,RFIFOW(fd,4));
 }
 

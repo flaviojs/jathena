@@ -1,16 +1,23 @@
 #ifndef _SKILL_H_
 #define _SKILL_H_
 
+#include "map.h"
+
 #define MAX_SKILL_DB			350
-#define MAX_SKILL_PRODUCE_DB	 100
+#define MAX_SKILL_PRODUCE_DB	 150
 #define MAX_SKILL_ARROW_DB	 150
 
 // スキルデータベース
 struct skill_db {
-	int range,hit,inf,pl,nk,max;
-	int sp[10],num[10];
-	int cast[10],delay[10];
+	int range[MAX_SKILL_LEVEL],hit,inf,pl,nk,max;
+	int num[MAX_SKILL_LEVEL];
+	int cast[MAX_SKILL_LEVEL],delay[MAX_SKILL_LEVEL];
+	int upkeep_time[MAX_SKILL_LEVEL],upkeep_time2[MAX_SKILL_LEVEL];
+	int castcancel,cast_def_rate;
 	int inf2;
+	int hp[MAX_SKILL_LEVEL],sp[MAX_SKILL_LEVEL],hp_rate[MAX_SKILL_LEVEL],sp_rate[MAX_SKILL_LEVEL],zeny[MAX_SKILL_LEVEL];
+	int weapon,state,spiritball[MAX_SKILL_LEVEL];
+	int itemid[5],amount[5];
 };
 extern struct skill_db skill_db[MAX_SKILL_DB];
 
@@ -37,16 +44,22 @@ struct skill_unit_group;
 int do_init_skill(void);
 
 // スキルデータベースへのアクセサ
-int skill_get_range( int id );
 int	skill_get_hit( int id );
 int	skill_get_inf( int id );
 int	skill_get_pl( int id );
 int	skill_get_nk( int id );
 int	skill_get_max( int id );
+int skill_get_range( int id , int lv );
+int	skill_get_hp( int id ,int lv );
 int	skill_get_sp( int id ,int lv );
+int	skill_get_zeny( int id ,int lv );
 int	skill_get_num( int id ,int lv );
 int	skill_get_cast( int id ,int lv );
 int	skill_get_delay( int id ,int lv );
+int	skill_get_time( int id ,int lv );
+int	skill_get_time2( int id ,int lv );
+int	skill_get_castdef( int id );
+int	skill_get_weapontype( int id );
 int skill_get_unit_id(int id,int flag);
 int	skill_get_inf2( int id );
 
@@ -87,14 +100,15 @@ void skill_stop_dancing(struct block_list *src);
 // 詠唱キャンセル
 int skill_castcancel(struct block_list *bl,int type);
 
+int skill_gangsterparadise(struct map_session_data *sd ,int type);
+
 #define skill_calc_heal(bl,skill_lv) (( battle_get_lv(bl)+battle_get_int(bl) )/8 *(4+ skill_lv*8))
 
 // その他
 int skill_check_cloaking(struct block_list *bl);
-int skill_gangsterparadise(struct map_session_data *sd ,int type);
 
 // ステータス異常
-int skill_status_change_start(struct block_list *bl,int type,int val1,int val2);
+int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,int tick,int flag);
 int skill_status_change_timer(int tid, unsigned int tick, int id, int data);
 int skill_encchant_eremental_end(struct block_list *bl, int type);
 int skill_status_change_end( struct block_list* bl , int type,int tid );
@@ -117,6 +131,10 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 int skill_attack( int attack_type, struct block_list* src, struct block_list *dsrc,
 	 struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag );
 
+enum {
+	ST_NONE,ST_HIDING,ST_CLOAKING,ST_HIDDEN,ST_RIDING,ST_FALCON,ST_CART,ST_SHIELD,ST_SIGHT,ST_EXPLOSIONSPIRITS,
+	ST_RECOV_WEIGHT_RATE,ST_MOVE_ENABLE,ST_WATER,
+};
 
 enum {	// struct map_session_data の status_changeの番号テーブル
 // SC_SENDMAX未満はクライアントへの通知あり。
@@ -138,7 +156,6 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_WATERBALL			=142,
 	SC_ANKLE				=143,
 	SC_DANCING				=144,
-	SC_INTIMIDATE				=145,
 
 	SC_TRICKDEAD			=29,
 	SC_PROVOKE				= 0,

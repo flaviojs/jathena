@@ -157,6 +157,12 @@ int map_addblock(struct block_list *bl)
 {
 	int m,x,y;
 
+	if(bl->prev != NULL){
+			if(battle_config.error_log)
+				printf("map_addblock error : bl->prev!=NULL\n");
+		return 0;
+	}
+
 	m=bl->m;
 	x=bl->x;
 	y=bl->y;
@@ -170,11 +176,13 @@ int map_addblock(struct block_list *bl)
 		bl->prev = &bl_head;
 		if(bl->next) bl->next->prev = bl;
 		map[m].block_mob[x/BLOCK_SIZE+(y/BLOCK_SIZE)*map[m].bxs] = bl;
+		map[m].block_mob_count[x/BLOCK_SIZE+(y/BLOCK_SIZE)*map[m].bxs]++;;
 	} else {
 		bl->next = map[m].block[x/BLOCK_SIZE+(y/BLOCK_SIZE)*map[m].bxs];
 		bl->prev = &bl_head;
 		if(bl->next) bl->next->prev = bl;
 		map[m].block[x/BLOCK_SIZE+(y/BLOCK_SIZE)*map[m].bxs] = bl;
+		map[m].block_count[x/BLOCK_SIZE+(y/BLOCK_SIZE)*map[m].bxs]++;
 		if(bl->type==BL_PC)
 			map[m].users++;
 	}
@@ -206,8 +214,12 @@ int map_delblock(struct block_list *bl)
 		// リストの頭なので、map[]のblock_listを更新する
 		if(bl->type==BL_MOB){
 			map[bl->m].block_mob[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs] = bl->next;
+			if((map[bl->m].block_mob_count[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs]--) < 0)
+				map[bl->m].block_mob_count[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs] = 0;
 		} else {
 			map[bl->m].block[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs] = bl->next;
+			if((map[bl->m].block_count[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs]--) < 0)
+				map[bl->m].block_count[bl->x/BLOCK_SIZE+(bl->y/BLOCK_SIZE)*map[bl->m].bxs] = 0;
 		}
 	} else {
 		bl->prev->next = bl->next;
@@ -256,7 +268,7 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 	int bx,by;
 	struct block_list *bl;
 	va_list ap;
-	int blockcount=bl_list_count,i;
+	int blockcount=bl_list_count,i,c;
 
 	va_start(ap,type);
 	if(x0<0) x0=0;
@@ -267,7 +279,8 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 		for(by=y0/BLOCK_SIZE;by<=y1/BLOCK_SIZE;by++){
 			for(bx=x0/BLOCK_SIZE;bx<=x1/BLOCK_SIZE;bx++){
 				bl = map[m].block[bx+by*map[m].bxs];
-				for(;bl;bl=bl->next){
+				c = map[m].block_count[bx+by*map[m].bxs];
+				for(i=0;i<c && bl;i++,bl=bl->next){
 					if(type && bl->type!=type)
 						continue;
 					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && bl_list_count<BL_LIST_MAX)
@@ -279,7 +292,8 @@ void map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int 
 		for(by=y0/BLOCK_SIZE;by<=y1/BLOCK_SIZE;by++){
 			for(bx=x0/BLOCK_SIZE;bx<=x1/BLOCK_SIZE;bx++){
 				bl = map[m].block_mob[bx+by*map[m].bxs];
-				for(;bl;bl=bl->next){
+				c = map[m].block_mob_count[bx+by*map[m].bxs];
+				for(i=0;i<c && bl;i++,bl=bl->next){
 					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && bl_list_count<BL_LIST_MAX)
 						bl_list[bl_list_count++]=bl;
 				}
@@ -316,7 +330,7 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 	int bx,by;
 	struct block_list *bl;
 	va_list ap;
-	int blockcount=bl_list_count,i;
+	int blockcount=bl_list_count,i,c;
 
 	va_start(ap,type);
 	if(dx==0 || dy==0){
@@ -341,14 +355,16 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 		for(by=y0/BLOCK_SIZE;by<=y1/BLOCK_SIZE;by++){
 			for(bx=x0/BLOCK_SIZE;bx<=x1/BLOCK_SIZE;bx++){
 				bl = map[m].block[bx+by*map[m].bxs];
-				for(;bl;bl=bl->next){
+				c = map[m].block_count[bx+by*map[m].bxs];
+				for(i=0;i<c && bl;i++,bl=bl->next){
 					if(type && bl->type!=type)
 						continue;
 					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && bl_list_count<BL_LIST_MAX)
 						bl_list[bl_list_count++]=bl;
 				}
 				bl = map[m].block_mob[bx+by*map[m].bxs];
-				for(;bl;bl=bl->next){
+				c = map[m].block_mob_count[bx+by*map[m].bxs];
+				for(i=0;i<c && bl;i++,bl=bl->next){
 					if(type && bl->type!=type)
 						continue;
 					if(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1 && bl_list_count<BL_LIST_MAX)
@@ -366,7 +382,8 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 		for(by=y0/BLOCK_SIZE;by<=y1/BLOCK_SIZE;by++){
 			for(bx=x0/BLOCK_SIZE;bx<=x1/BLOCK_SIZE;bx++){
 				bl = map[m].block[bx+by*map[m].bxs];
-				for(;bl;bl=bl->next){
+				c = map[m].block_count[bx+by*map[m].bxs];
+				for(i=0;i<c && bl;i++,bl=bl->next){
 					if(type && bl->type!=type)
 						continue;
 					if(!(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1))
@@ -377,7 +394,8 @@ void map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,
 							bl_list[bl_list_count++]=bl;
 				}
 				bl = map[m].block_mob[bx+by*map[m].bxs];
-				for(;bl;bl=bl->next){
+				c = map[m].block_mob_count[bx+by*map[m].bxs];
+				for(i=0;i<c && bl;i++,bl=bl->next){
 					if(type && bl->type!=type)
 						continue;
 					if(!(bl->x>=x0 && bl->x<=x1 && bl->y>=y0 && bl->y<=y1))
@@ -617,6 +635,7 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y)
 		exit(1);
 	}
 	fitem->bl.type=BL_ITEM;
+	fitem->bl.prev = fitem->bl.next = NULL;
 	fitem->bl.m=m;
 	fitem->bl.x=xy&0xffff;
 	fitem->bl.y=(xy>>16)&0xffff;
@@ -657,7 +676,7 @@ void map_addchariddb(int charid,char *name)
 		p->req_id=0;
 	}else
 		numdb_erase(charid_db,charid);
-	
+
 	req=p->req_id;
 	memcpy(p->nick,name,24);
 	p->req_id=0;
@@ -906,6 +925,51 @@ int map_mapname2ipport(char *name,int *ip,int *port)
 }
 
 /*==========================================
+ *
+ *------------------------------------------
+ */
+int map_check_dir(int s_dir,int t_dir)
+{
+	if(s_dir == t_dir)
+		return 0;
+	switch(s_dir) {
+		case 0:
+			if(t_dir == 7 || t_dir == 1 || t_dir == 0)
+				return 0;
+			break;
+		case 1:
+			if(t_dir == 0 || t_dir == 2 || t_dir == 1)
+				return 0;
+			break;
+		case 2:
+			if(t_dir == 1 || t_dir == 3 || t_dir == 2)
+				return 0;
+			break;
+		case 3:
+			if(t_dir == 2 || t_dir == 4 || t_dir == 3)
+				return 0;
+			break;
+		case 4:
+			if(t_dir == 3 || t_dir == 5 || t_dir == 4)
+				return 0;
+			break;
+		case 5:
+			if(t_dir == 4 || t_dir == 6 || t_dir == 5)
+				return 0;
+			break;
+		case 6:
+			if(t_dir == 5 || t_dir == 7 || t_dir == 6)
+				return 0;
+			break;
+		case 7:
+			if(t_dir == 6 || t_dir == 0 || t_dir == 7)
+				return 0;
+			break;
+	}
+	return 1;
+}
+
+/*==========================================
  * 彼我の方向を計算
  *------------------------------------------
  */
@@ -1107,6 +1171,20 @@ static int map_readmap(int m,char *fn)
 	}
 	memset(map[m].block_mob,0,map[m].bxs*map[m].bys*sizeof(struct block_list*));
 
+	map[m].block_count=malloc(map[m].bxs*map[m].bys*sizeof(int));
+	if(map[m].block_count==NULL){
+		printf("out of memory : map_readmap block\n");
+		exit(1);
+	}
+	memset(map[m].block_count,0,map[m].bxs*map[m].bys*sizeof(int));
+
+	map[m].block_mob_count=malloc(map[m].bxs*map[m].bys*sizeof(int));
+	if(map[m].block_mob_count==NULL){
+		printf("out of memory : map_readmap block_mob\n");
+		exit(1);
+	}
+	memset(map[m].block_mob_count,0,map[m].bxs*map[m].bys*sizeof(int));
+
 	strdb_insert(map_db,map[m].name,&map[m]);
 	printf("%s read done\n",fn);
 
@@ -1273,5 +1351,3 @@ int do_init(int argc,char *argv[])
 
 	return 0;
 }
-
-

@@ -59,8 +59,11 @@ int battle_weapon_attack( struct block_list *bl,struct block_list *target,
 	 unsigned int tick,int flag);
 
 // 各種パラメータを得る
+int battle_counttargeted(struct block_list *bl);
 int battle_get_class(struct block_list *bl);
+int battle_get_dir(struct block_list *bl);
 int battle_get_lv(struct block_list *bl);
+int battle_get_range(struct block_list *bl);
 int battle_get_hp(struct block_list *bl);
 int battle_get_max_hp(struct block_list *bl);
 int battle_get_str(struct block_list *bl);
@@ -110,8 +113,9 @@ enum {
 	BCT_ALL		=0x20000,
 	BCT_NOONE	=0x60000,
 };
-int battle_check_target( struct block_list *src, struct block_list *target,int flag);
 
+int battle_check_undead(int race,int element);
+int battle_check_target( struct block_list *src, struct block_list *target,int flag);
 int battle_check_range(struct block_list *src,struct block_list *bl,int range);
 
 
@@ -141,6 +145,8 @@ extern struct Battle_Config {
 	int restart_sp_rate;
 	int mvp_item_rate,mvp_exp_rate;
 	int mvp_hp_rate;
+	int monster_hp_rate;
+	int monster_max_aspd;
 	int atc_gmonly,gm_allskill;
 	int skillfree;
 	int skillup_limit;
@@ -165,7 +171,6 @@ extern struct Battle_Config {
 	int pet_support_rate;
 	int pet_attack_exp_to_master;
 	int skill_min_damage;
-	int sanctuary_type;
 	int finger_offensive_type;
 	int heal_exp,shop_exp;
 	int combo_delay_rate;
@@ -189,7 +194,13 @@ extern struct Battle_Config {
 	int error_log;
 	int etc_log;
 	int save_clothcolor;
-	int autocounter_mode;
+	int undead_detect_type;
+	int pc_auto_counter_type;
+	int monster_auto_counter_type;
+	int agi_penaly_type;
+	int agi_penaly_num;
+	int vit_penaly_type;
+	int vit_penaly_num;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

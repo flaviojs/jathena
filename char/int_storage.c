@@ -10,7 +10,7 @@
 #define STORAGE_MEMINC	16
 // ファイル名のデフォルト
 // inter_config_read()で再設定される
-char storage_txt[256]="storage.txt";
+char storage_txt[1024]="storage.txt";
 
 
 struct storage *storage=NULL;
@@ -192,7 +192,6 @@ int mapif_parse_SaveStorage(int fd)
 	}else{
 		i=account2storage(account_id);
 		memcpy(&storage[i],RFIFOP(fd,8),sizeof(struct storage));
-//		inter_storage_save();	// 一応セーブ
 		mapif_save_storage_ack(fd,account_id);
 	}
 	return 0;

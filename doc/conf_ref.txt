@@ -418,7 +418,7 @@ restart_sp_rate
 	そしてSPが比率より高い場合も回復しません。
 
 mvp_hp_rate
-	MVP MOBのHPを百分率で調整します。
+	MVP モンスターのHPを百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
 
 mvp_item_rate
@@ -428,6 +428,14 @@ mvp_item_rate
 mvp_exp_rate
 	MVP EXPの所得倍率を百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
+
+monster_hp_rate
+	MVP 以外のモンスターのHPを百分率で調整します。
+	0-1000程度の数値を指定してください。デフォルトは100です。
+
+monster_max_aspd
+	モンスターの最大攻撃速度を設定します。
+	デフォルトは199です。最大は199で最小は100です。
 
 atcommand_gm_only
 	＠コマンドをGM専用にするかどうかです。デフォルトはnoです。
@@ -540,11 +548,6 @@ skill_min_damage
 	スキルを使った時ダメージが連打数より未満の場合全てミスになるか1ダメージになるかを決定します。
 	デフォルトはnoです。
 
-sanctuary_type
-	スキルサンクチュアリとマグヌスエクソシズムの攻撃判定をどうするかを決定します。
-	0でアンデッドと悪魔種族で1で属性不死と悪魔種族に適用されます。
-	デフォルトは0です。
-
 finger_offensive_type
 	スキル指弾の表示タイプを決定します。
 	0は本サーバー仕様で1はアテナ仕様です。デフォルトは0です。
@@ -609,7 +612,7 @@ arrow_decrement
 	デフォルトはyesです。
 
 max_aspd
-	 最大攻撃速度を設定します。
+	プレイヤーの最大攻撃速度を設定します。
 	デフォルトは199です。最大は199で最小は100です。
 
 max_hp
@@ -658,11 +661,41 @@ save_clothcolor
 	服の色を保存するかどうか、有効にすると問題があるかもしれません。
 	デフォルトはnoです。
 
-autocounter_mode
-	オートカウンター発動時のステ計算法などを変更します。
-	0でコモド後仕様(HIT+20,CRI*2,敵DEF=0)
-	1で旧仕様(100%クリティカル)です。
-	デフォルトは0です。
+undead_detect_type
+	アンデッドを認識する方法を設定します。0で属性のみ、1で種族のみ、
+	2で属性と種族の両方のどちらでもあった場合になります。
+	デフォルトは2です。
+
+player_auto_counter_type
+	プレイヤーのオートカウンターの仕様を設定します。0で100%クリティカル、
+	1で防御無視、Hit+20、クリティカル率2倍です。
+	デフォルトは1す。
+
+monster_auto_counter_type
+	モンスターのオートカウンターの仕様を設定します。0で100%クリティカル、
+	1で防御無視、Hit+20、クリティカル率2倍です。
+	デフォルトは1す。
+
+agi_penaly_type
+	3匹以上の敵に攻撃された時のagiペナルティの仕様を設定します。
+	0でなし、1でagi_penaly_num%ずつ減って、2でagi_penaly_numだけ減ります。
+	デフォルトは0す。
+
+agi_penaly_num
+	agiペナルティによって減る回避の量を設定します。
+	デフォルトは0す。
+
+vit_penaly_type
+	3匹以上の敵に攻撃された時のvitペナルティの仕様を設定します。
+	0でなし、1でvit_penaly_num%ずつ減って、2でvit_penaly_numだけ減ります。
+	(減るのはvitによる防御のみ)
+	デフォルトは0す。
+
+vit_penaly_num
+	vitペナルティによって減る回避の量を設定します。
+	デフォルトは0す。
+
+
 
 < 例 >
 
@@ -696,6 +729,8 @@ restart_sp_rate: 0
 mvp_hp_rate: 100
 mvp_item_rate: 100
 mvp_exp_rate: 100
+monster_hp_rate: 100
+monster_max_aspd: 199
 atcommand_gm_only: no
 gm_all_skill: 0
 player_skillfree: no
@@ -720,7 +755,6 @@ pet_support: no
 pet_support_rate: 100
 pet_attack_exp_to_master: no
 skill_min_damage: no
-sanctuary_type: 0
 finger_offensive_type: 0
 heal_exp: 0
 shop_exp: 0
@@ -745,7 +779,13 @@ save_log: off
 error_log: on
 etc_log: on
 save_clothcolor: no
-autocounter_mode: 0
+undead_detect_type: 2
+player_auto_counter_type: 1
+monster_auto_counter_type: 0
+agi_penaly_type: 0
+agi_penaly_num: 0
+vit_penaly_type: 0
+vit_penaly_num: 0
 
 
 =====================================================================ghos6. atcommand_athena.conf

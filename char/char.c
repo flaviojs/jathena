@@ -44,7 +44,7 @@ int char_ip;
 int char_port = 6121;
 int char_maintenance;
 int char_new;
-char char_txt[256];
+char char_txt[1024];
 
 #define CHAR_STATE_WAITAUTH 0
 #define CHAR_STATE_AUTHOK 1

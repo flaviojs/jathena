@@ -8,10 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-char party_txt[256]="party.txt";
+char party_txt[1024]="party.txt";
 
 static struct dbt *party_db;
-static int party_newid=10000;
+static int party_newid=100;
 
 int mapif_party_broken(int party_id,int flag);
 int party_check_empty(struct party *p);

@@ -12,6 +12,7 @@
 #define LIFETIME_FLOORITEM 60
 #define DAMAGELOG_SIZE 16
 #define LOOTITEM_SIZE 20
+#define MAX_SKILL_LEVEL 100
 #define MAX_STATUSCHANGE 192
 #define MAX_SKILLUNITGROUP	32
 #define MAX_MOBSKILLUNITGROUP	4
@@ -119,6 +120,7 @@ struct map_session_data {
 		unsigned arrow_atk : 1;
 		unsigned attack_type : 3;
 		unsigned skill_flag : 1;
+		unsigned gangsterparadise : 1;
 	} state;
 	struct {
 		unsigned restart_full_recover : 1;
@@ -165,8 +167,9 @@ struct map_session_data {
 	struct skill_unit_group skillunit[MAX_SKILLUNITGROUP];
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL];
-	int ghost_timer;
+	short sg_count;
 
+	int ghost_timer;
 	unsigned int canact_tick;
 	unsigned int canmove_tick;
 	int hp_sub,sp_sub;
@@ -207,7 +210,7 @@ struct map_session_data {
 	int monster_drop_race[10],monster_drop_itemrate[10];
 	int double_add_rate,speed_add_rate,aspd_add_rate,perfect_hit_add,get_zeny_add_num;
 	short spiritball, spiritball_old;
-	int spirit_timer[10];
+	int spirit_timer[MAX_SKILL_LEVEL];
 
 	int reg_num;
 	struct script_reg *reg;
@@ -242,10 +245,6 @@ struct map_session_data {
 
 	char eventqueue[MAX_EVENTQUEUE][50];
 	int eventtimer[MAX_EVENTTIMER];
-
-	int sg_count;
-	int intimidate_x,intimidate_y,intimidate_map;
-	int gangsterparadise;
 };
 
 struct npc_item_list {
@@ -314,6 +313,7 @@ struct mob_data {
 	short sc_count;
 	short opt1,opt2,option;
 	short min_chase;
+	short sg_count;
 
 	int skilltimer;
 	int skilltarget;
@@ -326,9 +326,6 @@ struct mob_data {
 	struct skill_unit_group_tickset skillunittick[MAX_SKILLUNITGROUPTICKSET];
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL/2];
 	char npc_event[50];
-
-	int sg_count;
-	int intimidate_x,intimidate_y;
 };
 struct pet_data {
 	struct block_list bl;
@@ -358,7 +355,9 @@ enum { NONE_ATTACKABLE,ATTACKABLE };
 struct map_data {
 	char name[24];
 	unsigned char *gat;	// NULL‚È‚ç‰º‚Ìmap_data_other_server‚Æ‚µ‚Äˆµ‚¤
-	struct block_list **block,**block_mob;
+	struct block_list **block;
+	struct block_list **block_mob;
+	int *block_count,*block_mob_count;
 	int m;
 	short xs,ys;
 	short bxs,bys;
@@ -515,6 +514,7 @@ int map_getcell(int,int,int);
 int map_setcell(int,int,int,int);
 
 // ‚»‚Ì‘¼
+int map_check_dir(int s_dir,int t_dir);
 int map_calc_dir( struct block_list *src,int x,int y);
 
 // path.c‚æ‚è
