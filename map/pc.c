@@ -2776,6 +2776,8 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		pet_stopattack(sd->pd);
 		pet_changestate(sd->pd,MS_IDLE,0);
 	}
+	if(sd->sc_data[SC_BLADESTOP].timer!=-1)
+		skill_status_change_end(&sd->bl,SC_BLADESTOP,-1);
 
 	memcpy(mapname,mapname_org,24);
 	mapname[16]=0;
@@ -3349,6 +3351,8 @@ int pc_attack_timer(int tid,unsigned int tick,int id,int data)
 		return 0;
 
 	if(sd->sc_data[SC_AUTOCOUNTER].timer != -1)
+		return 0;
+	if(sd->sc_data[SC_BLADESTOP].timer != -1)
 		return 0;
 
 	if((opt = battle_get_option(bl)) != NULL && *opt&0x46)

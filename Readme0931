@@ -1,4 +1,37 @@
 --------------------
+//0934 by ぴざまん
+
+・MOBの状態異常耐性がやたら高かったのを修正。
+・速度減少の仕様変更(成功率計算式変更・失敗時にはエフェクト無し)。
+・何時の間にか状態異常の継ぎ足し禁止がコメントアウトされていたので戻し。
+・ポイズンリアクトのアイコン表示が無くなっていたので修正(でも出るだけ…)
+・白刃取り実装。
+
+	(map/)
+	battle.c
+		battle_weapon_attack() 修正。
+	clif.c
+		clif_parse_WalkToXY()、clif_parse_ActionRequest() 修正。
+		clif_parse_TakeItem()、clif_parse_UseItem() 修正。
+		clif_parse_DropItem()、clif_parse_EquipItem() 修正。
+		clif_parse_UnequipItem() 修正。
+	mob.c
+		mob_can_move()、mob_attack()、mob_ai_sub_hard() 修正。
+		mobskill_use_id()、mobskill_use_pos() 修正。
+		mobskill_castend_id()、mobskill_castend_pos() 修正。
+	pc.c
+		pc_attack_timer()、pc_setpos() 修正。
+	skill.c
+		SkillStatusChangeTable[] 修正。
+		skill_additional_effect()、skill_castend_damage_id() 修正。
+		skill_castend_nodamage_id()、skill_check_condition() 修正。
+		skill_status_change_start()、skill_status_change_end() 修正。
+		skill_use_id() 修正。
+	skill.h 修正。
+	(db/)
+	cast_db.txt 修正。
+
+--------------------
 //0933 by 胡蝶蘭
 
 

@@ -289,7 +289,7 @@ int mob_can_move(struct mob_data *md)
 {
 	if(md->canmove_tick > gettick() || (md->opt1 > 0 && md->opt1 != 6) || md->option&2)
 		return 0;
-	if( md->sc_data[SC_ANKLE].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1)	// アンクル中で動けない
+	if( md->sc_data[SC_ANKLE].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_BLADESTOP].timer != -1)	// アンクル中で動けない
 		return 0;
 
 	return 1;
@@ -411,6 +411,9 @@ static int mob_attack(struct mob_data *md,unsigned int tick,int data)
 		return 0;
 
 	if(md->sc_data[SC_AUTOCOUNTER].timer != -1)
+		return 0;
+
+	if(md->sc_data[SC_BLADESTOP].timer != -1)
 		return 0;
 
 	sd=map_id2sd(md->target_id);
@@ -1196,7 +1199,7 @@ static int mob_ai_sub_hard(struct block_list *bl,va_list ap)
 	race=mob_db[md->class].race;
 
 	// 異常
-	if((md->opt1 > 0 && md->opt1 != 6) || md->state.state==MS_DELAY){
+	if((md->opt1 > 0 && md->opt1 != 6) || md->state.state==MS_DELAY || md->sc_data[SC_BLADESTOP].timer != -1){
 		return 0;
 	}
 
@@ -2379,6 +2382,8 @@ int mobskill_castend_id( int tid, unsigned int tick, int id,int data )
 		md->sc_data[SC_STEELBODY].timer != -1)
 		return 0;
 	if(md->sc_data[SC_AUTOCOUNTER].timer != -1 && md->skillid != KN_AUTOCOUNTER) return 0;
+	if(md->sc_data[SC_BLADESTOP].timer != -1)
+		return 0;
 	if(md->skillid != NPC_EMOTION)
 		md->last_thinktime=tick + battle_get_adelay(&md->bl);
 
@@ -2451,7 +2456,8 @@ int mobskill_castend_pos( int tid, unsigned int tick, int id,int data )
 
 	md->skilltimer=-1;
 	if(md->opt1>0 || md->sc_data[SC_DIVINA].timer != -1 || md->sc_data[SC_ROKISWEIL].timer != -1 ||
-		md->sc_data[SC_STEELBODY].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1)
+		md->sc_data[SC_STEELBODY].timer != -1 || md->sc_data[SC_AUTOCOUNTER].timer != -1 ||
+		md->sc_data[SC_BLADESTOP].timer != -1)
 		return 0;
 
 	if(battle_config.monster_skill_reiteration == 0) {
@@ -2555,7 +2561,8 @@ int mobskill_use_id(struct mob_data *md,struct block_list *target,int skill_idx)
 
 	// 沈黙や異常
 	if( md->opt1>0 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
-		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
+		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1 ||
+		md->sc_data[SC_BLADESTOP].timer != -1)
 		return 0;
 
 	if(md->option&4 && skill_id==TF_HIDING)
@@ -2653,7 +2660,8 @@ int mobskill_use_pos( struct mob_data *md,
 		return 0;
 
 	if( md->opt1>0 || md->sc_data[SC_DIVINA].timer!=-1 ||  md->sc_data[SC_ROKISWEIL].timer!=-1 ||
-		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1)
+		md->sc_data[SC_AUTOCOUNTER].timer != -1 || md->sc_data[SC_STEELBODY].timer != -1 || 
+		md->sc_data[SC_BLADESTOP].timer != -1)
 		return 0;	// 異常や沈黙など
 
 	if(md->option&2)

@@ -5739,7 +5739,8 @@ void clif_parse_WalkToXY(int fd,struct map_session_data *sd)
 
 	// ステータス異常やハイディング中(トンネルドライブ無)で動けない
 	if((sd->opt1 > 0 && sd->opt1 != 6) ||
-		sd->sc_data[SC_ANKLE].timer !=-1 || sd->sc_data[SC_AUTOCOUNTER].timer!=-1 || sd->sc_data[SC_TRICKDEAD].timer!=-1)
+		sd->sc_data[SC_ANKLE].timer !=-1 || sd->sc_data[SC_AUTOCOUNTER].timer!=-1 ||
+		sd->sc_data[SC_TRICKDEAD].timer!=-1 || sd->sc_data[SC_BLADESTOP].timer !=-1)
 		return;
 	if( (sd->status.option&2) && pc_checkskill(sd,RG_TUNNELDRIVE) <= 0)
 		return;
@@ -5922,7 +5923,8 @@ void clif_parse_ActionRequest(int fd,struct map_session_data *sd)
 		clif_clearchar_area(&sd->bl,1);
 		return;
 	}
-	if(sd->npc_id!=0 || sd->opt1 > 0 || sd->status.option&2 || sd->sc_data[SC_AUTOCOUNTER].timer != -1) return;
+	if(sd->npc_id!=0 || sd->opt1 > 0 || sd->status.option&2 ||
+		sd->sc_data[SC_AUTOCOUNTER].timer != -1 || sd->sc_data[SC_BLADESTOP].timer != -1) return;
 
 	tick=gettick();
 
@@ -6048,7 +6050,7 @@ void clif_parse_TakeItem(int fd,struct map_session_data *sd)
 		return;
 	}
 
-	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0|| sd->sc_data[SC_AUTOCOUNTER].timer!=-1) return;
+	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0|| sd->sc_data[SC_AUTOCOUNTER].timer!=-1 || sd->sc_data[SC_BLADESTOP].timer!=-1) return;
 
 	if(fitem==NULL || fitem->bl.m != sd->bl.m)
 		return;
@@ -6066,7 +6068,7 @@ void clif_parse_DropItem(int fd,struct map_session_data *sd)
 		clif_clearchar_area(&sd->bl,1);
 		return;
 	}
-	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0|| sd->sc_data[SC_AUTOCOUNTER].timer!=-1)return;
+	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0|| sd->sc_data[SC_AUTOCOUNTER].timer!=-1 || sd->sc_data[SC_BLADESTOP].timer!=-1)return;
 	pc_dropitem(sd,RFIFOW(fd,2)-2,RFIFOW(fd,4));
 }
 
@@ -6080,7 +6082,7 @@ void clif_parse_UseItem(int fd,struct map_session_data *sd)
 		clif_clearchar_area(&sd->bl,1);
 		return;
 	}
-	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0 || sd->sc_data[SC_TRICKDEAD].timer != -1) return;
+	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0 || sd->sc_data[SC_TRICKDEAD].timer != -1 ||sd->sc_data[SC_BLADESTOP].timer!=-1) return;
 
 	if(sd->invincible_timer != -1)
 		pc_delinvincibletimer(sd);
@@ -6101,6 +6103,7 @@ void clif_parse_EquipItem(int fd,struct map_session_data *sd)
 	}
 	index = RFIFOW(fd,2)-2;
 	if(sd->npc_id!=0 || sd->vender_id != 0) return;
+	if(sd->sc_data[SC_BLADESTOP].timer!=-1) return;
 
 	if(sd->status.inventory[index].identify != 1) {		// 未鑑定
 		clif_equipitemack(sd,index,0,0);	// fail
@@ -6128,6 +6131,9 @@ void clif_parse_UnequipItem(int fd,struct map_session_data *sd)
 		clif_clearchar_area(&sd->bl,1);
 		return;
 	}
+
+	if(sd->sc_data[SC_BLADESTOP].timer!=-1) return;
+
 	if(sd->npc_id!=0 || sd->vender_id != 0 || sd->opt1 > 0) return;
 	pc_unequipitem(sd,RFIFOW(fd,2)-2,0);
 }

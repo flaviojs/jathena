@@ -251,6 +251,8 @@ enum {	// struct map_session_data ÇÃ status_changeÇÃî‘çÜÉeÅ[ÉuÉã
 	SC_VOLCANO				=153,
 	SC_DELUGE				=154,
 	SC_VIOLENTGALE				=155,
+	SC_BLADESTOP_WAIT		=156,
+	SC_BLADESTOP			=157,
 
 	SC_LULLABY				=160,
 	SC_RICHMANKIM			=161,

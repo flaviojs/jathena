@@ -3449,6 +3449,11 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 		battle_stopattack(src);
 		return 0;
 	}
+	if(sc_data && sc_data[SC_BLADESTOP].timer!=-1){
+		battle_stopattack(src);
+		return 0;
+	}
+	
 	race = battle_get_race(target);
 	ele = battle_get_elem_type(target);
 	if(battle_check_target(src,target,BCT_ENEMY) > 0 &&
@@ -3655,6 +3660,13 @@ int battle_weapon_attack( struct block_list *src,struct block_list *target,
 				battle_weapon_attack(target,src,tick,0x8000|t_sc_data[SC_AUTOCOUNTER].val1);
 			skill_status_change_end(target,SC_AUTOCOUNTER,-1);
 		}
+		if(t_sc_data && t_sc_data[SC_BLADESTOP_WAIT].timer != -1){
+			int lv = t_sc_data[SC_BLADESTOP_WAIT].val1;
+			skill_status_change_end(target,SC_BLADESTOP_WAIT,-1);
+			skill_status_change_start(src,SC_BLADESTOP,lv,1,(int)src,(int)target,skill_get_time2(MO_BLADESTOP,lv),0);
+			skill_status_change_start(target,SC_BLADESTOP,lv,2,(int)target,(int)src,skill_get_time2(MO_BLADESTOP,lv),0);
+		}
+
 		map_freeblock_unlock();
 	}
 	return 0;
