@@ -157,18 +157,29 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 /* 290- */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 /* 300- */
-	-1,-1,-1,-1,-1,-1,-1,-1,-1,
+	-1,-1,-1,-1,-1,-1,
+	SC_LULLABY,
+	SC_RICHMANKIM,
+	SC_ETERNALCHAOS,
 	SC_DRUMBATTLE,
 /* 310- */
-	-1,-1,-1,
+	SC_NIBELUNGEN,
+	SC_ROKISWEIL,
+	SC_INTOABYSS,
 	SC_SIEGFRIED,
-	-1,-1,-1,-1,-1,
+	-1,-1,-1,
+	SC_DISSONANCE,
+	SC_FROSTJOKE,
 	SC_WHISTLE,
 /* 320- */
 	SC_ASSNCROS,
 	SC_POEMBRAGI,
 	SC_APPLEIDUN,
-	-1,-1,-1,-1,-1,-1,
+	-1,-1,
+	SC_UGLYDANCE,
+	SC_SCREAM,
+	SC_HUMMING,
+	SC_DONTFORGETME,
 	SC_FORTUNE,
 /* 330- */
 	SC_SERVICE4U,
@@ -199,10 +210,9 @@ int	skill_get_inf2( int id ){ return skill_db[id].inf2; }
 
 /* プロトタイプ */
 struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,int skilllv,int x,int y,int flag);
-
 int skill_check_condition( struct map_session_data *sd );
-
 int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag );
+
 
 static int distance(int x0,int y0,int x1,int y1)
 {
@@ -395,6 +405,11 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 			skill_status_change_start(bl,SC_FREEZE,1,0);
 		break;
 #endif
+
+	case BD_LULLABY:	/* 子守唄 */
+		if( rand()%100 < 15 )
+			skill_status_change_start(bl,SC_SLEEP,skilllv,30000);
+		break;
 
 	/* MOBの追加効果付きスキル */
 	case NPC_POISON:
@@ -1418,16 +1433,6 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		break;
 
 	/* 対地スキル */
-	case BD_ETERNALCHAOS:		/* 永遠の混沌 */
-	case BD_DRUMBATTLEFIELD:	/* 戦太鼓の響き */
-	case BD_RINGNIBELUNGEN:		/* ニーベルングの指輪 */
-	case BD_SIEGFRIED:			/* 不死身のジークフリード */
-	case BA_WHISTLE:			/* 口笛 */
-	case BA_ASSASSINCROSS:		/* 夕陽のアサシンクロス */
-	case BA_APPLEIDUN:			/* イドゥンの林檎 */
-	case DC_FORTUNEKISS:		/* 幸運のキス */
-	case DC_SERVICEFORYOU:		/* サービスフォーユー */
-#if 0
 	case BD_LULLABY:			/* 子守唄 */
 	case BD_RICHMANKIM:			/* ニヨルドの宴 */
 	case BD_ETERNALCHAOS:		/* 永遠の混沌 */
@@ -1437,18 +1442,26 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case BD_INTOABYSS:			/* 深淵の中に */
 	case BD_SIEGFRIED:			/* 不死身のジークフリード */
 	case BA_DISSONANCE:			/* 不協和音 */
+	case BA_POEMBRAGI:			/* ブラギの詩 */
 	case BA_WHISTLE:			/* 口笛 */
 	case BA_ASSASSINCROSS:		/* 夕陽のアサシンクロス */
-	case BA_POEMBRAGI:			/* ブラギの詩 */
 	case BA_APPLEIDUN:			/* イドゥンの林檎 */
 	case DC_UGLYDANCE:			/* 自分勝手なダンス */
 	case DC_HUMMING:			/* ハミング */
 	case DC_DONTFORGETME:		/* 私を忘れないで… */
 	case DC_FORTUNEKISS:		/* 幸運のキス */
 	case DC_SERVICEFORYOU:		/* サービスフォーユー */
-#endif
 		skill_unitsetting(src,skillid,skilllv,src->x,src->y,0);
 		break;
+
+	case BD_ADAPTATION:			/* アドリブ */
+		{
+			struct skill_unit_group *group=skill_check_dancing(src);
+			if(group){
+				skill_delunitgroup(group);
+				pc_calcstatus(sd,0);
+			}
+		} break;
 
 	case TF_STEAL:			// スティール
 		if(pc_steal_item(sd,bl)) {
@@ -1965,7 +1978,8 @@ int skill_castend_map( struct map_session_data *sd,int skill_num, const char *ma
 	if( sd==NULL || sd->bl.prev == NULL || pc_isdead(sd))
 		return 0;
 
-	if( sd->opt1>0 || sd->status.option&6 || sd->sc_data[SC_DIVINA].timer!=-1 )
+	if( sd->opt1>0 || sd->status.option&6 ||
+		sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1)
 		return 0;	/* 異常や沈黙など */
 	
 	if( skill_num != sd->skillid)	/* 不正パケットらしい */
@@ -2204,57 +2218,68 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		target=BCT_ALL;
 		break;
 
-	case BD_DRUMBATTLEFIELD:	/* 戦太鼓の響き */
+	case BD_LULLABY:			/* 子守唄 */
+	case BD_ETERNALCHAOS:		/* エターナルカオス */
+	case BD_ROKISWEIL:			/* ロキの叫び */
 		count=81;
-		limit=40000*(6-skilllv);
-		val1=skilllv*15+10;
+		limit=60*1000;
+		range=5;
 		target=BCT_ALL;
 		break;
-
+	case BD_DRUMBATTLEFIELD:	/* 戦太鼓の響き */
+	case BD_RINGNIBELUNGEN:		/* ニーベルングの指輪 */
+	case BD_INTOABYSS:			/* 深淵の中に */
 	case BD_SIEGFRIED:			/* 不死身のジークフリード */
 		count=81;
-		target=BCT_ALL;
+		limit=60*1000;
+		range=5;
+		target=BCT_PARTY;
+		break;
+	case BA_WHISTLE:			/* 口笛 */
+	case DC_HUMMING:			/* ハミング */
+		count=81;
+		limit=60*1000;
+		range=5;
+		target=BCT_NOENEMY;
 		break;
 
 	case BA_DISSONANCE:			/* 不協和音 */
+	case DC_UGLYDANCE:			/* 自分勝手なダンス */
 		count=81;
+		limit=30*1000;
+		range=5;
 		target=BCT_ENEMY;
 		break;
 
-	case BA_WHISTLE:			/* 口笛 */
+	case DC_DONTFORGETME:		/* 私を忘れないで… */
 		count=81;
-		limit=40000*(6-skilllv);
-		range=9;
-		val1=skilllv*15+10;
-		target=BCT_ALL;
-		break;
-
-	case BA_APPLEIDUN:			/* イドゥンの林檎 */
-		count=81;
-		target=BCT_ALL;
-		break;
-
-	case DC_UGLYDANCE:			/* 自分勝手なダンス */
-		count=81;
-		limit=40000*(6-skilllv);
+		limit=180*1000;
 		range=5;
-		val1=skilllv*15+10;
-		target=BCT_ALL;
+		target=BCT_ENEMY;
 		break;
-
-	case DC_FORTUNEKISS:		/* 幸運のキス */
+	case BA_POEMBRAGI:			/* ブラギの詩 */
 		count=81;
-		limit=40000*(6-skilllv);
-		val1=skilllv*15+10;
-		target=BCT_ALL;
+		limit=180*1000;
+		range=5;
+		target=BCT_NOENEMY;
 		break;
-
+	case BA_APPLEIDUN:			/* イドゥンの林檎 */
 	case DC_SERVICEFORYOU:		/* サービスフォーユー */
 		count=81;
-		limit=40000*(6-skilllv);
-		val1=skilllv*15+10;
-		target=BCT_ALL;
+		limit=180*1000;
+		range=5;
+		target=BCT_PARTY;
 		break;
+
+	case BA_ASSASSINCROSS:		/* 夕陽のアサシンクロス */
+	case DC_FORTUNEKISS:		/* 幸運のキス */
+		count=81;
+		limit=120*1000;
+		range=5;
+		target=BCT_NOENEMY;
+		break;
+
+
 	};
 
 	group=skill_initunitgroup(src,count,skillid,skilllv,
@@ -2687,33 +2712,21 @@ int skill_unit_onout(struct skill_unit *src,struct block_list *bl,unsigned int t
 	case 0x9e:	/* 子守唄 */
 	case 0x9f:	/* ニヨルドの宴 */
 	case 0xa0:	/* 永遠の混沌 */
-#if 0
 	case 0xa1:	/* 戦太鼓の響き */
-#endif
 	case 0xa2:	/* ニーベルングの指輪 */
 	case 0xa3:	/* ロキの叫び */
-#if 0
 	case 0xa4:	/* 深淵の中に */
-#endif
 	case 0xa5:	/* 不死身のジークフリード */
-#if 0
 	case 0xa6:	/* 不協和音 */
 	case 0xa7:	/* 口笛 */
-#endif
 	case 0xa8:	/* 夕陽のアサシンクロス */
-#if 0
 	case 0xa9:	/* ブラギの詩 */
-#endif
 	case 0xaa:	/* イドゥンの林檎 */
-#if 0
 	case 0xab:	/* 自分勝手なダンス */
 	case 0xac:	/* ハミング */
-#endif
 	case 0xad:	/* 私を忘れないで… */
 	case 0xae:	/* 幸運のキス */
-#if 0
 	case 0xaf:	/* サービスフォーユー */
-#endif
 		{
 			struct skill_unit *unit2;
 			struct status_change *sc_data=battle_get_sc_data(bl);
@@ -2900,7 +2913,8 @@ int skill_check_condition( struct map_session_data *sd )
 	if(sd->skillitem==sd->skillid) {	/* アイテムの場合無条件成功 */
 		sd->skillitem = sd->skillitemlv = -1;
 	}else{
-		if(sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_STEELBODY].timer!=-1) {
+		if(sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1
+		 || sd->sc_data[SC_STEELBODY].timer!=-1) {
 			clif_skill_fail(sd,sd->skillid,0,0);
 			return 0;
 		}
@@ -3193,9 +3207,17 @@ int skill_check_condition( struct map_session_data *sd )
 
 		if	(item_id[0] || item_id[1] || item_id[2]) {
 			for(j=0;j<3;j++) {
+				// アイテム無し、３種ジェム＆ミストレスカード、は無処理
 				if(!item_id[j] ||
-						 ((item_id[j] == 715 || item_id[j] == 716 || item_id[j] == 717) &&  sd->special_state.no_gemstone) )
-					continue;	// アイテム無し、３種ジェム＆ミストレスカード、は無処理
+					 ((item_id[j] == 715 || item_id[j] == 716
+					  || item_id[j] == 717) && sd->special_state.no_gemstone) )
+					continue;
+				// 深淵の中にはジェムと罠がいらない
+				if( ((item_id[j] == 715 || item_id[j] == 716 ||
+					 item_id[j] == 717 || item_id[j] == 1065 )
+					 && sd->sc_data[SC_INTOABYSS].timer!=-1) )
+					continue;
+
 				if((i[j]=pc_search_inventory(sd,item_id[j])) == -1 ||
 						sd->status.inventory[i[j]].amount < item_amount[j]) {	// アイテムなし
 					if(item_id[j] == 716 || item_id[j] == 717)		// 赤＆青ジェムの場合のみ
@@ -3248,11 +3270,15 @@ int skill_castfix( struct block_list *bl, int time )
 	time=time*castrate*(150- dex)/15000;
 	time=time*battle_config.cast_rate/100;
 	
+	/* サフラギウム */
 	if( (sc_data = battle_get_sc_data(bl))[SC_SUFFRAGIUM].timer!=-1 ){
-		/* サフラギウム */
 		time=time*(100-sc_data[SC_SUFFRAGIUM].val1*15)/100;
 		skill_status_change_end( bl, SC_SUFFRAGIUM, -1);
 	}
+	/* ブラギの詩 */
+	if( (sc_data = battle_get_sc_data(bl))[SC_POEMBRAGI].timer!=-1 )
+		time=time*(100-sc_data[SC_POEMBRAGI].val2)/100;
+
 	return (time>0)?time:0;
 }
 /*==========================================
@@ -3261,6 +3287,7 @@ int skill_castfix( struct block_list *bl, int time )
  */
 int skill_delayfix( struct block_list *bl, int time )
 {
+	struct status_change *sc_data;
 	if(time<=0)
 		return 0;
 	
@@ -3268,6 +3295,10 @@ int skill_delayfix( struct block_list *bl, int time )
 		time=time*(150- battle_get_dex(bl))/150;
 
 	time=time*battle_config.delay_rate/100;
+	
+	/* ブラギの詩 */
+	if( (sc_data = battle_get_sc_data(bl))[SC_POEMBRAGI].timer!=-1 )
+		time=time*(100-sc_data[SC_POEMBRAGI].val2)/100;
 	
 	return (time>0)?time:0;
 }
@@ -3295,14 +3326,23 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		return 0;
 
 	/* 沈黙や異常（ただし、グリムなどの判定をする） */
-	if( sd->opt1>0 || sd->status.option&6 || sd->sc_data[SC_DIVINA].timer!=-1 ){
+	if( sd->opt1>0 || sd->status.option&6 ||
+		 sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1 ){
 		if( (sd->status.option&4) && skill_num==AS_CLOAKING );	/* クローキング中 */
 		else if( (sd->status.option&2) && (skill_num==TF_HIDING || skill_num==AS_GRIMTOOTH || skill_num==RG_BACKSTAP || skill_num==RG_RAID ));	/* ハイディング中 */
 		else
 			return 0;
 	}
 
-	if( skill_num==HT_BLITZBEAT && !(sd->status.option&0x10) ){	/* 鷹がいない */
+	/* 演奏/ダンス中 */
+	if( skill_check_dancing(&sd->bl) && skill_num!=BD_ADAPTATION &&
+		skill_num!=BA_MUSICALSTRIKE && skill_num!=DC_THROWARROW ){
+		printf("dancing! %d\n",skill_num);
+		return 0;
+	}
+
+	/* 鷹がいない */
+	if( skill_num==HT_BLITZBEAT && !(sd->status.option&0x10) ){
 		return 0;
 	}
 
@@ -3428,8 +3468,13 @@ int skill_use_pos( struct map_session_data *sd,
 	if(pc_isdead(sd))
 		return 0;
 
-	if( sd->opt1>0 || sd->status.option&6 || sd->sc_data[SC_DIVINA].timer!=-1 )
+	if( sd->opt1>0 || sd->status.option&6 ||
+		 sd->sc_data[SC_DIVINA].timer!=-1 || sd->sc_data[SC_ROKISWEIL].timer!=-1 )
 		return 0;	/* 異常や沈黙など */
+
+	/* 演奏/ダンス中かチェック */
+	if( skill_check_dancing(&sd->bl) )
+		return 0;
 
 	/* 射程と障害物チェック */
 	if(!battle_check_range(&sd->bl,skill_x,skill_y,skill_get_range(skill_num)))
@@ -3740,7 +3785,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 		}
 		break;
 
-	case SC_ENDURE:
+	case SC_ENDURE:	/* インデュア */
 		if(sd && sd->special_state.infinite_endure) {
 			if(sc_data[type].timer==tid) {
 				sc_data[type].timer=add_timer( 1000*600+tick,
@@ -3751,6 +3796,30 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 		}
 		break;
 
+	case SC_DISSONANCE:	/* 不協和音 */
+		if( (--sc_data[type].val2)>0){
+			struct skill_unit_group *group=
+				(struct skill_unit_group *)sc_data[type].val4;
+			if(!group)
+				break;
+			skill_attack(BF_MISC,(struct block_list *)&group->unit[0],
+				(struct block_list *)&group->unit[0],
+				bl,group->skill_id,sc_data[type].val1,tick,0);			
+			if(sc_data[type].timer==tid)
+				sc_data[type].timer=add_timer( 3000+tick,
+					skill_status_change_timer, bl->id, data );			
+		}break;
+		
+	case SC_LULLABY:	/* 子守唄 */
+		if( (--sc_data[type].val2)>0){
+			skill_additional_effect(bl,bl,
+				BD_LULLABY,sc_data[type].val1,BF_LONG|BF_SKILL|BF_MISC,tick);
+			if(sc_data[type].timer==tid)
+				sc_data[type].timer=add_timer( 6000+tick,
+					skill_status_change_timer, bl->id, data );			
+		}break;
+	
+	
 	/* 時間切れ無し？？ */
 	case SC_AETERNA:
 	case SC_TRICKDEAD:
@@ -3978,20 +4047,56 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			tick = 1000 * 300;
 			val2 = 20+val1;
 			break;
-		case SC_ASSNCROS:			/* 夕陽のアサシンクロス */
-			tick = 1000 * 120;
-			val2 = 10+val1;
+		
+		case SC_LULLABY:			/* 子守唄 */
+			tick = 1000 * 6;
+			val2 = 11;
+			break;
+		case SC_ETERNALCHAOS:		/* エターナルカオス */
+			tick = 1000* 60;
+			break;
+		case SC_DRUMBATTLE:			/* 戦太鼓の響き */
+			tick = 1000 * 60;
+			val2 = (val1+1)*25;
+			val3 = (val1+1)*2;
+			break;
+		case SC_NIBELUNGEN:			/* ニーベルングの指輪 */
+			tick = 1000 * 60;
+			val2 = (val1+2)*50;
+			break;
+		case SC_ROKISWEIL:			/* ロキの叫び */
+			tick = 1000 * 60;
+			break;
+		case SC_INTOABYSS:			/* 深淵の中に */
+			tick = 1000 * 60;
+			break;
+		case SC_SIEGFRIED:			/* 不死身のジークフリード */
+			tick = 1000 * 60;
+			val2 = (val1+3)*10;
+			break;
+		case SC_DISSONANCE:			/* 不協和音 */
+			tick = 1000 * 3;
+			val2 = 10;
+			val3 = (val1+3)*10;
 			break;
 		case SC_WHISTLE:			/* 口笛 */
 			tick = 1000 * 60;
 			break;
+		case SC_ASSNCROS:			/* 夕陽のアサシンクロス */
+			tick = 1000 * 120;
+			val2 = 10+val1;
+			break;
+		case SC_POEMBRAGI:			/* ブラギの詩 */
+			tick = 1000 * 180;
+			val2 = val1 * 3;
 		case SC_APPLEIDUN:			/* イドゥンの林檎 */
 			tick = 1000 * 60 * 3;
 			val2 = val1*2+5;
 			break;
-		case SC_SERVICE4U:			/* サービスフォーユー */
-			tick = 1000 * 60 * 3;
-			val2 = val1+10;
+		case SC_UGLYDANCE:			/* 自分勝手なダンス */
+			tick = 1000 * 3;
+			val2 = 10;
+			val3 = (val1+1)*5;
 			break;
 		case SC_HUMMING:			/* ハミング */
 			tick = 1000 * 60;
@@ -4005,22 +4110,12 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 		case SC_FORTUNE:			/* 幸運のキス */
 			tick = 1000 * 60 * 2;
 			break;
-		case SC_DRUMBATTLE:			/* 戦太鼓の響き */
-			tick = 1000 * 60;
-			val2 = (val1+1)*25;
-			val3 = (val1+1)*2;
+		case SC_SERVICE4U:			/* サービスフォーユー */
+			tick = 1000 * 60 * 3;
+			val2 = val1+10;
+			val3 = val1*3+10;
 			break;
-		case SC_ETERNALCHAOS:		/* エターナルカオス */
-			tick = 1000* 60;
-			break;
-		case SC_NIBELUNGEN:			/* ニーベルングの指輪 */
-			tick = 1000 * 60;
-			val2 = (val1+2)*50;
-			break;
-		case SC_SIEGFRIED:			/* 不死身のジークフリード */
-			tick = 1000 * 60;
-			val2 = (val1+3)*10;
-			break;
+		
 		case SC_EXPLOSIONSPIRITS:	// 爆裂波動
 			tick = 1000 * 60 * 3;
 			val2 = 75 + 25*val1;
@@ -4125,8 +4220,14 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 	switch(type){
 		case SC_STONE:	case SC_FREEZE:	case SC_STAN:	case SC_SLEEP:
 			battle_stopattack(bl);	/* 攻撃停止 */
-			{
-				/* 同時に掛からないステータス異常を解除 */
+			if(sd){	/* 演奏/ダンスの中断 */
+				struct skill_unit_group *group=skill_check_dancing(bl);
+				if(group){
+					skill_delunitgroup(group);
+					pc_calcstatus(sd,0);
+				}
+			}
+			{	/* 同時に掛からないステータス異常を解除 */
 				int i;
 				for(i = SC_STONE; i <= SC_SLEEP; i++){
 					if(sc_data[i].timer != -1){
@@ -4244,14 +4345,41 @@ int skill_check_cloaking(struct block_list *bl)
 
 
 
-
-
 /*
  *----------------------------------------------------------------------------
  * スキルユニット
  *----------------------------------------------------------------------------
  */
 
+
+/* 演奏/ダンス中かどうか（そのグループを返す） */
+struct skill_unit_group *skill_check_dancing(struct block_list *src)
+{
+	int i;
+	struct skill_unit_group *list=NULL;
+	int maxsug=0;
+
+	if(src->type==BL_PC){
+		list=((struct map_session_data *)src)->skillunit;
+		maxsug=MAX_SKILLUNITGROUP;
+	}else if(src->type==BL_MOB){
+		list=((struct mob_data *)src)->skillunit;
+		maxsug=MAX_MOBSKILLUNITGROUP;
+	}
+	if(!list) return NULL;
+	
+	for(i=0;i<maxsug;i++){	/* 検索 */
+		int id;
+		if(list[i].group_id==0)
+			continue;
+		id=list[i].skill_id;
+		if( (id>=BD_LULLABY && id<=BD_RAGNAROK) ||
+			(id>=BA_DISSONANCE && id<=BA_APPLEIDUN && id!=BA_FROSTJOKE ) ||
+			(id>=DC_UGLYDANCE && id<=DC_SERVICEFORYOU && id!=DC_SCREAM) )
+			return &list[i];
+	}
+	return NULL;
+}
 
 /*==========================================
  * スキルユニット初期化

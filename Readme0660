@@ -1,4 +1,37 @@
 --------------
+//0691 by 胡蝶蘭
+
+・item_db2.txtがあればitem_db.txtにオーバーライドするように
+	オリジナルアイテムを作ってる人は使うと便利かもしれません。
+
+	itemdb.c
+		read_itemdb()修正
+
+・演奏/ダンス系スキル仮実装
+	・演奏/ダンス中は移動が遅く、スキルも使えないようになりました
+	・アドリブスキルで演奏/ダンスを中断できるようになりました
+	・演奏/ダンスは石化などの異常、MHPの1/4以上のダメージで中断します
+	・キャラクターグラフィックは演奏/ダンスしません
+	・演奏/ダンス中のSP消費は未実装です
+	・移動しても効果範囲はついてきません
+	・重複しても不協和音などに変化しません
+	・エフェクトが出ても効果は未実装のものがあります
+	・ほとんど未テストなので多数の不都合があると思います
+
+	skill.h
+		SC_* の列挙表を修正
+	skill.c
+		skill_check_dancing()追加
+		SkillStatusChangeTable[]修正
+		skill_unit_onout(), skill_status_change_start(),
+		skill_status_change_timer(),skill_unitsetting(),
+		skill_castend_id(),skill_castend_pos(),skill_castend_map(),
+		skill_castend_nodamage_id()修正
+		その他は忘れました
+	pc.c
+		pc_calcstatus(),pc_damage()修正
+
+--------------
 //0690 by 波浪
 
 ・細かい修正

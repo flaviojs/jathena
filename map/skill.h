@@ -80,6 +80,8 @@ int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,
 
 int skill_unit_move( struct block_list *bl,unsigned int tick,int range);
 
+struct skill_unit_group *skill_check_dancing( struct block_list *src );
+
 // 詠唱キャンセル
 int skill_castcancel( struct block_list *sd );
 
@@ -165,8 +167,6 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_FROSTWEAPON			=95,
 	SC_LIGHTNINGLOADER		=96,
 	SC_SEISMICWEAPON		=97,
-	SC_ASSNCROS				=100,
-	SC_POEMBRAGI			=101,
 	SC_STRIPWEAPON			=50,
 	SC_STRIPSHIELD			=51,
 	SC_STRIPARMOR			=52,
@@ -181,16 +181,28 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_DEFENDER				=62,
 	SC_DEVOTION				=60,
 	SC_SPEARSQUICKEN		=99,
+	
+	SC_LULLABY				=107,
+	SC_RICHMANKIM			=108,
+	SC_ETERNALCHAOS			=105,
 	SC_DRUMBATTLE			=78,
+	SC_NIBELUNGEN			=103,
+	SC_ROKISWEIL			=110,
+	SC_INTOABYSS			=111,
 	SC_SIEGFRIED			=79,
+	SC_DISSONANCE			=112,
+	SC_FROSTJOKE			=113,
 	SC_WHISTLE				=80,
+	SC_ASSNCROS				=100,
+	SC_POEMBRAGI			=101,
 	SC_APPLEIDUN			=81,
+	SC_UGLYDANCE			=114,
+	SC_SCREAM				=109,
+	SC_HUMMING				=104,
+	SC_DONTFORGETME			=106,
 	SC_FORTUNE				=82,
 	SC_SERVICE4U			=83,
-	SC_NIBELUNGEN			=103,
-	SC_HUMMING				=104,
-	SC_ETERNALCHAOS			=105,
-	SC_DONTFORGETME			=106,
+	
 	SC_STEELBODY			=87,
 	SC_VOLCANO				=85,
 	SC_DELUGE				=89,

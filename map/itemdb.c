@@ -227,73 +227,81 @@ static int itemdb_readdb(void)
 	int nameid,j;
 	char *str[32],*p,*np;
 	struct item_data *id;
+	int i=0;
+	char *filename[]={ "db/item_db.txt","db/item_db2.txt" };
 
-	fp=fopen("db/item_db.txt","r");
-	if(fp==NULL){
-		printf("can't read db/item_db.txt\n");
-		exit(1);
-	}
-	while(fgets(line,1020,fp)){
-		if(line[0]=='/' && line[1]=='/')
-			continue;
-		memset(str,0,sizeof(str));
-		for(j=0,np=p=line;j<17 && p;j++){
-			str[j]=p;
-			p=strchr(p,',');
-			if(p){ *p++=0; np=p; }
+	for(i=0;i<2;i++){
+
+		fp=fopen(filename[i],"r");
+		if(fp==NULL){
+			if(i>0)
+				continue;
+			printf("can't read %s\n",filename[i]);
+			exit(1);
 		}
-		if(str[0]==NULL)
-			continue;
 		
-		nameid=atoi(str[0]);
-		if(nameid<=0 || nameid>=20000)
-			continue;
-		ln++;
-
-		//ID,Name,Jname,Type,Price,Sell,Weight,ATK,DEF,Range,Slot,Job,Gender,Loc,wLV,eLV,View
-		id=itemdb_search(nameid);
-		memcpy(id->name,str[1],24);
-		memcpy(id->jname,str[2],24);
-		id->type=atoi(str[3]);
-		// buy≠sell*2 は item_value_db.txt で指定してください。
-		if (atoi(str[5])) {		// sell値を優先とする
-			id->value_buy=atoi(str[5])*2;
-			id->value_sell=atoi(str[5]);
-		} else {
-			id->value_buy=atoi(str[4]);
-			id->value_sell=atoi(str[4])/2;
+		while(fgets(line,1020,fp)){
+			if(line[0]=='/' && line[1]=='/')
+				continue;
+			memset(str,0,sizeof(str));
+			for(j=0,np=p=line;j<17 && p;j++){
+				str[j]=p;
+				p=strchr(p,',');
+				if(p){ *p++=0; np=p; }
+			}
+			if(str[0]==NULL)
+				continue;
+			
+			nameid=atoi(str[0]);
+			if(nameid<=0 || nameid>=20000)
+				continue;
+			ln++;
+	
+			//ID,Name,Jname,Type,Price,Sell,Weight,ATK,DEF,Range,Slot,Job,Gender,Loc,wLV,eLV,View
+			id=itemdb_search(nameid);
+			memcpy(id->name,str[1],24);
+			memcpy(id->jname,str[2],24);
+			id->type=atoi(str[3]);
+			// buy≠sell*2 は item_value_db.txt で指定してください。
+			if (atoi(str[5])) {		// sell値を優先とする
+				id->value_buy=atoi(str[5])*2;
+				id->value_sell=atoi(str[5]);
+			} else {
+				id->value_buy=atoi(str[4]);
+				id->value_sell=atoi(str[4])/2;
+			}
+			id->weight=atoi(str[6]);
+			id->atk=atoi(str[7]);
+			id->def=atoi(str[8]);
+			id->range=atoi(str[9]);
+			id->slot=atoi(str[10]);
+			id->class=atoi(str[11]);
+			id->sex=atoi(str[12]);
+			if(id->equip != atoi(str[13])){
+				//printf("%d : equip point %d -> %d\n",nameid,id->equip,atoi(str[13]));
+				id->equip=atoi(str[13]);
+			}
+			id->wlv=atoi(str[14]);
+			id->elv=atoi(str[15]);
+			id->look=atoi(str[16]);
+			id->flag.available=1;
+			id->flag.value_notdc=0;
+			id->flag.value_notoc=0;
+			id->view_id=0;
+	
+			id->use_script=NULL;
+			id->equip_script=NULL;
+	
+			if((p=strchr(np,'{'))==NULL)
+				continue;
+			id->use_script = parse_script(p,0);
+			if((p=strchr(p+1,'{'))==NULL)
+				continue;
+			id->equip_script = parse_script(p,0);
 		}
-		id->weight=atoi(str[6]);
-		id->atk=atoi(str[7]);
-		id->def=atoi(str[8]);
-		id->range=atoi(str[9]);
-		id->slot=atoi(str[10]);
-		id->class=atoi(str[11]);
-		id->sex=atoi(str[12]);
-		if(id->equip != atoi(str[13])){
-			//printf("%d : equip point %d -> %d\n",nameid,id->equip,atoi(str[13]));
-			id->equip=atoi(str[13]);
-		}
-		id->wlv=atoi(str[14]);
-		id->elv=atoi(str[15]);
-		id->look=atoi(str[16]);
-		id->flag.available=1;
-		id->flag.value_notdc=0;
-		id->flag.value_notoc=0;
-		id->view_id=0;
-
-		id->use_script=NULL;
-		id->equip_script=NULL;
-
-		if((p=strchr(np,'{'))==NULL)
-			continue;
-		id->use_script = parse_script(p,0);
-		if((p=strchr(p+1,'{'))==NULL)
-			continue;
-		id->equip_script = parse_script(p,0);
+		fclose(fp);
+		printf("read %s done (count=%d)\n",filename[i],ln);
 	}
-	fclose(fp);
-	printf("read db/item_db.txt done (count=%d)\n",ln);
 	return 0;
 }
 
