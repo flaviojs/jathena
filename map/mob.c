@@ -1588,7 +1588,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 			printf("mob_damage : BlockError!!\n");
 		return 0;
 	}
-	if(src->type==BL_PC && md->first_attacked_id<=0)
+	if(src && src->type==BL_PC && md->first_attacked_id<=0)
 		md->first_attacked_id = sd->bl.id;
 
 	if(md->state.state==MS_DEAD || md->hp<=0) {

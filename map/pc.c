@@ -3747,6 +3747,13 @@ int pc_damage(struct block_list *src,struct map_session_data *sd,int damage)
 		sd->pvp_point-=5;
 		if(src && src->type==BL_PC )
 			((struct map_session_data *)src)->pvp_point++;
+		// ‹­§‘—ŠÒ
+		if( sd->pvp_point < 0 ){
+			sd->pvp_point=0;
+			pc_setstand(sd);
+			pc_setrestartvalue(sd,3);
+			pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,0);
+		}
 	}
 	//GvG
 	if(map[sd->bl.m].flag.gvg){

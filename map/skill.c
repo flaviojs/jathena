@@ -1602,7 +1602,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 			int per=0;
 			struct map_session_data *tsd=(struct map_session_data*)bl;
 
-			if( (map[bl->m].flag.pvp) && tsd->pvp_point<=0 )
+			if( (map[bl->m].flag.pvp) && tsd->pvp_point<0 )
 				break;			/* PVPで復活不可能状態 */
 
 			if(pc_isdead(tsd)){	/* 死亡判定 */
@@ -3442,222 +3442,217 @@ int skill_check_condition(struct map_session_data *sd,int type)
 		return 0;
 	}
 
-	if(sd->skillitem==sd->skillid && type&1) {	/* アイテムの場合無条件成功 */
-		sd->skillitem = sd->skillitemlv = -1;
+	if(sd->skillitem == sd->skillid) {	/* アイテムの場合無条件成功 */
+		if(type&1)
+			sd->skillitem = sd->skillitemlv = -1;
+		return 1;
 	}
-	else{
-		if(sd->sc_data[SC_DIVINA].timer != -1 || sd->sc_data[SC_ROKISWEIL].timer != -1 || sd->sc_data[SC_STEELBODY].timer != -1) {
-			clif_skill_fail(sd,sd->skillid,0,0);
+	if(sd->sc_data[SC_DIVINA].timer != -1 || sd->sc_data[SC_ROKISWEIL].timer != -1 || sd->sc_data[SC_STEELBODY].timer != -1) {
+		clif_skill_fail(sd,sd->skillid,0,0);
+		return 0;
+	}
+	if(sd->sc_data[SC_AUTOCOUNTER].timer != -1 && sd->skillid != KN_AUTOCOUNTER) {
+		clif_skill_fail(sd,sd->skillid,0,0);
+		return 0;
+	}
+	skill = sd->skillid;
+	lv = sd->skilllv;
+	hp=skill_get_hp(skill, lv);	/* 消費HP */
+	sp=skill_get_sp(skill, lv);	/* 消費SP */
+	hp_rate = (lv <= 0)? 0:skill_db[skill].hp_rate[lv-1];
+	sp_rate = (lv <= 0)? 0:skill_db[skill].sp_rate[lv-1];
+	zeny = skill_get_zeny(skill,lv);
+	weapon = skill_db[skill].weapon;
+	state = skill_db[skill].state;
+	spiritball = (lv <= 0)? 0:skill_db[skill].spiritball[lv-1];
+	for(i=0;i<5;i++) {
+		itemid[i] = skill_db[skill].itemid[i];
+		amount[i] = skill_db[skill].amount[i];
+	}
+	if(hp_rate > 0)
+		hp += (sd->status.hp * hp_rate)/100;
+	if(sp_rate > 0)
+		sp += (sd->status.sp * sp_rate)/100;
+	if(sd->dsprate!=100)
+		sp=sp*sd->dsprate/100;	/* 消費SP修正 */
+
+	switch(skill) {
+	case SA_CASTCANCEL:
+		if(sd->skilltimer == -1) {
+			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
-		if(sd->sc_data[SC_AUTOCOUNTER].timer != -1 && sd->skillid != KN_AUTOCOUNTER) {
-			clif_skill_fail(sd,sd->skillid,0,0);
+		break;
+	case BS_MAXIMIZE:		/* マキシマイズパワー */
+	case NV_TRICKDEAD:		/* 死んだふり */
+	case TF_HIDING:			/* ハイディング */
+	case AS_CLOAKING:		/* クローキング */
+	case CR_AUTOGUARD:
+	case CR_DEFENDER:
+		if(sd->sc_data[SkillStatusChangeTable[skill]].timer!=-1)
+			return 1;			/* 解除する場合はSP消費しない */
+		break;
+	case MO_CALLSPIRITS:
+		if(sd->spiritball >= lv) {
+			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
-		skill = sd->skillid;
-		lv = sd->skilllv;
-		hp=skill_get_hp(skill, lv);	/* 消費HP */
-		sp=skill_get_sp(skill, lv);	/* 消費SP */
-		hp_rate = (lv <= 0)? 0:skill_db[skill].hp_rate[lv-1];
-		sp_rate = (lv <= 0)? 0:skill_db[skill].sp_rate[lv-1];
-		zeny = skill_get_zeny(skill,lv);
-		weapon = skill_db[skill].weapon;
-		state = skill_db[skill].state;
-		spiritball = (lv <= 0)? 0:skill_db[skill].spiritball[lv-1];
-		for(i=0;i<5;i++) {
-			itemid[i] = skill_db[skill].itemid[i];
-			amount[i] = skill_db[skill].amount[i];
+		break;
+	case MO_FINGEROFFENSIVE:				//指弾
+		if (sd->spiritball > 0 && sd->spiritball < spiritball) {
+			spiritball = sd->spiritball;
+			sd->spiritball_old = sd->spiritball;
 		}
-		if(hp_rate > 0)
-			hp += (sd->status.hp * hp_rate)/100;
-		if(sp_rate > 0)
-			sp += (sd->status.sp * sp_rate)/100;
-		if(sd->dsprate!=100)
-			sp=sp*sd->dsprate/100;	/* 消費SP修正 */
+		else sd->spiritball_old = lv;	
+		break;
+	case MO_CHAINCOMBO:						//連打掌
+		if(sd->sc_data[SC_COMBO].timer == -1 || sd->sc_data[SC_COMBO].val1 != MO_TRIPLEATTACK)
+			return 0;
+		break;
+	case MO_COMBOFINISH:					//猛龍拳
+		if(sd->sc_data[SC_COMBO].timer == -1 || sd->sc_data[SC_COMBO].val1 != MO_CHAINCOMBO)
+			return 0;
+		break;
+	case MO_EXTREMITYFIST:					// 阿修羅覇鳳拳
+		if(sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH)
+			spiritball--;
+		break;
+	}
 
-		switch(skill) {
-			case SA_CASTCANCEL:
-				if(sd->skilltimer == -1) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case BS_MAXIMIZE:		/* マキシマイズパワー */
-			case NV_TRICKDEAD:		/* 死んだふり */
-			case TF_HIDING:			/* ハイディング */
-			case AS_CLOAKING:		/* クローキング */
-			case CR_AUTOGUARD:
-			case CR_DEFENDER:
-				if(sd->sc_data[SkillStatusChangeTable[skill]].timer!=-1)
-					return 1;			/* 解除する場合はSP消費しない */
-				break;
+	if( hp>0 && sd->status.hp < hp) {				/* HPチェック */
+		clif_skill_fail(sd,skill,2,0);		/* HP不足：失敗通知 */
+		return 0;
+	}
+	if( sp>0 && sd->status.sp < sp) {				/* SPチェック */
+		clif_skill_fail(sd,skill,1,0);		/* SP不足：失敗通知 */
+		return 0;
+	}
+	if( zeny>0 && sd->status.zeny < zeny) {
+		clif_skill_fail(sd,skill,5,0);
+		return 0;
+	}
+	if(!(weapon & (1<<sd->status.weapon) ) ) {
+		clif_skill_fail(sd,skill,6,0);
+		return 0;
+	}
+	if( spiritball > 0 && sd->spiritball < spiritball) {
+		clif_skill_fail(sd,skill,0,0);		// 氣球不足
+		return 0;
+	}
 
-			case MO_CALLSPIRITS:
-				if(sd->spiritball >= lv) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-
-			case MO_FINGEROFFENSIVE:				//指弾
-				if (sd->spiritball > 0 && sd->spiritball < spiritball) {
-					spiritball = sd->spiritball;
-					sd->spiritball_old = sd->spiritball;	
-				}
-				else sd->spiritball_old = lv;	
-				break;
-
-			case MO_CHAINCOMBO:						//連打掌
-				if(sd->sc_data[SC_COMBO].timer == -1 || sd->sc_data[SC_COMBO].val1 != MO_TRIPLEATTACK)
-					return 0;
-				break;
-
-			case MO_COMBOFINISH:					//猛龍拳
-				if(sd->sc_data[SC_COMBO].timer == -1 || sd->sc_data[SC_COMBO].val1 != MO_CHAINCOMBO)
-					return 0;
-				break;
-
-			case MO_EXTREMITYFIST:					// 阿修羅覇鳳拳
-				if(sd->sc_data[SC_COMBO].timer != -1 && sd->sc_data[SC_COMBO].val1 == MO_COMBOFINISH)
-					spiritball--;
-				break;
-
-		}
-
-		if( hp>0 && sd->status.hp < hp) {				/* HPチェック */
-			clif_skill_fail(sd,skill,2,0);		/* HP不足：失敗通知 */
+	switch(state) {
+	case ST_HIDING:
+		if(!(sd->status.option&2)) {
+			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
-		if( sp>0 && sd->status.sp < sp) {				/* SPチェック */
-			clif_skill_fail(sd,skill,1,0);		/* SP不足：失敗通知 */
+		break;
+	case ST_CLOAKING:
+		if(!(sd->status.option&4)) {
+			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
-		if( zeny>0 && sd->status.zeny < zeny) {
-			clif_skill_fail(sd,skill,5,0);
+		break;
+	case ST_HIDDEN:
+		if(!pc_ishiding(sd)) {
+			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
-		if(!(weapon & (1<<sd->status.weapon) ) ) {
-			clif_skill_fail(sd,skill,6,0);
+		break;
+	case ST_RIDING:
+		if(!pc_isriding(sd)) {
+			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
-		if( spiritball > 0 && sd->spiritball < spiritball) {
-			clif_skill_fail(sd,skill,0,0);		// 氣球不足
+		break;
+	case ST_FALCON:
+		if(!pc_isfalcon(sd)) {
+			clif_skill_fail(sd,skill,0,0);
 			return 0;
 		}
-
-		switch(state) {
-			case ST_HIDING:
-				if(!(sd->status.option&2)) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_CLOAKING:
-				if(!(sd->status.option&4)) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_HIDDEN:
-				if(!pc_ishiding(sd)) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_RIDING:
-				if(!pc_isriding(sd)) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_FALCON:
-				if(!pc_isfalcon(sd)) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_CART:
-				if(!pc_iscarton(sd)) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_SHIELD:
-				if(sd->status.shield <= 0) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_SIGHT:
-				if(sd->sc_data[SC_SIGHT].timer == -1) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_EXPLOSIONSPIRITS:
-				if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer == -1) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_RECOV_WEIGHT_RATE:
-				if(battle_config.natural_heal_weight_rate <= 100 && sd->weight*100/sd->max_weight >= battle_config.natural_heal_weight_rate) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_MOVE_ENABLE:
-				if(!pc_can_reach(sd,sd->skillx,sd->skilly)) {
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
-			case ST_WATER:
-				if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y) != 3){	//水場判定
-					clif_skill_fail(sd,skill,0,0);
-					return 0;
-				}
-				break;
+		break;
+	case ST_CART:
+		if(!pc_iscarton(sd)) {
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
 		}
-
-		for(i=0;i<5;i++) {
-			index[i] = -1;
-			if(itemid[i] <= 0)
-				continue;
-			if(itemid[i] >= 715 && itemid[i] <= 717 && sd->special_state.no_gemstone)
-				continue;
-			if(((itemid[i] >= 715 && itemid[i] <= 717) || itemid[i] == 1065) && sd->sc_data[SC_INTOABYSS].timer != -1)
-				continue;
-
-			index[i] = pc_search_inventory(sd,itemid[i]);
-			if(index[i] < 0 || sd->status.inventory[index[i]].amount < amount[i]) {
-				if(itemid[i] == 716 || itemid[i] == 717)
-					clif_skill_fail(sd,skill,(7+(itemid[i]-716)),0);
-				else
-					clif_skill_fail(sd,skill,0,0);
-				return 0;
-			}
+		break;
+	case ST_SHIELD:
+		if(sd->status.shield <= 0) {
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
 		}
-
-		if(!(type&1)) return 1;
-
-		if(sp > 0) {					// SP消費
-			sd->status.sp-=sp;
-			clif_updatestatus(sd,SP_SP);
+		break;
+	case ST_SIGHT:
+		if(sd->sc_data[SC_SIGHT].timer == -1) {
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
 		}
-		if(hp > 0) {					// HP消費
-			sd->status.hp-=hp;
-			clif_updatestatus(sd,SP_HP);
+		break;
+	case ST_EXPLOSIONSPIRITS:
+		if(sd->sc_data[SC_EXPLOSIONSPIRITS].timer == -1) {
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
 		}
-		if(zeny > 0)					// Zeny消費
-			pc_payzeny(sd,zeny);
-		if(spiritball > 0)				// 氣球消費
-			pc_delspiritball(sd,spiritball,0);
+		break;
+	case ST_RECOV_WEIGHT_RATE:
+		if(battle_config.natural_heal_weight_rate <= 100 && sd->weight*100/sd->max_weight >= battle_config.natural_heal_weight_rate) {
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
+		}
+		break;
+	case ST_MOVE_ENABLE:
+		if(!pc_can_reach(sd,sd->skillx,sd->skilly)) {
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
+		}
+		break;
+	case ST_WATER:
+		if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y) != 3){	//水場判定
+			clif_skill_fail(sd,skill,0,0);
+			return 0;
+		}
+		break;
+	}
 
-		for(i=0;i<5;i++) {
-			if(index[i] >= 0)
-				pc_delitem(sd,index[i],amount[i],0);		// アイテム消費
+	for(i=0;i<5;i++) {
+		index[i] = -1;
+		if(itemid[i] <= 0)
+			continue;
+		if(itemid[i] >= 715 && itemid[i] <= 717 && sd->special_state.no_gemstone)
+			continue;
+		if(((itemid[i] >= 715 && itemid[i] <= 717) || itemid[i] == 1065) && sd->sc_data[SC_INTOABYSS].timer != -1)
+			continue;
+
+		index[i] = pc_search_inventory(sd,itemid[i]);
+		if(index[i] < 0 || sd->status.inventory[index[i]].amount < amount[i]) {
+			if(itemid[i] == 716 || itemid[i] == 717)
+				clif_skill_fail(sd,skill,(7+(itemid[i]-716)),0);
+			else
+				clif_skill_fail(sd,skill,0,0);
+			return 0;
 		}
+	}
+
+	if(!(type&1))
+		return 1;
+
+	if(sp > 0) {					// SP消費
+		sd->status.sp-=sp;
+		clif_updatestatus(sd,SP_SP);
+	}
+	if(hp > 0) {					// HP消費
+		sd->status.hp-=hp;
+		clif_updatestatus(sd,SP_HP);
+	}
+	if(zeny > 0)					// Zeny消費
+		pc_payzeny(sd,zeny);
+	if(spiritball > 0)				// 氣球消費
+		pc_delspiritball(sd,spiritball,0);
+
+	for(i=0;i<5;i++) {
+		if(index[i] >= 0)
+			pc_delitem(sd,index[i],amount[i],0);		// アイテム消費
 	}
 	return 1;
 }

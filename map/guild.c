@@ -47,8 +47,7 @@ static int guild_read_castledb(void)
 	int j,ln=0;
 	char *str[32],*p;
 	struct guild_castle *gc;
-	printf("debug: 1\n");
-	
+
 	if( (fp=fopen("db/castle_db.txt","r"))==NULL){
 		printf("can't read db/castle_db.txt\n");
 		return -1;
