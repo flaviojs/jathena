@@ -507,7 +507,6 @@ int skill_additional_effect( struct block_list* src, struct block_list *bl,int s
 		if( rand()%100 < (5*skilllv+30)*sc_def_int/100 )
 			skill_status_change_start(bl,SC_SLEEP,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
 		break;
-
 	case TF_SPRINKLESAND:	/* 砂まき */
 		if( rand()%100 < 15*sc_def_int/100 )
 			skill_status_change_start(bl,SC_BLIND,skilllv,0,0,0,skill_get_time2(skillid,skilllv),0);
@@ -3309,11 +3308,24 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 	case HT_BLASTMINE:			/* ブラストマイン */
 	case HT_CLAYMORETRAP:		/* クレイモアートラップ */
 	case AS_VENOMDUST:			/* ベノムダスト */
-	case AM_DEMONSTRATION:			/* デモンストレーション */
+	case AM_DEMONSTRATION:		/* デモンストレーション */
 	case PF_SPIDERWEB:			/* スパイダーウェッブ */
 	case PF_FOGWALL:			/* フォグウォール */
 		skill_unitsetting(src,skillid,skilllv,x,y,0);
 		break;
+
+	case HT_TALKIEBOX:			/* トーキーボックス */
+		{
+			struct skill_unit_group *group;
+			group=skill_unitsetting(src,skillid,skilllv,x,y,0);
+			group->valstr=calloc(80, 1);
+			if(group->valstr==NULL){
+				printf("skill_castend_map: out of memory !\n");
+				exit(1);
+			}
+			memcpy(group->valstr,talkie_mes,80);
+			break;
+		}
 
 	case SA_VOLCANO:		/* ボルケーノ */
 	case SA_DELUGE:			/* デリュージ */
@@ -3602,50 +3614,28 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 		break;
 
 	case HT_SKIDTRAP:			/* スキッドトラップ */
-		limit=skill_get_time(skillid,skilllv);
-		range=1;
-		break;
-
 	case HT_LANDMINE:			/* ランドマイン */
+	case HT_ANKLESNARE:			/* アンクルスネア */
+	case HT_SANDMAN:			/* サンドマン */
+	case PF_SPIDERWEB:			/* スパイダーウェッブ */
+	case HT_FLASHER:			/* フラッシャー */
+	case HT_FREEZINGTRAP:		/* フリージングトラップ */
+	case HT_BLASTMINE:			/* ブラストマイン */
+	case HT_CLAYMORETRAP:		/* クレイモアートラップ */
 		limit=skill_get_time(skillid,skilllv);
 		range=1;
 		break;
 
-	case HT_ANKLESNARE:			/* アンクルスネア */
-	case PF_SPIDERWEB:			/* スパイダーウェッブ */
+	case HT_TALKIEBOX:			/* トーキーボックス */
 		limit=skill_get_time(skillid,skilllv);
 		range=1;
+		target=BCT_ALL;
 		break;
 
 	case HT_SHOCKWAVE:			/* ショックウェーブトラップ */
 		limit=skill_get_time(skillid,skilllv);
 		range=1;
 		val1=skilllv*15+10;
-		break;
-
-	case HT_SANDMAN:			/* サンドマン */
-		limit=skill_get_time(skillid,skilllv);
-		range=1;
-		break;
-
-	case HT_FLASHER:			/* フラッシャー */
-		limit=skill_get_time(skillid,skilllv);
-		range=1;
-		break;
-
-	case HT_FREEZINGTRAP:		/* フリージングトラップ */
-		limit=skill_get_time(skillid,skilllv);
-		range=1;
-		break;
-
-	case HT_BLASTMINE:			/* ブラストマイン */
-		limit=skill_get_time(skillid,skilllv);
-		range=1;
-		break;
-
-	case HT_CLAYMORETRAP:		/* クレイモアートラップ */
-		limit=skill_get_time(skillid,skilllv);
-		range=1;
 		break;
 
 	case AS_VENOMDUST:			/* ベノムダスト */
@@ -4312,6 +4302,13 @@ int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int
 		skill_attack(BF_WEAPON,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
 //		if(bl->type == BL_PC && rand()%100 < sg->skill_lv)
 //			pc_break_weapon((struct map_session_data *)bl);
+		break;
+	case 0x99:				/* トーキーボックス */
+		if(sg->val2==0){
+			clif_talkiebox(&src->bl,sg->valstr);
+			sg->limit=DIFF_TICK(tick,sg->tick)+5000;
+			sg->val2=-1; //踏んだ
+		}
 		break;
 	case 0xb2:				/* あなたを_会いたいです */
 	case 0xb3:				/* ゴスペル */

@@ -77,6 +77,7 @@ int clif_leavechat(struct chat_data*,struct map_session_data*);	// chat
 int clif_changechatstatus(struct chat_data*);	// chat
 
 void clif_emotion(struct block_list *bl,int type);
+void clif_talkiebox(struct block_list *bl,char* talkie);
 
 // trade
 int clif_traderequest(struct map_session_data *sd,char *name);

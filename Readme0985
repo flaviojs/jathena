@@ -1,4 +1,22 @@
 --------------------
+//0986 by (凸)
+・client_packetの記述から推察してトーキーボックスを実装してみたつもり
+
+	(db/)
+	skill_db.txt
+	(map/)
+	clif.c
+		clif_talkiebox() 追加
+		clif_parse_UseSkillToPos() 変更
+		clif_parse() 変更
+	clif.h 変更
+	map.h 変更
+	skill.c
+		skill_castend_pos2() 変更
+		skill_unitsetting() 変更
+		skill_unit_onplace() 変更
+
+--------------------
 //0985 by (凸)
 ・サーバーsnapshot
 ・/script/extensionに語り部を追加したり

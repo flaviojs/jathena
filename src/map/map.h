@@ -509,6 +509,7 @@ extern int agit_flag;
 extern char motd_txt[];
 extern char help_txt[];
 
+extern char talkie_mes[];
 
 // I‘S‘Ìî•ñ
 void map_setusers(int);

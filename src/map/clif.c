@@ -122,6 +122,7 @@ enum {
 static char map_ip_str[16];
 static in_addr_t map_ip;
 static int map_port = 5121;
+char talkie_mes[80];
 
 /*==========================================
  * map鯖のip設定
@@ -5537,6 +5538,18 @@ void clif_emotion(struct block_list *bl,int type)
 	WBUFB(buf,6)=type;
 	clif_send(buf,packet_len_table[0xc0],bl,AREA);
 }
+/*==========================================
+ * トーキーボックス
+ *------------------------------------------
+ */
+void clif_talkiebox(struct block_list *bl,char* talkie)
+{
+	unsigned char buf[86];
+	WBUFW(buf,0)=0x191;
+	WBUFL(buf,2)=bl->id;
+	memcpy(WBUFP(buf,6),talkie,80);
+	clif_send(buf,packet_len_table[0x191],bl,AREA);
+}
 
 /*==========================================
  *
@@ -6468,6 +6481,9 @@ void clif_parse_UseSkillToPos(int fd,struct map_session_data *sd)
 
 	skillnum = RFIFOW(fd,4);
 	skilllv = RFIFOW(fd,2);
+	if(RFIFOW(fd,0)==0x190){
+		memcpy(talkie_mes,RFIFOP(fd,10),80);
+	}
 
 	if(sd->skilltimer != -1)
 		return;
@@ -7334,7 +7350,8 @@ static int clif_parse(int fd)
 		clif_parse_ProduceMix,
 		NULL,
 		// 190
-		NULL,NULL,NULL,
+		clif_parse_UseSkillToPos,
+		NULL,NULL,
 		clif_parse_SolveCharName,
 		NULL,NULL,NULL,
 		clif_parse_ResetChar,
