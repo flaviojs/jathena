@@ -59,6 +59,7 @@ int battle_weapon_attack( struct block_list *bl,struct block_list *target,
 	 unsigned int tick,int flag);
 
 // 各種パラメータを得る
+int battle_get_class(struct block_list *bl);
 int battle_get_lv(struct block_list *bl);
 int battle_get_hp(struct block_list *bl);
 int battle_get_max_hp(struct block_list *bl);
@@ -115,13 +116,20 @@ int battle_check_range(struct block_list *src,int x,int y,int range);
 extern struct Battle_Config {
 	int warp_point_debug;
 	int enemy_critical;
+	int enemy_critical_rate;
+	int enemy_perfect_flee;
 	int cast_rate,delay_rate,delay_dependon_dex;
 	int sdelay_attack_enable;
+	int pc_skill_add_range;
+	int skill_out_range_consume;
+	int mob_skill_add_range;
 	int pc_damage_delay;
 	int defnotenemy;
+	int random_monster_checklv;
 	int attr_recover;
 	int flooritem_lifetime;
 	int item_rate,base_exp_rate,job_exp_rate;
+	int drop_rate0item;
 	int death_penalty_type;
 	int death_penalty_base,death_penalty_job;
 	int restart_hp_rate;
@@ -137,16 +145,32 @@ extern struct Battle_Config {
 	int quest_skill_learn;
 	int quest_skill_reset;
 	int basic_skill_check;
+	int guild_emperium_check;
 	int ghost_time;
 	int pet_catch_rate;
 	int pet_rename;
 	int pet_friendly_rate;
 	int pet_hungry_delay_rate;
+	int pet_support;
+	int pet_support_rate;
+	int pet_attack_exp_to_master;
 	int skill_min_damage;
 	int sanctuary_type;
 	int finger_offensive_type;
 	int heal_exp,shop_exp;
 	int asuradelay;
+	int item_check;
+	int wedding_modifydisplay;
+	int natural_healhp_interval;
+	int natural_healsp_interval;
+	int natural_heal_skill_interval;
+	int natural_heal_weight_rate;
+	int item_name_override_grffile;
+	int arrow_decrement;
+	int max_aspd;
+	int max_hp;
+	int max_sp;
+	int max_cart_weight;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"

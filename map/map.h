@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include "mmo.h"
 
-#define MAX_PC_CLASS (1+6+6+1+6+1+1)
+#define MAX_PC_CLASS (1+6+6+1+6+1+1+1+1)
 #define MAX_NPC_PER_MAP 512
 #define BLOCK_SIZE 8
 #define AREA_SIZE 20
@@ -59,9 +59,9 @@ struct vending {
 struct skill_unit_group;
 struct skill_unit {
 	struct block_list bl;
-	
+
 	struct skill_unit_group *group;
-	
+
 	int limit;
 	int val1,val2;
 	short alive,range;
@@ -102,6 +102,7 @@ struct skill_timerskill {
 
 struct npc_data;
 struct pet_db;
+struct item_data;
 
 struct map_session_data {
 	struct block_list bl;
@@ -113,15 +114,30 @@ struct map_session_data {
 		unsigned dead_sit : 2;
 		unsigned skillcastcancel : 1;
 		unsigned waitingdisconnect : 1;
+		unsigned lr_flag : 2;
+		unsigned connect_new : 1;
+		unsigned arrow_atk : 1;
+		unsigned attack_type : 3;
 	} state;
+	struct {
+		unsigned restart_full_recover : 1;
+		unsigned no_castcancel : 1;
+		unsigned no_sizefix : 1;
+		unsigned no_magic_damage : 1;
+		unsigned no_weapon_damage : 1;
+		unsigned no_gemstone : 1;
+		unsigned def_ratio_atk : 1;
+	} special_state;
 	int char_id,login_id1,login_id2,sex;
 	struct mmo_charstatus status;
+	struct item_data *inventory_data[MAX_INVENTORY];
+	short equip_index[11];
 	int weight,max_weight;
 	int cart_weight,cart_max_weight,cart_num,cart_max_num;
 	char mapname[16];
 	int fd,new_fd;
 	short to_x,to_y;
-	short speed;
+	short speed,prev_speed;
 	short opt1,opt2;
 	char dir,head_dir;
 	unsigned long client_tick,server_tick;
@@ -137,7 +153,7 @@ struct map_session_data {
 	int attacktarget;
 	unsigned int attackabletime;
 
-	short attackrange;
+	short attackrange,attackrange_;
 	int skilltimer;
 	int skilltarget;
 	short skillx,skilly;
@@ -153,17 +169,34 @@ struct map_session_data {
 	int hp_sub,sp_sub;
 	int inchealhptick,inchealsptick,inchealspirittick;
 
-	int paramb[6],paramc[6],parame[6];
+	short view_class;
+	short weapontype1,weapontype2;
+	int paramb[6],paramc[6],parame[6],paramcard[6];
 	int hit,flee,flee2,aspd,amotion,dmotion;
-	int watk,watk2,atkmods[3],atkmodr[16],atkmoda[16];
+	int watk,watk2,atkmods[3];
 	int def,def2,mdef,mdef2,critical,matk1,matk2;
 	int atk_ele,def_ele,star,overrefine;
-	int wcard[8],dcard[16],wcard_count,dcard_count;
 	int castrate,hprate,sprate,dsprate;
-	int addele[10],addrace[10],addsize[3],subele[10],subrace[10];
+	int addele[10],addrace[12],addsize[3],subele[10],subrace[12];
 	int addeff[10],reseff[10];
-	int watk_,watk_2,atkmods_[3],atkmodr_[16],atkmoda_[16];	//ìÒìÅó¨ÇÃÇΩÇﬂÇ…í«â¡
+	int watk_,watk_2,atkmods_[3],addele_[10],addrace_[12],addsize_[3];	//ìÒìÅó¨ÇÃÇΩÇﬂÇ…í«â¡
 	int atk_ele_,star_,overrefine_;				//ìÒìÅó¨ÇÃÇΩÇﬂÇ…í«â¡
+	int base_atk,atk_rate;
+	int arrow_atk,arrow_ele,arrow_cri;
+	int arrow_addele[10],arrow_addrace[12],arrow_addsize[3],arrow_addeff[10];
+	int nhealhp,nhealsp,nshealhp,nshealsp,nsshealhp,nsshealsp;
+	int aspd_rate,speed_rate,hprecov_rate,sprecov_rate,critical_def,double_rate;
+	int near_attack_def_rate,long_attack_def_rate,magic_def_rate,misc_def_rate;
+	int matk_rate,ignore_def_ele,ignore_def_race,ignore_def_ele_,ignore_def_race_;
+	int ignore_mdef_ele,ignore_mdef_race;
+	int magic_addele[10],magic_addrace[12],magic_subrace[12];
+	int perfect_hit,critical_rate,get_zeny_num;
+	int add_damage_class_count,add_damage_class_count_,add_magic_damage_class_count;
+	short add_damage_classid[10],add_damage_classid_[10],add_magic_damage_classid[10];
+	int add_damage_classrate[10],add_damage_classrate_[10],add_magic_damage_classrate[10];
+	int monster_drop_item_count;
+	short monster_drop_itemid[10];
+	int monster_drop_itemrate[10];
 	short spiritball, spiritball_old;
 	int spirit_timer[10];
 	unsigned short combo_flag, skill_old;
@@ -195,7 +228,7 @@ struct map_session_data {
 	int catch_target_class;
 	struct s_pet pet;
 	struct pet_db *petDB;
-	struct npc_data *pet_npcdata;
+	struct pet_data *pd;
 	int pet_hungry_timer;
 
 	int pvp_point,pvp_rank,pvp_timer,pvp_lastusers;
@@ -214,17 +247,8 @@ struct npc_data {
 	short speed;
 	char name[24];
 	char exname[24];
-	struct {
-		unsigned state : 8 ;
-		unsigned skillstate : 8 ;
-		unsigned flag : 8 ;
-	} state;
-	int timer;
-	short to_x,to_y;
-	short equip;
 	int chat_id;
-	struct walkpath_data walkpath;
-
+	short flag;
 	union {
 		struct {
 			char *script;
@@ -254,15 +278,17 @@ struct mob_data {
 		unsigned steal_coin_flag : 1 ;
 		unsigned skillcastcancel : 1 ;
 		unsigned master_check : 1 ;
+		unsigned change_walk_target : 1 ;
+		unsigned walk_easy : 1 ;
 	} state;
 	int timer;
 	short to_x,to_y;
 	short speed;
 	int hp;
 	int target_id,attacked_id;
-//	int flag;
 	struct walkpath_data walkpath;
 	unsigned int next_walktime;
+	unsigned int attackabletime;
 	unsigned int last_deadtime,last_spawntime,last_thinktime;
 	short move_fail_count;
 	struct {
@@ -271,7 +297,7 @@ struct mob_data {
 	} dmglog[DAMAGELOG_SIZE];
 	struct item *lootitem;
 	short lootitem_count;
-	
+
 	struct status_change sc_data[MAX_STATUSCHANGE];
 	short sc_count;
 	short opt1,opt2,option;
@@ -289,6 +315,27 @@ struct mob_data {
 	struct skill_timerskill skilltimerskill[MAX_SKILLTIMERSKILL/2];
 	char npc_event[50];
 };
+struct pet_data {
+	struct block_list bl;
+	short n;
+	short class,dir;
+	short speed;
+	char name[24];
+	struct {
+		unsigned state : 8 ;
+		unsigned skillstate : 8 ;
+		unsigned change_walk_target : 1 ;
+	} state;
+	int timer;
+	short to_x,to_y;
+	short equip;
+	struct walkpath_data walkpath;
+	int target_id;
+	int move_fail_count;
+	unsigned int attackabletime,next_walktime,last_thinktime;
+	struct map_session_data *msd;
+};
+
 enum { MS_IDLE,MS_WALK,MS_ATTACK,MS_DEAD,MS_DELAY };
 
 enum { NONE_ATTACKABLE,ATTACKABLE };
@@ -313,7 +360,6 @@ struct map_data {
 		unsigned pvp_noguild : 1;
 		unsigned gvg : 1;
 		unsigned gvg_noparty : 1;
-		unsigned water_flag : 2;
 	} flag;
 	struct point save;
 	struct npc_data *npc[MAX_NPC_PER_MAP];
@@ -342,16 +388,30 @@ enum {
 	SP_USTR,SP_UAGI,SP_UVIT,SP_UINT,SP_UDEX,SP_ULUK,SP_26,SP_27,	// 32-39
 	SP_28,SP_ATK1,SP_ATK2,SP_MATK1,SP_MATK2,SP_DEF1,SP_DEF2,SP_MDEF1,	// 40-47
 	SP_MDEF2,SP_HIT,SP_FLEE1,SP_FLEE2,SP_CRITICAL,SP_ASPD,SP_36,SP_JOBLEVEL,	// 48-55
-	// original
-	SP_ATTACKRANGE,	SP_ATKELE,SP_DEFELE,	// 56-58
-	SP_CASTRATE, SP_MAXHPRATE, SP_MAXSPRATE, SP_SPRATE, // 59-62
-	SP_ADDELE, SP_ADDRACE, SP_ADDSIZE, SP_SUBELE, SP_SUBRACE, // 63-67
-	SP_ADDEFF, SP_RESEFF,	// 68-69
 	SP_CARTINFO=99,	// 99
+
+	// original 1000-
+	SP_ATTACKRANGE=1000,	SP_ATKELE,SP_DEFELE,	// 1000-1002
+	SP_CASTRATE, SP_MAXHPRATE, SP_MAXSPRATE, SP_SPRATE, // 1003-1006
+	SP_ADDELE, SP_ADDRACE, SP_ADDSIZE, SP_SUBELE, SP_SUBRACE, // 1007-1011
+	SP_ADDEFF, SP_RESEFF,	// 1012-1013
+	SP_BASE_ATK,SP_ASPD_RATE,SP_HP_RECOV_RATE,SP_SP_RECOV_RATE,SP_SPEED_RATE, // 1014-1018
+	SP_CRITICAL_DEF,SP_NEAR_ATK_DEF,SP_LONG_ATK_DEF, // 1019-1021
+	SP_DOUBLE_RATE, SP_DOUBLE_ADD_RATE, SP_MATK, SP_MATK_RATE, // 1022-1025
+	SP_IGNORE_DEF_ELE,SP_IGNORE_DEF_RACE, // 1026-1027
+	SP_ATK_RATE,SP_SPEED_ADDRATE,SP_ASPD_ADDRATE, // 1028-1030
+	SP_MAGIC_ATK_DEF,SP_MISC_ATK_DEF, // 1031-1032
+	SP_IGNORE_MDEF_ELE,SP_IGNORE_MDEF_RACE, // 1033-1034
+	SP_MAGIC_ADDELE,SP_MAGIC_ADDRACE,SP_MAGIC_SUBRACE, // 1035-1037
+	SP_PERFECT_HIT_RATE,SP_PERFECT_HIT_ADD_RATE,SP_CRITICAL_RATE,SP_GET_ZENY_NUM,SP_ADD_GET_ZENY_NUM, // 1038-1042
+	SP_ADD_DAMAGE_CLASS,SP_ADD_MAGIC_DAMAGE_CLASS,ADD_MONSTER_DROP_ITEM, // 1043-1045
+
+	SP_RESTART_FULL_RECORVER=2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
+	SP_DEF_RATIO_ATK, // 2006-
 };
 
 enum {
-	LOOK_BASE,LOOK_HAIR,LOOK_WEAPON,LOOK_HEAD_BOTTOM,LOOK_HEAD_TOP,LOOK_HEAD_MID,LOOK_HAIR_COLOR,LOOK_CLOTHES_COLOR,LOOK_SHIELD
+	LOOK_BASE,LOOK_HAIR,LOOK_WEAPON,LOOK_HEAD_BOTTOM,LOOK_HEAD_TOP,LOOK_HEAD_MID,LOOK_HAIR_COLOR,LOOK_CLOTHES_COLOR,LOOK_SHIELD,LOOK_SHOES
 };
 
 struct chat_data {

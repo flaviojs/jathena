@@ -5,6 +5,9 @@
 
 #include "map.h"
 
+#define OPTION_MASK 0xd7b8
+#define CART_MASK 0x788
+
 #define pc_setdead(sd) ((sd)->state.dead_sit = 1)
 #define pc_setsit(sd) ((sd)->state.dead_sit = 2)
 #define pc_setstand(sd) ((sd)->state.dead_sit = 0)
@@ -13,12 +16,14 @@
 #define pc_setdir(sd,b,h) ((sd)->dir = (b) ,(sd)->head_dir = (h) )
 #define pc_setchatid(sd,n) ((sd)->chatID = n)
 #define pc_ishiding(sd) ((sd)->status.option&0x0006)
-#define pc_iscarton(sd) (((sd)->status.option&0x0008)||(0x0080<=(sd)->status.option&&(sd)->status.option<0x0800))
+#define pc_iscarton(sd) ((sd)->status.option&CART_MASK)
 #define pc_isfalcon(sd) ((sd)->status.option&0x0010)
 #define pc_isriding(sd) ((sd)->status.option&0x0020)
+#define pc_isinvisible(sd) ((sd)->status.option&0x0040)
 #define pc_is50overweight(sd) (sd->weight*2 >= sd->max_weight) 
 #define pc_is90overweight(sd) (sd->weight*10 >= sd->max_weight*9)
 
+void pc_set_gm_account_fname(char *str);
 int pc_isGM(struct map_session_data *sd);
 
 int pc_setrestartvalue(struct map_session_data *sd,int type);
@@ -26,6 +31,9 @@ int pc_makesavestatus(struct map_session_data *);
 int pc_setnewpc(struct map_session_data*,int,int,int,int,int,int);
 int pc_authok(int,struct mmo_charstatus *);
 int pc_authfail(int);
+
+int pc_isequip(struct map_session_data *sd,int n);
+int pc_equippoint(struct map_session_data *sd,int n);
 
 int pc_checkskill(struct map_session_data *sd,int skill_id);
 int pc_checkallowskill(struct map_session_data *sd,int nameid);
@@ -50,9 +58,10 @@ int pc_payzeny(struct map_session_data*,int);
 int pc_additem(struct map_session_data*,struct item*,int);
 int pc_getzeny(struct map_session_data*,int);
 int pc_delitem(struct map_session_data*,int,int,int);
+int pc_checkitem(struct map_session_data*);
 
 int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amount);
-int pc_cart_delitem(struct map_session_data *sd,int n,int amount);
+int pc_cart_delitem(struct map_session_data *sd,int n,int amount,int type);
 int pc_putitemtocart(struct map_session_data *sd,int idx,int amount);
 int pc_getitemfromcart(struct map_session_data *sd,int idx,int amount);
 
@@ -67,9 +76,6 @@ int pc_bonus2(struct map_session_data *sd,int,int,int);
 int pc_skill(struct map_session_data*,int,int,int);
 
 int pc_insert_card(struct map_session_data *sd,int idx_card,int idx_equip);
-int pc_check_equip_card(struct map_session_data *sd,int cardid);
-int pc_check_equip_wcard(struct map_session_data *sd,int cardid);
-int pc_check_equip_dcard(struct map_session_data *sd,int cardid);
 
 int pc_item_identify(struct map_session_data *sd,int idx);
 int pc_steal_item(struct map_session_data *sd,struct block_list *bl);
@@ -92,7 +98,7 @@ int pc_skillup(struct map_session_data*,int);
 int pc_resetstate(struct map_session_data*);
 int pc_resetskill(struct map_session_data*);
 int pc_equipitem(struct map_session_data*,int,int);
-int pc_unequipitem(struct map_session_data*,int);
+int pc_unequipitem(struct map_session_data*,int,int);
 int pc_checkitem(struct map_session_data*);
 int pc_useitem(struct map_session_data*,int);
 
@@ -115,8 +121,6 @@ int pc_setreg(struct map_session_data*,int,int);
 int pc_readglobalreg(struct map_session_data*,char*);
 int pc_setglobalreg(struct map_session_data*,char*,int);
 int pc_percentrefinery(struct map_session_data *sd,struct item *item);
-int pc_equipitemindex(struct map_session_data *sd,int pos);
-
 
 int pc_addeventtimer(struct map_session_data *sd,int tick,const char *name);
 int pc_deleventtimer(struct map_session_data *sd,const char *name);

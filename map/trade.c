@@ -15,24 +15,23 @@ void trade_traderequest(struct map_session_data *sd,int target_id)
 	struct map_session_data *target_sd;
 
 	if((target_sd = map_id2sd(target_id)) != NULL){
-		if(target_sd->status.skill[1].lv >= 1){
-			if((target_sd->trade_partner !=0) || (sd->trade_partner !=0)){
-				clif_tradestart(sd,2); //person is in another trade
-			}else{
-				if(sd->bl.m != target_sd->bl.m
-				 || (sd->bl.x - target_sd->bl.x <= -5 || sd->bl.x - target_sd->bl.x >= 5)
-				 || (sd->bl.y - target_sd->bl.y <= -5 || sd->bl.y - target_sd->bl.y >= 5)) {
-					clif_tradestart(sd,0); //too far
-				}else{
-					target_sd->trade_partner = sd->status.account_id;
-					sd->trade_partner = target_sd->status.account_id;
-					clif_traderequest(target_sd,sd->status.name);
-				}
-			}
-		}else{
-			clif_tradestart(sd,4); //trade canceled
+		if((target_sd->trade_partner !=0) || (sd->trade_partner !=0)){
+			clif_tradestart(sd,2); //person is in another trade
 		}
-	}else{
+		else{
+			if(sd->bl.m != target_sd->bl.m
+			 || (sd->bl.x - target_sd->bl.x <= -5 || sd->bl.x - target_sd->bl.x >= 5)
+			 || (sd->bl.y - target_sd->bl.y <= -5 || sd->bl.y - target_sd->bl.y >= 5)) {
+				clif_tradestart(sd,0); //too far
+			}
+			else{
+				target_sd->trade_partner = sd->status.account_id;
+				sd->trade_partner = target_sd->status.account_id;
+				clif_traderequest(target_sd,sd->status.name);
+			}
+		}
+	}
+	else{
 		clif_tradestart(sd,1); //character does not exist
 	}
 }
@@ -75,7 +74,7 @@ void trade_tradeadditem(struct map_session_data *sd,int index,int amount)
 		}else if(amount <= sd->status.inventory[index-2].amount && amount > 0){
 			for(trade_i=0; trade_i<10;trade_i++){
 				if(sd->deal_item_amount[trade_i] == 0){
-					if(target_sd->weight + itemdb_weight(sd->status.inventory[index-2].nameid)*sd->status.inventory[index-2].amount > target_sd->max_weight){
+					if(target_sd->weight + sd->inventory_data[index-2]->weight*sd->status.inventory[index-2].amount > target_sd->max_weight){
 						clif_tradeitemok(sd,index,1); //fail to add item -- the player was over weighted.
 					}else{
 						sd->deal_item_index[trade_i] =index;

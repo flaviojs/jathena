@@ -192,7 +192,7 @@ int mapif_parse_SaveStorage(int fd)
 	}else{
 		i=account2storage(account_id);
 		memcpy(&storage[i],RFIFOP(fd,8),sizeof(struct storage));
-		inter_storage_save();	// 一応セーブ
+//		inter_storage_save();	// 一応セーブ
 		mapif_save_storage_ack(fd,account_id);
 	}
 	return 0;

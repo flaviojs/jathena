@@ -1,0 +1,412 @@
+--------------
+//0676 by 死神
+
+・色々と修正。
+・battle_athena.confに項目追加。(詳しいことはconf_ref.txtで)
+・みすとれ巣を参考してダメージ計算を少し修正。
+・装備bonusに色々と追加。(詳しいことはitem_bonus.txtで)
+・自動セーブする時(キャラ鯖にデータを送る時)倉庫のデータも送るように変更。
+・0667で言い忘れ。カートを外してもアイテムが消えないように変更。(本鯖で消えるのが仕様だと思っていたけど修正されたみたいなので。)
+・取引要請を受ける側は基本スキルをチェックしないヨウニ修正。(受ける側の基本スキルチェックは自分が入れた物ではないです。いつの間にか入っていたので削除しました。)
+・防具の精錬ボーナスを端数無視に変更。(これが本鯖の仕様みたいなので)
+・アンクルの処理少し変更。(かからないと言う報告がありましたので...)
+・プレイヤーのステータス計算で問題ありそうな所修正。
+・カードのIDで機能が決まっていたカードもスクリプトによって変えることができるように変更。(詳しいことはitem_bonus.txtで)
+・aspd計算方法少し変更。
+・矢にbCritical、bAtkEle、bHit、bAddEle、bAddRace、bAddSize、bAddEffを適用できるように変更。矢を使うスキルや弓による攻撃だけに矢のbCritical、bAtkEle、bHit、bAddEle、bAddRace、bAddSize、bAddEffが適用されるように修正。
+・キリの実装に為に修正はしましたがキリが防御無視なのかどうかがわからなかったので防御無視はしないようになっています。
+・テストした物はbAddMonsterDropItemとbGetZenyNumだけなので正常に動作するかどうかの報告が欲しい所です。(ついでにitem_dbの修正も...これで吸収系とオートスペル系以外は殆ど実装できるはずです。多分...)
+・その他は覚えてないけど修正した所が少しあるかも...
+	(conf/)
+	battle_athena.conf 修正。
+	(doc/)
+	conf_ref.txt 修正。
+	item_bonus.txt 修正。	
+	(db/)
+	const.txt 修正。
+	(char/)
+	inter.c
+		inter_init() 修正。
+	int_storage.c
+		mapif_parse_SaveStorage() 修正。
+	(map/)
+	trade.c
+		trade_traderequest() 修正。
+	pc.h 修正。
+	pc.c
+		pc_autosave_sub()、pc_calcstatus() 修正。
+		pc_bonus()、pc_bonus2() 修正。
+		pc_setrestartvalue()、pc_setequipindex() 修正。
+		pc_check_equip_wcard()、pc_check_equip_dcard()、pc_check_equip_card() 削除
+		その他修正。
+	skill.h 修正。
+	skill.c 修正。
+		skill_castend_nodamage_id()、skill_unit_onplace() 修正。
+		skill_check_condition()、skill_additional_effect() 修正。
+		skill_attack()、skill_status_change_start() 修正。
+	map.h 修正。
+	battle.h 修正。
+	battle.c
+		battle_get_def()、battle_get_mdef2() 修正。
+		battle_weapon_attack()、battle_damage() 修正。
+		battle_calc_magic_attack()、battle_calc_pc_weapon_attack() 修正。
+		battle_calc_mob_weapon_attack()、battle_calc_pet_weapon_attack() 修正。
+		battle_calc_misc_attack()、battle_config_read() 修正。
+	mob.c
+		mob_damage() 修正。
+	pet.c
+		pet_target_check() 修正。
+	clif.c
+		clif_set0078()、clif_set007b()、clif_changelook() 修正。
+	atcommand.c 修正。
+
+--------------
+//0675 by 波浪
+
+・韓鯖で村正の効果が変更されたので報告を元にitem_db.txtを修正
+・job_db1.txtを修正
+	(db/)
+	item_db.txt
+	job_db1.txt
+
+--------------
+//0674 by npc
+
+・ファーマシーの仮実装。
+	(db/)
+	produce_db.txt
+	(map/)
+	skill.c
+
+--------------
+//0673 by 南
+
+・集中力向上に装備品の補正が入っていなかったのを修正。
+　　　　　(map/)　　　
+　　　　　 pc.c
+
+--------------
+//0672 by 南
+
+・集中力向上に装備品の補正が入っていなかったのを修正。
+　　　　　(map/)　　　
+　　　　　 pc.c
+
+--------------
+//0672 by 聖
+
+・モンスター系のバグ修正(すみません、まだ残ってました(^^; )
+	(map/)
+	mob.c
+
+--------------
+//0671 by 聖
+
+・IDチェック範囲の修正他。
+・@monsterで数を指定しなくても召還できるように修正。
+	(map/)
+	atcommand.c
+	battle.c
+	battle.h
+	mob.c
+	pet.c
+	(conf/)
+	battle_athena.conf
+	(doc/)
+	conf_ref.txt
+
+--------------
+//0670 by RR
+
+・モンスタードロップ率を修正(本鯖準拠、DBでの設定+1/10000)。
+・落下率０に設定したアイテムを落とすかどうかをbattle_athena.confで設定可能に。
+	(map/)
+	mob.c
+		mob_damage() 修正。
+	battle.c
+	battle.h
+	(conf/)
+	battle_athena.conf
+
+--------------
+//0669 by 聖
+
+・モンスタードロップの修正。
+	(map/)
+	mob.c
+		mob_damage() 修正。
+
+--------------
+//0668 by 聖
+
+・モンスターIDの範囲チェックを修正。
+	(map/)
+	mob.c
+		mob_db、mob_once_spawn()、mob_once_spawn_area()、
+		mob_summonslave()、mob_read_randommonster()、mob_readdb() 修正。
+
+--------------
+//0667 by 死神
+
+・最大HP計算式をミストレ巣を参考して修正。(多分これで本鯖にあっていると思います。)
+・防具の精錬ボーナスを0.7に変更。(今は端数を四捨五入していますが本鯖が端数無視なら修正しておきます。)
+・@refineコマンドで装備場所IDに0を入れると装備している全ての装備を精錬するように変更。
+・その他細かい修正。
+	(db/)
+	item_db.txt
+		7140、7142を元に戻して0666の物はコマントアウトしました。
+	job_db1.txt 修正。
+	refine_db.txt 修正。
+	(map/)
+	mob.c
+		mob_once_spawn() 修正。
+	itemdb.c
+		itemdb_read_randomitem() 修正。
+	pet.c
+		pet_food() 修正。
+	pc.c
+		pc_readdb()、do_init_pc()、pc_calcstatus()、pc_setoption() 修正。
+		pc_calc_sigma() 追加。
+		その他修正。
+	map.h 修正。
+	battle.c
+		battle_calc_magic_attack()、battle_calc_misc_attack() 修正。
+	atcommand.c 修正。
+
+--------------
+//0666 by 聖
+
+・ランダムアイテムの細かい修正。
+・battle_athena.confの項目追加。
+・古木の枝で召還するモンスターの確率を設定出来るようにしました。
+・モンスター召還アイテムを複数作る事が出来るようにしました。
+・召還アイテムのサンプルとして
+　生命の種子をポリン系召還、
+　エンブリオをMVPボス系召還にしてみました。
+　あまりいいサンプルを思いつかなかったので、
+　何かいい案を思いついた人は書き換えてやってください(^^;
+	(conf/)
+	battle_athena.conf
+	(doc/)
+	conf_ref.txt
+	(map/)
+	mob.h
+		mob_db 修正。
+	mob.c
+		mob_once_spawn()、mob_makedummymobdb()、mob_readdb() 修正。
+		mob_readbranch() -> mob_read_randommonster()に変更。
+	battle.h
+		battle_config 修正。
+	battle.c
+		battle_config_read() 修正。
+	itemdb.c
+		itemdb_read_randomitem() 修正。
+	(db/)
+	item_db.txt
+	item_bluebox.txt
+	item_cardalbum.txt
+	item_giftbox.txt
+	item_scroll.txt
+	item_violetbox.txt
+	mob_branch.txt
+	mob_poring.txt 追加。
+	mob_boss.txt 追加。
+
+--------------
+//0665 by J
+
+・怨霊武士の取り巻きがカブキ忍者になっていたのを酒天狗に修正。
+・オットーにフェイクエンジェルが出すはずの取り巻きがついてたのを修正。
+	(db/)
+	mob_skill_db.txt
+
+--------------
+//0664 by 聖
+
+・精錬失敗時他のプレーヤーにもエフェクトが表示されるように修正。
+	(map/)
+	script.c
+		buildin_failedrefitem() 修正。
+
+--------------
+//0663 by lide
+
+・ブランディッシュスピア修正
+	(map/)
+	battle.c
+	skill.c
+
+--------------
+//0662 by 死神
+
+・細かい修正とバグ修正。
+・プロボックによってモンスターは乗算防御と減算防御が減るように修正してプレイヤーは減算防御だけ減るように修正。
+・スクリプトgetgmlevel追加。機能はそのNPCと話しているプレイヤーのGMレベルを返します。
+・0659の書き忘れですがペットのパフォマンスの種類が親密度によって増えるように変更しました。
+	(map/)
+	clif.c
+	pc.c
+	script.c
+
+--------------
+//0661 by 死神
+
+・細かい修正。
+・接続した時のペットのメッセージを親密度がきわめて親しいの時のみに出るように変更。
+・0659で書き忘れですがペットの支援攻撃は親密度がきわめて親しいの時のみに発生します。(それと親密度によって支援攻撃確率が少し変化します。)
+・ジルタスとアリスの卵のIDをitem_db.txtに合わせました。(自分が作ったpet_db.txtの方が自分勝手に設定していた物でしたので。て言うか未実装アイテムだから番号がわからなかっただけですが...)
+・pet_db.txtのattack_rateが正しく適用されなかったバグ修正。
+	(db/)
+	pet_db.txt
+	(map/)
+	clif.c
+		clif_parse_LoadEndAck() 修正。
+	pc.c
+		pc_attack_timer() 修正。
+
+--------------------
+//0660 by いど
+
+・サーバーsnapshot
+
+--------------------
+
+//0659以前の変更点はReadmeを参照してください
+
+--------------------
+
+    Athena Dev. v2.1.1       Released: Middle July, 2003
+    (c) 2003 Athena Project.
+     http://project-yare.de/
+
+1. Athena(アテナ)について
+2. このリリースについて
+3. 必要な物
+4. 使い方
+5. 現在の仕様
+6. 祝辞
+7. 免責事項
+8. 募集
+9. English
+
+
+1. アテナについて
+    アテナとは2003年1月半ばにでた0052.lzhをベースとして作られているエミュレータの一つです。
+    基本的なライセンスはオリジナルがGPLの下に配布されている為、
+    これに従いGPLの下配布を許可します。
+    /*
+        改良版を配布する場合は必ずこのREADMEを書き換えてください。
+        何処を改良したのか報告(athena@project-yare.deまで)して貰えると助かります。
+        バイナリのみの配布はGPL違反ですので"必ず"ソースも添付してください。
+     */
+    動作の確認は以下の通りのみ行っています。
+    // ただし完璧に動く事を保証するものでありません
+    対象CPU: Intel Pentium系   // PentiumII以上で確認.
+        FreeBSD 4.8R, 4.6.2R
+        Linux RedHat 7.3
+        cygwin + gcc 3.2 20020927 (prerelease)
+    開発元URL: http://project-yare.de/
+
+
+2. このリリースについて
+    今回のリリースは前回(V2.1)同様開発版のリリースのみです。
+    2.1に比べ下記の点が修正されています。
+        mapのデフォルト設定が韓国data.grfのみ正常に動作するようになっていた点
+        common/timer.cやmap/script.cの幾つかのバグ
+
+    迅速にUpdateを強く推奨するものではありませんが各自の判断で行って下さい。
+
+
+3. 必要な物
+    data.grf      //sdata.grfは必要に応じて
+    account.txt   //存在しない場合athena.shが自動生成します
+    conf/*.cnf    //Map用とChar用の二種類あります
+    conf/npc*.txt //npc設定用ファイルです。複数のファイルに分けることが可能です。
+    db/*.txt      //アイテム、job情報など
+
+
+4. 使い方
+    > tar xvfz athena-d?.?.tar.gz
+    > cd athena-d?.?.tar.gz
+    > make
+    > vi conf/char_athena.cnf       //IP(127.0.0.1)の部分を環境に合わせて変更してください
+    > vi conf/map_athena.cnf        //同上、またmap設定などは、このファイルで行います。
+    > ./athena.sh
+    上記を行えば"たぶん"起動します。
+
+    補足:
+    conf/npc_sampleJ.txtにはスクリプトの書き方について色々な説明が記載されています。
+    もし、独自のMap設定を行ってみたい人や、スクリプトを弄りたい方は参考にしてください。
+    ただし、開発中のためスクリプトの仕様が変更される可能性が高いです。
+    command.txtには実装済みの特殊コマンドについての説明を記載しています。
+
+
+5. 現在の仕様
+    本鯖と比べておかしい(例えばプバが歩く、ポリンがアイテムを拾わないなど)点は、
+    全て現在開発中に因るものです。
+    現状としてキャラクタ系及びモンスター系のバグ報告は無視される可能性が高いです。
+
+    バグ報告について必ず発生条件をお書き下さい。
+    下にある報告用テンプレートを使って報告して頂くと助かります。
+    報告先はエミュ板の開発スレにでも。
+    ---- Athena v 2.0 (stable or develop) ----
+    【gcc ver】gcc -vを実行時に表示される内容
+    【動作システム】FreeBSD, Linux(ディストリビュージョンも), cygwinなど
+    【発生内容】mapが落ちてしまった時の表示されていたデバッグ情報など具体的に書いてください。
+    【操作内容】具体的にどんな操作を行ったかを書いてください。
+    ------------------ END -------------------
+    理想はテンプレに加えてmap.coreなどcoreファイルをUploaderにアップして頂くことですが
+    問題のMapだけの状態にしcoreの吐く容量に注意してください。
+    /*
+        確認した限りでは324個ほどmapデータを読み込ませると、
+         40MB近いcoreファイルを吐き出します @FreeBSD
+         cygwinの場合はstackdumpというファイルになるそうです。
+        しかし、coreファイルなどをgzip圧縮などすれば大幅に小さくなります。
+         大凡30MBのcoreファイルが2.9MBほどになるようです。
+        ですので、もしアップロードする場合はgzip圧縮など各自行ってください。
+     */
+
+    今回のリリースだけでなくHISTORYを作成すると大量に記述が必要な為省略しています。
+    // 多い日だと本当に結構ありますので‥‥。
+
+
+6. 祝辞
+    今回このAthena開発版を出すに当たって感謝したい方々(順番不同)
+        Lemming氏 (Project YARE)
+        0052氏 (Uploader)
+        35氏 (エミュ開発スレ)
+        Johan Lindh氏(Author of memwatch)
+        YARE forumのNPC情報を作成した方々
+        weiss研究会BBSの様々な情報ファイルを作成した方々
+        最後に、.coreファイル達
+
+
+7. 免責事項
+    Athena Projectは一切Athenaの動作に関する保証等は行いません。
+    つまり、Athenaは無保証です。
+    athena@project-yare.deに動作・操作等に関する質問などを送られても一切お答えできません。
+    又Athenaを用いたことにより生じた被害・問題等の責任は一切Athena Projectは負いません。
+
+
+8. 募集
+    athenaの開発に参加したい//興味があるという方ご連絡下さい。
+    我々は貴方の参加をお待ちしています。
+    // 最新版が欲しいだけで何ら協力して頂けないという方はお断りです;-)
+    [募集要項: プログラマ(2-3人)]
+        年齢: 不問
+        性別: 不問
+        言語: 日本語が理解可能
+        内容: C言語もしくはC++による開発。(特にネットワークやDBの経験が有る方大募集!)
+    [募集要項: 翻訳(?人)]
+        年齢: 不問
+        性別: 不問
+        言語: 日本語、英語が理解可能
+        内容: 仏蘭西語、独逸語、西班牙語、伊太利亜語、泰(タイ)語、朝鮮語、中国語へ文献、サイトなどの翻訳
+    連絡先: athena@project-yare.de 雑務担当まで。
+
+
+9. English
+     This release is just fixed some bugs in timer.c, script.c and map_athena1.conf.
+
+
+(c) 2003 Athena Project.

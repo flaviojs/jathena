@@ -1,5 +1,5 @@
 ==========================================================================
- Athena dev 2.1.1 mod0537 現在のconfのリファレンス＋α
+ Athena dev 2.1.1 mod0659 現在のconfのリファレンス＋α
 --------------------------------------------------------------------------
 
 < このファイルは何？ >
@@ -57,6 +57,13 @@ new_account
 	新しいアカウント作成を許可するかどうかです。
 	1で許可、0で禁止します。
 
+account_filename
+	アカウントセーブファイルを指定します。
+	省略可能で、デフォルトはaccount.txtです。
+
+gm_account_filename
+	GMアカウントファイルを指定します。
+	省略可能で、デフォルトはconf/GM_account.txtです。
 
 < 例 >
 
@@ -64,6 +71,8 @@ login_port: 6900
 admin_pass: admin
 gm_pass: gm
 new_account: 1
+account_filename: account.txt
+gm_account_filename: conf_GM_account.txt
 
 
 ==========================================================================
@@ -223,6 +232,14 @@ autosave_time
 	データを自動的にキャラ鯖に送る時間です。単位は秒です。
 	省略可能でデフォルトは60(1分)です。
 
+gm_account_filename
+	GMアカウントファイルを指定します。
+	省略可能で、デフォルトはconf/GM_account.txtです。
+
+water_height
+	水場の高さを指定するファイルを決めます。
+	省略可能で、デフォルトはconf/water_height.txtです。
+
 data_grf
 	ROデータファイル data.grf へのパスです。
 	省略可能で、デフォルトは ./data.grf です。
@@ -251,6 +268,8 @@ char_port: 6121
 map_ip: 127.0.0.1
 map_port: 5121
 autosave_time: 60
+gm_account_filename: conf/GM_account.txt
+water_height: conf/water_height.txt
 data_grf: ./data.grf
 sdata_grf: ./sdata.grf
 npc: conf/npc_warp.txt
@@ -287,9 +306,17 @@ warp_point_debug
 	ポイントの名前を確認することができます。デフォルトはnoです。
 
 enemy_critical
-	プレイヤーと同じLUKによるクリティカル判定をMOBに有効にするかどうかです
+	プレイヤーと同じLUKによるクリティカル判定をMOBとペットに有効にするかどうかです。
 	このクリティカルはもちろん必中なので、onにすると高Fleeでも、
 	LUKの高い敵の攻撃が避けづらくなります。デフォルトはyesです。
+
+enemy_critical_rate
+	モンスターとペットのクリティカル頻度の百分率です。enemy_criticalがyesじゃないと設定しても何の意味もありません。デフォルトは100です。
+
+
+enemy_perfect_flee
+	敵が完全回避をするかどうかです。これをyesにすると敵も完全回避を
+	するようになります。デフォルトはnoです。
 
 casting_rate
 	スキルの詠唱時間を百分率で調整します。
@@ -309,6 +336,15 @@ skill_delay_attack_enable
 	スキルディレイの間攻撃できるかどうかです。yesにすればスキルディレイの間スキルは使えないけど攻撃はできます。
 	デフォルトはnoです。
 
+player_skill_add_range
+	プレイヤーのスキル射程から敵が離れた時どれぐらいの距離までスキルを使用可能にするかを決めます。スキルの射程+player_skill_add_rangeまでスキルが届きます。デフォルトは0ですが少しは入れた方がいいです。
+
+skill_out_range_consume
+	スキルの射程から敵が離れてスキルが失敗した時SPやアイテムを消耗するかどうかです。デフォルトはyesです。
+
+monster_skill_add_range
+	モンスターのスキル射程から敵が離れた時どれぐらいの距離までスキルを使用可能にするかを決めます。スキルの射程+monster_skill_add_rangeまでスキルが届きます。デフォルトは0です。
+
 player_damage_delay
 	PCがダメージを受けた時移動できないディレイを入れるかどうかです。
 	yesにするとインデュアでも使わない限りダメージを受けた時
@@ -317,6 +353,11 @@ player_damage_delay
 defunit_not_enemy
 	防御ユニット（セイフティウォール/ニューマなど）がMOBに効果を
 	及ぼさないようにするかどうかです。デフォルトはyesです。
+
+random_monster_checklv
+	モンスター召還アイテムを使ったときに自分よりLVの高いモンスターを召還するかどうかです。
+	yesにすると、自分よりLVの高いモンスターを召還しないようになります。
+	デフォルトはyesです。
 
 attribute_recover
 	属性によって攻撃されても回復するかどうかです。noの場合は-属性を
@@ -330,6 +371,10 @@ item_rate
 	アイテムドロップ率を百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
 
+drop_rate0item
+	落下確率0のアイテム(一部モンスターにおけるリンゴ)を落下するかどうかの設定です。
+	デフォルトはnoです。
+
 base_exp_rate
 	BaseEXPの所得倍率を百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
@@ -338,7 +383,7 @@ job_exp_rate
 	JobEXPの所得倍率を百分率で調整します。
 	0-1000程度の数値を指定してください。デフォルトは100です。
 
-death_penalty_type: 0
+death_penalty_type
 	デスペナルティのタイプを決定します。
 	0で死んだ後リスタートする時に適用で持っているEXPの量から比率の分を減らす仕様、1で死んだ直後に適用で持っているEXPの量から比率の分を減らす仕様です。
 	2で死んだ後リスタートする時に適用で次のレベルアップまでのEXPから比率の分を減らす仕様、3で死んだ直後に適用で次のレベルアップまでのEXPから比率の分を減らす仕様です。
@@ -354,11 +399,11 @@ death_penalty_job
 	あまり低すぎる値を使うと減りません。単位は0.01%です。
 	デフォルトは0です。
 
-restart_hp_rate: 0
+restart_hp_rate
 	リスタートする時に回復するHP比率を百分率で調整します。単位は%です。
 	デフォルトは0です。0の場合1回復になります。
 
-restart_sp_rate: 0
+restart_sp_rate
 	リスタートする時に回復するSP比率を百分率で調整します。単位は%です。
 	デフォルトは0です。0の場合は回復しません。
 	そしてSPが比率より高い場合も回復しません。
@@ -391,7 +436,6 @@ monster_active_enable
 	先攻モンスターを先攻にするかどうかです。これをnoにすると
 	先攻モンスターが非先攻になります。デフォルトはyesです。
 
-
 monster_loot_type
 	ルートモンスターの行動の仕方を指定します。
 	0の場合はLOOTITEM_SIZEまでアイテムを食べてもまたアイテムを食べて、
@@ -414,13 +458,18 @@ quest_skill_learn
 	デフォルトは noです。
 
 quest_skill_reset
-	スキルをリセットする時にクェストスキルをリセットするかどうかです。
+	スキルをリセットする時クェストスキルをリセットするかどうかです。
 	デフォルトはyesです。
 	noにしてもquest_skill_learnをyesにすればリセットされます。
 
 basic_skill_check
 	座り、交換、パーティ結成、チャットルーム作り等の時基本スキルをチェックするかどうかです。 
 	これをnoにすれば座り、交換等の基本スキルが必要な行動を基本スキルに関係なく使うことができます。
+	デフォルトは yesです。
+
+guild_emperium_check
+	ギルドを作る時エンペリウムを消費するかどうかです。これをnoにすれば
+	エンペリウムなしでもギルドが作れます。
 	デフォルトは yesです。
 
 ghost_time
@@ -441,6 +490,19 @@ pet_friendly_rate
 pet_hungry_delay_rate
 	ペットの腹が減る時間の倍率です。
 	倍率が高いと腹が減り難くなります。デフォルトは100です。
+
+pet_support
+	ペットが支援攻撃をするかどうかです。yesにするとペットの親密度が
+	きわめて親しいの時だけ支援攻撃をしてくれます。デフォルトはnoです。
+
+pet_support_rate
+	ペットの支援攻撃確率の倍率です。（100で通常、200で倍です) 
+	倍率が高いと支援攻撃よくしてくれるようになります。デフォルトは100です。
+
+pet_attack_exp_to_master
+	ペットが与えたダメージの分の経験値を主人が収得するかどうかです。
+	これをyesにするとペットの攻撃によるダメージも主人が与えた物になり
+	主人が経験値を収得することができます。デフォルトはnoです。
 
 skill_min_damage
 	スキルを使った時ダメージが連打数より未満の場合全てミスになるか1ダメージになるかを決定します。
@@ -467,20 +529,85 @@ shop_exp
 	計算式は適度に作った物です。
 	デフォルトは0です。
 
+item_check
+	アイテムのチェックを行うかどうかです。
+	ログイン時とマップ移動時に所持アイテムに不正アイテムがないかチェックします。
+	また@itemで不正アイテムを所得できなくします。
+	デバグやアイテムの確認を行うときなどはoffにしてください。
+	デフォルトはonです。
+
+wedding_modifydisplay
+	タキシードとウェディングドレスを表示するかどうかです。
+	結婚キャラを表示したい場合はこれをyesにしてください。
+	デフォルトはnoです。
+
+natural_healhp_interval
+	HPが自動回復するまで掛かる時間です。単位はms(ミリ秒)です。
+	デフォルトは4000でNATURAL_HEAL_INTERVAL未満にすることはできません。
+
+natural_healsp_interval
+	SPが自動回復するまで掛かる時間です。単位はms(ミリ秒)です。
+	デフォルトは8000でNATURAL_HEAL_INTERVAL未満にすることはできません。
+
+natural_heal_skill_interval
+	スキルによって自動回復する場合掛かる時間です。単位はms(ミリ秒)です。
+	デフォルトは10000でNATURAL_HEAL_INTERVAL未満にすることはできません。
+
+natural_heal_weight_rate
+	自動回復ができなくなる重量を設定します。単位は%です。
+	最小は50で最大は101です。最大が101なのは重量が
+	natural_heal_weight_rate未満の時に自動回復するからです。(つまり101なら
+	いつでも自動回復できます。)
+	デフォルトは50です。
+
+item_name_override_grffile
+	アイテムの名前(英語以外の名前です。)を.grfファイルから読むかどうかです。
+	noにするとitem_db.txtの名前を使います。
+	デフォルトはyesです。
+
+arrow_decrement
+	弓を使う時矢を消耗するかどうかです。これをnoにすると
+	矢が消耗されません。(矢を装備する必要はあります。)
+	デフォルトはyesです。
+
+max_aspd
+	 最大攻撃速度を設定します。
+	デフォルトは199です。最大は199で最小は100です。
+
+max_hp
+	 最大HPを設定します。
+	デフォルトは32500です。最大は1000000で最小は100です。
+
+max_sp
+	 最大SPを設定します。
+	デフォルトは32500です。最大は1000000で最小は100です。
+
+max_cart_weight
+	 カートの最大重量を設定します。
+	デフォルトは8000です。最大は1000000で最小は100です。
+
+
 
 < 例 >
 
 warp_point_debug: no
 enemy_critical: yes
+enemy_critical_rate: 100
+enemy_perfect_flee: no
 casting_rate: 100
 delay_rate: 100
 delay_dependon_dex: no
 skill_delay_attack_enable: no
+player_skill_add_range: 0
+skill_out_range_consume: yes
+monster_skill_add_range: 0
 player_damage_delay: yes
 defunit_not_enemy: yes
+random_monster_checklv: yes
 attribute_recover: yes
 flooritem_lifetime: 60000
 item_rate: 100
+drop_rate0item: no
 base_exp_rate: 100
 job_exp_rate: 100
 death_penalty_type: 0
@@ -501,16 +628,33 @@ mob_count_rate: 100
 quest_skill_learn: no
 quest_skill_reset: yes
 basic_skill_check: yes
+guild_emperium_check: yes
 ghost_time: 5000
 pet_catch_rate: 100
 pet_rename: no
 pet_friendly_rate: 100
 pet_hungry_delay_rate: 100
+pet_support: no
+pet_support_rate: 100
+pet_attack_exp_to_master: no
 skill_min_damage: no
 sanctuary_type: 0
 finger_offensive_type: 0
 heal_exp: 0
 shop_exp: 0
+item_check: on
+wedding_modifydisplay: no
+natural_healhp_interval:4000
+natural_healsp_interval:8000
+natural_heal_skill_interval:10000
+natural_heal_weight_rate: 50
+item_name_override_grffile: yes
+arrow_decrement: yes
+max_aspd: 199
+max_hp: 32500
+max_sp: 32500
+max_cart_weight: 8000
+
 
 =====================================================================ghos6. atcommand_athena.conf
 --------------------------------------------------------------------------
@@ -551,7 +695,7 @@ storage
 option
 	@コマンド @option
 hide
-	@コマンド @hide
+	GMコマンド /hideと@コマンド @hide
 jobchange
 	@コマンド @jobchange
 die
@@ -566,6 +710,10 @@ heal
 	@コマンド @heal
 item
 	@コマンド @item
+itemreset
+	@コマンド @itemreset
+itemcheck
+	@コマンド @itemcheck
 lvup
 	@コマンド @lvup
 joblvup
@@ -647,7 +795,7 @@ charbaselvl
 charjlvl
 	@コマンド @charjlvl
 kick
-	@コマンド @kick
+	@コマンド @kickとGM右クリック命令「使用者強制終了」
 questskill
 	@コマンド @questskil
 lostskill
@@ -656,8 +804,10 @@ spiritball
 	@コマンド @spiritball
 party
 	@コマンド @party
-itemreset
-	@コマンド @itemreset
+guild
+	@コマンド @guild
+
+
 
 < 例 >
 
@@ -684,6 +834,8 @@ alive: 1
 kami: 1
 heal: 1
 item:1
+itemreset: 1
+itemcheck: 1
 lvup: 1
 joblvup:1
 help: 1
@@ -728,8 +880,9 @@ kick: 1
 questskill: 1
 lostskill: 1
 spiritball: 1
-party: 0
-itemreset: 1
+party: 1
+guild: 1
+
 
 ==========================================================================
 EOF

@@ -123,7 +123,7 @@ int inter_config_read(const char *cfgName)
 		return 1;
 	}
 	while(fgets(line,1020,fp)){
-		i=sscanf(line,"%[^:]:%s",w1,w2);
+		i=sscanf(line,"%[^:]: %[^\r\n]",w1,w2);
 		if(i!=2)
 			continue;
 		if(strcmpi(w1,"storage_txt")==0){
@@ -170,7 +170,7 @@ int inter_init(const char *file)
 	inter_guild_init();
 	inter_pet_init();
 
-	i=add_timer_interval(gettick()+10,inter_save_timer,0,0,autosave_interval);
+	i=add_timer_interval(gettick()+autosave_interval,inter_save_timer,0,0,autosave_interval);
 
 	return 0;
 }

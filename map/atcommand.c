@@ -205,20 +205,25 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			 */
 			sd->opt1=x;
 			sd->opt2=y;
+			if(!(sd->status.option & CART_MASK) && z & CART_MASK) {
+				clif_cart_itemlist(sd);
+				clif_cart_equiplist(sd);
+				clif_updatestatus(sd,SP_CARTINFO);
+			}
 			sd->status.option=z;
 			clif_changeoption(&sd->bl);
-			clif_displaymessage(fd,"秘儀！七変化！");
+			clif_displaymessage(fd,"秘技！七変化！");
 			return 1;
 		}
 //消える
 //「@hide」と入力
 		if (strcmpi(command, "@hide") == 0 && gm_level >= atcommand_config.hide) {
-			if(sd->status.option&4){
-				sd->status.option-=4;
-				clif_displaymessage(fd,"hide off!");
+			if(sd->status.option&0x40){
+				sd->status.option&=~0x40;
+				clif_displaymessage(fd,"invisible off!");
 			}else{
-				sd->status.option+=4;
-				clif_displaymessage(fd,"hide!");
+				sd->status.option|=0x40;
+				clif_displaymessage(fd,"invisible!");
 			}
 			clif_changeoption(&sd->bl);
 			return 1;
@@ -304,19 +309,19 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 //省略して「@heal」とだけ打てば、両方全回復
 		if (strcmpi(command, "@heal") == 0 && gm_level >= atcommand_config.heal) {
 			sscanf(message, "%s%d%d", command, &x, &y);
-			if (x == 0 && y == 0) {	//省略記述で全回復
+			if (x <= 0 && y <= 0) {	//省略記述で全回復
 				x=sd->status.max_hp-sd->status.hp;
 				y=sd->status.max_sp-sd->status.sp;
 			} else {
-				if (x > sd->status.hp) {
-					x = 0;
+				if (sd->status.hp + x > sd->status.max_hp) {
+					x = sd->status.max_hp - sd->status.hp;
 				}
-				if (y > sd->status.sp) {
-					y = 0;
+				if (sd->status.sp + y > sd->status.max_sp) {
+					y = sd->status.max_sp - sd->status.sp;
 				}
 			}
-			clif_heal(fd,SP_HP,x);
-			clif_heal(fd,SP_SP,y);
+			clif_heal(fd,SP_HP,(x > 0x7fff)? 0x7fff:x);
+			clif_heal(fd,SP_SP,(y > 0x7fff)? 0x7fff:y);
 			pc_heal(sd,x,y);
 			clif_displaymessage(fd,"HP,SPを回復しました");
 			return 1;
@@ -329,10 +334,14 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			sscanf(message, "%s%s%d", command, temp0, &y);
 			if(y==0) y=1;	//個数指定が無かったら１個にするbyれあ
 			
-			if( (x=atoi(temp0))>0 )
-				x=((item_data=itemdb_search(x))?x:0);
-			else if( (item_data=itemdb_searchname(temp0))!=NULL )
-				x=item_data->nameid;
+			if( (x=atoi(temp0))>0 ){
+				if(battle_config.item_check){
+					x=(( (item_data=itemdb_exists(x)) && itemdb_available(x))?x:0);
+				}else
+					item_data=itemdb_search(x);
+			}else if( (item_data=itemdb_searchname(temp0))!=NULL )
+				x=(!battle_config.item_check ||
+				 itemdb_available(item_data->nameid))?item_data->nameid:0;
 			
 			if( x>0 ) {
 				int a1=1,a2=y,i;
@@ -362,6 +371,10 @@ int atcommand(int fd,struct map_session_data *sd,char *message)
 			}
 			clif_displaymessage(fd,"全アイテム破棄しました(´∀｀) ");
 			return 1;
+		}
+//所持アイテムのチェック
+		if (strcmpi(command, "@itemcheck") == 0 && gm_level >= atcommand_config.itemcheck) {
+			pc_checkitem(sd);
 		}
 //Lvアップコマンド
 //「@Lvup 増加値」と入力
@@ -584,45 +597,48 @@ z [0～4]服の色
 // x座標 y座標 は省略可（ランダム）
 		if (strcmpi(command, "@monster") == 0 && gm_level >= atcommand_config.monster) {
 			i1 = i2 = x = y = 0;
-			sscanf(message, "%s %s %s %d%d%d", command, temp1, temp0, &i2, &x, &y);
-			if( (i1=atoi(temp0))==0 )
-				i1=mobdb_searchname(temp0);
-			printf("%s name=%s id=%d count=%d (%d,%d)\n", command, temp1, i1, i2, x, y);
-		
-			if(i1>=1000 && i1<2000 && mob_db[i1].max_hp>0){
-				for(i=0;i<i2;i++) {
-					int mx,my;
-					if(x<=0) mx = sd->bl.x + (rand()%10 - 5);
-					else mx = x;
-					if(y<=0) my=sd->bl.y + (rand()%10 - 5);
-					else my = y;
-					mob_once_spawn(sd,"this",mx,my,temp1,i1,1,"");
+			if(sscanf(message, "%s %s %s %d%d%d", command, temp1, temp0, &i2, &x, &y) >= 3) {
+				if( (i1=atoi(temp0))==0 )
+					i1=mobdb_searchname(temp0);
+				if( i2 <= 0 ) i2 = 1;
+				printf("%s name=%s id=%d count=%d (%d,%d)\n", command, temp1, i1, i2, x, y);
+
+				if(i1>1000 && i1<=2000 && mob_db[i1].max_hp>0){
+					for(i=0;i<i2;i++) {
+						int mx,my;
+						if(x<=0) mx = sd->bl.x + (rand()%10 - 5);
+						else mx = x;
+						if(y<=0) my=sd->bl.y + (rand()%10 - 5);
+						else my = y;
+						mob_once_spawn(sd,"this",mx,my,temp1,i1,1,"");
+					}
+					clif_displaymessage(fd,"モンスター召喚 !!");
 				}
-				clif_displaymessage(fd,"モンスター召喚 !!");
-			}else{
-				clif_displaymessage(fd,"無効なモンスターIDです。");
+				else{
+					clif_displaymessage(fd,"無効なモンスターIDです。");
+				}
 			}
-			
 			return 1;
 		}
 // 精錬 @refine 装備場所ID +数値
 // 右手=2 左手=32 両手=34 頭=256/257/768/769 体=16 肩=4 足=64
 		if(strcmpi(command,"@refine")==0 && gm_level >= atcommand_config.refine){
 			i1=i2=0;
-			if(sscanf(message,"%s%d%d",command,&i1,&i2) >= 3 && i1 > 0) {
+			if(sscanf(message,"%s%d%d",command,&i1,&i2) >= 3) {
 				for(i=0;i< MAX_INVENTORY;i++){
 					if( sd->status.inventory[i].nameid &&	// 該当個所の装備を精錬する
-					    (sd->status.inventory[i].equip==i1) ){
+					    (sd->status.inventory[i].equip&i1 || (sd->status.inventory[i].equip && !i1) ) ) {
 						if(i2<=0 || i2>10 ) i2=1;
 						if( sd->status.inventory[i].refine<10 ){
 							sd->status.inventory[i].refine+=i2;
 							if(sd->status.inventory[i].refine>10)
 								sd->status.inventory[i].refine=10;
-							pc_unequipitem(sd,i);	// 装備解除
+							x = sd->status.inventory[i].equip;
+							pc_unequipitem(sd,i,0);	// 装備解除
 							clif_refine(fd,sd,0,i,sd->status.inventory[i].refine);	// 精錬エフェクト とりあえず必ず成功
 							clif_delitem(sd,i,1);	// 精錬前アイテム消失
 							clif_additem(sd,i,1,0);	// 精錬後アイテム所得
-							pc_equipitem(sd,i,i1);	// 再装備（含ステータス計算）
+							pc_equipitem(sd,i,x);	// 再装備（含ステータス計算）
 							clif_misceffect(&sd->bl,3); // 他人にも成功を通知
 						}
 					}
@@ -641,7 +657,8 @@ z [0～4]服の色
 					if(item_data)
 						i1=item_data->nameid;
 				}
-				if( (i1<=500 || i1>1099) && (i1<4001 || i1>4148) &&
+				if( itemdb_exists(i1) &&
+					(i1<=500 || i1>1099) && (i1<4001 || i1>4148) &&
 					(i1<7001 || i1>10019) && itemdb_isequip(i1)){
 					struct item tmp_item;
 					if(i2<0 || i2>4) i2=0;	// 属性範囲
@@ -785,7 +802,7 @@ z [0～4]服の色
 // ペット親密度変更
 		if(strcmpi(command,"@petfriendly")==0 && gm_level >= atcommand_config.petfriendly) {
 			sscanf(message,"%s%d",command,&i1);
-			if(sd->status.pet_id && sd->pet_npcdata) {
+			if(sd->status.pet_id && sd->pd) {
 				if(i1 >= 0 && i1 <= 1000) {
 					sd->pet.intimate = i1;
 					clif_send_petstatus(sd);
@@ -797,7 +814,7 @@ z [0～4]服の色
 // ペット満腹度変更
 		if(strcmpi(command,"@pethungry")==0 && gm_level >= atcommand_config.pethungry) {
 			sscanf(message,"%s%d",command,&i1);
-			if(sd->status.pet_id && sd->pet_npcdata) {
+			if(sd->status.pet_id && sd->pd) {
 				if(i1 >= 0 && i1 <= 100) {
 					sd->pet.hungry = i1;
 					clif_send_petstatus(sd);
@@ -808,7 +825,7 @@ z [0～4]服の色
 
 // ペット名前変更
 		if(strcmpi(command,"@petrename")==0 && gm_level >= atcommand_config.petrename) {
-			if(sd->status.pet_id && sd->pet_npcdata) {
+			if(sd->status.pet_id && sd->pd) {
 				sd->pet.rename_flag = 0;
 				intif_save_petdata(sd->status.account_id,&sd->pet);
 				clif_send_petstatus(sd);
@@ -1167,12 +1184,18 @@ z [0～4]服の色
 		}
 
 		if(strcmpi(command, "@party") == 0 && gm_level >= atcommand_config.party){
-			if(sscanf(message, "%s %s", command, moji) >= 2) {
-				if(battle_config.basic_skill_check == 0 || pc_checkskill(sd,NV_BASIC) >= 7){
-					party_create(sd,moji);
-				}
-				else
-					clif_skill_fail(sd,1,0,4);
+			if(sscanf(message, "%s %[^\n]", command, moji) >= 2) {
+				party_create(sd,moji);
+			}
+			return 1;
+		}
+
+		if(strcmpi(command, "@guild") == 0 && gm_level >= atcommand_config.guild){
+			if(sscanf(message, "%s %[^\n]", command, moji) >= 2) {
+				int temp = battle_config.guild_emperium_check;
+				battle_config.guild_emperium_check = 0;
+				guild_create(sd,moji);
+				battle_config.guild_emperium_check = temp;
 			}
 			return 1;
 		}
@@ -1225,6 +1248,7 @@ int atcommand_config_read(const char *cfgName)
 				{ "kami",&atcommand_config.kami },
 				{ "heal",&atcommand_config.heal },
 				{ "item",&atcommand_config.item },
+				{ "itemcheck",&atcommand_config.itemcheck },
 				{ "itemreset",&atcommand_config.itemreset },
 				{ "lvup",&atcommand_config.lvup },
 				{ "joblvup",&atcommand_config.joblvup },
@@ -1271,6 +1295,7 @@ int atcommand_config_read(const char *cfgName)
 				{ "lostskill",&atcommand_config.lostskill },
 				{ "spiritball",&atcommand_config.spiritball },
 				{ "party",&atcommand_config.party },
+				{ "guild",&atcommand_config.guild },
 			};
 		
 			if(line[0] == '/' && line[1] == '/')

@@ -3,7 +3,7 @@
 
 #define MAX_SKILL_DB			350
 #define MAX_SKILL_PRODUCE_DB	 100
-#define MAX_SKILL_ARROW_DB	 100
+#define MAX_SKILL_ARROW_DB	 150
 
 // スキルデータベース
 struct skill_db {
@@ -59,10 +59,10 @@ int skill_use_pos( struct map_session_data *sd,
 int skill_castend_map( struct map_session_data *sd,int skill_num, const char *map);
 
 int skill_cleartimerskill(struct block_list *src);
-int skill_addtimerskill(struct block_list *src,int tick,int target,int x,int y,int skill_id,int skill_lv,int type,int flag);
+int skill_addtimerskill(struct block_list *src,unsigned int tick,int target,int x,int y,int skill_id,int skill_lv,int type,int flag);
 
 // 追加効果
-int skill_additional_effect( struct block_list* src, struct block_list *bl,int skillid,int skilllv,unsigned int tick);
+int skill_additional_effect( struct block_list* src, struct block_list *bl,int skillid,int skilllv,int attack_type,unsigned int tick);
 
 // ユニットスキル
 struct skill_unit *skill_initunit(struct skill_unit_group *group,int idx,int x,int y);
@@ -92,6 +92,7 @@ int skill_check_cloaking(struct block_list *bl);
 // ステータス異常
 int skill_status_change_start(struct block_list *bl,int type,int val1,int val2);
 int skill_status_change_timer(int tid, unsigned int tick, int id, int data);
+int skill_encchant_eremental_end(struct block_list *bl, int type);
 int skill_status_change_end( struct block_list* bl , int type,int tid );
 int skill_status_change_clear(struct block_list *bl);
 
@@ -100,6 +101,8 @@ int skill_status_change_clear(struct block_list *bl);
 int skill_can_produce_mix( struct map_session_data *sd, int nameid, int trigger );
 int skill_produce_mix( struct map_session_data *sd,
 	int nameid, int slot1, int slot2, int slot3 );
+
+int skill_arrow_create( struct map_session_data *sd,int nameid);
 
 // mobスキルのため
 int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag );
@@ -164,7 +167,6 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_SEISMICWEAPON		=97,
 	SC_ASSNCROS				=100,
 	SC_POEMBRAGI			=101,
-	SC_FREECAST				=102,
 	SC_STRIPWEAPON			=50,
 	SC_STRIPSHIELD			=51,
 	SC_STRIPARMOR			=52,
@@ -207,7 +209,6 @@ enum {	// struct map_session_data の status_changeの番号テーブル
 	SC_SAFETYWALL			=90,
 	SC_PNEUMA				=91,
 	SC_WATERBALL			=92,
-	SC_METEOSTORM			=93,
 	SC_ANKLE				=94,
 };
 extern int SkillStatusChangeTable[];
