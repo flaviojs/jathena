@@ -1,4 +1,15 @@
 --------------------
+//0973 by 獅子o^.^o
+・スクリプトのBASELEVEL,JOBLEVEL命令追加
+	例: set BASELEVEL,1;
+	例: set JOBLEVEL,1;
+	(map/)
+	pc.c
+		pc_setparam()
+		case SP_BASELEVEL: 項目追加
+		case SP_JOBLEVEL: 項目追加
+		
+--------------------
 //0972 by (凸)
 ・転生スキルをエフェクトだけいくつか追加したり
 ・状態変化はそのうち誰かが

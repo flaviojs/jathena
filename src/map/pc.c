@@ -4203,6 +4203,12 @@ int pc_readparam(struct map_session_data *sd,int type)
 int pc_setparam(struct map_session_data *sd,int type,int val)
 {
 	switch(type){
+	case SP_BASELEVEL:
+		sd->status.base_level = val;
+		break;
+	case SP_JOBLEVEL:
+		sd->status.job_level = val;
+		break;
 	case SP_SKILLPOINT:
 		sd->status.skill_point = val;
 		break;
