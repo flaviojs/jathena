@@ -5,6 +5,9 @@
 #include "mmo.h"
 
 #define MAX_PC_CLASS (1+6+6+1+6+1+1+1+1)
+#define PC_CLASS_BASE 0
+#define PC_CLASS_BASE2 (PC_CLASS_BASE + 4001)
+#define PC_CLASS_BASE3 (PC_CLASS_BASE2 + 22)
 #define MAX_NPC_PER_MAP 512
 #define BLOCK_SIZE 8
 #define AREA_SIZE 20

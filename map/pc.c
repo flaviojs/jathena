@@ -725,10 +725,11 @@ static int pc_calc_skillpoint(struct map_session_data* sd)
 int pc_calc_skilltree(struct map_session_data *sd)
 {
 	int i,id=0,flag;
-	int c=0;
+	int c=0, s=0;
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
-	c = s_class.job; //“]¶E‚È‚Ç‚ÍƒXƒLƒ‹‚ª•s–¾‚È‚Ì‚Åb’è‚Å’ÊíE‚ÌƒXƒLƒ‹ˆ—
+	c = s_class.job;
+	s = (s_class.upper==1) ? 1 : 0 ; //“]¶ˆÈŠO‚Í’Êí‚ÌƒXƒLƒ‹H
 
 	if(battle_config.skillup_limit && c >= 0 && c < 23) {
 		int skill_point = pc_calc_skillpoint(sd);
@@ -785,12 +786,12 @@ int pc_calc_skilltree(struct map_session_data *sd)
 		// ’Êí‚ÌŒvZ
 		do{
 			flag=0;
-			for(i=0;(id=skill_tree[s_class.upper][c][i].id)>0;i++){
+			for(i=0;(id=skill_tree[s][c][i].id)>0;i++){
 				int j,f=1;
 				if(!battle_config.skillfree) {
 					for(j=0;j<5;j++) {
-						if( skill_tree[s_class.upper][c][i].need[j].id &&
-							pc_checkskill(sd,skill_tree[s_class.upper][c][i].need[j].id) < skill_tree[s_class.upper][c][i].need[j].lv)
+						if( skill_tree[s][c][i].need[j].id &&
+							pc_checkskill(sd,skill_tree[s][c][i].need[j].id) < skill_tree[s][c][i].need[j].lv)
 							f=0;
 					}
 				}
@@ -3341,14 +3342,14 @@ struct pc_base_job pc_calc_base_job(int b_class)
 	if(b_class < MAX_PC_CLASS){ //’Êí
 		bj.job = b_class;
 		bj.upper = 0;
-	}else if(b_class >= 4001 && b_class < 4023){ //“]¶E
-		bj.job = b_class - 4001;
+	}else if(b_class >= PC_CLASS_BASE2 && b_class < PC_CLASS_BASE3){ //“]¶E
+		bj.job = b_class - PC_CLASS_BASE2;
 		bj.upper = 1;
-	}else if(b_class == 23 + 4023 -1){ //—{qƒXƒpƒmƒr
-		bj.job = b_class - (4023 - 1);
+	}else if(b_class == 23 + PC_CLASS_BASE3 -1){ //—{qƒXƒpƒmƒr
+		bj.job = b_class - (PC_CLASS_BASE3 - 1);
 		bj.upper = 2;
 	}else{ //—{qƒXƒpƒmƒrˆÈŠO‚Ì—{q
-		bj.job = b_class - 4023;
+		bj.job = b_class - PC_CLASS_BASE3;
 		bj.upper = 2;
 	}
 
@@ -3627,8 +3628,8 @@ int pc_nextbaseexp(struct map_session_data *sd)
 	else if(sd->status.class<=6) i=1;
 	else if(sd->status.class<=22) i=2;
 	else if(sd->status.class==23) i=3;
-	else if(sd->status.class==4001) i=4;
-	else if(sd->status.class<=4007) i=5;
+	else if(sd->status.class==PC_CLASS_BASE2) i=4;
+	else if(sd->status.class<=PC_CLASS_BASE2 + 6) i=5;
 	else i=6;
 
 	return exp_table[i][sd->status.base_level-1];
@@ -3649,8 +3650,8 @@ int pc_nextjobexp(struct map_session_data *sd)
 	else if(sd->status.class<=6) i=8;
 	else if(sd->status.class<=22) i=9;
 	else if(sd->status.class==23) i=10;
-	else if(sd->status.class==4001) i=11;
-	else if(sd->status.class<=4007) i=12;
+	else if(sd->status.class==PC_CLASS_BASE2) i=11;
+	else if(sd->status.class<=PC_CLASS_BASE2 + 6) i=12;
 	else i=13;
 
 	return exp_table[i][sd->status.job_level-1];
@@ -3854,10 +3855,11 @@ int pc_skillup(struct map_session_data *sd,int skill_num)
 int pc_allskillup(struct map_session_data *sd)
 {
 	int i,id;
-	int c=0;
+	int c=0, s=0;
 	//“]¶‚â—{q‚Ìê‡‚ÌŒ³‚ÌE‹Æ‚ğZo‚·‚é
 	struct pc_base_job s_class = pc_calc_base_job(sd->status.class);
-	c = s_class.job; //“]¶E‚È‚Ç‚ÍƒXƒLƒ‹‚ª•s–¾‚È‚Ì‚Åb’è‚Å’ÊíE‚ÌƒXƒLƒ‹ˆ—
+	c = s_class.job;
+	s = (s_class.upper==1) ? 1 : 0 ; //“]¶ˆÈŠO‚Í’Êí‚ÌƒXƒLƒ‹H
 
 	for(i=0;i<MAX_SKILL;i++){
 		sd->status.skill[i].id=0;
@@ -3877,7 +3879,7 @@ int pc_allskillup(struct map_session_data *sd)
 			sd->status.skill[i].lv=skill_get_max(i);
 	}
 	else {
-		for(i=0;(id=skill_tree[s_class.upper][c][i].id)>0;i++){
+		for(i=0;(id=skill_tree[s][c][i].id)>0;i++){
 			if(sd->status.skill[id].id==0 && (!(skill_get_inf2(id)&0x01) || battle_config.quest_skill_learn) )
 				sd->status.skill[id].lv=skill_get_max(id);
 		}
@@ -4376,10 +4378,10 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 		if(job == 23){ //“]¶‚ÉƒXƒpƒmƒr‚Í‘¶İ‚µ‚È‚¢‚Ì‚Å‚¨’f‚è
 			return 1;
 		}else{
-			b_class = job + 4001;
+			b_class = job + PC_CLASS_BASE2;
 		}
 	}else if(upper == 2){ //—{q‚ÉŒ‹¥‚Í‚È‚¢‚¯‚Ç‚Ç‚¤‚¹Ÿ‚ÅR‚ç‚ê‚é‚©‚ç‚¢‚¢‚â
-		b_class = (job==23)?job + 4022:job + 4023;
+		b_class = (job==23)?(job + (PC_CLASS_BASE3 - 1)):(job + PC_CLASS_BASE3);
 	}else{
 		return 1;
 	}
@@ -5640,7 +5642,7 @@ int pc_read_gm_account()
  */
 int pc_readdb(void)
 {
-	int i,j,k;
+	int i,j,k,upper=0;
 	FILE *fp;
 	char line[1024],*p;
 
@@ -5770,58 +5772,25 @@ int pc_readdb(void)
 		char *split[50];
 		if(line[0]=='/' && line[1]=='/')
 			continue;
-		for(j=0,p=line;j<13 && p;j++){
+		for(j=0,p=line;j<14 && p;j++){
 			split[j]=p;
 			p=strchr(p,',');
 			if(p) *p++=0;
 		}
-		if(j<13)
+		if(j<14)
 			continue;
-		i=atoi(split[0]);
-		for(j=0;skill_tree[0][i][j].id;j++);
-		skill_tree[0][i][j].id=atoi(split[1]);
-		skill_tree[0][i][j].max=atoi(split[2]);
-		skill_tree[2][i][j].id=atoi(split[1]); //—{qE‚Í—Ç‚­•ª‚©‚ç‚È‚¢‚Ì‚Åb’è
-		skill_tree[2][i][j].max=atoi(split[2]); //—{qE‚Í—Ç‚­•ª‚©‚ç‚È‚¢‚Ì‚Åb’è
+		upper=atoi(split[0]);
+		i=atoi(split[1]);
+		for(j=0;skill_tree[upper][i][j].id;j++);
+		skill_tree[upper][i][j].id=atoi(split[2]);
+		skill_tree[upper][i][j].max=atoi(split[3]);
 		for(k=0;k<5;k++){
-			skill_tree[0][i][j].need[k].id=atoi(split[k*2+3]);
-			skill_tree[0][i][j].need[k].lv=atoi(split[k*2+4]);
-			skill_tree[2][i][j].need[k].id=atoi(split[k*2+3]); //—{qE‚Í—Ç‚­•ª‚©‚ç‚È‚¢‚Ì‚Åb’è
-			skill_tree[2][i][j].need[k].lv=atoi(split[k*2+4]); //—{qE‚Í—Ç‚­•ª‚©‚ç‚È‚¢‚Ì‚Åb’è
+			skill_tree[upper][i][j].need[k].id=atoi(split[k*2+4]);
+			skill_tree[upper][i][j].need[k].lv=atoi(split[k*2+5]);
 		}
 	}
 	fclose(fp);
 	printf("read db/skill_tree.txt done\n");
-
-	// ƒXƒLƒ‹ƒcƒŠ[2 “]¶E—p
-//	memset(skill_tree,0,sizeof(skill_tree));
-	fp=fopen("db/skill_tree2.txt","r");
-	if(fp==NULL){
-		printf("can't read db/skill_tree2.txt\n");
-		return 1;
-	}
-	while(fgets(line,1020,fp)){
-		char *split[50];
-		if(line[0]=='/' && line[1]=='/')
-			continue;
-		for(j=0,p=line;j<13 && p;j++){
-			split[j]=p;
-			p=strchr(p,',');
-			if(p) *p++=0;
-		}
-		if(j<13)
-			continue;
-		i=atoi(split[0]);
-		for(j=0;skill_tree[1][i][j].id;j++);
-		skill_tree[1][i][j].id=atoi(split[1]);
-		skill_tree[1][i][j].max=atoi(split[2]);
-		for(k=0;k<5;k++){
-			skill_tree[1][i][j].need[k].id=atoi(split[k*2+3]);
-			skill_tree[1][i][j].need[k].lv=atoi(split[k*2+4]);
-		}
-	}
-	fclose(fp);
-	printf("read db/skill_tree2.txt done\n");
 
 	// ‘®«C³ƒe[ƒuƒ‹
 	for(i=0;i<4;i++)

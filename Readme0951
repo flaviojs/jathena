@@ -1,4 +1,24 @@
 --------------------
+//0964 by (凸)
+
+・この前追加したskill_tree2.txtを廃止したので削除してください
+・skill_tree.txtのフォーマットを変更＆Kalenさんなどの情報を元に転生ツリーの見直し
+・それにともなってpc.cのファイル読み出し部分などを変更
+・Athena雑談スレッド part3 >>14 miyaさんの指摘があるまですっかり忘れていたatcommand_athena.confの修正を同梱
+
+	(conf/)
+	atcommand_athena.conf 修正
+	(db/)
+	skill_tree.txt 修正
+	skill_tree2.txt 廃止
+	(map/)
+	map.h PC_CLASS_BASE等追加
+	pc.c
+		pc_calc_skilltree() 修正
+		pc_allskillup() 修正
+		pc_readdb() 修正
+
+--------------------
 //0963 by (凸)
 
 ・@jobchange2, @jobchange3廃止 @jobchangeに引数追加 @help参照
