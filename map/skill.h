@@ -182,10 +182,10 @@ enum {	// struct map_session_data ÇÃ status_changeÇÃî‘çÜÉeÅ[ÉuÉã
 	SC_HUMMING				=104,
 	SC_ETERNALCHAOS			=105,
 	SC_DONTFORGETME			=106,
-	SC_STEELBODY			=84,
+	SC_STEELBODY			=87,
 	SC_VOLCANO				=85,
 	SC_DELUGE				=89,
-	SC_CASTCANCEL			=87,
+	SC_CASTCANCEL			=84,
 	SC_SPELLBREAKER			=88,
 	SC_EXPLOSIONSPIRITS		=86,
 	

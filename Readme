@@ -1,4 +1,19 @@
 --------------
+//0517 by 死神
+
+・アイスウォールで摺り抜る問題修正と少し修正。(Mさんパケットの提供ありがとうございます。)
+	clif.h
+		clif_changemapcell() 追加。
+	clif.c
+		clif_changemapcell() 追加。
+	skill.h
+		SC_STEELBODYを84から87に変更。
+	skill.c
+		skill_unitsetting()、skill_unit_onlimit() 修正。
+		skill_status_change_end()、skill_status_change_start() 修正。
+	client_packet.txt 修正。
+
+--------------
 //0516 by 死神
 
 ・モンスターのメテオによる鯖ダウンを臨時に防いで置きました。(テストはしてません。) モンスターのスキルについてちょっと分析不足ですので分析した後に修正して置きます。

@@ -1623,6 +1623,7 @@ int clif_useitemack(struct map_session_data *sd,int index,int amount,int ok)
 	WFIFOW(fd,4)=amount;
 	WFIFOB(fd,6)=ok;
 	WFIFOSET(fd,packet_len_table[0xa8]);
+	return 0;
 #else
 	char buf[32];
 
@@ -3788,6 +3789,26 @@ int clif_spiritball(struct map_session_data *sd)
 	WBUFL(buf,2)=sd->bl.id;
 	WBUFW(buf,6)=sd->spiritball;
 	clif_send(buf,packet_len_table[0x1d0],&sd->bl,AREA);
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------
+ */
+int clif_changemapcell(int m,int x,int y,int type)
+{
+	struct block_list bl;
+	char buf[32];
+
+	bl.m = m;
+	WBUFW(buf,0) = 0x192;
+	WBUFW(buf,2) = x;
+	WBUFW(buf,4) = y;
+	WBUFW(buf,6) = type;
+	memcpy(WBUFP(buf,8),map[m].name,16);
+	clif_send(buf,packet_len_table[0x192],&bl,ALL_SAMEMAP);
+
 	return 0;
 }
 

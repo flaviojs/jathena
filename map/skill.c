@@ -2009,8 +2009,10 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 				val2=map_getcell(src->m,ux,uy);
 				if(val2==5 || val2==1)
 					alive=0;
-				else
+				else {
 					map_setcell(src->m,ux,uy,5);
+					clif_changemapcell(src->m,ux,uy,5);
+				}
 			}
 			break;
 
@@ -2439,6 +2441,7 @@ int skill_unit_onlimit(struct skill_unit *src,unsigned int tick)
 
 	case 0x8d:	/* アイスウォール */
 		map_setcell(src->bl.m,src->bl.x,src->bl.y,src->val2);
+		clif_changemapcell(src->bl.m,src->bl.x,src->bl.y,src->val2);
 		break;
 			
 	}
@@ -3065,7 +3068,7 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 		sc_data[type].timer=-1;
 		(*sc_count)--;
 
-		if(bl->type==BL_PC && (type<64 || type == SC_EXPLOSIONSPIRITS))	/* アイコン消去 */
+		if(bl->type==BL_PC && (type<64 || type == SC_EXPLOSIONSPIRITS || type == SC_STEELBODY))	/* アイコン消去 */
 			clif_status_change(bl,type,0);
 
 		switch(type){	/* 正常に戻るときなにか処理が必要 */
@@ -3510,7 +3513,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2)
 			return 0;
 	}
 
-	if(bl->type==BL_PC && (type<64 || type == SC_EXPLOSIONSPIRITS))	/* アイコン表示パケット */
+	if(bl->type==BL_PC && (type<64 || type == SC_EXPLOSIONSPIRITS || type == SC_STEELBODY))	/* アイコン表示パケット */
 		clif_status_change(bl,type,1);
 
 	/* optionの変更 */

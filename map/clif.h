@@ -129,6 +129,7 @@ int clif_skill_setunit(struct skill_unit *unit);
 int clif_skill_delunit(struct skill_unit *unit);
 
 int clif_spiritball(struct map_session_data *sd);
+int clif_changemapcell(int m,int x,int y,int type);
 
 int clif_status_change(struct block_list *bl,int type,int flag);
 
