@@ -1329,6 +1329,8 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 
 	if((skill=pc_checkskill(sd,HP_MEDITATIO))>0) // メディテイティオ 
 		sd->status.max_sp += sd->status.max_sp*skill/100;
+	if((skill=pc_checkskill(sd,HW_SOULDRAIN))>0) /* ソウルドレイン */
+		sd->status.max_sp += sd->status.max_sp*2*skill/100;
 
 	if(sd->status.max_sp < 0 || sd->status.max_sp > battle_config.max_sp)
 		sd->status.max_sp = battle_config.max_sp;
@@ -1429,6 +1431,10 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 			sd->def = sd->def * (100 - 5*sd->sc_data[SC_CONCENTRATION].val1)/100;
 		}
 
+		if(sd->sc_data[SC_MAGICPOWER].timer!=-1){ //魔法力増幅
+			sd->matk1 = sd->matk1*(100+sd->sc_data[SC_MAGICPOWER].val1)/100;
+			sd->matk2 = sd->matk2*(100+sd->sc_data[SC_MAGICPOWER].val1)/100;
+		}
 		// ASPD/移動速度変化系
 		if(sd->sc_data[SC_TWOHANDQUICKEN].timer != -1 && sd->sc_data[SC_QUAGMIRE].timer == -1 && sd->sc_data[SC_DONTFORGETME].timer == -1)	// 2HQ
 			aspd_rate -= 30;

@@ -1742,6 +1742,7 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	struct item item;
 	int ret;
 	int drop_rate;
+	int skill,sp;
 
 	if(src && src->type == BL_PC) {
 		sd = (struct map_session_data *)src;
@@ -1878,6 +1879,16 @@ int mob_damage(struct block_list *src,struct mob_data *md,int damage,int type)
 	memset(pt,0,sizeof(pt));
 
 	max_hp = battle_get_max_hp(&md->bl);
+
+	/* ソウルドレイン */
+	if(sd && (skill=pc_checkskill(sd,HW_SOULDRAIN))>0){
+		clif_skill_nodamage(src,&md->bl,HW_SOULDRAIN,skill,1);
+		sp = (battle_get_lv(&md->bl))*(65+15*skill)/100;
+		if(sd->status.sp + sp > sd->status.max_sp)
+			sp = sd->status.max_sp - sd->status.sp;
+		sd->status.sp += sp;
+		clif_heal(sd->fd,SP_SP,sp);
+	}
 
 	// map外に消えた人は計算から除くので
 	// overkill分は無いけどsumはmax_hpとは違う

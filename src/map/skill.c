@@ -207,7 +207,9 @@ int SkillStatusChangeTable[]={	/* skill.hのenumのSC_***とあわせること */
 /* 360- */
 	-1,
 	SC_ASSUMPTIO,
-	-1,-1,-1,-1,-1,-1,-1,-1,
+	-1,-1,-1,-1,
+	SC_MAGICPOWER,
+	-1,-1,-1,
 /* 370- */
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 /* 380- */
@@ -2171,6 +2173,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 	case SN_SIGHT:			/* トゥルーサイト */
 	case WS_MELTDOWN:		/* メルトダウン */
 	case ST_REJECTSWORD:	/* リジェクトソード */
+	case HW_MAGICPOWER:		/* 魔法力増幅 */
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		skill_status_change_start(bl,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
 		break;
@@ -2277,6 +2280,7 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 		skill_status_change_start(src,SkillStatusChangeTable[skillid],skilllv,0,0,0,skill_get_time(skillid,skilllv),0 );
 		break;
 	case MO_ABSORBSPIRITS:	// 気奪
+		i=0;
 		if(sd && dstsd) {
 			if(sd == dstsd || map[sd->bl.m].flag.pvp || map[sd->bl.m].flag.gvg) {
 				if(dstsd->spiritball > 0) {
@@ -2285,20 +2289,23 @@ int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int
 					pc_delspiritball(dstsd,dstsd->spiritball,0);
 					if(i > 0x7FFF)
 						i = 0x7FFF;
-					if(sd->status.sp + i > sd->status.max_sp) {
+					if(sd->status.sp + i > sd->status.max_sp)
 						i = sd->status.max_sp - sd->status.sp;
-						sd->status.sp = sd->status.max_sp;
-					}
-					else
-						sd->status.sp += i;
-					clif_heal(sd->fd,SP_SP,i);
 				}
-				else
-					clif_skill_nodamage(src,bl,skillid,skilllv,0);
 			}
-			else
-				clif_skill_nodamage(src,bl,skillid,skilllv,0);
+		}else if(sd && dstmd){ //対象がモンスターの場合
+			//20%の確率で対象のLv*2のSPを回復する。成功したときはターゲット(σﾟДﾟ)σｹﾞｯﾂ!!
+			if(rand()%100<20){
+				i=2*mob_db[dstmd->class].lv;
+				mob_target(dstmd,src,0);
+			}
 		}
+		if(i){
+			sd->status.sp += i;
+			clif_heal(sd->fd,SP_SP,i);
+		}
+		else
+			clif_skill_nodamage(src,bl,skillid,skilllv,0);
 		break;
 
 	case AC_MAKINGARROW:			/* 矢作成 */
@@ -5202,6 +5209,10 @@ int skill_use_id( struct map_session_data *sd, int target_id,
 		skill_castend_id(sd->skilltimer,tick,sd->bl.id,0);
 	}
 
+	//マジックパワーの効果終了
+	if(sd->sc_data[SC_MAGICPOWER].timer != -1 && skill_num != HW_MAGICPOWER)
+		skill_status_change_end(&sd->bl,SC_MAGICPOWER,-1);
+
 	return 0;
 }
 
@@ -5291,6 +5302,9 @@ int skill_use_pos( struct map_session_data *sd,
 		sd->skilltimer = -1;
 		skill_castend_pos(sd->skilltimer,tick,sd->bl.id,0);
 	}
+	//マジックパワーの効果終了
+	if(sd->sc_data[SC_MAGICPOWER].timer != -1 && skill_num != HW_MAGICPOWER)
+		skill_status_change_end(&sd->bl,SC_MAGICPOWER,-1);
 
 	return 0;
 }
@@ -5892,6 +5906,7 @@ int skill_status_change_end( struct block_list* bl , int type,int tid )
 			case SC_WINDWALK:		/* ウインドウォーク */
 			case SC_TRUESIGHT:		/* トゥルーサイト */
 			case SC_SPIDERWEB:		/* スパイダーウェッブ */
+			case SC_MAGICPOWER:		/* 魔法力増幅 */
 				calc_flag = 1;
 				break;
 
@@ -6171,6 +6186,8 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	case SC_FALCON:
 	case SC_WEIGHT50:
 	case SC_WEIGHT90:
+	case SC_MAGICPOWER:		/* 魔法力増幅 */
+
 		if(sc_data[type].timer==tid)
 			sc_data[type].timer=add_timer( 1000*600+tick,skill_status_change_timer, bl->id, data );
 		return 0;
@@ -6180,7 +6197,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 }
 
 /*==========================================
- * ステータス異常開始
+ * ステータス異常終了
  *------------------------------------------
  */
 int skill_encchant_eremental_end(struct block_list *bl,int type)
@@ -6736,6 +6753,7 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_CARTBOOST:		/* カートブースト */
 		case SC_TRUESIGHT:		/* トゥルーサイト */
 		case SC_SPIDERWEB:		/* スパイダーウェッブ */
+		case SC_MAGICPOWER:		/* 魔法力増幅 */
 			calc_flag = 1;
 			break;
 
