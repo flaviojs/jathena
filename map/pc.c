@@ -480,8 +480,13 @@ int pc_calc_skilltree(struct map_session_data *sd)
 {
 	int i,id=0,flag;
 	int c=sd->status.class;
-	for(i=0;i<MAX_SKILL;i++)
+	for(i=0;i<MAX_SKILL;i++){
 		sd->status.skill[i].id=0;
+		if (sd->status.skill[i].flag){	// cardスキルなら、
+			sd->status.skill[i].lv=0;	// 本当は覚えていないはずなので0に
+			sd->status.skill[i].flag=0;	// flagも0にしておく
+		}
+	}
 	
 	if (battle_config.gm_allskill > 0 && pc_isGM(sd) >= battle_config.gm_allskill){
 		// 全てのスキル
@@ -884,7 +889,7 @@ int pc_calcstatus(struct map_session_data* sd,int first)
 		sd->flee += (skill*3)>>1;
 	if( (skill=pc_checkskill(sd,BS_WEAPONRESEARCH))>0)	// 武器研究の命中率増加
 		sd->hit += skill*2;
-	if(sd->skilltimer!=-1 && (skill=pc_checkskill(sd,SA_FREECAST))>0){ // フリ?キャスト
+	if(sd->skilltimer!=-1 && (skill=pc_checkskill(sd,SA_FREECAST))>0){ // フリーキャスト
 		sd->aspd += sd->aspd*(10-skill)/20;
 		sd->speed = sd->speed + (15-skill) * 0.1 * DEFAULT_WALK_SPEED;
 	}
@@ -1223,16 +1228,15 @@ int pc_skill(struct map_session_data *sd,int id,int level,int flag)
 		printf("support card skill only!\n");
 		return 0;
 	}
-	if(!flag || sd->status.skill[id].id!=id){	// 覚 えてないスキルなら
-		if(flag)
-			sd->status.skill[id].id=id;
-		sd->status.skill[id].lv=level;
-		sd->status.skill[id].flag=flag;	// cardスキルとする
-	}
-
 	if(!flag){	// クエスト所得ならここで条件を確認して送信する
+		sd->status.skill[id].lv=level;
 		pc_calcstatus(sd,0);
 		clif_skillinfoblock(sd);
+	}
+	else if(sd->status.skill[id].id!=id){	// flag==1かつ覚えていないなら
+		sd->status.skill[id].id=id;
+		sd->status.skill[id].lv=level;
+		sd->status.skill[id].flag=1;	// cardスキルとする
 	}
 
 	return 0;

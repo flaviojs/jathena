@@ -1,3 +1,10 @@
+//0584 by 引退人
+・カードスキルを修正
+	(/map)
+	pc.c
+		pc_calc_skilltree() cardスキルを忘れさせる処理を追加
+		pc_skill() 整理
+
 --------------
 //0583 by kalen
 ・script修正
