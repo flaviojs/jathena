@@ -822,6 +822,7 @@ int parse_login(int fd)
 			WFIFOB(fd,2)=0;
 			WFIFOSET(fd,3);
 			session[fd]->func_parse=parse_fromchar;
+			realloc_fifo(fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
 		} else {
 			WFIFOW(fd,0)=0x2711;
 			WFIFOB(fd,2)=3;

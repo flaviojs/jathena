@@ -272,6 +272,40 @@ int delete_session(int fd)
 	return 0;
 }
 
+int realloc_fifo(int fd,int rfifo_size,int wfifo_size)
+{
+	struct socket_data *s=session[fd];
+	if( s->max_rdata != rfifo_size && s->rdata_size < rfifo_size){
+	
+		s->rdata      = realloc(s->rdata, rfifo_size);
+		if(s->rdata==NULL){
+			printf("out of memory : realloc_fifo rdata\n");
+		}
+		s->max_rdata  = rfifo_size;
+	}
+	if( s->max_wdata != wfifo_size && s->wdata_size < wfifo_size){
+		s->wdata      = realloc(s->wdata, wfifo_size);
+		if(s->wdata==NULL){
+			printf("out of memory : realloc_fifo wdata\n");
+			exit(1);
+		}
+		s->max_wdata  = wfifo_size;
+	}
+	return 0;
+}
+
+int WFIFOSET(int fd,int len)
+{
+	struct socket_data *s=session[fd];
+	if( s->wdata_size+len+16384 > s->max_wdata ){
+		realloc_fifo(fd,s->max_rdata, s->max_wdata <<1 );
+		printf("socket: %d wdata expanded to %d bytes.\n",fd, s->max_wdata);
+	}
+	s->wdata_size=(s->wdata_size+(len)+2048 < s->max_wdata) ?
+		 s->wdata_size+len : (printf("socket: %d wdata lost !!\n",fd),s->wdata_size);
+	return 0;
+}
+
 int do_sendrecv(int next)
 {
 	fd_set rfd,wfd;

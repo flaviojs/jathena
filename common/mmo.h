@@ -10,6 +10,8 @@
 #define RETCODE "\n"	// (LFÅFUnixånÅj
 #endif
 
+#define FIFOSIZE_SERVERLINK	128*1024
+
 #define MAX_MAP_PER_SERVER 512
 #define MAX_INVENTORY 100
 #define MAX_AMOUNT 30000

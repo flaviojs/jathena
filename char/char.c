@@ -1157,6 +1157,7 @@ int parse_char(int fd)
 				memset(server[i].map,0,sizeof(server[i].map));
 				WFIFOSET(fd,3);
 				RFIFOSKIP(fd,60);
+				realloc_fifo(fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
 				return 0;
 			}
 			break;
@@ -1265,6 +1266,7 @@ int check_connect_login_server(int tid,unsigned int tick,int id,int data)
   if(login_fd<=0 || session[login_fd]==NULL){
     login_fd=make_connection(login_ip,login_port);
     session[login_fd]->func_parse=parse_tologin;
+	realloc_fifo(login_fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);	
     WFIFOW(login_fd,0)=0x2710;
     memcpy(WFIFOP(login_fd,2),userid,24);
     memcpy(WFIFOP(login_fd,26),passwd,24);

@@ -28,7 +28,8 @@
 #define WFIFOB(fd,pos) (*(unsigned char*)(session[fd]->wdata+session[fd]->wdata_size+(pos)))
 #define WFIFOW(fd,pos) (*(unsigned short*)(session[fd]->wdata+session[fd]->wdata_size+(pos)))
 #define WFIFOL(fd,pos) (*(unsigned int*)(session[fd]->wdata+session[fd]->wdata_size+(pos)))
-#define WFIFOSET(fd,len) (session[fd]->wdata_size = (session[fd]->wdata_size+(len)+2048 < session[fd]->max_wdata) ? session[fd]->wdata_size+len : session[fd]->wdata_size)
+// use function instead of macro.
+//#define WFIFOSET(fd,len) (session[fd]->wdata_size = (session[fd]->wdata_size+(len)+2048 < session[fd]->max_wdata) ? session[fd]->wdata_size+len : session[fd]->wdata_size)
 #define WBUFP(p,pos) (((unsigned char*)(p))+(pos))
 #define WBUFB(p,pos) (*(unsigned char*)WBUFP((p),(pos)))
 #define WBUFW(p,pos) (*(unsigned short*)WBUFP((p),(pos)))
@@ -42,6 +43,7 @@
 #undef FD_SETSIZE
 #define FD_SETSIZE 4096
 #endif
+
 
 // Struct declaration
 
@@ -70,6 +72,8 @@ extern int fd_max;
 int make_listen_port(int);
 int make_connection(long,int);
 int delete_session(int);
+int realloc_fifo(int fd,int rfifo_size,int wfifo_size);
+int WFIFOSET(int fd,int len);
 
 int do_sendrecv(int next);
 int do_parsepacket(void);
