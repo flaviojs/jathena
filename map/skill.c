@@ -750,7 +750,18 @@ int skill_attack( int attack_type, struct block_list* src, struct block_list *ds
 			skill_additional_effect(src,bl,skillid,skilllv,attack_type,tick);
 
 		if(bl->type==BL_MOB && src!=bl)	/* スキル使用条件のMOBスキル */
-			mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(skillid<<16));
+		{
+				if(battle_config.mob_changetarget_byskill == 1)
+				{
+					int target=((struct mob_data *)bl)->target_id;
+					if(src->type == BL_PC)
+						((struct mob_data *)bl)->target_id=src->id;
+					mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(skillid<<16));
+					((struct mob_data *)bl)->target_id=target;
+				}
+				else
+					mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(skillid<<16));
+		}
 	}
 
 	if(attack_type&BF_WEAPON && sc_data && sc_data[SC_AUTOCOUNTER].timer != -1 && sc_data[SC_AUTOCOUNTER].val4 > 0) {
@@ -1311,7 +1322,18 @@ int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int s
 				if(damage > 0)
 					skill_additional_effect(src,bl,skillid,skilllv,BF_WEAPON,tick);
 				if(bl->type==BL_MOB && src!=bl)	/* スキル使用条件のMOBスキル */
-					mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(skillid<<16));
+				{
+						if(battle_config.mob_changetarget_byskill == 1)
+						{
+							int target=((struct mob_data *)bl)->target_id;
+							if(src->type == BL_PC)
+								((struct mob_data *)bl)->target_id=src->id;
+							mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(skillid<<16));
+							((struct mob_data *)bl)->target_id=target;
+						}
+						else
+							mobskill_use((struct mob_data *)bl,tick,MSC_SKILLUSED|(skillid<<16));
+				}
 			}
 				if(sc_data && sc_data[SC_AUTOCOUNTER].timer != -1 && sc_data[SC_AUTOCOUNTER].val4 > 0) {
 				if(sc_data[SC_AUTOCOUNTER].val3 == src->id)

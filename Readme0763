@@ -1,4 +1,20 @@
 --------------------
+//0787 by ぽぽぽ
+・ペットにもmob_avail.txtの設定を適用するようにした。
+・MOBスキルのskillusedでval1に0を入れるとあらゆるスキルに対して発動するようにした。
+・skillusedで発動したスキルの対象を、発動させたPCにするかどうか設定できるようにした(対IWハメなど？)。
+	(/map)
+	clif.c
+		clif_pet0078()、clif_pet007b()修正。
+	mob.c
+		mobskill_use()修正。
+	skill.c
+		skill_attack() 、skill_castend_damage_id()修正。
+	battle.h
+	battle.c
+		battle_config_read()修正。
+
+--------------------
 //0786 by huge
 ・BDS修正
     前から吹き飛ばして行くと良くないかもしれないので、後ろから処理

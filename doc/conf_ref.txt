@@ -736,7 +736,9 @@ gvg_misc_attack_damage_rate
 	シーズモードで物理攻撃と魔法攻撃以外の攻撃(鷹やトラップ等)の
 	ダメージ倍率です。デフォルトは100です。
 
-
+mob_changetarget_byskill: no
+	条件がskillusedのスキルをMOBがPCに使用するとき、その対象をスキル使用者にするかどうかです。
+	MOBスキル使用後にタゲは戻ります。デフォルトはnoです。
 < 例 >
 
 warp_point_debug: no
@@ -836,6 +838,7 @@ gvg_short_attack_damage_rate: 100
 gvg_long_attack_damage_rate: 100
 gvg_magic_attack_damage_rate: 100
 gvg_misc_attack_damage_rate: 100
+mob_changetarget_byskill: no
 
 
 =====================================================================ghos6. atcommand_athena.conf

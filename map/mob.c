@@ -2449,7 +2449,7 @@ int mobskill_use(struct mob_data *md,unsigned int tick,int event)
 			case MSC_ATTACKPCGE:	// attack pc >= num
 				flag=( mob_counttargeted(md,NULL) >= c2 ); break;
 			case MSC_SKILLUSED:		// specificated skill used
-				flag=( (event&0xffff)==MSC_SKILLUSED && (event>>16)==c2); break;
+				flag=( (event&0xffff)==MSC_SKILLUSED && ((event>>16)==c2 || c2==0)); break;
 			}
 		}
 

@@ -3632,6 +3632,7 @@ int battle_config_read(const char *cfgName)
 	battle_config.gvg_magic_damage_rate = 100;
 	battle_config.gvg_misc_damage_rate = 100;
 	battle_config.gvg_eliminate_time = 5000;
+	battle_config.mob_changetarget_byskill = 0;
 
 	fp=fopen(cfgName,"r");
 	if(fp==NULL){
@@ -3742,6 +3743,7 @@ int battle_config_read(const char *cfgName)
 			{ "gvg_magic_attack_damage_rate" ,&battle_config.gvg_magic_damage_rate },
 			{ "gvg_misc_attack_damage_rate" ,&battle_config.gvg_misc_damage_rate },
 			{ "gvg_eliminate_time" ,&battle_config.gvg_eliminate_time },
+			{ "mob_changetarget_byskill" ,&battle_config.mob_changetarget_byskill },
 		};
 		
 		if(line[0] == '/' && line[1] == '/')

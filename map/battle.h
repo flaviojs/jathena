@@ -212,6 +212,7 @@ extern struct Battle_Config {
 	int gvg_magic_damage_rate;
 	int gvg_misc_damage_rate;
 	int gvg_eliminate_time;
+	int mob_changetarget_byskill;
 } battle_config;
 
 #define BATTLE_CONF_FILENAME	"conf/battle_athena.conf"
