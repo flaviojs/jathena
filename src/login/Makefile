@@ -10,6 +10,8 @@ md5calc.o: md5calc.c md5calc.h
 
 clean:
 	rm -f *.o
+	rm -f GNUmakefile
+
 ifeq ($(findstring CYGWIN,$(shell uname)), CYGWIN)
 		rm -f ../../bin/login-server.exe
 else

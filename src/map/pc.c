@@ -3125,7 +3125,6 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		guild_reply_reqalliance(sd,sd->guild_alliance_account,0);
 
 	skill_castcancel(&sd->bl,0);	// ‰r¥’†’f
-	skill_stop_dancing(&sd->bl,1);// ƒ_ƒ“ƒX/‰‰‘t’†’f
 	pc_stop_walking(sd,0);		// •às’†’f
 	pc_stopattack(sd);			// UŒ‚’†’f
 
@@ -3146,6 +3145,7 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 		if(sd->mapname[0]){
 			int ip,port;
 			if(map_mapname2ipport(mapname,&ip,&port)==0){
+				skill_stop_dancing(&sd->bl,1);
 				skill_unit_out_all(&sd->bl,gettick(),1);
 				clif_clearchar_area(&sd->bl,clrtype&0xffff);
 				skill_gangsterparadise(sd,0);
@@ -3231,8 +3231,13 @@ int pc_setpos(struct map_session_data *sd,char *mapname_org,int x,int y,int clrt
 
 	memcpy(sd->mapname,mapname,24);
 	sd->bl.m = m;
-	sd->bl.x = sd->to_x = x;
-	sd->bl.y = sd->to_y = y;
+	sd->to_x = x;
+	sd->to_y = y;
+
+	skill_stop_dancing(&sd->bl, 2); //ˆÚ“®æ‚Éƒ†ƒjƒbƒg‚ðˆÚ“®‚·‚é‚©‚Ç‚¤‚©‚Ì”»’f‚à‚·‚é
+
+	sd->bl.x =  x;
+	sd->bl.y =  y;
 
 	if(sd->status.pet_id > 0 && sd->pd && sd->pet.intimate > 0) {
 		sd->pd->bl.m = m;
@@ -5347,6 +5352,12 @@ int pc_setglobalreg(struct map_session_data *sd,char *reg,int val)
 	if( sd == NULL ){
 		printf("pc_setglobalreg nullpo\n");
 		return 0;
+	}
+
+	//PC_DIE_COUNTER‚ªƒXƒNƒŠƒvƒg‚È‚Ç‚Å•ÏX‚³‚ê‚½Žž‚Ìˆ—
+	if(strcmp(reg,"PC_DIE_COUNTER") == 0 && sd->die_counter != val){
+		sd->die_counter = val;
+		pc_calcstatus(sd,0);
 	}
 	if(val==0){
 		for(i=0;i<sd->status.global_reg_num;i++){

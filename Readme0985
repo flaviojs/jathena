@@ -1,4 +1,32 @@
 --------------------
+//1012 by (凸)
+・help.txtにある@goの説明から13と14を削除
+　機能は消えてないので使えることは使えますが、helpに載せるのはjROに来てからということで
+・cast_db.txtをskill_cast_db.txtに改名
+・ついでにmake cleanでGNUmakefileも消してみることにする
+・u-0さんの検証などを総合してダンスユニット関連を変更
+　演奏・ダンス中のハエはユニット付きで飛ぶそうです
+　演奏・ダンス中にワープポイントに乗ったら状態が解除されるようです
+　合奏中に片方がハエ飛びしたらエフェクトは元の場所に残り、飛んだ先では合奏状態が継続して動けない＆時間ごとにSP消費するようです
+・PC_DIE_COUNTERがスクリプトから変更された時にすぐに反映されるように変更
+
+	(conf/)
+	help.txt @go説明変更
+	(db/)
+	skill_cast_db.txt 改名
+	(map/)
+	pc.c
+		pc_setpos() ダンス中断のタイミング変更
+		pc_setglobalreg() PC_DIE_COUNTER特別処理追加
+	skill.c
+		skill_castend_id() NULLチェック変更
+		skill_stop_dancing() マップ移動などでの挙動を変更
+		skill_readdb() skill_cast_dbに改名
+		skill_blown() 飛ばされたらダンス移動
+	npc.c
+		npc_touch_areanpc() ワープポイントに乗ったらダンス解除
+
+--------------------
 //1011 by パイン
 ・パーティ要請やギルド要請を出しているときに他の要請を拒否る処理を追加
 　battle_athena.confで切り替えが出来るようになっています。

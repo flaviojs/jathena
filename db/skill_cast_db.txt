@@ -1,4 +1,4 @@
-//cast_db.txt＠AthenaDB計画 2004/06/06 16:36:04 +0900 (JST)
+//skill_cast_db.txt＠AthenaDB計画 2004/06/07 23:02:02 +0900 (JST)
 //id,cast_list,delay_list,upkeep_time,upkeep_time2
 
 6,0,0,30000,0	//SM_PROVOKE#プロボック#

@@ -29,6 +29,8 @@ pet.o:pet.c pet.h map.h clif.h chrif.h intif.h pc.h itemdb.h battle.h mob.h npc.
 
 clean:
 	rm -f *.o
+	rm -f GNUmakefile
+
 ifeq ($(findstring CYGWIN,$(shell uname)), CYGWIN)
 		rm -f ../../bin/map-server.exe
 else

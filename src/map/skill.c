@@ -782,10 +782,16 @@ int skill_blown( struct block_list *src, struct block_list *target,int count)
 	if(su){
 		skill_unit_move_unit_group(su->group,target->m,dx,dy);
 	}else{
+		struct status_change *sc_data=battle_get_sc_data(target);
 		if(moveblock) map_delblock(target);
 		target->x=nx;
 		target->y=ny;
 		if(moveblock) map_addblock(target);
+		if(sc_data && sc_data[SC_DANCING].timer!=-1){ //対象がダンス中なのでエフェクトも移動
+			struct skill_unit_group *sg=(struct skill_unit_group *)sc_data[SC_DANCING].val2;
+			if(sg)
+				skill_unit_move_unit_group(sg,target->m,dx,dy);
+		}
 	}
 
 	if(sd) {	/* 画面内に入ってきたので表示 */
@@ -3395,10 +3401,12 @@ int skill_castend_id( int tid, unsigned int tick, int id,int data )
 	struct block_list *bl;
 	int range,inf2;
 
-	if( (sd=map_id2sd(id))==NULL || sd->bl.prev == NULL ){
+	if( (sd=map_id2sd(id))==NULL ){
 		printf("skill_castend_id nullpo\n");
 		return 0;
 	}
+	if( sd->bl.prev == NULL ) //prevが無いのはありなの？
+		return 0;
 
 	if(sd->skillid != SA_CASTCANCEL && sd->skilltimer != tid )	/* タイマIDの確認 */
 		return 0;
@@ -7981,9 +7989,15 @@ void skill_stop_dancing(struct block_list *src, int flag)
 		if(flag){ //ログアウトなど片方が落ちても演奏が継続される
 			if(dsd && src->id == group->src_id){ //グループを持ってるPCが落ちる
 				group->src_id=sc_data[SC_DANCING].val4; //相方にグループを任せる
-				dsd->sc_data[SC_DANCING].val4=0; //相方の相方を0にして合奏終了→通常のダンス状態
+				if(flag&1) //ログアウト
+					dsd->sc_data[SC_DANCING].val4=0; //相方の相方を0にして合奏終了→通常のダンス状態
+				if(flag&2) //ハエ飛びなど
+					return; //合奏もダンス状態も終了させない＆スキルユニットは置いてけぼり
 			}else if(dsd && dsd->bl.id == group->src_id){ //相方がグループを持っているPCが落ちる(自分はグループを持っていない)
-				dsd->sc_data[SC_DANCING].val4=0; //相方の相方を0にして合奏終了→通常のダンス状態
+				if(flag&1) //ログアウト
+					dsd->sc_data[SC_DANCING].val4=0; //相方の相方を0にして合奏終了→通常のダンス状態
+				if(flag&2) //ハエ飛びなど
+					return; //合奏もダンス状態も終了させない＆スキルユニットは置いてけぼり
 			}
 			skill_status_change_end(src,SC_DANCING,-1);//自分のステータスを終了させる
 			//そしてグループは消さない＆消さないのでステータス計算もいらない？
@@ -7996,6 +8010,11 @@ void skill_stop_dancing(struct block_list *src, int flag)
 				skill_status_change_end(src,SC_DANCING,-1);//自分のステータスを終了させる
 			}
 		}
+	}
+	if(flag&2 && group && src->type==BL_PC){ //ハエで飛んだときとかはユニットも飛ぶ
+		struct map_session_data *sd = (struct map_session_data *)src;
+		skill_unit_move_unit_group(group, sd->bl.m,(sd->to_x - sd->bl.x),(sd->to_y - sd->bl.y));
+		return;
 	}
 	skill_delunitgroup(group);
 	if(src->type==BL_PC)
@@ -9023,7 +9042,7 @@ int skill_arrow_create( struct map_session_data *sd,int nameid)
 /*==========================================
  * スキル関係ファイル読み込み
  * skill_db.txt スキルデータ
- * cast_db.txt スキルの詠唱時間とディレイデータ
+ * skill_cast_db.txt スキルの詠唱時間とディレイデータ
  * produce_db.txt アイテム作成スキル用データ
  * create_arrow_db.txt 矢作成スキル用データ
  * abra_db.txt アブラカダブラ発動スキルデータ
@@ -9240,9 +9259,9 @@ int skill_readdb(void)
 	printf("read db/skill_require_db.txt done\n");
 
 	/* キャスティングデータベース */
-	fp=fopen("db/cast_db.txt","r");
+	fp=fopen("db/skill_cast_db.txt","r");
 	if(fp==NULL){
-		printf("can't read db/cast_db.txt\n");
+		printf("can't read db/skill_cast_db.txt\n");
 		return 1;
 	}
 	while(fgets(line,1020,fp)){
@@ -9298,7 +9317,7 @@ int skill_readdb(void)
 			skill_db[i].upkeep_time2[k]=(split2[k])? atoi(split2[k]):atoi(split2[0]);
 	}
 	fclose(fp);
-	printf("read db/cast_db.txt done\n");
+	printf("read db/skill_cast_db.txt done\n");
 
 	/* 製造系スキルデータベース */
 	memset(skill_produce_db,0,sizeof(skill_produce_db));

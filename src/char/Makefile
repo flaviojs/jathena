@@ -13,6 +13,8 @@ int_storage.o: int_storage.c int_storage.h int_guild.h inter.h char.h $(COMMON_H
 int_pet.o: int_pet.c int_pet.h inter.h char.h $(COMMON_H)
 clean:
 	rm -f *.o
+	rm -f GNUmakefile
+
 ifeq ($(findstring CYGWIN,$(shell uname)), CYGWIN)
 		rm -f ../../bin/char-server.exe
 else
