@@ -5697,6 +5697,8 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	clif_changelook(&sd->bl,LOOK_WEAPON,0);
 #endif
 
+	clif_changelook(&sd->bl,LOOK_CLOTHES_COLOR,sd->status.clothes_color);
+
 	if(sd->status.hp<sd->status.max_hp>>2 && pc_checkskill(sd,SM_AUTOBERSERK)>0 &&
 		(sd->sc_data[SC_PROVOKE].timer==-1 || sd->sc_data[SC_PROVOKE].val2==0 ))
 		// オートバーサーク発動

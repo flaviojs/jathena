@@ -1,4 +1,4 @@
-//skill_db.txt＠AthenaDB計画 2004/05/18 13:59:26 +0900 (JST)
+//skill_db.txt＠AthenaDB計画 2004/05/22 03:20:32 +0900 (JST)
 //id,range,hit,inf,pl,nk,max,list_num,castcancel,cast_defence_rate,inf2,maxcount,skill_type,blow_count
 1,0,0,0,0,0,9,0,no,0,0,0,none,0	//NV_BASIC#基本スキル#
 2,0,0,0,0,0,10,0,no,0,0,0,weapon,0	//SM_SWORD#剣修練#
@@ -409,7 +409,7 @@
 374,0,0,4,0,1,1,1,yes,0,0,0,magic,0	//PF_SOULCHANGE#ソウルチェンジ#
 375,0,0,4,0,1,1,1,yes,0,0,0,magic,0	//PF_SOULBURN#ソウルバーン#
 376,0,0,0,0,1,5,1,no,0,0,0,weapon,0	//ASC_KATAR#アドバンスドカタール研究#
-377,0,0,4,0,1,10,1,no,0,0,0,misc,0	//ASC_HALLUCINATION#ホールウシネイションウォーク#
+377,0,0,4,0,1,10,1,no,0,0,0,misc,0	//ASC_HALLUCINATION#ハルシネーションウォーク#
 378,8,6,16,5,1,10,1,no,0,1024,0,weapon,0	//ASC_EDP#エンチャントデッドリーポイズン#
 379,0,0,4,0,1,10,1,no,0,0,0,weapon,0	//ASC_BREAKER#ソウルブレーカー#
 380,0,6,4,0,1,10,1,no,0,0,0,weapon,0	//SN_SIGHT#トゥルーサイト#
@@ -422,7 +422,7 @@
 387,0,6,4,0,1,1,1,no,0,0,0,weapon,0	//WS_CARTBOOST#カートブースト#
 388,8,6,2,0,1,5,1,no,0,0,0,none,0	//WS_SYSTEMCREATE#自動攻撃装置製作#
 389,0,6,4,0,1,5,1,no,0,0,0,none,0	//ST_CHASEWALK#チェイスウォーク#
-390,0,0,4,0,1,1,1,yes,0,0,0,magic,0	//ST_REJECTSWORD#リジェクトソード#
+390,0,0,4,0,1,5,1,yes,0,0,0,magic,0	//ST_REJECTSWORD#リジェクトソード#
 //391,0,0,4,0,1,1,1,yes,0,0,0,magic,0	//ST_STEALBACKPACK#スティールバックパック#
 392,0,0,4,0,1,1,1,yes,0,0,0,magic,0	//CR_ALCHEMY#アルケミー#
 393,0,0,4,0,1,1,1,yes,0,0,0,magic,0	//CR_SYNTHESISPOTION#ポーションシンセシス#

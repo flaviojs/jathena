@@ -1418,6 +1418,18 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,int damage,i
 				clif_skill_nodamage(bl,bl,LK_PARRYING,sc_data[SC_PARRYING].val1,1);
 			}
 		}
+		// && (struct map_session_data *)src->status.weapon == (1 || 2 || 3))
+		if(sc_data[SC_REJECTSWORD].timer!=-1 && damage > 0 && flag&BF_WEAPON && ((src->type==BL_PC || src->type==BL_MOB ))){	// リジェクトソード 
+			if(rand()%100 < (10+5*sc_data[SC_REJECTSWORD].val1)){ //反射確率は10+5*Lv
+				damage = damage*50/100;
+				battle_damage(bl,src,damage,0);
+				//ダメージを与えたのは良いんだが、ここからどうして表示するんだかわかんねぇ
+				//エフェクトもこれでいいのかわかんねぇ
+				clif_skill_nodamage(bl,bl,ST_REJECTSWORD,sc_data[SC_REJECTSWORD].val1,1);
+				if((--sc_data[SC_REJECTSWORD].val2)<=0)
+					skill_status_change_end(bl, SC_REJECTSWORD, -1);
+			}
+		}
 	}
 
 	if(class == 1288 || class == 1287 || class == 1286 || class == 1285) {

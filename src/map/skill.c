@@ -6187,6 +6187,7 @@ int skill_status_change_timer(int tid, unsigned int tick, int id, int data)
 	case SC_WEIGHT50:
 	case SC_WEIGHT90:
 	case SC_MAGICPOWER:		/* 魔法力増幅 */
+	case SC_REJECTSWORD:	/* リジェクトソード */
 
 		if(sc_data[type].timer==tid)
 			sc_data[type].timer=add_timer( 1000*600+tick,skill_status_change_timer, bl->id, data );
@@ -6741,7 +6742,6 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_HEADCRUSH:		/* ヘッドクラッシュ */
 		case SC_JOINTBEAT:		/* ジョイントビート */
 		case SC_MELTDOWN:		/* メルトダウン */
-		case SC_REJECTSWORD:	/* リジェクトソード */
 		case SC_MARIONETTE:		/* マリオネットコントロール */
 
 			//とりあえず手抜き
@@ -6755,6 +6755,9 @@ int skill_status_change_start(struct block_list *bl,int type,int val1,int val2,i
 		case SC_SPIDERWEB:		/* スパイダーウェッブ */
 		case SC_MAGICPOWER:		/* 魔法力増幅 */
 			calc_flag = 1;
+			break;
+		case SC_REJECTSWORD:	/* リジェクトソード */
+			val2 = 3; //3回攻撃を跳ね返す
 			break;
 
 		default:
